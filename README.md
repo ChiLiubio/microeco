@@ -22,7 +22,7 @@ devtools::install_local("microeco-master.zip")
 See the detailed package [tutorial](https://chiliubio.github.io/microeco/) or the help documentation.
 
 ### QQ
-If the user has problems or suggestions, feel free to join the QQ group for discussions.
+If the user has problems or suggestions, feel free to join the QQ group for discussions.  
 QQ group: 277434916
 
 
