@@ -5,7 +5,7 @@ An R package for ecological analysis of microbial communities
 If you do not already have R/RStudio installed, do as follows.
 1. Install [R](https://www.r-project.org/)
 2. Install [RStudio](https://rstudio.com/)
-3. With Windows, install also [Rtools](https://cran.r-project.org/bin/windows/Rtools/)\n
+3. With Windows, install also [Rtools](https://cran.r-project.org/bin/windows/Rtools/)  
 Put R and Rtools in the computer env path.
 
 ### install microeco
@@ -22,7 +22,7 @@ devtools::install_local("microeco-master.zip")
 See the detailed package [tutorial](https://chiliubio.github.io/microeco/) or the help documentation.
 
 ### QQ
-If the user has problems or suggestions, feel free to join the QQ group for discussions.\n
+If the user has problems or suggestions, feel free to join the QQ group for discussions.
 QQ group: 277434916
 
 
