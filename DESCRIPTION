@@ -1,0 +1,20 @@
+Package: microeco
+Type: Package
+Title: Microbial community ecology analysis
+Version: 0.1.0
+Author: Chi Liu
+Maintainer: Chi Liu <liuchi0426@126.com>
+Description: A series of approaches for statistics and plotting in microbial community ecology.
+Depends: R (>= 3.5.0), R6, ape, vegan, rlang, data.table, magrittr,
+        dplyr, tibble, reshape2, scales, grid, ggplot2, RColorBrewer,
+        Rcpp, RcppArmadillo, RcppEigen
+Suggests: GUniFrac, igraph, picante, randomForest, MASS, WGCNA,
+        pheatmap, ggpubr, gridExtra, ggrepel, ggdendro, mice
+LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+License: GPL-3
+Encoding: UTF-8
+NeedsCompilation: yes
+Packaged: 2020-04-16 11:17:38 UTC; Chi
+Repository: CRAN
+Date/Publication: 2020-02-02
+RoxygenNote: 7.1.0
