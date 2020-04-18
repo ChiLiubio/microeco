@@ -170,7 +170,7 @@ replace_name <- function(){
 
 #' Create trans_network object.
 #'
-#' This class inherits trans_corr class. create trans_network object see \code{\link{trans_corr}}. 
+#' This class inherits \code{\link{trans_corr}} class. 
 #' This class is a wrapper for a series of network related calculating and plotting methods.
 #' The functions in this class: \code{\link{cal_network}}, \code{\link{save_network}}, \code{\link{cal_network_attr}},
 #' \code{\link{cal_node_type}}, \code{\link{plot_taxa_roles}}, \code{\link{cal_sum_links}}, \code{\link{plot_sum_links}}.
@@ -421,8 +421,8 @@ trans_network <- R6Class(classname = "trans_network",
 			# combine all graph attributes into a meta-data
 			graphAtt <- sapply(list.graph.attributes(network), function(attr) sub("&", "&",get.graph.attribute(network, attr)))
 			output_gexf <- write.gexf(nodes, edges,
-								edgesLabel= E(network)$label,
-								edgesWeight=E(network)$weight,
+								edgesLabel = as.data.frame(E(network)$label),
+								edgesWeight = E(network)$weight,
 								nodesAtt = nodesAtt,
 								edgesAtt = edgesAtt,
 								meta=c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt))
