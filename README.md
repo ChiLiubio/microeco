@@ -47,7 +47,7 @@ dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
 
-<p><span style="color:red"> Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ... </span></p>
+<p><font color="red"> <strong>Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...</strong> </font></p>
 
 The solutions:
 
