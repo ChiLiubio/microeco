@@ -49,13 +49,20 @@ dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
 
+```html
 <div style="background-color: #FFFF00; color:red">
 <strong>Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...</strong>
 </div>
+```
 
+```html
 <span style="background-color: #FFFF00; color:red">
 <strong>Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...</strong>
 </span>
+
+```
+
+<br>
 
 The solutions:
 
