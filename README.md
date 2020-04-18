@@ -155,7 +155,7 @@ Then, if you want to install these packages or some of them, you can do like thi
 # First select the packages of interest
 packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", "ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf")
 # Now check or install
-package.check <- lapply(
+lapply(
   packages,
   FUN <- function(x) {
     if (!require(x, character.only = TRUE)) {
@@ -167,9 +167,8 @@ package.check <- lapply(
 
 Besides, some dependency packages of WGCNA are stored in Bioconductor. The tax4fun package can be downloaded from http://tax4fun.gobics.de/
 and the correponding SILVA123 ref data is also required.
-
-
-
+The package chorddiag can be instaled from Github https://github.com/mattflor/chorddiag directly.
+Some packages of python and julia are required to run the example codes and described in the [tutorial](https://chiliubio.github.io/microeco/).
 
 
 
