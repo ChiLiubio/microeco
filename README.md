@@ -24,6 +24,8 @@ devtools::install_local("microeco-master.zip")
 
 ### Use
 See the detailed package [tutorial](https://chiliubio.github.io/microeco/) and the help documentations.
+If you want to run the codes in the tutorial completely, you need to install some packages, see the following Notes part.
+
 
 ### QQ
 If the user has problems or suggestions, feel free to join the QQ group for discussions.  
@@ -46,6 +48,10 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax
 dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
+
+<div style="background-color: #FFFF00; color:red">
+<strong>Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...</strong>
+</div>
 
 <span style="background-color: #FFFF00; color:red">
 <strong>Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...</strong>
@@ -159,8 +165,8 @@ package.check <- lapply(
 )
 ```
 
-Besides, some dependency packages of WGCNA are stored in Bioconductor. The tax4fun package 
-
+Besides, some dependency packages of WGCNA are stored in Bioconductor. The tax4fun package can be downloaded from http://tax4fun.gobics.de/
+and the correponding SILVA123 ref data is also required.
 
 
 
