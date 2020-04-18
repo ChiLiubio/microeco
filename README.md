@@ -168,7 +168,7 @@ lapply(
 
 Besides, some dependency packages of WGCNA are stored in Bioconductor. The tax4fun package can be downloaded from http://tax4fun.gobics.de/
 and the correponding SILVA123 ref data is also required.
-The package chorddiag can be instaled from Github https://github.com/mattflor/chorddiag directly.
+The package chorddiag can be installed from Github https://github.com/mattflor/chorddiag directly.
 Some packages of python and julia are required to run the example codes and described in the [tutorial](https://chiliubio.github.io/microeco/).
 
 
