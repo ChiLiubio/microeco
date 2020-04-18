@@ -47,7 +47,7 @@ dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
 
-<font color='red'> Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ... </font>
+<span style="color:red"> Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ... </span>
 
 The solutions:
 
@@ -140,7 +140,22 @@ The solutions:
 </div>
 
 
+Then, if you want to install these packages or some of them, you can do like this:
 
+```r
+# If a package is not installed, it will be installed from CRAN.
+# First select the packages of interest
+packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", "ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf")
+# Now check or install
+package.check <- lapply(
+  packages,
+  FUN <- function(x) {
+    if (!require(x, character.only = TRUE)) {
+      install.packages(x, dependencies = TRUE)
+    }
+  }
+)
+```
 
 
 
