@@ -14,10 +14,12 @@ Open RStudio...Tools...Global Options...Packages, select the appropriate mirror 
 ### Install microeco
 Directly install microeco online.
 ```r
-# require devtools package
+# If devtools package is not installed, first install it
+install.packages("devtools")
+# then install microeco
 devtools::install_github("ChiLiubio/microeco")
 ```
-If failed because of the bad internet, download the package first, then install it.
+If the installation of microeco is failed because of the bad internet, download the package first, then install it.
 ```r
 devtools::install_local("microeco-master.zip")
 ```
