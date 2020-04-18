@@ -59,9 +59,6 @@ The solutions:
 <div id="content-wrapper">
   <div class="inner clearfix">
     <section id="main-content">
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># read</span></a>
-<a class="sourceLine" id="cb1-2" title="2">t1 &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;package_description.csv&quot;</span>, <span class="dt">check.names =</span> <span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb1-3" title="3">pander<span class="op">::</span><span class="kw">pander</span>(t1)</a></code></pre></div>
 <table>
 <colgroup>
 <col width="19%"></col>
