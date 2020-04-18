@@ -47,7 +47,7 @@ dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
 
-<span style="color:red"> Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ... </span>
+<p><span style="color:red"> Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ... </span></p>
 
 The solutions:
 
@@ -157,7 +157,7 @@ package.check <- lapply(
 )
 ```
 
-
+Besides, some dependency packages of WGCNA are stored in Bioconductor. The tax4fun package 
 
 
 
