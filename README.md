@@ -60,7 +60,7 @@ Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...
 
 The solutions:
 
-1. install the package when encounter such error. It's not troublesome.
+1. install the package when encounter such an error. Indeed, it's very easy to install in Rstudio. Just try it.
 
 2. install the packages in advance. We first show some packages that are necessary in some functions.
 
