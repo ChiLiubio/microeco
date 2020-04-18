@@ -50,13 +50,9 @@ dataset$cal_betadiv(unifrac = TRUE)
 ```
 
 
-
-<p>
-<span style="color:red">
-<strong>Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...</strong>
-</span>
-</p>
-
+```html
+Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...
+```
 
 
 <br>
