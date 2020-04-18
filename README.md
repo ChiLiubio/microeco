@@ -37,7 +37,7 @@ QQ group: 277434916
 To keep the start and use of the package simplified, 
 the installation of microeco package only depend on several packages, which are compulsory-installed and very useful in the data analysis.
 These packages include R6, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, RColorBrewer, Rcpp, RcppArmadillo and RcppEigen.
-So the question is that you may encounter an error when using a class or function like this:
+So the question is that you may encounter an error when using a class or function that invoke an additional package like this:
 
 ```r
 library(microeco)
