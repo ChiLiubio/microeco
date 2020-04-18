@@ -55,40 +55,92 @@ The solutions:
 
 2. install the packages in advance. We first show some packages that are necessary in some functions.
 
------------------------------------------------------------------------------
-   Package                 where                       description           
--------------- ----------------------------- --------------------------------
-   GUniFrac             cal_betadiv           UniFrac beta diversity matrix  
 
-   picante             cal_alphadiv             Faith's phylogenetic alpha   
-                                                        diversity            
-
-  agricolae      cal_diff(method = anova)          multiple comparisons      
-
-    ggpubr              plot_alpha               some plotting functions     
-
-   ggdendro           plot_clustering         plotting clustering dendrogram 
-
-     MASS         trans_diff$new(method =      linear discriminant analysis  
-                       "lefse",...)                                          
-
- randomForest     trans_diff$new(method =         random forest analysis     
-                         "rf",...)                                           
-
-   ggrepel               trans_rda            reduce the text overlap in the 
-                                                           plot              
-
-   pheatmap     plot_corr(pheatmap = TRUE)       correlation heatmap with    
-                                                  clustering dendrogram      
-
-    WGCNA       trans_network$new(cal_cor =      invoke WGCNA package to     
-                       "WGCNA",...)               calcuate correlations      
-
-    igraph          trans_network class         network related operations   
-
-    rgexf              save_network            save network with gexf style  
------------------------------------------------------------------------------
-
+<div id="content-wrapper">
+  <div class="inner clearfix">
+    <section id="main-content">
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># read</span></a>
+<a class="sourceLine" id="cb1-2" title="2">t1 &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;package_description.csv&quot;</span>, <span class="dt">check.names =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3">pander<span class="op">::</span><span class="kw">pander</span>(t1)</a></code></pre></div>
+<table>
+<colgroup>
+<col width="19%"></col>
+<col width="38%"></col>
+<col width="42%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Package</th>
+<th align="center">where</th>
+<th align="center">description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">GUniFrac</td>
+<td align="center">cal_betadiv</td>
+<td align="center">UniFrac beta diversity matrix</td>
+</tr>
+<tr class="even">
+<td align="center">picante</td>
+<td align="center">cal_alphadiv</td>
+<td align="center">Faith’s phylogenetic alpha diversity</td>
+</tr>
+<tr class="odd">
+<td align="center">agricolae</td>
+<td align="center">cal_diff(method = anova)</td>
+<td align="center">multiple comparisons</td>
+</tr>
+<tr class="even">
+<td align="center">ggpubr</td>
+<td align="center">plot_alpha</td>
+<td align="center">some plotting functions</td>
+</tr>
+<tr class="odd">
+<td align="center">ggdendro</td>
+<td align="center">plot_clustering</td>
+<td align="center">plotting clustering dendrogram</td>
+</tr>
+<tr class="even">
+<td align="center">MASS</td>
+<td align="center">trans_diff$new(method = “lefse”,…)</td>
+<td align="center">linear discriminant analysis</td>
+</tr>
+<tr class="odd">
+<td align="center">randomForest</td>
+<td align="center">trans_diff$new(method = “rf”,…)</td>
+<td align="center">random forest analysis</td>
+</tr>
+<tr class="even">
+<td align="center">ggrepel</td>
+<td align="center">trans_rda</td>
+<td align="center">reduce the text overlap in the plot</td>
+</tr>
+<tr class="odd">
+<td align="center">pheatmap</td>
+<td align="center">plot_corr(pheatmap = TRUE)</td>
+<td align="center">correlation heatmap with clustering dendrogram</td>
+</tr>
+<tr class="even">
+<td align="center">WGCNA</td>
+<td align="center">trans_network$new(cal_cor = “WGCNA”,…)</td>
+<td align="center">invoke WGCNA package to calcuate correlations</td>
+</tr>
+<tr class="odd">
+<td align="center">igraph</td>
+<td align="center">trans_network class</td>
+<td align="center">network related operations</td>
+</tr>
+<tr class="even">
+<td align="center">rgexf</td>
+<td align="center">save_network</td>
+<td align="center">save network with gexf style</td>
+</tr>
+</tbody>
+</table>
+    </section>
+  </div>
+</div>
 
 
 
