@@ -5,7 +5,6 @@
 #' \code{\link{merge_samples}}, \code{\link{merge_taxa}}, \code{\link{cal_alphadiv}}
 #' \code{\link{cal_betadiv}}, \code{\link{sample_sums}}, \code{\link{taxa_sums}}, \code{\link{sample_names}}, \code{\link{taxa_names}}
 #'
-#' @usage microtable(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL)
 #'
 #' @param sample_table data.frame; The sample information table, rows are samples, cols are information types.
 #' @param otu_table data.frame; The species or OTU table, rows are species, cols are samples.
