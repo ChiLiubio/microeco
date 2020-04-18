@@ -49,6 +49,14 @@ dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
 
+<div id="content-wrapper">
+  <div class="inner clearfix">
+    <section id="main-content">
+<p><span style="color:red"> 这个非常重要，一定不能搞错。 </span></p>
+    </section>
+  </div>
+</div>
+
 ```html
 <p>
 <span style="color:red">
