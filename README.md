@@ -31,7 +31,7 @@ QQ group: 277434916
 
 ### Notes
 
-## Some packages important
+#### Packages important
 To keep the start and use of the package simplified, 
 the installation of microeco package only depend on several packages, which are compulsory-installed and very useful in the data analysis.
 So the question is that you may encounter an error when using a class or function like this:
@@ -47,7 +47,7 @@ dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
 
-Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...
+<font color='red'> Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ... </font>
 
 The solutions:
 
@@ -55,21 +55,39 @@ The solutions:
 
 2. install the packages in advance. We first show some packages that are necessary in some functions.
 
-----------------------------------------------------
-    Package        function            description  
--------------- ------------- ----------------------
- **GUniFrac**   cal_betadiv       GUniFrac beta diversity matrix
+-----------------------------------------------------------------------------
+   Package                 where                       description           
+-------------- ----------------------------- --------------------------------
+   GUniFrac             cal_betadiv           UniFrac beta diversity matrix  
 
- **OTU_236**    k__Bacteria      p__Chloroflexi       
+   picante             cal_alphadiv             Faith's phylogenetic alpha   
+                                                        diversity            
 
- **OTU_399**    k__Bacteria    p__Proteobacteria   
+  agricolae      cal_diff(method = anova)          multiple comparisons      
 
- **OTU_1556**   k__Bacteria     p__Acidobacteria    
+    ggpubr              plot_alpha               some plotting functions     
 
-  **OTU_32**    k__Archaea      p__Miscellaneous       
-                              Crenarchaeotic Group                         
-----------------------------------------------------
+   ggdendro           plot_clustering         plotting clustering dendrogram 
 
+     MASS         trans_diff$new(method =      linear discriminant analysis  
+                       "lefse",...)                                          
+
+ randomForest     trans_diff$new(method =         random forest analysis     
+                         "rf",...)                                           
+
+   ggrepel               trans_rda            reduce the text overlap in the 
+                                                           plot              
+
+   pheatmap     plot_corr(pheatmap = TRUE)       correlation heatmap with    
+                                                  clustering dendrogram      
+
+    WGCNA       trans_network$new(cal_cor =      invoke WGCNA package to     
+                       "WGCNA",...)               calcuate correlations      
+
+    igraph          trans_network class         network related operations   
+
+    rgexf              save_network            save network with gexf style  
+-----------------------------------------------------------------------------
 
 
 
