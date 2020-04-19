@@ -4,30 +4,17 @@
 \alias{cal_sum_links}
 \title{Sum the linkages among taxa.}
 \usage{
-cal_sum_links(plot_pos = TRUE, plot_num = NULL, color_values = NULL)
-
-cal_sum_links(plot_pos = TRUE, plot_num = NULL, color_values = NULL)
+cal_sum_links(taxa_level = "Phylum")
 }
 \arguments{
-\item{plot_pos}{default TRUE; plot the summed positive or negative linkages.}
-
-\item{plot_num}{default NULL; number of taxa presented in the plot.}
-
-\item{color_values}{default NULL; If not provided, use default.}
-
 \item{taxa_level}{default "Phylum"; taxonomic rank.}
 }
 \value{
 res_sum_links_pos or res_sum_links_neg in object.
-
-chorddiag plot
 }
 \description{
 Sum the linkages among taxa.
-
-Plot the summed linkages among taxa.
 }
 \examples{
 t1$cal_sum_links(taxa_level = "Phylum")
-t1$cal_sum_links(plot_pos = TRUE, plot_num = 10)
 }

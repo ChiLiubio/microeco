@@ -702,9 +702,9 @@ cal_sum_links <- function(taxa_level = "Phylum"){
 #' @param color_values default NULL; If not provided, use default.
 #' @return chorddiag plot
 #' @examples
-#' t1$cal_sum_links(plot_pos = TRUE, plot_num = 10)
-cal_sum_links <- function(plot_pos = TRUE, plot_num = NULL, color_values = NULL){
-	dataset$cal_sum_links()
+#' t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+plot_sum_links <- function(plot_pos = TRUE, plot_num = NULL, color_values = NULL){
+	dataset$plot_sum_links()
 }
 
 
