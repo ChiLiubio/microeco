@@ -18,6 +18,6 @@ res_alpha_diff in object.
 Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
 }
 \examples{
-dataset$cal_diff(method = "KW")
-dataset$cal_diff(method = "anova")
+t1$cal_diff(method = "KW")
+t1$cal_diff(method = "anova")
 }

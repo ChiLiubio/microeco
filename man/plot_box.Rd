@@ -69,5 +69,5 @@ ggplot2 plot.
 Plot the box plot with the object of trans_abund Class.
 }
 \examples{
-dataset$plot_box(group = "Group", show_point = FALSE)
+t1$plot_box(group = "Group", show_point = FALSE)
 }

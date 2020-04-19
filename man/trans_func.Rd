@@ -12,7 +12,7 @@ The functions in this class include \code{\link{cal_spe_func}}, \code{\link{cal_
 \code{\link{plot_spe_func_perc}}, \code{\link{cal_tax4fun_func}}, \code{\link{cal_biogeo}}.
 }
 \examples{
-trans_diff$new(dataset = dataset)
+t1 <- trans_diff$new(dataset = dataset)
 }
 \section{Methods}{
 \subsection{Public methods}{

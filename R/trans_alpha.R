@@ -9,7 +9,7 @@
 #' @param order_x default:null; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
 #' @return alpha_data and alpha_stat. 
 #' @examples
-#' trans_alpha$new(dataset = dataset, group = "Group")
+#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
@@ -171,8 +171,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 #' @param measures default NULL; a vector, if null, all indexes will be calculated.
 #' @return res_alpha_diff in object.
 #' @examples
-#' dataset$cal_diff(method = "KW")
-#' dataset$cal_diff(method = "anova")
+#' t1$cal_diff(method = "KW")
+#' t1$cal_diff(method = "anova")
 cal_diff <- function(method = c("KW", "anova")[1], measures = NULL){
 	dataset$cal_diff()
 }
@@ -197,7 +197,7 @@ cal_diff <- function(method = c("KW", "anova")[1], measures = NULL){
 #' @param ... parameters pass to \code{\link{ggpubr::ggboxplot}}.
 #' @return ggplot.
 #' @examples
-#' dataset$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
+#' t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
 plot_alpha <- function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), measure = "Shannon", group = NULL, add_letter = FALSE,
 			pair_compare = FALSE, pair_compare_filter = "", pair_compare_method = "wilcox.test", map_signif_level = TRUE,
 			xtext_type = NULL, xtext_size = 10,

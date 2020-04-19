@@ -16,5 +16,5 @@ None.
 Show the basic information for one function.
 }
 \examples{
-dataset$show_spe_func(use_func = "methanotrophy")
+t1$show_spe_func(use_func = "methanotrophy")
 }

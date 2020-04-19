@@ -18,5 +18,5 @@ res_betamntd in object.
 This code runs faster than \code{\link{comdistnt}} in picante package.
 }
 \examples{
-dataset$cal_betamntd(abundance.weighted=FALSE)
+t1$cal_betamntd(abundance.weighted=FALSE)
 }

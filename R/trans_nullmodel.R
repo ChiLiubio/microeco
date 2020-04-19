@@ -15,7 +15,7 @@
 #' @param complete_na default FALSE; whether fill the NA in physicochemical data.
 #' @return intermediate files in object.
 #' @examples
-#' trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
+#' t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
 #' @export
 trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	public = list(
@@ -322,7 +322,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 #' @param ... parameters pass to \code{\link{mantel.correlog}}
 #' @return res_mantel_corr in object.
 #' @examples
-#' dataset$cal_mantel_corr(use_env = "pH")
+#' t1$cal_mantel_corr(use_env = "pH")
 cal_mantel_corr <- function(use_env = NULL, break.pts = seq(0, 1, 0.02), cutoff=FALSE, ...){
 	dataset$cal_mantel_corr()
 }
@@ -331,7 +331,7 @@ cal_mantel_corr <- function(use_env = NULL, break.pts = seq(0, 1, 0.02), cutoff=
 #'
 #' @return ggplot.
 #' @examples
-#' dataset$plot_mantel_corr()
+#' t1$plot_mantel_corr()
 plot_mantel_corr <- function(){
 	dataset$plot_mantel_corr()
 }
@@ -343,7 +343,7 @@ plot_mantel_corr <- function(){
 #' @param abundance.weighted default FALSE; whether use weighted abundance
 #' @return res_betampd in object.
 #' @examples
-#' dataset$cal_betampd(abundance.weighted=FALSE)
+#' t1$cal_betampd(abundance.weighted=FALSE)
 cal_betampd <- function(abundance.weighted=FALSE){
 	dataset$cal_betampd()
 }
@@ -356,7 +356,7 @@ cal_betampd <- function(abundance.weighted=FALSE){
 #' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
 #' @return res_betamntd in object.
 #' @examples
-#' dataset$cal_betamntd(abundance.weighted=FALSE)
+#' t1$cal_betamntd(abundance.weighted=FALSE)
 cal_betamntd <- function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
 	dataset$cal_betamntd()
 }
@@ -368,7 +368,7 @@ cal_betamntd <- function(abundance.weighted = FALSE, exclude.conspecifics = FALS
 #' @param abundance.weighted default FALSE; whether use weighted abundance
 #' @return res_ses_betampd in object.
 #' @examples
-#' dataset$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
+#' t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
 cal_ses_betampd <- function(runs=1000, abundance.weighted = FALSE){
 	dataset$cal_ses_betampd()
 }
@@ -381,7 +381,7 @@ cal_ses_betampd <- function(runs=1000, abundance.weighted = FALSE){
 #' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
 #' @return res_ses_betamntd in object.
 #' @examples
-#' dataset$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+#' t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
 cal_ses_betamntd <- function(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE){
 	dataset$cal_ses_betamntd()
 }
@@ -392,7 +392,7 @@ cal_ses_betamntd <- function(runs=1000, abundance.weighted = FALSE, exclude.cons
 #' @param runs default 1000; simulation runs.
 #' @return res_rcbray in object.
 #' @examples
-#' dataset$cal_rcbray(runs=1000)
+#' t1$cal_rcbray(runs=1000)
 cal_rcbray <- function(runs=1000){
 	dataset$cal_rcbray()
 }
@@ -403,7 +403,7 @@ cal_rcbray <- function(runs=1000){
 #' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
 #' @return res_rcbray in object.
 #' @examples
-#' dataset$cal_process(use_betamntd = TRUE)
+#' t1$cal_process(use_betamntd = TRUE)
 cal_process <- function(use_betamntd = TRUE){
 	dataset$cal_process()
 }

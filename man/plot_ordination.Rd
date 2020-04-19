@@ -61,5 +61,5 @@ ggplot.
 Plotting the ordination result.
 }
 \examples{
-dataset$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
 }

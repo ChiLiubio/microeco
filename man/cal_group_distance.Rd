@@ -16,5 +16,5 @@ group_distance in object.
 Tranform sample distances within groups or between groups.
 }
 \examples{
-dataset$cal_group_distance()
+t1$cal_group_distance()
 }

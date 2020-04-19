@@ -36,5 +36,5 @@ ggplot.
 Plotting the distance between samples within or between groups.
 }
 \examples{
-dataset$plot_group_distance(distance_pair_stat = TRUE)
+t1$plot_group_distance(distance_pair_stat = TRUE)
 }

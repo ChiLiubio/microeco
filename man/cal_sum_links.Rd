@@ -28,6 +28,6 @@ Sum the linkages among taxa.
 Plot the summed linkages among taxa.
 }
 \examples{
-dataset$cal_sum_links(taxa_level = "Phylum")
-dataset$cal_sum_links(plot_pos = TRUE, plot_num = 10)
+t1$cal_sum_links(taxa_level = "Phylum")
+t1$cal_sum_links(plot_pos = TRUE, plot_num = 10)
 }

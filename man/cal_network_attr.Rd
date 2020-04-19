@@ -13,5 +13,5 @@ res_network_attr in object.
 Calculate network properties.
 }
 \examples{
-dataset$cal_network_attr()
+t1$cal_network_attr()
 }

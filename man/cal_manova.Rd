@@ -27,5 +27,5 @@ res_manova in object.
 Calculate perMANOVA.
 }
 \examples{
-dataset$cal_manova(cal_manova_all = TRUE)
+t1$cal_manova(cal_manova_all = TRUE)
 }

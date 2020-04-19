@@ -27,5 +27,5 @@ ggplot.
 Bar plot metastat.
 }
 \examples{
-dataset$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 }

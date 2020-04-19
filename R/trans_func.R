@@ -7,7 +7,7 @@
 #' @param dataset the object of \code{\link{microtable}} Class.
 #' @return trans_func object with tax_table, otu_table, sample_table.
 #' @examples 
-#' trans_diff$new(dataset = dataset)
+#' t1 <- trans_diff$new(dataset = dataset)
 #' @export
 trans_func <- R6Class(classname = "trans_func",
 	public = list(
@@ -198,7 +198,7 @@ trans_func <- R6Class(classname = "trans_func",
 #'
 #' @return otu_func_table in object.
 #' @examples
-#' dataset$cal_spe_func()
+#' t1$cal_spe_func()
 cal_spe_func <- function(){
 	dataset$cal_spe_func()
 }
@@ -213,7 +213,7 @@ cal_spe_func <- function(){
 #' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of \code{\link{cal_node_type}}.
 #' @return res_spe_func_perc in object.
 #' @examples
-#' dataset$cal_spe_func_perc(use_community = TRUE)
+#' t1$cal_spe_func_perc(use_community = TRUE)
 cal_spe_func_perc <- function(use_community = TRUE, node_type_table = NULL){
 	dataset$cal_spe_func_perc()
 }
@@ -224,7 +224,7 @@ cal_spe_func_perc <- function(use_community = TRUE, node_type_table = NULL){
 #' @param use_func default NULL; the function name.
 #' @return None.
 #' @examples
-#' dataset$show_spe_func(use_func = "methanotrophy")
+#' t1$show_spe_func(use_func = "methanotrophy")
 show_spe_func <- function(use_community = TRUE, node_type_table = NULL){
 	dataset$show_spe_func()
 }
@@ -237,7 +237,7 @@ show_spe_func <- function(use_community = TRUE, node_type_table = NULL){
 #' @param group_list_default default FALSE; whether use the default group list.
 #' @return ggplot2.
 #' @examples
-#' dataset$plot_spe_func_perc(group_list_default = TRUE)
+#' t1$plot_spe_func_perc(group_list_default = TRUE)
 plot_spe_func_perc <- function(filter_func = NULL, group_list = NULL, group_list_default = FALSE){
 	dataset$plot_spe_func_perc()
 }
@@ -249,7 +249,7 @@ plot_spe_func_perc <- function(filter_func = NULL, group_list = NULL, group_list
 #' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.
 #' @return tax4fun_KO and tax4fun_path in object.
 #' @examples
-#' dataset$cal_tax4fun_func(folderReferenceData = "./SILVA123")
+#' t1$cal_tax4fun_func(folderReferenceData = "./SILVA123")
 cal_tax4fun_func <- function(keep_tem = FALSE, folderReferenceData = NULL){
 	dataset$cal_tax4fun_func()
 }
@@ -261,7 +261,7 @@ cal_tax4fun_func <- function(keep_tem = FALSE, folderReferenceData = NULL){
 #' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
 #' @return res_biogeo in object.
 #' @examples
-#' dataset$cal_biogeo(code_path = "./FAPROTAX_1.2.1")
+#' t1$cal_biogeo(code_path = "./FAPROTAX_1.2.1")
 cal_biogeo <- function(code_path = "./FAPROTAX_1.2.1", keep_tem = TRUE){
 	dataset$cal_biogeo()
 }

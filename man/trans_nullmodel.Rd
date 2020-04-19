@@ -12,7 +12,7 @@ The functions in this class: \code{\link{cal_mantel_corr}}, \code{\link{plot_man
 \code{\link{cal_ses_betampd}}, \code{\link{cal_ses_betamntd}}, \code{\link{cal_rcbray}}, \code{\link{cal_process}}
 }
 \examples{
-trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
+t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
 }
 \section{Methods}{
 \subsection{Public methods}{

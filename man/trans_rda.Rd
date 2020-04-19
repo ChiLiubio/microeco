@@ -33,5 +33,5 @@ res_rda_trans in object.
 transform RDA result for the following plotting.
 }
 \examples{
-dataset$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
 }

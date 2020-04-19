@@ -18,5 +18,5 @@ ggplot.
 Plot the classification and importance of nodes.
 }
 \examples{
-dataset$plot_taxa_roles()
+t1$plot_taxa_roles()
 }

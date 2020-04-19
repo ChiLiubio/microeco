@@ -18,5 +18,5 @@ res_ses_betampd in object.
 Calculate ses_betaMPD.
 }
 \examples{
-dataset$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
+t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
 }

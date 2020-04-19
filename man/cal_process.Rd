@@ -16,5 +16,5 @@ res_rcbray in object.
 Infer the processes according to ses.betaMNTD ses.betaMPD and rcbray.
 }
 \examples{
-dataset$cal_process(use_betamntd = TRUE)
+t1$cal_process(use_betamntd = TRUE)
 }

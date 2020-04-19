@@ -63,5 +63,5 @@ ggplot2 plot.
 Plot the bar plot with the object of trans_abund Class.
 }
 \examples{
-dataset$plot_bar(bar_type = "full", others_color = "grey90")
+t1$plot_bar(bar_type = "full", others_color = "grey90")
 }

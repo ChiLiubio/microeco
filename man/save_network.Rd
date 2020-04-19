@@ -16,5 +16,5 @@ None.
 Save network.
 }
 \examples{
-dataset$save_network(filepath = "network.gexf")
+t1$save_network(filepath = "network.gexf")
 }

@@ -75,5 +75,5 @@ ggplot2 plot.
 Plot the heatmap with the object of trans_abund Class.
 }
 \examples{
-dataset$plot_heatmap(withmargin = FALSE)
+t1$plot_heatmap(withmargin = FALSE)
 }

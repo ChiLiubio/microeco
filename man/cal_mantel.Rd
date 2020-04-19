@@ -31,5 +31,5 @@ res_mantel in object.
 Mantel test between beta diversity matrix and physicochemical data.
 }
 \examples{
-dataset$cal_mantel(use_measure = "bray")
+t1$cal_mantel(use_measure = "bray")
 }

@@ -13,7 +13,7 @@
 #' @param scale.species default FALSE; whether species loading in PCA will be scaled.
 #' @return res_ordination, group_distance_within, group_distance_between or res_manova in the object.
 #' @examples
-#' trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group", trans_between_group_distance = TRUE, cal_manova_paired = TRUE)
+#' t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
@@ -175,7 +175,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				theme_bw() +
 				theme(panel.grid=element_blank()) +
 				geom_boxplot(outlier.size =1,width=.6,linetype=1) +
-				stat_summary(fun.y="mean", geom="point", shape=20, size=3, fill="white") +
+				stat_summary(fun="mean", geom="point", shape=20, size=3, fill="white") +
 				xlab("") +
 				ylab(ylabname) +
 				theme(axis.text=element_text(size=12)) +
@@ -321,7 +321,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 #' @param within_group default TRUE; whether transform sample distance within groups, if false, transform sample distance between any two groups.
 #' @return group_distance in object.
 #' @examples
-#' dataset$cal_group_distance()
+#' t1$cal_group_distance()
 cal_group_distance <- function(within_group = TRUE){
 	dataset$cal_group_distance()
 }
@@ -334,7 +334,7 @@ cal_group_distance <- function(within_group = TRUE){
 #' @param permutations default 999; see permutations in \code{\link{adonis}}.
 #' @return res_manova in object.
 #' @examples
-#' dataset$cal_manova(cal_manova_all = TRUE)
+#' t1$cal_manova(cal_manova_all = TRUE)
 cal_manova <- function(cal_manova_all = FALSE, cal_manova_paired = FALSE, cal_manova_set = NULL, permutations = 999){
 	dataset$cal_manova()
 }
@@ -359,7 +359,7 @@ cal_manova <- function(cal_manova_all = FALSE, cal_manova_paired = FALSE, cal_ma
 #' @param ellipse_type default t; see type in \code{\link{stat_ellipse}}.
 #' @return ggplot.
 #' @examples
-#' dataset$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
 plot_ordination <- function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"), plot_color = NULL, plot_shape = NULL, plot_group_order = NULL, 
 			shape_values = c(16, 17, 7,  8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0,1,2,14),
@@ -381,7 +381,7 @@ plot_ordination <- function(
 #' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
 #' @return ggplot.
 #' @examples
-#' dataset$plot_group_distance(distance_pair_stat = TRUE)
+#' t1$plot_group_distance(distance_pair_stat = TRUE)
 plot_group_distance <- function(plot_group_order = NULL, 
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
 			distance_pair_stat = FALSE, pair_compare_filter = "", pair_compare_method = "wilcox.test", map_signif_level = TRUE,
@@ -400,7 +400,7 @@ plot_group_distance <- function(plot_group_order = NULL,
 #' @param replace_name default NULL; if provided, use this as label.
 #' @return ggplot.
 #' @examples
-#' dataset$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
+#' t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 plot_clustering <- function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), measure = NULL, group = NULL, replace_name = NULL){
 	dataset$plot_clustering()
 }

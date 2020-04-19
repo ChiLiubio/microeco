@@ -11,9 +11,9 @@ This class is a wrapper for a series of correlation calculating methods.
 The functions in this class: \code{\link{replace_name}}.
 }
 \examples{
-trans_corr$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001, SparCC_code_path = "./SparCC")
-trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
+t1 <- trans_corr$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001, SparCC_code_path = "./SparCC")
+t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
 }
 \section{Methods}{
 \subsection{Public methods}{

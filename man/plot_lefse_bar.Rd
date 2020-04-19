@@ -42,5 +42,5 @@ ggplot.
 Bar plot for LDA score.
 }
 \examples{
-dataset$plot_lefse_bar(LDA_score = 2)
+t1$plot_lefse_bar(LDA_score = 2)
 }

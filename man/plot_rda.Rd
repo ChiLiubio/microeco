@@ -30,5 +30,5 @@ ggplot object.
 plot RDA result.
 }
 \examples{
-dataset$plot_rda(plot_color = "Group")
+t1$plot_rda(plot_color = "Group")
 }

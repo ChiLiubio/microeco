@@ -13,5 +13,5 @@ res_node_type in object.
 Calculate node properties.
 }
 \examples{
-dataset$cal_node_type()
+t1$cal_node_type()
 }

@@ -16,5 +16,5 @@ res_betampd in object.
 This code runs faster than \code{\link{comdist}} in picante package.
 }
 \examples{
-dataset$cal_betampd(abundance.weighted=FALSE)
+t1$cal_betampd(abundance.weighted=FALSE)
 }

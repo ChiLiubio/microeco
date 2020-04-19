@@ -12,7 +12,7 @@ The functions in this class include \code{\link{cal_rda}}, \code{\link{trans_rda
 \code{\link{cal_cor}}, \code{\link{plot_corr}}
 }
 \examples{
-trans_env$new(dataset = dataset, add_data = env_data)
+t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 }
 \section{Methods}{
 \subsection{Public methods}{

@@ -18,5 +18,5 @@ res_biogeo in object.
 Predict functional potential using FAPROTAX.
 }
 \examples{
-dataset$cal_biogeo(code_path = "./FAPROTAX_1.2.1")
+t1$cal_biogeo(code_path = "./FAPROTAX_1.2.1")
 }

@@ -11,7 +11,7 @@ This class is a wrapper for a series of alpha diveristy related analysis.
 The functions in this class include \code{\link{cal_diff}}, \code{\link{plot_alpha}}.
 }
 \examples{
-trans_alpha$new(dataset = dataset, group = "Group")
+t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 }
 \section{Methods}{
 \subsection{Public methods}{

@@ -13,5 +13,5 @@ ggplot.
 Plot mantel correlogram.
 }
 \examples{
-dataset$plot_mantel_corr()
+t1$plot_mantel_corr()
 }

@@ -29,5 +29,5 @@ ggplot.
 Plotting clustering result. Require ggdendro package.
 }
 \examples{
-dataset$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
+t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 }

@@ -11,8 +11,8 @@ This class is a wrapper for the taxonomic abundance transformations and plotting
 The functions in this class include \code{\link{plot_bar}}, \code{\link{plot_box}}, \code{\link{plot_heatmap}}, \code{\link{plot_pie}}.
 }
 \examples{
-trans_abund$new(dataset = microtable_object, taxrank = "Phylum", show = 0, ntaxa = 10)
-trans_abund$new(dataset = microtable_object, taxrank = "Phylum", show = 0.1)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 }
 \section{Methods}{
 \subsection{Public methods}{

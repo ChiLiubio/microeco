@@ -18,5 +18,5 @@ res_spe_func_perc in object.
 The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
 }
 \examples{
-dataset$cal_spe_func_perc(use_community = TRUE)
+t1$cal_spe_func_perc(use_community = TRUE)
 }

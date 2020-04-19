@@ -11,7 +11,7 @@
 #' @param complete_na default FALSE; Whether fill the NA in the physicochemical data.
 #' @return env_data and dataset in trans_env object.
 #' @examples
-#' trans_env$new(dataset = dataset, add_data = env_data)
+#' t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 #' @export
 trans_env <- R6Class(classname = "trans_env",
 	public = list(
@@ -370,7 +370,7 @@ trans_env <- R6Class(classname = "trans_env",
 #' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
 #' @return res_rda in object.
 #' @examples
-#' dataset$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+#' t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 cal_rda <- function(use_dbrda = TRUE, add_matrix = NULL, use_measure = NULL, feature_sel = FALSE, taxa_level = NULL, taxa_filter_thres = NULL){
 	dataset$cal_rda()
 }
@@ -388,7 +388,7 @@ cal_rda <- function(use_dbrda = TRUE, add_matrix = NULL, use_measure = NULL, fea
 #' @param max_perc_tax default 100; maximum value for tax arrow, relatively.
 #' @return res_rda_trans in object.
 #' @examples
-#' dataset$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+#' t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
 trans_rda <- function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env = 1, max_perc_env = 100, min_perc_tax = 1, max_perc_tax = 100){
 	dataset$trans_rda()
 }
@@ -403,7 +403,7 @@ trans_rda <- function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env 
 #' @param taxa_text_type default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.
 #' @return ggplot object.
 #' @examples
-#' dataset$plot_rda(plot_color = "Group")
+#' t1$plot_rda(plot_color = "Group")
 plot_rda <- function(plot_color = NULL, plot_shape = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 				taxa_text_color = "firebrick1", taxa_text_type = "italic"){
 	dataset$plot_rda()
@@ -419,7 +419,7 @@ plot_rda <- function(plot_color = NULL, plot_shape = NULL, color_values = RColor
 #' @param method default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.
 #' @return res_mantel in object.
 #' @examples
-#' dataset$cal_mantel(use_measure = "bray")
+#' t1$cal_mantel(use_measure = "bray")
 cal_mantel <- function(select_env_data = NULL, partial_mantel = FALSE, add_matrix = NULL, use_measure = NULL, method = "pearson", ...){
 	dataset$cal_mantel()
 }
@@ -466,7 +466,7 @@ cal_cor <- function(use_data = c("Genus", "all", "other")[1], select_env_data = 
 #' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
 #' @return plot.
 #' @examples
-#' dataset$plot_corr()
+#' t1$plot_corr()
 
 plot_corr <- function(color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
 			pheatmap = FALSE, ylab_type_italic = FALSE, 

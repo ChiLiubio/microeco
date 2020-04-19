@@ -40,5 +40,5 @@ plot.
 Plot correlations heatmap.
 }
 \examples{
-dataset$plot_corr()
+t1$plot_corr()
 }

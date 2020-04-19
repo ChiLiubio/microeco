@@ -16,5 +16,5 @@ a new res_cor_p in trans_corr object.
 Replace names in res_cor_p of trans_corr object.
 }
 \examples{
-trans_corr$replace_name()
+t1$replace_name()
 }

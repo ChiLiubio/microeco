@@ -11,7 +11,7 @@ This class is a wrapper for a series of differential abundance test and indicato
 The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}}
 }
 \examples{
-trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 }
 \section{Methods}{
 \subsection{Public methods}{

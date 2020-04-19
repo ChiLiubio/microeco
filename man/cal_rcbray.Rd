@@ -16,5 +16,5 @@ res_rcbray in object.
 Calculate rcbray.
 }
 \examples{
-dataset$cal_rcbray(runs=1000)
+t1$cal_rcbray(runs=1000)
 }

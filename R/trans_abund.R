@@ -13,8 +13,8 @@
 #' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
 #' @return Object of trans_abund \code{\link{R6Class}} containing transformed data. 
 #' @examples
-#' trans_abund$new(dataset = microtable_object, taxrank = "Phylum", show = 0, ntaxa = 10)
-#' trans_abund$new(dataset = microtable_object, taxrank = "Phylum", show = 0.1)
+#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
+#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 #' @export
 trans_abund <- R6Class(classname = "trans_abund",
 	public = list(
@@ -333,7 +333,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 #' @return ggplot2 plot. 
 #' @format \code{\link{trans_abund}} object.
 #' @examples 
-#' dataset$plot_bar(bar_type = "full", others_color = "grey90")
+#' t1$plot_bar(bar_type = "full", others_color = "grey90")
 plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_type = "full", others_color = "grey90", facet = NULL, barwidth = NULL,
 	facet_color= "grey95", strip_text = 11, legend_text_italic = FALSE, xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
 	ytitle_size = 17, base_font =NULL, ylab_title = NULL){
@@ -363,7 +363,7 @@ plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_typ
 #' @return ggplot2 plot. 
 #' @format \code{\link{trans_abund}} object.
 #' @examples
-#' dataset$plot_box(group = "Group", show_point = FALSE)
+#' t1$plot_box(group = "Group", show_point = FALSE)
 plot_box <- function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), group = NULL, show_point = FALSE, point_color = "black", point_size = 3, point_alpha = .3, 
 			plot_flip = FALSE, boxfill = TRUE, middlecolor = "grey95", middlesize = 1,
 			xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
@@ -396,7 +396,7 @@ plot_box <- function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), group 
 #' @return ggplot2 plot.
 #' @format \code{\link{trans_abund}} object.
 #' @examples 
-#' dataset$plot_heatmap(withmargin = FALSE)
+#' t1$plot_heatmap(withmargin = FALSE)
 plot_heatmap <- function(use_colors = viridis::viridis(100, option = "D"), withmargin = TRUE,
 			plot_numbers = FALSE, plot_text_size = 4, plot_breaks = NULL, margincolor = "white",
 			plot_colorscale = "log10", min_abundance = 0.01, max_abundance = NULL,
@@ -415,7 +415,7 @@ plot_heatmap <- function(use_colors = viridis::viridis(100, option = "D"), withm
 #' @return ggplot2 plot. 
 #' @format \code{\link{trans_abund}} object.
 #' @examples 
-#' dataset$plot_pie(facet_nrow = 2)
+#' t1$plot_pie(facet_nrow = 2)
 plot_pie <- function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), facet_nrow = 1, strip_text = 11, legend_text_italic = FALSE){
 	dataset$plot_pie()
 }

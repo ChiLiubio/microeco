@@ -33,5 +33,5 @@ res_rda in object.
 calculate RDA.
 }
 \examples{
-dataset$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 }

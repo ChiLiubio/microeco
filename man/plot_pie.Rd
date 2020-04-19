@@ -30,5 +30,5 @@ ggplot2 plot.
 Plot pie chart with the object of trans_abund Class.
 }
 \examples{
-dataset$plot_pie(facet_nrow = 2)
+t1$plot_pie(facet_nrow = 2)
 }

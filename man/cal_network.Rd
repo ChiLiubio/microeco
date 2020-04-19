@@ -54,5 +54,5 @@ res_network in object.
 Calculate network either based on the correlation method or based on the Probabilistic Graphical Models in julia FlashWeave.
 }
 \examples{
-dataset$cal_network(p_thres = 0.01, COR_cut = 0.6)
+t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
 }

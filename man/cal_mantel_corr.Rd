@@ -27,5 +27,5 @@ res_mantel_corr in object.
 Calculate mantel correlogram.
 }
 \examples{
-dataset$cal_mantel_corr(use_env = "pH")
+t1$cal_mantel_corr(use_env = "pH")
 }

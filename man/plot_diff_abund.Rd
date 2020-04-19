@@ -57,5 +57,5 @@ a list with two ggplot.
 Plotting the abundance of differencial taxa.
 }
 \examples{
-dataset$plot_diff_abund(use_number = 1:10)
+t1$plot_diff_abund(use_number = 1:10)
 }

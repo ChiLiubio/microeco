@@ -24,5 +24,5 @@ ggplot2.
 Plot the percentages of species with specific trait in communities or modules.
 }
 \examples{
-dataset$plot_spe_func_perc(group_list_default = TRUE)
+t1$plot_spe_func_perc(group_list_default = TRUE)
 }

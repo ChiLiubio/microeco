@@ -13,5 +13,5 @@ otu_func_table in object.
 Confirm traits of each OTU by matching the taxonomic assignments to the FAPROTAX database.
 }
 \examples{
-dataset$cal_spe_func()
+t1$cal_spe_func()
 }

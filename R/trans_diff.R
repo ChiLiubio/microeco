@@ -19,7 +19,7 @@
 #' @param metastat_group_choose default NULL; a vector used for selecting the required groups for testing.
 #' @return res_rf res_lefse res_abund or res_metastat in trans_diff object.
 #' @examples 
-#' trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
@@ -490,7 +490,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 #' @param use_se default TRUE; whether use SE in plot 2, if FALSE, use SD.
 #' @return a list with two ggplot.
 #' @examples
-#' dataset$plot_diff_abund(use_number = 1:10)
+#' t1$plot_diff_abund(use_number = 1:10)
 
 plot_diff_abund <- function(method = NULL, only_abund_plot = TRUE, use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			plot1_bar_color = "grey50", plot2_sig_color = "red", plot2_sig_size = 1.2,
@@ -515,7 +515,7 @@ plot_diff_abund <- function(method = NULL, only_abund_plot = TRUE, use_number = 
 #' @param ... parameters pass to \code{\link{geom_bar}}
 #' @return ggplot.
 #' @examples
-#' dataset$plot_lefse_bar(LDA_score = 2)
+#' t1$plot_lefse_bar(LDA_score = 2)
 
 plot_lefse_bar <- function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), LDA_score = NULL,
 			simplify_names = TRUE, keep_prefix = TRUE, group_order = NULL, axis_text_y = 12, plot_vertical = TRUE, ...){
@@ -530,7 +530,7 @@ plot_lefse_bar <- function(use_number = 1:10, color_values = RColorBrewer::brewe
 #' @param choose_group default 1; which column in res_metastat_group_matrix will be used.
 #' @return ggplot.
 #' @examples
-#' dataset$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+#' t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 plot_metastat <- function(use_number = 1:10, qvalue = 0.05, choose_group = 1, color_values = RColorBrewer::brewer.pal(8, "Dark2")){
 	dataset$plot_metastat()
 }

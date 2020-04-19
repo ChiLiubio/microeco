@@ -4,14 +4,14 @@
 \alias{trans_network}
 \title{Create trans_network object.}
 \description{
-This class inherits trans_corr class. create trans_network object see \code{\link{trans_corr}}. 
+This class inherits \code{\link{trans_corr}} class. 
 This class is a wrapper for a series of network related calculating and plotting methods.
 The functions in this class: \code{\link{cal_network}}, \code{\link{save_network}}, \code{\link{cal_network_attr}},
-\code{\link{cal_node_type}}, \code{\link{plot_taxa_roles}}, \code{\link{cal_sum_links}}, \code{\link{plot_sum_links}}.
+\code{\link{cal_node_type}}, \code{\link{plot_taxa_roles}}, \code{\link{cal_sum_links}}, \code{\link{plot_sum_links}}, \code{\link{subset_network}}.
 }
 \examples{
-trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
 }
 \section{Super class}{
 \code{\link[microeco:trans_corr]{microeco::trans_corr}} -> \code{trans_network}
@@ -26,6 +26,7 @@ trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filt
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-cal_sum_links}{\code{trans_network$cal_sum_links()}}
 \item \href{#method-plot_sum_links}{\code{trans_network$plot_sum_links()}}
+\item \href{#method-subset_network}{\code{trans_network$subset_network()}}
 \item \href{#method-print}{\code{trans_network$print()}}
 \item \href{#method-clone}{\code{trans_network$clone()}}
 }
@@ -116,6 +117,15 @@ trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filt
   plot_num = NULL,
   color_values = NULL
 )}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-subset_network"></a>}}
+\if{latex}{\out{\hypertarget{method-subset_network}{}}}
+\subsection{Method \code{subset_network()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$subset_network(node = NULL, rm_single = TRUE)}\if{html}{\out{</div>}}
 }
 
 }

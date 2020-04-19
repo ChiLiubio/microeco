@@ -27,6 +27,8 @@
 #' data(sample_info)
 #' data(phylo_tree)
 #' dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
+#' # trim the dataset
+#' dataset$tidy_dataset()
 
 #' @import ape
 #' @import vegan

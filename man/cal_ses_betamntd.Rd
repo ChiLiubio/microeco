@@ -24,5 +24,5 @@ res_ses_betamntd in object.
 Calculate ses_betaMNTD.
 }
 \examples{
-dataset$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
 }

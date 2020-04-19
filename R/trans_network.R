@@ -15,9 +15,9 @@
 #' @param add_data default NULL; provide physicochemical table additionally.
 #' @return res_cor_p in trans_corr object.
 #' @examples 
-#' trans_corr$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-#' trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001, SparCC_code_path = "./SparCC")
-#' trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
+#' t1 <- trans_corr$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
+#' t1 <- trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001, SparCC_code_path = "./SparCC")
+#' t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
 #' @export
 trans_corr <- R6Class(classname = "trans_corr",
 	public = list(
@@ -162,7 +162,7 @@ trans_corr <- R6Class(classname = "trans_corr",
 #' @param No parameters
 #' @return a new res_cor_p in trans_corr object.
 #' @examples 
-#' trans_corr$replace_name()
+#' t1$replace_name()
 replace_name <- function(){
 	dataset$replace_name()
 }
@@ -173,11 +173,11 @@ replace_name <- function(){
 #' This class inherits \code{\link{trans_corr}} class. 
 #' This class is a wrapper for a series of network related calculating and plotting methods.
 #' The functions in this class: \code{\link{cal_network}}, \code{\link{save_network}}, \code{\link{cal_network_attr}},
-#' \code{\link{cal_node_type}}, \code{\link{plot_taxa_roles}}, \code{\link{cal_sum_links}}, \code{\link{plot_sum_links}}.
+#' \code{\link{cal_node_type}}, \code{\link{plot_taxa_roles}}, \code{\link{cal_sum_links}}, \code{\link{plot_sum_links}}, \code{\link{subset_network}}.
 #' 
 #' @examples 
-#' trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-#' trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
+#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
+#' t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
 #' @export
 trans_network <- R6Class(classname = "trans_network",
 	inherit = trans_corr,
@@ -357,6 +357,26 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 			}
 			chorddiag::chorddiag(use_data, groupColors = groupColors)
+		},
+		subset_network = function(node = NULL, rm_single = TRUE){
+			if(!is.null(node)){
+				network <- self$res_network
+				nodes_raw <- V(network)$name
+				delete_nodes <- nodes_raw %>% .[! . %in% node]
+				sub_network <- delete_vertices(network, delete_nodes)
+				# whether remove the single node without edges
+				if(rm_single == T){
+				nodes_raw <- V(sub_network)$name
+				edges <- t(sapply(1:ecount(sub_network), function(x) ends(sub_network, x)))
+				delete_nodes <- nodes_raw %>% .[! . %in% as.character(c(edges[,1], edges[,2]))]
+					if(length(delete_nodes) > 0){
+						sub_network %<>% delete_vertices(delete_nodes)
+					}
+				}
+				sub_network
+			}else{
+				stop("Please provide the retained nodes name using node parameter!")
+			}
 		},
 		print = function(...) {
 			cat("trans_network class:\n")
@@ -606,7 +626,7 @@ trans_network <- R6Class(classname = "trans_network",
 #' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
 #' @return res_network in object.
 #' @examples
-#' dataset$cal_network(p_thres = 0.01, COR_cut = 0.6)
+#' t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
 cal_network <- function(network_method = c("COR", "PGM")[1],
 			p_thres = 0.01,
 			COR_weight = TRUE,
@@ -630,7 +650,7 @@ cal_network <- function(network_method = c("COR", "PGM")[1],
 #' @param filepath default "network.gexf"; file path.
 #' @return None.
 #' @examples
-#' dataset$save_network(filepath = "network.gexf")
+#' t1$save_network(filepath = "network.gexf")
 save_network <- function(filepath = "network.gexf"){
 	dataset$save_network()
 }
@@ -640,7 +660,7 @@ save_network <- function(filepath = "network.gexf"){
 #'
 #' @return res_network_attr in object.
 #' @examples
-#' dataset$cal_network_attr()
+#' t1$cal_network_attr()
 cal_network_attr <- function(){
 	dataset$cal_network_attr()
 }
@@ -649,7 +669,7 @@ cal_network_attr <- function(){
 #'
 #' @return res_node_type in object.
 #' @examples
-#' dataset$cal_node_type()
+#' t1$cal_node_type()
 cal_node_type <- function(){
 	dataset$cal_node_type()
 }
@@ -660,7 +680,7 @@ cal_node_type <- function(){
 #' @param plot_module default FALSE; whether plot the modules information.
 #' @return ggplot.
 #' @examples
-#' dataset$plot_taxa_roles()
+#' t1$plot_taxa_roles()
 plot_taxa_roles <- function(roles_colors = NULL, plot_module = FALSE){
 	dataset$plot_taxa_roles()
 }
@@ -670,7 +690,7 @@ plot_taxa_roles <- function(roles_colors = NULL, plot_module = FALSE){
 #' @param taxa_level default "Phylum"; taxonomic rank.
 #' @return res_sum_links_pos or res_sum_links_neg in object.
 #' @examples
-#' dataset$cal_sum_links(taxa_level = "Phylum")
+#' t1$cal_sum_links(taxa_level = "Phylum")
 cal_sum_links <- function(taxa_level = "Phylum"){
 	dataset$cal_sum_links()
 }
@@ -682,12 +702,22 @@ cal_sum_links <- function(taxa_level = "Phylum"){
 #' @param color_values default NULL; If not provided, use default.
 #' @return chorddiag plot
 #' @examples
-#' dataset$cal_sum_links(plot_pos = TRUE, plot_num = 10)
+#' t1$cal_sum_links(plot_pos = TRUE, plot_num = 10)
 cal_sum_links <- function(plot_pos = TRUE, plot_num = NULL, color_values = NULL){
 	dataset$cal_sum_links()
 }
 
 
-
+#' Subset of the network.
+#'
+#' @param node default NULL; provide the names of the nodes that you want to use in the sub-network.
+#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
+#' @return network
+#' @examples
+#' t1$subset_network(node = t1$res_node_type %>% .[.$module == "M1", ] %>% rownames, rm_single = TRUE)
+#' # return a sub network that contains all nodes of module M1
+subset_network = function(node = NULL, rm_single = TRUE){
+	dataset$subset_network()
+}
 
 

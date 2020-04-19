@@ -12,7 +12,7 @@ The functions in this class include \code{\link{cal_group_distance}}, \code{\lin
 \code{\link{plot_group_distance}}, \code{\link{plot_clustering}}
 }
 \examples{
-trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group", trans_between_group_distance = TRUE, cal_manova_paired = TRUE)
+t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 }
 \section{Methods}{
 \subsection{Public methods}{

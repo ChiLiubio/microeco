@@ -18,5 +18,5 @@ tax4fun_KO and tax4fun_path in object.
 Predict functional potential using tax4fun.
 }
 \examples{
-dataset$cal_tax4fun_func(folderReferenceData = "./SILVA123")
+t1$cal_tax4fun_func(folderReferenceData = "./SILVA123")
 }
