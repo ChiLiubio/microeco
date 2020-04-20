@@ -20,9 +20,10 @@ an object of class "microtable" with the following components:
 }
 \description{
 This class is a wrapper for a series of operations on the original files and the basic manipulations.
-The functions in this class include \code{\link{tidy_dataset}}, \code{\link{filter_pollution}}, \code{\link{rarefy_samples}}, \code{\link{cal_abund}}, 
-\code{\link{merge_samples}}, \code{\link{merge_taxa}}, \code{\link{cal_alphadiv}}
-\code{\link{cal_betadiv}}, \code{\link{sample_sums}}, \code{\link{taxa_sums}}, \code{\link{sample_names}}, \code{\link{taxa_names}}
+The functions in this class include \code{\link{tidy_dataset}}, \code{\link{filter_pollution}}, \code{\link{rarefy_samples}}, 
+\code{\link{cal_abund}}, \code{\link{save_abund}},
+\code{\link{merge_samples}}, \code{\link{merge_taxa}}, \code{\link{cal_alphadiv}}, \code{\link{save_alphadiv}},
+\code{\link{cal_betadiv}}, \code{\link{save_betadiv}}, \code{\link{sample_sums}}, \code{\link{taxa_sums}}, \code{\link{sample_names}}, \code{\link{taxa_names}}
 }
 \examples{
 data(otu_table)
@@ -42,6 +43,7 @@ dataset$tidy_dataset()
 \item \href{#method-rarefy_samples}{\code{microtable$rarefy_samples()}}
 \item \href{#method-tidy_dataset}{\code{microtable$tidy_dataset()}}
 \item \href{#method-cal_abund}{\code{microtable$cal_abund()}}
+\item \href{#method-save_abund}{\code{microtable$save_abund()}}
 \item \href{#method-sample_sums}{\code{microtable$sample_sums()}}
 \item \href{#method-taxa_sums}{\code{microtable$taxa_sums()}}
 \item \href{#method-sample_names}{\code{microtable$sample_names()}}
@@ -49,7 +51,9 @@ dataset$tidy_dataset()
 \item \href{#method-merge_samples}{\code{microtable$merge_samples()}}
 \item \href{#method-merge_taxa}{\code{microtable$merge_taxa()}}
 \item \href{#method-cal_alphadiv}{\code{microtable$cal_alphadiv()}}
+\item \href{#method-save_alphadiv}{\code{microtable$save_alphadiv()}}
 \item \href{#method-cal_betadiv}{\code{microtable$cal_betadiv()}}
+\item \href{#method-save_betadiv}{\code{microtable$save_betadiv()}}
 \item \href{#method-clone}{\code{microtable$clone()}}
 }
 }
@@ -129,6 +133,15 @@ dataset$tidy_dataset()
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-save_abund"></a>}}
+\if{latex}{\out{\hypertarget{method-save_abund}{}}}
+\subsection{Method \code{save_abund()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(dirpath = "taxa_abund")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sample_sums"></a>}}
 \if{latex}{\out{\hypertarget{method-sample_sums}{}}}
 \subsection{Method \code{sample_sums()}}{
@@ -192,11 +205,29 @@ dataset$tidy_dataset()
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-save_alphadiv"></a>}}
+\if{latex}{\out{\hypertarget{method-save_alphadiv}{}}}
+\subsection{Method \code{save_alphadiv()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$save_alphadiv(dirpath = "alpha_diversity")}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(unifrac = FALSE)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-save_betadiv"></a>}}
+\if{latex}{\out{\hypertarget{method-save_betadiv}{}}}
+\subsection{Method \code{save_betadiv()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$save_betadiv(dirpath = "beta_diversity")}\if{html}{\out{</div>}}
 }
 
 }
