@@ -188,11 +188,13 @@ The R package chorddiag can be installed from Github https://github.com/mattflor
 1. download and install python 2.7 from https://www.python.org/downloads/release
 2. Put python in the computer env PATH, such as your_directory_path\python and your_directory_path\python\Scripts
 3. With Windows, download and install the following packages from https://www.lfd.uci.edu/~gohlke/pythonlibs/  
-　　Open cmd or Powershell, input
-　　　pip install numpy-1.16.6+mkl-cp27-cp27m-win_amd64.whl
-　　　pip install python_dateutil-2.8.1-py2.py3-none-any.whl
-　　　pip install pandas-0.24.2-cp27-cp27m-win_amd64.whl
-　　　pip install scipy-1.2.3-cp27-cp27m-win_amd64.whl
+　Open cmd or Powershell, switch to the directory, install  
+```python
+pip install numpy-1.16.6+mkl-cp27-cp27m-win_amd64.whl
+pip install python_dateutil-2.8.1-py2.py3-none-any.whl
+pip install pandas-0.24.2-cp27-cp27m-win_amd64.whl
+pip install scipy-1.2.3-cp27-cp27m-win_amd64.whl
+```
 
 4. download SparCC from https://github.com/luispedro/sparcc  
 unzip
