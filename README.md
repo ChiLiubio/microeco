@@ -191,6 +191,7 @@ pip install scipy-1.2.3-cp27-cp27m-win_amd64.whl
 unzip
 
 ##### FAPROTAX
+require python 2.7, see 1 and 2 parts of above SparCC
 Download FAPROTAX_1.2.1 from http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Download  
 unzip
 
