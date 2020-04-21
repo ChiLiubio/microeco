@@ -8,7 +8,7 @@ If you do not already have R/RStudio installed, do as follows.
 2. Install [RStudio](https://rstudio.com/)
 3. With Windows, install also [Rtools](https://cran.r-project.org/bin/windows/Rtools/)  
 
-Put R and Rtools in the computer env path.  
+Put R and Rtools in the computer env PATH: your_directory\R-3.6.3\bin\x64, your_directory\Rtools\bin and your_directory\Rtools\mingw_64\bin  
 Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
 
 ### Install microeco
@@ -168,10 +168,46 @@ lapply(
 )
 ```
 
-Besides, some dependency packages of WGCNA are stored in Bioconductor. The tax4fun package can be downloaded from http://tax4fun.gobics.de/
-and the correponding SILVA123 ref data is also required.
-The package chorddiag can be installed from Github https://github.com/mattflor/chorddiag directly.
-Some packages of python and julia are required to run the example codes and described in the [tutorial](https://chiliubio.github.io/microeco/).
+Besides, WGCNA also depends on the GO.db package,
+which can be installed from Bioconductor (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html).
+
+##### Tax4Fun 
+1. download tax4fun package and the SILVA123 reference data from http://tax4fun.gobics.de/
+2. # install package:
+install.packages("E:/3_R_packages/R/R_package_make/tutorial/Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
+3. unzip SILVA123.zip
+
+
+##### chorddiag
+The R package chorddiag can be installed from Github https://github.com/mattflor/chorddiag
+
+##### SparCC
+
+1. download and install python 2.7 from https://www.python.org/downloads/release
+2. Put python in the computer env PATH, such as your_directory_path\python and your_directory_path\python\Scripts
+3. With Windows, download and install the following packages from https://www.lfd.uci.edu/~gohlke/pythonlibs/  
+　　Open cmd or Powershell, input
+　　　pip install numpy-1.16.6+mkl-cp27-cp27m-win_amd64.whl
+　　　pip install python_dateutil-2.8.1-py2.py3-none-any.whl
+　　　pip install pandas-0.24.2-cp27-cp27m-win_amd64.whl
+　　　pip install scipy-1.2.3-cp27-cp27m-win_amd64.whl
+
+4. download SparCC from https://github.com/luispedro/sparcc  
+unzip
+
+##### FAPROTAX
+Download FAPROTAX_1.2.1 from http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Download  
+unzip
+
+##### FlashWeave
+
+1. download and install julia from https://julialang.org/downloads/
+2. Put julia in the computer env PATH, such as  your_directory_path\Julia-1.4.1\bin
+3. Open cmd or Powershell, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
+	julia  
+	]  
+	add FlashWeave  
+
 
 
 
