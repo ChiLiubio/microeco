@@ -198,7 +198,7 @@ unzip
 1. download tax4fun package and the SILVA123 reference data from http://tax4fun.gobics.de/
 2. install package
 ```r
-install.packages("E:/3_R_packages/R/R_package_make/tutorial/Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
+install.packages("Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
 ```
 3. unzip downloaded SILVA123.zip
 
