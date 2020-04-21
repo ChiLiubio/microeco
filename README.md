@@ -171,15 +171,6 @@ lapply(
 Besides, WGCNA also depends on the GO.db package,
 which can be installed from Bioconductor (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html).
 
-##### Tax4Fun 
-1. download tax4fun package and the SILVA123 reference data from http://tax4fun.gobics.de/
-2. install package
-```r
-install.packages("E:/3_R_packages/R/R_package_make/tutorial/Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
-```
-3. unzip downloaded SILVA123.zip
-
-
 ##### chorddiag
 The R package chorddiag can be installed from Github https://github.com/mattflor/chorddiag
 
@@ -188,7 +179,7 @@ The R package chorddiag can be installed from Github https://github.com/mattflor
 1. download and install python 2.7 from https://www.python.org/downloads/release
 2. Put python in the computer env PATH, such as your_directory_path\python and your_directory_path\python\Scripts
 3. With Windows, download and install the following packages from https://www.lfd.uci.edu/~gohlke/pythonlibs/  
-　Open cmd or Powershell, switch to the directory, install  
+　Open cmd or Powershell, switch to the directory, run
 ```python
 pip install numpy-1.16.6+mkl-cp27-cp27m-win_amd64.whl
 pip install python_dateutil-2.8.1-py2.py3-none-any.whl
@@ -203,12 +194,21 @@ unzip
 Download FAPROTAX_1.2.1 from http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Download  
 unzip
 
+##### Tax4Fun 
+1. download tax4fun package and the SILVA123 reference data from http://tax4fun.gobics.de/
+2. install package
+```r
+install.packages("E:/3_R_packages/R/R_package_make/tutorial/Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
+```
+3. unzip downloaded SILVA123.zip
+
+
 ##### FlashWeave
 
 1. download and install julia from https://julialang.org/downloads/
 2. Put julia in the computer env PATH, such as  your_directory_path\Julia-1.4.1\bin
 3. install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
-	Open cmd or Powershell, input julia
+	Open cmd or Powershell, input julia, run
 ```julia
 ]
 add FlashWeave  
