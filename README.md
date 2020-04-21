@@ -207,11 +207,12 @@ unzip
 
 1. download and install julia from https://julialang.org/downloads/
 2. Put julia in the computer env PATH, such as  your_directory_path\Julia-1.4.1\bin
-3. Open cmd or Powershell, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
-	julia  
-	]  
-	add FlashWeave  
-
+3. install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
+	Open cmd or Powershell, input julia
+```julia
+]
+add FlashWeave  
+```
 
 
 
