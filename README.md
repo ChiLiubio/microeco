@@ -173,9 +173,11 @@ which can be installed from Bioconductor (https://bioconductor.org/packages/rele
 
 ##### Tax4Fun 
 1. download tax4fun package and the SILVA123 reference data from http://tax4fun.gobics.de/
-2. # install package:
+2. install package
+```r
 install.packages("E:/3_R_packages/R/R_package_make/tutorial/Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
-3. unzip SILVA123.zip
+```
+3. unzip downloaded SILVA123.zip
 
 
 ##### chorddiag
