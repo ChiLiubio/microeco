@@ -164,9 +164,8 @@ Then, if you want to install these packages or some of them, you can do like thi
 packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", 
 	"ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf", "VGAM")
 # Now check or install
-lapply(
-	packages,
-	FUN <- function(x) {
+lapply(packages,
+	function(x) {
 		if (!require(x, character.only = TRUE)) {
 			install.packages(x, dependencies = TRUE)
 		}
