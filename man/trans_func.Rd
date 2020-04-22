@@ -49,7 +49,7 @@ t1 <- trans_diff$new(dataset = dataset)
 \if{latex}{\out{\hypertarget{method-cal_biogeo}{}}}
 \subsection{Method \code{cal_biogeo()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_biogeo(code_path = "./FAPROTAX_1.2.1", keep_tem = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_biogeo(keep_tem = TRUE)}\if{html}{\out{</div>}}
 }
 
 }

@@ -17,7 +17,7 @@ trans_func <- R6Class(classname = "trans_func",
 			self$otu_table <- dataset$otu_table
 			self$sample_table <- dataset$sample_table
 			},
-		cal_biogeo = function(code_path = "./FAPROTAX_1.2.1", keep_tem = TRUE) {
+		cal_biogeo = function(keep_tem = TRUE) {
 			otu_file <- self$otu_table
 			tax_file <- self$tax_table
 			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
@@ -26,6 +26,7 @@ trans_func <- R6Class(classname = "trans_func",
 			# save to local place
 			message("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction...")
 			write.table(otu_file, "otu_table_for_FAPROTAX.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+			code_path <- system.file("extdata", "FAPROTAX_1.2.1", package="microeco")
 			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
 			message("run python to predict...")
 			system(use_command)

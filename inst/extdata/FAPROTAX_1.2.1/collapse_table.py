@@ -62,36 +62,6 @@ from numpy import NaN
 
 
 # OPTIONAL DEPENDENCIES
-try:
-	import biom
-	HAS_BIOME_MODULE = True;
-except ImportError as e:
-	HAS_BIOME_MODULE = False;
-	name = 'biom'
-	if e.message != 'No module named %s'%(name):
-		print("WARNING: An error occurred while importing the module '%s': %s\n         This script will only work with classical (e.g. tab-separated) tables"%(name,e.message))
-	else:
-		print("WARNING: The module '%s' was not found.\n         This script will only accept classical (e.g. tab-separated) tables"%(name))
-
-
-try:
-	import json
-except ImportError as e:
-	name = 'json'
-	if e.message != 'No module named %s'%(name):
-		print("WARNING: An error occurred while importing the module '%s': %s\n         This script may not work with tables in BIOM JSON format"%(name,e.message))
-	else:
-		print("WARNING: The module '%s' was not found.\n         This script may not work with tables in BIOM JSON format"%(name))
-
-
-try:
-	import h5py
-except ImportError as e:
-	name = 'h5py'
-	if e.message != 'No module named %s'%(name):
-		print("WARNING: An error occurred while importing the module '%s': %s\n         This script may not work with tables in BIOM HDF5 format"%(name,e.message))
-	else:
-		print("WARNING: The module '%s' was not found.\n         This script may not work with tables in BIOM HDF5 format"%(name))
 
 
 # Python 2 & 3 universality issues

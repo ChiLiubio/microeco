@@ -192,16 +192,21 @@ install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microec
 
 ##### python
 
-1. download python 3 from https://www.python.org/downloads/release
-2. when install, remember to select the path item, otherwise you should put python in the computer env PATH manually, 
+1. download python 2.7 from https://www.python.org/downloads/release
+2. With windows, put python in the computer env PATH manually, 
 　such as your_directory_path\python and your_directory_path\python\Scripts
-3. With Windows, download and install the following packages from https://www.lfd.uci.edu/~gohlke/pythonlibs/  
-　Open cmd, Powershell or python terminal, switch to the directory, run
+3. Open terminal or cmd or Powershell , run
 
 ```python
-pip3 install numpy -i https://pypi.douban.com/simple/
-pip3 install argparse -i https://pypi.douban.com/simple/
-pip3 install argparse -i https://pypi.douban.com/simple/
+pip install numpy
+pip install argparse
+```
+
+If the installation is too slow to be failed, use -i select the appropriate mirror, for example, in China, you can use:
+
+```python
+pip install numpy -i https://pypi.douban.com/simple/
+pip install argparse -i https://pypi.douban.com/simple/
 ```
 
 ##### FlashWeave
