@@ -174,35 +174,30 @@ which can be installed from Bioconductor (https://bioconductor.org/packages/rele
 ##### chorddiag
 The R package chorddiag can be installed from Github https://github.com/mattflor/chorddiag
 
-##### SparCC
-
-1. download and install python 2.7 from https://www.python.org/downloads/release
-2. Put python in the computer env PATH, such as your_directory_path\python and your_directory_path\python\Scripts
-3. With Windows, download and install the following packages from https://www.lfd.uci.edu/~gohlke/pythonlibs/  
-　Open cmd or Powershell, switch to the directory, run
-```python
-pip install numpy-1.16.6+mkl-cp27-cp27m-win_amd64.whl
-pip install python_dateutil-2.8.1-py2.py3-none-any.whl
-pip install pandas-0.24.2-cp27-cp27m-win_amd64.whl
-pip install scipy-1.2.3-cp27-cp27m-win_amd64.whl
-```
-
-4. download SparCC from https://github.com/luispedro/sparcc  
-unzip
-
-##### FAPROTAX
-require python 2.7, see 1 and 2 parts of above SparCC
-Download FAPROTAX_1.2.1 from http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Download  
-unzip
-
 ##### Tax4Fun 
-1. download tax4fun package and the SILVA123 reference data from http://tax4fun.gobics.de/
-2. install package
+1. install Tax4Fun package
 ```r
-install.packages("Tax4Fun_0.3.1.tar.gz", repos = NULL, type = "source")
+install.packages(system.file("extdata", "biom_0.3.12.tar.gz", package="microeco"), repos = NULL, type = "source")
+install.packages(system.file("extdata", "qiimer_0.9.4.tar.gz", package="microeco"), repos = NULL, type = "source")
+install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microeco"), repos = NULL, type = "source")
 ```
-3. unzip downloaded SILVA123.zip
+2. download SILVA123 reference data from http://tax4fun.gobics.de/
+　unzip SILVA123.zip , move it to a place you can remember
 
+
+##### python
+
+1. download python 3 from https://www.python.org/downloads/release
+2. when install, remember to select the path item, otherwise you should put python in the computer env PATH manually, 
+　such as your_directory_path\python and your_directory_path\python\Scripts
+3. With Windows, download and install the following packages from https://www.lfd.uci.edu/~gohlke/pythonlibs/  
+　Open cmd, Powershell or python terminal, switch to the directory, run
+
+```python
+pip3 install numpy -i https://pypi.douban.com/simple/
+pip3 install argparse -i https://pypi.douban.com/simple/
+pip3 install argparse -i https://pypi.douban.com/simple/
+```
 
 ##### FlashWeave
 

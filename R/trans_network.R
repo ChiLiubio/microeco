@@ -24,8 +24,7 @@ trans_corr <- R6Class(classname = "trans_corr",
 		initialize = function(dataset = NULL, cor_method = c("pearson", "spearman", "kendall")[1],
 			cal_cor = c("base", "WGCNA", "SparCC", "none")[1],
 			taxa_level = "OTU", filter_thres = 0,
-			WGCNA_nThreads = 1,
-			SparCC_code_path = NULL,
+			nThreads = 1,
 			SparCC_simu_num = 100,
 			env_cols = NULL, add_data = NULL
 			) {
@@ -64,22 +63,11 @@ trans_corr <- R6Class(classname = "trans_corr",
 				cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
 			}
 			if(cal_cor == "WGCNA"){
-				cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = WGCNA_nThreads)
+				cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
 			}
 			if(cal_cor == "SparCC"){
-				if(is.null(SparCC_code_path)){
-					stop("Please provide the code path with parameter SparCC_code_path, for example: './SparCC' !")
-				}
-				use_abund <- as.data.frame(t(use_abund))
-				use_abund <- cbind.data.frame(rownames(use_abund), use_abund)
-				colnames(use_abund)[1] <- "taxa_id"
-				tem_dir <- "temp_SparCC"
-				if(!dir.exists(tem_dir)){
-					dir.create(tem_dir)
-				}
-				write.table(use_abund, paste0(tem_dir, "/temp_abund_table_for_SparCC.txt"), quote=FALSE, row.names = FALSE, sep = "\t")
-				cor_result <- private$cal_sparcc(inputdir = tem_dir, inputfile = "temp_abund_table_for_SparCC.txt", cor_method = cor_method, 
-					SparCC_simu_num = SparCC_simu_num, code_path = SparCC_code_path)				
+				bootres <- sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
+				cor_result <- pval.sparccboot(bootres)
 			}
 			if(cal_cor != "none"){
 				self$res_cor_p <- cor_result
@@ -129,26 +117,6 @@ trans_corr <- R6Class(classname = "trans_corr",
 			res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
 			res_p <- reshape2::dcast(res, t1~t2, value.var = "p") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
 			res <- list(cor = res_cor, p = res_p)
-			res
-		},
-		cal_sparcc = function(inputdir = "temp_SparCC", inputfile = "temp_abund_table_for_SparCC.txt", cor_method = "pearson",
-			SparCC_simu_num = 100, 
-			code_path = "./SparCC") {
-			abs_path <- normalizePath(code_path, winslash = "/")
-			system(paste0('python ', abs_path, '/SparCC.py ', paste0(inputdir, "/", inputfile), " -a ", cor_method, " --cor_file=", paste0(inputdir, "/", "taxa_correlation.txt")))
-			system(paste0('python ', abs_path, '/MakeBootstraps.py ', paste0(inputdir, "/", inputfile), " -n ", SparCC_simu_num, " -p ", paste0(inputdir, "/", "Resamplings/boot")))
-			dir.create(paste0(inputdir, "/", "Bootstraps"))
-			for(i in 0:(SparCC_simu_num-1)){
-				system(paste0('python ', abs_path, '/SparCC.py ', paste0(paste0(inputdir, "/", "Resamplings/boot"), paste0(inputdir, "/", inputfile), ".permuted_", i, ".txt"), 
-					" --cor_file=", paste0(paste0(inputdir, "/", "Bootstraps/sim_cor_"), i, ".txt")))
-			}
-			system(paste0('python ', abs_path, '/PseudoPvals.py ', paste0(inputdir, "/", "taxa_correlation.txt "), paste0(paste0(inputdir, "/", "Bootstraps/sim_cor_#.txt "), SparCC_simu_num," -o "), 
-				paste0(inputdir, "/", "taxa_correlation_pvalue.txt -t two_sided")))
-			out_r <- paste0(inputdir, "/taxa_correlation.txt")
-			out_p <- paste0(inputdir, "/taxa_correlation_pvalue.txt")
-			cor_result_cor <- read.table(out_r, header = TRUE, row.names = 1)
-			cor_result_p <- read.table(out_p, header = TRUE, row.names = 1)
-			res <- list(cor = cor_result_cor, p = cor_result_p)
 			res
 		}
 	),

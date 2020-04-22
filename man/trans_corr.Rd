@@ -35,8 +35,7 @@ t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
   cal_cor = c("base", "WGCNA", "SparCC", "none")[1],
   taxa_level = "OTU",
   filter_thres = 0,
-  WGCNA_nThreads = 1,
-  SparCC_code_path = NULL,
+  nThreads = 1,
   SparCC_simu_num = 100,
   env_cols = NULL,
   add_data = NULL
@@ -55,10 +54,6 @@ t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
 \item{\code{taxa_level}}{default "OTU"; taxonomic rank.}
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
-
-\item{\code{WGCNA_nThreads}}{default 1; the thread for "WGCNA" method in cal_cor.}
-
-\item{\code{SparCC_code_path}}{default NULL; provide the folder path of SparCC code.}
 
 \item{\code{SparCC_simu_num}}{default 100; SparCC simulation number.}
 
