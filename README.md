@@ -149,6 +149,11 @@ The solutions:
 <td align="center">trans_corr class</td>
 <td align="center">Generates Dirichlet random variates in SparCC</td>
 </tr>
+<tr class="even">
+<td align="center">RJSONIO</td>
+<td align="center">trans_func</td>
+<td align="center">the dependency of biom package</td>
+</tr>
 </tbody>
 </table>
     </section>
@@ -162,7 +167,7 @@ Then, if you want to install these packages or some of them, you can do like thi
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
 packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", 
-	"ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf", "VGAM")
+	"ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf", "VGAM", "RJSONIO")
 # Now check or install
 lapply(packages,
 	function(x) {
@@ -191,6 +196,7 @@ install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microec
 
 
 ##### python
+Install python 
 
 1. download python 2.7 from https://www.python.org/downloads/release
 2. With windows, put python in the computer env PATH manually, 
@@ -212,13 +218,35 @@ pip install argparse -i https://pypi.douban.com/simple/
 ##### FlashWeave
 
 1. download and install julia from https://julialang.org/downloads/
-2. Put julia in the computer env PATH, such as  your_directory_path\Julia-1.4.1\bin
-3. install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
-	Open cmd or Powershell, input julia, run
+2. Put julia in the computer env PATH, such as  your_directory_path\Julia\bin
+3. Open terminal or cmd or Powershell, input julia, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
+	or 
 ```julia
-]
-add FlashWeave  
+using Pkg
+Pkg.add("FlashWeave")
 ```
+
+### Acknowledgement
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

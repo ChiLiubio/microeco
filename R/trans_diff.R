@@ -148,7 +148,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * lefse_nresam))]
 					abund_table_sub_resample <- abund_table_sub[, sample_names_resample]
 					sampleinfo_resample <- sampleinfo[sample_names_resample, ]
-					# make sure the groups and samples numbers right
+					# make sure the groups and samples numbers available
 					if(length(unique(sampleinfo_resample[, group])) != length(unique(sampleinfo[, group])) | min(table(sampleinfo_resample[, group])) < 2){
 						next
 					}
@@ -165,6 +165,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 							# consider subgroup as a independent variable
 							abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
 						}
+						# LDA analysis
 						mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10)
 						# calculate effect size
 						w <- mod1$scaling[,1]
@@ -185,14 +186,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					res_lda[[num]] <- res_lda_pair
 				}
-				# same with the python lefse
+				# obtain the final lda value
 				res <- sapply(rownames(abund_table_sub), function(k){
 					unlist(lapply(seq_len(ncol(all_class_pairs)), function(p){
 						unlist(lapply(res_lda, function(x){ x[[p]][k]})) %>% .[!is.na(.)] %>% mean
 					})) %>% .[!is.nan(.)] %>% max
 				})
 				res <- sapply(res, function(x) {log10(1 + abs(x)) * ifelse(x > 0, 1, -1)})
-				res1 <- cbind.data.frame(Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)]), pvalue = pvalue_sub, LDA = res)
+				res1 <- cbind.data.frame(Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)]), 
+					pvalue = pvalue_sub, LDA = res)
 				res1 %<>% .[order(.$LDA, decreasing = TRUE), ]
 				res1 <- cbind.data.frame(Taxa = rownames(res1), res1)
 				self$res_lefse <- res1

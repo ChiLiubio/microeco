@@ -99,7 +99,7 @@ summarySE = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE) {
 
 #' sparcc wrapper
 #'
-#' A reimplementation of SparCC algorithm (Friedman et Alm 2012, PLoS Comp Bio, 2012) from https://github.com/zdk123/SpiecEasi.
+#' An implementation of SparCC R code from https://github.com/zdk123/SpiecEasi
 #' @param data Community count data matrix
 #' @param iter Number of iterations in the outer loop
 #' @param inner_iter Number of iterations in the inner loop
@@ -151,7 +151,7 @@ sparccboot <- function(data, sparcc.params=list(),
 
 #' SparCC p-vals
 #'
-#' Get empirical p-values from bootstrap SparCC output.
+#' Get empirical p-values from bootstrap SparCC output, modified based on https://github.com/zdk123/SpiecEasi
 #'
 #' @param x output from \code{sparccboot}
 #' @param sided type of p-value to compute. Only two sided (sided="both") is implemented.

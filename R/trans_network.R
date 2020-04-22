@@ -8,15 +8,14 @@
 #' @param cal_cor default "base"; one of  c("base", "WGCNA", "SparCC", "none"); correlation method; "none" represent do not calculate. 
 #' @param taxa_level default "OTU"; taxonomic rank. 
 #' @param filter_thres default 0; the relative abundance threshold. 
-#' @param WGCNA_nThreads default 1; the thread for "WGCNA" method in cal_cor. 
-#' @param SparCC_code_path default NULL; provide the folder path of SparCC code. 
-#' @param SparCC_simu_num default 100; SparCC simulation number. 
+#' @param nThreads default 1; the thread number used for "WGCNA" and SparCC. 
+#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap. 
 #' @param env_cols default NULL; number or name vector to select the physicochemical data in dataset$sample_table. 
 #' @param add_data default NULL; provide physicochemical table additionally.
 #' @return res_cor_p in trans_corr object.
 #' @examples 
 #' t1 <- trans_corr$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-#' t1 <- trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001, SparCC_code_path = "./SparCC")
+#' t1 <- trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001)
 #' t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
 #' @export
 trans_corr <- R6Class(classname = "trans_corr",

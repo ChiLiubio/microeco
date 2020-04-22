@@ -12,7 +12,7 @@ The functions in this class: \code{\link{replace_name}}.
 }
 \examples{
 t1 <- trans_corr$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-t1 <- trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001, SparCC_code_path = "./SparCC")
+t1 <- trans_corr$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.0001)
 t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
 }
 \section{Methods}{
@@ -55,7 +55,9 @@ t1 <- trans_corr$new(dataset = dataset, cal_cor = "WGCNA")
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
 
-\item{\code{SparCC_simu_num}}{default 100; SparCC simulation number.}
+\item{\code{nThreads}}{default 1; the thread number used for "WGCNA" and SparCC.}
+
+\item{\code{SparCC_simu_num}}{default 100; SparCC simulation number for bootstrap.}
 
 \item{\code{env_cols}}{default NULL; number or name vector to select the physicochemical data in dataset$sample_table.}
 
