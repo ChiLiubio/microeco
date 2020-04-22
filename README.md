@@ -144,6 +144,11 @@ The solutions:
 <td align="center">save_network</td>
 <td align="center">save network with gexf style</td>
 </tr>
+<tr class="odd">
+<td align="center">VGAM</td>
+<td align="center">trans_corr class</td>
+<td align="center">Generates Dirichlet random variates in SparCC</td>
+</tr>
 </tbody>
 </table>
     </section>
@@ -156,7 +161,7 @@ Then, if you want to install these packages or some of them, you can do like thi
 ```r
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
-packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", "ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf")
+packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", "ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf", "VGAM")
 # Now check or install
 lapply(
   packages,
