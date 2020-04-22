@@ -161,15 +161,16 @@ Then, if you want to install these packages or some of them, you can do like thi
 ```r
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
-packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", "ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf", "VGAM")
+packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", 
+	"ggrepel", "pheatmap", "WGCNA", "igraph", "rgexf", "VGAM")
 # Now check or install
 lapply(
-  packages,
-  FUN <- function(x) {
-    if (!require(x, character.only = TRUE)) {
-      install.packages(x, dependencies = TRUE)
-    }
-  }
+	packages,
+	FUN <- function(x) {
+		if (!require(x, character.only = TRUE)) {
+			install.packages(x, dependencies = TRUE)
+		}
+	}
 )
 ```
 
