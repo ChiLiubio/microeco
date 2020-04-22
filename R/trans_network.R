@@ -134,17 +134,16 @@ trans_corr <- R6Class(classname = "trans_corr",
 		cal_sparcc = function(inputdir = "temp_SparCC", inputfile = "temp_abund_table_for_SparCC.txt", cor_method = "pearson",
 			SparCC_simu_num = 100, 
 			code_path = "./SparCC") {
-			setwd(inputdir)
-			system(paste0('python ', code_path, '/SparCC.py ', inputfile, " -a ", cor_method, " --cor_file=", "taxa_correlation.txt"))
-			system(paste0('python ', code_path, '/MakeBootstraps.py ', inputfile, " -n ", SparCC_simu_num, " -p ", "Resamplings/boot"))
-			dir.create("Bootstraps")
+			abs_path <- normalizePath(code_path, winslash = "/")
+			system(paste0('python ', abs_path, '/SparCC.py ', paste0(inputdir, "/", inputfile), " -a ", cor_method, " --cor_file=", paste0(inputdir, "/", "taxa_correlation.txt")))
+			system(paste0('python ', abs_path, '/MakeBootstraps.py ', paste0(inputdir, "/", inputfile), " -n ", SparCC_simu_num, " -p ", paste0(inputdir, "/", "Resamplings/boot")))
+			dir.create(paste0(inputdir, "/", "Bootstraps"))
 			for(i in 0:(SparCC_simu_num-1)){
-				system(paste0('python ', code_path, '/SparCC.py ', paste0("Resamplings/boot", inputfile, ".permuted_", i, ".txt"), 
-					" --cor_file=", paste0("Bootstraps/sim_cor_", i, ".txt")))
+				system(paste0('python ', abs_path, '/SparCC.py ', paste0(paste0(inputdir, "/", "Resamplings/boot"), paste0(inputdir, "/", inputfile), ".permuted_", i, ".txt"), 
+					" --cor_file=", paste0(paste0(inputdir, "/", "Bootstraps/sim_cor_"), i, ".txt")))
 			}
-			system(paste0('python ', code_path, '/PseudoPvals.py ', "taxa_correlation.txt ", paste0("Bootstraps/sim_cor_#.txt ", SparCC_simu_num," -o "), 
-				paste0("taxa_correlation_pvalue.txt -t two_sided")))
-			setwd("..")
+			system(paste0('python ', abs_path, '/PseudoPvals.py ', paste0(inputdir, "/", "taxa_correlation.txt "), paste0(paste0(inputdir, "/", "Bootstraps/sim_cor_#.txt "), SparCC_simu_num," -o "), 
+				paste0(inputdir, "/", "taxa_correlation_pvalue.txt -t two_sided")))
 			out_r <- paste0(inputdir, "/taxa_correlation.txt")
 			out_p <- paste0(inputdir, "/taxa_correlation_pvalue.txt")
 			cor_result_cor <- read.table(out_r, header = TRUE, row.names = 1)
