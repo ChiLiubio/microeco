@@ -110,7 +110,8 @@ trans_corr <- R6Class(classname = "trans_corr",
 				c(t1 = com_res[1, x], t2 = com_res[2, x], cor = unname(cor_res$estimate), p = unname(cor_res$p.value))
 			})
 			res <- do.call(rbind, res) %>% as.data.frame(stringsAsFactors = FALSE)
-			res <- rbind.data.frame(res, data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), data.frame(t1 = use_names, t2 = use_names, cor = rep(1, N), p = rep(0, N)))
+			res <- rbind.data.frame(res, data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), 
+				data.frame(t1 = use_names, t2 = use_names, cor = rep(1, N), p = rep(0, N)))
 			res$cor %<>% as.numeric
 			res$p %<>% as.numeric
 			res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
@@ -171,7 +172,6 @@ trans_network <- R6Class(classname = "trans_network",
 				cortable <- self$res_cor_p$cor
 				adp <- apply(self$res_cor_p$p, 2, p.adjust, method = COR_p_adjust)
 				if(COR_optimization == T) {
-					require(ks)
 					#find out threshold of correlation 
 					print(paste(Sys.time(),"calculate COR threshold: start"))
 					tc1 <- private$rmt(cortable)
@@ -194,7 +194,6 @@ trans_network <- R6Class(classname = "trans_network",
 				}else{
 					E(network)$weight <- rep.int(1, ecount(network))
 				}
-
 			}else{
 				use_abund <- self$use_abund
 				#use_abund <- cbind.data.frame(SampleID = rownames(use_abund), use_abund)
@@ -217,7 +216,7 @@ trans_network <- R6Class(classname = "trans_network",
 					L4 <- paste0("netw_results = learn_network(data_path, alpha=", p_thres, ", sensitive=", PGM_sensitive, ", heterogeneous=", PGM_heterogeneous, ")\n")
 				}
 				L5 <- 'save_network("network_PGM.gml", netw_results)'
-				L <- paste0(L1,L2,L3,L4,L5)
+				L <- paste0(L1, L2, L3, L4, L5)
 				openfile <- file("calculate_network.jl", "wb")
 				write(L, file = openfile)
 				close(openfile)
@@ -273,7 +272,8 @@ trans_network <- R6Class(classname = "trans_network",
 			node_type <- private$module_roles(network)
 			if(self$taxa_level != "OTU"){
 				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
-				node_type <- cbind.data.frame(node_type, self$use_tax[replace_table[rownames(node_type), 2], 1:which(colnames(self$use_tax) %in% self$taxa_level), drop = FALSE])
+				node_type <- cbind.data.frame(node_type, 
+					self$use_tax[replace_table[rownames(node_type), 2], 1:which(colnames(self$use_tax) %in% self$taxa_level), drop = FALSE])
 			}else{
 				node_type <- cbind.data.frame(node_type, self$use_tax[rownames(node_type), ])
 			}
@@ -369,11 +369,11 @@ trans_network <- R6Class(classname = "trans_network",
 		),
 	private = list(
 		rmt = function(cormat,lcor=0.4, hcor=0.8){
-			nnsd<-function(sp=spp){
+			nnsd <- function(sp = spp){
 				nns<-NULL
 				for(j in 2:length(sp)){
-					nn=abs(sp[j]-sp[j-1])
-					nns<-c(nns,nn)
+					nn=abs(sp[j] - sp[j-1])
+					nns<-c(nns, nn)
 				}
 				return(nns)
 			}
@@ -382,13 +382,13 @@ trans_network <- R6Class(classname = "trans_network",
 			geo<-0.5*pi*s*exp(-0.25*pi*s^2)
 			ps<-NULL  
 			for (i in seq(lcor,hcor,0.01)){
-				cormat1<-abs(cormat)
-				cormat1[cormat1<i]<-0  
-				eigen=sort(eigen(cormat1)$value)
-				ssp<-smooth.spline(eigen,control.spar=list(low=0,high=3)) 
+				cormat1 <- abs(cormat)
+				cormat1[cormat1<i] <- 0  
+				eigen = sort(eigen(cormat1)$value)
+				ssp <- smooth.spline(eigen, control.spar = list(low = 0,high = 3)) 
 				nnsd1<-density(nnsd(ssp$y))
 				nnsdpois<-density(nnsd(pois))
-				chival1<-sum((nnsd1$y-nnsdpois$y)^2/nnsdpois$y/512)
+				chival1<-sum((nnsd1$y - nnsdpois$y)^2/nnsdpois$y/512)
 				ps<-rbind(ps,chival1)
 				print(i*100)
 			}
@@ -407,11 +407,11 @@ trans_network <- R6Class(classname = "trans_network",
 			# combine all graph attributes into a meta-data
 			graphAtt <- sapply(list.graph.attributes(network), function(attr) sub("&", "&",get.graph.attribute(network, attr)))
 			output_gexf <- write.gexf(nodes, edges,
-								edgesLabel = as.data.frame(E(network)$label),
-								edgesWeight = E(network)$weight,
-								nodesAtt = nodesAtt,
-								edgesAtt = edgesAtt,
-								meta=c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt))
+				edgesLabel = as.data.frame(E(network)$label),
+				edgesWeight = E(network)$weight,
+				nodesAtt = nodesAtt,
+				edgesAtt = edgesAtt,
+				meta=c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt))
 			cat(output_gexf$graph, file = filepath)
 		},
 		network_attribute = function(x){

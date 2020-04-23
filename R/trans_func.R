@@ -107,7 +107,7 @@ trans_func <- R6Class(classname = "trans_func",
 				spe_func$func_annotation[[use_func]]
 			}
 		},
-		plot_spe_func_perc = function(filter_func = NULL, group_list = NULL, group_list_default = FALSE){
+		plot_spe_func_perc = function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE){
 			plot_data <- self$res_spe_func_perc
 			if(!is.null(filter_func)){
 				plot_data <- plot_data[, colnames(plot_data) %in% filter_func]
@@ -139,7 +139,7 @@ trans_func <- R6Class(classname = "trans_func",
 				theme(panel.grid = element_blank(), panel.border = element_blank()) +
 				theme(panel.spacing = unit(.1, "lines")) + theme(plot.margin=unit(c(1, 0, 0, 1), "cm"))
 				
-			if(!is.null(group_list)){
+			if((!is.null(group_list)) & add_facet){
 				g1 <- g1 + facet_grid(group ~ ., drop=TRUE, scale="free",space="free", switch = "y") +
 				theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y = element_text(angle=180), strip.text=element_text(size=14))
 			}
@@ -236,10 +236,11 @@ show_spe_func <- function(use_community = TRUE, node_type_table = NULL){
 #' @param filter_func default NULL; a vector of function names.
 #' @param group_list default NULL; a list with group names and the functions in the groups.
 #' @param group_list_default default FALSE; whether use the default group list.
+#' @param add_facet default TRUE; whether use facet in the plot.
 #' @return ggplot2.
 #' @examples
 #' t1$plot_spe_func_perc(group_list_default = TRUE)
-plot_spe_func_perc <- function(filter_func = NULL, group_list = NULL, group_list_default = FALSE){
+plot_spe_func_perc <- function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE){
 	dataset$plot_spe_func_perc()
 }
 

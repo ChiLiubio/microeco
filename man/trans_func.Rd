@@ -88,7 +88,8 @@ t1 <- trans_diff$new(dataset = dataset)
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(
   filter_func = NULL,
   group_list = NULL,
-  group_list_default = FALSE
+  group_list_default = FALSE,
+  add_facet = TRUE
 )}\if{html}{\out{</div>}}
 }
 

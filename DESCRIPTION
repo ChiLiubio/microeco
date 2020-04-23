@@ -14,7 +14,7 @@ LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2020-04-22 14:19:45 UTC; Chi
+Packaged: 2020-04-23 12:15:19 UTC; Chi
 Repository: CRAN
 Date/Publication: 2020-02-02
 RoxygenNote: 7.1.0

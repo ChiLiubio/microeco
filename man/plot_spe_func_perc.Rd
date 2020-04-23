@@ -7,7 +7,8 @@
 plot_spe_func_perc(
   filter_func = NULL,
   group_list = NULL,
-  group_list_default = FALSE
+  group_list_default = FALSE,
+  add_facet = TRUE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ plot_spe_func_perc(
 \item{group_list}{default NULL; a list with group names and the functions in the groups.}
 
 \item{group_list_default}{default FALSE; whether use the default group list.}
+
+\item{add_facet}{default TRUE; whether use facet in the plot.}
 }
 \value{
 ggplot2.
