@@ -1,7 +1,7 @@
 # microeco
 An R package for ecological analysis of microbial communities
 
-# Background
+## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
 the increasing data amount and complexity make the community data analysis and management a challenge.
 There has been a lot of R packages created for the community data analysis in microbial ecology, such as phyloseq,
@@ -9,7 +9,7 @@ microbiomeSeq, ampvis2, mare and microbiome.
 However, it is still difficult to perform data mining fast and efficiently.
 Based on this, we created R package microeco.
 
-# Main Features
+## Main Features
   + R6 Class to store and analyze data; fast, flexible and modularized
   + Plotting the taxonomic abundance
   + Venn diagram
