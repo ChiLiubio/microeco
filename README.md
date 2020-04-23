@@ -247,11 +247,6 @@ through statistical co-occurrence or co-abundance.
 1. download and install julia from https://julialang.org/downloads/
 2. Put julia in the computer env PATH, such as  your_directory_path\Julia\bin
 3. Open terminal or cmd or Powershell, input julia, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
-	or 
-```julia
-using Pkg
-Pkg.add("FlashWeave")
-```
 
 ## Acknowledgement
   - [R6](https://github.com/r-lib/R6), The
