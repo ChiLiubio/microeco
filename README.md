@@ -1,7 +1,28 @@
 # microeco
 An R package for ecological analysis of microbial communities
 
-### Installing R/RStudio
+# Background
+In microbial community ecology, with the development of the high-throughput sequencing techniques,
+the increasing data amount and complexity make the community data analysis and management a challenge.
+There has been a lot of R packages created for the community data analysis in microbial ecology, such as phyloseq,
+microbiomeSeq, ampvis2, mare and microbiome.
+However, it is still difficult to perform data mining fast and efficiently.
+Based on this, we created R package microeco.
+
+# Main Features
+  + R6 Class to store and analyze data; fast, flexible and modularized
+  + Plotting the taxonomic abundance
+  + Venn diagram
+  + Alpha diversity
+  + Beta diversity
+  + Differential abundance analysis
+  + Physicochemical data analysis
+  + Network analysis
+  + Null model analysis
+  + Functional analysis
+
+
+## Installing R/RStudio
 If you do not already have R/RStudio installed, do as follows.
 
 1. Install [R](https://www.r-project.org/)
@@ -11,7 +32,7 @@ If you do not already have R/RStudio installed, do as follows.
 Put R and Rtools in the computer env PATH: your_directory\R-3.6.3\bin\x64, your_directory\Rtools\bin and your_directory\Rtools\mingw_64\bin  
 Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
 
-### Install microeco
+## Install microeco
 Directly install microeco online.
 ```r
 # If devtools package is not installed, first install it
@@ -24,18 +45,18 @@ If the installation of microeco is failed because of the bad internet, download 
 devtools::install_local("microeco-master.zip")
 ```
 
-### Use
+## Use
 See the detailed package [tutorial](https://chiliubio.github.io/microeco/) and the help documentations.
 If you want to run the codes in the tutorial completely, you need to install some additional packages, see the following Notes part.
 
 
-### QQ
+## QQ
 If the user has problems or suggestions, feel free to join the QQ group for discussions.  
 QQ group: 277434916
 
-### Notes
+## Notes
 
-#### Packages important
+### packages important
 To keep the start and use of the package simplified, 
 the installation of microeco package only depend on several packages, which are compulsory-installed and very useful in the data analysis.
 These packages include R6, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, RColorBrewer, Rcpp, RcppArmadillo and RcppEigen.
@@ -181,10 +202,13 @@ lapply(packages,
 Besides, WGCNA also depends on the GO.db package,
 which can be installed from Bioconductor (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html).
 
-##### chorddiag
-The R package chorddiag can be installed from Github https://github.com/mattflor/chorddiag
+#### chorddiag
 
-##### Tax4Fun 
+The R package chorddiag is used for the chord plot in the network analysis and can be installed from Github https://github.com/mattflor/chorddiag
+
+#### Tax4Fun
+Tax4Fun is an R package used for the prediction of functional potential of microbial communities.
+
 1. install Tax4Fun package
 ```r
 install.packages(system.file("extdata", "biom_0.3.12.tar.gz", package="microeco"), repos = NULL, type = "source")
@@ -195,8 +219,8 @@ install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microec
 　unzip SILVA123.zip , move it to a place you can remember
 
 
-##### python
-Install python 
+#### python
+Predicting the functional potential on the biogeochemical cycles require python 2.7 and several packages.
 
 1. download python 2.7 from https://www.python.org/downloads/release
 2. With windows, put python in the computer env PATH manually, 
@@ -215,7 +239,10 @@ pip install numpy -i https://pypi.douban.com/simple/
 pip install argparse -i https://pypi.douban.com/simple/
 ```
 
-##### FlashWeave
+#### FlashWeave
+FlashWeave is a julia package used for network analysis.
+It predicts ecological interactions between microbes from large-scale compositional abundance data (i.e. OTU tables constructed from sequencing data) 
+through statistical co-occurrence or co-abundance.
 
 1. download and install julia from https://julialang.org/downloads/
 2. Put julia in the computer env PATH, such as  your_directory_path\Julia\bin
@@ -226,9 +253,21 @@ using Pkg
 Pkg.add("FlashWeave")
 ```
 
-### Acknowledgement
-
-
+## Acknowledgement
+  - [R6](https://github.com/r-lib/R6), The
+    main class system used in this package.
+  - [lefse python
+    script](https://bitbucket.org/biobakery/biobakery/wiki/lefse), The
+    main lefse code are translated from **lefse python script**.
+  - [phyloseq](https://github.com/joey711/phyloseq), the idea of data
+    structures of microtable class in microeco comes from
+    `phyloseq-class` in package **phyloseq**.
+  - [microbiomeSeq](https://github.com/umerijaz/microbiomeSeq), 
+    the method that calculate the roles of nodes within- and among- modules connectivity is 
+    modified from the package **microbiomeSeq**.
+  - [SpiecEasi](https://github.com/zdk123/SpiecEasi), 
+    the method that calculate SparCC is
+    modified from the package **SpiecEasi**.
 
 
 
