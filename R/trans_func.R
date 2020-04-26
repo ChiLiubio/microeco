@@ -27,7 +27,8 @@ trans_func <- R6Class(classname = "trans_func",
 			message("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction...")
 			write.table(otu_file, "otu_table_for_FAPROTAX.txt", sep = "\t", row.names = FALSE, quote = FALSE)
 			code_path <- system.file("extdata", "FAPROTAX_1.2.1", package="microeco")
-			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
+			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", 
+				code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
 			message("run python to predict...")
 			system(use_command)
 			message("save prediction result FAPROTAX_prediction.tsv ...")
@@ -107,7 +108,7 @@ trans_func <- R6Class(classname = "trans_func",
 				spe_func$func_annotation[[use_func]]
 			}
 		},
-		plot_spe_func_perc = function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE){
+		plot_spe_func_perc = function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE, select_samples = NULL){
 			plot_data <- self$res_spe_func_perc
 			if(!is.null(filter_func)){
 				plot_data <- plot_data[, colnames(plot_data) %in% filter_func]
@@ -129,6 +130,10 @@ trans_func <- R6Class(classname = "trans_func",
 			if(!is.null(filter_func)){
 				plot_data$variable %<>% gsub("_", " ", .) %>% factor(., levels = gsub("_", " ", filter_func))			
 			}
+			if(!is.null(select_samples)){
+				plot_data %<>% .[.$sampname %in% select_samples, , drop = FALSE]
+				plot_data$sampname %<>% factor(., levels = select_samples)
+			}
 			g1 <- ggplot(aes(x=sampname, y=variable, fill=value), data=plot_data) + 
 				theme_bw() + 
 				geom_tile() + 
@@ -141,7 +146,8 @@ trans_func <- R6Class(classname = "trans_func",
 				
 			if((!is.null(group_list)) & add_facet){
 				g1 <- g1 + facet_grid(group ~ ., drop=TRUE, scale="free",space="free", switch = "y") +
-				theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y = element_text(angle=180), strip.text=element_text(size=14))
+				theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y.left = element_text(angle=360), 
+				strip.text=element_text(size=14))
 			}
 			g1
 		},
@@ -182,7 +188,8 @@ trans_func <- R6Class(classname = "trans_func",
 		default_func_group = list(
 			"Energy source" = c("aerobic_chemoheterotrophy", "anaerobic_chemoheterotrophy", "photoautotrophy", "photoheterotrophy"),
 			"C-cycle" = c("chitinolysis", "cellulolysis", "fermentation",  "methanogenesis", "methanotrophy", "methylotrophy"),
-			"N-cycle" = c("nitrogen_fixation", "aerobic_ammonia_oxidation","nitrification","aerobic_nitrite_oxidation","nitrate_reduction","nitrate_respiration","nitrite_respiration"),
+			"N-cycle" = c("nitrogen_fixation", "aerobic_ammonia_oxidation","nitrification","aerobic_nitrite_oxidation", 
+				"nitrate_reduction","nitrate_respiration","nitrite_respiration"),
 			"S-cycle" = c("sulfate_respiration", "sulfur_respiration", "sulfite_respiration","dark_sulfide_oxidation", "respiration_of_sulfur_compounds"),
 			"Others" = c("dark_hydrogen_oxidation", "iron_respiration", "manganese_oxidation", "fumarate_respiration")
 		)
@@ -237,10 +244,11 @@ show_spe_func <- function(use_community = TRUE, node_type_table = NULL){
 #' @param group_list default NULL; a list with group names and the functions in the groups.
 #' @param group_list_default default FALSE; whether use the default group list.
 #' @param add_facet default TRUE; whether use facet in the plot.
+#' @param select_samples default NULL; character vector, select partial samples to show
 #' @return ggplot2.
 #' @examples
 #' t1$plot_spe_func_perc(group_list_default = TRUE)
-plot_spe_func_perc <- function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE){
+plot_spe_func_perc <- function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE, select_samples = NULL){
 	dataset$plot_spe_func_perc()
 }
 

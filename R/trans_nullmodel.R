@@ -179,7 +179,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			cat("Simulate betaMNTD.\n")
 			beta_rand <- sapply(seq_len(runs), function(x){
 				private$show_run(x = x, runs = runs)
-				as.dist(private$betamntd(comm = comm, dis = picante::taxaShuffle(dis), abundance.weighted = abundance.weighted, exclude.conspecifics = exclude.conspecifics))
+				as.dist(private$betamntd(comm = comm, dis = picante::taxaShuffle(dis), abundance.weighted = abundance.weighted, 
+					exclude.conspecifics = exclude.conspecifics))
 			}, simplify = "array")
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
@@ -227,8 +228,10 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		fin_matrix = function(all_samples, beta_obs_z){
 			res <- data.frame(t(combn(all_samples, 2)), beta_obs_z)
 			colnames(res) <- c("S1", "S2", "distance")
-			res1 <- rbind.data.frame(res, data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), data.frame(S1 = all_samples, S2 = all_samples, distance = 0))
-			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE] %>% .[all_samples, all_samples] %>% as.matrix
+			res1 <- rbind.data.frame(res, data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), 
+				data.frame(S1 = all_samples, S2 = all_samples, distance = 0))
+			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE] %>%
+				.[all_samples, all_samples] %>% as.matrix
 			res1
 		},
 		betampd = function(comm = NULL, dis = NULL, cpp = FALSE
@@ -252,7 +255,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				inter_res <- data.frame(S1 = rownames(comm_use), S2 = sample_name, distance = wd[, 1])
 				res <- rbind.data.frame(res, inter_res)
 			}
-			res1 <- rbind.data.frame(res, data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), data.frame(S1 = all_samples, S2 = all_samples, distance = 0))
+			res1 <- rbind.data.frame(res, data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), 
+				data.frame(S1 = all_samples, S2 = all_samples, distance = 0))
 			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
 			as.matrix(res1[all_samples, all_samples])
 		},
@@ -292,7 +296,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 			res1 <- data.frame(t(com_group[, res1$com_name]), res1$distance)
 			colnames(res1) <- c("S1", "S2", "distance")
-			res1 <- rbind.data.frame(res1, data.frame(S1 = res1$S2, S2 = res1$S1, distance = res1$distance), data.frame(S1 = all_samples, S2 = all_samples, distance = 0))
+			res1 <- rbind.data.frame(res1, data.frame(S1 = res1$S2, S2 = res1$S1, distance = res1$distance), 
+				data.frame(S1 = all_samples, S2 = all_samples, distance = 0))
 			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
 			as.matrix(res1[all_samples, all_samples])
 		},

@@ -8,7 +8,8 @@ res_rf res_lefse res_abund or res_metastat in trans_diff object.
 }
 \description{
 This class is a wrapper for a series of differential abundance test and indicator analysis methods.
-The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}}
+The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}},
+\code{\link{plot_lefse_cladogram}}
 }
 \examples{
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
@@ -19,6 +20,7 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 \item \href{#method-new}{\code{trans_diff$new()}}
 \item \href{#method-plot_diff_abund}{\code{trans_diff$plot_diff_abund()}}
 \item \href{#method-plot_lefse_bar}{\code{trans_diff$plot_lefse_bar()}}
+\item \href{#method-plot_lefse_cladogram}{\code{trans_diff$plot_lefse_cladogram()}}
 \item \href{#method-plot_metastat}{\code{trans_diff$plot_metastat()}}
 \item \href{#method-print}{\code{trans_diff$print()}}
 \item \href{#method-clone}{\code{trans_diff$clone()}}
@@ -37,7 +39,7 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
   lefse_subgroup = NULL,
   lefse_min_subsam = 10,
   lefse_norm = 1e+06,
-  lefse_nresam = 0.6667,
+  nresam = 0.6667,
   boots = 30,
   rf_taxa_level = "all",
   rf_ntree = 1000,
@@ -63,7 +65,7 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 
 \item{\code{lefse_norm}}{default 1000000; scale value.}
 
-\item{\code{lefse_nresam}}{default .6667; sample number ratio used in each bootstrap.}
+\item{\code{nresam}}{default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.}
 
 \item{\code{boots}}{default 30; bootstrap test number for lefse or rf.}
 
@@ -127,6 +129,38 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 )}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_lefse_cladogram"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_lefse_cladogram}{}}}
+\subsection{Method \code{plot_lefse_cladogram()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_lefse_cladogram(
+  color = RColorBrewer::brewer.pal(8, "Dark2"),
+  use_taxa_num = 200,
+  filter_taxa = NULL,
+  use_feature_num = NULL,
+  clade_label_level = 4,
+  select_show_labels = NULL,
+  only_select_show = FALSE,
+  sep = "|",
+  branch_size = 0.2,
+  alpha = 0.2,
+  clade_label_size = 0.7,
+  node_size_scale = 1,
+  node_size_offset = 1,
+  annotation_shape = 22,
+  annotation_shape_size = 5
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{alpha}}{default .05; significance threshold.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_metastat"></a>}}

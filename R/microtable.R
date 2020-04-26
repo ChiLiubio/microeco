@@ -47,7 +47,9 @@
 
 microtable <- R6Class(classname = "microtable",
 	public = list(
-		initialize = function(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, taxa_abund = NULL, alpha_diversity = NULL, beta_diversity = NULL){
+		initialize = function(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, taxa_abund = NULL, 
+			alpha_diversity = NULL, beta_diversity = NULL)
+			{
 			self$otu_table <- otu_table
 			if(is.null(sample_table)){
 				message("No sample_table provided, automatically use colnames of otu_table to create one.")
@@ -78,11 +80,12 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$tax_table %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case=TRUE)))))
 		},
-		rarefy_samples = function(sample.size = NULL, rngseed = 123, replace = TRUE){
-			set.seed(rngseed)
-			message("`set.seed(", rngseed, ")` was used to initialize repeatable random subsampling.")
+		# modified from the rarefy_even_depth() in phyloseq package
+		rarefy_samples = function(sample.size = NULL, replace = TRUE){
+			self$tidy_dataset()
 			if(is.null(sample.size)){
 				sample.size <- min(self$sample_sums())
+				message("Use the minimum number across samples: ", sample.size)
 			}
 			if (length(sample.size) > 1) {
 				stop("`sample.size` had more than one value. ")
@@ -186,15 +189,19 @@ microtable <- R6Class(classname = "microtable",
 			tax <- tax[, 1:ranknumber, drop=FALSE]
 			# concatenate taxonomy in case of duplicated taxa names
 			merged_taxonomy <- apply(tax, 1, paste, collapse="|")
-			abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
-			abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% .[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
+			abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
+				reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
+			abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
+				.[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
 			# use dcast to generate table
-			new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% `row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
+			new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
+				`row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
 			new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
 			# choose OTU names with highest abundance to replace the long taxonomic information in names
 			name1 <- cbind.data.frame(otuname = rownames(tax), Display = merged_taxonomy, abundance = apply(abund[rownames(tax), ], 1, sum))
 			name1 <- data.table(name1)[, max_abund:=max(abundance), by = Display]
-			name1 <- name1[max_abund == abundance] %>% .[, c("abundance", "max_abund"):=NULL] %>% setkey(Display) %>% unique() %>% as.data.frame()
+			name1 <- name1[max_abund == abundance] %>% .[, c("abundance", "max_abund"):=NULL] %>% 
+				setkey(Display) %>% unique() %>% as.data.frame()
 			name1 <- name1[!duplicated(name1$Display), ] %>% `row.names<-`(.$Display)
 			rownames(new_abund) <- name1[rownames(new_abund), "otuname"]
 			new_tax <- tax[rownames(new_abund), ]
@@ -302,11 +309,19 @@ microtable <- R6Class(classname = "microtable",
 			tax <- input$tax_table
 			tax <- tax[, 1:ranknumber, drop=FALSE]
 			# transform too long format
-			abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse="|"), abund) %>% reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
+			abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse="|"), abund) %>% 
+				reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
 			# sum abundance by sample and taxonomy
-			abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% .[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
-			abund1 <- data.table(abund1)[, rel_abund:=sum_abund/sum(sum_abund), by=list(Sample)] %>% .[, c("sum_abund"):=NULL] %>% as.data.frame()
-			abund2 <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("rel_abund"))) %>% `row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
+			abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
+				.[, c("Abundance"):=NULL] %>% 
+				setkey(Display, Sample) %>% 
+				unique() %>% 
+				as.data.frame()
+			abund1 <- data.table(abund1)[, rel_abund:=sum_abund/sum(sum_abund), by=list(Sample)] %>% 
+				.[, c("sum_abund"):=NULL] %>% as.data.frame()
+			abund2 <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("rel_abund"))) %>%
+				`row.names<-`(.[,1]) %>% 
+				.[,-1, drop = FALSE]
 			abund2 <- abund2[order(apply(abund2, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
 			return(abund2)
 		},

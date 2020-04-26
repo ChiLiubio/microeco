@@ -211,9 +211,11 @@ trans_network <- R6Class(classname = "trans_network",
 					L3 <- "\n"
 				}
 				if(PGM_meta_data == T){
-					L4 <- paste0("netw_results = learn_network(data_path, meta_data_path, alpha=", p_thres, ", sensitive=", PGM_sensitive, ", heterogeneous=", PGM_heterogeneous, ")\n")
+					L4 <- paste0("netw_results = learn_network(data_path, meta_data_path, alpha=", p_thres, ", sensitive=", PGM_sensitive, 
+						", heterogeneous=", PGM_heterogeneous, ")\n")
 				}else{
-					L4 <- paste0("netw_results = learn_network(data_path, alpha=", p_thres, ", sensitive=", PGM_sensitive, ", heterogeneous=", PGM_heterogeneous, ")\n")
+					L4 <- paste0("netw_results = learn_network(data_path, alpha=", p_thres, ", sensitive=", PGM_sensitive, ", heterogeneous=", 
+						PGM_heterogeneous, ")\n")
 				}
 				L5 <- 'save_network("network_PGM.gml", netw_results)'
 				L <- paste0(L1, L2, L3, L4, L5)
@@ -549,7 +551,8 @@ trans_network <- R6Class(classname = "trans_network",
 			p
 		},
 		sum_link = function(taxa_table, link_table, taxa_level){
-			all_names <- taxa_table[rownames(taxa_table) %in% unique(c(link_table[,1], link_table[,2])), ] %>% {table(.[, taxa_level])} %>% sort(., decreasing = TRUE) %>% rownames
+			all_names <- taxa_table[rownames(taxa_table) %in% unique(c(link_table[,1], link_table[,2])), ] %>%
+				{table(.[, taxa_level])} %>% sort(., decreasing = TRUE) %>% rownames
 			com_group <- expand.grid(all_names, all_names)
 			colnames(com_group) <- c("C1", "C2")
 			rownames(com_group) <- apply(com_group, 1, function(x) paste0(x, collapse = "-"))

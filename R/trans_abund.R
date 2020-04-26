@@ -124,7 +124,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
 			}
-			p <- p + theme(panel.grid = element_blank(), panel.border = element_blank()) + theme(axis.line.y = element_line(color = "grey60", linetype = "solid", lineend = "square"))
+			p <- p + theme(panel.grid = element_blank(), panel.border = element_blank()) + 
+				theme(axis.line.y = element_line(color = "grey60", linetype = "solid", lineend = "square"))
 			if(legend_text_italic == T) p <- p + theme(legend.text = element_text(face = 'italic'))
 			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
 			if(!xtext_keep){
@@ -140,7 +141,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p <- p + guides(fill=guide_legend(title=self$taxrank))
 			p
 		},
-		plot_box = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), group = NULL, show_point = FALSE, point_color = "black", point_size = 3, point_alpha = .3, 
+		plot_box = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), group = NULL, show_point = FALSE, point_color = "black", 
+			point_size = 3, point_alpha = .3, 
 			plot_flip = FALSE, boxfill = TRUE, middlecolor = "grey95", middlesize = 1,
 			xtext_type_hor = FALSE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
 			ytitle_size = 17, base_font =NULL, ...
@@ -194,7 +196,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
-		plot_heatmap = function(use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
+		plot_heatmap = function(
+			use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
 			withmargin = TRUE, plot_numbers = FALSE, plot_text_size = 4, plot_breaks = NULL, margincolor = "white",
 			plot_colorscale = "log10", min_abundance = 0.01, max_abundance = NULL,
 			facet = NULL, order_facet = NULL, strip_text = 11, xtext_size = 10, ytext_size = 11,

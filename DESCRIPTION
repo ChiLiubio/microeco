@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial community ecology analysis
-Version: 0.1.0
+Version: 0.1.1
 Author: Chi Liu
 Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of approaches for statistics and plotting in microbial community ecology.
@@ -14,7 +14,7 @@ LinkingTo: Rcpp, RcppArmadillo, RcppEigen
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2020-04-23 12:15:19 UTC; Chi
+Packaged: 2020-04-26 03:32:45 UTC; Chi
 Repository: CRAN
 Date/Publication: 2020-02-02
 RoxygenNote: 7.1.0

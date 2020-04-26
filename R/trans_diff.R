@@ -1,8 +1,8 @@
 #' Create trans_diff object for the difference tests on the taxonomic abundance and plotting.
 #'
 #' This class is a wrapper for a series of differential abundance test and indicator analysis methods.
-#' The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}}
-#'
+#' The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}},
+#' \code{\link{plot_lefse_cladogram}}
 #'
 #' @param dataset the object of \code{\link{microtable}} Class.
 #' @param method default "lefse"; one of c("lefse", "rf", "metastat").
@@ -11,7 +11,7 @@
 #' @param alpha default .05; significance threshold.
 #' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 #' @param lefse_norm default 1000000; scale value.
-#' @param lefse_nresam default .6667; sample number ratio used in each bootstrap.
+#' @param nresam default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.
 #' @param boots default 30; bootstrap test number for lefse or rf.
 #' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
 #' @param rf_ntree default 1000; see ntree in \code{\link{randomForest}}.
@@ -25,7 +25,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
 		initialize = function(dataset = NULL, method = c("lefse", "rf", "metastat")[1],
 			group = NULL, alpha = 0.05,
-			lefse_subgroup = NULL, lefse_min_subsam = 10, lefse_norm = 1000000, lefse_nresam = 0.6667, boots = 30,
+			lefse_subgroup = NULL, lefse_min_subsam = 10, lefse_norm = 1000000, nresam = 0.6667, boots = 30,
 			rf_taxa_level = "all", rf_ntree = 1000,
 			metastat_taxa_level = "Genus", metastat_group_choose = NULL
 			){
@@ -36,9 +36,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				stop("Please first calculate taxa_abund use cal_abund function!")
 			}
 			sampleinfo <- dataset$sample_table
+#			self$method <- method
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(lapply(dataset$taxa_abund, function(x) x * lefse_norm)))
+					self$lefse_norm <- lefse_norm
 				}else{
 					if(grepl("all", rf_taxa_level, ignore.case = TRUE)){
 						abund_table <- do.call(rbind, unname(dataset$taxa_abund))
@@ -54,6 +56,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				pvalue[is.nan(pvalue)] <- 1
 				# select significant taxa
 				sel_taxa <- pvalue < alpha
+				# save abund_table in self for the cladogram
+				self$abund_table <- abund_table
 				abund_table_sub <- abund_table[sel_taxa, ]
 				pvalue_sub <- pvalue[sel_taxa]
 			}
@@ -67,7 +71,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res <- NULL
 				for(num in seq_len(boots)){
 					# resampling
-					sample_names_resample <- rownames(predictors)[base::sample(1:nrow(predictors), size = ceiling(nrow(predictors) * lefse_nresam))]
+					sample_names_resample <- rownames(predictors)[base::sample(1:nrow(predictors), size = ceiling(nrow(predictors) * nresam))]
 					predictors_sub <- predictors[sample_names_resample, ]
 					sampleinfo_resample <- sampleinfo[sample_names_resample, ]
 					# make sure the groups and samples numbers right
@@ -145,7 +149,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				for(num in seq_len(boots)){
 					res_lda_pair <- list()
 					# resampling samples
-					sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * lefse_nresam))]
+					sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * nresam))]
 					abund_table_sub_resample <- abund_table_sub[, sample_names_resample]
 					sampleinfo_resample <- sampleinfo[sample_names_resample, ]
 					# make sure the groups and samples numbers available
@@ -218,9 +222,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				abund <- dataset$otu_table
 				tax <- dataset$tax_table[, 1:ranknumber, drop=FALSE]
 				merged_taxonomy <- apply(tax, 1, paste, collapse="|")
-				abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
-				abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% .[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
-				new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% `row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
+				abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
+					reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
+				abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
+					.[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
+				new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
+					`row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
 				new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
 				if(is.null(metastat_group_choose)){
 					all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
@@ -324,7 +331,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				scale_fill_manual(values=color_values) +
 				ylab("Relative abundance") +
 				theme(legend.position = "right") +
-				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.border = element_blank(), panel.background=element_rect(fill="white")) + #, panel.grid.minor.x = element_blank())
+				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.border = element_blank(), 
+					panel.background=element_rect(fill="white")) +
 				theme(axis.title = element_text(size = 17)) +
 				guides(fill=guide_legend(reverse=TRUE, ncol=1), color = FALSE)
 			
@@ -336,7 +344,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(add_significance == T){
 					Significance <- rev(as.character(cut(data1$pvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))))
 					p2 <- p2 + scale_x_discrete(labels=Significance) +
-						theme(axis.title.y=element_blank(), axis.ticks.y = element_blank(), axis.text.y = element_text(color = plot2_sig_color, size = rel(plot2_sig_size))) +
+						theme(axis.title.y=element_blank(), axis.ticks.y = element_blank(), 
+						axis.text.y = element_text(color = plot2_sig_color, size = rel(plot2_sig_size))) +
 						theme(plot.margin = unit(c(.1, 0, .1, .8), "cm"))
 				}else{
 					p2 <- p2 + theme(axis.title.y=element_blank(), axis.ticks.y = element_blank(), axis.text.y = element_blank()) +
@@ -406,7 +415,165 @@ trans_diff <- R6Class(classname = "trans_diff",
 				p <- p + coord_flip()
 			}
 			p
+		},
+		plot_lefse_cladogram = function(color = RColorBrewer::brewer.pal(8, "Dark2"),
+				use_taxa_num = 200, filter_taxa = NULL, use_feature_num = NULL, clade_label_level = 4, select_show_labels = NULL,
+				only_select_show = FALSE, sep = "|", branch_size = 0.2, alpha = 0.2, clade_label_size = 0.7, 
+				node_size_scale = 1, node_size_offset = 1, annotation_shape = 22, annotation_shape_size = 5
+			){
 
+			abund_table <- self$abund_table
+			marker_table <- self$res_lefse %>% dropallfactors
+
+			if(!is.null(use_feature_num)){
+				marker_table %<>% .[1:use_feature_num, ]
+			}
+			if(only_select_show == T){
+				marker_table %<>% .[.$Taxa %in% select_show_labels, ]
+			}
+			color <- color[1:length(unique(marker_table$Group))]
+
+			# filter the taxa with unidentified classification or with space, in case of the unexpected error in the following operations
+			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]}
+			abund_table %<>% {.[!grepl("\\s", rownames(.)), ]}
+
+			if(!is.null(use_taxa_num)){
+				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
+			}
+			if(!is.null(filter_taxa)){
+				abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
+			}
+			abund_table %<>% .[sort(rownames(abund_table)), ]
+
+			tree_table <- data.frame(taxa = row.names(abund_table), abd = rowMeans(abund_table), stringsAsFactors = FALSE) %>%
+				dplyr::mutate(taxa =  paste("r__Root", .data$taxa, sep = sep), abd = .data$abd/max(.data$abd)*100)
+			taxa_split <- strsplit(tree_table$taxa, split = sep, fixed = TRUE)
+			nodes <- purrr::map_chr(taxa_split, utils::tail, n = 1)
+
+			# check whether some nodes duplicated from bad classification
+			if(any(duplicated(nodes))){
+				del <- nodes %>% .[duplicated(.)] %>% unique
+				for(i in del){
+					tree_table %<>% .[!grepl(paste0("\\|", i, "($|\\|)"), .$taxa), ]
+				}
+				taxa_split <- strsplit(tree_table$taxa, split = sep, fixed = TRUE)
+				nodes <- purrr::map_chr(taxa_split, utils::tail, n = 1)
+			}
+
+			# add root node
+			nodes <- c("r__Root", nodes)
+			# levels used for extend of clade label
+			label_levels <- purrr::map_chr(nodes, ~ gsub("__.*$", "", .x)) %>%
+				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% .[!duplicated(.)]))
+
+			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1])
+			# root must be a parent node
+			nodes_parent <- c("root", nodes_parent)
+
+			## add index for nodes
+			is_tip <- !nodes %in% nodes_parent
+			index <- vector("integer", length(is_tip))
+			index[is_tip] <- 1:sum(is_tip)
+			index[!is_tip] <- (sum(is_tip)+1):length(is_tip)
+
+			edges <- cbind(parent = index[match(nodes_parent, nodes)], child = index)
+			edges <- edges[!is.na(edges[, 1]), ]
+			# not label the tips
+			node_label <- nodes[!is_tip]
+			phylo <- structure(list(edge = edges, node.label = node_label, tip.label = nodes[is_tip], edge.length = rep(1, nrow(edges)), Nnode = length(node_label)),
+				class = "phylo")
+			mapping <- data.frame(node = index, abd = c(100, tree_table$abd), node_label = nodes, stringsAsFactors = FALSE)
+			mapping$node_class <- label_levels
+			tree <- tidytree::treedata(phylo = phylo, data = tibble::as_tibble(mapping))
+			tree <- ggtree::ggtree(tree, size = 0.2, layout = 'circular')
+			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color)
+			
+			# backgroup hilight
+			annotation_info <- dplyr::left_join(annotation, tree$data, by = c("node" = "label")) %>%
+				mutate(label = .data$node, id = .data$node.y, level = as.numeric(.data$node_class))
+			hilight_para <- dplyr::transmute(
+				annotation_info,
+				node = .data$id,
+				fill = .data$color,
+				alpha = alpha,
+				extend = private$get_offset(.data$level)
+			)
+			hilights_g <- purrr::pmap(hilight_para, ggtree::geom_hilight)
+			tree <- purrr::reduce(hilights_g, `+`, .init = tree)
+
+			# hilight legend
+			hilights_df <- dplyr::distinct(annotation_info, .data$enrich_group, .data$color)
+			hilights_df$x <- 0
+			hilights_df$y <- 1
+			# set_hilight_legend
+			tree <- tree + geom_rect(aes_(xmin = ~x, xmax = ~x, ymax = ~y, ymin = ~y, fill = ~enrich_group), data = hilights_df, inherit.aes = FALSE) +
+				guides(fill = guide_legend(title = NULL, order = 1, override.aes = list(fill = hilights_df$color)))
+
+			# set nodes color and size
+			nodes_colors <- rep("white", nrow(tree$data))
+			nodes_colors[annotation_info$id] <- annotation_info$color
+			node_size <- node_size_scale*log(tree$data$abd) + node_size_offset
+			tree$data$node_size <- node_size
+			tree <- tree + ggtree::geom_point2(aes(size = I(node_size)), fill = nodes_colors, shape = 21)
+
+			## add clade labels
+			clade_label <- dplyr::transmute(
+				annotation_info,
+				node = .data$id,
+				offset = private$get_offset(.data$level)-0.4,
+				offset.text = 0,
+				angle = purrr::map_dbl(.data$id, private$get_angle, tree = tree),
+				label = .data$label,
+				fontsize = clade_label_size + log(.data$level + 20),
+				barsize = 0,
+				extend = 0.2,
+				hjust = 0.5,
+				level = .data$level
+			) %>% dplyr::arrange(desc(.data$level))
+
+			clade_label$offset.text <- unlist(lapply(seq_len(nrow(clade_label)), function(x){
+				if(clade_label$angle[x] < 180){ 0.2 }else{ 0 }}))
+			clade_label$angle <- unlist(lapply(clade_label$angle, function(x){
+				if(x < 180){ x - 90 }else{ x + 90 }}))
+			clade_label_new <- clade_label
+
+			# add letters label to replace long taxonomic label
+			if(is.null(select_show_labels)){
+				ind <- clade_label$level < clade_label_level	
+			}else{
+				ind <- ! clade_label$label %in% select_show_labels
+			}
+			ind_num <- sum(ind)
+
+			if(ind_num > 0){
+				if(ind_num < 27){
+					use_letters <- letters
+				}else{
+					if(ind_num < 326){
+						use_letters <- apply(combn(letters, 2), 2, function(x){paste0(x, collapse = "")})
+					}else{
+						stop("Too much features to be labelled with letters, consider to use use_feature_num parameter to reduce the number!")
+					}
+				}
+				clade_label_new$label_legend <- clade_label_new$label_show <- clade_label_new$label_raw <-clade_label_new$label
+				clade_label_new$label_show[ind] <- use_letters[1:ind_num]
+				clade_label_new$label_legend[ind] <- paste0(clade_label_new$label_show[ind], ": ", clade_label_new$label[ind])
+				clade_label_new$label <- clade_label_new$label_show
+			}
+
+			clade_label_g <- purrr::pmap(clade_label_new, ggtree::geom_cladelabel)
+			p <- purrr::reduce(clade_label_g, `+`, .init = tree)
+
+			# if letters are used, add guide labels
+			if(ind_num > 0){
+				guide_label <- clade_label_new[ind, ] %>%
+					dplyr::mutate(color = annotation_info$color[match(.data$label_raw, annotation_info$label)])
+				p <- p + geom_point(data = guide_label, inherit.aes = FALSE, aes_(x = 0, y = 0, shape = ~label_legend), size = 0, stroke = 0) +
+					scale_shape_manual(values = rep(annotation_shape, nrow(guide_label))) +
+					guides(shape = guide_legend(override.aes = list(size = annotation_shape_size, shape = annotation_shape, fill = guide_label$color)))
+			}
+			p <- p + theme(legend.position = "right", legend.title = element_blank())
+			p
 		},
 		plot_metastat = function(use_number = 1:10, qvalue = 0.05, choose_group = 1, color_values = RColorBrewer::brewer.pal(8, "Dark2")
 			){
@@ -419,7 +586,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(nrow(use_data) > length(use_number)){
 				use_data %<>% .[use_number, ]
 			}
-			plot_data <- data.frame(taxa = rep(use_data[,2], 2), Mean = c(use_data[,3], use_data[,6]), SE = c(use_data[,5], use_data[,8]), Group = rep(group_char, times = 1, each = nrow(use_data)))
+			plot_data <- data.frame(taxa = rep(use_data[,2], 2), Mean = c(use_data[,3], use_data[,6]), SE = c(use_data[,5], use_data[,8]), 
+				Group = rep(group_char, times = 1, each = nrow(use_data)))
 			plot_data$taxa %<>% factor(., levels = unique(.))
 			p <- ggplot(plot_data, aes(x=taxa, y=Mean, color = Group, fill = Group, group = Group)) +
 				geom_bar(stat="identity", position = position_dodge()) +
@@ -467,7 +635,36 @@ trans_diff <- R6Class(classname = "trans_diff",
 					pvalue
 				}
 			}
-		}
+		},
+		generate_cladogram_annotation = function(marker_table, tree, color, sep = "|") {
+			use_marker_table <- marker_table
+			feature <- use_marker_table$Taxa
+			label <- strsplit(feature, split = sep, fixed = TRUE) %>% purrr::map_chr(utils::tail, n =1)
+			plot_color <- use_marker_table$Group
+			for(i in seq_along(unique(plot_color))){
+				plot_color %<>% gsub(unique(use_marker_table$Group)[i], color[i], .)
+			}
+			annotation <- data.frame(
+				node = label,
+				color = plot_color,
+				enrich_group = use_marker_table$Group,
+				stringsAsFactors = FALSE
+			)
+			# filter the feature with bad classification
+			annotation %<>% .[label %in% tree$data$label, ]
+			annotation
+		},
+		get_angle = function(tree, node){
+			if (length(node) != 1) {
+				stop("The length of `node` must be 1")
+			}
+			tree_data <- tree$data
+			sp <- tidytree::offspring(tree_data, node)$node
+			sp2 <- c(sp, node)
+			sp.df <- tree_data[match(sp2, tree_data$node),]
+			mean(range(sp.df$angle))
+		},
+		get_offset = function(x) {(x*0.2+0.2)^2}
 	),
 	lock_class = FALSE,
 	lock_objects = FALSE
@@ -493,7 +690,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 #' @return a list with two ggplot.
 #' @examples
 #' t1$plot_diff_abund(use_number = 1:10)
-
 plot_diff_abund <- function(method = NULL, only_abund_plot = TRUE, use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			plot1_bar_color = "grey50", plot2_sig_color = "red", plot2_sig_size = 1.2,
 			axis_text_y = 10, 
@@ -501,8 +697,6 @@ plot_diff_abund <- function(method = NULL, only_abund_plot = TRUE, use_number = 
 			plot2_barwidth = .9, add_significance = TRUE, use_se = TRUE){
 	dataset$plot_diff_abund()
 }
-
-
 
 #' Bar plot for LDA score.
 #'
@@ -518,10 +712,39 @@ plot_diff_abund <- function(method = NULL, only_abund_plot = TRUE, use_number = 
 #' @return ggplot.
 #' @examples
 #' t1$plot_lefse_bar(LDA_score = 2)
-
 plot_lefse_bar <- function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), LDA_score = NULL,
 			simplify_names = TRUE, keep_prefix = TRUE, group_order = NULL, axis_text_y = 12, plot_vertical = TRUE, ...){
 	dataset$plot_lefse_bar()
+}
+
+#' Plot the cladogram for LEfSe result.
+#'
+#' Plot the cladogram for LEfSe result similar with the python version. Codes are modified from microbiomeMarker 
+#'
+#' @param color default RColorBrewer::brewer.pal(8, "Dark2"); color used in the plot.
+#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance 
+#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance
+#' @param use_feature_num default NULL; integer; The feature number used in the plot; select the features according to the LDA score
+#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest
+#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters
+#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels
+#' @param sep default "|"; the seperate character in the taxonomic information
+#' @param branch_size default 0.2; numberic, size of branch
+#' @param alpha default 0.2; shading of the color
+#' @param clade_label_size default 0.7; size for the clade label
+#' @param node_size_scale default 1; scale for the node size
+#' @param node_size_offset default 1; offset for the node size
+#' @param annotation_shape default 22; shape used in the annotation legend
+#' @param annotation_shape_size default 5; size used in the annotation legend
+#' @return ggplot.
+#' @examples
+#' t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+plot_lefse_cladogram <- function(color = RColorBrewer::brewer.pal(8, "Dark2"),
+		use_taxa_num = 200, filter_taxa = NULL, use_feature_num = NULL, clade_label_level = 4, select_show_labels = NULL,
+		only_select_show = FALSE, sep = "|", branch_size = 0.2, alpha = 0.2, clade_label_size = 0.7, 
+		node_size_scale = 1, node_size_offset = 1, annotation_shape = 22, annotation_shape_size = 5
+		){
+		dataset$plot_lefse_cladogram()
 }
 
 #' Bar plot metastat.
@@ -536,11 +759,6 @@ plot_lefse_bar <- function(use_number = 1:10, color_values = RColorBrewer::brewe
 plot_metastat <- function(use_number = 1:10, qvalue = 0.05, choose_group = 1, color_values = RColorBrewer::brewer.pal(8, "Dark2")){
 	dataset$plot_metastat()
 }
-
-
-
-
-
 
 
 

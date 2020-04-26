@@ -188,7 +188,8 @@ pval.sparccboot <- function(x, sided='both') {
 	com_res <- t(combn(use_names, 2))
 	res <- cbind.data.frame(com_res, cors, pvals, stringsAsFactors = FALSE)
 	colnames(res) <- c("t1", "t2", "cor", "p")
-	res <- rbind.data.frame(res, data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), data.frame(t1 = use_names, t2 = use_names, cor = rep(1, length(use_names)), p = rep(0, length(use_names))))
+	res <- rbind.data.frame(res, data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), 
+		data.frame(t1 = use_names, t2 = use_names, cor = rep(1, length(use_names)), p = rep(0, length(use_names))))
 	res$cor %<>% as.numeric
 	res$p %<>% as.numeric
 	res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix

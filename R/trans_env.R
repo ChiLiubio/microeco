@@ -157,7 +157,8 @@ trans_env <- R6Class(classname = "trans_env",
 				if(taxa_text_type == "italic"){
 					df_arrows_spe1[, self$taxa_level] %<>%  paste0("italic('", .,"')")
 				}
-				p <- p + ggrepel::geom_text_repel(data=df_arrows_spe1, aes_string("x", "y", label = self$taxa_level), size=3, color = taxa_text_color, segment.alpha = .01, parse = TRUE)
+				p <- p + ggrepel::geom_text_repel(data=df_arrows_spe1, aes_string("x", "y", label = self$taxa_level), size=3, 
+					color = taxa_text_color, segment.alpha = .01, parse = TRUE)
 			}
 			p
 		},
@@ -294,7 +295,8 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("pheatmap package not installed")
 				}
 				if(ylab_type_italic == T){
-					eval(parse(text = paste0("mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data_1),'"'), "))", collapse = ","),")", collapse = "")))
+					eval(parse(text = paste0("mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data_1),'"'), "))", collapse = ","),")", 
+						collapse = "")))
 				}else{
 					mylabels_y <- rownames(clu_data_1)
 				}

@@ -129,7 +129,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					text=element_text(family="sans"))
 				p
 			}else{
-				p <- ggpubr::ggboxplot(use_data, x = group, y= "Value", color = group, shape = group, palette = color_values, add = "jitter", outlier.colour = "white", ...)
+				p <- ggpubr::ggboxplot(use_data, x = group, y= "Value", color = group, shape = group, palette = color_values, add = "jitter", 
+					outlier.colour = "white", ...)
 				if(pair_compare == T){
 					# construct and filter the paired comparisons list
 					comparisons_list <- unique(as.character(self$alpha_data[, group])) %>% 

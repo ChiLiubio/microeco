@@ -8,7 +8,8 @@ plot_spe_func_perc(
   filter_func = NULL,
   group_list = NULL,
   group_list_default = FALSE,
-  add_facet = TRUE
+  add_facet = TRUE,
+  select_samples = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ plot_spe_func_perc(
 \item{group_list_default}{default FALSE; whether use the default group list.}
 
 \item{add_facet}{default TRUE; whether use facet in the plot.}
+
+\item{select_samples}{default NULL; character vector, select partial samples to show}
 }
 \value{
 ggplot2.

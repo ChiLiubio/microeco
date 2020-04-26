@@ -89,7 +89,8 @@ t1 <- trans_diff$new(dataset = dataset)
   filter_func = NULL,
   group_list = NULL,
   group_list_default = FALSE,
-  add_facet = TRUE
+  add_facet = TRUE,
+  select_samples = NULL
 )}\if{html}{\out{</div>}}
 }
 

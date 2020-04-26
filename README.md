@@ -151,26 +151,21 @@ The solutions:
 <td align="center">correlation heatmap with clustering dendrogram</td>
 </tr>
 <tr class="even">
-<td align="center">WGCNA</td>
-<td align="center">trans_network$new(cal_cor = “WGCNA”,…)</td>
-<td align="center">invoke WGCNA package to calcuate correlations</td>
-</tr>
-<tr class="odd">
 <td align="center">igraph</td>
 <td align="center">trans_network class</td>
 <td align="center">network related operations</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="center">rgexf</td>
 <td align="center">save_network</td>
 <td align="center">save network with gexf style</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="center">VGAM</td>
 <td align="center">trans_corr class</td>
 <td align="center">Generates Dirichlet random variates in SparCC</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="center">RJSONIO</td>
 <td align="center">trans_func</td>
 <td align="center">the dependency of biom package</td>
@@ -188,19 +183,38 @@ Then, if you want to install these packages or some of them, you can do like thi
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
 packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", 
-	"ggrepel", "pheatmap", "igraph", "rgexf", "VGAM", "RJSONIO", "WGCNA")
+	"ggrepel", "pheatmap", "igraph", "rgexf", "VGAM", "RJSONIO")
 # Now check or install
-lapply(packages,
-	function(x) {
-		if (!require(x, character.only = TRUE)) {
-			install.packages(x, dependencies = TRUE)
-		}
-	}
-)
+lapply(packages, function(x) {
+	if(!require(x, character.only = TRUE)) {
+		install.packages(x, dependencies = TRUE)
+	}})
 ```
 
-Besides, WGCNA also depends on the GO.db package,
-which can be installed from Bioconductor (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html).
+#### WGCNA
+In the correlation-based network, when the species number is large,
+the correlation algorithm in WGCNA is very fast compared to the cor function in R base.
+WGCNA depends on several packages in Bioconductor, including GO.db and impute.
+So if you want to install WGCNA, first install  GO.db (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
+and impute (http://www.bioconductor.org/packages/release/bioc/html/impute.html) with the following code.
+
+```r
+# install GO.db and impute
+# First check and install BiocManager package
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+# install GO.db and impute
+BiocManager::install("GO.db")
+BiocManager::install("impute")
+# then install WGCNA.
+install.packages("WGCNA", dependencies = TRUE)
+```
+
+#### ggtree
+Plotting the cladogram from the LEfSe result requires the ggtree package in bioconductor (https://bioconductor.org/packages/release/bioc/html/ggtree.html).
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install("ggtree")
+```
 
 #### chorddiag
 
@@ -248,6 +262,11 @@ through statistical co-occurrence or co-abundance.
 2. Put julia in the computer env PATH, such as  your_directory_path\Julia\bin
 3. Open terminal or cmd or Powershell, input julia, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
 
+#### Gephi
+Gephi is used to open saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
+You can download Gephi and learn how to use it from https://gephi.org/users/download/
+
+
 ## Acknowledgement
   - [R6](https://github.com/r-lib/R6), The
     main class system used in this package.
@@ -263,6 +282,9 @@ through statistical co-occurrence or co-abundance.
   - [SpiecEasi](https://github.com/zdk123/SpiecEasi), 
     the method that calculate SparCC is
     modified from the package **SpiecEasi**.
+  - [microbiomeMarker](https://github.com/yiluheihei/microbiomeMarker), 
+    the method that plot the LEfSe cladogram is
+    modified from the package **microbiomeMarker**.
 
 
 

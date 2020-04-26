@@ -96,7 +96,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 				self$res_manova <- adonis(reformulate(self$group, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
 			}
 			if(cal_manova_paired == T){
-				self$res_manova <- private$paired_group_manova(sample_info_use = self$sample_table, use_matrix = use_matrix, group = self$group, measure = self$measure, permutations = permutations)
+				self$res_manova <- private$paired_group_manova(sample_info_use = self$sample_table, use_matrix = use_matrix, 
+					group = self$group, measure = self$measure, permutations = permutations)
 			}
 		},
 		plot_ordination = function(
@@ -140,7 +141,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 					plot_group <- plot_color
 				}
 				mapping = aes_string(x = plot_x, y = plot_y, group = plot_group, fill = plot_group)
-				p <- p + ggplot2::stat_ellipse(mapping = mapping, data = combined, level = ellipse_level, type = ellipse_type, alpha = ellipse_alpha, geom = "polygon") + 
+				p <- p + ggplot2::stat_ellipse(mapping = mapping, data = combined, level = ellipse_level, type = ellipse_type, 
+					alpha = ellipse_alpha, geom = "polygon") + 
 					scale_fill_manual(values = color_values)
 			}
 			if(!is.null(plot_color)){
