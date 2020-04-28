@@ -12,6 +12,8 @@ plot_bar(
   bar_type = "full",
   others_color = "grey90",
   facet = NULL,
+  use_alluvium = FALSE,
+  clustering = FALSE,
   barwidth = NULL,
   facet_color = "grey95",
   strip_text = 11,
@@ -31,6 +33,10 @@ plot_bar(
 \item{others_color}{default "grey90"; the color for others.}
 
 \item{facet}{default NULL; if using facet, providing the group name.}
+
+\item{use_alluvium}{default FALSE; whether add alluvium plot}
+
+\item{clustering}{default FALSE; whether order samples by the clustering}
 
 \item{barwidth}{default NULL; bar width, see width in \code{\link{geom_bar}}.}
 

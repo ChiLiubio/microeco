@@ -58,7 +58,7 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 
 \item{\code{use_percentage}}{default TRUE; showing the abundance percentage.}
 
-\item{\code{order_x}}{default NULL; if x xais should be ordered, input the samples or group names.}
+\item{\code{order_x}}{default NULL; character vector; if x xais should be ordered, input the samples or group vector or the column name in sample table.}
 
 \item{\code{input_taxaname}}{default NULL; if some taxa are selected, input taxa names.}
 }
@@ -76,6 +76,8 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
   others_color = "grey90",
   facet = NULL,
   barwidth = NULL,
+  use_alluvium = FALSE,
+  clustering = FALSE,
   facet_color = "grey95",
   strip_text = 11,
   legend_text_italic = FALSE,

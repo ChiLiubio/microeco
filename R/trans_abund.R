@@ -9,7 +9,7 @@
 #' @param ntaxa default 10; how many taxa will be saved.
 #' @param groupmean default NULL; for calculating mean abundance, select a group column in sample_table .
 #' @param use_percentage default TRUE; showing the abundance percentage.
-#' @param order_x default NULL; if x xais should be ordered, input the samples or group names.
+#' @param order_x default NULL; character vector; if x xais should be ordered, input the samples or group vector or the column name in sample table.
 #' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
 #' @return Object of trans_abund \code{\link{R6Class}} containing transformed data. 
 #' @examples
@@ -82,12 +82,16 @@ trans_abund <- R6Class(classname = "trans_abund",
 			self$use_taxanames <- use_taxanames
 		},
 		plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_type = "full", others_color = "grey90", facet = NULL, barwidth = NULL,
+			use_alluvium = FALSE, clustering = FALSE, 
 			facet_color= "grey95", strip_text = 11, legend_text_italic = FALSE, xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
 			ytitle_size = 17, base_font =NULL, ylab_title = NULL
 			){
 			plot_data <- self$abund_data		
 			if(!is.null(facet)){
 				plot_data <- suppressWarnings(dplyr::left_join(plot_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
+			}
+			if(use_alluvium){
+				bar_type <- "notfull"
 			}
 			if(bar_type == "full"){
 				plot_data$Taxonomy[!plot_data$Taxonomy %in% self$use_taxanames] <- "Others"
@@ -100,27 +104,39 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
 			bar_colors_use <- use_colors[1:length(unique(plot_data$Taxonomy))]
 			if(any(grepl("Others", as.character(plot_data$Taxonomy)))) bar_colors_use[length(bar_colors_use)] <- others_color
-			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy"))
-			if(!is.null(facet)){
-				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+			if(clustering){
+				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance") %>% `row.names<-`(.[,1]) %>% .[, -1]
+				order_x <- hclust(dist(data_clustering)) %>% {.$labels[.$order]} %>% as.character
+				plot_data$Sample %<>% factor(., levels = order_x)
 			}
+			if(use_alluvium){
+				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy", color = "Taxonomy",  weight = "Abundance", 
+					alluvium = "Taxonomy", stratum = "Taxonomy")) +
+					ggalluvial::geom_flow(alpha = .4, width = 3/15) +
+					ggalluvial::geom_stratum(width = .2) +
+					scale_color_manual(values = rev(bar_colors_use)) +
+					scale_y_continuous(expand = c(0, 0))
+			}else{
+				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy"))
+				if(bar_type == "full"){
+					if(self$use_percentage == T){
+						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + scale_y_continuous(expand = c(0, 0))
+					}else{
+						p <- p + geom_bar(stat = "identity", position = "fill", show.legend = T, width = barwidth)
+						p <- p + scale_y_continuous(limits = c(0,1), expand = c(0, 0))
+					}
+				}else{
+					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + scale_y_continuous(expand = c(0, 0))
+				}
+			}
+			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("")
 			if(!is.null(ylab_title)){
 				p <- p + ylab(ylab_title)
 			}else{
 				p <- p + ylab(self$ylabname)		
 			}
-			if(bar_type == "full"){
-				if(self$use_percentage == T){
-					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + scale_y_continuous(expand = c(0, 0))
-				}else{
-					p <- p + geom_bar(stat = "identity", position = "fill", show.legend = T, width = barwidth)
-					p <- p + scale_y_continuous(limits = c(0,1), expand = c(0, 0))
-				}
-			}else{
-				p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + scale_y_continuous(expand = c(0, 0))
-			}
-			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("")
 			if(!is.null(facet)) {
+				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
 			}
@@ -139,6 +155,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + theme(text=element_text(family=base_font))
 			}
 			p <- p + guides(fill=guide_legend(title=self$taxrank))
+			if(use_alluvium){
+			p <- p + guides(color = guide_legend(title=self$taxrank))
+			}
 			p
 		},
 		plot_box = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), group = NULL, show_point = FALSE, point_color = "black", 
@@ -322,6 +341,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 #' @param bar_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
 #' @param others_color default "grey90"; the color for others.
 #' @param facet default NULL; if using facet, providing the group name.
+#' @param use_alluvium default FALSE; whether add alluvium plot
+#' @param clustering default FALSE; whether order samples by the clustering
 #' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
 #' @param facet_color default "grey95"; facet background color.
 #' @param strip_text default 11; facet text size.
@@ -337,7 +358,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 #' @format \code{\link{trans_abund}} object.
 #' @examples 
 #' t1$plot_bar(bar_type = "full", others_color = "grey90")
-plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_type = "full", others_color = "grey90", facet = NULL, barwidth = NULL,
+plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_type = "full", others_color = "grey90", facet = NULL, 
+	use_alluvium = FALSE, clustering = FALSE, barwidth = NULL,
 	facet_color= "grey95", strip_text = 11, legend_text_italic = FALSE, xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
 	ytitle_size = 17, base_font =NULL, ylab_title = NULL){
 	dataset$plot_bar()

@@ -47,7 +47,7 @@ devtools::install_local("microeco-master.zip")
 
 ## Use
 See the detailed package tutorial (https://chiliubio.github.io/microeco/) and the help documentations.
-If you want to run the codes in the tutorial completely, you need to install some additional packages, see the following Notes part.
+If you want to run the codes in the tutorial completely, you need to install some additional packages, see the following **Notes** part.
 
 
 ## QQ
@@ -170,6 +170,11 @@ The solutions:
 <td align="center">trans_func</td>
 <td align="center">the dependency of biom package</td>
 </tr>
+<tr class="even">
+<td align="center">ggalluvial</td>
+<td align="center">plot_bar(use_alluvium = TRUE)</td>
+<td align="center">alluvial plot</td>
+</tr>
 </tbody>
 </table>
     </section>
@@ -183,7 +188,7 @@ Then, if you want to install these packages or some of them, you can do like thi
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
 packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", 
-	"ggrepel", "pheatmap", "igraph", "rgexf", "VGAM", "RJSONIO")
+	"ggrepel", "pheatmap", "igraph", "rgexf", "VGAM", "RJSONIO", "ggalluvial")
 # Now check or install
 lapply(packages, function(x) {
 	if(!require(x, character.only = TRUE)) {
@@ -246,7 +251,7 @@ pip install numpy
 pip install argparse
 ```
 
-If the installation is too slow to be failed, use -i select the appropriate mirror, for example, in China, you can use:
+If the installation is too slow and failed, use -i select the appropriate mirror, for example, in China, you can use:
 
 ```python
 pip install numpy -i https://pypi.douban.com/simple/
@@ -265,6 +270,51 @@ through statistical co-occurrence or co-abundance.
 #### Gephi
 Gephi is used to open saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
+
+## change plot
+All the plotting in the package rely on the ggplot2.
+We provide some parameters to change the corresponding plot.
+If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
+Of course, you can also directly modify the function or class to reload them.
+
+## read your file
+In this part, we show how to construct the object of microtable class using the raw otu file from qiime.
+
+```r
+# use the raw data files stored inside the package
+otu_file_path <- system.file("extdata", "otu_table_raw.txt", package="microeco")
+# the example sample table is csv style
+sample_file_path <- system.file("extdata", "sample_info.csv", package="microeco")
+# phylogenetic tree
+phylo_file_path <- system.file("extdata", "rep_phylo.tre", package="microeco")
+# load microeco and qiimer, if qiimer is not installed, see Tax4Fun part to install qiimer package
+library(microeco)
+library(qiimer)
+# the otu_table_raw.txt do not has the first commented line, so we use commented = FALSE
+otu_raw_table <- read_qiime_otu_table(otu_file_path, commented=FALSE)
+# obtain the otu table data.frame
+otu_table_1 <- as.data.frame(otu_raw_table[[3]])
+colnames(otu_table_1) <- unlist(otu_raw_table[[1]])
+# obtain the taxonomic table  data.frame
+taxonomy_table_1 <- as.data.frame(split_assignments(unlist(otu_raw_table[[4]])))
+# read sample metadata table, data.frame
+sample_info <- read.csv(sample_file_path, row.names = 1, stringsAsFactors = FALSE)
+# obtain the phylogenetic tree
+phylo_tree <- read.tree(phylo_file_path)
+# check whether the tree is rooted, if unrooted, transform to rooted
+if(!is.rooted(phylo_tree)){
+	phylo_tree <- multi2di(phylo_tree)
+}
+# then, make the taxonomic table clean, this is very important
+taxonomy_table_1 %<>% tidy_taxonomy
+# create a microtable object
+dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, tax_table = taxonomy_table_1, phylo_tree = phylo_tree)
+# for other operations, see the tutorial (https://chiliubio.github.io/microeco/) and the help documentations
+# the class documentation include the function links, see the microtable class, input:
+?microtable
+# see the tidy_dataset function in the microtable, click the link or input:
+?tidy_dataset
+```
 
 
 ## Acknowledgement
