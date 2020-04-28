@@ -290,7 +290,7 @@ phylo_file_path <- system.file("extdata", "rep_phylo.tre", package="microeco")
 # load microeco and qiimer, if qiimer is not installed, see Tax4Fun part to install qiimer package
 library(microeco)
 library(qiimer)
-# the otu_table_raw.txt do not has the first commented line, so we use commented = FALSE
+# read and parse otu_table_raw.txt; this file does not have the first commented line, so we use commented = FALSE
 otu_raw_table <- read_qiime_otu_table(otu_file_path, commented=FALSE)
 # obtain the otu table data.frame
 otu_table_1 <- as.data.frame(otu_raw_table[[3]])
@@ -299,13 +299,13 @@ colnames(otu_table_1) <- unlist(otu_raw_table[[1]])
 taxonomy_table_1 <- as.data.frame(split_assignments(unlist(otu_raw_table[[4]])))
 # read sample metadata table, data.frame
 sample_info <- read.csv(sample_file_path, row.names = 1, stringsAsFactors = FALSE)
-# obtain the phylogenetic tree
+# read the phylogenetic tree
 phylo_tree <- read.tree(phylo_file_path)
 # check whether the tree is rooted, if unrooted, transform to rooted
 if(!is.rooted(phylo_tree)){
 	phylo_tree <- multi2di(phylo_tree)
 }
-# then, make the taxonomic table clean, this is very important
+# make the taxonomic table clean, this is very important
 taxonomy_table_1 %<>% tidy_taxonomy
 # create a microtable object
 dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, tax_table = taxonomy_table_1, phylo_tree = phylo_tree)
