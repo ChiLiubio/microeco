@@ -50,9 +50,6 @@ See the detailed package tutorial (https://chiliubio.github.io/microeco/) and th
 If you want to run the codes in the tutorial completely, you need to install some additional packages, see the following **Notes** part.
 
 
-## QQ
-If the user has problems or suggestions, feel free to join the QQ group for discussions.  
-QQ group: 277434916
 
 ## Notes
 
@@ -315,6 +312,10 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 # see the tidy_dataset function in the microtable, click the link or input:
 ?tidy_dataset
 ```
+
+## QQ
+If the user has problems or suggestions, feel free to join the QQ group for discussions.  
+QQ group: 277434916
 
 
 ## Acknowledgement
