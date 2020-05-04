@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_env.R
 \name{cal_mantel}
 \alias{cal_mantel}
-\title{Mantel test between beta diversity matrix and physicochemical data.}
+\title{Mantel test between beta diversity matrix and environmental data.}
 \usage{
 cal_mantel(
   select_env_data = NULL,
@@ -28,7 +28,7 @@ cal_mantel(
 res_mantel in object.
 }
 \description{
-Mantel test between beta diversity matrix and physicochemical data.
+Mantel test between beta diversity matrix and environmental data.
 }
 \examples{
 t1$cal_mantel(use_measure = "bray")

@@ -2,12 +2,12 @@
 % Please edit documentation in R/trans_env.R
 \name{trans_env}
 \alias{trans_env}
-\title{Create trans_env object for the analysis of the effects of physicochemical indexes on communities.}
+\title{Create trans_env object for the analysis of the effects of environmental factors on communities.}
 \value{
 env_data and dataset in trans_env object.
 }
 \description{
-This class is a wrapper for a series of operations associated with physicochemical measurements.
+This class is a wrapper for a series of operations associated with environmental measurements.
 The functions in this class include \code{\link{cal_rda}}, \code{\link{trans_rda}}, \code{\link{plot_rda}}, \code{\link{cal_mantel}},
 \code{\link{cal_cor}}, \code{\link{plot_corr}}
 }
@@ -46,11 +46,11 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{env_cols}}{default NULL; a vector; If the physicochemical data is in sample_table, use this parameter to indicate the columns.}
+\item{\code{env_cols}}{default NULL; a vector; If the environmental data is in sample_table, use this parameter to indicate the columns.}
 
-\item{\code{add_data}}{default NULL; provide the physicochemical data frame individually.}
+\item{\code{add_data}}{default NULL; provide the environmental data frame individually.}
 
-\item{\code{complete_na}}{default FALSE; Whether fill the NA in the physicochemical data.}
+\item{\code{complete_na}}{default FALSE; Whether fill the NA in the environmental data.}
 }
 \if{html}{\out{</div>}}
 }

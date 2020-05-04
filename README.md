@@ -16,7 +16,7 @@ Based on this, we created R package microeco.
   + Alpha diversity
   + Beta diversity
   + Differential abundance analysis
-  + Physicochemical data analysis
+  + Environmental data analysis
   + Network analysis
   + Null model analysis
   + Functional analysis
@@ -260,8 +260,8 @@ pip install argparse -i https://pypi.douban.com/simple/
 
 #### FlashWeave
 FlashWeave is a julia package used for network analysis.
-It predicts ecological interactions between microbes from large-scale compositional abundance data (i.e. OTU tables constructed from sequencing data) 
-through statistical co-occurrence or co-abundance.
+It predicts ecological interactions among microbes from large-scale compositional abundance data (i.e. OTU tables constructed from sequencing data) 
+through statistical co-occurrence.
 
 1. download and install julia from https://julialang.org/downloads/
 2. Put julia in the computer env PATH, such as  your_directory_path\Julia\bin
@@ -271,8 +271,8 @@ through statistical co-occurrence or co-abundance.
 Gephi is used to open saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
 
-## change plot
-All the plotting in the package rely on the ggplot2.
+## plotting
+All the plots in the package rely on the ggplot2 package system.
 We provide some parameters to change the corresponding plot.
 If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
 Of course, you can also directly modify the function or class to reload them.
@@ -319,21 +319,21 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 
 ## Acknowledgement
   - [R6](https://github.com/r-lib/R6), The
-    main class system used in this package.
+    main class system in this package.
   - [lefse python
     script](https://bitbucket.org/biobakery/biobakery/wiki/lefse), The
-    main lefse code are translated from **lefse python script**.
+    main lefse codes are translated from **lefse python script**.
   - [phyloseq](https://github.com/joey711/phyloseq), the idea of data
     structures of microtable class in microeco comes from
     `phyloseq-class` in package **phyloseq**.
   - [microbiomeSeq](https://github.com/umerijaz/microbiomeSeq), 
-    the method that calculate the roles of nodes within- and among- modules connectivity is 
+    the method that calculates the roles of nodes within- and among- modules connectivity is 
     modified from the package **microbiomeSeq**.
   - [SpiecEasi](https://github.com/zdk123/SpiecEasi), 
-    the method that calculate SparCC is
+    the method that calculates SparCC is
     modified from the package **SpiecEasi**.
   - [microbiomeMarker](https://github.com/yiluheihei/microbiomeMarker), 
-    the method that plot the LEfSe cladogram is
+    the method that plots the LEfSe cladogram is
     modified from the package **microbiomeMarker**.
 
 

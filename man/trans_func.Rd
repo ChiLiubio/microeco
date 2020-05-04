@@ -8,8 +8,8 @@ trans_func object with tax_table, otu_table, sample_table.
 }
 \description{
 This class is a wrapper for a series of functional analysis for communities and species.
-The functions in this class include \code{\link{cal_spe_func}}, \code{\link{cal_spe_func_perc}}, \code{\link{show_spe_func}},
-\code{\link{plot_spe_func_perc}}, \code{\link{cal_tax4fun_func}}, \code{\link{cal_biogeo}}.
+The functions in this class include \code{\link{cal_prok_biogeo}}, \code{\link{cal_prok_biogeo_perc}}, \code{\link{show_prok_biogeo}},
+\code{\link{plot_prok_biogeo_perc}}, \code{\link{cal_tax4fun_func}}, \code{\link{cal_biogeo}}.
 }
 \examples{
 t1 <- trans_diff$new(dataset = dataset)
@@ -19,10 +19,10 @@ t1 <- trans_diff$new(dataset = dataset)
 \itemize{
 \item \href{#method-new}{\code{trans_func$new()}}
 \item \href{#method-cal_biogeo}{\code{trans_func$cal_biogeo()}}
-\item \href{#method-cal_spe_func}{\code{trans_func$cal_spe_func()}}
-\item \href{#method-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
-\item \href{#method-show_spe_func}{\code{trans_func$show_spe_func()}}
-\item \href{#method-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
+\item \href{#method-cal_prok_biogeo}{\code{trans_func$cal_prok_biogeo()}}
+\item \href{#method-cal_prok_biogeo_perc}{\code{trans_func$cal_prok_biogeo_perc()}}
+\item \href{#method-show_prok_biogeo}{\code{trans_func$show_prok_biogeo()}}
+\item \href{#method-plot_prok_biogeo_perc}{\code{trans_func$plot_prok_biogeo_perc()}}
 \item \href{#method-cal_tax4fun_func}{\code{trans_func$cal_tax4fun_func()}}
 \item \href{#method-print}{\code{trans_func$print()}}
 \item \href{#method-clone}{\code{trans_func$clone()}}
@@ -54,38 +54,38 @@ t1 <- trans_diff$new(dataset = dataset)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_spe_func"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_spe_func}{}}}
-\subsection{Method \code{cal_spe_func()}}{
+\if{html}{\out{<a id="method-cal_prok_biogeo"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_prok_biogeo}{}}}
+\subsection{Method \code{cal_prok_biogeo()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_prok_biogeo()}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_spe_func_perc}{}}}
-\subsection{Method \code{cal_spe_func_perc()}}{
+\if{html}{\out{<a id="method-cal_prok_biogeo_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_prok_biogeo_perc}{}}}
+\subsection{Method \code{cal_prok_biogeo_perc()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(use_community = TRUE, node_type_table = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_prok_biogeo_perc(use_community = TRUE, node_type_table = NULL)}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-show_spe_func"></a>}}
-\if{latex}{\out{\hypertarget{method-show_spe_func}{}}}
-\subsection{Method \code{show_spe_func()}}{
+\if{html}{\out{<a id="method-show_prok_biogeo"></a>}}
+\if{latex}{\out{\hypertarget{method-show_prok_biogeo}{}}}
+\subsection{Method \code{show_prok_biogeo()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$show_spe_func(use_func = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$show_prok_biogeo(use_func = NULL)}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_spe_func_perc}{}}}
-\subsection{Method \code{plot_spe_func_perc()}}{
+\if{html}{\out{<a id="method-plot_prok_biogeo_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_prok_biogeo_perc}{}}}
+\subsection{Method \code{plot_prok_biogeo_perc()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_prok_biogeo_perc(
   filter_func = NULL,
   group_list = NULL,
   group_list_default = FALSE,

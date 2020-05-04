@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_env.R
 \name{cal_cor}
 \alias{cal_cor}
-\title{Correlations between abundance data table and physicochemical data table.}
+\title{Correlations between abundance data table and environmental data table.}
 \usage{
 cal_cor(
   use_data = c("Genus", "all", "other")[1],
@@ -25,7 +25,7 @@ cal_cor(
 
 \item{p_adjust_method}{default "fdr"; p.adjust method.}
 
-\item{p_adjust_type}{default "Env"; one of c("Type", "Taxa", "Env"); p.adjust type; Env: physicochemical data; Taxa: taxa data; Type: group used.}
+\item{p_adjust_type}{default "Env"; one of c("Type", "Taxa", "Env"); p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.}
 
 \item{add_abund_table}{default NULL; additional data table to be used. Samples must be rows.}
 

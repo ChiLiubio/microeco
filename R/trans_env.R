@@ -1,14 +1,14 @@
 
-#' Create trans_env object for the analysis of the effects of physicochemical indexes on communities.
+#' Create trans_env object for the analysis of the effects of environmental factors on communities.
 #'
-#' This class is a wrapper for a series of operations associated with physicochemical measurements.
+#' This class is a wrapper for a series of operations associated with environmental measurements.
 #' The functions in this class include \code{\link{cal_rda}}, \code{\link{trans_rda}}, \code{\link{plot_rda}}, \code{\link{cal_mantel}},
 #' \code{\link{cal_cor}}, \code{\link{plot_corr}}
 #'
 #' @param dataset the object of \code{\link{microtable}} Class.
-#' @param env_cols default NULL; a vector; If the physicochemical data is in sample_table, use this parameter to indicate the columns.
-#' @param add_data default NULL; provide the physicochemical data frame individually.
-#' @param complete_na default FALSE; Whether fill the NA in the physicochemical data.
+#' @param env_cols default NULL; a vector; If the environmental data is in sample_table, use this parameter to indicate the columns.
+#' @param add_data default NULL; provide the environmental data frame individually.
+#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
 #' @return env_data and dataset in trans_env object.
 #' @examples
 #' t1 <- trans_env$new(dataset = dataset, add_data = env_data)
@@ -412,7 +412,7 @@ plot_rda <- function(plot_color = NULL, plot_shape = NULL, color_values = RColor
 }
 
 
-#' Mantel test between beta diversity matrix and physicochemical data.
+#' Mantel test between beta diversity matrix and environmental data.
 #'
 #' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
 #' @param partial_mantel default FALSE; whether use partial mantel test.
@@ -426,7 +426,7 @@ cal_mantel <- function(select_env_data = NULL, partial_mantel = FALSE, add_matri
 	dataset$cal_mantel()
 }
 
-#' Correlations between abundance data table and physicochemical data table.
+#' Correlations between abundance data table and environmental data table.
 #'
 #' Calculating any correlation between two columns from two tables.
 #'
@@ -434,7 +434,7 @@ cal_mantel <- function(select_env_data = NULL, partial_mantel = FALSE, add_matri
 #' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
 #' @param method default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.
 #' @param p_adjust_method default "fdr"; p.adjust method.
-#' @param p_adjust_type default "Env"; one of c("Type", "Taxa", "Env"); p.adjust type; Env: physicochemical data; Taxa: taxa data; Type: group used.
+#' @param p_adjust_type default "Env"; one of c("Type", "Taxa", "Env"); p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
 #' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 #' @param by_group default NULL; numeric or character vector to select one column in env_data; correlations separately for groups.
 #' @param other_taxa default NULL; provide additional taxa, see use_data parameter.
