@@ -1,5 +1,5 @@
 # microeco
-An R package for ecological analysis of microbial communities
+An R package for data analysis in microbial community ecology
 
 ## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
@@ -16,6 +16,7 @@ Based on this, we created R package microeco.
   + Alpha diversity
   + Beta diversity
   + Differential abundance analysis
+  + Indicator species analysis
   + Environmental data analysis
   + Network analysis
   + Null model analysis
@@ -29,7 +30,7 @@ If you do not already have R/RStudio installed, do as follows.
 2. Install [RStudio](https://rstudio.com/)
 3. With Windows, install also [Rtools](https://cran.r-project.org/bin/windows/Rtools/)  
 
-Put R and Rtools in the computer env PATH: your_directory\R-3.6.3\bin\x64, your_directory\Rtools\bin and your_directory\Rtools\mingw_64\bin  
+Put R and Rtools in the computer env PATH, for example your_directory\R-3.6.3\bin\x64, your_directory\Rtools\bin and your_directory\Rtools\mingw_64\bin  
 Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
 
 ## Install microeco
@@ -54,8 +55,8 @@ If you want to run the codes in the tutorial completely, you need to install som
 ## Notes
 
 ### packages important
-To keep the start and use of the package simplified, 
-the installation of microeco package only depend on several packages, which are compulsory-installed and very useful in the data analysis.
+To keep the start and use of microeco package simplified, 
+the installation of microeco only depend on several packages, which are compulsory-installed and very useful in the data analysis.
 These packages include R6, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, RColorBrewer, Rcpp, RcppArmadillo and RcppEigen.
 So the question is that you may encounter an error when using a class or function that invoke an additional package like this:
 
