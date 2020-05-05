@@ -106,7 +106,7 @@ The solutions:
 <tr class="odd">
 <td align="center">GUniFrac</td>
 <td align="center">cal_betadiv</td>
-<td align="center">UniFrac beta diversity matrix</td>
+<td align="center">UniFrac distance matrix</td>
 </tr>
 <tr class="even">
 <td align="center">picante</td>
