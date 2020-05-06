@@ -316,7 +316,7 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 
 ## QQ
 If the user has problems or suggestions, feel free to join the QQ group for discussions.  
-QQ group: 277434916
+QQ group: 207510995
 
 
 ## Acknowledgement
