@@ -81,7 +81,8 @@ microtable <- R6Class(classname = "microtable",
 			self$tax_table %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case=TRUE)))))
 		},
 		# modified from the rarefy_even_depth() in phyloseq package
-		rarefy_samples = function(sample.size = NULL, replace = TRUE){
+		rarefy_samples = function(sample.size = NULL, rngseed = 123, replace = TRUE){
+			set.seed(rngseed)
 			self$tidy_dataset()
 			if(is.null(sample.size)){
 				sample.size <- min(self$sample_sums())
@@ -399,7 +400,7 @@ tidy_dataset <- function(main_data = TRUE){
 #' @param replace default: TRUE; see \code{\link{sample}} for the random sampling.
 #' @return None; rarefied dataset.
 #' @examples
-#' dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), rngseed = 123, replace = TRUE)
+#' dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 
 rarefy_samples <- function(sample.size = NULL, rngseed = 123, replace = TRUE){
 	dataset$rarefy_samples()
@@ -407,10 +408,10 @@ rarefy_samples <- function(sample.size = NULL, rngseed = 123, replace = TRUE){
 
 #' Calculate the taxonomic abundance at each taxonomic ranks.
 #'
-#' @return taxa_summary in object.
+#' @return taxa_abund in object.
 #' @examples
 #' dataset$cal_abund()
-#' str(dataset$taxa_summary)
+#' str(dataset$taxa_abund)
 cal_abund <- function(){
 	dataset$cal_abund()
 }

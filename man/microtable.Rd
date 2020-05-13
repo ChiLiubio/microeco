@@ -110,7 +110,7 @@ dataset$tidy_dataset()
 \if{latex}{\out{\hypertarget{method-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(sample.size = NULL, replace = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(sample.size = NULL, rngseed = 123, replace = TRUE)}\if{html}{\out{</div>}}
 }
 
 }

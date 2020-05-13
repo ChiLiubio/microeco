@@ -20,5 +20,5 @@ None; rarefied dataset.
 Rarefy communities to make all samples have same species number.
 }
 \examples{
-dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), rngseed = 123, replace = TRUE)
+dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 }

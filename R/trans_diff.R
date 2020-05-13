@@ -247,6 +247,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					res <- cbind.data.frame(compare = add_name, res)
 					output <- rbind.data.frame(output, res)
 				}
+				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_metastat <- output
 				self$res_metastat_group_matrix <- all_name				
 			}
@@ -577,7 +578,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		},
 		plot_metastat = function(use_number = 1:10, qvalue = 0.05, choose_group = 1, color_values = RColorBrewer::brewer.pal(8, "Dark2")
 			){
-			use_data <- self$res_metastat %>% dropallfactors
+			use_data <- self$res_metastat
 			group_char <- self$res_metastat_group_matrix[, choose_group]
 			use_group <- use_data[,1] %>% unique %>% .[1]
 			use_data %<>% .[.$qvalue < qvalue & .[,1] == use_group, ]

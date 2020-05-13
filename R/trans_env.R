@@ -288,11 +288,29 @@ trans_env <- R6Class(classname = "trans_env",
 			if(keep_prefix == F){
 				use_data$Taxa %<>% gsub(".*__", "", .)
 			}
-			clu_data_1 <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
-			sig_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Significance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
+			if(pheatmap & length(unique(use_data$Type)) > 1){
+				use_data$Env <- paste0(use_data$Type, ": ", use_data$Env)
+			}
+			if(length(unique(use_data$Type)) == 1 | pheatmap){
+				clu_data_1 <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
+				clu_data_1[is.na(clu_data_1)] <- 0
+				sig_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Significance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
+				sig_data[is.na(sig_data)] <- ""
+				if(length(unique(use_data$Type)) == 1 & pheatmap == F){
+					lim_y <- hclust(dist(clu_data_1)) %>% {.$labels[.$order]}
+					lim_x <- hclust(dist(t(clu_data_1))) %>% {.$labels[.$order]}
+				}
+			}
+
 			if(pheatmap == T){
 				if(!require(pheatmap)){
 					stop("pheatmap package not installed")
+				}
+				# check sd for each feature, if 0, delete
+				if(any(apply(clu_data_1, MARGIN = 1, FUN = function(x) sd(x) == 0))){
+					select_rows <- apply(clu_data_1, MARGIN = 1, FUN = function(x) sd(x) != 0)
+					clu_data_1 %<>% {.[select_rows, ]}
+					sig_data %<>% {.[select_rows, ]}
 				}
 				if(ylab_type_italic == T){
 					eval(parse(text = paste0("mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data_1),'"'), "))", collapse = ","),")", 
@@ -307,20 +325,21 @@ trans_env <- R6Class(classname = "trans_env",
 						 color = color_vector_use)
 				p$gtable
 			}else{
-				lim_y <- hclust(dist(clu_data_1)) %>% {.$labels[.$order]}
-				lim_x <- hclust(dist(t(clu_data_1))) %>% {.$labels[.$order]}
-
 				p <- ggplot(aes(x=Env, y=Taxa, fill=Correlation), data = use_data) +
 					theme_bw() + 
 					geom_tile() + 
 					scale_fill_gradientn(colours = color_vector) +
-					scale_y_discrete(limits=lim_y, position = "left") + 
-					scale_x_discrete(limits=lim_x) +
 					geom_text(aes(label=Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = self$cor_method) +
 					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white")) +
 					theme(strip.text=element_text(size=11), panel.border = element_blank(), panel.grid = element_blank())
+				if(length(unique(use_data$Type)) == 1){
+					p <- p + scale_y_discrete(limits=lim_y, position = "left") + 
+						scale_x_discrete(limits=lim_x)
+				}else{
+					p <- p + facet_grid(. ~ Type, drop=TRUE,scale="free",space="free_x")
+				}
 				if(ylab_type_italic == T){
 					p <- p + theme(axis.text.y = element_text(face = 'italic'))
 				}

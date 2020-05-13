@@ -7,12 +7,12 @@
 cal_abund()
 }
 \value{
-taxa_summary in object.
+taxa_abund in object.
 }
 \description{
 Calculate the taxonomic abundance at each taxonomic ranks.
 }
 \examples{
 dataset$cal_abund()
-str(dataset$taxa_summary)
+str(dataset$taxa_abund)
 }
