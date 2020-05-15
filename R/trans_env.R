@@ -1,4 +1,3 @@
-
 #' Create trans_env object for the analysis of the effects of environmental factors on communities.
 #'
 #' This class is a wrapper for a series of operations associated with environmental measurements.
@@ -114,11 +113,15 @@ trans_env <- R6Class(classname = "trans_env",
 				multiplier_spe <- vegan:::ordiArrowMul(scrs$biplot_spe)
 				df_arrows_spe <- scrs$biplot_spe * multiplier_spe
 				colnames(df_arrows_spe)<-c("x","y")
-				df_arrows_spe = dropallfactors(cbind.data.frame(df_arrows_spe, self$dataset$tax_table[rownames(df_arrows_spe), self$taxa_level, drop = FALSE]))
+				df_arrows_spe <- dropallfactors(cbind.data.frame(df_arrows_spe, self$dataset$tax_table[rownames(df_arrows_spe), self$taxa_level, drop = FALSE]))
 				df_arrows_spe %<>% .[!grepl("__$|__uncultured|sp$", .[, 3]), ]
-				df_arrows_spe <- df_arrows_spe %>% {.[,1]^2 + .[,2]^2} %>% `names<-`(rownames(df_arrows_spe)) %>% 
-					sort(., decreasing = TRUE) %>% .[1:10] %>% names %>% df_arrows_spe[., ]
-
+				df_arrows_spe <- df_arrows_spe %>% 
+					{.[,1]^2 + .[,2]^2} %>% 
+					`names<-`(rownames(df_arrows_spe)) %>% 
+					sort(., decreasing = TRUE) %>% 
+					.[1:show_taxa] %>% 
+					names %>% 
+					df_arrows_spe[., ]
 			}else{
 				df_species = NULL
 				df_arrows_spe = NULL
@@ -132,20 +135,25 @@ trans_env <- R6Class(classname = "trans_env",
 			
 			self$res_rda_trans = list(df_sites = df_sites, df_arrows = df_arrows, eigval = eigval, df_species = df_species, df_arrows_spe = df_arrows_spe)
 		},
-		plot_rda = function(plot_color = NULL, plot_shape = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), taxa_text_color = "firebrick1", 
+		plot_rda = function(plot_color = NULL, plot_shape = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
+			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14), 
+			taxa_text_color = "firebrick1", 
 			taxa_text_type = "italic"){
 			p <- ggplot()
 			p <- p + theme_bw()
 			p <- p + theme(panel.grid=element_blank())
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
-			p <- p + geom_point(data=self$res_rda_trans$df_sites,aes_string("x", "y", colour = plot_color, shape = plot_shape),size= 3.5)
+			p <- p + geom_point(data=self$res_rda_trans$df_sites, aes_string("x", "y", colour = plot_color, shape = plot_shape),size= 3.5)
 			# plot arrows
 			p <- p + geom_segment(data=self$res_rda_trans$df_arrows, aes(x = 0, y = 0, xend = x, yend = y), arrow = arrow(length = unit(0.2, "cm")), color = "grey30")
 			p <- p + ggrepel::geom_text_repel(data=as.data.frame(self$res_rda_trans$df_arrows*1), 
 				aes(x, y, label = gsub("`", "", rownames(self$res_rda_trans$df_arrows))),size=3.7, color = "black", segment.color = "white")
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)
+			}
+			if(!is.null(plot_shape)){
+				p <- p + scale_shape_manual(values = shape_values)
 			}
 			p <- p + xlab(self$res_rda_trans$eigval[1]) + ylab(self$res_rda_trans$eigval[2])
 			
@@ -220,7 +228,7 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!is.null(add_abund_table)){
 				abund_table <- add_abund_table
 			}else{
-				if(use_data %in% taxonomic_ranks){
+				if(use_data %in% microeco:::taxonomic_ranks){
 					abund_table <- self$dataset$taxa_abund[[use_data]]
 				}
 				if(grepl("all|other", use_data, ignore.case = TRUE)){
@@ -419,13 +427,15 @@ trans_rda <- function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env 
 #'
 #' @param plot_color default NULL; group used for color.
 #' @param plot_shape default NULL; group used for shape.
-#' @param color_values color pallete.
+#' @param color_values; color pallete.
+#' @param shape_values; vector used in the shape, see ggplot2 tutorial.
 #' @param taxa_text_color default "firebrick1"; taxa text colors.
 #' @param taxa_text_type default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.
 #' @return ggplot object.
 #' @examples
 #' t1$plot_rda(plot_color = "Group")
 plot_rda <- function(plot_color = NULL, plot_shape = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+				shape_values = c(16, 17, 7,  8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0,1,2,14),
 				taxa_text_color = "firebrick1", taxa_text_type = "italic"){
 	dataset$plot_rda()
 }
