@@ -208,6 +208,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocMana
 # install GO.db and impute
 BiocManager::install("GO.db")
 BiocManager::install("impute")
+BiocManager::install("preprocessCore")
 # then install WGCNA.
 install.packages("WGCNA", dependencies = TRUE)
 ```
