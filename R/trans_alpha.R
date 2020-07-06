@@ -1,18 +1,17 @@
-
-#' Create trans_alpha Class to store the transformed alpha diveristy and statistics.
+#' @title Create trans_alpha object for alpha diveristy statistics and plotting.
 #'
+#' @description
 #' This class is a wrapper for a series of alpha diveristy related analysis.
-#' The functions in this class include \code{\link{cal_diff}}, \code{\link{plot_alpha}}.
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @param group default NULL; the sample column used for the statistics; If provided, can return alpha_stat.
-#' @param order_x default:null; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
-#' @return alpha_data and alpha_stat. 
-#' @examples
-#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param group default NULL; the sample column used for the statistics; If provided, can return alpha_stat.
+		#' @param order_x default:null; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
+		#' @return alpha_data and alpha_stat stored in the object.
+		#' @examples
+		#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 		initialize = function(dataset = NULL, group = NULL, order_x = NULL) {
 			self$group <- group
 			alpha_data <- dataset$alpha_diversity %>% cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE)
@@ -28,12 +27,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			alpha_data <- dplyr::left_join(alpha_data, rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
 			if(!is.null(group)){
-				self$alpha_stat <- summarySE(alpha_data, measurevar = "Value", groupvars = c(self$group, "Measure"))
+				self$alpha_stat <- microeco:::summarySE_inter(alpha_data, measurevar = "Value", groupvars = c(self$group, "Measure"))
 			}else{
 				self$alpha_stat <- NULL
 			}			
 			self$alpha_data <- alpha_data
 		},
+		#' @description
+		#' Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
+		#'
+		#' @param method default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.
+		#' @param measures default NULL; a vector, if null, all indexes will be calculated.
+		#' @return res_alpha_diff in object.
+		#' @examples
+		#' t1$cal_diff(method = "KW")
+		#' t1$cal_diff(method = "anova")
 		cal_diff = function(method = c("KW", "anova")[1], measures = NULL){
 			group <- self$group
 			alpha_data <- self$alpha_data
@@ -90,10 +98,39 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			self$res_alpha_diff <- compare_result
 		},
-		plot_alpha = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), measure = "Shannon", group = NULL, add_letter = FALSE,
-			pair_compare = FALSE, pair_compare_filter = "", pair_compare_method = "wilcox.test", map_signif_level = TRUE,
-			xtext_type = NULL, xtext_size = 10,
-			ytitle_size = 17, base_font =NULL, ...
+		#' @description
+		#' Plotting the alpha diveristy.
+		#'
+		#' @param color_values colors used for presentation.
+		#' @param measure default Shannon; alpha diveristy measurement that will be used.
+		#' @param group default NULL; group name used for the plot.
+		#' @param add_letter default FALSE; If TRUE, the letters of duncan test will be added in the plot.
+		#' @param pair_compare default FALSE; whether perform paired comparisons.
+		#' @param pair_compare_filter default ""; groups that will be removed.
+		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
+		#' @param map_signif_level default TRUE; whether indicate the significance level.
+		#' @param xtext_type default NULL; number used to make x axis text generate angle.
+		#' @param xtext_size default 10, x axis text size.
+		#' @param ytitle_size default 17, y axis title size.
+		#' @param base_font default NULL, font in the plot.
+		#' @param ... parameters pass to \code{\link{ggpubr::ggboxplot}}.
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
+		plot_alpha = function(
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			measure = "Shannon",
+			group = NULL,
+			add_letter = FALSE,
+			pair_compare = FALSE,
+			pair_compare_filter = "",
+			pair_compare_method = "wilcox.test",
+			map_signif_level = TRUE,
+			xtext_type = NULL,
+			xtext_size = 10,
+			ytitle_size = 17,
+			base_font =NULL,
+			...
 			){
 			if(is.null(group)){
 				group <- self$group
@@ -151,7 +188,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 
 		},
-		print = function(...) {
+		print = function() {
 			cat("trans_alpha class:\n")
 			cat(paste("alpha_data have", ncol(self$alpha_data), "columns: ", paste0(colnames(self$alpha_data), collapse = ", "), "\n"))
 			if(!is.null(self$alpha_stat)) cat(paste("alpha_stat have", ncol(self$alpha_stat), "columns: ", paste0(colnames(self$alpha_stat), collapse = ", "), "\n"))
@@ -161,51 +198,4 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 	lock_objects = FALSE,
 	lock_class = FALSE
 )
-
-
-#' Test the difference of alpha diveristy across groups.
-#'
-#' Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
-#'
-#'
-#' @param method default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.
-#' @param measures default NULL; a vector, if null, all indexes will be calculated.
-#' @return res_alpha_diff in object.
-#' @examples
-#' t1$cal_diff(method = "KW")
-#' t1$cal_diff(method = "anova")
-cal_diff <- function(method = c("KW", "anova")[1], measures = NULL){
-	dataset$cal_diff()
-}
-
-
-
-
-#' Plotting the alpha diveristy.
-#'
-#' @param color_values colors used for presentation.
-#' @param measure default Shannon; alpha diveristy that will be plotted.
-#' @param group default NULL; group name used for the plot.
-#' @param add_letter default FALSE; If TRUE, the letters of duncan test will be added in the plot.
-#' @param pair_compare default FALSE; whether do paired comparisons.
-#' @param pair_compare_filter default ""; groups that will be removed.
-#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
-#' @param map_signif_level default TRUE; whether indicate the significance level.
-#' @param xtext_type default NULL; number used to make x axis text generate angle.
-#' @param xtext_size default 10, x axis text size.
-#' @param ytitle_size default 17, y axis title size.
-#' @param base_font default NULL, font in the plot.
-#' @param ... parameters pass to \code{\link{ggpubr::ggboxplot}}.
-#' @return ggplot.
-#' @examples
-#' t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
-plot_alpha <- function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), measure = "Shannon", group = NULL, add_letter = FALSE,
-			pair_compare = FALSE, pair_compare_filter = "", pair_compare_method = "wilcox.test", map_signif_level = TRUE,
-			xtext_type = NULL, xtext_size = 10,
-			ytitle_size = 17, base_font = NULL, ...){
-	dataset$plot_alpha()
-}
-
-
-
 

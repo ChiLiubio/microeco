@@ -3,15 +3,28 @@
 \name{trans_venn}
 \alias{trans_venn}
 \title{Create trans_venn object.}
-\value{
-venn_table venn_count_abund in trans_venn object.
-}
 \description{
 This class is a wrapper for a series of venn analysis related methods.
-The functions in this class: \code{\link{plot_venn}}, \code{\link{trans_venn_com}}.
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_venn$new`
+## ------------------------------------------------
+
 trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
+
+## ------------------------------------------------
+## Method `trans_venn$plot_venn`
+## ------------------------------------------------
+
+dataset$plot_venn()
+
+## ------------------------------------------------
+## Method `trans_venn$trans_venn_com`
+## ------------------------------------------------
+
+dataset$trans_venn_com()
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -42,13 +55,26 @@ trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+venn_table venn_count_abund stored in trans_venn object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_venn"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_venn}{}}}
 \subsection{Method \code{plot_venn()}}{
+Plot venn.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$plot_venn(
+  petal_color = "skyblue",
   text_size = 4.5,
   text_name_size = 6,
   text_name_position = NULL,
@@ -64,9 +90,58 @@ trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
   petal_move_xy = 4,
   petal_move_k = 2.3,
   petal_move_k_count = 1.3,
-  petal_text_move = 40,
-  petal_color = "skyblue"
+  petal_text_move = 40
 )}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{petal_color}}{default "skyblue"; color of the petal}
+
+\item{\code{text_size}}{default 4.5; text size in plot}
+
+\item{\code{text_name_size}}{default 6; name size in plot}
+
+\item{\code{text_name_position}}{default NULL; name position in plot; use default, if NULL.}
+
+\item{\code{color_circle}}{color pallete}
+
+\item{\code{alpha}}{default .3; alpha for transparency}
+
+\item{\code{fill_color}}{default TRUE; whether fill the area color}
+
+\item{\code{linesize}}{default 1.1; cycle line size}
+
+\item{\code{petal_plot}}{default FALSE; whether use petal plot.}
+
+\item{\code{petal_a}}{default 4; the length of the ellipse}
+
+\item{\code{petal_r}}{default 1; scaling up the size of the ellipse}
+
+\item{\code{petal_use_lim}}{default c(-12, 12); the width of the plot}
+
+\item{\code{petal_center_size}}{default 40; petal center circle size}
+
+\item{\code{petal_move_xy}}{default 4; the distance of text to circle}
+
+\item{\code{petal_move_k}}{default 2.3; the distance of title to circle}
+
+\item{\code{petal_move_k_count}}{default 1.3; the distance of data text to circle}
+
+\item{\code{petal_text_move}}{default 40; the distance between two data text}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$plot_venn()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -74,8 +149,27 @@ trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
 \if{html}{\out{<a id="method-trans_venn_com"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_venn_com}{}}}
 \subsection{Method \code{trans_venn_com()}}{
+Transform venn result for the composition analysis.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$trans_venn_com(use_OTUs_frequency = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_OTUs_frequency}}{default TRUE; whether only use OTUs occurrence frequency, if FALSE, use abundance.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a new \code{\link{microtable}} class.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$trans_venn_com()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }

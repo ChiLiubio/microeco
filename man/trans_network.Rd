@@ -2,27 +2,94 @@
 % Please edit documentation in R/trans_network.R
 \name{trans_network}
 \alias{trans_network}
-\title{Create trans_network object.}
+\title{Create trans_network object for co-occurrence network analysis.}
 \description{
-This class inherits \code{\link{trans_corr}} class. 
-This class is a wrapper for a series of network related calculating and plotting methods.
-The functions in this class: \code{\link{cal_network}}, \code{\link{save_network}}, \code{\link{cal_network_attr}},
-\code{\link{cal_node_type}}, \code{\link{plot_taxa_roles}}, \code{\link{cal_sum_links}}, \code{\link{plot_sum_links}}, \code{\link{subset_network}}.
+This class is a wrapper for a series of network analysis related methods.
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_network$new`
+## ------------------------------------------------
+
+# correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
 t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
-}
-\section{Super class}{
-\code{\link[microeco:trans_corr]{microeco::trans_corr}} -> \code{trans_network}
+t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.001)
+# non correlation-based network
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0001)
+
+## ------------------------------------------------
+## Method `trans_network$replace_name`
+## ------------------------------------------------
+
+t1$replace_name()
+
+## ------------------------------------------------
+## Method `trans_network$cal_network`
+## ------------------------------------------------
+
+t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+
+## ------------------------------------------------
+## Method `trans_network$save_network`
+## ------------------------------------------------
+
+t1$save_network(filepath = "network.gexf")
+
+## ------------------------------------------------
+## Method `trans_network$cal_network_attr`
+## ------------------------------------------------
+
+t1$cal_network_attr()
+
+## ------------------------------------------------
+## Method `trans_network$cal_node_type`
+## ------------------------------------------------
+
+t1$cal_node_type()
+
+## ------------------------------------------------
+## Method `trans_network$cal_eigen`
+## ------------------------------------------------
+
+t1$cal_eigen()
+
+## ------------------------------------------------
+## Method `trans_network$plot_taxa_roles`
+## ------------------------------------------------
+
+t1$plot_taxa_roles()
+
+## ------------------------------------------------
+## Method `trans_network$cal_sum_links`
+## ------------------------------------------------
+
+t1$cal_sum_links(taxa_level = "Phylum")
+
+## ------------------------------------------------
+## Method `trans_network$plot_sum_links`
+## ------------------------------------------------
+
+t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+
+## ------------------------------------------------
+## Method `trans_network$subset_network`
+## ------------------------------------------------
+
+t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% rownames, rm_single = TRUE)
+# return a sub network that contains all nodes of module M1
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-new}{\code{trans_network$new()}}
+\item \href{#method-replace_name}{\code{trans_network$replace_name()}}
 \item \href{#method-cal_network}{\code{trans_network$cal_network()}}
 \item \href{#method-save_network}{\code{trans_network$save_network()}}
 \item \href{#method-cal_network_attr}{\code{trans_network$cal_network_attr()}}
 \item \href{#method-cal_node_type}{\code{trans_network$cal_node_type()}}
+\item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-cal_sum_links}{\code{trans_network$cal_sum_links()}}
 \item \href{#method-plot_sum_links}{\code{trans_network$plot_sum_links()}}
@@ -31,34 +98,148 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \item \href{#method-clone}{\code{trans_network$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="microeco" data-topic="trans_corr" data-id="initialize">}\href{../../microeco/html/trans_corr.html#method-initialize}{\code{microeco::trans_corr$initialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="microeco" data-topic="trans_corr" data-id="replace_name">}\href{../../microeco/html/trans_corr.html#method-replace_name}{\code{microeco::trans_corr$replace_name()}}\out{</span>}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
+\subsection{Method \code{new()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
+  dataset = NULL,
+  cor_method = c("pearson", "spearman", "kendall")[1],
+  cal_cor = c("base", "WGCNA", "SparCC", NA)[1],
+  taxa_level = "OTU",
+  filter_thres = 0,
+  nThreads = 1,
+  SparCC_simu_num = 100,
+  env_cols = NULL,
+  add_data = NULL
+)}\if{html}{\out{</div>}}
 }
-\out{</details>}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
+
+\item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm.}
+
+\item{\code{cal_cor}}{default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represent do not calculate.}
+
+\item{\code{taxa_level}}{default "OTU"; taxonomic rank.}
+
+\item{\code{filter_thres}}{default 0; the relative abundance threshold.}
+
+\item{\code{nThreads}}{default 1; the thread number used for "WGCNA" and SparCC.}
+
+\item{\code{SparCC_simu_num}}{default 100; SparCC simulation number for bootstrap.}
+
+\item{\code{env_cols}}{default NULL; number or name vector to select the physicochemical data in dataset$sample_table.}
+
+\item{\code{add_data}}{default NULL; provide physicochemical table additionally.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_cor_p list.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{# correlation network
+t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.001)
+# non correlation-based network
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0001)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-replace_name"></a>}}
+\if{latex}{\out{\hypertarget{method-replace_name}{}}}
+\subsection{Method \code{replace_name()}}{
+Replace names in res_cor_p of trans_network object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$replace_name()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+a new res_cor_p in trans_network object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$replace_name()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_network"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
+Calculate network either based on the correlation method or based on the Probabilistic Graphical Models in julia FlashWeave.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
   network_method = c("COR", "PGM")[1],
   p_thres = 0.01,
-  with_module = TRUE,
   COR_weight = TRUE,
   COR_p_adjust = "fdr",
   COR_cut = 0.6,
   COR_low_threshold = 0.4,
   COR_optimization = FALSE,
-  add_taxa_name = "Phylum",
   PGM_meta_data = FALSE,
   PGM_sensitive = "true",
   PGM_heterogeneous = "true",
+  with_module = TRUE,
+  add_taxa_name = "Phylum",
   usename_rawtaxa_when_taxalevel_notOTU = FALSE
 )}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{network_method}}{default "COR"; "COR" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method; doi: 10.1016/j.cels.2019.08.002}
+
+\item{\code{p_thres}}{default .01; the p value threshold.}
+
+\item{\code{COR_weight}}{default TRUE; whether use correlation coefficient as the weight of edges.}
+
+\item{\code{COR_p_adjust}}{default "fdr"; p.adjust method, see p.adjust.methods.}
+
+\item{\code{COR_cut}}{default .6; correlation coefficient threshold.}
+
+\item{\code{COR_low_threshold}}{default .4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.}
+
+\item{\code{COR_optimization}}{default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113}
+
+\item{\code{PGM_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, will automatically find the env_data in the object.}
+
+\item{\code{PGM_sensitive}}{default "true"; whether use sensitive type in the PGM model.}
+
+\item{\code{PGM_heterogeneous}}{default "true"; whether use heterogeneous type in the PGM model.}
+
+\item{\code{with_module}}{default TRUE; whether calculate modules.}
+
+\item{\code{add_taxa_name}}{default "Phylum"; add taxonomic rank name to the result.}
+
+\item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_network in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -66,8 +247,27 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{html}{\out{<a id="method-save_network"></a>}}
 \if{latex}{\out{\hypertarget{method-save_network}{}}}
 \subsection{Method \code{save_network()}}{
+Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{filepath}}{default "network.gexf"; file path.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$save_network(filepath = "network.gexf")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -75,8 +275,20 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{html}{\out{<a id="method-cal_network_attr"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_network_attr}{}}}
 \subsection{Method \code{cal_network_attr()}}{
+Calculate network properties.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network_attr()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+res_network_attr in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_network_attr()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -84,8 +296,41 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{html}{\out{<a id="method-cal_node_type"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_node_type}{}}}
 \subsection{Method \code{cal_node_type()}}{
+Calculate node properties.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_node_type()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+res_node_type in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_node_type()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_eigen"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_eigen}{}}}
+\subsection{Method \code{cal_eigen()}}{
+Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_eigen()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+res_eigen and res_eigen_expla in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_eigen()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -93,8 +338,59 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{html}{\out{<a id="method-plot_taxa_roles"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_taxa_roles}{}}}
 \subsection{Method \code{plot_taxa_roles()}}{
+Plot the classification and importance of nodes.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_taxa_roles(roles_colors = NULL, plot_module = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_taxa_roles(
+  use_type = c(1, 2)[1],
+  roles_colors = NULL,
+  plot_module = FALSE,
+  use_level = "Phylum",
+  show_value = c("z", "p"),
+  show_number = 1:10,
+  plot_color = "Phylum",
+  plot_shape = "taxa_roles",
+  plot_size = NULL,
+  color_values = RColorBrewer::brewer.pal(12, "Paired"),
+  shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14)
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_type}}{default 1; 1 or 2; 1 represent the traditional taxa roles plot; 2 represent the plot with taxa names as x axis.}
+
+\item{\code{roles_colors}}{default NULL; for use_type 1; colors for each group.}
+
+\item{\code{plot_module}}{default FALSE; for use_type 1; whether plot the modules information.}
+
+\item{\code{use_level}}{default "Phylum"; for use_type 2; used taxonomic level in x axis.}
+
+\item{\code{show_value}}{default c("z", "p"); for use_type 2; used variable in y axis.}
+
+\item{\code{show_number}}{default 1:10; for use_type 2; showed number in x axis, sorting according to the nodes number.}
+
+\item{\code{plot_color}}{default "Phylum"; for use_type 2; used variable for color.}
+
+\item{\code{plot_shape}}{default "taxa_roles"; for use_type 2; used variable for shape.}
+
+\item{\code{plot_size}}{default NULL; for use_type 2; used variable for shape.}
+
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); for use_type 2; color vector}
+
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type 2; shape vector, see ggplot2 tutorial for the shape meaning.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_taxa_roles()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -102,8 +398,27 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{html}{\out{<a id="method-cal_sum_links"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_sum_links}{}}}
 \subsection{Method \code{cal_sum_links()}}{
+Sum the linkages among taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_sum_links(taxa_level = "Phylum")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{taxa_level}}{default "Phylum"; taxonomic rank.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_sum_links_pos and res_sum_links_neg in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_sum_links(taxa_level = "Phylum")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -111,6 +426,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{html}{\out{<a id="method-plot_sum_links"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_sum_links}{}}}
 \subsection{Method \code{plot_sum_links()}}{
+Plot the summed linkages among taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_sum_links(
   plot_pos = TRUE,
@@ -119,13 +435,57 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot_pos}}{default TRUE; plot the summed positive or negative linkages.}
+
+\item{\code{plot_num}}{default NULL; number of taxa presented in the plot.}
+
+\item{\code{color_values}}{default NULL; If not provided, use default.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+chorddiag plot
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset_network"></a>}}
 \if{latex}{\out{\hypertarget{method-subset_network}{}}}
 \subsection{Method \code{subset_network()}}{
+Subset of the network.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$subset_network(node = NULL, rm_single = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{node}}{default NULL; provide the names of the nodes that you want to use in the sub-network.}
+
+\item{\code{rm_single}}{default TRUE; whether remove the nodes without any edge in the sub-network.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a new network
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% rownames, rm_single = TRUE)
+# return a sub network that contains all nodes of module M1
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -134,7 +494,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU"
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$print()}\if{html}{\out{</div>}}
 }
 
 }

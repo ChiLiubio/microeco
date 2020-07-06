@@ -6,26 +6,15 @@
 \format{
 microtable.
 }
-\value{
-an object of class "microtable" with the following components:
-\describe{
-  \item{\code{sample_table}}{The sample information table.}
-  \item{\code{otu_table}}{The OTU table.}
-  \item{\code{tax_table}}{The taxonomic table.}
-  \item{\code{phylo_tree}}{The phylogenetic tree}
-  \item{\code{taxa_abund}}{default NULL; use \code{\link{cal_abund}} function to calculate}
-  \item{\code{alpha_diversity}}{default NULL; use \code{\link{cal_alphadiv}} function to calculate}
-  \item{\code{beta_diversity}}{default NULL; use \code{\link{cal_betadiv}} function to calculate}
-}
-}
 \description{
 This class is a wrapper for a series of operations on the original files and the basic manipulations.
-The functions in this class include \code{\link{tidy_dataset}}, \code{\link{filter_pollution}}, \code{\link{rarefy_samples}}, 
-\code{\link{cal_abund}}, \code{\link{save_abund}},
-\code{\link{merge_samples}}, \code{\link{merge_taxa}}, \code{\link{cal_alphadiv}}, \code{\link{save_alphadiv}},
-\code{\link{cal_betadiv}}, \code{\link{save_betadiv}}, \code{\link{sample_sums}}, \code{\link{taxa_sums}}, \code{\link{sample_names}}, \code{\link{taxa_names}}
 }
 \examples{
+
+## ------------------------------------------------
+## Method `microtable$new`
+## ------------------------------------------------
+
 data(otu_table)
 data(taxonomy_table)
 data(sample_info)
@@ -33,6 +22,99 @@ data(phylo_tree)
 dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
 # trim the dataset
 dataset$tidy_dataset()
+
+## ------------------------------------------------
+## Method `microtable$filter_pollution`
+## ------------------------------------------------
+
+dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+
+## ------------------------------------------------
+## Method `microtable$rarefy_samples`
+## ------------------------------------------------
+
+dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+
+## ------------------------------------------------
+## Method `microtable$tidy_dataset`
+## ------------------------------------------------
+
+dataset$tidy_dataset(main_data = TRUE)
+
+## ------------------------------------------------
+## Method `microtable$cal_abund`
+## ------------------------------------------------
+
+dataset$cal_abund()
+
+## ------------------------------------------------
+## Method `microtable$save_abund`
+## ------------------------------------------------
+
+dataset$save_abund(dirpath = "taxa_abund")
+
+## ------------------------------------------------
+## Method `microtable$sample_sums`
+## ------------------------------------------------
+
+dataset$sample_sums()
+
+## ------------------------------------------------
+## Method `microtable$taxa_sums`
+## ------------------------------------------------
+
+dataset$taxa_sums()
+
+## ------------------------------------------------
+## Method `microtable$sample_names`
+## ------------------------------------------------
+
+dataset$sample_names()
+
+## ------------------------------------------------
+## Method `microtable$taxa_names`
+## ------------------------------------------------
+
+dataset$taxa_names()
+
+## ------------------------------------------------
+## Method `microtable$merge_samples`
+## ------------------------------------------------
+
+dataset$merge_samples(use_group = "Group")
+
+## ------------------------------------------------
+## Method `microtable$merge_taxa`
+## ------------------------------------------------
+
+dataset$merge_taxa(taxa = "Genus")
+
+## ------------------------------------------------
+## Method `microtable$cal_alphadiv`
+## ------------------------------------------------
+
+dataset$cal_alphadiv(measures = NULL, PD = FALSE)
+class(dataset$alpha_diversity)
+
+## ------------------------------------------------
+## Method `microtable$save_alphadiv`
+## ------------------------------------------------
+
+# save alpha diversity table in the alpha_diversity directory
+dataset$save_alphadiv(dirpath = "alpha_diversity")
+
+## ------------------------------------------------
+## Method `microtable$cal_betadiv`
+## ------------------------------------------------
+
+dataset$cal_betadiv(unifrac = FALSE)
+class(dataset$beta_diversity)
+
+## ------------------------------------------------
+## Method `microtable$save_betadiv`
+## ------------------------------------------------
+
+dataset$save_betadiv(dirpath = "beta_diversity")
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -66,33 +148,56 @@ dataset$tidy_dataset()
   otu_table = NULL,
   sample_table = NULL,
   tax_table = NULL,
-  phylo_tree = NULL,
-  taxa_abund = NULL,
-  alpha_diversity = NULL,
-  beta_diversity = NULL
+  phylo_tree = NULL
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame; The species or OTU table, rows are species, cols are samples.}
+\item{\code{otu_table}}{data.frame; default NULL; necessary; The species or OTU table, rows are species, cols are samples.}
 
-\item{\code{sample_table}}{data.frame; The sample information table, rows are samples, cols are information types.}
+\item{\code{sample_table}}{data.frame; default NULL; The sample information table, rows are samples, cols are sample metadata.}
 
-\item{\code{tax_table}}{data.frame; The taxonomic information table, rows are species, cols are taxonomic classes.}
+\item{\code{tax_table}}{data.frame; default NULL; The taxonomic information table, rows are species, cols are taxonomic classes.}
 
-\item{\code{phylo_tree}}{phylo; The phylogenetic tree.}
+\item{\code{phylo_tree}}{phylo; default NULL; If provided, the phylogenetic tree can be used for some analysis, for example, phylogenetic diversity.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+an object of class "microtable" with the following components:
+\describe{
+  \item{\code{sample_table}}{The sample information table.}
+  \item{\code{otu_table}}{The OTU table.}
+  \item{\code{tax_table}}{The taxonomic table.}
+  \item{\code{phylo_tree}}{The phylogenetic tree}
+  \item{\code{taxa_abund}}{default NULL; use \code{\link{cal_abund}} function to calculate}
+  \item{\code{alpha_diversity}}{default NULL; use \code{\link{cal_alphadiv}} function to calculate}
+  \item{\code{beta_diversity}}{default NULL; use \code{\link{cal_betadiv}} function to calculate}
+}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{data(otu_table)
+data(taxonomy_table)
+data(sample_info)
+data(phylo_tree)
+dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
+# trim the dataset
+dataset$tidy_dataset()
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$print()}\if{html}{\out{</div>}}
 }
 
 }
@@ -100,8 +205,28 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-filter_pollution"></a>}}
 \if{latex}{\out{\hypertarget{method-filter_pollution}{}}}
 \subsection{Method \code{filter_pollution()}}{
+Filter the taxa considered as pollution.
+This operation will remove any line of the tax_table containing any the word in taxa parameter regardless of word case.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$filter_pollution(taxa = c("mitochondria", "chloroplast"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{taxa}}{default: c("mitochondria", "chloroplast"); filter mitochondria and chloroplast, or others as needed.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -109,8 +234,31 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-rarefy_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
+Rarefy communities to make all samples have same species number, modified from the rarefy_even_depth() in phyloseq package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(sample.size = NULL, rngseed = 123, replace = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{sample.size}}{default:NULL; the required species number, If not provided, use minimum number of all samples.}
+
+\item{\code{rngseed}}{random seed; default: 123.}
+
+\item{\code{replace}}{default: TRUE; see \code{\link{sample}} for the random sampling.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None; rarefied dataset.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -118,8 +266,28 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-tidy_dataset"></a>}}
 \if{latex}{\out{\hypertarget{method-tidy_dataset}{}}}
 \subsection{Method \code{tidy_dataset()}}{
+Tidy the object of microtable Class.
+Trim the dataset to make OTUs and samples consistent across all files in the object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$tidy_dataset(main_data = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{main_data}}{TRUE or FALSE, if TRUE, only basic files in microtable object is tidied, otherwise, all files, including taxa_abund, alpha_diversity and beta_diversity, are all trimed.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None, Object of microtable itself cleaned up.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$tidy_dataset(main_data = TRUE)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -127,8 +295,20 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-cal_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_abund}{}}}
 \subsection{Method \code{cal_abund()}}{
+Calculate the taxonomic abundance at each taxonomic ranks.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+taxa_abund in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$cal_abund()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -136,8 +316,24 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-save_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-save_abund}{}}}
 \subsection{Method \code{save_abund()}}{
+Save taxonomic abundance to the computer local place.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(dirpath = "taxa_abund")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dirpath}}{default "taxa_abund"; directory name to save the taxonomic abundance files.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$save_abund(dirpath = "taxa_abund")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -145,8 +341,20 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-sample_sums"></a>}}
 \if{latex}{\out{\hypertarget{method-sample_sums}{}}}
 \subsection{Method \code{sample_sums()}}{
+Sum the species number for each sample.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$sample_sums()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+species number of samples.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$sample_sums()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -154,8 +362,20 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-taxa_sums"></a>}}
 \if{latex}{\out{\hypertarget{method-taxa_sums}{}}}
 \subsection{Method \code{taxa_sums()}}{
+Sum the species number for each taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$taxa_sums()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+species number of taxa.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$taxa_sums()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -163,8 +383,20 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-sample_names"></a>}}
 \if{latex}{\out{\hypertarget{method-sample_names}{}}}
 \subsection{Method \code{sample_names()}}{
+Sample names.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$sample_names()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+sample names.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$sample_names()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -172,8 +404,20 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-taxa_names"></a>}}
 \if{latex}{\out{\hypertarget{method-taxa_names}{}}}
 \subsection{Method \code{taxa_names()}}{
+Taxa names.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$taxa_names()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+taxa names.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$taxa_names()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -181,8 +425,27 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-merge_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-merge_samples}{}}}
 \subsection{Method \code{merge_samples()}}{
+Merge samples according to specific group to generate a new microtable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$merge_samples(use_group)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_group}}{the group column in sample_table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a new created merged microtable object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$merge_samples(use_group = "Group")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -190,8 +453,27 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-merge_taxa"></a>}}
 \if{latex}{\out{\hypertarget{method-merge_taxa}{}}}
 \subsection{Method \code{merge_taxa()}}{
+Merge taxa according to specific taxonomic rank to generate a new microtable.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$merge_taxa(taxa = "Genus")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{taxa}}{the specific rank in tax_table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a new created merged microtable object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$merge_taxa(taxa = "Genus")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -199,8 +481,30 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-cal_alphadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_alphadiv}{}}}
 \subsection{Method \code{cal_alphadiv()}}{
+Calculate alpha diversity in microtable Class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_alphadiv(measures = NULL, PD = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{measures}}{one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; default NULL, using all those measures.}
+
+\item{\code{PD}}{TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+alpha_diversity stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$cal_alphadiv(measures = NULL, PD = FALSE)
+class(dataset$alpha_diversity)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -208,8 +512,25 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-save_alphadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-save_alphadiv}{}}}
 \subsection{Method \code{save_alphadiv()}}{
+Save alpha diversity table to the computer.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$save_alphadiv(dirpath = "alpha_diversity")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dirpath}}{default "alpha_diversity"; directory name to save the alpha_diversity.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{# save alpha diversity table in the alpha_diversity directory
+dataset$save_alphadiv(dirpath = "alpha_diversity")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -217,8 +538,28 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-cal_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
+Calculate beta diversity in microtable Class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(unifrac = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{unifrac}}{TRUE or FALSE, whether unifrac index should be calculated, default FALSE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+beta_diversity stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$cal_betadiv(unifrac = FALSE)
+class(dataset$beta_diversity)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -226,8 +567,24 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-save_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-save_betadiv}{}}}
 \subsection{Method \code{save_betadiv()}}{
+Save beta diversity matrix to the computer.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$save_betadiv(dirpath = "beta_diversity")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dirpath}}{default "beta_diversity"; directory name to save the beta diversity matrix files.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{dataset$save_betadiv(dirpath = "beta_diversity")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }

@@ -75,14 +75,12 @@ tidy_taxonomy <- function(taxonomy_table){
 
 
 
-
-#' @keywords internal
-taxonomic_ranks <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
-
 ##################################################################################
 
-#' @keywords internal
-summarySE = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE) {
+taxonomic_ranks <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
+
+
+summarySE_inter = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE) {
 	length2 <- function(x, na.rm=TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
 	datac <- usedata %>% 
 			dplyr::grouped_df(groupvars) %>% 

@@ -1,130 +1,232 @@
+#' @title
 #' Create trans_func object for functional analysis.
 #'
-#' This class is a wrapper for a series of functional analysis for communities and species.
-#' The functions in this class include \code{\link{cal_prok_biogeo}}, \code{\link{cal_prok_biogeo_perc}}, \code{\link{show_prok_biogeo}},
-#' \code{\link{plot_prok_biogeo_perc}}, \code{\link{cal_tax4fun_func}}, \code{\link{cal_biogeo}}.
+#' @description
+#' This class is a wrapper for a series of functional analysis for species and communities.
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @return trans_func object with tax_table, otu_table, sample_table.
-#' @examples 
-#' t1 <- trans_diff$new(dataset = dataset)
 #' @export
 trans_func <- R6Class(classname = "trans_func",
 	public = list(
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified.
+		#' @examples 
+		#' t1 <- trans_diff$new(dataset = dataset)
 		initialize = function(dataset = NULL
 			){
 			self$tax_table <- dataset$tax_table
 			self$otu_table <- dataset$otu_table
 			self$sample_table <- dataset$sample_table
-			},
-		cal_biogeo = function(keep_tem = TRUE) {
-			otu_file <- self$otu_table
-			tax_file <- self$tax_table
-			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
-			tax_file <- apply(tax_file, 1, function(x){paste0(x, collapse = ";")})
-			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
-			# save to local place
-			message("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction...")
-			write.table(otu_file, "otu_table_for_FAPROTAX.txt", sep = "\t", row.names = FALSE, quote = FALSE)
-			code_path <- system.file("extdata", "FAPROTAX_1.2.1", package="microeco")
-			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", 
-				code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
-			message("run python to predict...")
-			system(use_command)
-			message("save prediction result FAPROTAX_prediction.tsv ...")
-			self$res_biogeo <- read.delim("FAPROTAX_prediction.tsv", check.names = FALSE, row.names = 1)
-			if(keep_tem == F){
-				message("remove intermediate file otu_table_for_FAPROTAX.txt ...")
-				unlink("otu_table_for_FAPROTAX.txt", recursive = FALSE, force = TRUE)
-			}
-		},
-		cal_prok_biogeo = function(){
-			data(spe_func)
-			# collapse taxonomy
-			tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
-			# reduce computational cost
-			tax2 <- unique(tax1)
-			# first create result matrix of tax2, then tax1-OTU
-			res <- matrix(nrow = length(tax2), ncol = length(spe_func$func_tax))
-			rownames(res) <- tax2
-			colnames(res) <- names(spe_func$func_tax)
-			# match taxa
-			for(i in seq_len(ncol(res))){
-				res[, i] <- grepl(spe_func$func_tax[i], tax2) %>% as.numeric
-			}
-			res %<>% as.data.frame
-			# identify the inclusion part among groups
-			for(i in names(spe_func$func_groups)){
-				if(length(spe_func$func_groups[[i]]) == 0){
-					next
+			# confirm the taxonomy automatically, for prokaryotes or fungi
+			for_what <- NA
+			if(!is.null(self$tax_table$Kingdom)){
+				all_Kingdom <- unique(as.character(self$tax_table$Kingdom))
+				if(any(grepl("Bacteria|Archaea", all_Kingdom, ignore.case = TRUE))){
+					for_what <- "prok"
 				}else{
-					for(j in seq_along(spe_func$func_groups[[i]])){
-						res[, i] <- res[, i] + res[, spe_func$func_groups[[i]][j]]
+					if(any(grepl("Fungi", all_Kingdom, ignore.case = TRUE))){
+						for_what <- "fungi"
+					}else{
+						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table, please set the for_what object use prok or fungi manually!")
 					}
 				}
+			}else{
+				message("No Kingdom found in the tax_table, please set the for_what object use prok or fungi manually!")
 			}
-			# only use 1 represent exist
-			res[res > 1] <- 1
-
-			otu_func_table <- res[tax1, ]
-			rownames(otu_func_table) <- names(tax1)
-			otu_func_table$anaerobic_chemoheterotrophy <- 0
-			otu_func_table$anaerobic_chemoheterotrophy[otu_func_table$chemoheterotrophy != 0 & otu_func_table$aerobic_chemoheterotrophy == 0] <- 1			
-			self$res_prok_biogeo <- otu_func_table
+			self$for_what <- for_what
 		},
-		cal_prok_biogeo_perc = function(use_community = TRUE, node_type_table = NULL){
-			res_prok_biogeo <- self$res_prok_biogeo
+		#' @description
+		#' Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
+		#' for prokaryotes, use FAPROTAX database; for fungi, use FUNGuild database.
+		#'
+		#' @return res_spe_func in object.
+		#' @examples
+		#' t1$cal_spe_func()
+		cal_spe_func = function(){
+			for_what <- self$for_what
+			if(is.na(for_what)){
+				stop("No for_what object found, please set the for_what object use prok or fungi manually!")
+			}
+			if(! for_what %in% c("prok", "fungi")){
+				stop("Wrong for_what found, please set the for_what object use prok or fungi !")
+			}
+			if(for_what == "prok"){
+				data(prok_func)
+				# collapse taxonomy
+				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
+				# reduce computational cost
+				tax2 <- unique(tax1)
+				# first create result matrix of tax2, then tax1-OTU
+				res <- matrix(nrow = length(tax2), ncol = length(prok_func$func_tax))
+				rownames(res) <- tax2
+				colnames(res) <- names(prok_func$func_tax)
+				# match taxa
+				for(i in seq_len(ncol(res))){
+					res[, i] <- grepl(prok_func$func_tax[i], tax2) %>% as.numeric
+				}
+				res %<>% as.data.frame
+				# identify the inclusion part among groups
+				for(i in names(prok_func$func_groups)){
+					if(length(prok_func$func_groups[[i]]) == 0){
+						next
+					}else{
+						for(j in seq_along(prok_func$func_groups[[i]])){
+							res[, i] <- res[, i] + res[, prok_func$func_groups[[i]][j]]
+						}
+					}
+				}
+				# only use 1 represent exist
+				res[res > 1] <- 1
+
+				otu_func_table <- res[tax1, ]
+				rownames(otu_func_table) <- names(tax1)
+				otu_func_table$anaerobic_chemoheterotrophy <- 0
+				otu_func_table$anaerobic_chemoheterotrophy[otu_func_table$chemoheterotrophy != 0 & otu_func_table$aerobic_chemoheterotrophy == 0] <- 1
+			}
+			if(for_what == "fungi"){
+				data(fungi_func)
+				tax1 <- self$tax_table
+				tax1[] <- lapply(tax1, function(x) gsub(".*__", "", x))
+				tax1 %<>% dropallfactors
+				# add taxon column to store the target taxon
+				tax1$taxon <- ""
+				# operate the matching for each level that stored in the database
+				for(i in c("Phylum", "Order", "Family", "Genus", "Species")){
+					use_database <- switch(i, 
+						Phylum = fungi_func[fungi_func$taxonomicLevel == "3", ], 
+						Order = fungi_func[fungi_func$taxonomicLevel == "7", ], 
+						Family = fungi_func[fungi_func$taxonomicLevel == "9", ],
+						Genus = fungi_func[fungi_func$taxonomicLevel == "13", ],
+						Species = fungi_func[fungi_func$taxonomicLevel %in% c("20", "21", "22", "24"), ])
+					# search each OTU even though it has been matched
+					for(j in rownames(tax1)){
+						if(tax1[j, i] %in% use_database[, "taxon"]){
+							tax1[j, "taxon"] <- tax1[j, i]
+						}
+					}
+				}
+				# merge two tables
+				res_table <- dplyr::left_join(tax1, fungi_func, by = c("taxon" = "taxon"))
+				rownames(res_table) <- rownames(tax1)
+				res_table <- res_table[, which(colnames(res_table) %in% "taxon"):ncol(res_table)]
+				res_table[is.na(res_table)] <- ""
+				# store the raw table similar with the FUNGuild results from python version
+				self$res_spe_func_raw_funguild <- res_table
+				# generate a data frame store the binary data
+				otu_func_table <- res_table[, c("taxon"), drop = FALSE]
+				# generate trophicMode binary information
+				trophicMode <- c("Pathotroph", "Saprotroph", "Symbiotroph")
+				for(i in trophicMode){
+					otu_func_table[, i] <- grepl(i, res_table[, "trophicMode"]) %>% as.numeric
+				}
+				# generate Guild binary information
+				Guild <- c("Bryophyte Parasite", "Dung Saprotroph", "Ectomycorrhizal", "Fungal Parasite", "Leaf Saprotroph", "Plant Parasite",
+						"Wood Saprotroph", "Animal Pathogen", "Endophyte", "Plant Pathogen", "Lichen Parasite", "Litter Saprotroph", "Soil Saprotroph",
+						"Plant Saprotroph", "Epiphyte", "Lichenized", "Arbuscular Mycorrhizal", "Endomycorrhizal", "Ericoid Mycorrhizal", "Orchid Mycorrhizal", 
+						"Root Associated Biotroph", "Clavicipitaceous Endophyte", "Animal Endosymbiont", "Wood Saprotrop")
+				for(i in Guild){
+					otu_func_table[, i] <- grepl(i, res_table[, "guild"]) %>% as.numeric
+				}
+				otu_func_table %<>% .[, -1]
+			}
+			self$res_spe_func <- otu_func_table
+		},
+		#' @description
+		#' Calculating the percentages of species with specific trait in communities or modules.
+		#' The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+		#'
+		#' @param use_community default TRUE; whether calculate community; if FALSE, use module.
+		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of \code{\link{cal_node_type}}.
+		#' @param abundance_weighted default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.
+		#' @return res_spe_func_perc in object.
+		#' @examples
+		#' t1$cal_spe_func_perc(use_community = TRUE)
+		cal_spe_func_perc = function(use_community = TRUE, node_type_table = NULL, abundance_weighted = FALSE){
+			res_spe_func <- self$res_spe_func
+			otu_table <- self$otu_table
 			if(use_community){
-				x1 <- self$otu_table
-				res_prok_biogeo_perc <- sapply(colnames(x1), function(input_samplecolumn){
-					z1 <- x1[, input_samplecolumn]
-					names(z1) <- rownames(x1)
+				res_spe_func_perc <- sapply(colnames(otu_table), function(input_samplecolumn){
+					sample_otu <- otu_table[, input_samplecolumn]
+					names(sample_otu) <- rownames(otu_table)
 					# remove species whose abundance is 0
-					z1 <- z1[z1 != 0]
-					z2 <- unlist(lapply(colnames(res_prok_biogeo), function(x){
-						res_prok_biogeo[names(z1), x, drop = TRUE] %>% {sum(. != 0) * 100/length(.)} %>% {round(., 2)}
+					sample_otu <- sample_otu[sample_otu != 0]
+					res_table <- unlist(lapply(colnames(res_spe_func), function(x){
+						if(abundance_weighted){
+							(res_spe_func[names(sample_otu), x, drop = TRUE] * sample_otu) %>% 
+								{sum(.) * 100/sum(sample_otu)} %>% 
+								{round(., 2)}
+						}else{
+							res_spe_func[names(sample_otu), x, drop = TRUE] %>% 
+								{sum(. != 0) * 100/length(.)} %>% 
+								{round(., 2)}
+						}
 					}))
-					z2
+					res_table
 				})
 			}else{
 				if(is.null(node_type_table)){
 					stop("No node_type_table provided! parameter: node_type_table !")
 				}else{
-					x1 <- node_type_table
-					res_prok_biogeo_perc <- sapply(sort(as.character(unique(x1$module))), function(input_samplecolumn){
-						z1 <- rownames(x1[x1$module == input_samplecolumn, ])
-						z2 <- unlist(lapply(colnames(res_prok_biogeo), function(x){
-							res_prok_biogeo[z1, x, drop = TRUE] %>% {sum(. != 0) * 100/length(.)} %>% {round(., 2)}
-						}))
-						z2
+					if(abundance_weighted){
+						otu_total_abund <- apply(otu_table, 1, sum)
+					}
+					# calculate for each module
+					res_spe_func_perc <- sapply(sort(unique(as.character(node_type_table$module))), function(input_module){
+							otu_names <- rownames(node_type_table[node_type_table$module == input_module, ])
+							res_table <- unlist(lapply(colnames(res_spe_func), function(x){
+								if(abundance_weighted){
+									(res_spe_func[otu_names, x, drop = TRUE] * otu_total_abund[otu_names]) %>% 
+										{sum(.) * 100/sum(otu_total_abund[otu_names])} %>% 
+										{round(., 2)}
+								}else{
+									res_spe_func[otu_names, x, drop = TRUE] %>% 
+										{sum(. != 0) * 100/length(.)} %>% 
+										{round(., 2)}
+								}
+							}))
+						res_table
 					})
 				}
 			}
-			res_prok_biogeo_perc %<>% t %>% as.data.frame %>% `colnames<-`(colnames(res_prok_biogeo)) %>% .[, apply(., 2, sum) != 0]
-			self$res_prok_biogeo_perc <- res_prok_biogeo_perc
+			res_spe_func_perc %<>% t %>% as.data.frame %>% `colnames<-`(colnames(res_spe_func)) %>% .[, apply(., 2, sum) != 0]
+			self$res_spe_func_perc <- res_spe_func_perc
 		},
-		show_prok_biogeo = function(use_func = NULL){
+		#' @description
+		#' Show the basic information for a specific function of prokaryotes.
+		#'
+		#'
+		#' @param use_func default NULL; the function name.
+		#' @return None.
+		#' @examples
+		#' t1$show_prok_func(use_func = "methanotrophy")
+		show_prok_func = function(use_func = NULL){
 			if(!is.null(use_func)){
 				spe_func$func_annotation[[use_func]]
 			}
 		},
-		plot_prok_biogeo_perc = function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE, select_samples = NULL){
-			plot_data <- self$res_prok_biogeo_perc
+		#' @description
+		#' Plot the percentages of species with specific trait in communities or modules.
+		#'
+		#' @param filter_func default NULL; a vector of function names.
+		#' @param use_group_list default TRUE; If TRUE, use default group list; If use personalized group list, first set \code{\link{trans_func$func_group_list}} object with a list of group names and functions.
+		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see \code{\link{trans_func$func_group_list}} object.
+		#' @param select_samples default NULL; character vector, select partial samples to show
+		#' @return ggplot2.
+		#' @examples
+		#' t1$plot_spe_func_perc(use_group_list = TRUE)
+		plot_spe_func_perc = function(filter_func = NULL, use_group_list = TRUE, add_facet = TRUE, select_samples = NULL){
+			plot_data <- self$res_spe_func_perc
 			if(!is.null(filter_func)){
 				plot_data <- plot_data[, colnames(plot_data) %in% filter_func]
 			}
 			plot_data <- reshape2::melt(cbind.data.frame(sampname = rownames(plot_data), plot_data), id.vars = "sampname") %>% dropallfactors
-			if(group_list_default == T){
-				group_list <- private$default_func_group
-			}
 			# add group and factor
-			if(!is.null(group_list)){
-				group_table <- reshape2::melt(group_list) %>% dropallfactors
+			if(use_group_list){
+				group_table <- reshape2::melt(self$func_group_list) %>% dropallfactors
 				colnames(group_table) <- c("func", "group")
 				filter_func <- group_table$func
 				plot_data <- plot_data[plot_data$variable %in% group_table$func, ]
 				plot_data <- dplyr::left_join(plot_data, group_table, by = c("variable" = "func"))
-				plot_data$group %<>% factor(., levels = names(group_list))
+				plot_data$group %<>% factor(., levels = names(self$func_group_list))
 			}
 			# make func order better
 			if(!is.null(filter_func)){
@@ -142,17 +244,58 @@ trans_func <- R6Class(classname = "trans_func",
 				labs(y=NULL, x=NULL, fill="Percentage (%)") +
 				theme(axis.text.x = element_text(angle = 35, colour = "black", vjust = 1, hjust = 1, size = 14), axis.text.y = element_text(size = 10)) +
 				theme(panel.grid = element_blank(), panel.border = element_blank()) +
-				theme(panel.spacing = unit(.1, "lines")) + theme(plot.margin=unit(c(1, 0, 0, 1), "cm"))
+				theme(panel.spacing = unit(.1, "lines")) + 
+				theme(plot.margin=unit(c(1, 0, 0, 1), "cm"))
 				
-			if((!is.null(group_list)) & add_facet){
+			if(use_group_list & add_facet){
 				g1 <- g1 + facet_grid(group ~ ., drop=TRUE, scale="free",space="free", switch = "y") +
-				theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y.left = element_text(angle=360), 
-				strip.text=element_text(size=14))
+					theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y.left = element_text(angle=360), strip.text=element_text(size=14))
 			}
 			g1
 		},
-		cal_tax4fun_func = function(keep_tem = FALSE, folderReferenceData = NULL){
-			
+		#' @description
+		#' Predict functional potential of communities using FAPROTAX.
+		#'
+		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
+		#' @return res_FAPROTAX in object.
+		#' @examples
+		#' t1$cal_FAPROTAX()
+		cal_FAPROTAX = function(keep_tem = TRUE) {
+			otu_file <- self$otu_table
+			tax_file <- self$tax_table
+			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
+			tax_file <- apply(tax_file, 1, function(x){paste0(x, collapse = ";")})
+			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
+			# save to local place
+			message("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction...")
+			write.table(otu_file, "otu_table_for_FAPROTAX.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+			code_path <- system.file("extdata", "FAPROTAX_1.2.1", package="microeco")
+			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", 
+				code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
+			message("run python to predict...")
+			system(use_command)
+			message("save prediction result FAPROTAX_prediction.tsv ...")
+			self$res_FAPROTAX <- read.delim("FAPROTAX_prediction.tsv", check.names = FALSE, row.names = 1)
+			if(keep_tem == F){
+				message("remove intermediate file otu_table_for_FAPROTAX.txt ...")
+				unlink("otu_table_for_FAPROTAX.txt", recursive = FALSE, force = TRUE)
+			}
+		},
+		#' @description
+		#' Predict functional potential of communities using tax4fun.
+		#'
+		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
+		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.
+		#' @return tax4fun_KO and tax4fun_path in object.
+		#' @examples
+		#' t1$cal_tax4fun(folderReferenceData = "./SILVA123")
+		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
+			if(is.null(folderReferenceData)){
+				stop("No folderReferenceData provided! Please see the help document!")
+			}
+			if(!require(Tax4Fun)){
+				stop("Tax4Fun package not installed! see http://tax4fun.gobics.de/ ")
+			}
 			otu_file <- self$otu_table
 			tax_file <- self$tax_table
 			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
@@ -167,7 +310,7 @@ trans_func <- R6Class(classname = "trans_func",
 			cat("# Constructed from biom file\n", file = output)
 			write.table(otu_file, file = output, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE)
 			close(output)
-			require(Tax4Fun)
+
 			x1 <- importQIIMEData(pathfilename)
 			self$tax4fun_KO <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = TRUE)
 			self$tax4fun_path <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = FALSE)
@@ -184,14 +327,43 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 		}
 	),
+	active = list(
+		#' @description
+		#' Functional group list for the plot_spe_func_perc function.
+		#'
+		#' @param func_list list; If missing, use the built-in functional group list automatically.
+		#' @return list with group names and group functions.
+		#' @examples
+		#' t1$func_group_list()
+		func_group_list = function(func_list) {
+			if (missing(func_list)){
+				switch(self$for_what, prok = private$default_prok_func_group, fungi = private$default_fungi_func_group, NA)
+			}else{
+				if(self$for_what == "prok"){
+					private$default_prok_func_group <- func_list
+				}else{
+					if(self$for_what == "fungi"){
+						private$default_fungi_func_group <- func_list
+					}
+				}
+			}
+		}
+	),
 	private = list(
-		default_func_group = list(
+		default_prok_func_group = list(
 			"Energy source" = c("aerobic_chemoheterotrophy", "anaerobic_chemoheterotrophy", "photoautotrophy", "photoheterotrophy"),
 			"C-cycle" = c("chitinolysis", "cellulolysis", "fermentation",  "methanogenesis", "methanotrophy", "methylotrophy"),
 			"N-cycle" = c("nitrogen_fixation", "aerobic_ammonia_oxidation","nitrification","aerobic_nitrite_oxidation", 
 				"nitrate_reduction","nitrate_respiration","nitrite_respiration"),
 			"S-cycle" = c("sulfate_respiration", "sulfur_respiration", "sulfite_respiration","dark_sulfide_oxidation", "respiration_of_sulfur_compounds"),
 			"Others" = c("dark_hydrogen_oxidation", "iron_respiration", "manganese_oxidation", "fumarate_respiration")
+		),
+		default_fungi_func_group = list(
+			"Trophic Mode" = c("Pathotroph", "Saprotroph", "Symbiotroph"),
+			"Guild" = c("Bryophyte Parasite", "Dung Saprotroph", "Ectomycorrhizal", "Fungal Parasite", "Leaf Saprotroph", "Plant Parasite",
+				"Wood Saprotroph", "Animal Pathogen", "Endophyte", "Plant Pathogen", "Lichen Parasite", "Litter Saprotroph", "Soil Saprotroph",
+				"Plant Saprotroph", "Epiphyte", "Lichenized", "Arbuscular Mycorrhizal", "Endomycorrhizal", "Ericoid Mycorrhizal", "Orchid Mycorrhizal", 
+				"Root Associated Biotroph", "Clavicipitaceous Endophyte", "Animal Endosymbiont", "Wood Saprotrop")
 		)
 	),
 	lock_class = FALSE,
@@ -199,80 +371,4 @@ trans_func <- R6Class(classname = "trans_func",
 )
 
 
-
-#' Confirm species traits.
-#'
-#' Confirm traits of each OTU by matching the taxonomic assignments to the FAPROTAX database.
-#'
-#' @return res_prok_biogeo in object.
-#' @examples
-#' t1$cal_prok_biogeo()
-cal_prok_biogeo <- function(){
-	dataset$cal_prok_biogeo()
-}
-
-
-
-#' Calculating the percentages of species with specific trait in communities or modules.
-#'
-#' The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
-#'
-#' @param use_community default TRUE; whether calculate community; if FALSE, use module.
-#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of \code{\link{cal_node_type}}.
-#' @return res_prok_biogeo_perc in object.
-#' @examples
-#' t1$cal_prok_biogeo_perc(use_community = TRUE)
-cal_prok_biogeo_perc <- function(use_community = TRUE, node_type_table = NULL){
-	dataset$cal_prok_biogeo_perc()
-}
-
-#' Show the basic information for one function.
-#'
-#'
-#' @param use_func default NULL; the function name.
-#' @return None.
-#' @examples
-#' t1$show_prok_biogeo(use_func = "methanotrophy")
-show_prok_biogeo <- function(use_community = TRUE, node_type_table = NULL){
-	dataset$show_prok_biogeo()
-}
-
-#' Plot the percentages of species with specific trait in communities or modules.
-#'
-#'
-#' @param filter_func default NULL; a vector of function names.
-#' @param group_list default NULL; a list with group names and the functions in the groups.
-#' @param group_list_default default FALSE; whether use the default group list.
-#' @param add_facet default TRUE; whether use facet in the plot.
-#' @param select_samples default NULL; character vector, select partial samples to show
-#' @return ggplot2.
-#' @examples
-#' t1$plot_prok_biogeo_perc(group_list_default = TRUE)
-plot_prok_biogeo_perc <- function(filter_func = NULL, group_list = NULL, group_list_default = FALSE, add_facet = TRUE, select_samples = NULL){
-	dataset$plot_prok_biogeo_perc()
-}
-
-#' Predict functional potential using tax4fun.
-#'
-#'
-#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
-#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.
-#' @return tax4fun_KO and tax4fun_path in object.
-#' @examples
-#' t1$cal_tax4fun_func(folderReferenceData = "./SILVA123")
-cal_tax4fun_func <- function(keep_tem = FALSE, folderReferenceData = NULL){
-	dataset$cal_tax4fun_func()
-}
-
-#' Predict functional potential using FAPROTAX.
-#'
-#'
-#' @param code_path default "./FAPROTAX_1.2.1"; the code folder, download from http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Download.
-#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
-#' @return res_biogeo in object.
-#' @examples
-#' t1$cal_biogeo(code_path = "./FAPROTAX_1.2.1")
-cal_biogeo <- function(code_path = "./FAPROTAX_1.2.1", keep_tem = TRUE){
-	dataset$cal_biogeo()
-}
 

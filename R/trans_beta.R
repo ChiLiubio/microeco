@@ -1,24 +1,23 @@
-
-#' Create trans_beta Class to store and analyze beta-diveristy related statistics.
+#' @title Create trans_beta object for the analysis of distance matrix of beta-diversity.
 #'
-#' This class is a wrapper for a series of beta-diveristy related analysis.
-#' The functions in this class include \code{\link{cal_group_distance}}, \code{\link{cal_manova}}, \code{\link{plot_ordination}},
-#' \code{\link{plot_group_distance}}, \code{\link{plot_clustering}}
+#' @description
+#' This class is a wrapper for a series of beta-diversity related analysis.
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @param ordination default NULL; if provided, should be PCA, PCoA or NMDS.
-#' @param measure default NULL; beta diversity index used for ordination, manova or group distance.
-#' @param group default NULL; sample group used for manova or group distance.
-#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
-#' @param scale.species default FALSE; whether species loading in PCA will be scaled.
-#' @return res_ordination, group_distance_within, group_distance_between or res_manova in the object.
-#' @examples
-#' t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param ordination default NULL; PCA, PCoA or NMDS.
+		#' @param measure default NULL; beta diversity index used for ordination, manova or group distance.
+		#' @param group default NULL; sample group used for manova or group distance.
+		#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
+		#' @param ncomp default 3; the returned dimensions.
+		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
+		#' @return res_ordination stored in the object.
+		#' @examples
+		#' t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 		initialize = function(dataset = NULL, ordination = NULL, measure = NULL, group = NULL, trans_otu = FALSE, ncomp = 3,
-			scale.species = FALSE
+			scale_species = FALSE
 			) {
 			self$sample_table <- dataset$sample_table
 			self$measure <- measure
@@ -50,7 +49,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					loading <- cbind.data.frame(scores(model, choices = 1:ncomp)$species, dataset$tax_table)
 					loading <- cbind.data.frame(loading, rownames(loading))
 
-					if(scale.species == T){
+					if(scale_species == T){
 						maxx <- max(abs(scores[,plot.x]))/max(abs(loading[,plot.x]))
 						loading[, plot.x] <- loading[, plot.x] * maxx * 0.8
 						maxy <- max(abs(scores[,plot.y]))/max(abs(loading[,plot.y]))
@@ -80,32 +79,45 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			self$ordination <- ordination
 		},
-		cal_group_distance = function(within_group = TRUE){
-			if(within_group == T){
-				self$group_distance <- private$within_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
-			}else{
-				self$group_distance <- private$between_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
-			}
-		},
-		cal_manova = function(cal_manova_all = FALSE, cal_manova_paired = FALSE, cal_manova_set = NULL, permutations = 999){
-			use_matrix <- self$use_matrix
-			if(!is.null(cal_manova_set)){
-				self$res_manova <- adonis(reformulate(cal_manova_set, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
-			}
-			if(cal_manova_all == T){
-				self$res_manova <- adonis(reformulate(self$group, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
-			}
-			if(cal_manova_paired == T){
-				self$res_manova <- private$paired_group_manova(sample_info_use = self$sample_table, use_matrix = use_matrix, 
-					group = self$group, measure = self$measure, permutations = permutations)
-			}
-		},
+		#' @description
+		#' Plotting the ordination result.
+		#'
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors for presentation.
+		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector used in the shape type, see ggplot2 tutorial.
+		#' @param plot_color default NULL; the sample group name used for color in plot.
+		#' @param plot_shape default NULL; the sample group name used for shape in plot.
+		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
+		#' @param plot_point_size default 3; point size in plot.
+		#' @param plot_point_alpha default .9; point transparency in plot.
+		#' @param plot_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
+		#' @param plot_group_centroid default FALSE; whether show the centroid in each group of plot.
+		#' @param plot_group default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_ellipse.
+		#' @param segment_alpha default .6; segment transparency in plot.
+		#' @param centroid_linetype default 3; the line type related with centroid in plot.
+		#' @param plot_group_ellipse default FALSE; whether show the confidence ellipse in each group of plot.
+		#' @param ellipse_level default .9; confidence level of ellipse.
+		#' @param ellipse_alpha default .1; color transparency in the ellipse.
+		#' @param ellipse_type default t; see type in \code{\link{stat_ellipse}}.
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
 		plot_ordination = function(
-			color_values = RColorBrewer::brewer.pal(8, "Dark2"), plot_color = NULL, plot_shape = NULL, plot_group_order = NULL, 
-			shape_values = c(16, 17, 7,  8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0,1,2,14),
-			plot_point_size = 3, plot_point_alpha = .9, plot_sample_label = NULL,
-			plot_group_centroid = FALSE, plot_group = NULL, segment_alpha = .6, centroid_linetype = 3,
-			plot_group_ellipse = FALSE, ellipse_level = 0.9, ellipse_alpha = 0.1, ellipse_type = "t"
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
+			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
+			plot_color = NULL,
+			plot_shape = NULL,
+			plot_group_order = NULL,
+			plot_point_size = 3,
+			plot_point_alpha = .9,
+			plot_sample_label = NULL,
+			plot_group_centroid = FALSE,
+			plot_group = NULL,
+			segment_alpha = .6,
+			centroid_linetype = 3,
+			plot_group_ellipse = FALSE,
+			ellipse_level = 0.9,
+			ellipse_alpha = 0.1,
+			ellipse_type = "t"
 			){
 			ordination <- self$ordination
 			combined <- self$res_ordination$scores
@@ -156,12 +168,65 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			p
 		},
-		plot_group_distance = function(plot_group_order = NULL, 
-			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
-			distance_pair_stat = FALSE, pair_compare_filter = "", pair_compare_method = "wilcox.test", map_signif_level = TRUE,
+		#' @description
+		#' Calculate perMANOVA.
+		#'
+		#' @param cal_manova_all default FALSE; whether manova is used for all data.
+		#' @param cal_manova_paired default FALSE; whether manova is used for all the paired groups.
+		#' @param cal_manova_set default NULL; specified group set for manova, see \code{\link{adonis}}.
+		#' @param permutations default 999; see permutations in \code{\link{adonis}}.
+		#' @return res_manova stored in object.
+		#' @examples
+		#' t1$cal_manova(cal_manova_all = TRUE)
+		cal_manova = function(cal_manova_all = FALSE, cal_manova_paired = FALSE, cal_manova_set = NULL, permutations = 999){
+			use_matrix <- self$use_matrix
+			if(!is.null(cal_manova_set)){
+				self$res_manova <- adonis(reformulate(cal_manova_set, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
+			}
+			if(cal_manova_all == T){
+				self$res_manova <- adonis(reformulate(self$group, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
+			}
+			if(cal_manova_paired == T){
+				self$res_manova <- private$paired_group_manova(sample_info_use = self$sample_table, use_matrix = use_matrix, 
+					group = self$group, measure = self$measure, permutations = permutations)
+			}
+		},
+		#' @description
+		#' Transform sample distances within groups or between groups.
+		#'
+		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
+		#' @return res_group_distance stored in object.
+		#' @examples
+		#' t1$cal_group_distance(within_group = TRUE)
+		cal_group_distance = function(within_group = TRUE){
+			if(within_group == T){
+				self$res_group_distance <- private$within_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
+			}else{
+				self$res_group_distance <- private$between_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
+			}
+		},
+		#' @description
+		#' Plotting the distance between samples within or between groups.
+		#'
+		#' @param plot_group_order default NULL; a vector used to order the groups in the plot.
+		#' @param color_values colors for presentation.
+		#' @param distance_pair_stat default FALSE; whether do the paired comparisions.
+		#' @param pair_compare_filter default ""; if provided, remove the matched groups.
+		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
+		#' @param map_signif_level default TRUE; whether indicate the significance level.
+		#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_group_distance(distance_pair_stat = TRUE)
+		plot_group_distance = function(plot_group_order = NULL,
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			distance_pair_stat = FALSE,
+			pair_compare_filter = "",
+			pair_compare_method = "wilcox.test",
+			map_signif_level = TRUE,
 			plot_distance_xtype = NULL
 			){
-			group_distance <- self$group_distance
+			group_distance <- self$res_group_distance
 			group <- self$group
 			if(self$measure %in% c("wei_unifrac", "unwei_unifrac", "bray", "jaccard")){
 				titlename <- switch(self$measure, wei_unifrac = "Weighted Unifrac", unwei_unifrac = "Unweighted Unifrac", bray = "Bray-Curtis", jaccard = "Jaccard")
@@ -195,8 +260,17 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			p
 		},
-		plot_clustering = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), 
-			measure = NULL, group = NULL, replace_name = NULL){
+		#' @description
+		#' Plotting clustering result. Require ggdendro package.
+		#'
+		#' @param use_colors colors for presentation.
+		#' @param measure default NULL; beta diversity index; suggest using the measure when creating object
+		#' @param group default NULL; if provided, use this group to assign color.
+		#' @param replace_name default NULL; if provided, use this as label.
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
+		plot_clustering = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), measure = NULL, group = NULL, replace_name = NULL){
 			if(is.null(measure)){
 				if(is.null(self$measure)){
 					measure_matrix <- dataset$beta_diversity[[1]]
@@ -256,7 +330,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				theme(axis.line.x = element_line(color = "black", linetype = "solid", lineend = "square"))
 			g1
 		},
-		print = function(...) {
+		print = function() {
 			cat("trans_beta class:\n")
 			if(!is.null(self$ordination)) cat(paste(self$ordination, "is used for ordination \n"))
 			if(!is.null(self$res_manova)) cat("PerMANOVA is used for finding significance \n")
@@ -264,7 +338,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		}
 		),
 	private = list(
-		within_group_distance = function(distance, sampleinfo, type) {
+		within_group_distance = function(distance, sampleinfo, type){
 			all_group <- as.character(sampleinfo[,type]) %>% unique
 			res <- list()
 			for (i in all_group) {
@@ -318,91 +392,3 @@ trans_beta <- R6Class(classname = "trans_beta",
 )
 
 
-#' Tranform sample distances within groups or between groups.
-#'
-#' @param within_group default TRUE; whether transform sample distance within groups, if false, transform sample distance between any two groups.
-#' @return group_distance in object.
-#' @examples
-#' t1$cal_group_distance()
-cal_group_distance <- function(within_group = TRUE){
-	dataset$cal_group_distance()
-}
-
-#' Calculate perMANOVA.
-#'
-#' @param cal_manova_all default FALSE; whether manova is used for all data.
-#' @param cal_manova_paired default FALSE; whether manova is used for all the paired groups.
-#' @param cal_manova_set default NULL; specified group set for manova, see \code{\link{adonis}}.
-#' @param permutations default 999; see permutations in \code{\link{adonis}}.
-#' @return res_manova in object.
-#' @examples
-#' t1$cal_manova(cal_manova_all = TRUE)
-cal_manova <- function(cal_manova_all = FALSE, cal_manova_paired = FALSE, cal_manova_set = NULL, permutations = 999){
-	dataset$cal_manova()
-}
-
-
-#' Plotting the ordination result.
-#'
-#' @param color_values colors for presentation.
-#' @param plot_color default NULL; the sample group name used for color in plot.
-#' @param plot_shape default NULL; the sample group name used for shape in plot.
-#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
-#' @param shape_values default c(16, 17, 7,  8, 15); a vector used in the shape type of plot, see ggplot2 tutorial.
-#' @param plot_point_size default 3; point size in plot.
-#' @param plot_point_alpha default .9; point transparency in plot.
-#' @param plot_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
-#' @param plot_group_centroid default FALSE; whether show the centroid in each group of plot.
-#' @param plot_group default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_ellipse.
-#' @param segment_alpha default .6; segment transparency in plot.
-#' @param plot_group_ellipse default FALSE; whether show the confidence ellipse in each group of plot.
-#' @param ellipse_level default .9; confidence level of ellipse.
-#' @param ellipse_alpha default .1; color transparency in the ellipse.
-#' @param ellipse_type default t; see type in \code{\link{stat_ellipse}}.
-#' @return ggplot.
-#' @examples
-#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
-plot_ordination <- function(
-			color_values = RColorBrewer::brewer.pal(8, "Dark2"), plot_color = NULL, plot_shape = NULL, plot_group_order = NULL, 
-			shape_values = c(16, 17, 7,  8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0,1,2,14),
-			plot_point_size = 3, plot_point_alpha = .9, plot_sample_label = NULL,
-			plot_group_centroid = FALSE, plot_group = NULL, segment_alpha = .6, centroid_linetype = 3,
-			plot_group_ellipse = FALSE, ellipse_level = 0.9, ellipse_alpha = 0.1, ellipse_type = "t"
-			){
-			dataset$plot_ordination()
-}
-
-#' Plotting the distance between samples within or between groups.
-#'
-#' @param plot_group_order default NULL; a vector used to order the groups in the plot.
-#' @param color_values colors for presentation.
-#' @param distance_pair_stat default FALSE; whether do the paired comparisions.
-#' @param pair_compare_filter default ""; if provided, remove the matched groups.
-#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
-#' @param map_signif_level default TRUE; whether indicate the significance level.
-#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
-#' @return ggplot.
-#' @examples
-#' t1$plot_group_distance(distance_pair_stat = TRUE)
-plot_group_distance <- function(plot_group_order = NULL, 
-			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
-			distance_pair_stat = FALSE, pair_compare_filter = "", pair_compare_method = "wilcox.test", map_signif_level = TRUE,
-			plot_distance_xtype = NULL){
-	dataset$plot_group_distance()
-}
-
-#' Plotting clustering result.
-#'
-#' Plotting clustering result. Require ggdendro package.
-#'
-#' @param use_colors colors for presentation.
-#' @param plot_group_order default NULL; a vector used to order the groups in the plot.
-#' @param measure default NULL; beta diversity index; suggest NULL, use the measure when creating object
-#' @param group default NULL; if provided, use this group to assign color.
-#' @param replace_name default NULL; if provided, use this as label.
-#' @return ggplot.
-#' @examples
-#' t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
-plot_clustering <- function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), measure = NULL, group = NULL, replace_name = NULL){
-	dataset$plot_clustering()
-}

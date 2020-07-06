@@ -1,19 +1,19 @@
+#' @title 
 #' Create trans_env object for the analysis of the effects of environmental factors on communities.
 #'
+#' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements.
-#' The functions in this class include \code{\link{cal_rda}}, \code{\link{trans_rda}}, \code{\link{plot_rda}}, \code{\link{cal_mantel}},
-#' \code{\link{cal_cor}}, \code{\link{plot_corr}}
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @param env_cols default NULL; a vector; If the environmental data is in sample_table, use this parameter to indicate the columns.
-#' @param add_data default NULL; provide the environmental data frame individually.
-#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
-#' @return env_data and dataset in trans_env object.
-#' @examples
-#' t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 #' @export
 trans_env <- R6Class(classname = "trans_env",
 	public = list(
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table.
+		#' @param add_data default NULL; provide the environmental data frame individually.
+		#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
+		#' @return env_data and dataset in trans_env object.
+		#' @examples
+		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 		initialize = function(dataset = NULL, env_cols = NULL, add_data = NULL, complete_na = FALSE
 			){
 			if(is.null(add_data)){
@@ -36,6 +36,18 @@ trans_env <- R6Class(classname = "trans_env",
 			self$env_data <- env_data
 			self$dataset <- dataset1
 			},
+		#' @description
+		#' Redundancy analysis (RDA).
+		#'
+		#' @param use_dbrda default TRUE; whether use db-RDA, if FALSE, use RDA.
+		#' @param add_matrix default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset.
+		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
+		#' @param feature_sel default FALSE; whether perform the feature selection.
+		#' @param taxa_level default NULL; If use RDA, provide the taxonomic rank.
+		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
+		#' @return res_rda in object.
+		#' @examples
+		#' t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 		cal_rda = function(use_dbrda = TRUE, add_matrix = NULL, use_measure = NULL, feature_sel = FALSE, taxa_level = NULL, taxa_filter_thres = NULL){
 			env_data <- self$env_data
 			if(use_dbrda == T){
@@ -91,6 +103,18 @@ trans_env <- R6Class(classname = "trans_env",
 				self$res_rda <- rda(use_data ~ ., env_data)
 			}
 		},
+		#' @description
+		#' transform RDA result for the following plotting.
+		#'
+		#' @param show_taxa default 10; taxa number shown in the plot.
+		#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clear
+		#' @param min_perc_env default 1; minimum scale value for env arrow, relatively.
+		#' @param max_perc_env default 100; maximum scale value for env arrow, relatively.
+		#' @param min_perc_tax default 1; minimum scale value for tax arrow, relatively.
+		#' @param max_perc_tax default 100; maximum scale value for tax arrow, relatively.
+		#' @return res_rda_trans in object.
+		#' @examples
+		#' t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
 		trans_rda = function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env = 1, max_perc_env = 100, min_perc_tax = 1, max_perc_tax = 100){
 			res_rda <- self$res_rda
 			scrs <- scores(res_rda ,choices = c(1, 2), display = c("sp", "wa", "cn"))
@@ -135,10 +159,26 @@ trans_env <- R6Class(classname = "trans_env",
 			
 			self$res_rda_trans = list(df_sites = df_sites, df_arrows = df_arrows, eigval = eigval, df_species = df_species, df_arrows_spe = df_arrows_spe)
 		},
-		plot_rda = function(plot_color = NULL, plot_shape = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
-			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14), 
+		#' @description
+		#' plot RDA result.
+		#'
+		#' @param plot_color default NULL; group used for color.
+		#' @param plot_shape default NULL; group used for shape.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.
+		#' @param shape_values default see the function; vector used in the shape, see ggplot2 tutorial.
+		#' @param taxa_text_color default "firebrick1"; taxa text colors.
+		#' @param taxa_text_type default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.
+		#' @return ggplot object.
+		#' @examples
+		#' t1$plot_rda(plot_color = "Group")
+		plot_rda = function(
+			plot_color = NULL,
+			plot_shape = NULL,
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
 			taxa_text_color = "firebrick1", 
-			taxa_text_type = "italic"){
+			taxa_text_type = "italic"
+			){
 			p <- ggplot()
 			p <- p + theme_bw()
 			p <- p + theme(panel.grid=element_blank())
@@ -170,6 +210,18 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			p
 		},
+		#' @description
+		#' Mantel test between beta diversity matrix and environmental data.
+		#'
+		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
+		#' @param partial_mantel default FALSE; whether use partial mantel test.
+		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
+		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
+		#' @param method default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.
+		#' @param ... paremeters pass to \code{\link{mantel}}.
+		#' @return res_mantel in object.
+		#' @examples
+		#' t1$cal_mantel(use_measure = "bray")
 		cal_mantel = function(select_env_data = NULL, partial_mantel = FALSE, add_matrix = NULL, use_measure = NULL, method = "pearson", ...){
 			if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
 				stop("No distance matrix provided; please use set add_matrix parameter or use provide dataset in creating Class")
@@ -199,9 +251,9 @@ trans_env <- R6Class(classname = "trans_env",
 				env.dist <- vegdist(scale(env_data[, i, drop=FALSE]), "euclid")
 				if(partial_mantel == T){
 					zdis <- vegdist(scale(env_data[, -i, drop=FALSE]), "euclid")
-					man1 <- mantel.partial(veg.dist, env.dist, zdis)
+					man1 <- mantel.partial(veg.dist, env.dist, zdis, ...)
 				}else{
-					man1 <- mantel(veg.dist, env.dist)
+					man1 <- mantel(veg.dist, env.dist, ...)
 				}
 				variable_name <- c(variable_name, colnames(env_data)[i])
 				corr_res <- c(corr_res, man1$statistic)
@@ -216,9 +268,37 @@ trans_env <- R6Class(classname = "trans_env",
 				self$res_mantel <- res_mantel
 			}
 		},
-		cal_cor = function(use_data = c("Genus", "all", "other")[1], select_env_data = NULL, cor_method = c("pearson", "spearman", "kendall")[1],
-			p_adjust_type = c("Type", "Taxa", "Env")[3], p_adjust_method = "fdr", add_abund_table = NULL, by_group = NULL,
-			other_taxa = NULL, group_use = NULL, group_select = NULL,
+		#' @description
+		#' Calculating the correlations between taxa abundance and environmental variables. 
+		#' Indeed, it can also be used for calculating other correlation between any two variables from two tables.
+		#'
+		#' @param use_data default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa abundance, other: provide additional data with other_taxa parameter.
+		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
+		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
+		#' @param p_adjust_method default "fdr"; p.adjust method.
+		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
+		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
+		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
+		#' @param other_taxa default NULL; provide additional taxa, see use_data parameter.
+		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
+		#' @param group_select default NULL; the group name used; will retain samples within the group.
+		#' @param taxa_name_full default TRUE; Whether retain the complete taxonomic name of taxa.
+		#' @return res_cor in object.
+		#' @examples
+		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
+		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
+		#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+		cal_cor = function(
+			use_data = c("Genus", "all", "other")[1],
+			select_env_data = NULL,
+			cor_method = c("pearson", "spearman", "kendall")[1],
+			p_adjust_method = "fdr",
+			p_adjust_type = c("Type", "Taxa", "Env")[3],
+			add_abund_table = NULL,
+			by_group = NULL,
+			other_taxa = NULL,
+			group_use = NULL,
+			group_select = NULL,
 			taxa_name_full = TRUE
 			){
 			env_data <- self$env_data
@@ -260,34 +340,54 @@ trans_env <- R6Class(classname = "trans_env",
 				message("Calculate the corr by the groups in ", by_group, " of sample_table, respectively")
 			}
 			comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% t %>% as.data.frame(stringsAsFactors = FALSE)
-			df1 <- sapply(comb_names, function(x){
+			res <- sapply(comb_names, function(x){
 				suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
 				{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
 			})
-			df1 %<>% t %>% as.data.frame(stringsAsFactors = FALSE)
-			colnames(df1) <- c("Type", "Taxa", "Env", "Correlation","Pvalue")
-			df1$Pvalue %<>% as.numeric
-			df1$Correlation %<>% as.numeric
-			df1$AdjPvalue <- rep(0, nrow(df1))
+			res %<>% t %>% as.data.frame(stringsAsFactors = FALSE)
+			colnames(res) <- c("Type", "Taxa", "Env", "Correlation","Pvalue")
+			res$Pvalue %<>% as.numeric
+			res$Correlation %<>% as.numeric
+			res$AdjPvalue <- rep(0, nrow(res))
 			choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
-			comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
+			comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% 
+				unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
 			invisible(lapply(comb_names2, function(x){
-				row_sel <- unlist(lapply(as.data.frame(t(df1[, choose_col, drop = FALSE])), function(y) all(y %in% x)));
-				df1$AdjPvalue[row_sel] <<- p.adjust(df1[row_sel, "Pvalue"], method = p_adjust_method)
+				row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)));
+				res$AdjPvalue[row_sel] <<- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
 			}))
-			df1$Significance <- cut(df1$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
-			df1<-df1[complete.cases(df1), ]
-			df1$Env <- factor(df1$Env, levels = unique(as.character(df1$Env)))
+			res$Significance <- cut(res$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+			res<-res[complete.cases(res), ]
+			res$Env <- factor(res$Env, levels = unique(as.character(res$Env)))
 			if(taxa_name_full == F){
-				df1$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
+				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}
-			self$res_cor <- df1
+			self$res_cor <- res
 			self$cor_method <- cor_method
 		},
-		plot_corr = function(pheatmap = FALSE, ylab_type_italic = FALSE, 
-			keep_full_name = FALSE, keep_prefix = TRUE,
+		#' @description
+		#' Plot correlation heatmap.
+		#'
+		#' @param color_vector color pallete.
+		#' @param pheatmap default FALSE; whether use heatmap with clustering plot.
+		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
+		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
+		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
+		#' @param plot_x_size default 9; x axis text size.
+		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
+		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
+		#' @return plot.
+		#' @examples
+		#' t1$plot_corr(pheatmap = FALSE)
+		plot_corr = function(
 			color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
-			plot_x_size = 9, mylabels_x = NULL, font_family = NULL
+			pheatmap = FALSE,
+			ylab_type_italic = FALSE,
+			keep_full_name = FALSE,
+			keep_prefix = TRUE,
+			plot_x_size = 9,
+			mylabels_x = NULL,
+			font_family = NULL
 			){
 			use_data <- self$res_cor
 			if(keep_full_name == F){
@@ -346,7 +446,7 @@ trans_env <- R6Class(classname = "trans_env",
 					p <- p + scale_y_discrete(limits=lim_y, position = "left") + 
 						scale_x_discrete(limits=lim_x)
 				}else{
-					p <- p + facet_grid(. ~ Type, drop=TRUE,scale="free",space="free_x")
+					p <- p + facet_grid(. ~ Type, drop = TRUE,scale = "free", space = "free_x")
 				}
 				if(ylab_type_italic == T){
 					p <- p + theme(axis.text.y = element_text(face = 'italic'))
@@ -386,134 +486,5 @@ trans_env <- R6Class(classname = "trans_env",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
-
-
-#' calculate RDA.
-#'
-#' @param use_dbrda default TRUE; whether use db-RDA, if FALSE, use RDA.
-#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
-#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-#' @param feature_sel default FALSE; whether perform the feature selection.
-#' @param taxa_level default NULL; If use RDA, provide the taxonomic rank.
-#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
-#' @return res_rda in object.
-#' @examples
-#' t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
-cal_rda <- function(use_dbrda = TRUE, add_matrix = NULL, use_measure = NULL, feature_sel = FALSE, taxa_level = NULL, taxa_filter_thres = NULL){
-	dataset$cal_rda()
-}
-
-
-
-
-#' transform RDA result for the following plotting.
-#'
-#' @param show_taxa default 10; taxa number shown in the plot.
-#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clear
-#' @param min_perc_env default 1; minimum value for env arrow, relatively.
-#' @param max_perc_env default 100; maximum value for env arrow, relatively.
-#' @param min_perc_tax default 1; minimum value for tax arrow, relatively.
-#' @param max_perc_tax default 100; maximum value for tax arrow, relatively.
-#' @return res_rda_trans in object.
-#' @examples
-#' t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
-trans_rda <- function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env = 1, max_perc_env = 100, min_perc_tax = 1, max_perc_tax = 100){
-	dataset$trans_rda()
-}
-
-
-#' plot RDA result.
-#'
-#' @param plot_color default NULL; group used for color.
-#' @param plot_shape default NULL; group used for shape.
-#' @param color_values; color pallete.
-#' @param shape_values; vector used in the shape, see ggplot2 tutorial.
-#' @param taxa_text_color default "firebrick1"; taxa text colors.
-#' @param taxa_text_type default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.
-#' @return ggplot object.
-#' @examples
-#' t1$plot_rda(plot_color = "Group")
-plot_rda <- function(plot_color = NULL, plot_shape = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-				shape_values = c(16, 17, 7,  8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0,1,2,14),
-				taxa_text_color = "firebrick1", taxa_text_type = "italic"){
-	dataset$plot_rda()
-}
-
-
-#' Mantel test between beta diversity matrix and environmental data.
-#'
-#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
-#' @param partial_mantel default FALSE; whether use partial mantel test.
-#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
-#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-#' @param method default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.
-#' @return res_mantel in object.
-#' @examples
-#' t1$cal_mantel(use_measure = "bray")
-cal_mantel <- function(select_env_data = NULL, partial_mantel = FALSE, add_matrix = NULL, use_measure = NULL, method = "pearson", ...){
-	dataset$cal_mantel()
-}
-
-#' Correlations between abundance data table and environmental data table.
-#'
-#' Calculating any correlation between two columns from two tables.
-#'
-#' @param use_data default "Genus"; one of c("Genus", "all", "other"); Genus: genus abundance, all: all taxa abundance, other: provide additional data with other_taxa parameter.
-#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
-#' @param method default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.
-#' @param p_adjust_method default "fdr"; p.adjust method.
-#' @param p_adjust_type default "Env"; one of c("Type", "Taxa", "Env"); p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
-#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
-#' @param by_group default NULL; numeric or character vector to select one column in env_data; correlations separately for groups.
-#' @param other_taxa default NULL; provide additional taxa, see use_data parameter.
-#' @param group_use default NULL; numeric or character vector to select one column in env_data for selecting samples; together with group_select.
-#' @param group_select default NULL; the group name used; will retain samples within the group.
-#' @param taxa_name_full default TRUE; Whether retain the complete taxonomic name of taxa.
-#' @return res_cor in object.
-#' @examples
-#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
-#' t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
-#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
-
-cal_cor <- function(use_data = c("Genus", "all", "other")[1], select_env_data = NULL, cor_method = c("pearson", "spearman", "kendall")[1],
-			p_adjust_method = "fdr", p_adjust_type = c("Env", "Taxa", "Type")[1], add_abund_table = NULL, by_group = NULL,
-			other_taxa = NULL, group_use = NULL, group_select = NULL,
-			taxa_name_full = TRUE){
-	dataset$cal_cor()
-}
-
-
-#' Plot correlations heatmap.
-#'
-#'
-#' @param color_vector color pallete.
-#' @param pheatmap default FALSE; whether use heatmap with clustering plot.
-#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
-#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
-#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-#' @param plot_x_size default 9; x axis text size.
-#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
-#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
-#' @return plot.
-#' @examples
-#' t1$plot_corr()
-
-plot_corr <- function(color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
-			pheatmap = FALSE, ylab_type_italic = FALSE, 
-			keep_full_name = FALSE, keep_prefix = TRUE,
-			plot_x_size = 9, mylabels_x = NULL, font_family = NULL){
-	dataset$plot_corr()
-}
-
-
-
-
-
-
-
-
-
-
 
 

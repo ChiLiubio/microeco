@@ -2,25 +2,55 @@
 % Please edit documentation in R/trans_beta.R
 \name{trans_beta}
 \alias{trans_beta}
-\title{Create trans_beta Class to store and analyze beta-diveristy related statistics.}
-\value{
-res_ordination, group_distance_within, group_distance_between or res_manova in the object.
-}
+\title{Create trans_beta object for the analysis of distance matrix of beta-diversity.}
 \description{
-This class is a wrapper for a series of beta-diveristy related analysis.
-The functions in this class include \code{\link{cal_group_distance}}, \code{\link{cal_manova}}, \code{\link{plot_ordination}},
-\code{\link{plot_group_distance}}, \code{\link{plot_clustering}}
+This class is a wrapper for a series of beta-diversity related analysis.
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_beta$new`
+## ------------------------------------------------
+
 t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
+
+## ------------------------------------------------
+## Method `trans_beta$plot_ordination`
+## ------------------------------------------------
+
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+
+## ------------------------------------------------
+## Method `trans_beta$cal_manova`
+## ------------------------------------------------
+
+t1$cal_manova(cal_manova_all = TRUE)
+
+## ------------------------------------------------
+## Method `trans_beta$cal_group_distance`
+## ------------------------------------------------
+
+t1$cal_group_distance(within_group = TRUE)
+
+## ------------------------------------------------
+## Method `trans_beta$plot_group_distance`
+## ------------------------------------------------
+
+t1$plot_group_distance(distance_pair_stat = TRUE)
+
+## ------------------------------------------------
+## Method `trans_beta$plot_clustering`
+## ------------------------------------------------
+
+t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_beta$new()}}
-\item \href{#method-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
-\item \href{#method-cal_manova}{\code{trans_beta$cal_manova()}}
 \item \href{#method-plot_ordination}{\code{trans_beta$plot_ordination()}}
+\item \href{#method-cal_manova}{\code{trans_beta$cal_manova()}}
+\item \href{#method-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
 \item \href{#method-plot_group_distance}{\code{trans_beta$plot_group_distance()}}
 \item \href{#method-plot_clustering}{\code{trans_beta$plot_clustering()}}
 \item \href{#method-print}{\code{trans_beta$print()}}
@@ -39,7 +69,7 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
   group = NULL,
   trans_otu = FALSE,
   ncomp = 3,
-  scale.species = FALSE
+  scale_species = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -48,7 +78,7 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{ordination}}{default NULL; if provided, should be PCA, PCoA or NMDS.}
+\item{\code{ordination}}{default NULL; PCA, PCoA or NMDS.}
 
 \item{\code{measure}}{default NULL; beta diversity index used for ordination, manova or group distance.}
 
@@ -56,31 +86,21 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
 
 \item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed, used for PCA.}
 
-\item{\code{scale.species}}{default FALSE; whether species loading in PCA will be scaled.}
+\item{\code{ncomp}}{default 3; the returned dimensions.}
+
+\item{\code{scale_species}}{default FALSE; whether species loading in PCA will be scaled.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+res_ordination stored in the object.
 }
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_group_distance"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_group_distance}{}}}
-\subsection{Method \code{cal_group_distance()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(within_group = TRUE)}\if{html}{\out{</div>}}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 }
+\if{html}{\out{</div>}}
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_manova"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_manova}{}}}
-\subsection{Method \code{cal_manova()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
-  cal_manova_all = FALSE,
-  cal_manova_paired = FALSE,
-  cal_manova_set = NULL,
-  permutations = 999
-)}\if{html}{\out{</div>}}
 }
 
 }
@@ -88,13 +108,14 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
 \if{html}{\out{<a id="method-plot_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_ordination}{}}}
 \subsection{Method \code{plot_ordination()}}{
+Plotting the ordination result.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_ordination(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
   plot_color = NULL,
   plot_shape = NULL,
   plot_group_order = NULL,
-  shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
   plot_point_size = 3,
   plot_point_alpha = 0.9,
   plot_sample_label = NULL,
@@ -109,11 +130,127 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors for presentation.}
+
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector used in the shape type, see ggplot2 tutorial.}
+
+\item{\code{plot_color}}{default NULL; the sample group name used for color in plot.}
+
+\item{\code{plot_shape}}{default NULL; the sample group name used for shape in plot.}
+
+\item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the legend of plot.}
+
+\item{\code{plot_point_size}}{default 3; point size in plot.}
+
+\item{\code{plot_point_alpha}}{default .9; point transparency in plot.}
+
+\item{\code{plot_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
+
+\item{\code{plot_group_centroid}}{default FALSE; whether show the centroid in each group of plot.}
+
+\item{\code{plot_group}}{default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_ellipse.}
+
+\item{\code{segment_alpha}}{default .6; segment transparency in plot.}
+
+\item{\code{centroid_linetype}}{default 3; the line type related with centroid in plot.}
+
+\item{\code{plot_group_ellipse}}{default FALSE; whether show the confidence ellipse in each group of plot.}
+
+\item{\code{ellipse_level}}{default .9; confidence level of ellipse.}
+
+\item{\code{ellipse_alpha}}{default .1; color transparency in the ellipse.}
+
+\item{\code{ellipse_type}}{default t; see type in \code{\link{stat_ellipse}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_manova"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_manova}{}}}
+\subsection{Method \code{cal_manova()}}{
+Calculate perMANOVA.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
+  cal_manova_all = FALSE,
+  cal_manova_paired = FALSE,
+  cal_manova_set = NULL,
+  permutations = 999
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{cal_manova_all}}{default FALSE; whether manova is used for all data.}
+
+\item{\code{cal_manova_paired}}{default FALSE; whether manova is used for all the paired groups.}
+
+\item{\code{cal_manova_set}}{default NULL; specified group set for manova, see \code{\link{adonis}}.}
+
+\item{\code{permutations}}{default 999; see permutations in \code{\link{adonis}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_manova stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_manova(cal_manova_all = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_group_distance"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_group_distance}{}}}
+\subsection{Method \code{cal_group_distance()}}{
+Transform sample distances within groups or between groups.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(within_group = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{within_group}}{default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_group_distance stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_group_distance(within_group = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_group_distance"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_group_distance}{}}}
 \subsection{Method \code{plot_group_distance()}}{
+Plotting the distance between samples within or between groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_group_distance(
   plot_group_order = NULL,
@@ -126,11 +263,42 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the plot.}
+
+\item{\code{color_values}}{colors for presentation.}
+
+\item{\code{distance_pair_stat}}{default FALSE; whether do the paired comparisions.}
+
+\item{\code{pair_compare_filter}}{default ""; if provided, remove the matched groups.}
+
+\item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
+
+\item{\code{map_signif_level}}{default TRUE; whether indicate the significance level.}
+
+\item{\code{plot_distance_xtype}}{default NULL; number used to make x axis text generate angle.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_group_distance(distance_pair_stat = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_clustering"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_clustering}{}}}
 \subsection{Method \code{plot_clustering()}}{
+Plotting clustering result. Require ggdendro package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_clustering(
   use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -143,19 +311,34 @@ t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", g
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{measure}}{default NULL; beta diversity index used for ordination, manova or group distance.}
+\item{\code{use_colors}}{colors for presentation.}
 
-\item{\code{group}}{default NULL; sample group used for manova or group distance.}
+\item{\code{measure}}{default NULL; beta diversity index; suggest using the measure when creating object}
+
+\item{\code{group}}{default NULL; if provided, use this group to assign color.}
+
+\item{\code{replace_name}}{default NULL; if provided, use this as label.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$print()}\if{html}{\out{</div>}}
 }
 
 }

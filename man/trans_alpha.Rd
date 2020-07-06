@@ -2,16 +2,30 @@
 % Please edit documentation in R/trans_alpha.R
 \name{trans_alpha}
 \alias{trans_alpha}
-\title{Create trans_alpha Class to store the transformed alpha diveristy and statistics.}
-\value{
-alpha_data and alpha_stat.
-}
+\title{Create trans_alpha object for alpha diveristy statistics and plotting.}
 \description{
 This class is a wrapper for a series of alpha diveristy related analysis.
-The functions in this class include \code{\link{cal_diff}}, \code{\link{plot_alpha}}.
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_alpha$new`
+## ------------------------------------------------
+
 t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+
+## ------------------------------------------------
+## Method `trans_alpha$cal_diff`
+## ------------------------------------------------
+
+t1$cal_diff(method = "KW")
+t1$cal_diff(method = "anova")
+
+## ------------------------------------------------
+## Method `trans_alpha$plot_alpha`
+## ------------------------------------------------
+
+t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -42,13 +56,46 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+alpha_data and alpha_stat stored in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
+Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(method = c("KW", "anova")[1], measures = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{method}}{default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.}
+
+\item{\code{measures}}{default NULL; a vector, if null, all indexes will be calculated.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_alpha_diff in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_diff(method = "KW")
+t1$cal_diff(method = "anova")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -56,6 +103,7 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \if{html}{\out{<a id="method-plot_alpha"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_alpha}{}}}
 \subsection{Method \code{plot_alpha()}}{
+Plotting the alpha diveristy.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -77,17 +125,52 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{group}}{default NULL; the sample column used for the statistics; If provided, can return alpha_stat.}
+\item{\code{color_values}}{colors used for presentation.}
+
+\item{\code{measure}}{default Shannon; alpha diveristy measurement that will be used.}
+
+\item{\code{group}}{default NULL; group name used for the plot.}
+
+\item{\code{add_letter}}{default FALSE; If TRUE, the letters of duncan test will be added in the plot.}
+
+\item{\code{pair_compare}}{default FALSE; whether perform paired comparisons.}
+
+\item{\code{pair_compare_filter}}{default ""; groups that will be removed.}
+
+\item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
+
+\item{\code{map_signif_level}}{default TRUE; whether indicate the significance level.}
+
+\item{\code{xtext_type}}{default NULL; number used to make x axis text generate angle.}
+
+\item{\code{xtext_size}}{default 10, x axis text size.}
+
+\item{\code{ytitle_size}}{default 17, y axis title size.}
+
+\item{\code{base_font}}{default NULL, font in the plot.}
+
+\item{\code{...}}{parameters pass to \code{\link{ggpubr::ggboxplot}}.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_alpha$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_alpha$print()}\if{html}{\out{</div>}}
 }
 
 }

@@ -1,17 +1,18 @@
+#' @title
 #' Create trans_venn object.
 #'
+#' @description
 #' This class is a wrapper for a series of venn analysis related methods.
-#' The functions in this class: \code{\link{plot_venn}}, \code{\link{trans_venn_com}}.
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @param sample_names default NULL; if provided, filter the samples.
-#' @param ratio default "numratio"; "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage.
-#' @return venn_table venn_count_abund in trans_venn object.
-#' @examples 
-#' trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
 #' @export
 trans_venn <- R6Class(classname = "trans_venn",
 	public = list(
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param sample_names default NULL; if provided, filter the samples.
+		#' @param ratio default "numratio"; "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage.
+		#' @return venn_table venn_count_abund stored in trans_venn object.
+		#' @examples 
+		#' trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = "numratio"
 			) {
 			use_dataset <- clone(dataset)
@@ -59,10 +60,47 @@ trans_venn <- R6Class(classname = "trans_venn",
 			self$otu_table <- abund
 			self$tax_table <- use_dataset$tax_table
 		},
-		plot_venn = function(text_size = 4.5, text_name_size = 6, text_name_position = NULL,
-			color_circle = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.3, fill_color = TRUE, 
-			linesize = 1.1, petal_plot = FALSE, petal_a = 4, petal_r = 1, petal_use_lim = c(-12, 12), petal_center_size = 40,
-			petal_move_xy = 4, petal_move_k = 2.3, petal_move_k_count = 1.3, petal_text_move = 40, petal_color = "skyblue"
+		#' @description
+		#' Plot venn.
+		#'
+		#' @param petal_color default "skyblue"; color of the petal
+		#' @param text_size default 4.5; text size in plot
+		#' @param text_name_size default 6; name size in plot
+		#' @param text_name_position default NULL; name position in plot; use default, if NULL.
+		#' @param color_circle color pallete
+		#' @param alpha default .3; alpha for transparency
+		#' @param fill_color default TRUE; whether fill the area color
+		#' @param linesize default 1.1; cycle line size
+		#' @param petal_plot default FALSE; whether use petal plot.
+		#' @param petal_a default 4; the length of the ellipse
+		#' @param petal_r default 1; scaling up the size of the ellipse
+		#' @param petal_use_lim default c(-12, 12); the width of the plot
+		#' @param petal_center_size default 40; petal center circle size
+		#' @param petal_move_xy default 4; the distance of text to circle
+		#' @param petal_move_k default 2.3; the distance of title to circle
+		#' @param petal_move_k_count default 1.3; the distance of data text to circle
+		#' @param petal_text_move default 40; the distance between two data text
+		#' @return ggplot.
+		#' @examples
+		#' dataset$plot_venn()
+		plot_venn = function(
+			petal_color = "skyblue",
+			text_size = 4.5,
+			text_name_size = 6,
+			text_name_position = NULL,
+			color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
+			alpha = 0.3,
+			fill_color = TRUE,
+			linesize = 1.1,
+			petal_plot = FALSE,
+			petal_a = 4,
+			petal_r = 1,
+			petal_use_lim = c(-12, 12),
+			petal_center_size = 40,
+			petal_move_xy = 4,
+			petal_move_k = 2.3,
+			petal_move_k_count = 1.3,
+			petal_text_move = 40
 			){
 			colnumber <- self$colnumber
 			ratio <- self$ratio
@@ -209,6 +247,13 @@ trans_venn <- R6Class(classname = "trans_venn",
 			}
 			return(p)
 		},
+		#' @description
+		#' Transform venn result for the composition analysis.
+		#'
+		#' @param use_OTUs_frequency default TRUE; whether only use OTUs occurrence frequency, if FALSE, use abundance.
+		#' @return a new \code{\link{microtable}} class.
+		#' @examples
+		#' dataset$trans_venn_com()
 		trans_venn_com = function(use_OTUs_frequency = TRUE){
 			otudata <- self$otu_table
 			venn_table <- self$venn_table
@@ -309,45 +354,4 @@ trans_venn <- R6Class(classname = "trans_venn",
 	lock_objects = FALSE
 )
 
-#' Plot venn.
-#'
-#'
-#' @param text_size default 4.5; text size in plot
-#' @param text_name_size default 6; name size in plot
-#' @param text_name_position default NULL; name position in plot; use default, if NULL.
-#' @param color_circle color pallete
-#' @param alpha default .3; alpha for transparency
-#' @param fill_color default TRUE; whether fill the area color
-#' @param linesize default 1.1; cycle line size
-#' @param petal_plot default FALSE; whether use petal plot.
-#' @param petal_color default "skyblue"; color of the petal
-#' @param petal_a default 4; the length of the ellipse
-#' @param petal_r default 1; scaling up the size of the ellipse
-#' @param petal_use_lim default c(-12, 12); the width of the plot
-#' @param petal_center_size default 40; petal center circle size
-#' @param petal_move_xy default 4; the distance of text to circle
-#' @param petal_move_k default 2.3; the distance of title to circle
-#' @param petal_move_k_count default 1.3; the distance of data text to circle
-#' @param petal_text_move default 40; the distance between two data text
-#' @return ggplot.
-#' @examples
-#' dataset$plot_venn()
-plot_venn <- function(text_size = 4.5, text_name_size = 6, text_name_position = NULL,
-			color_circle = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.3, fill_color = TRUE, linesize = 1.1, 
-			petal_plot = FALSE, petal_color = "skyblue", petal_a = 4, petal_r = 1, petal_use_lim = c(-12, 12), petal_center_size = 40,
-			petal_move_xy = 4, petal_move_k = 2.3, petal_move_k_count = 1.3, petal_text_move = 40
-			){
-	dataset$plot_venn()
-}
-
-#' Transform venn result for the community analysis.
-#'
-#'
-#' @param use_OTUs_frequency default TRUE; whether only use OTUs occurrence frequency, if FALSE, use abundance.
-#' @return a new \code{\link{microtable}} class.
-#' @examples
-#' dataset$trans_venn_com()
-trans_venn_com = function(use_OTUs_frequency = TRUE){
-	dataset$trans_venn_com()
-}
 

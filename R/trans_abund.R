@@ -1,23 +1,24 @@
-#' Create trans_abund object to use transformed taxonomic abundance for statistics and plotting.
+#' @title
+#' Create trans_abund object to transform taxonomic abundance for plotting.
 #'
+#' @description
 #' This class is a wrapper for the taxonomic abundance transformations and plotting.
-#' The functions in this class include \code{\link{plot_bar}}, \code{\link{plot_box}}, \code{\link{plot_heatmap}}, \code{\link{plot_pie}}.
-#' 
-#' @param dataset The microtable class.
-#' @param taxrank default "Phylum"; taxonomic rank.
-#' @param show default 0; the relative abundance threshold.
-#' @param ntaxa default 10; how many taxa will be saved.
-#' @param groupmean default NULL; for calculating mean abundance, select a group column in sample_table .
-#' @param use_percentage default TRUE; showing the abundance percentage.
-#' @param order_x default NULL; character vector; if x xais should be ordered, input the samples or group vector or the column name in sample table.
-#' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
-#' @return Object of trans_abund \code{\link{R6Class}} containing transformed data. 
-#' @examples
-#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+#'
 #' @export
 trans_abund <- R6Class(classname = "trans_abund",
 	public = list(
+		#' @param dataset The microtable class.
+		#' @param taxrank default "Phylum"; taxonomic rank.
+		#' @param show default 0; the relative abundance threshold.
+		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low.
+		#' @param groupmean default NULL; for calculating mean abundance, select a group column in sample_table .
+		#' @param use_percentage default TRUE; showing the abundance percentage.
+		#' @param order_x default NULL; character vector; if x xais is ordered, input the samples or group vector or the column name in sample table.
+		#' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
+		#' @return abund_data and other file for plotting. 
+		#' @examples
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 		initialize = function(dataset = NULL, taxrank = "Phylum", show = 0, ntaxa = 10, groupmean = NULL, use_percentage = TRUE, order_x = NULL, 
 			input_taxaname = NULL){
 			self$sample_table <- dataset$sample_table
@@ -25,18 +26,22 @@ trans_abund <- R6Class(classname = "trans_abund",
 			self$use_percentage <- use_percentage
 
 			abund_data <- dataset$taxa_abund[[self$taxrank]] %>% cbind.data.frame(Taxonomy = rownames(.), ., stringsAsFactors = FALSE)
-			abund_data = reshape2::melt(abund_data, id.vars = "Taxonomy")
+			abund_data <- reshape2::melt(abund_data, id.vars = "Taxonomy")
 			colnames(abund_data) <- c("Taxonomy", "Sample", "Abundance")
 			if(any(grepl("__$", abund_data$Taxonomy))){
 				abund_data$Taxonomy[grepl("__$", abund_data$Taxonomy)] <- paste0(abund_data$Taxonomy[grepl("__$", abund_data$Taxonomy)],"unidentified")
 			}
 			abund_data$Taxonomy %<>% gsub(paste0(".*", tolower(substr(self$taxrank, 1, 1)), "__(.*)"), "\\1", .)
-			abund_data %<>% dplyr::group_by_("Taxonomy", "Sample") %>% dplyr::summarise(Abundance = sum(Abundance)) %>% as.data.frame
+			abund_data %<>% dplyr::group_by_("Taxonomy", "Sample") %>% 
+				dplyr::summarise(Abundance = sum(Abundance)) %>% 
+				as.data.frame
 			if(!is.null(groupmean)){
 				abund_data$Sample %<>% as.character
 				mdf <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
 				cat(paste0(groupmean, " column is used to calculate mean abundance"))
-				abund_data <- dplyr::group_by_(mdf, "Taxonomy", groupmean) %>% dplyr::summarise(Abundance = mean(Abundance)) %>% as.data.frame
+				abund_data <- dplyr::group_by_(mdf, "Taxonomy", groupmean) %>% 
+					dplyr::summarise(Abundance = mean(Abundance)) %>% 
+					as.data.frame
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
 			}
 			if(!is.null(order_x)){
@@ -81,14 +86,56 @@ trans_abund <- R6Class(classname = "trans_abund",
 			self$abund_data <- abund_data
 			self$use_taxanames <- use_taxanames
 		},
-		plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_type = "full", others_color = "grey90", facet = NULL, barwidth = NULL,
-			use_alluvium = FALSE, clustering = FALSE, 
-			facet_color= "grey95", strip_text = 11, legend_text_italic = FALSE, xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
-			ytitle_size = 17, base_font =NULL, ylab_title = NULL
+		#' @description
+		#' Plot the bar plot with the object of trans_abund Class.
+		#'
+		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
+		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
+		#' @param others_color default "grey90"; the color for "others" taxa.
+		#' @param facet default NULL; if using facet, providing the group name.
+		#' @param order_facet NULL; vector, used to order the facet.
+		#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
+		#' @param use_alluvium default FALSE; whether add alluvium plot
+		#' @param clustering default FALSE; whether order samples by the clustering
+		#' @param facet_color default "grey95"; facet background color.
+		#' @param strip_text default 11; facet text size.
+		#' @param legend_text_italic default FALSE; whether use italic in legend.
+		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_size default 10; x axis text size.
+		#' @param xtext_keep default TRUE; whether retain x text.
+		#' @param xtitle_keep default TRUE; whether retain x title.
+		#' @param ytitle_size default 17; y axis title size.
+		#' @param base_font default NULL; font in the plot.
+		#' @param ylab_title default NULL; y axis title.
+		#' @return ggplot2 plot. 
+		#' @examples 
+		#' t1$plot_bar(bar_type = "full", others_color = "grey90")
+		plot_bar = function(
+			use_colors = RColorBrewer::brewer.pal(12, "Paired"),
+			bar_type = "full",
+			others_color = "grey90",
+			facet = NULL,
+			order_facet = NULL,
+			barwidth = NULL,
+			use_alluvium = FALSE,
+			clustering = FALSE,
+			facet_color= "grey95",
+			strip_text = 11,
+			legend_text_italic = FALSE,
+			xtext_type_hor = TRUE,
+			xtext_size = 10,
+			xtext_keep = TRUE,
+			xtitle_keep = TRUE,
+			ytitle_size = 17,
+			base_font = NULL,
+			ylab_title = NULL
 			){
 			plot_data <- self$abund_data		
 			if(!is.null(facet)){
 				plot_data <- suppressWarnings(dplyr::left_join(plot_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
+				if(!is.null(order_facet)){
+					plot_data[, facet] %<>% factor(., levels = order_facet)
+				}
 			}
 			if(use_alluvium){
 				bar_type <- "notfull"
@@ -142,7 +189,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p <- p + theme(panel.grid = element_blank(), panel.border = element_blank()) + 
 				theme(axis.line.y = element_line(color = "grey60", linetype = "solid", lineend = "square"))
-			if(legend_text_italic == T) p <- p + theme(legend.text = element_text(face = 'italic'))
+			if(legend_text_italic == T) {
+				p <- p + theme(legend.text = element_text(face = 'italic'))
+			}
+			
 			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
 			if(!xtext_keep){
 				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
@@ -160,11 +210,47 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
-		plot_box = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), group = NULL, show_point = FALSE, point_color = "black", 
-			point_size = 3, point_alpha = .3, 
-			plot_flip = FALSE, boxfill = TRUE, middlecolor = "grey95", middlesize = 1,
-			xtext_type_hor = FALSE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
-			ytitle_size = 17, base_font =NULL, ...
+		#' @description
+		#' Plot the box plot with the object of trans_abund Class.
+		#'
+		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
+		#' @param group default NULL; sample table column name.
+		#' @param show_point default FALSE; whether show points in plot.
+		#' @param point_color default "black"; If show_point TRUE; use the color
+		#' @param point_size default 3; If show_point TRUE; use the size
+		#' @param point_alpha default .3; If show_point TRUE; use the transparency.
+		#' @param plot_flip default FALSE; Whether rotate plot.
+		#' @param boxfill default TRUE; Whether fill the box.
+		#' @param middlecolor default "grey95"; The middle line color.
+		#' @param middlesize default 1; The middle line size.
+		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_size default 10; x axis text size.
+		#' @param xtext_keep default TRUE; whether retain x text.
+		#' @param xtitle_keep default TRUE; whether retain x title.
+		#' @param ytitle_size default 17; y axis title size.
+		#' @param base_font default NULL; font in the plot.
+		#' @param ... parameters pass to \code{\link{geom_boxplot}}.
+		#' @return ggplot2 plot. 
+		#' @examples
+		#' t1$plot_box(group = "Group", show_point = FALSE)
+		plot_box = function(
+			use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
+			group = NULL,
+			show_point = FALSE,
+			point_color = "black",
+			point_size = 3,
+			point_alpha = .3,
+			plot_flip = FALSE,
+			boxfill = TRUE,
+			middlecolor = "grey95",
+			middlesize = 1,
+			xtext_type_hor = FALSE,
+			xtext_size = 10,
+			xtext_keep = TRUE,
+			xtitle_keep = TRUE,
+			ytitle_size = 17,
+			base_font =NULL,
+			...
 			){
 			plot_data <- self$abund_data
 			plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
@@ -215,13 +301,51 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
+		#' @description
+		#' Plot the heatmap with the object of trans_abund Class.
+		#'
+		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
+		#' @param withmargin default TRUE; whether retain the tile margin.
+		#' @param plot_numbers default FALSE; whether plot the number in heatmap.
+		#' @param plot_text_size default 4; If plot_numbers TRUE, text size in plot.
+		#' @param plot_breaks default NULL; The legend breaks.
+		#' @param margincolor default "white"; If withmargin TRUE, use this as the margin color.
+		#' @param plot_colorscale default "log10"; color scale.
+		#' @param min_abundance default .01; the minimum abundance percentage in plot.
+		#' @param max_abundance default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.
+		#' @param facet default NULL; if using facet, providing the group name.
+		#' @param order_facet default NULL; if reorder facet, provide the vector.
+		#' @param strip_text default 11; facet text size.
+		#' @param xtext_size default 10; x axis text size.
+		#' @param ytext_size default 11; y axis text size.
+		#' @param xtext_keep default TRUE; whether retain x text.
+		#' @param xtitle_keep default TRUE; whether retain x title.
+		#' @param grid_clean default TRUE; whether remove grid lines.
+		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param base_font default NULL; font in the plot.
+		#' @return ggplot2 plot.
+		#' @examples 
+		#' t1$plot_heatmap(withmargin = FALSE)
 		plot_heatmap = function(
 			use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
-			withmargin = TRUE, plot_numbers = FALSE, plot_text_size = 4, plot_breaks = NULL, margincolor = "white",
-			plot_colorscale = "log10", min_abundance = 0.01, max_abundance = NULL,
-			facet = NULL, order_facet = NULL, strip_text = 11, xtext_size = 10, ytext_size = 11,
-			xtext_keep = TRUE, xtitle_keep = TRUE, grid_clean = TRUE,
-			xtext_type_hor = TRUE, base_font =NULL
+			withmargin = TRUE,
+			plot_numbers = FALSE,
+			plot_text_size = 4,
+			plot_breaks = NULL,
+			margincolor = "white",
+			plot_colorscale = "log10",
+			min_abundance = 0.01,
+			max_abundance = NULL,
+			facet = NULL,
+			order_facet = NULL,
+			strip_text = 11,
+			xtext_size = 10,
+			ytext_size = 11,
+			xtext_keep = TRUE,
+			xtitle_keep = TRUE,
+			grid_clean = TRUE,
+			xtext_type_hor = TRUE,
+			base_font =NULL
 			){
 			plot_data <- self$abund_data
 			if (is.null(min_abundance)){
@@ -277,6 +401,16 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
+		#' @description
+		#' Plot pie chart with the object of trans_abund Class.
+		#'
+		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.
+		#' @param facet_nrow default 1; how many rows in the plot.
+		#' @param strip_text default 11; sample title size.
+		#' @param legend_text_italic default FALSE; whether use italic in legend.
+		#' @return ggplot2 plot. 
+		#' @examples 
+		#' t1$plot_pie(facet_nrow = 2)
 		plot_pie = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), facet_nrow = 1, strip_text = 11, legend_text_italic = FALSE
 			){
 			plot_data <- self$abund_data
@@ -297,7 +431,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
-		print = function(...) {
+		print = function() {
 			cat("trans_abund class:\n")
 			cat(paste("abund_data have", ncol(self$abund_data), "columns: ", paste0(colnames(self$abund_data), collapse = ", "), "\n"))
 			cat(paste("abund_data have", nrow(self$abund_data), "rows\n"))
@@ -333,118 +467,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 	lock_objects = FALSE,
 	lock_class = FALSE
 )
-
-
-#' Plot the bar plot with the object of trans_abund Class.
-#'
-#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
-#' @param bar_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-#' @param others_color default "grey90"; the color for others.
-#' @param facet default NULL; if using facet, providing the group name.
-#' @param use_alluvium default FALSE; whether add alluvium plot
-#' @param clustering default FALSE; whether order samples by the clustering
-#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
-#' @param facet_color default "grey95"; facet background color.
-#' @param strip_text default 11; facet text size.
-#' @param legend_text_italic default FALSE; whether use italic in legend.
-#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-#' @param xtext_size default 10; x axis text size.
-#' @param xtext_keep default TRUE; whether retain x text.
-#' @param xtitle_keep default TRUE; whether retain x title.
-#' @param ytitle_size default 17; y axis title size.
-#' @param base_font default NULL; font in the plot.
-#' @param ylab_title default NULL; y axis title.
-#' @return ggplot2 plot. 
-#' @format \code{\link{trans_abund}} object.
-#' @examples 
-#' t1$plot_bar(bar_type = "full", others_color = "grey90")
-plot_bar = function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), bar_type = "full", others_color = "grey90", facet = NULL, 
-	use_alluvium = FALSE, clustering = FALSE, barwidth = NULL,
-	facet_color= "grey95", strip_text = 11, legend_text_italic = FALSE, xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
-	ytitle_size = 17, base_font =NULL, ylab_title = NULL){
-	dataset$plot_bar()
-}
-
-
-#' Plot the box plot with the object of trans_abund Class.
-#'
-#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-#' @param group default NULL; sample table column name.
-#' @param show_point default FALSE; whether show points in plot.
-#' @param point_color default "black"; If show_point TRUE; use the color
-#' @param point_size default 3; If show_point TRUE; use the size
-#' @param point_alpha default .3; If show_point TRUE; use the transparency.
-#' @param plot_flip default FALSE; Whether rotate plot.
-#' @param boxfill default TRUE; Whether fill the box.
-#' @param middlecolor default "grey95"; The middle line color.
-#' @param middlesize default 1; The middle line size.
-#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-#' @param xtext_size default 10; x axis text size.
-#' @param xtext_keep default TRUE; whether retain x text.
-#' @param xtitle_keep default TRUE; whether retain x title.
-#' @param ytitle_size default 17; y axis title size.
-#' @param base_font default NULL; font in the plot.
-#' @param ... parameters pass to \code{\link{geom_boxplot}}.
-#' @return ggplot2 plot. 
-#' @format \code{\link{trans_abund}} object.
-#' @examples
-#' t1$plot_box(group = "Group", show_point = FALSE)
-plot_box <- function(use_colors = RColorBrewer::brewer.pal(12, "Paired"), group = NULL, show_point = FALSE, point_color = "black", point_size = 3, point_alpha = .3, 
-			plot_flip = FALSE, boxfill = TRUE, middlecolor = "grey95", middlesize = 1,
-			xtext_type_hor = TRUE, xtext_size = 10, xtext_keep = TRUE, xtitle_keep = TRUE,
-			ytitle_size = 17, base_font =NULL, ...){
-	dataset$plot_box()
-}
-
-
-#' Plot the heatmap with the object of trans_abund Class.
-#'
-#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-#' @param withmargin default TRUE; whether retain the tile margin.
-#' @param plot_numbers default FALSE; whether plot the number in heatmap.
-#' @param plot_text_size default 4; If plot_numbers TRUE, text size in plot.
-#' @param plot_breaks default NULL; The legend breaks.
-#' @param margincolor default "white"; If withmargin TRUE, use this as the margin color.
-#' @param plot_colorscale default "log10"; color scale.
-#' @param min_abundance default .01; the minimum abundance percentage in plot.
-#' @param max_abundance default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.
-#' @param facet default NULL; if using facet, providing the group name.
-#' @param order_facet default NULL; if reorder facet, provide the vector.
-#' @param strip_text default 11; facet text size.
-#' @param xtext_size default 10; x axis text size.
-#' @param ytext_size default 11; y axis text size.
-#' @param xtext_keep default TRUE; whether retain x text.
-#' @param xtitle_keep default TRUE; whether retain x title.
-#' @param grid_clean default TRUE; whether remove grid lines.
-#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-#' @param base_font default NULL; font in the plot.
-#' @return ggplot2 plot.
-#' @format \code{\link{trans_abund}} object.
-#' @examples 
-#' t1$plot_heatmap(withmargin = FALSE)
-plot_heatmap <- function(use_colors = viridis::viridis(100, option = "D"), withmargin = TRUE,
-			plot_numbers = FALSE, plot_text_size = 4, plot_breaks = NULL, margincolor = "white",
-			plot_colorscale = "log10", min_abundance = 0.01, max_abundance = NULL,
-			facet = NULL, order_facet = NULL, strip_text = 11, xtext_size = 10, ytext_size = 11,
-			xtext_keep = TRUE, xtitle_keep = TRUE, grid_clean = TRUE,
-			xtext_type_hor = TRUE, base_font =NULL){
-	dataset$plot_heatmap()
-}
-
-#' Plot pie chart with the object of trans_abund Class.
-#'
-#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.
-#' @param facet_nrow default 1; how many rows in the plot.
-#' @param strip_text default 11; sample title size.
-#' @param legend_text_italic default FALSE; whether use italic in legend.
-#' @return ggplot2 plot. 
-#' @format \code{\link{trans_abund}} object.
-#' @examples 
-#' t1$plot_pie(facet_nrow = 2)
-plot_pie <- function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), facet_nrow = 1, strip_text = 11, legend_text_italic = FALSE){
-	dataset$plot_pie()
-}
-
 
 
 

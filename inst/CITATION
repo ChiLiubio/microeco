@@ -1,0 +1,35 @@
+citHeader("Please cite the package as follows:")
+
+citEntry(entry="misc",
+         title = "microeco R package",
+         author = personList(
+	 	person(given ="Chi", family="Liu", email = "liuchi0426@126.com"),
+	 	person(given ="Xiangzhen", family="Li"),
+		person(given ="Minjie", family="Yao")
+	 	  ),
+	 journal = "",
+	 year = "2020-2021",
+         textVersion =
+         paste("Chi Liu et al. 
+	        microeco R package. 
+	        URL: https://github.com/ChiLiubio/microeco",
+                sep=" ")
+         )
+
+citEntry(entry="article",
+         title = "microeco: An R package for data mining in microbial community ecology",
+         author = personList( as.person("Chi Liu"),
+                              as.person("Xiangzhen Li*"),
+                              as.person("Minjie Yao*")),
+         year = "2020",
+         journal = "XX",
+         volume = "",
+         pages = "",
+         doi = "",
+         url = "",
+         textVersion =
+         paste("Chi Liu, Xiangzhen Li*, Minjie Yao*.",
+               "microeco: An R package for data mining in microbial community ecology.",
+        "Submitted")
+)
+

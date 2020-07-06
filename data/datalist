@@ -1,7 +1,11 @@
-env_data
+env_data_16S
+fungi_func
 ko_map
-otu_table
-phylo_tree
-sample_info
-spe_func
-taxonomy_table
+otu_table_16S
+otu_table_ITS
+phylo_tree_16S
+prok_func
+sample_info_16S
+sample_info_ITS
+taxonomy_table_16S
+taxonomy_table_ITS

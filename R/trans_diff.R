@@ -1,33 +1,42 @@
-#' Create trans_diff object for the difference tests on the taxonomic abundance and plotting.
+#' @title 
+#' Create trans_diff object for the differential analysis on the taxonomic abundance.
 #'
+#' @description
 #' This class is a wrapper for a series of differential abundance test and indicator analysis methods.
-#' The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}},
-#' \code{\link{plot_lefse_cladogram}}
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @param method default "lefse"; one of c("lefse", "rf", "metastat").
-#' @param group default NULL; sample group used for main comparision.
-#' @param lefse_subgroup default NULL; sample sub group used in lefse.
-#' @param alpha default .05; significance threshold.
-#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
-#' @param lefse_norm default 1000000; scale value.
-#' @param nresam default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.
-#' @param boots default 30; bootstrap test number for lefse or rf.
-#' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
-#' @param rf_ntree default 1000; see ntree in \code{\link{randomForest}}.
-#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test.
-#' @param metastat_group_choose default NULL; a vector used for selecting the required groups for testing.
-#' @return res_rf res_lefse res_abund or res_metastat in trans_diff object.
-#' @examples 
-#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
-		initialize = function(dataset = NULL, method = c("lefse", "rf", "metastat")[1],
-			group = NULL, alpha = 0.05,
-			lefse_subgroup = NULL, lefse_min_subsam = 10, lefse_norm = 1000000, nresam = 0.6667, boots = 30,
-			rf_taxa_level = "all", rf_ntree = 1000,
-			metastat_taxa_level = "Genus", metastat_group_choose = NULL
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param method default "lefse"; "lefse", "rf" or "metastat".
+		#' @param group default NULL; sample group used for main comparision.
+		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse.
+		#' @param alpha default .05; significance threshold.
+		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
+		#' @param lefse_norm default 1000000; scale value in lefse.
+		#' @param nresam default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.
+		#' @param boots default 30; bootstrap test number for lefse or rf.
+		#' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
+		#' @param rf_ntree default 1000; see ntree in \code{\link{randomForest}}.
+		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test.
+		#' @param metastat_group_choose default NULL; a vector used for selecting the required groups for testing.
+		#' @return res_rf res_lefse res_abund or res_metastat in trans_diff object.
+		#' @examples 
+		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+		initialize = function(
+			dataset = NULL,
+			method = c("lefse", "rf", "metastat")[1],
+			group = NULL,
+			lefse_subgroup = NULL,
+			alpha = 0.05,
+			lefse_min_subsam = 10,
+			lefse_norm = 1000000,
+			nresam = 0.6667,
+			boots = 30,
+			rf_taxa_level = "all",
+			rf_ntree = 1000,
+			metastat_taxa_level = "Genus",
+			metastat_group_choose = NULL
 			){
 			if(is.null(dataset)){
 				stop("No dataset provided!")
@@ -69,6 +78,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				predictors <- t(abund_table_sub)
 				colnames(predictors) <- nametable$repl
 				res <- NULL
+				if(all(table(as.character(sampleinfo[, group])) < 4)){
+					if(nresam < 1){
+						message("The sample number in all your group less than 4, automatically set nresam = 1 for random forest analysis !")
+						nresam <- 1
+					}
+				}
 				for(num in seq_len(boots)){
 					# resampling
 					sample_names_resample <- rownames(predictors)[base::sample(1:nrow(predictors), size = ceiling(nrow(predictors) * nresam))]
@@ -152,16 +167,26 @@ trans_diff <- R6Class(classname = "trans_diff",
 					sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * nresam))]
 					abund_table_sub_resample <- abund_table_sub[, sample_names_resample]
 					sampleinfo_resample <- sampleinfo[sample_names_resample, ]
-					# make sure the groups and samples numbers available
-					if(length(unique(sampleinfo_resample[, group])) != length(unique(sampleinfo[, group])) | min(table(sampleinfo_resample[, group])) < 2){
+					# make sure the groups and samples numbers available					
+					if(sum(table(as.character(sampleinfo_resample[, group])) > 1) < 2){
+						res_lda[[num]] <- NA
 						next
 					}
 					# cycle all paired groups
 					for(i in seq_len(ncol(all_class_pairs))){
 						sel_samples <- sampleinfo_resample[, group] %in% all_class_pairs[, i]
+						# make sure the groups and samples numbers available
+						if(length(table(as.character(sampleinfo_resample[sel_samples, group]))) < 2){
+							res_lda_pair[[i]] <- NA
+							next
+						}
+						if(min(table(as.character(sampleinfo_resample[sel_samples, group]))) < 2){
+							res_lda_pair[[i]] <- NA
+							next
+						}
+						group_vec_lda <- sampleinfo_resample[sel_samples, group] %>% as.character %>% as.factor
 						abund_table_sub_lda <- abund_table_sub_resample[, sel_samples]
 						abund_table_sub_lda %<>% .[apply(., 1, sd) > 1.0e-10, ]
-						group_vec_lda <- sampleinfo_resample[sel_samples, group] %>% as.character %>% as.factor
 						if(is.null(lefse_subgroup)){
 							abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda)
 						}else{
@@ -170,7 +195,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 							abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
 						}
 						# LDA analysis
-						mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10)
+						skip_to_next <- FALSE
+						tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <<- TRUE})
+						if(skip_to_next) {
+							res_lda_pair[[i]] <- NA
+							next
+						}
 						# calculate effect size
 						w <- mod1$scaling[,1]
 						w_unit <- w/sqrt(sum(w^2))
@@ -194,7 +224,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res <- sapply(rownames(abund_table_sub), function(k){
 					unlist(lapply(seq_len(ncol(all_class_pairs)), function(p){
 						unlist(lapply(res_lda, function(x){ x[[p]][k]})) %>% .[!is.na(.)] %>% mean
-					})) %>% .[!is.nan(.)] %>% max
+					})) %>% .[!is.na(.)] %>% .[!is.nan(.)] %>% max
 				})
 				res <- sapply(res, function(x) {log10(1 + abs(x)) * ifelse(x > 0, 1, -1)})
 				res1 <- cbind.data.frame(Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)]), 
@@ -205,16 +235,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
 				if(grepl("lefse", method, ignore.case = TRUE)){
-					tran_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
+					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
 				}else{
-					tran_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")				
+					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")				
 				}
-				colnames(tran_abund) <- c("Taxa", "Sample", "Abund")
-				tran_abund <- suppressWarnings(left_join(tran_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
-				tran_abund <- summarySE(tran_abund, measurevar = "Abund", groupvars = c("Taxa", group))
-				self$res_abund <- tran_abund
+				colnames(res_abund) <- c("Taxa", "Sample", "Abund")
+				res_abund <- suppressWarnings(left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
+				res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
+				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
+				self$res_abund <- res_abund
 			}
-			
 			if(grepl("metastat", method, ignore.case = TRUE)){
 				self$metastat_taxa_level <- metastat_taxa_level
 				# transform data
@@ -252,11 +282,41 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_metastat_group_matrix <- all_name				
 			}
 		},
-		plot_diff_abund = function(method = NULL, only_abund_plot = TRUE, use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-			plot1_bar_color = "grey50", plot2_sig_color = "red", plot2_sig_size = 1.2,
-			axis_text_y = 10, 
-			simplify_names = TRUE, keep_prefix = TRUE, group_order = NULL, 
-			plot2_barwidth = .9, add_significance = TRUE, use_se = TRUE
+		#' @description
+		#' Plotting the abundance of differential taxa.
+		#'
+		#' @param method default NULL; "rf" or "lefse"; automatically check the method in the result.
+		#' @param only_abund_plot default TRUE; if true, return only abundance plot; if false, return both indicator plot and abundance plot
+		#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
+		#' @param color_values colors for presentation.
+		#' @param plot1_bar_color default "grey30"; the color for the plot 1.
+		#' @param plot2_sig_color default "red"; the color for the significance in plot 2.
+		#' @param plot2_sig_size default 1.5; the size for the significance in plot 2.
+		#' @param axis_text_y default 12; the size for the y axis text.
+		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
+		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
+		#' @param group_order default NULL; a vector to order the legend in plot.
+		#' @param plot2_barwidth default .9; the bar width in plot 2.
+		#' @param add_significance default TRUE; whether add the significance asterisk; only available when only_abund_plot FALSE.
+		#' @param use_se default TRUE; whether use SE in plot 2, if FALSE, use SD.
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_diff_abund(use_number = 1:10)
+		plot_diff_abund = function(
+			method = NULL,
+			only_abund_plot = TRUE,
+			use_number = 1:10,
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			plot1_bar_color = "grey50",
+			plot2_sig_color = "red",
+			plot2_sig_size = 1.2,
+			axis_text_y = 10,
+			simplify_names = TRUE,
+			keep_prefix = TRUE,
+			group_order = NULL,
+			plot2_barwidth = .9,
+			add_significance = TRUE,
+			use_se = TRUE
 			){
 			data2 <- self$res_abund
 			if(is.null(method)){
@@ -355,8 +415,31 @@ trans_diff <- R6Class(classname = "trans_diff",
 				return(list(p1 = p1, p2 = p2))
 			}
 		},
-		plot_lefse_bar = function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), LDA_score = NULL,
-			simplify_names = TRUE, keep_prefix = TRUE, group_order = NULL, axis_text_y = 12, plot_vertical = TRUE, ...
+		#' @description
+		#' Bar plot for LDA score.
+		#'
+		#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
+		#' @param color_values colors for presentation.
+		#' @param LDA_score default NULL; numeric value as the threshold, such as 2, limited with use_number.
+		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
+		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
+		#' @param group_order default NULL; a vector to order the legend in plot.
+		#' @param axis_text_y default 12; the size for the y axis text.
+		#' @param plot_vertical default TRUE; whether use vertical bar plot or horizontal.
+		#' @param ... parameters pass to \code{\link{geom_bar}}
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_lefse_bar(LDA_score = 2)
+		plot_lefse_bar = function(
+			use_number = 1:10,
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			LDA_score = NULL,
+			simplify_names = TRUE,
+			keep_prefix = TRUE,
+			group_order = NULL,
+			axis_text_y = 12,
+			plot_vertical = TRUE,
+			...
 			){
 			use_data <- self$res_lefse
 			if(simplify_names == T){
@@ -417,12 +500,44 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			p
 		},
-		plot_lefse_cladogram = function(color = RColorBrewer::brewer.pal(8, "Dark2"),
-				use_taxa_num = 200, filter_taxa = NULL, use_feature_num = NULL, clade_label_level = 4, select_show_labels = NULL,
-				only_select_show = FALSE, sep = "|", branch_size = 0.2, alpha = 0.2, clade_label_size = 0.7, 
-				node_size_scale = 1, node_size_offset = 1, annotation_shape = 22, annotation_shape_size = 5
+		#' @description
+		#' Plot the cladogram for LEfSe result similar with the python version. Codes are modified from microbiomeMarker 
+		#'
+		#' @param color default RColorBrewer::brewer.pal(8, "Dark2"); color used in the plot.
+		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance 
+		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance
+		#' @param use_feature_num default NULL; integer; The feature number used in the plot; select the features according to the LDA score
+		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest
+		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters
+		#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels
+		#' @param sep default "|"; the seperate character in the taxonomic information
+		#' @param branch_size default 0.2; numberic, size of branch
+		#' @param alpha default 0.2; shading of the color
+		#' @param clade_label_size default 0.7; size for the clade label
+		#' @param node_size_scale default 1; scale for the node size
+		#' @param node_size_offset default 1; offset for the node size
+		#' @param annotation_shape default 22; shape used in the annotation legend
+		#' @param annotation_shape_size default 5; size used in the annotation legend
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+		plot_lefse_cladogram = function(
+			color = RColorBrewer::brewer.pal(8, "Dark2"),
+			use_taxa_num = 200,
+			filter_taxa = NULL,
+			use_feature_num = NULL,
+			clade_label_level = 4,
+			select_show_labels = NULL,
+			only_select_show = FALSE,
+			sep = "|",
+			branch_size = 0.2,
+			alpha = 0.2,
+			clade_label_size = 0.7,
+			node_size_scale = 1,
+			node_size_offset = 1,
+			annotation_shape = 22,
+			annotation_shape_size = 5
 			){
-
 			abund_table <- self$abund_table
 			marker_table <- self$res_lefse %>% dropallfactors
 
@@ -576,7 +691,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 			p <- p + theme(legend.position = "right", legend.title = element_blank())
 			p
 		},
-		plot_metastat = function(use_number = 1:10, qvalue = 0.05, choose_group = 1, color_values = RColorBrewer::brewer.pal(8, "Dark2")
+		#' @description
+		#' Bar plot for metastat.
+		#'
+		#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
+		#' @param color_values colors for presentation.
+		#' @param qvalue default .05; numeric value as the threshold of q value.
+		#' @param choose_group default 1; which column in res_metastat_group_matrix will be used.
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+		plot_metastat = function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), qvalue = 0.05, choose_group = 1
 			){
 			use_data <- self$res_metastat
 			group_char <- self$res_metastat_group_matrix[, choose_group]
@@ -602,7 +727,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				xlab(self$metastat_taxa_level)
 			p
 		},
-		print = function(...) {
+		print = function() {
 			cat("trans_diff class:\n")
 			if(!is.null(self$res_rf)) cat("Randomeforest has been calculated \n")
 			if(!is.null(self$res_lefse)) cat("Lefse has been calculated \n")
@@ -670,97 +795,4 @@ trans_diff <- R6Class(classname = "trans_diff",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
-
-#' Plotting the abundance of differencial taxa.
-#'
-#' @param method default NULL; "rf" or "lefse"; automatically check the method in the result.
-#' @param only_abund_plot default TRUE; if true, return only abundance plot; if false, return both indicator plot and abundance plot
-#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
-#' @param color_values colors for presentation.
-#' @param plot1_bar_color default "grey30"; the color for the plot 1.
-#' @param plot2_sig_color default "red"; the color for the significance in plot 2.
-#' @param plot2_sig_size default 1.5; the size for the significance in plot 2.
-#' @param axis_text_y default 12; the size for the y axis text.
-#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
-#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-#' @param group_order default NULL; a vector to order the legend in plot.
-#' @param plot2_barwidth default .9; the bar width in plot 2.
-#' @param add_significance default TRUE; whether add the significance asterisk; only available when only_abund_plot FALSE.
-#' @param use_se default TRUE; whether use SE in plot 2, if FALSE, use SD.
-#' @return a list with two ggplot.
-#' @examples
-#' t1$plot_diff_abund(use_number = 1:10)
-plot_diff_abund <- function(method = NULL, only_abund_plot = TRUE, use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-			plot1_bar_color = "grey50", plot2_sig_color = "red", plot2_sig_size = 1.2,
-			axis_text_y = 10, 
-			simplify_names = TRUE, keep_prefix = TRUE, group_order = NULL, 
-			plot2_barwidth = .9, add_significance = TRUE, use_se = TRUE){
-	dataset$plot_diff_abund()
-}
-
-#' Bar plot for LDA score.
-#'
-#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
-#' @param color_values colors for presentation.
-#' @param LDA_score default NULL; numeric value as the threshold, such as 2, limited with use_number.
-#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
-#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-#' @param group_order default NULL; a vector to order the legend in plot.
-#' @param axis_text_y default 12; the size for the y axis text.
-#' @param plot_vertical default TRUE; whether use vertical bar plot or horizontal.
-#' @param ... parameters pass to \code{\link{geom_bar}}
-#' @return ggplot.
-#' @examples
-#' t1$plot_lefse_bar(LDA_score = 2)
-plot_lefse_bar <- function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), LDA_score = NULL,
-			simplify_names = TRUE, keep_prefix = TRUE, group_order = NULL, axis_text_y = 12, plot_vertical = TRUE, ...){
-	dataset$plot_lefse_bar()
-}
-
-#' Plot the cladogram for LEfSe result.
-#'
-#' Plot the cladogram for LEfSe result similar with the python version. Codes are modified from microbiomeMarker 
-#'
-#' @param color default RColorBrewer::brewer.pal(8, "Dark2"); color used in the plot.
-#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance 
-#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance
-#' @param use_feature_num default NULL; integer; The feature number used in the plot; select the features according to the LDA score
-#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest
-#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters
-#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels
-#' @param sep default "|"; the seperate character in the taxonomic information
-#' @param branch_size default 0.2; numberic, size of branch
-#' @param alpha default 0.2; shading of the color
-#' @param clade_label_size default 0.7; size for the clade label
-#' @param node_size_scale default 1; scale for the node size
-#' @param node_size_offset default 1; offset for the node size
-#' @param annotation_shape default 22; shape used in the annotation legend
-#' @param annotation_shape_size default 5; size used in the annotation legend
-#' @return ggplot.
-#' @examples
-#' t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
-plot_lefse_cladogram <- function(color = RColorBrewer::brewer.pal(8, "Dark2"),
-		use_taxa_num = 200, filter_taxa = NULL, use_feature_num = NULL, clade_label_level = 4, select_show_labels = NULL,
-		only_select_show = FALSE, sep = "|", branch_size = 0.2, alpha = 0.2, clade_label_size = 0.7, 
-		node_size_scale = 1, node_size_offset = 1, annotation_shape = 22, annotation_shape_size = 5
-		){
-		dataset$plot_lefse_cladogram()
-}
-
-#' Bar plot metastat.
-#'
-#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
-#' @param color_values colors for presentation.
-#' @param qvalue default .05; numeric value as the threshold of q value.
-#' @param choose_group default 1; which column in res_metastat_group_matrix will be used.
-#' @return ggplot.
-#' @examples
-#' t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
-plot_metastat <- function(use_number = 1:10, qvalue = 0.05, choose_group = 1, color_values = RColorBrewer::brewer.pal(8, "Dark2")){
-	dataset$plot_metastat()
-}
-
-
-
 

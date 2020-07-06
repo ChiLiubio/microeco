@@ -1,26 +1,34 @@
+#' @title
 #' Create trans_nullmodel object.
 #'
+#' @description
 #' This class is a wrapper for a series of null model related approaches.
-#' The functions in this class: \code{\link{cal_mantel_corr}}, \code{\link{plot_mantel_corr}}, \code{\link{cal_betampd}}, \code{\link{cal_betamntd}},
-#' \code{\link{cal_ses_betampd}}, \code{\link{cal_ses_betamntd}}, \code{\link{cal_rcbray}}, \code{\link{cal_process}}
 #'
-#' @param dataset the object of \code{\link{microtable}} Class.
-#' @param filter_thres default 0; the relative abundance threshold. 
-#' @param taxa_number default NULL; how many taxa you want to use, if set, filter_thres parameter invalid.
-#' @param group default NULL; which group column name in sample_table is selected.
-#' @param select_group default NULL; the group name, used following the group to filter samples.
-#' @param cpp default FALSE; invoke c++ to accelerate betaMPD calculation.
-#' @param env_cols default NULL; number or name vector to select the physicochemical data in dataset$sample_table. 
-#' @param add_data default NULL; provide physicochemical table additionally.
-#' @param complete_na default FALSE; whether fill the NA in physicochemical data.
-#' @return intermediate files in object.
-#' @examples
-#' t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
 #' @export
 trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	public = list(
-		initialize = function(dataset = NULL, filter_thres = 0, taxa_number = NULL, group = NULL, select_group = NULL, cpp = FALSE,
-			env_cols = NULL, add_data = NULL, complete_na = FALSE
+		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param filter_thres default 0; the relative abundance threshold. 
+		#' @param taxa_number default NULL; how many taxa you want to use, if set, filter_thres parameter invalid.
+		#' @param group default NULL; which group column name in sample_table is selected.
+		#' @param select_group default NULL; the group name, used following the group to filter samples.
+		#' @param cpp default FALSE; invoke c++ to accelerate betaMPD calculation.
+		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
+		#' @param add_data default NULL; provide environmental data table additionally.
+		#' @param complete_na default FALSE; whether fill the NA in environmental data.
+		#' @return intermediate files in object.
+		#' @examples
+		#' t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
+		initialize = function(
+			dataset = NULL,
+			filter_thres = 0,
+			taxa_number = NULL,
+			group = NULL,
+			select_group = NULL,
+			cpp = FALSE,
+			env_cols = NULL,
+			add_data = NULL,
+			complete_na = FALSE
 			){
 			use_set <- clone(dataset)
 			if(!is.null(group)){
@@ -65,6 +73,16 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				self$env_data <- env_data
 			}
 		},
+		#' @description
+		#' Calculate mantel correlogram.
+		#'
+		#' @param use_env default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, use PCA to reduce dimensionality.
+		#' @param break.pts default seq(0, 1, 0.02); see \code{\link{mantel.correlog}}
+		#' @param cutoff default FALSE; see cutoff in \code{\link{mantel.correlog}}
+		#' @param ... parameters pass to \code{\link{mantel.correlog}}
+		#' @return res_mantel_corr in object.
+		#' @examples
+		#' t1$cal_mantel_corr(use_env = "pH")
 		cal_mantel_corr = function(use_env = NULL, break.pts = seq(0, 1, 0.02), cutoff=FALSE, ...){
 			dis <- self$dis
 			comm <- self$comm
@@ -92,6 +110,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			res_mantel_corr <- mantel.correlog(niche_matrix, trenic_matrix, break.pts = break.pts, cutoff = cutoff, ...)
 			self$res_mantel_corr <- res_mantel_corr
 		},
+		#' @description
+		#' Plot mantel correlogram.
+		#'
+		#' @return ggplot.
+		#' @examples
+		#' t1$plot_mantel_corr()
 		plot_mantel_corr = function(){
 			plot_data <- self$res_mantel_corr$mantel.res %>% as.data.frame
 			plot_data <- plot_data[, -4]
@@ -120,6 +144,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				guides(fill=guide_legend(title = NULL, reverse=FALSE))
 			g
 		},
+		#' @description
+		#' Calculate betaMPD. Faster than \code{\link{comdist}} in picante package.
+		#'
+		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @return res_betampd in object.
+		#' @examples
+		#' t1$cal_betampd(abundance.weighted=FALSE)
 		cal_betampd = function(abundance.weighted=FALSE){
 			dis <- self$dis
 			if(is.null(dis)){
@@ -133,6 +164,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- decostand(comm, method="total", MARGIN=1)
 			self$res_betampd <- private$betampd(comm = comm, dis = dis, cpp = cpp)
 		},
+		#' @description
+		#' Calculate betaMNTD. Faster than \code{\link{comdistnt}} in picante package.
+		#'
+		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
+		#' @return res_betamntd in object.
+		#' @examples
+		#' t1$cal_betamntd(abundance.weighted=FALSE)
 		cal_betamntd = function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
 			dis <- self$dis
 			if(is.null(dis)){
@@ -141,6 +180,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- self$comm
 			self$res_betamntd <- private$betamntd(comm = comm, dis = dis, abundance.weighted=abundance.weighted, exclude.conspecifics = exclude.conspecifics)
 		},
+		#' @description
+		#' Calculate ses.betaMPD (betaNRI).
+		#'
+		#' @param runs default 1000; simulation runs.
+		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @return res_ses_betampd in object.
+		#' @examples
+		#' t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
 		cal_ses_betampd = function(runs=1000, abundance.weighted = FALSE) {
 			cpp <- self$cpp
 			comm <- self$comm
@@ -166,6 +213,15 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
 			self$res_ses_betampd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
 		},
+		#' @description
+		#' Calculate ses.betaMNTD (betaNTI).
+		#'
+		#' @param runs default 1000; simulation runs.
+		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
+		#' @return res_ses_betamntd in object.
+		#' @examples
+		#' t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
 		cal_ses_betamntd = function(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE) {
 			comm <- self$comm
 			dis <- self$dis
@@ -187,6 +243,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
 			self$res_ses_betamntd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
 		},
+		#' @description
+		#' Calculate rcbray.
+		#'
+		#' @param runs default 1000; simulation runs.
+		#' @return res_rcbray in object.
+		#' @examples
+		#' t1$cal_rcbray(runs=1000)
 		cal_rcbray = function(runs=1000) {
 			comm <- self$comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
@@ -200,6 +263,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			beta_obs_z <- (beta_obs_z - 0.5) * 2
 			self$res_rcbray <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
 		},
+		#' @description
+		#' Infer the processes according to ses.betaMNTD ses.betaMPD and rcbray.
+		#'
+		#' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
+		#' @return res_rcbray in object.
+		#' @examples
+		#' t1$cal_process(use_betamntd = TRUE)
 		cal_process = function(use_betamntd = TRUE){
 			if(use_betamntd == T){
 				ses_phylo_beta <- self$res_ses_betamntd
@@ -319,97 +389,4 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	lock_objects = FALSE
 )
 
-#' Calculate mantel correlogram.
-#'
-#' @param use_env default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, use PCA to reduce dimensionality.
-#' @param break.pts default seq(0, 1, 0.02); see \code{\link{mantel.correlog}}
-#' @param cutoff default FALSE; see cutoff in \code{\link{mantel.correlog}}
-#' @param ... parameters pass to \code{\link{mantel.correlog}}
-#' @return res_mantel_corr in object.
-#' @examples
-#' t1$cal_mantel_corr(use_env = "pH")
-cal_mantel_corr <- function(use_env = NULL, break.pts = seq(0, 1, 0.02), cutoff=FALSE, ...){
-	dataset$cal_mantel_corr()
-}
-
-#' Plot mantel correlogram.
-#'
-#' @return ggplot.
-#' @examples
-#' t1$plot_mantel_corr()
-plot_mantel_corr <- function(){
-	dataset$plot_mantel_corr()
-}
-
-#' Calculate betaMPD.
-#'
-#' This code runs faster than \code{\link{comdist}} in picante package.
-#'
-#' @param abundance.weighted default FALSE; whether use weighted abundance
-#' @return res_betampd in object.
-#' @examples
-#' t1$cal_betampd(abundance.weighted=FALSE)
-cal_betampd <- function(abundance.weighted=FALSE){
-	dataset$cal_betampd()
-}
-
-#' Calculate betaMNTD.
-#'
-#' This code runs faster than \code{\link{comdistnt}} in picante package.
-#'
-#' @param abundance.weighted default FALSE; whether use weighted abundance
-#' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
-#' @return res_betamntd in object.
-#' @examples
-#' t1$cal_betamntd(abundance.weighted=FALSE)
-cal_betamntd <- function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
-	dataset$cal_betamntd()
-}
-
-#' Calculate ses_betaMPD.
-#'
-#'
-#' @param runs default 1000; simulation runs.
-#' @param abundance.weighted default FALSE; whether use weighted abundance
-#' @return res_ses_betampd in object.
-#' @examples
-#' t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
-cal_ses_betampd <- function(runs=1000, abundance.weighted = FALSE){
-	dataset$cal_ses_betampd()
-}
-
-#' Calculate ses_betaMNTD.
-#'
-#'
-#' @param runs default 1000; simulation runs.
-#' @param abundance.weighted default FALSE; whether use weighted abundance
-#' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
-#' @return res_ses_betamntd in object.
-#' @examples
-#' t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
-cal_ses_betamntd <- function(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE){
-	dataset$cal_ses_betamntd()
-}
-
-#' Calculate rcbray.
-#'
-#'
-#' @param runs default 1000; simulation runs.
-#' @return res_rcbray in object.
-#' @examples
-#' t1$cal_rcbray(runs=1000)
-cal_rcbray <- function(runs=1000){
-	dataset$cal_rcbray()
-}
-
-#' Infer the processes according to ses.betaMNTD ses.betaMPD and rcbray.
-#'
-#'
-#' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
-#' @return res_rcbray in object.
-#' @examples
-#' t1$cal_process(use_betamntd = TRUE)
-cal_process <- function(use_betamntd = TRUE){
-	dataset$cal_process()
-}
 

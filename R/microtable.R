@@ -1,54 +1,36 @@
+#' @title
 #' Create microtable object to store and manage all the basic files.
 #'
+#' @description
 #' This class is a wrapper for a series of operations on the original files and the basic manipulations.
-#' The functions in this class include \code{\link{tidy_dataset}}, \code{\link{filter_pollution}}, \code{\link{rarefy_samples}}, 
-#' \code{\link{cal_abund}}, \code{\link{save_abund}},
-#' \code{\link{merge_samples}}, \code{\link{merge_taxa}}, \code{\link{cal_alphadiv}}, \code{\link{save_alphadiv}},
-#' \code{\link{cal_betadiv}}, \code{\link{save_betadiv}}, \code{\link{sample_sums}}, \code{\link{taxa_sums}}, \code{\link{sample_names}}, \code{\link{taxa_names}}
 #'
-#'
-#' @param sample_table data.frame; The sample information table, rows are samples, cols are information types.
-#' @param otu_table data.frame; The species or OTU table, rows are species, cols are samples.
-#' @param tax_table data.frame; The taxonomic information table, rows are species, cols are taxonomic classes.
-#' @param phylo_tree phylo; The phylogenetic tree.
-#' @return an object of class "microtable" with the following components:
-#' \describe{
-#'   \item{\code{sample_table}}{The sample information table.}
-#'   \item{\code{otu_table}}{The OTU table.}
-#'   \item{\code{tax_table}}{The taxonomic table.}
-#'   \item{\code{phylo_tree}}{The phylogenetic tree}
-#'   \item{\code{taxa_abund}}{default NULL; use \code{\link{cal_abund}} function to calculate}
-#'   \item{\code{alpha_diversity}}{default NULL; use \code{\link{cal_alphadiv}} function to calculate}
-#'   \item{\code{beta_diversity}}{default NULL; use \code{\link{cal_betadiv}} function to calculate}
-#' }
-#' @format microtable.
-#' @examples
-#' data(otu_table)
-#' data(taxonomy_table)
-#' data(sample_info)
-#' data(phylo_tree)
-#' dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
-#' # trim the dataset
-#' dataset$tidy_dataset()
-
-#' @import ape
-#' @import vegan
-#' @import data.table
-#' @import ggplot2
-#' @import grid
-#' @importFrom magrittr %<>%
-#' @importFrom magrittr %>%
-#' @importFrom R6 R6Class
-#' @importFrom tibble rownames_to_column
-#' @importFrom rlang !!
-#' @importFrom rlang sym
-#' @useDynLib microeco
 #' @export
-
 microtable <- R6Class(classname = "microtable",
 	public = list(
-		initialize = function(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, taxa_abund = NULL, 
-			alpha_diversity = NULL, beta_diversity = NULL)
+		#' @param otu_table data.frame; default NULL; necessary; The species or OTU table, rows are species, cols are samples.
+		#' @param sample_table data.frame; default NULL; The sample information table, rows are samples, cols are sample metadata.
+		#' @param tax_table data.frame; default NULL; The taxonomic information table, rows are species, cols are taxonomic classes.
+		#' @param phylo_tree phylo; default NULL; If provided, the phylogenetic tree can be used for some analysis, for example, phylogenetic diversity.
+		#' @return an object of class "microtable" with the following components:
+		#' \describe{
+		#'   \item{\code{sample_table}}{The sample information table.}
+		#'   \item{\code{otu_table}}{The OTU table.}
+		#'   \item{\code{tax_table}}{The taxonomic table.}
+		#'   \item{\code{phylo_tree}}{The phylogenetic tree}
+		#'   \item{\code{taxa_abund}}{default NULL; use \code{\link{cal_abund}} function to calculate}
+		#'   \item{\code{alpha_diversity}}{default NULL; use \code{\link{cal_alphadiv}} function to calculate}
+		#'   \item{\code{beta_diversity}}{default NULL; use \code{\link{cal_betadiv}} function to calculate}
+		#' }
+		#' @format microtable.
+		#' @examples
+		#' data(otu_table)
+		#' data(taxonomy_table)
+		#' data(sample_info)
+		#' data(phylo_tree)
+		#' dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
+		#' # trim the dataset
+		#' dataset$tidy_dataset()
+		initialize = function(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL)
 			{
 			self$otu_table <- otu_table
 			if(is.null(sample_table)){
@@ -59,11 +41,11 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$tax_table <- tax_table
 			self$phylo_tree <- phylo_tree
-			self$taxa_abund <- taxa_abund
-			self$alpha_diversity <- alpha_diversity
-			self$beta_diversity <- beta_diversity
+			self$taxa_abund <- NULL
+			self$alpha_diversity <- NULL
+			self$beta_diversity <- NULL
 		},
-		print = function(...){
+		print = function(){
 			cat("microtable class:\n")
 			cat(paste("sample_table have", nrow(self$sample_table), "rows and", ncol(self$sample_table), "columns\n"))
 			cat(paste("otu_table have", nrow(self$otu_table), "rows and", ncol(self$otu_table), "columns\n"))
@@ -74,13 +56,29 @@ microtable <- R6Class(classname = "microtable",
 			if(!is.null(self$beta_diversity)) cat(paste("Beta diversity: calculated for", paste0(names(self$beta_diversity), collapse = ","), "\n"))
 			invisible(self)
 		},
+		#' @description
+		#' Filter the taxa considered as pollution.
+		#' This operation will remove any line of the tax_table containing any the word in taxa parameter regardless of word case.
+		#'
+		#' @param taxa default: c("mitochondria", "chloroplast"); filter mitochondria and chloroplast, or others as needed.
+		#' @return None
+		#' @examples 
+		#' dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 		filter_pollution = function(taxa = c("mitochondria", "chloroplast")){
 			if(length(taxa) > 1){
 				taxa <- paste0(taxa, collapse = "|")
 			}
 			self$tax_table %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case=TRUE)))))
 		},
-		# modified from the rarefy_even_depth() in phyloseq package
+		#' @description
+		#' Rarefy communities to make all samples have same species number, modified from the rarefy_even_depth() in phyloseq package.
+		#'
+		#' @param sample.size default:NULL; the required species number, If not provided, use minimum number of all samples.
+		#' @param rngseed random seed; default: 123.
+		#' @param replace default: TRUE; see \code{\link{sample}} for the random sampling.
+		#' @return None; rarefied dataset.
+		#' @examples
+		#' dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 		rarefy_samples = function(sample.size = NULL, rngseed = 123, replace = TRUE){
 			set.seed(rngseed)
 			self$tidy_dataset()
@@ -115,6 +113,14 @@ microtable <- R6Class(classname = "microtable",
 				self$tidy_dataset()
 			}
 		},
+		#' @description
+		#' Tidy the object of microtable Class.
+		#' Trim the dataset to make OTUs and samples consistent across all files in the object.
+		#'
+		#' @param main_data TRUE or FALSE, if TRUE, only basic files in microtable object is tidied, otherwise, all files, including taxa_abund, alpha_diversity and beta_diversity, are all trimed.
+		#' @return None, Object of microtable itself cleaned up. 
+		#' @examples 
+		#' dataset$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = TRUE){
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
 			# keep the sample order same with raw sample table
@@ -135,6 +141,12 @@ microtable <- R6Class(classname = "microtable",
 				if(!is.null(self$beta_diversity)) self$beta_diversity %<>% lapply(., function(x) x[sample_names, sample_names])
 			}
 		},
+		#' @description
+		#' Calculate the taxonomic abundance at each taxonomic ranks.
+		#'
+		#' @return taxa_abund in object.
+		#' @examples
+		#' dataset$cal_abund()
 		cal_abund = function(){
 			taxa_abund = list()
 			for(i in 1:ncol(self$tax_table)) {
@@ -143,6 +155,12 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$taxa_abund <- taxa_abund
 		},
+		#' @description
+		#' Save taxonomic abundance to the computer local place.
+		#'
+		#' @param dirpath default "taxa_abund"; directory name to save the taxonomic abundance files.
+		#' @examples
+		#' dataset$save_abund(dirpath = "taxa_abund")
 		save_abund = function(dirpath = "taxa_abund"){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
@@ -151,18 +169,49 @@ microtable <- R6Class(classname = "microtable",
 				write.csv(self$taxa_abund[[i]], file = paste0(dirpath, "/", i, "_abund.csv"), row.names = TRUE)
 			}
 		},
+		#' @description
+		#' Sum the species number for each sample.
+		#'
+		#' @return species number of samples.
+		#' @examples
+		#' dataset$sample_sums()
 		sample_sums = function(){
 			colSums(self$otu_table)
 		},
+		#' @description
+		#' Sum the species number for each taxa.
+		#'
+		#' @return species number of taxa.
+		#' @examples
+		#' dataset$taxa_sums()
 		taxa_sums = function(){
 			rowSums(self$otu_table)
 		},
+		#' @description
+		#' Sample names.
+		#'
+		#' @return sample names.
+		#' @examples
+		#' dataset$sample_names()
 		sample_names = function(){
 			rownames(self$sample_table)
 		},
+		#' @description
+		#' Taxa names.
+		#'
+		#' @return taxa names.
+		#' @examples
+		#' dataset$taxa_names()
 		taxa_names = function(){
 			rownames(self$tax_table)
 		},
+		#' @description
+		#' Merge samples according to specific group to generate a new microtable.
+		#'
+		#' @param use_group the group column in sample_table.
+		#' @return a new created merged microtable object.
+		#' @examples 
+		#' dataset$merge_samples(use_group = "Group")
 		merge_samples = function(use_group){
 			otu_table <- self$otu_table
 			sample_table <- self$sample_table
@@ -181,6 +230,13 @@ microtable <- R6Class(classname = "microtable",
 			# return a new microtable object
 			microtable$new(sample_table = sample_table_new, otu_table = otu_table_new, tax_table = tax_table, phylo_tree = phylo_tree)
 		},
+		#' @description
+		#' Merge taxa according to specific taxonomic rank to generate a new microtable.
+		#'
+		#' @param taxa the specific rank in tax_table.
+		#' @return a new created merged microtable object.
+		#' @examples 
+		#' dataset$merge_taxa(taxa = "Genus")
 		merge_taxa = function(taxa = "Genus"){
 			# Agglomerate all OTUs by given taxonomic level
 			ranknumber <- which(colnames(self$tax_table) %in% taxa)
@@ -208,6 +264,15 @@ microtable <- R6Class(classname = "microtable",
 			new_tax <- tax[rownames(new_abund), ]
 			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax)
 		},
+		#' @description
+		#' Calculate alpha diversity in microtable Class.
+		#'
+		#' @param measures one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; default NULL, using all those measures.
+		#' @param PD TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.
+		#' @return alpha_diversity stored in object.
+		#' @examples
+		#' dataset$cal_alphadiv(measures = NULL, PD = FALSE)
+		#' class(dataset$alpha_diversity)
 		cal_alphadiv = function(measures = NULL, PD = FALSE){
 			if (!any(self$otu_table == 1)){
 				warning("The data you have provided does not have\n", 
@@ -265,12 +330,27 @@ microtable <- R6Class(classname = "microtable",
 			colnames(out)[colnames(out) %in% namechange] <- renamevec[namechange]
 			self$alpha_diversity <- as.data.frame(out)
 		},
+		#' @description
+		#' Save alpha diversity table to the computer.
+		#'
+		#' @param dirpath default "alpha_diversity"; directory name to save the alpha_diversity.csv file.
+		#' @examples
+		#' # save alpha diversity table in the alpha_diversity directory
+		#' dataset$save_alphadiv(dirpath = "alpha_diversity")
 		save_alphadiv = function(dirpath = "alpha_diversity"){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
 			}
 			write.csv(self$alpha_diversity, file = paste0(dirpath, "/", "alpha_diversity.csv"), row.names = TRUE)
 		},
+		#' @description
+		#' Calculate beta diversity in microtable Class.
+		#'
+		#' @param unifrac TRUE or FALSE, whether unifrac index should be calculated, default FALSE.
+		#' @return beta_diversity stored in object.
+		#' @examples
+		#' dataset$cal_betadiv(unifrac = FALSE)
+		#' class(dataset$beta_diversity)
 		cal_betadiv = function(unifrac = FALSE){
 			res <- list()
 			eco_table <- t(self$otu_table)
@@ -294,6 +374,12 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$beta_diversity <- res
 		},
+		#' @description
+		#' Save beta diversity matrix to the computer.
+		#'
+		#' @param dirpath default "beta_diversity"; directory name to save the beta diversity matrix files.
+		#' @examples
+		#' dataset$save_betadiv(dirpath = "beta_diversity")
 		save_betadiv = function(dirpath = "beta_diversity"){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
@@ -365,169 +451,5 @@ microtable <- R6Class(classname = "microtable",
 	lock_objects = FALSE,
 	lock_class = FALSE
 )
-
-#' Filter the taxa considered as pollution.
-#'
-#' This operation will remove any line of the tax_table containing any the word in taxa parameter regardless of word case.
-#'
-#' @param taxa default: c("mitochondria", "chloroplast"); filter mitochondria and chloroplast, or others as needed.
-#' @return None
-#' @examples 
-#' dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
-filter_pollution <- function(taxa = c("mitochondria", "chloroplast")){
-	dataset$filter_pollution()
-}
-
-
-#' Tidy the object of microtable Class.
-#'
-#' Trim the dataset to make OTUs and samples consistent across all files in the object.
-#'
-#' @param main_data TRUE or FALSE, if TRUE, only basic files in microtable object is tidied, otherwise, all files, including taxa_summary, alpha_diversity and beta_diversity, are all tidied.
-#' @return None, Object of microtable itself cleaned up. 
-#' @examples 
-#' dataset$tidy_dataset(main_data = TRUE)
-
-tidy_dataset <- function(main_data = TRUE){
-	dataset$tidy_dataset()
-}
-
-
-#' Rarefy communities to make all samples have same species number.
-#'
-#' @param sample.size default:NULL; the required species number, If not provided, use minimum number of all samples.
-#' @param rngseed random seed; default: 123.
-#' @param replace default: TRUE; see \code{\link{sample}} for the random sampling.
-#' @return None; rarefied dataset.
-#' @examples
-#' dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
-
-rarefy_samples <- function(sample.size = NULL, rngseed = 123, replace = TRUE){
-	dataset$rarefy_samples()
-}
-
-#' Calculate the taxonomic abundance at each taxonomic ranks.
-#'
-#' @return taxa_abund in object.
-#' @examples
-#' dataset$cal_abund()
-#' str(dataset$taxa_abund)
-cal_abund <- function(){
-	dataset$cal_abund()
-}
-
-#' Save taxonomic abundance to the computer.
-#'
-#' @param dirpath default "taxa_abund"; directory name to save the taxonomic abundance files.
-#' @examples
-#' dataset$save_abund(dirpath = "taxa_abund")
-save_abund = function(dirpath = "taxa_abund"){
-	dataset$save_abund()
-}
-
-#' Merge samples according to specific group to generate a new microtable.
-#'
-#' @param use_group the specific group in sample_table.
-#' @return a new created merged \code{\link{microtable}}.
-#' @examples 
-#' dataset$merge_samples(use_group = "Group")
-
-merge_samples <- function(use_group){
-	dataset$merge_samples()
-}
-
-#' Merge taxa according to specific taxonomic rank to generate a new microtable.
-#'
-#' @param taxa the specific rank in tax_table.
-#' @return a new created merged \code{\link{microtable}}.
-#' @examples 
-#' dataset$merge_taxa(taxa = "Genus")
-
-merge_taxa <- function(taxa = "Genus"){
-	dataset$merge_taxa(taxa = taxa)
-}
-
-
-#' Calculate alpha diversity in microtable Class.
-#'
-#' @param measures one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; default NULL, using all those measures.
-#' @param PD TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.
-#' @return alpha_diversity in object.
-#' @examples
-#' dataset$cal_alphadiv(measures = NULL, PD = FALSE)
-#' class(dataset$alpha_diversity)
-cal_alphadiv <- function(measures = NULL, PD = FALSE){
-	dataset$cal_alphadiv(measures = measures, PD = PD)
-}
-
-
-#' Save alpha diversity table to the computer.
-#'
-#' @param dirpath default "alpha_diversity"; directory name to save the alpha_diversity.csv file.
-#' @examples
-#' # save alpha diversity table in the alpha_diversity directory
-#' dataset$save_alphadiv(dirpath = "alpha_diversity")
-save_alphadiv = function(dirpath = "alpha_diversity"){
-	dataset$save_alphadiv()
-}
-
-
-#' Calculate beta diversity in microtable Class.
-#'
-#' @param unifrac TRUE or FALSE, whether unifrac index should be calculated, default FALSE.
-#' @return beta_diversity in object.
-#' @examples
-#' dataset$cal_betadiv(unifrac = FALSE)
-#' class(dataset$beta_diversity)
-cal_betadiv <- function(unifrac = FALSE){
-	dataset$cal_betadiv()
-}
-
-#' Save beta diversity matrix to the computer.
-#'
-#' @param dirpath default "beta_diversity"; directory name to save the beta diversity matrix files.
-#' @examples
-#' dataset$save_betadiv(dirpath = "beta_diversity")
-save_betadiv = function(dirpath = "beta_diversity"){
-	dataset$save_betadiv()
-}
-
-#' Sum the species number for each sample.
-#'
-#' @return species number of samples.
-#' @examples
-#' dataset$sample_sums()
-sample_sums <- function() {
-	colSums(dataset$otu_table)
-}
-
-#' Sum the species number for each taxa.
-#'
-#' @return species number of taxa.
-#' @examples
-#' dataset$taxa_sums()
-taxa_sums <- function(){
-	rowSums(dataset$otu_table)
-}
-
-#' Sample names.
-#'
-#' @return sample names.
-#' @examples
-#' dataset$sample_names()
-sample_names <- function(){
-	rownames(dataset$sample_table)
-}
-
-#' Taxa names.
-#'
-#' @return taxa names.
-#' @examples
-#' dataset$taxa_names()
-taxa_names <- function(){
-	rownames(dataset$tax_table)
-}
-
-
 
 

@@ -2,17 +2,41 @@
 % Please edit documentation in R/trans_diff.R
 \name{trans_diff}
 \alias{trans_diff}
-\title{Create trans_diff object for the difference tests on the taxonomic abundance and plotting.}
-\value{
-res_rf res_lefse res_abund or res_metastat in trans_diff object.
-}
+\title{Create trans_diff object for the differential analysis on the taxonomic abundance.}
 \description{
 This class is a wrapper for a series of differential abundance test and indicator analysis methods.
-The functions in this class include \code{\link{plot_diff_abund}}, \code{\link{plot_lefse_bar}}, \code{\link{plot_metastat}},
-\code{\link{plot_lefse_cladogram}}
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_diff$new`
+## ------------------------------------------------
+
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+
+## ------------------------------------------------
+## Method `trans_diff$plot_diff_abund`
+## ------------------------------------------------
+
+t1$plot_diff_abund(use_number = 1:10)
+
+## ------------------------------------------------
+## Method `trans_diff$plot_lefse_bar`
+## ------------------------------------------------
+
+t1$plot_lefse_bar(LDA_score = 2)
+
+## ------------------------------------------------
+## Method `trans_diff$plot_lefse_cladogram`
+## ------------------------------------------------
+
+t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+
+## ------------------------------------------------
+## Method `trans_diff$plot_metastat`
+## ------------------------------------------------
+
+t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -35,8 +59,8 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
   dataset = NULL,
   method = c("lefse", "rf", "metastat")[1],
   group = NULL,
-  alpha = 0.05,
   lefse_subgroup = NULL,
+  alpha = 0.05,
   lefse_min_subsam = 10,
   lefse_norm = 1e+06,
   nresam = 0.6667,
@@ -53,17 +77,17 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{method}}{default "lefse"; one of c("lefse", "rf", "metastat").}
+\item{\code{method}}{default "lefse"; "lefse", "rf" or "metastat".}
 
 \item{\code{group}}{default NULL; sample group used for main comparision.}
 
-\item{\code{alpha}}{default .05; significance threshold.}
+\item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse.}
 
-\item{\code{lefse_subgroup}}{default NULL; sample sub group used in lefse.}
+\item{\code{alpha}}{default .05; significance threshold.}
 
 \item{\code{lefse_min_subsam}}{default 10; sample numbers required in the subgroup test.}
 
-\item{\code{lefse_norm}}{default 1000000; scale value.}
+\item{\code{lefse_norm}}{default 1000000; scale value in lefse.}
 
 \item{\code{nresam}}{default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.}
 
@@ -79,11 +103,23 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+res_rf res_lefse res_abund or res_metastat in trans_diff object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_diff_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_diff_abund}{}}}
 \subsection{Method \code{plot_diff_abund()}}{
+Plotting the abundance of differential taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_abund(
   method = NULL,
@@ -106,15 +142,53 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "lefse"; one of c("lefse", "rf", "metastat").}
+\item{\code{method}}{default NULL; "rf" or "lefse"; automatically check the method in the result.}
+
+\item{\code{only_abund_plot}}{default TRUE; if true, return only abundance plot; if false, return both indicator plot and abundance plot}
+
+\item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
+
+\item{\code{color_values}}{colors for presentation.}
+
+\item{\code{plot1_bar_color}}{default "grey30"; the color for the plot 1.}
+
+\item{\code{plot2_sig_color}}{default "red"; the color for the significance in plot 2.}
+
+\item{\code{plot2_sig_size}}{default 1.5; the size for the significance in plot 2.}
+
+\item{\code{axis_text_y}}{default 12; the size for the y axis text.}
+
+\item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
+
+\item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
+
+\item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
+
+\item{\code{plot2_barwidth}}{default .9; the bar width in plot 2.}
+
+\item{\code{add_significance}}{default TRUE; whether add the significance asterisk; only available when only_abund_plot FALSE.}
+
+\item{\code{use_se}}{default TRUE; whether use SE in plot 2, if FALSE, use SD.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_diff_abund(use_number = 1:10)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_lefse_bar"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_lefse_bar}{}}}
 \subsection{Method \code{plot_lefse_bar()}}{
+Bar plot for LDA score.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_lefse_bar(
   use_number = 1:10,
@@ -129,11 +203,46 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
+
+\item{\code{color_values}}{colors for presentation.}
+
+\item{\code{LDA_score}}{default NULL; numeric value as the threshold, such as 2, limited with use_number.}
+
+\item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
+
+\item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
+
+\item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
+
+\item{\code{axis_text_y}}{default 12; the size for the y axis text.}
+
+\item{\code{plot_vertical}}{default TRUE; whether use vertical bar plot or horizontal.}
+
+\item{\code{...}}{parameters pass to \code{\link{geom_bar}}}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_lefse_bar(LDA_score = 2)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_lefse_cladogram"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_lefse_cladogram}{}}}
 \subsection{Method \code{plot_lefse_cladogram()}}{
+Plot the cladogram for LEfSe result similar with the python version. Codes are modified from microbiomeMarker
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_lefse_cladogram(
   color = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -157,22 +266,86 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{alpha}}{default .05; significance threshold.}
+\item{\code{color}}{default RColorBrewer::brewer.pal(8, "Dark2"); color used in the plot.}
+
+\item{\code{use_taxa_num}}{default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance}
+
+\item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance}
+
+\item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; select the features according to the LDA score}
+
+\item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest}
+
+\item{\code{select_show_labels}}{default NULL; character vector; The features to show in the plot with full label names, not the letters}
+
+\item{\code{only_select_show}}{default FALSE; whether only use the the select features in the parameter select_show_labels}
+
+\item{\code{sep}}{default "|"; the seperate character in the taxonomic information}
+
+\item{\code{branch_size}}{default 0.2; numberic, size of branch}
+
+\item{\code{alpha}}{default 0.2; shading of the color}
+
+\item{\code{clade_label_size}}{default 0.7; size for the clade label}
+
+\item{\code{node_size_scale}}{default 1; scale for the node size}
+
+\item{\code{node_size_offset}}{default 1; offset for the node size}
+
+\item{\code{annotation_shape}}{default 22; shape used in the annotation legend}
+
+\item{\code{annotation_shape_size}}{default 5; size used in the annotation legend}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_metastat"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_metastat}{}}}
 \subsection{Method \code{plot_metastat()}}{
+Bar plot for metastat.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_metastat(
   use_number = 1:10,
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   qvalue = 0.05,
-  choose_group = 1,
-  color_values = RColorBrewer::brewer.pal(8, "Dark2")
+  choose_group = 1
 )}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
+
+\item{\code{color_values}}{colors for presentation.}
+
+\item{\code{qvalue}}{default .05; numeric value as the threshold of q value.}
+
+\item{\code{choose_group}}{default 1; which column in res_metastat_group_matrix will be used.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -181,7 +354,7 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_diff$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_diff$print()}\if{html}{\out{</div>}}
 }
 
 }

@@ -3,16 +3,54 @@
 \name{trans_env}
 \alias{trans_env}
 \title{Create trans_env object for the analysis of the effects of environmental factors on communities.}
-\value{
-env_data and dataset in trans_env object.
-}
 \description{
 This class is a wrapper for a series of operations associated with environmental measurements.
-The functions in this class include \code{\link{cal_rda}}, \code{\link{trans_rda}}, \code{\link{plot_rda}}, \code{\link{cal_mantel}},
-\code{\link{cal_cor}}, \code{\link{plot_corr}}
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_env$new`
+## ------------------------------------------------
+
 t1 <- trans_env$new(dataset = dataset, add_data = env_data)
+
+## ------------------------------------------------
+## Method `trans_env$cal_rda`
+## ------------------------------------------------
+
+t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+
+## ------------------------------------------------
+## Method `trans_env$trans_rda`
+## ------------------------------------------------
+
+t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+
+## ------------------------------------------------
+## Method `trans_env$plot_rda`
+## ------------------------------------------------
+
+t1$plot_rda(plot_color = "Group")
+
+## ------------------------------------------------
+## Method `trans_env$cal_mantel`
+## ------------------------------------------------
+
+t1$cal_mantel(use_measure = "bray")
+
+## ------------------------------------------------
+## Method `trans_env$cal_cor`
+## ------------------------------------------------
+
+t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
+t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
+t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+
+## ------------------------------------------------
+## Method `trans_env$plot_corr`
+## ------------------------------------------------
+
+t1$plot_corr(pheatmap = FALSE)
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -46,7 +84,7 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{env_cols}}{default NULL; a vector; If the environmental data is in sample_table, use this parameter to indicate the columns.}
+\item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table.}
 
 \item{\code{add_data}}{default NULL; provide the environmental data frame individually.}
 
@@ -54,11 +92,23 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+env_data and dataset in trans_env object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1 <- trans_env$new(dataset = dataset, add_data = env_data)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_rda"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_rda}{}}}
 \subsection{Method \code{cal_rda()}}{
+Redundancy analysis (RDA).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_rda(
   use_dbrda = TRUE,
@@ -70,11 +120,40 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_dbrda}}{default TRUE; whether use db-RDA, if FALSE, use RDA.}
+
+\item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset.}
+
+\item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
+
+\item{\code{feature_sel}}{default FALSE; whether perform the feature selection.}
+
+\item{\code{taxa_level}}{default NULL; If use RDA, provide the taxonomic rank.}
+
+\item{\code{taxa_filter_thres}}{default NULL; If want to filter taxa, provide the relative abundance threshold.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_rda in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_rda"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_rda}{}}}
 \subsection{Method \code{trans_rda()}}{
+transform RDA result for the following plotting.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$trans_rda(
   show_taxa = 10,
@@ -86,19 +165,77 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{show_taxa}}{default 10; taxa number shown in the plot.}
+
+\item{\code{adjust_arrow_length}}{default FALSE; whether adjust the arrow length to be clear}
+
+\item{\code{min_perc_env}}{default 1; minimum scale value for env arrow, relatively.}
+
+\item{\code{max_perc_env}}{default 100; maximum scale value for env arrow, relatively.}
+
+\item{\code{min_perc_tax}}{default 1; minimum scale value for tax arrow, relatively.}
+
+\item{\code{max_perc_tax}}{default 100; maximum scale value for tax arrow, relatively.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_rda_trans in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_rda"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_rda}{}}}
 \subsection{Method \code{plot_rda()}}{
+plot RDA result.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_rda(
   plot_color = NULL,
   plot_shape = NULL,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
   taxa_text_color = "firebrick1",
   taxa_text_type = "italic"
 )}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot_color}}{default NULL; group used for color.}
+
+\item{\code{plot_shape}}{default NULL; group used for shape.}
+
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.}
+
+\item{\code{shape_values}}{default see the function; vector used in the shape, see ggplot2 tutorial.}
+
+\item{\code{taxa_text_color}}{default "firebrick1"; taxa text colors.}
+
+\item{\code{taxa_text_type}}{default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_rda(plot_color = "Group")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
@@ -106,6 +243,7 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 \if{html}{\out{<a id="method-cal_mantel"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_mantel}{}}}
 \subsection{Method \code{cal_mantel()}}{
+Mantel test between beta diversity matrix and environmental data.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_mantel(
   select_env_data = NULL,
@@ -117,18 +255,48 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
+
+\item{\code{partial_mantel}}{default FALSE; whether use partial mantel test.}
+
+\item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.}
+
+\item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
+
+\item{\code{method}}{default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.}
+
+\item{\code{...}}{paremeters pass to \code{\link{mantel}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_mantel in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_mantel(use_measure = "bray")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_cor"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_cor}{}}}
 \subsection{Method \code{cal_cor()}}{
+Calculating the correlations between taxa abundance and environmental variables. 
+Indeed, it can also be used for calculating other correlation between any two variables from two tables.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
   select_env_data = NULL,
   cor_method = c("pearson", "spearman", "kendall")[1],
-  p_adjust_type = c("Type", "Taxa", "Env")[3],
   p_adjust_method = "fdr",
+  p_adjust_type = c("Type", "Taxa", "Env")[3],
   add_abund_table = NULL,
   by_group = NULL,
   other_taxa = NULL,
@@ -138,23 +306,96 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa abundance, other: provide additional data with other_taxa parameter.}
+
+\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
+
+\item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation method.}
+
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method.}
+
+\item{\code{p_adjust_type}}{default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.}
+
+\item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
+
+\item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate correlations for different groups separately.}
+
+\item{\code{other_taxa}}{default NULL; provide additional taxa, see use_data parameter.}
+
+\item{\code{group_use}}{default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.}
+
+\item{\code{group_select}}{default NULL; the group name used; will retain samples within the group.}
+
+\item{\code{taxa_name_full}}{default TRUE; Whether retain the complete taxonomic name of taxa.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_cor in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
+t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
+t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_corr"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_corr}{}}}
 \subsection{Method \code{plot_corr()}}{
+Plot correlation heatmap.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_corr(
+  color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
+    "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
   pheatmap = FALSE,
   ylab_type_italic = FALSE,
   keep_full_name = FALSE,
   keep_prefix = TRUE,
-  color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
-    "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
   plot_x_size = 9,
   mylabels_x = NULL,
   font_family = NULL
 )}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{color_vector}}{color pallete.}
+
+\item{\code{pheatmap}}{default FALSE; whether use heatmap with clustering plot.}
+
+\item{\code{ylab_type_italic}}{default FALSE; whether use italic type for y lab text.}
+
+\item{\code{keep_full_name}}{default FALSE; whether use the complete taxonomic name.}
+
+\item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
+
+\item{\code{plot_x_size}}{default 9; x axis text size.}
+
+\item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
+
+\item{\code{font_family}}{default NULL; font family used in ggplot2; only available when pheatmap = FALSE.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_corr(pheatmap = FALSE)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }

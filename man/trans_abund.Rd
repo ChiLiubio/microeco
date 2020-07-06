@@ -2,17 +2,42 @@
 % Please edit documentation in R/trans_abund.R
 \name{trans_abund}
 \alias{trans_abund}
-\title{Create trans_abund object to use transformed taxonomic abundance for statistics and plotting.}
-\value{
-Object of trans_abund \code{\link{R6Class}} containing transformed data.
-}
+\title{Create trans_abund object to transform taxonomic abundance for plotting.}
 \description{
 This class is a wrapper for the taxonomic abundance transformations and plotting.
-The functions in this class include \code{\link{plot_bar}}, \code{\link{plot_box}}, \code{\link{plot_heatmap}}, \code{\link{plot_pie}}.
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_abund$new`
+## ------------------------------------------------
+
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+
+## ------------------------------------------------
+## Method `trans_abund$plot_bar`
+## ------------------------------------------------
+
+t1$plot_bar(bar_type = "full", others_color = "grey90")
+
+## ------------------------------------------------
+## Method `trans_abund$plot_box`
+## ------------------------------------------------
+
+t1$plot_box(group = "Group", show_point = FALSE)
+
+## ------------------------------------------------
+## Method `trans_abund$plot_heatmap`
+## ------------------------------------------------
+
+t1$plot_heatmap(withmargin = FALSE)
+
+## ------------------------------------------------
+## Method `trans_abund$plot_pie`
+## ------------------------------------------------
+
+t1$plot_pie(facet_nrow = 2)
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -52,29 +77,43 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 
 \item{\code{show}}{default 0; the relative abundance threshold.}
 
-\item{\code{ntaxa}}{default 10; how many taxa will be saved.}
+\item{\code{ntaxa}}{default 10; how many taxa will be used, ordered by abundance from high to low.}
 
 \item{\code{groupmean}}{default NULL; for calculating mean abundance, select a group column in sample_table .}
 
 \item{\code{use_percentage}}{default TRUE; showing the abundance percentage.}
 
-\item{\code{order_x}}{default NULL; character vector; if x xais should be ordered, input the samples or group vector or the column name in sample table.}
+\item{\code{order_x}}{default NULL; character vector; if x xais is ordered, input the samples or group vector or the column name in sample table.}
 
 \item{\code{input_taxaname}}{default NULL; if some taxa are selected, input taxa names.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+abund_data and other file for plotting.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_bar"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_bar}{}}}
 \subsection{Method \code{plot_bar()}}{
+Plot the bar plot with the object of trans_abund Class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_bar(
   use_colors = RColorBrewer::brewer.pal(12, "Paired"),
   bar_type = "full",
   others_color = "grey90",
   facet = NULL,
+  order_facet = NULL,
   barwidth = NULL,
   use_alluvium = FALSE,
   clustering = FALSE,
@@ -91,11 +130,64 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+
+\item{\code{bar_type}}{default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.}
+
+\item{\code{others_color}}{default "grey90"; the color for "others" taxa.}
+
+\item{\code{facet}}{default NULL; if using facet, providing the group name.}
+
+\item{\code{order_facet}}{NULL; vector, used to order the facet.}
+
+\item{\code{barwidth}}{default NULL; bar width, see width in \code{\link{geom_bar}}.}
+
+\item{\code{use_alluvium}}{default FALSE; whether add alluvium plot}
+
+\item{\code{clustering}}{default FALSE; whether order samples by the clustering}
+
+\item{\code{facet_color}}{default "grey95"; facet background color.}
+
+\item{\code{strip_text}}{default 11; facet text size.}
+
+\item{\code{legend_text_italic}}{default FALSE; whether use italic in legend.}
+
+\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+
+\item{\code{xtext_size}}{default 10; x axis text size.}
+
+\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+
+\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
+
+\item{\code{ytitle_size}}{default 17; y axis title size.}
+
+\item{\code{base_font}}{default NULL; font in the plot.}
+
+\item{\code{ylab_title}}{default NULL; y axis title.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_bar(bar_type = "full", others_color = "grey90")
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_box"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_box}{}}}
 \subsection{Method \code{plot_box()}}{
+Plot the box plot with the object of trans_abund Class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_box(
   use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -118,11 +210,62 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+
+\item{\code{group}}{default NULL; sample table column name.}
+
+\item{\code{show_point}}{default FALSE; whether show points in plot.}
+
+\item{\code{point_color}}{default "black"; If show_point TRUE; use the color}
+
+\item{\code{point_size}}{default 3; If show_point TRUE; use the size}
+
+\item{\code{point_alpha}}{default .3; If show_point TRUE; use the transparency.}
+
+\item{\code{plot_flip}}{default FALSE; Whether rotate plot.}
+
+\item{\code{boxfill}}{default TRUE; Whether fill the box.}
+
+\item{\code{middlecolor}}{default "grey95"; The middle line color.}
+
+\item{\code{middlesize}}{default 1; The middle line size.}
+
+\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+
+\item{\code{xtext_size}}{default 10; x axis text size.}
+
+\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+
+\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
+
+\item{\code{ytitle_size}}{default 17; y axis title size.}
+
+\item{\code{base_font}}{default NULL; font in the plot.}
+
+\item{\code{...}}{parameters pass to \code{\link{geom_boxplot}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_box(group = "Group", show_point = FALSE)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_heatmap"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_heatmap}{}}}
 \subsection{Method \code{plot_heatmap()}}{
+Plot the heatmap with the object of trans_abund Class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
   use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
@@ -148,11 +291,66 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+
+\item{\code{withmargin}}{default TRUE; whether retain the tile margin.}
+
+\item{\code{plot_numbers}}{default FALSE; whether plot the number in heatmap.}
+
+\item{\code{plot_text_size}}{default 4; If plot_numbers TRUE, text size in plot.}
+
+\item{\code{plot_breaks}}{default NULL; The legend breaks.}
+
+\item{\code{margincolor}}{default "white"; If withmargin TRUE, use this as the margin color.}
+
+\item{\code{plot_colorscale}}{default "log10"; color scale.}
+
+\item{\code{min_abundance}}{default .01; the minimum abundance percentage in plot.}
+
+\item{\code{max_abundance}}{default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.}
+
+\item{\code{facet}}{default NULL; if using facet, providing the group name.}
+
+\item{\code{order_facet}}{default NULL; if reorder facet, provide the vector.}
+
+\item{\code{strip_text}}{default 11; facet text size.}
+
+\item{\code{xtext_size}}{default 10; x axis text size.}
+
+\item{\code{ytext_size}}{default 11; y axis text size.}
+
+\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+
+\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
+
+\item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
+
+\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+
+\item{\code{base_font}}{default NULL; font in the plot.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_heatmap(withmargin = FALSE)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_pie"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_pie}{}}}
 \subsection{Method \code{plot_pie()}}{
+Plot pie chart with the object of trans_abund Class.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_pie(
   use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -162,13 +360,37 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.}
+
+\item{\code{facet_nrow}}{default 1; how many rows in the plot.}
+
+\item{\code{strip_text}}{default 11; sample title size.}
+
+\item{\code{legend_text_italic}}{default FALSE; whether use italic in legend.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_pie(facet_nrow = 2)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_abund$print(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_abund$print()}\if{html}{\out{</div>}}
 }
 
 }

@@ -3,27 +3,63 @@
 \name{trans_func}
 \alias{trans_func}
 \title{Create trans_func object for functional analysis.}
-\value{
-trans_func object with tax_table, otu_table, sample_table.
-}
 \description{
-This class is a wrapper for a series of functional analysis for communities and species.
-The functions in this class include \code{\link{cal_prok_biogeo}}, \code{\link{cal_prok_biogeo_perc}}, \code{\link{show_prok_biogeo}},
-\code{\link{plot_prok_biogeo_perc}}, \code{\link{cal_tax4fun_func}}, \code{\link{cal_biogeo}}.
+This class is a wrapper for a series of functional analysis for species and communities.
 }
 \examples{
+
+## ------------------------------------------------
+## Method `trans_func$new`
+## ------------------------------------------------
+
 t1 <- trans_diff$new(dataset = dataset)
+
+## ------------------------------------------------
+## Method `trans_func$cal_spe_func`
+## ------------------------------------------------
+
+t1$cal_spe_func()
+
+## ------------------------------------------------
+## Method `trans_func$cal_spe_func_perc`
+## ------------------------------------------------
+
+t1$cal_spe_func_perc(use_community = TRUE)
+
+## ------------------------------------------------
+## Method `trans_func$show_prok_func`
+## ------------------------------------------------
+
+t1$show_prok_func(use_func = "methanotrophy")
+
+## ------------------------------------------------
+## Method `trans_func$plot_spe_func_perc`
+## ------------------------------------------------
+
+t1$plot_spe_func_perc(use_group_list = TRUE)
+
+## ------------------------------------------------
+## Method `trans_func$cal_FAPROTAX`
+## ------------------------------------------------
+
+t1$cal_FAPROTAX()
+
+## ------------------------------------------------
+## Method `trans_func$cal_tax4fun`
+## ------------------------------------------------
+
+t1$cal_tax4fun(folderReferenceData = "./SILVA123")
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_func$new()}}
-\item \href{#method-cal_biogeo}{\code{trans_func$cal_biogeo()}}
-\item \href{#method-cal_prok_biogeo}{\code{trans_func$cal_prok_biogeo()}}
-\item \href{#method-cal_prok_biogeo_perc}{\code{trans_func$cal_prok_biogeo_perc()}}
-\item \href{#method-show_prok_biogeo}{\code{trans_func$show_prok_biogeo()}}
-\item \href{#method-plot_prok_biogeo_perc}{\code{trans_func$plot_prok_biogeo_perc()}}
-\item \href{#method-cal_tax4fun_func}{\code{trans_func$cal_tax4fun_func()}}
+\item \href{#method-cal_spe_func}{\code{trans_func$cal_spe_func()}}
+\item \href{#method-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
+\item \href{#method-show_prok_func}{\code{trans_func$show_prok_func()}}
+\item \href{#method-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
+\item \href{#method-cal_FAPROTAX}{\code{trans_func$cal_FAPROTAX()}}
+\item \href{#method-cal_tax4fun}{\code{trans_func$cal_tax4fun()}}
 \item \href{#method-print}{\code{trans_func$print()}}
 \item \href{#method-clone}{\code{trans_func$clone()}}
 }
@@ -43,64 +79,199 @@ t1 <- trans_diff$new(dataset = dataset)
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified.
 }
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_biogeo"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_biogeo}{}}}
-\subsection{Method \code{cal_biogeo()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_biogeo(keep_tem = TRUE)}\if{html}{\out{</div>}}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1 <- trans_diff$new(dataset = dataset)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_prok_biogeo"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_prok_biogeo}{}}}
-\subsection{Method \code{cal_prok_biogeo()}}{
+\if{html}{\out{<a id="method-cal_spe_func"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_spe_func}{}}}
+\subsection{Method \code{cal_spe_func()}}{
+Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
+for prokaryotes, use FAPROTAX database; for fungi, use FUNGuild database.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_prok_biogeo()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+res_spe_func in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_spe_func()
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_prok_biogeo_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_prok_biogeo_perc}{}}}
-\subsection{Method \code{cal_prok_biogeo_perc()}}{
+\if{html}{\out{<a id="method-cal_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_spe_func_perc}{}}}
+\subsection{Method \code{cal_spe_func_perc()}}{
+Calculating the percentages of species with specific trait in communities or modules.
+The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_prok_biogeo_perc(use_community = TRUE, node_type_table = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
+  use_community = TRUE,
+  node_type_table = NULL,
+  abundance_weighted = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_community}}{default TRUE; whether calculate community; if FALSE, use module.}
+
+\item{\code{node_type_table}}{default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of \code{\link{cal_node_type}}.}
+
+\item{\code{abundance_weighted}}{default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_spe_func_perc in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_spe_func_perc(use_community = TRUE)
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-show_prok_biogeo"></a>}}
-\if{latex}{\out{\hypertarget{method-show_prok_biogeo}{}}}
-\subsection{Method \code{show_prok_biogeo()}}{
+\if{html}{\out{<a id="method-show_prok_func"></a>}}
+\if{latex}{\out{\hypertarget{method-show_prok_func}{}}}
+\subsection{Method \code{show_prok_func()}}{
+Show the basic information for a specific function of prokaryotes.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$show_prok_biogeo(use_func = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$show_prok_func(use_func = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_func}}{default NULL; the function name.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$show_prok_func(use_func = "methanotrophy")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_prok_biogeo_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_prok_biogeo_perc}{}}}
-\subsection{Method \code{plot_prok_biogeo_perc()}}{
+\if{html}{\out{<a id="method-plot_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_spe_func_perc}{}}}
+\subsection{Method \code{plot_spe_func_perc()}}{
+Plot the percentages of species with specific trait in communities or modules.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_prok_biogeo_perc(
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(
   filter_func = NULL,
-  group_list = NULL,
-  group_list_default = FALSE,
+  use_group_list = TRUE,
   add_facet = TRUE,
   select_samples = NULL
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{filter_func}}{default NULL; a vector of function names.}
+
+\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If use personalized group list, first set \code{\link{trans_func$func_group_list}} object with a list of group names and functions.}
+
+\item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see \code{\link{trans_func$func_group_list}} object.}
+
+\item{\code{select_samples}}{default NULL; character vector, select partial samples to show}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$plot_spe_func_perc(use_group_list = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_tax4fun_func"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_tax4fun_func}{}}}
-\subsection{Method \code{cal_tax4fun_func()}}{
+\if{html}{\out{<a id="method-cal_FAPROTAX"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_FAPROTAX}{}}}
+\subsection{Method \code{cal_FAPROTAX()}}{
+Predict functional potential of communities using FAPROTAX.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun_func(keep_tem = FALSE, folderReferenceData = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_FAPROTAX(keep_tem = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_FAPROTAX in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_FAPROTAX()
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_tax4fun"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_tax4fun}{}}}
+\subsection{Method \code{cal_tax4fun()}}{
+Predict functional potential of communities using tax4fun.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun(keep_tem = FALSE, folderReferenceData = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the otu table in local place.}
+
+\item{\code{folderReferenceData}}{default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+tax4fun_KO and tax4fun_path in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_tax4fun(folderReferenceData = "./SILVA123")
+}
+\if{html}{\out{</div>}}
+
 }
 
 }
