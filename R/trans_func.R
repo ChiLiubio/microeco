@@ -50,6 +50,9 @@ trans_func <- R6Class(classname = "trans_func",
 				stop("Wrong for_what found, please set the for_what object use prok or fungi !")
 			}
 			if(for_what == "prok"){
+				# Copyright (c) 2019, Stilianos Louca
+				# All rights reserved.
+				# prok_func is a database developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 				data(prok_func)
 				# collapse taxonomy
 				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
