@@ -272,7 +272,7 @@ Gephi is used to open saved network file, i.e. network.gexf in the [tutorial](ht
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
 
 ## plotting
-All the plots in the package rely on the ggplot2 package system.
+Most of the plotting in the package rely on the ggplot2 package system.
 We provide some parameters to change the corresponding plot.
 If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
 Of course, you can also directly modify the function or class to reload them.
@@ -312,8 +312,6 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 # for other operations, see the tutorial (https://chiliubio.github.io/microeco/) and the help documentations
 # the class documentation include the function links, see the microtable class, input:
 ?microtable
-# see the tidy_dataset function in the microtable, click the link or input:
-?tidy_dataset
 ```
 
 ## QQ
