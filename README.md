@@ -339,17 +339,22 @@ QQ group: 207510995
     the method that plots the LEfSe cladogram is
     modified from the package **microbiomeMarker**.
 
-
-
-
-
-
-
-
-
-
-
-
+## References
+  - If the user use cal_spe_func function for the functional identification of prokaryotes or cal_FAPROTAX function in trans_func class, 
+    please also cite the original FAPROTAX database paper: 
+    Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507.
+  - If the user use cal_spe_func function for the functional identification of fungi,
+    please also cite the original FUNGuild database paper: 
+    Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
+    FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248.
+  - If the user use trans_nullmodel class, please also cite the original paper: 
+    Liu, C., Yao, M., Stegen, J. C., Rui, J., Li, J., & Li, X. (2017). Long-term nitrogen addition affects the phylogenetic turnover of soil microbial community responding to moisture pulse. Scientific Reports, 7(1), 17492. Journal Article.
+  - If the user use LefSe method in trans_diff class, please also cite the original paper:
+    Segata, N., Izard, J., Waldron, L., Gevers, D., Miropolsky, L., Garrett, W. S., & Huttenhower, C. (2011). Metagenomic biomarker discovery and explanation. Genome Biology, 12(6), R60.
+  - An, J., Liu, C., Wang, Q., Yao, M., Rui, J., Zhang, S., & Li, X. (2019). Soil bacterial community structure in Chinese wetlands. Geoderma, 337, 290–299.
+  - Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
+  - Tackmann, J., Matias Rodrigues, J. F., & Mering, C. von. (2019). Rapid inference of direct interactions in large-scale ecological networks from heterogeneous microbial sequencing data. Cell Systems, 9(3), 286–296 e8.
+  - White, J., Nagarajan, N., & Pop, M. (2009). Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Computational Biology, 5(4), e1000352. 
 
 
 

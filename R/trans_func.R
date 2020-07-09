@@ -36,7 +36,11 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
-		#' for prokaryotes, use FAPROTAX database; for fungi, use FUNGuild database.
+		#' Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
+		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507;
+		#' Fungi, based on the FUNGuild database, please also cite:
+		#' Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
+		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248.
 		#'
 		#' @return res_spe_func in object.
 		#' @examples
@@ -54,6 +58,7 @@ trans_func <- R6Class(classname = "trans_func",
 				# All rights reserved.
 				# prok_func is a database developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 				data(prok_func)
+				message("This prokaryotic database is developed based on the FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507")
 				# collapse taxonomy
 				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
 				# reduce computational cost
@@ -258,12 +263,15 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Predict functional potential of communities using FAPROTAX.
+		#' please also cite the original FAPROTAX paper: 
+		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507;
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
 		#' @return res_FAPROTAX in object.
 		#' @examples
 		#' t1$cal_FAPROTAX()
 		cal_FAPROTAX = function(keep_tem = TRUE) {
+			message("This is FAPROTAX database 1.2.1 with python 2.7. The newer versions may exist in http://www.loucalab.com/archive/FAPROTAX ")
 			otu_file <- self$otu_table
 			tax_file <- self$tax_table
 			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
@@ -286,6 +294,8 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Predict functional potential of communities using tax4fun.
+		#' please also cite: Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). 
+		#' Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
 		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.
