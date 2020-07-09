@@ -62,11 +62,11 @@ So the question is that you may encounter an error when using a class or functio
 
 ```r
 library(microeco)
-data(sample_info)
-data(otu_table)
-data(taxonomy_table)
-data(phylo_tree)
-dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
+data(sample_info_16S)
+data(otu_table_16S)
+data(taxonomy_table_16S)
+data(phylo_tree_16S)
+dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 dataset$tidy_dataset()
 dataset$cal_betadiv(unifrac = TRUE)
 ```
@@ -78,6 +78,7 @@ Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...
 
 
 <br>
+The reason is that calculating unifrac distance require ‘GUniFrac’ package.
 
 The solutions:
 
