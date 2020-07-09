@@ -84,7 +84,7 @@ The solutions:
 
 1. install the package when encounter such an error. Indeed, it's very easy to install in Rstudio. Just try it.
 
-2. install the packages in advance. We recommend this solution if you are interest at many methods of the microeco package. We first show some packages that are necessary in some functions.
+2. install the packages in advance. We recommend this solution if you are interest in many methods of the microeco package. We first show some packages that are necessary in some functions.
 
 
 <div id="content-wrapper">
