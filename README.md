@@ -277,8 +277,8 @@ We provide some parameters to change the corresponding plot.
 If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
 Of course, you can also directly modify the function or class to reload them.
 
-## read your file
-In this part, we show how to construct the object of microtable class using the raw otu file from qiime.
+## read the raw files
+In this part, we show how to construct the object of microtable class using the raw otu file from QIIME.
 
 ```r
 # use the raw data files stored inside the package
