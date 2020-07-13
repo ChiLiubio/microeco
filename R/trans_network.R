@@ -65,17 +65,17 @@ trans_network <- R6Class(classname = "trans_network",
 			if( (!is.na(cal_cor)) & (!is.null(env_cols) | !is.null(add_data))){
 				use_abund <- cbind.data.frame(use_abund, env_data)
 			}
-			if(cal_cor == "base"){
-				cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
-			}
-			if(cal_cor == "WGCNA"){
-				cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
-			}
-			if(cal_cor == "SparCC"){
-				bootres <- sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
-				cor_result <- pval.sparccboot(bootres)
-			}
 			if(!is.na(cal_cor)){
+				if(cal_cor == "base"){
+					cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
+				}
+				if(cal_cor == "WGCNA"){
+					cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
+				}
+				if(cal_cor == "SparCC"){
+					bootres <- sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
+					cor_result <- pval.sparccboot(bootres)
+				}
 				self$res_cor_p <- cor_result
 			}else{
 				self$res_cor_p <- NULL
