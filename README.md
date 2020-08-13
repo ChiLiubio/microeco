@@ -162,7 +162,7 @@ The solutions:
 <tr class="even">
 <td align="center">VGAM</td>
 <td align="center">trans_network class</td>
-<td align="center">Generates Dirichlet random variates in SparCC</td>
+<td align="center">generate Dirichlet random variates in SparCC</td>
 </tr>
 <tr class="odd">
 <td align="center">RJSONIO</td>
