@@ -161,7 +161,7 @@ The solutions:
 </tr>
 <tr class="even">
 <td align="center">VGAM</td>
-<td align="center">trans_corr class</td>
+<td align="center">trans_network class</td>
 <td align="center">Generates Dirichlet random variates in SparCC</td>
 </tr>
 <tr class="odd">
