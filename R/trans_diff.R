@@ -42,9 +42,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 				stop("No dataset provided!")
 			}
 			if(is.null(dataset$taxa_abund)){
-				stop("Please first calculate taxa_abund use cal_abund function!")
+				stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 			}
 			sampleinfo <- dataset$sample_table
+			sampleinfo[, group] %<>% as.character
 #			self$method <- method
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
 				if(grepl("lefse", method, ignore.case = TRUE)){
@@ -60,11 +61,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.)), ]}
 				# differential test
 				group_vec <- sampleinfo[, group] %>% as.factor
+				message("Start differential test for ", group, " ...")
 				res_class <- lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x,], group_vec))
 				pvalue <- unlist(lapply(res_class, function(x) x$p_value))
 				pvalue[is.nan(pvalue)] <- 1
 				# select significant taxa
 				sel_taxa <- pvalue < alpha
+				message("Total ", sum(sel_taxa), " biomarkers found ...")
+				if(sum(sel_taxa) == 0){
+					stop("No significant biomarkers found! stop running!")
+				}
 				# save abund_table in self for the cladogram
 				self$abund_table <- abund_table
 				abund_table_sub <- abund_table[sel_taxa, ]
@@ -117,7 +123,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 				all_class_pairs <- combn(unique(as.character(group_vec)), 2)
 				# check the difference among subgroups
 				if(!is.null(lefse_subgroup)){
+					message("Start lefse subgroup biomarkers check for ", lefse_subgroup, " ...")
+					all_sub_number <- as.data.table(sampleinfo)[, .N, by = c(group, lefse_subgroup)] %>% as.data.frame %>% .$N
+					if(all(all_sub_number < lefse_min_subsam)){
+						stop("All sample numbers for subgroups < ", lefse_min_subsam, "! Please consider use small lefse_min_subsam parameter!")
+					}
 					remove_list_total <- list()
+					# for each group paires
 					for(i in 1:ncol(all_class_pairs)){
 						y1 <- all_class_pairs[, i]
 						y1_sub_pairs <- expand.grid(unique(sampleinfo[sampleinfo[, group] == y1[1], lefse_subgroup]), 
@@ -128,6 +140,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						})), drop = FALSE]
 						if(ncol(y1_sub_pairs) == 0) next
 						res_sub_total <- list()
+						# check each subgroup pairs under fixed group pair condition
 						for(j in 1:ncol(y1_sub_pairs)){
 							y2 <- y1_sub_pairs[, j]
 							abund_table_sub_y2 <- abund_table_sub[, c(rownames(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], ]), 
@@ -154,10 +167,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}))
 						remove_list_total[[i]] <- remove_list
 					}
-					remove_list_total %<>% do.call(cbind, .) %>% apply(., 1, any)
-					abund_table_sub %<>% .[!remove_list_total, ]
-					pvalue_sub %<>% .[!remove_list_total]
-					class_taxa_median_sub %<>% .[, !remove_list_total]
+					if(!identical(remove_list_total, list())){
+						remove_list_total %<>% do.call(cbind, .) %>% apply(., 1, any)
+						message("Remove ", sum(remove_list_total), " biomarkers after subgroup check ...")
+						abund_table_sub %<>% .[!remove_list_total, ]
+						if(nrow(abund_table_sub) == 0){
+							stop("No biomarkers remained after subgroup check! stop running!")
+						}
+						pvalue_sub %<>% .[!remove_list_total]
+						class_taxa_median_sub %<>% .[, !remove_list_total]
+					}
 				}
 				res_lda <- list()
 				# bootstrap default 30 times
@@ -231,6 +250,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					pvalue = pvalue_sub, LDA = res)
 				res1 %<>% .[order(.$LDA, decreasing = TRUE), ]
 				res1 <- cbind.data.frame(Taxa = rownames(res1), res1)
+				message("Finished, minimum LDA score: ", range(res1$LDA)[1], " maximum LDA score: ", range(res1$LDA)[2])
 				self$res_lefse <- res1
 			}
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
@@ -265,7 +285,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					all_name <- combn(unique(metastat_group_choose), 2)
 				}
 				output <- data.frame()
+				message("Total ", ncol(all_name), " paired group for calculation ...")
 				for(i in 1:ncol(all_name)) {
+					cat(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
 					use_data <- new_abund[ , unlist(lapply(as.character(all_name[,i]), function(x) which(as.character(sampleinfo[, group]) %in% x)))]
 					use_data %<>% .[!grepl("__$", rownames(.)), ]
 					use_data <- use_data[apply(use_data, 1, sum) != 0, ]
@@ -279,7 +301,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_metastat <- output
-				self$res_metastat_group_matrix <- all_name				
+				self$res_metastat_group_matrix <- all_name
 			}
 		},
 		#' @description
@@ -671,7 +693,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("Too much features to be labelled with letters, consider to use use_feature_num parameter to reduce the number!")
 					}
 				}
-				clade_label_new$label_legend <- clade_label_new$label_show <- clade_label_new$label_raw <-clade_label_new$label
+				clade_label_new$label_legend <- clade_label_new$label_show <- clade_label_new$label_raw <- clade_label_new$label
 				clade_label_new$label_show[ind] <- use_letters[1:ind_num]
 				clade_label_new$label_legend[ind] <- paste0(clade_label_new$label_show[ind], ": ", clade_label_new$label[ind])
 				clade_label_new$label <- clade_label_new$label_show
@@ -747,6 +769,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 						res1 <- wilcox.test(d1[,1], g=group)
 					}else{
 						res1 <- kruskal.test(d1[,1], g=group)
+					}
+					if(is.nan(res1$p.value)){
+						res1$p.value <- 1
 					}
 					med <- tapply(d1[,1], group, median) %>% as.data.frame
 					colnames(med) <- colnames(d1)

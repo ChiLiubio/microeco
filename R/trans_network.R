@@ -22,7 +22,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.001)
-		#' # non correlation-based network
+		#' # PGM network
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0001)
 		initialize = function(
 			dataset = NULL,
@@ -544,7 +544,7 @@ trans_network <- R6Class(classname = "trans_network",
 			colnames(res) <- NULL
 			res
 		},
-		# Same with that in microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
+		# modified based on microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
 		module_roles = function(comm_graph){
 			td <- degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)
@@ -664,9 +664,13 @@ trans_network <- R6Class(classname = "trans_network",
 			p
 		},
 		# plot z and p according to the taxonomic levels
-		plot_roles_2 = function(node_roles, 
-			use_level = "Phylum", show_value = c("z", "p"), show_number = 1:10, 
-			plot_color = "Phylum", plot_shape = "taxa_roles",
+		plot_roles_2 = function(
+			node_roles, 
+			use_level = "Phylum", 
+			show_value = c("z", "p"), 
+			show_number = 1:10, 
+			plot_color = "Phylum", 
+			plot_shape = "taxa_roles",
 			plot_size = "Abundance",
 			color_values = RColorBrewer::brewer.pal(12, "Paired"),
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14)

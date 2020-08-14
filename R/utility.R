@@ -3,7 +3,7 @@
 #'
 #' @param x R6 class object
 #' @param deep default TRUE; deep copy
-#' @return same but unrelated R6 object.
+#' @return identical but unrelated R6 object.
 #' @examples
 #' clone(dataset)
 #' @export
@@ -22,7 +22,9 @@ clone <- function(x, deep = TRUE){
 #' @export
 dropallfactors <- function(x, unfac2num = FALSE){
 	# check x class
-	if(!is.data.frame(x)) stop("input data must be data.frame class")
+	if(!is.data.frame(x)){
+		stop("input data must be data.frame class")
+	}
 	trycharnum <- function(x){
 		if(suppressWarnings(sum(is.na(as.numeric(as.character(x)))) != sum(is.na(x)))) {
 			x <- as.character(x)
@@ -77,9 +79,8 @@ tidy_taxonomy <- function(taxonomy_table){
 
 ##################################################################################
 
-taxonomic_ranks <- c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
 
-
+# inner function
 summarySE_inter = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE) {
 	length2 <- function(x, na.rm=TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
 	datac <- usedata %>% 

@@ -37,7 +37,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
 		#'
 		#' @param method default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.
-		#' @param measures default NULL; a vector, if null, all indexes will be calculated.
+		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @return res_alpha_diff in object.
 		#' @examples
 		#' t1$cal_diff(method = "KW")
@@ -102,7 +102,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' Plotting the alpha diveristy.
 		#'
 		#' @param color_values colors used for presentation.
-		#' @param measure default Shannon; alpha diveristy measurement that will be used.
+		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
 		#' @param add_letter default FALSE; If TRUE, the letters of duncan test will be added in the plot.
 		#' @param pair_compare default FALSE; whether perform paired comparisons.

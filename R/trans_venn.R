@@ -9,10 +9,10 @@ trans_venn <- R6Class(classname = "trans_venn",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param sample_names default NULL; if provided, filter the samples.
-		#' @param ratio default "numratio"; "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage.
+		#' @param ratio default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; NULL: no additional percentage.
 		#' @return venn_table venn_count_abund stored in trans_venn object.
 		#' @examples 
-		#' trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
+		#' trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "numratio")
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = "numratio"
 			) {
 			use_dataset <- clone(dataset)
@@ -26,7 +26,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			colnumber <- ncol(abund)
 			abund1 <- cbind.data.frame(OTU = rownames(abund), abund)
 			abund2 <- reshape2::melt(abund1, id.var = "OTU", value.name= "Abundance", variable.name = "SeqID")
-			## Create intersect matrix (removes duplicates!)
+			## Create intersect matrix (removes duplicates)
 			setunion <- rownames(abund)
 			setmatrix <- abund
 			setmatrix[setmatrix >= 1] <- 1
@@ -35,7 +35,10 @@ trans_venn <- R6Class(classname = "trans_venn",
 			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix=setmatrix, allcombl=allcombl, index=x, setunion = setunion))
 			names(venn_list) <- sapply(allcombl, paste, collapse= "-")
 			venn_abund <- sapply(venn_list, function(x){
-				subset(abund2, OTU %in% x) %>% dplyr::summarise(Sum = sum(Abundance)) %>% unlist() %>% unname()
+				subset(abund2, OTU %in% x) %>% 
+				dplyr::summarise(Sum = sum(Abundance)) %>% 
+				unlist() %>% 
+				unname()
 			})
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
 			if(!is.null(ratio)) {
@@ -61,17 +64,17 @@ trans_venn <- R6Class(classname = "trans_venn",
 			self$tax_table <- use_dataset$tax_table
 		},
 		#' @description
-		#' Plot venn.
+		#' Plot venn diagram.
 		#'
-		#' @param petal_color default "skyblue"; color of the petal
+		#' @param color_circle default RColorBrewer::brewer.pal(8, "Dark2"); color pallete
+		#' @param fill_color default TRUE; whether fill the area color
 		#' @param text_size default 4.5; text size in plot
 		#' @param text_name_size default 6; name size in plot
-		#' @param text_name_position default NULL; name position in plot; use default, if NULL.
-		#' @param color_circle color pallete
+		#' @param text_name_position default NULL; name position in plot
 		#' @param alpha default .3; alpha for transparency
-		#' @param fill_color default TRUE; whether fill the area color
 		#' @param linesize default 1.1; cycle line size
 		#' @param petal_plot default FALSE; whether use petal plot.
+		#' @param petal_color default "skyblue"; color of the petal
 		#' @param petal_a default 4; the length of the ellipse
 		#' @param petal_r default 1; scaling up the size of the ellipse
 		#' @param petal_use_lim default c(-12, 12); the width of the plot
@@ -84,15 +87,15 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @examples
 		#' dataset$plot_venn()
 		plot_venn = function(
-			petal_color = "skyblue",
+			color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
+			fill_color = TRUE,
 			text_size = 4.5,
 			text_name_size = 6,
 			text_name_position = NULL,
-			color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
 			alpha = 0.3,
-			fill_color = TRUE,
 			linesize = 1.1,
 			petal_plot = FALSE,
+			petal_color = "skyblue",
 			petal_a = 4,
 			petal_r = 1,
 			petal_use_lim = c(-12, 12),
@@ -151,7 +154,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber == 4) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(0,10) + ylim(0,10) + private$ main_theme
+				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(0,10) + ylim(0,10) + private$main_theme
 
 				if(fill_color == T){
 					p <- p + 
@@ -169,7 +172,6 @@ trans_venn <- R6Class(classname = "trans_venn",
 						y = private$plotellipse(center = c(5.3, 4.4), rotate = 35)$y, color = color_circle[3], size = linesize) +
 					annotate("path", x = private$plotellipse(center = c(6.5, 3.6), rotate = 35)$x, 
 						y = private$plotellipse(center = c(6.5, 3.6), rotate = 35)$y, color = color_circle[4], size = linesize)
-
 				}
 			}
 			if(colnumber == 5 & petal_plot == F) {
@@ -224,14 +226,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 					  ylim(petal_use_lim[1], petal_use_lim[2]) +
 					  private$main_theme
 				for(i in 1:nPetals){
-					rotate = 90 - (i-1)*360/nPetals
-					rotate2 = rotate*pi/180
-					if(rotate < -90) rotate = rotate + 180
-					mx = petal_move_xy * cos(rotate2)
-					my = petal_move_xy * sin(rotate2)
-					petal_data <- private$petal(mx =mx, my =my, rotate = rotate, a = petal_a, r = petal_r)
+					rotate <- 90 - (i-1)*360/nPetals
+					rotate2 <- rotate*pi/180
+					if(rotate < -90){
+						rotate <- rotate + 180
+					}
+					mx <- petal_move_xy * cos(rotate2)
+					my <- petal_move_xy * sin(rotate2)
+					petal_data <- private$petal(mx = mx, my = my, rotate = rotate, a = petal_a, r = petal_r)
 
-					p <- p + geom_polygon(data = petal_data, aes(x = x, y = y), fill=petal_color_use[i], alpha = alpha)
+					p <- p + geom_polygon(data = petal_data, aes(x = x, y = y), fill = petal_color_use[i], alpha = alpha)
 					p <- p + annotate("text", x = petal_move_k * mx, y = petal_move_k * my, label = rownames(plot_data)[i], size = text_name_size)
 					p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count *my, label = plot_data[i, 1], size = text_size)
 					if(!is.null(ratio)){
@@ -250,7 +254,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @description
 		#' Transform venn result for the composition analysis.
 		#'
-		#' @param use_OTUs_frequency default TRUE; whether only use OTUs occurrence frequency, if FALSE, use abundance.
+		#' @param use_OTUs_frequency default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.
 		#' @return a new \code{\link{microtable}} class.
 		#' @examples
 		#' dataset$trans_venn_com()

@@ -129,16 +129,27 @@ microtable <- R6Class(classname = "microtable",
 			self$otu_table %<>% .[ , sample_names, drop = FALSE]
 			# then, trim taxa
 			self$otu_table %<>% {.[apply(., 1, sum) > 0, , drop = FALSE]}
-			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% .[!unlist(lapply(., is.null))]
+			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
+				.[!unlist(lapply(., is.null))]
 			taxa_names <- Reduce(intersect, taxa_list)
 			self$otu_table %<>% .[taxa_names, , drop = FALSE]
-			if(!is.null(self$tax_table)) self$tax_table %<>% .[taxa_names, , drop = FALSE]
-			if(!is.null(self$phylo_tree)) self$phylo_tree %<>% ape::drop.tip(., base::setdiff(.$tip.label, taxa_names))
+			if(!is.null(self$tax_table)){
+				self$tax_table %<>% .[taxa_names, , drop = FALSE]
+			}
+			if(!is.null(self$phylo_tree)){
+				self$phylo_tree %<>% ape::drop.tip(., base::setdiff(.$tip.label, taxa_names))
+			}
 			# other files will also be changed if main_data FALSE
 			if(main_data == F){
-				if(!is.null(self$taxa_abund)) self$taxa_abund %<>% lapply(., function(x) x[, sample_names, drop = FALSE])
-				if(!is.null(self$alpha_diversity)) self$alpha_diversity %<>% .[sample_names, , drop = FALSE]
-				if(!is.null(self$beta_diversity)) self$beta_diversity %<>% lapply(., function(x) x[sample_names, sample_names])
+				if(!is.null(self$taxa_abund)){
+					self$taxa_abund %<>% lapply(., function(x) x[, sample_names, drop = FALSE])
+				}
+				if(!is.null(self$alpha_diversity)){
+					self$alpha_diversity %<>% .[sample_names, , drop = FALSE]
+				}
+				if(!is.null(self$beta_diversity)){
+					self$alpha_diversity %<>% .[sample_names, , drop = FALSE]
+				}
 			}
 		},
 		#' @description
@@ -249,17 +260,25 @@ microtable <- R6Class(classname = "microtable",
 			abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
 				reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
 			abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
-				.[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
+				.[, c("Abundance"):=NULL] %>% 
+				setkey(Display, Sample) %>% 
+				unique() %>% 
+				as.data.frame()
 			# use dcast to generate table
 			new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
-				`row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
+				`row.names<-`(.[,1]) %>% 
+				.[,-1, drop = FALSE]
 			new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
 			# choose OTU names with highest abundance to replace the long taxonomic information in names
 			name1 <- cbind.data.frame(otuname = rownames(tax), Display = merged_taxonomy, abundance = apply(abund[rownames(tax), ], 1, sum))
 			name1 <- data.table(name1)[, max_abund:=max(abundance), by = Display]
-			name1 <- name1[max_abund == abundance] %>% .[, c("abundance", "max_abund"):=NULL] %>% 
-				setkey(Display) %>% unique() %>% as.data.frame()
-			name1 <- name1[!duplicated(name1$Display), ] %>% `row.names<-`(.$Display)
+			name1 <- name1[max_abund == abundance] %>% 
+				.[, c("abundance", "max_abund"):=NULL] %>% 
+				setkey(Display) %>% 
+				unique() %>% 
+				as.data.frame()
+			name1 <- name1[!duplicated(name1$Display), ] %>% 
+				`row.names<-`(.$Display)
 			rownames(new_abund) <- name1[rownames(new_abund), "otuname"]
 			new_tax <- tax[rownames(new_abund), ]
 			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax)
@@ -395,7 +414,7 @@ microtable <- R6Class(classname = "microtable",
 			abund <- input$otu_table
 			tax <- input$tax_table
 			tax <- tax[, 1:ranknumber, drop=FALSE]
-			# transform too long format
+			# transform to long format
 			abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse="|"), abund) %>% 
 				reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
 			# sum abundance by sample and taxonomy

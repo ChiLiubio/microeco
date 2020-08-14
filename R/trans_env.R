@@ -23,8 +23,15 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			if(!is.null(dataset)){
 				dataset1 <- clone(dataset)
-				dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
-				dataset1$tidy_dataset(main_data = FALSE)
+				inter_sum <- sum(rownames(dataset1$sample_table) %in% rownames(env_data))
+				if(inter_sum == 0){
+					stop("No sample names of sample_table found in env_data! Please chech the names of env_data!")
+				}
+				if(inter_sum < nrow(dataset1$sample_table)){
+					message(nrow(dataset1$sample_table)-inter_sum, " samples not found in env_data and removed!")
+					dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
+					dataset1$tidy_dataset(main_data = FALSE)
+				}
 				env_data %<>% .[rownames(dataset1$sample_table), ]
 			}
 			if(complete_na == T){
@@ -52,7 +59,7 @@ trans_env <- R6Class(classname = "trans_env",
 			env_data <- self$env_data
 			if(use_dbrda == T){
 				if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
-					stop("No distance matrix provided; please use set add_matrix parameter")
+					stop("No distance matrix provided; please use add_matrix parameter to add!")
 				}
 				if(!is.null(self$dataset$beta_diversity)){
 					if(!is.null(use_measure)){
@@ -272,13 +279,14 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Calculating the correlations between taxa abundance and environmental variables. 
 		#' Indeed, it can also be used for calculating other correlation between any two variables from two tables.
 		#'
-		#' @param use_data default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa abundance, other: provide additional data with other_taxa parameter.
+		#' @param use_data default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa, other: provide additional taxa name with other_taxa parameter.
 		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method.
 		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
 		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
+		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g. "Genus".
 		#' @param other_taxa default NULL; provide additional taxa, see use_data parameter.
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; will retain samples within the group.
@@ -296,6 +304,7 @@ trans_env <- R6Class(classname = "trans_env",
 			p_adjust_type = c("Type", "Taxa", "Env")[3],
 			add_abund_table = NULL,
 			by_group = NULL,
+			use_taxa_num = NULL,
 			other_taxa = NULL,
 			group_use = NULL,
 			group_select = NULL,
@@ -308,19 +317,25 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!is.null(add_abund_table)){
 				abund_table <- add_abund_table
 			}else{
-				if(use_data %in% microeco:::taxonomic_ranks){
+				if(use_data %in% names(self$dataset$taxa_abund)){
 					abund_table <- self$dataset$taxa_abund[[use_data]]
-				}
-				if(grepl("all|other", use_data, ignore.case = TRUE)){
-					abund_table <- do.call(rbind, unname(self$dataset$taxa_abund))
-					if(use_data == "other"){
-						if(is.null(other_taxa)){
-							stop("You select other, but no other_taxa provided!")
+				}else{
+					if(grepl("all|other", use_data, ignore.case = TRUE)){
+						abund_table <- do.call(rbind, unname(self$dataset$taxa_abund))
+						if(use_data == "other"){
+							if(is.null(other_taxa)){
+								stop("You select other, but no other_taxa provided!")
+							}
+							abund_table <- abund_table[other_taxa, ]
 						}
-						abund_table <- abund_table[other_taxa, ]
 					}
 				}
 				abund_table %<>% .[!grepl("__$|__uncultured$", rownames(.)), ]
+				if(use_data %in% names(self$dataset$taxa_abund) & !is.null(use_taxa_num)){
+					if(nrow(abund_table) > use_taxa_num){
+						abund_table %<>% .[1:use_taxa_num, ] 
+					}
+				}
 				abund_table <- as.data.frame(t(abund_table))
 			}
 			# filter samples by one group
@@ -357,7 +372,7 @@ trans_env <- R6Class(classname = "trans_env",
 				res$AdjPvalue[row_sel] <<- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
 			}))
 			res$Significance <- cut(res$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
-			res<-res[complete.cases(res), ]
+			res <- res[complete.cases(res), ]
 			res$Env <- factor(res$Env, levels = unique(as.character(res$Env)))
 			if(taxa_name_full == F){
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)

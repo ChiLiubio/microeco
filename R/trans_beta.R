@@ -8,7 +8,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param ordination default NULL; PCA, PCoA or NMDS.
-		#' @param measure default NULL; beta diversity index used for ordination, manova or group distance.
+		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; beta diversity index used for ordination, manova or group distance.
 		#' @param group default NULL; sample group used for manova or group distance.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
 		#' @param ncomp default 3; the returned dimensions.

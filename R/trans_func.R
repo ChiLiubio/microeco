@@ -2,13 +2,14 @@
 #' Create trans_func object for functional analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of functional analysis for species and communities.
+#' This class is a wrapper for a series of functional analysis on species and communities.
 #'
 #' @export
 trans_func <- R6Class(classname = "trans_func",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified.
+		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified according to the Kingdom information, 
+		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
 		#' @examples 
 		#' t1 <- trans_diff$new(dataset = dataset)
 		initialize = function(dataset = NULL
@@ -58,7 +59,7 @@ trans_func <- R6Class(classname = "trans_func",
 				# All rights reserved.
 				# prok_func is a database developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 				data(prok_func)
-				message("This prokaryotic database is developed based on the FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507")
+				cat("This prokaryotic database is developed based on the FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507\n")
 				# collapse taxonomy
 				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
 				# reduce computational cost
@@ -278,17 +279,17 @@ trans_func <- R6Class(classname = "trans_func",
 			tax_file <- apply(tax_file, 1, function(x){paste0(x, collapse = ";")})
 			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
 			# save to local place
-			message("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction...")
+			cat("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction ...")
 			write.table(otu_file, "otu_table_for_FAPROTAX.txt", sep = "\t", row.names = FALSE, quote = FALSE)
 			code_path <- system.file("extdata", "FAPROTAX_1.2.1", package="microeco")
 			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", 
 				code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
-			message("run python to predict...")
+			cat("run python to predict...")
 			system(use_command)
-			message("save prediction result FAPROTAX_prediction.tsv ...")
+			cat("save prediction result FAPROTAX_prediction.tsv ...")
 			self$res_FAPROTAX <- read.delim("FAPROTAX_prediction.tsv", check.names = FALSE, row.names = 1)
 			if(keep_tem == F){
-				message("remove intermediate file otu_table_for_FAPROTAX.txt ...")
+				cat("remove intermediate file otu_table_for_FAPROTAX.txt ...")
 				unlink("otu_table_for_FAPROTAX.txt", recursive = FALSE, force = TRUE)
 			}
 		},

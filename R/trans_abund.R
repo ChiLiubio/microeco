@@ -25,7 +25,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			self$taxrank <- taxrank
 			self$use_percentage <- use_percentage
 
-			abund_data <- dataset$taxa_abund[[self$taxrank]] %>% cbind.data.frame(Taxonomy = rownames(.), ., stringsAsFactors = FALSE)
+			abund_data <- dataset$taxa_abund[[self$taxrank]] %>% 
+				cbind.data.frame(Taxonomy = rownames(.), ., stringsAsFactors = FALSE)
 			abund_data <- reshape2::melt(abund_data, id.vars = "Taxonomy")
 			colnames(abund_data) <- c("Taxonomy", "Sample", "Abundance")
 			if(any(grepl("__$", abund_data$Taxonomy))){
@@ -105,7 +106,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
-		#' @param base_font default NULL; font in the plot.
+		#' @param base_font default NULL; ggplot font family in the plot.
 		#' @param ylab_title default NULL; y axis title.
 		#' @return ggplot2 plot. 
 		#' @examples 
@@ -152,7 +153,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			bar_colors_use <- use_colors[1:length(unique(plot_data$Taxonomy))]
 			if(any(grepl("Others", as.character(plot_data$Taxonomy)))) bar_colors_use[length(bar_colors_use)] <- others_color
 			if(clustering){
-				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance") %>% `row.names<-`(.[,1]) %>% .[, -1]
+				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance") %>% 
+					`row.names<-`(.[,1]) %>% .[, -1]
 				order_x <- hclust(dist(data_clustering)) %>% {.$labels[.$order]} %>% as.character
 				plot_data$Sample %<>% factor(., levels = order_x)
 			}
@@ -167,13 +169,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy"))
 				if(bar_type == "full"){
 					if(self$use_percentage == T){
-						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + scale_y_continuous(expand = c(0, 0))
+						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + 
+							scale_y_continuous(expand = c(0, 0))
 					}else{
 						p <- p + geom_bar(stat = "identity", position = "fill", show.legend = T, width = barwidth)
 						p <- p + scale_y_continuous(limits = c(0,1), expand = c(0, 0))
 					}
 				}else{
-					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + scale_y_continuous(expand = c(0, 0))
+					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + 
+						scale_y_continuous(expand = c(0, 0))
 				}
 			}
 			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("")
