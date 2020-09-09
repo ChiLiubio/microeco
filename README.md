@@ -48,6 +48,8 @@ devtools::install_local("microeco-master.zip")
 
 ## Use
 See the detailed package tutorial (https://chiliubio.github.io/microeco/) and the help documentations.
+If the tutorial website can not be opened because of bad internet connection, you can download the microeco-master.zip and open the index.html to see the tutorial 
+using your browser directly.
 If you want to run the codes in the tutorial completely, you need to install some additional packages, see the following **Notes** part.
 
 
