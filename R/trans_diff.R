@@ -2,7 +2,8 @@
 #' Create trans_diff object for the differential analysis on the taxonomic abundance.
 #'
 #' @description
-#' This class is a wrapper for a series of differential abundance test and indicator analysis methods.
+#' This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
+#' LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest and metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 #'
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
@@ -10,19 +11,22 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param method default "lefse"; "lefse", "rf" or "metastat".
 		#' @param group default NULL; sample group used for main comparision.
-		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse.
+		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param alpha default .05; significance threshold.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
 		#' @param nresam default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.
 		#' @param boots default 30; bootstrap test number for lefse or rf.
 		#' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
-		#' @param rf_ntree default 1000; see ntree in \code{\link{randomForest}}.
-		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test.
+		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package.
+		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 		#' @param metastat_group_choose default NULL; a vector used for selecting the required groups for testing.
 		#' @return res_rf res_lefse res_abund or res_metastat in trans_diff object.
-		#' @examples 
+		#' @examples
+		#' \donttest{
+		#' data(dataset)
 		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+		#' }
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat")[1],
@@ -214,28 +218,28 @@ trans_diff <- R6Class(classname = "trans_diff",
 							abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
 						}
 						# LDA analysis
-						skip_to_next <- FALSE
-						tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <<- TRUE})
-						if(skip_to_next) {
+						check_res <- tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <- TRUE})
+						if(rlang::is_true(check_res)) {
 							res_lda_pair[[i]] <- NA
 							next
+						}else{
+							# calculate effect size
+							w <- mod1$scaling[,1]
+							w_unit <- w/sqrt(sum(w^2))
+							w_unit %<>% {.[!grepl("lefse_subgroup", names(.))]}
+							ss <- abund1[, !colnames(abund1) %in% c("Group", "lefse_subgroup")]
+							xy_matrix <- as.matrix(ss)
+							LD <- xy_matrix %*% w_unit
+							effect_size <- tapply(LD, group_vec_lda, mean) %>% as.vector %>% {.[1] - .[2]} %>% abs
+							coeff <- w_unit * effect_size %>% abs
+							coeff[is.nan(coeff)] <- 0
+							names(coeff) %<>% gsub("^`|`$", "", .)
+							rres <- mod1$means %>% as.data.frame
+							colnames(rres) %<>% gsub("^`|`$", "", .)
+							rres <- rres[, rownames(abund_table_sub_lda)]
+							rres1 <- apply(rres, 2, function(x) abs(x[1] - x[2]))
+							res_lda_pair[[i]] <- (rres1 + coeff[names(rres1)]) *0.5
 						}
-						# calculate effect size
-						w <- mod1$scaling[,1]
-						w_unit <- w/sqrt(sum(w^2))
-						w_unit %<>% {.[!grepl("lefse_subgroup", names(.))]}
-						ss <- abund1[, !colnames(abund1) %in% c("Group", "lefse_subgroup")]
-						xy_matrix <- as.matrix(ss)
-						LD <- xy_matrix %*% w_unit
-						effect_size <- tapply(LD, group_vec_lda, mean) %>% as.vector %>% {.[1] - .[2]} %>% abs
-						coeff <- w_unit * effect_size %>% abs
-						coeff[is.nan(coeff)] <- 0
-						names(coeff) %<>% gsub("^`|`$", "", .)
-						rres <- mod1$means %>% as.data.frame
-						colnames(rres) %<>% gsub("^`|`$", "", .)
-						rres <- rres[, rownames(abund_table_sub_lda)]
-						rres1 <- apply(rres, 2, function(x) abs(x[1] - x[2]))
-						res_lda_pair[[i]] <- (rres1 + coeff[names(rres1)]) *0.5
 					}
 					res_lda[[num]] <- res_lda_pair
 				}
@@ -260,7 +264,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")				
 				}
 				colnames(res_abund) <- c("Taxa", "Sample", "Abund")
-				res_abund <- suppressWarnings(left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
+				res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
 				res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
 				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				self$res_abund <- res_abund
@@ -287,7 +291,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				output <- data.frame()
 				message("Total ", ncol(all_name), " paired group for calculation ...")
 				for(i in 1:ncol(all_name)) {
-					cat(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
 					use_data <- new_abund[ , unlist(lapply(as.character(all_name[,i]), function(x) which(as.character(sampleinfo[, group]) %in% x)))]
 					use_data %<>% .[!grepl("__$", rownames(.)), ]
 					use_data <- use_data[apply(use_data, 1, sum) != 0, ]
@@ -323,7 +327,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param use_se default TRUE; whether use SE in plot 2, if FALSE, use SD.
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_diff_abund(use_number = 1:10)
+		#' }
 		plot_diff_abund = function(
 			method = NULL,
 			only_abund_plot = TRUE,
@@ -451,7 +457,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param ... parameters pass to \code{\link{geom_bar}}
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_lefse_bar(LDA_score = 2)
+		#' }
 		plot_lefse_bar = function(
 			use_number = 1:10,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -542,7 +550,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param annotation_shape_size default 5; size used in the annotation legend
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+		#' }
 		plot_lefse_cladogram = function(
 			color = RColorBrewer::brewer.pal(8, "Dark2"),
 			use_taxa_num = 200,
@@ -628,7 +638,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			
 			# backgroup hilight
 			annotation_info <- dplyr::left_join(annotation, tree$data, by = c("node" = "label")) %>%
-				mutate(label = .data$node, id = .data$node.y, level = as.numeric(.data$node_class))
+				dplyr::mutate(label = .data$node, id = .data$node.y, level = as.numeric(.data$node_class))
 			hilight_para <- dplyr::transmute(
 				annotation_info,
 				node = .data$id,
@@ -722,7 +732,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param choose_group default 1; which column in res_metastat_group_matrix will be used.
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
+		#' t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
 		#' t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+		#' }
 		plot_metastat = function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), qvalue = 0.05, choose_group = 1
 			){
 			use_data <- self$res_metastat
@@ -749,6 +762,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				xlab(self$metastat_taxa_level)
 			p
 		},
+		#' @description
+		#' Print the trans_diff object.
 		print = function() {
 			cat("trans_diff class:\n")
 			if(!is.null(self$res_rf)) cat("Randomeforest has been calculated \n")

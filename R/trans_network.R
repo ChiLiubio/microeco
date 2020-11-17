@@ -2,14 +2,16 @@
 #' Create trans_network object for co-occurrence network analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of network analysis related methods.
+#' This class is a wrapper for a series of network analysis related methods, 
+#' including the correlation based <doi:10.1186/1471-2105-13-113>, SpiecEasi <doi:10.1371/journal.pcbi.1004226>,
+#' and Probabilistic Graphical Models based <doi:10.1016/j.cels.2019.08.002> network construction approaches, network and node attributes analysis and other network operations.
 #'
 #' @export
 trans_network <- R6Class(classname = "trans_network",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm.
-		#' @param cal_cor default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represent do not calculate. 
+		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation based network.
+		#' @param cal_cor default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represent do not calculate correlations, used for non-correlation based network. 
 		#' @param taxa_level default "OTU"; taxonomic rank. 
 		#' @param filter_thres default 0; the relative abundance threshold. 
 		#' @param nThreads default 1; the thread number used for "WGCNA" and SparCC. 
@@ -18,12 +20,19 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param add_data default NULL; provide physicochemical table additionally.
 		#' @return res_cor_p list.
 		#' @examples
+		#' \donttest{
+		#' data(dataset)
 		#' # correlation network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.001)
-		#' # PGM network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0001)
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		#'   taxa_level = "OTU", filter_thres = 0.001)
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", 
+		#'   taxa_level = "OTU", filter_thres = 0.001)
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", 
+		#'   taxa_level = "OTU", filter_thres = 0.0001)
+		#' # SpiecEasi or PGM network
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU",
+  		#'   filter_thres = 0.0001)
+		#' }
 		initialize = function(
 			dataset = NULL,
 			cor_method = c("pearson", "spearman", "kendall")[1],
@@ -73,8 +82,8 @@ trans_network <- R6Class(classname = "trans_network",
 					cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
 				}
 				if(cal_cor == "SparCC"){
-					bootres <- sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
-					cor_result <- pval.sparccboot(bootres)
+					bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
+					cor_result <- SpiecEasi::pval.sparccboot(bootres)
 				}
 				self$res_cor_p <- cor_result
 			}else{
@@ -90,7 +99,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @return a new res_cor_p in trans_network object.
 		#' @examples 
+		#' \donttest{
 		#' t1$replace_name()
+		#' }
 		replace_name = function(){
 			res_cor <- self$res_cor_p$cor
 			res_p <- self$res_cor_p$p
@@ -108,9 +119,12 @@ trans_network <- R6Class(classname = "trans_network",
 			self$res_cor_p <- list(cor = res_cor, p = res_p)
 		},
 		#' @description
-		#' Calculate network either based on the correlation method or based on the Probabilistic Graphical Models in julia FlashWeave.
+		#' Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
+		#' see Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method; 
+		#' see Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method; 
+		#' see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 		#'
-		#' @param network_method default "COR"; "COR" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method; doi: 10.1016/j.cels.2019.08.002
+		#' @param network_method default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method.
 		#' @param p_thres default .01; the p value threshold.
 		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges.
 		#' @param COR_p_adjust default "fdr"; p.adjust method, see p.adjust.methods.
@@ -120,14 +134,20 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param PGM_meta_data default FALSE; whether use env data for the optimization, If TRUE, will automatically find the env_data in the object.
 		#' @param PGM_sensitive default "true"; whether use sensitive type in the PGM model.
 		#' @param PGM_heterogeneous default "true"; whether use heterogeneous type in the PGM model.
+		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param with_module default TRUE; whether calculate modules.
 		#' @param add_taxa_name default "Phylum"; add taxonomic rank name to the result.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
+		#' @param ... paremeters pass to spiec.easi in package SpiecEasi.
 		#' @return res_network in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+		#' t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
+		#' t1$cal_network(network_method = "PGM")
+		#' }
 		cal_network = function(
-			network_method = c("COR", "PGM")[1],
+			network_method = c("COR", "SpiecEasi", "PGM")[1],
 			p_thres = 0.01,
 			COR_weight = TRUE,
 			COR_p_adjust = "fdr",
@@ -137,9 +157,11 @@ trans_network <- R6Class(classname = "trans_network",
 			PGM_meta_data = FALSE,
 			PGM_sensitive = "true",
 			PGM_heterogeneous = "true",
+			SpiecEasi_method = "mb",
 			with_module = TRUE,
 			add_taxa_name = "Phylum",
-			usename_rawtaxa_when_taxalevel_notOTU = FALSE
+			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
+			...
 			){
 			if(!require(igraph)){
 				stop("igraph package not installed")
@@ -147,7 +169,10 @@ trans_network <- R6Class(classname = "trans_network",
 			sampleinfo <- self$use_sampleinfo
 			taxa_level <- self$taxa_level
 			taxa_table <- self$use_tax
-			if(network_method == "COR"){
+			if(!grepl("COR|PGM|SpiecEasi", network_method, ignore.case = TRUE)){
+				stop("Unknown network method in network_method parameter!")
+			}
+			if(grepl("COR", network_method, ignore.case = TRUE)){
 				cortable <- self$res_cor_p$cor
 				adp <- apply(self$res_cor_p$p, 2, p.adjust, method = COR_p_adjust)
 				if(COR_optimization == T) {
@@ -174,13 +199,28 @@ trans_network <- R6Class(classname = "trans_network",
 				}else{
 					E(network)$weight <- rep.int(1, ecount(network))
 				}
-			}else{
+			}
+			if(grepl("SpiecEasi", network_method, ignore.case = TRUE)){
+				if(!require(SpiecEasi)){
+					stop("SpiecEasi package not installed")
+				}
 				use_abund <- self$use_abund
+				use_abund <- as.matrix(use_abund)
+				# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
+				network <- spiec.easi(use_abund, method = SpiecEasi_method, ...)
+				network <- adj2igraph(getRefit(network))
+				V(network)$name <- colnames(use_abund)
+				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
+			}
+			if(grepl("PGM", network_method, ignore.case = TRUE)){
+				use_abund <- self$use_abund
+				# make sure the working directory can not be changed by the function when quit.
+				oldwd <- getwd()
+				on.exit(setwd(oldwd))
 				#use_abund <- cbind.data.frame(SampleID = rownames(use_abund), use_abund)
-				tem_dir <- "temp_PGM"
-				dir.create(tem_dir)				
-				write.table(use_abund, paste0(tem_dir, "/taxa_table_PGM.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+				tem_dir <- tempdir()
 				setwd(tem_dir)
+				write.table(use_abund, "taxa_table_PGM.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 				L1 <- "using FlashWeave\n"
 				L2 <- 'data_path = "taxa_table_PGM.tsv"\n'
 				if(PGM_meta_data == T){
@@ -241,12 +281,14 @@ trans_network <- R6Class(classname = "trans_network",
 			self$res_network <- network
 		},
 		#' @description
-		#' Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
+		#' Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
 		#'
 		#' @param filepath default "network.gexf"; file path.
 		#' @return None.
 		#' @examples
+		#' \donttest{
 		#' t1$save_network(filepath = "network.gexf")
+		#' }
 		save_network = function(filepath = "network.gexf"){
 			if(!require(rgexf)){
 				stop("Please install rgexf package")
@@ -258,7 +300,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @return res_network_attr in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_network_attr()
+		#' }
 		cal_network_attr = function(){
 			self$res_network_attr <- private$network_attribute(self$res_network)
 		},
@@ -267,7 +311,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @return res_node_type in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_node_type()
+		#' }
 		cal_node_type = function(){
 			network <- self$res_network
 			node_type <- private$module_roles(network)
@@ -289,7 +335,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @return res_eigen and res_eigen_expla in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_eigen()
+		#' }
 		cal_eigen = function(){
 			use_abund <- self$use_abund
 			res_node_type <- self$res_node_type
@@ -330,7 +378,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type 2; shape vector, see ggplot2 tutorial for the shape meaning.
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_taxa_roles()
+		#' }
 		plot_taxa_roles = function(
 			use_type = c(1, 2)[1],
 			roles_colors = NULL,
@@ -357,12 +407,15 @@ trans_network <- R6Class(classname = "trans_network",
 			res
 		},
 		#' @description
-		#' Sum the linkages among taxa.
+		#' This function is used to sum the links number from one taxa to another or in the same taxa, for example, at Phylum level.
+		#' This is very useful to fast see how many nodes are connected between different taxa or within the taxa.
 		#'
 		#' @param taxa_level default "Phylum"; taxonomic rank.
 		#' @return res_sum_links_pos and res_sum_links_neg in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_sum_links(taxa_level = "Phylum")
+		#' }
 		cal_sum_links = function(taxa_level = "Phylum"){
 			taxa_table <- self$use_tax
 			network <- self$res_network
@@ -377,14 +430,16 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 		},
 		#' @description
-		#' Plot the summed linkages among taxa.
+		#' Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
 		#'
 		#' @param plot_pos default TRUE; plot the summed positive or negative linkages.
 		#' @param plot_num default NULL; number of taxa presented in the plot.
 		#' @param color_values default NULL; If not provided, use default.
 		#' @return chorddiag plot
 		#' @examples
+		#' \donttest{
 		#' t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+		#' }
 		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = NULL){
 			if(plot_pos == T){
 				if(is.null(self$res_sum_links_pos)){
@@ -418,8 +473,11 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
 		#' @return a new network
 		#' @examples
-		#' t1$subset_network(node = t1$res_node_type %>% .[.$module == "M1", ] %>% rownames, rm_single = TRUE)
+		#' \donttest{
+		#' t1$subset_network(node = t1$res_node_type %>% .[.$module == "M1", ] %>% 
+		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
+		#' }
 		subset_network = function(node = NULL, rm_single = TRUE){
 			if(!is.null(node)){
 				network <- self$res_network
@@ -440,6 +498,8 @@ trans_network <- R6Class(classname = "trans_network",
 				stop("Please provide the retained nodes name using node parameter!")
 			}
 		},
+		#' @description
+		#' Print the trans_network object.
 		print = function() {
 			cat("trans_network class:\n")
 			if(!is.null(self$res_network)){
@@ -713,22 +773,36 @@ trans_network <- R6Class(classname = "trans_network",
 			p
 		},
 		sum_link = function(taxa_table, link_table, taxa_level){
+			# first obtain the taxa names
 			all_names <- taxa_table[rownames(taxa_table) %in% unique(c(link_table[,1], link_table[,2])), ] %>%
-				{table(.[, taxa_level])} %>% sort(., decreasing = TRUE) %>% rownames
+				{table(.[, taxa_level])} %>%
+				sort(., decreasing = TRUE) %>% 
+				rownames
 			com_group <- expand.grid(all_names, all_names)
 			colnames(com_group) <- c("C1", "C2")
+			# assign rownames irrespective of the order
 			rownames(com_group) <- apply(com_group, 1, function(x) paste0(x, collapse = "-"))
+			# get the unifrom combined name without regard to the order
 			com_group$uni_name <- apply(com_group, 1, function(x) paste0(sort(x), collapse = "-"))
 			com_group1 <- com_group[, -c(1,2), drop = FALSE]
 			res <- link_table
+			# use taxa name to replace the species name
 			res[, 1] <- taxa_table[res[, 1], taxa_level]
 			res[, 2] <- taxa_table[res[, 2], taxa_level]
 			res$pname <- paste(res[, 1], res[, 2], sep = "-")
-			res %<>% dplyr::group_by(pname) %>% dplyr::summarise(count = dplyr::n()) %>% as.data.frame(stringsAsFactors = FALSE)
-			res <- dplyr::left_join(res, rownames_to_column(com_group1), by = c("pname" = "rowname")) %>% dplyr::group_by(uni_name) %>% 
-				dplyr::summarise(sum_count = sum(count)) %>% as.data.frame(stringsAsFactors = FALSE)
+			res %<>% dplyr::group_by(pname) %>% 
+				dplyr::summarise(count = dplyr::n()) %>%
+				as.data.frame(stringsAsFactors = FALSE)
+			res <- dplyr::left_join(res, rownames_to_column(com_group1), by = c("pname" = "rowname")) %>%
+				dplyr::group_by(uni_name) %>% 
+				dplyr::summarise(sum_count = sum(count)) %>%
+				as.data.frame(stringsAsFactors = FALSE)
 			res <- dplyr::left_join(res, com_group, by = c("uni_name" = "uni_name"))
-			res <- reshape2::dcast(res, C1~C2, value.var = "sum_count") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE] %>% .[all_names, all_names] %>% as.matrix
+			res <- reshape2::dcast(res, C1~C2, value.var = "sum_count") %>%
+				`row.names<-`(.[,1]) %>%
+				.[, -1, drop = FALSE] %>%
+				.[all_names, all_names] %>%
+				as.matrix
 			res[is.na(res)] <- 0			
 			res
 		}

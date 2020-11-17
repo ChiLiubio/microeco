@@ -7,7 +7,10 @@
 microtable.
 }
 \description{
-This class is a wrapper for a series of operations on the original files and the basic manipulations.
+This class is a wrapper for a series of operations on the original files and the basic manipulations,
+including the microtable object creation, data reduction, data rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxa abundance calculation, 
+alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
+Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.
 }
 \examples{
 
@@ -15,11 +18,12 @@ This class is a wrapper for a series of operations on the original files and the
 ## Method `microtable$new`
 ## ------------------------------------------------
 
-data(otu_table)
-data(taxonomy_table)
-data(sample_info)
-data(phylo_tree)
-dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
+data(otu_table_16S)
+data(taxonomy_table_16S)
+data(sample_info_16S)
+data(phylo_tree_16S)
+dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
+  tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 # trim the dataset
 dataset$tidy_dataset()
 
@@ -33,7 +37,9 @@ dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 ## Method `microtable$rarefy_samples`
 ## ------------------------------------------------
 
+\donttest{
 dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+}
 
 ## ------------------------------------------------
 ## Method `microtable$tidy_dataset`
@@ -45,13 +51,17 @@ dataset$tidy_dataset(main_data = TRUE)
 ## Method `microtable$cal_abund`
 ## ------------------------------------------------
 
+\donttest{
 dataset$cal_abund()
+}
 
 ## ------------------------------------------------
 ## Method `microtable$save_abund`
 ## ------------------------------------------------
 
+\donttest{
 dataset$save_abund(dirpath = "taxa_abund")
+}
 
 ## ------------------------------------------------
 ## Method `microtable$sample_sums`
@@ -81,40 +91,52 @@ dataset$taxa_names()
 ## Method `microtable$merge_samples`
 ## ------------------------------------------------
 
+\donttest{
 dataset$merge_samples(use_group = "Group")
+}
 
 ## ------------------------------------------------
 ## Method `microtable$merge_taxa`
 ## ------------------------------------------------
 
+\donttest{
 dataset$merge_taxa(taxa = "Genus")
+}
 
 ## ------------------------------------------------
 ## Method `microtable$cal_alphadiv`
 ## ------------------------------------------------
 
+\donttest{
 dataset$cal_alphadiv(measures = NULL, PD = FALSE)
 class(dataset$alpha_diversity)
+}
 
 ## ------------------------------------------------
 ## Method `microtable$save_alphadiv`
 ## ------------------------------------------------
 
 # save alpha diversity table in the alpha_diversity directory
+\donttest{
 dataset$save_alphadiv(dirpath = "alpha_diversity")
+}
 
 ## ------------------------------------------------
 ## Method `microtable$cal_betadiv`
 ## ------------------------------------------------
 
+\donttest{
 dataset$cal_betadiv(unifrac = FALSE)
 class(dataset$beta_diversity)
+}
 
 ## ------------------------------------------------
 ## Method `microtable$save_betadiv`
 ## ------------------------------------------------
 
+\donttest{
 dataset$save_betadiv(dirpath = "beta_diversity")
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -172,18 +194,19 @@ an object of class "microtable" with the following components:
   \item{\code{otu_table}}{The OTU table.}
   \item{\code{tax_table}}{The taxonomic table.}
   \item{\code{phylo_tree}}{The phylogenetic tree}
-  \item{\code{taxa_abund}}{default NULL; use \code{\link{cal_abund}} function to calculate}
-  \item{\code{alpha_diversity}}{default NULL; use \code{\link{cal_alphadiv}} function to calculate}
-  \item{\code{beta_diversity}}{default NULL; use \code{\link{cal_betadiv}} function to calculate}
+  \item{\code{taxa_abund}}{default NULL; use cal_abund function to calculate}
+  \item{\code{alpha_diversity}}{default NULL; use cal_alphadiv function to calculate}
+  \item{\code{beta_diversity}}{default NULL; use cal_betadiv function to calculate}
 }
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(otu_table)
-data(taxonomy_table)
-data(sample_info)
-data(phylo_tree)
-dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table, tax_table = taxonomy_table, phylo_tree = phylo_tree)
+\preformatted{data(otu_table_16S)
+data(taxonomy_table_16S)
+data(sample_info_16S)
+data(phylo_tree_16S)
+dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
+  tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 # trim the dataset
 dataset$tidy_dataset()
 }
@@ -196,6 +219,7 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the microtable object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$print()}\if{html}{\out{</div>}}
 }
@@ -234,7 +258,8 @@ None
 \if{html}{\out{<a id="method-rarefy_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
-Rarefy communities to make all samples have same species number, modified from the rarefy_even_depth() in phyloseq package.
+Rarefy communities to make all samples have same species number, modified from the rarefy_even_depth() in phyloseq package, 
+see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(sample.size = NULL, rngseed = 123, replace = TRUE)}\if{html}{\out{</div>}}
 }
@@ -255,7 +280,9 @@ None; rarefied dataset.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+\preformatted{\donttest{
+dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -305,7 +332,9 @@ taxa_abund in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$cal_abund()
+\preformatted{\donttest{
+dataset$cal_abund()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -330,7 +359,9 @@ Save taxonomic abundance to the computer local place.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$save_abund(dirpath = "taxa_abund")
+\preformatted{\donttest{
+dataset$save_abund(dirpath = "taxa_abund")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -442,7 +473,9 @@ a new created merged microtable object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$merge_samples(use_group = "Group")
+\preformatted{\donttest{
+dataset$merge_samples(use_group = "Group")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -470,7 +503,9 @@ a new created merged microtable object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$merge_taxa(taxa = "Genus")
+\preformatted{\donttest{
+dataset$merge_taxa(taxa = "Genus")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -500,8 +535,10 @@ alpha_diversity stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$cal_alphadiv(measures = NULL, PD = FALSE)
+\preformatted{\donttest{
+dataset$cal_alphadiv(measures = NULL, PD = FALSE)
 class(dataset$alpha_diversity)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -527,7 +564,9 @@ Save alpha diversity table to the computer.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{# save alpha diversity table in the alpha_diversity directory
+\donttest{
 dataset$save_alphadiv(dirpath = "alpha_diversity")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -538,7 +577,8 @@ dataset$save_alphadiv(dirpath = "alpha_diversity")
 \if{html}{\out{<a id="method-cal_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
-Calculate beta diversity in microtable Class.
+Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac, 
+see An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(unifrac = FALSE)}\if{html}{\out{</div>}}
 }
@@ -555,8 +595,10 @@ beta_diversity stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$cal_betadiv(unifrac = FALSE)
+\preformatted{\donttest{
+dataset$cal_betadiv(unifrac = FALSE)
 class(dataset$beta_diversity)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -581,7 +623,9 @@ Save beta diversity matrix to the computer.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$save_betadiv(dirpath = "beta_diversity")
+\preformatted{\donttest{
+dataset$save_betadiv(dirpath = "beta_diversity")
+}
 }
 \if{html}{\out{</div>}}
 

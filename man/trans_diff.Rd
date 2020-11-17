@@ -4,7 +4,8 @@
 \alias{trans_diff}
 \title{Create trans_diff object for the differential analysis on the taxonomic abundance.}
 \description{
-This class is a wrapper for a series of differential abundance test and indicator analysis methods.
+This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
+LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest and metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 }
 \examples{
 
@@ -12,31 +13,43 @@ This class is a wrapper for a series of differential abundance test and indicato
 ## Method `trans_diff$new`
 ## ------------------------------------------------
 
+\donttest{
+data(dataset)
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+}
 
 ## ------------------------------------------------
 ## Method `trans_diff$plot_diff_abund`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_diff_abund(use_number = 1:10)
+}
 
 ## ------------------------------------------------
 ## Method `trans_diff$plot_lefse_bar`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_lefse_bar(LDA_score = 2)
+}
 
 ## ------------------------------------------------
 ## Method `trans_diff$plot_lefse_cladogram`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+}
 
 ## ------------------------------------------------
 ## Method `trans_diff$plot_metastat`
 ## ------------------------------------------------
 
+\donttest{
+t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
 t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -81,7 +94,7 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 
 \item{\code{group}}{default NULL; sample group used for main comparision.}
 
-\item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse.}
+\item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
 
 \item{\code{alpha}}{default .05; significance threshold.}
 
@@ -95,9 +108,9 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 
 \item{\code{rf_taxa_level}}{default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".}
 
-\item{\code{rf_ntree}}{default 1000; see ntree in \code{\link{randomForest}}.}
+\item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package.}
 
-\item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test.}
+\item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.}
 
 \item{\code{metastat_group_choose}}{default NULL; a vector used for selecting the required groups for testing.}
 }
@@ -108,7 +121,10 @@ res_rf res_lefse res_abund or res_metastat in trans_diff object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+\preformatted{\donttest{
+data(dataset)
+t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -177,7 +193,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_diff_abund(use_number = 1:10)
+\preformatted{\donttest{
+t1$plot_diff_abund(use_number = 1:10)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -231,7 +249,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_lefse_bar(LDA_score = 2)
+\preformatted{\donttest{
+t1$plot_lefse_bar(LDA_score = 2)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -303,7 +323,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+\preformatted{\donttest{
+t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -342,7 +364,10 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+\preformatted{\donttest{
+t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
+t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -353,6 +378,7 @@ ggplot.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_diff object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$print()}\if{html}{\out{</div>}}
 }

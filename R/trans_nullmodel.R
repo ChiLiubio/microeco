@@ -2,7 +2,8 @@
 #' Create trans_nullmodel object.
 #'
 #' @description
-#' This class is a wrapper for a series of null model related approaches.
+#' This class is a wrapper for a series of null model and phylogeny related approaches, including the mantel correlogram analysis of phylogenetic signal, betaNTI, betaNRI and RCbray calculations;
+#' see Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w>. 
 #'
 #' @export
 trans_nullmodel <- R6Class(classname = "trans_nullmodel",
@@ -12,20 +13,20 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param taxa_number default NULL; how many taxa you want to use, if set, filter_thres parameter invalid.
 		#' @param group default NULL; which group column name in sample_table is selected.
 		#' @param select_group default NULL; the group name, used following the group to filter samples.
-		#' @param cpp default FALSE; invoke c++ to accelerate betaMPD calculation.
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data.
 		#' @return intermediate files in object.
 		#' @examples
-		#' t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
+		#' data(dataset)
+		#' data(env_data_16S)
+		#' t1 <- trans_nullmodel$new(dataset, taxa_number = 100, add_data = env_data_16S)
 		initialize = function(
 			dataset = NULL,
 			filter_thres = 0,
 			taxa_number = NULL,
 			group = NULL,
 			select_group = NULL,
-			cpp = FALSE,
 			env_cols = NULL,
 			add_data = NULL,
 			complete_na = FALSE
@@ -53,7 +54,6 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				dis <- NULL
 			}
 			self$comm <- comm
-			self$cpp <- cpp
 			self$dis <- dis
 			self$sample_table <- use_set$sample_table
 			if(!is.null(env_cols) | !is.null(add_data)){
@@ -82,7 +82,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... parameters pass to \code{\link{mantel.correlog}}
 		#' @return res_mantel_corr in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_mantel_corr(use_env = "pH")
+		#' }
 		cal_mantel_corr = function(use_env = NULL, break.pts = seq(0, 1, 0.02), cutoff=FALSE, ...){
 			dis <- self$dis
 			comm <- self$comm
@@ -115,7 +117,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_mantel_corr()
+		#' }
 		plot_mantel_corr = function(){
 			plot_data <- self$res_mantel_corr$mantel.res %>% as.data.frame
 			plot_data <- plot_data[, -4]
@@ -145,7 +149,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			g
 		},
 		#' @description
-		#' Calculate betaMPD. Faster than \code{\link{comdist}} in picante package.
+		#' Calculate betaMPD. Faster than comdist in picante package.
 		#'
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
 		#' @return res_betampd in object.
@@ -157,18 +161,17 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				stop("Phylogenetic tree is required!")
 			}
 			comm <- self$comm
-			cpp <- self$cpp
 			if (abundance.weighted == F) {
 				comm <- decostand(comm, method="pa")
 			}
 			comm <- decostand(comm, method="total", MARGIN=1)
-			self$res_betampd <- private$betampd(comm = comm, dis = dis, cpp = cpp)
+			self$res_betampd <- private$betampd(comm = comm, dis = dis)
 		},
 		#' @description
-		#' Calculate betaMNTD. Faster than \code{\link{comdistnt}} in picante package.
+		#' Calculate betaMNTD. Faster than comdistnt in picante package.
 		#'
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
-		#' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
+		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
 		#' @return res_betamntd in object.
 		#' @examples
 		#' t1$cal_betamntd(abundance.weighted=FALSE)
@@ -184,12 +187,15 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' Calculate ses.betaMPD (betaNRI).
 		#'
 		#' @param runs default 1000; simulation runs.
-		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @param abundance.weighted default FALSE; whether use weighted abundance.
+		#' @param verbose default TRUE; whether show the calculation process message.
 		#' @return res_ses_betampd in object.
 		#' @examples
-		#' t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
-		cal_ses_betampd = function(runs=1000, abundance.weighted = FALSE) {
-			cpp <- self$cpp
+		#' \donttest{
+		#' t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
+		#' }
+		cal_ses_betampd = function(runs=1000, abundance.weighted = FALSE, verbose = TRUE) {
+
 			comm <- self$comm
 			dis <- self$dis
 			if(is.null(dis)){
@@ -199,14 +205,20 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				comm <- decostand(comm, method="pa")
 			}
 			comm <- decostand(comm, method="total", MARGIN=1)
-			cat("Calculate observed betaMPD.\n")
-			betaobs <- private$betampd(comm = comm, dis = dis, cpp = cpp) %>% as.dist
+			if(verbose){
+				cat("Calculate observed betaMPD.\n")
+			}
+			betaobs <- private$betampd(comm = comm, dis = dis) %>% as.dist
 			all_samples <- rownames(comm)
 			betaobs_vec <- as.vector(betaobs)
-			cat("Simulate betaMPD.\n")
+			if(verbose){
+				cat("Simulate betaMPD.\n")
+			}
 			beta_rand <- sapply(seq_len(runs), function(x){
-				private$show_run(x = x, runs = runs)
-				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis), cpp = cpp))
+				if(verbose){
+					private$show_run(x = x, runs = runs)
+				}
+				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis)))
 			}, simplify = "array")
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
@@ -218,23 +230,32 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
-		#' @param exclude.conspecifics default FALSE; see \code{\link{comdistnt}} in picante package.
+		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
+		#' @param verbose default TRUE; whether show the calculation process message.
 		#' @return res_ses_betamntd in object.
 		#' @examples
-		#' t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
-		cal_ses_betamntd = function(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE) {
+		#' \donttest{
+		#' t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+		#' }
+		cal_ses_betamntd = function(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE, verbose = TRUE) {
 			comm <- self$comm
 			dis <- self$dis
 			if(is.null(dis)){
 				stop("Phylogenetic tree is required!")
 			}
 			all_samples <- rownames(comm)
-			cat("Calculate observed betaMNTD.\n")
+			if(verbose){
+				cat("Calculate observed betaMNTD.\n")
+			}
 			betaobs <- private$betamntd(comm = comm, dis = dis, abundance.weighted = abundance.weighted, exclude.conspecifics = exclude.conspecifics) %>% as.dist
 			betaobs_vec <- as.vector(betaobs)
-			cat("Simulate betaMNTD.\n")
+			if(verbose){
+				cat("Simulate betaMNTD.\n")
+			}
 			beta_rand <- sapply(seq_len(runs), function(x){
-				private$show_run(x = x, runs = runs)
+				if(verbose){
+					private$show_run(x = x, runs = runs)
+				}
 				as.dist(private$betamntd(comm = comm, dis = picante::taxaShuffle(dis), abundance.weighted = abundance.weighted, 
 					exclude.conspecifics = exclude.conspecifics))
 			}, simplify = "array")
@@ -247,15 +268,20 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' Calculate rcbray.
 		#'
 		#' @param runs default 1000; simulation runs.
+		#' @param verbose default TRUE; whether show the calculation process message.
 		#' @return res_rcbray in object.
 		#' @examples
-		#' t1$cal_rcbray(runs=1000)
-		cal_rcbray = function(runs=1000) {
+		#' \donttest{
+		#' t1$cal_rcbray(runs=200)
+		#' }
+		cal_rcbray = function(runs=1000, verbose = TRUE) {
 			comm <- self$comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
 			beta_rand <- sapply(seq_len(runs), function(x){
-				private$show_run(x = x, runs = runs)
+				if(verbose){
+					private$show_run(x = x, runs = runs)
+				}
 				vegdist(picante::randomizeMatrix(comm, "independentswap"), "bray")
 			}, simplify = "array") %>% as.data.frame
 			beta_rand[, (runs + 1)] <- betaobs_vec
@@ -269,7 +295,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
 		#' @return res_rcbray in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_process(use_betamntd = TRUE)
+		#' }
 		cal_process = function(use_betamntd = TRUE){
 			if(use_betamntd == T){
 				ses_phylo_beta <- self$res_ses_betamntd
@@ -304,14 +332,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				.[all_samples, all_samples] %>% as.matrix
 			res1
 		},
-		betampd = function(comm = NULL, dis = NULL, cpp = FALSE
-			){
+		betampd = function(comm = NULL, dis = NULL){
 			all_samples <- rownames(comm)
-			if(cpp == T){
-				matrix_multi <- function(comm_use, dis_use, ag_vector){eigenMapMatMult(eigenMapMatMult(comm_use, dis_use), ag_vector)}
-			}else{
-				matrix_multi <- function(comm_use, dis_use, ag_vector){(comm_use %*% dis_use) %*% ag_vector}
-			}
+			# use cpp instead of base
+			matrix_multi <- function(comm_use, dis_use, ag_vector){(comm_use %*% dis_use) %*% ag_vector}
+			# matrix_multi <- function(comm_use, dis_use, ag_vector){eigenMapMatMult(eigenMapMatMult(comm_use, dis_use), ag_vector)}
+			
 			res <- data.frame()
 			rm_samples <- c()
 			for(sample_name in all_samples[-length(all_samples)]){

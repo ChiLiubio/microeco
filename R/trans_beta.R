@@ -1,7 +1,9 @@
 #' @title Create trans_beta object for the analysis of distance matrix of beta-diversity.
 #'
 #' @description
-#' This class is a wrapper for a series of beta-diversity related analysis.
+#' This class is a wrapper for a series of beta-diversity related analysis, 
+#' including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
+#' clustering and perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
 #'
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
@@ -15,6 +17,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
 		#' @return res_ordination stored in the object.
 		#' @examples
+		#' data(dataset)
 		#' t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 		initialize = function(dataset = NULL, ordination = NULL, measure = NULL, group = NULL, trans_otu = FALSE, ncomp = 3,
 			scale_species = FALSE
@@ -80,7 +83,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			self$ordination <- ordination
 		},
 		#' @description
-		#' Plotting the ordination result.
+		#' Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 		#'
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors for presentation.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector used in the shape type, see ggplot2 tutorial.
@@ -169,7 +172,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Calculate perMANOVA.
+		#' Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis function.
 		#'
 		#' @param cal_manova_all default FALSE; whether manova is used for all data.
 		#' @param cal_manova_paired default FALSE; whether manova is used for all the paired groups.
@@ -213,7 +216,6 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param distance_pair_stat default FALSE; whether do the paired comparisions.
 		#' @param pair_compare_filter default ""; if provided, remove the matched groups.
 		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
-		#' @param map_signif_level default TRUE; whether indicate the significance level.
 		#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
 		#' @return ggplot.
 		#' @examples
@@ -223,7 +225,6 @@ trans_beta <- R6Class(classname = "trans_beta",
 			distance_pair_stat = FALSE,
 			pair_compare_filter = "",
 			pair_compare_method = "wilcox.test",
-			map_signif_level = TRUE,
 			plot_distance_xtype = NULL
 			){
 			group_distance <- self$res_group_distance
@@ -252,11 +253,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 				p <- p + theme(axis.text.x = element_text(angle = plot_distance_xtype, colour = "black", vjust = 1, hjust = 1, size = 10))
 			}
 			if(distance_pair_stat == T){
+				# remove some groups
 				comparisons_list <- unique(as.character(group_distance[, group])) %>% 
 					combn(., 2) %>% 
 					{.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter, x)))), drop = FALSE]} %>% 
 					{lapply(seq_len(ncol(.)), function(x) .[, x])}
-				p <- p + stat_compare_signif(comparisons = comparisons_list, method = pair_compare_method, map_signif_level = map_signif_level)
+				p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, method = pair_compare_method, 
+						tip.length=0.01, label = "p.signif", symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1),
+						symbols = c("****", "***", "**", "*", "ns")))
 			}
 			p
 		},
@@ -288,7 +292,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 
 			g1 <- ggplot(data = ggdendro::segment(hc_d_measure)) + geom_segment(aes(x=x, y=y, xend=xend, yend=yend), color = "grey30")
 			if(!is.null(group) | !is.null(replace_name)){
-				data2 <- suppressWarnings(left_join(hc_d_measure$label, rownames_to_column(self$sample_table), by = c("label" = "rowname")))
+				data2 <- suppressWarnings(dplyr::left_join(hc_d_measure$label, rownames_to_column(self$sample_table), by = c("label" = "rowname")))
 				if(length(replace_name) > 1){
 					data2$replace_name_use <- apply(data2[, replace_name], 1, function(x){paste0(x, collapse = "-")})
 				}
@@ -330,6 +334,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 				theme(axis.line.x = element_line(color = "black", linetype = "solid", lineend = "square"))
 			g1
 		},
+		#' @description
+		#' Print the trans_beta object.
 		print = function() {
 			cat("trans_beta class:\n")
 			if(!is.null(self$ordination)) cat(paste(self$ordination, "is used for ordination \n"))

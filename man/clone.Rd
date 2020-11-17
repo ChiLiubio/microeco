@@ -12,11 +12,12 @@ clone(x, deep = TRUE)
 \item{deep}{default TRUE; deep copy}
 }
 \value{
-same but unrelated R6 object.
+identical but unrelated R6 object.
 }
 \description{
 Copy an R6 class object completely
 }
 \examples{
+data("dataset")
 clone(dataset)
 }

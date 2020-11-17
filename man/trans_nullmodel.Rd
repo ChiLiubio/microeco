@@ -4,7 +4,8 @@
 \alias{trans_nullmodel}
 \title{Create trans_nullmodel object.}
 \description{
-This class is a wrapper for a series of null model related approaches.
+This class is a wrapper for a series of null model and phylogeny related approaches, including the mantel correlogram analysis of phylogenetic signal, betaNTI, betaNRI and RCbray calculations;
+see Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w>.
 }
 \examples{
 
@@ -12,19 +13,25 @@ This class is a wrapper for a series of null model related approaches.
 ## Method `trans_nullmodel$new`
 ## ------------------------------------------------
 
-t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
+data(dataset)
+data(env_data_16S)
+t1 <- trans_nullmodel$new(dataset, taxa_number = 100, add_data = env_data_16S)
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_mantel_corr`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_mantel_corr(use_env = "pH")
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$plot_mantel_corr`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_mantel_corr()
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_betampd`
@@ -42,25 +49,33 @@ t1$cal_betamntd(abundance.weighted=FALSE)
 ## Method `trans_nullmodel$cal_ses_betampd`
 ## ------------------------------------------------
 
-t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
+\donttest{
+t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_ses_betamntd`
 ## ------------------------------------------------
 
-t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+\donttest{
+t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_rcbray`
 ## ------------------------------------------------
 
-t1$cal_rcbray(runs=1000)
+\donttest{
+t1$cal_rcbray(runs=200)
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_process`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_process(use_betamntd = TRUE)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -88,7 +103,6 @@ t1$cal_process(use_betamntd = TRUE)
   taxa_number = NULL,
   group = NULL,
   select_group = NULL,
-  cpp = FALSE,
   env_cols = NULL,
   add_data = NULL,
   complete_na = FALSE
@@ -108,8 +122,6 @@ t1$cal_process(use_betamntd = TRUE)
 
 \item{\code{select_group}}{default NULL; the group name, used following the group to filter samples.}
 
-\item{\code{cpp}}{default FALSE; invoke c++ to accelerate betaMPD calculation.}
-
 \item{\code{env_cols}}{default NULL; number or name vector to select the environmental data in dataset$sample_table.}
 
 \item{\code{add_data}}{default NULL; provide environmental data table additionally.}
@@ -123,7 +135,9 @@ intermediate files in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_nullmodel$new(dataset, taxa_number = 1000, add_data = env_data, cpp = TRUE)
+\preformatted{data(dataset)
+data(env_data_16S)
+t1 <- trans_nullmodel$new(dataset, taxa_number = 100, add_data = env_data_16S)
 }
 \if{html}{\out{</div>}}
 
@@ -162,7 +176,9 @@ res_mantel_corr in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_mantel_corr(use_env = "pH")
+\preformatted{\donttest{
+t1$cal_mantel_corr(use_env = "pH")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -183,7 +199,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_mantel_corr()
+\preformatted{\donttest{
+t1$plot_mantel_corr()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -194,7 +212,7 @@ ggplot.
 \if{html}{\out{<a id="method-cal_betampd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betampd}{}}}
 \subsection{Method \code{cal_betampd()}}{
-Calculate betaMPD. Faster than \code{\link{comdist}} in picante package.
+Calculate betaMPD. Faster than comdist in picante package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betampd(abundance.weighted = FALSE)}\if{html}{\out{</div>}}
 }
@@ -222,7 +240,7 @@ res_betampd in object.
 \if{html}{\out{<a id="method-cal_betamntd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betamntd}{}}}
 \subsection{Method \code{cal_betamntd()}}{
-Calculate betaMNTD. Faster than \code{\link{comdistnt}} in picante package.
+Calculate betaMNTD. Faster than comdistnt in picante package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
   abundance.weighted = FALSE,
@@ -235,7 +253,7 @@ Calculate betaMNTD. Faster than \code{\link{comdistnt}} in picante package.
 \describe{
 \item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
 
-\item{\code{exclude.conspecifics}}{default FALSE; see \code{\link{comdistnt}} in picante package.}
+\item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -257,7 +275,11 @@ res_betamntd in object.
 \subsection{Method \code{cal_ses_betampd()}}{
 Calculate ses.betaMPD (betaNRI).
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betampd(runs = 1000, abundance.weighted = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betampd(
+  runs = 1000,
+  abundance.weighted = FALSE,
+  verbose = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -265,7 +287,9 @@ Calculate ses.betaMPD (betaNRI).
 \describe{
 \item{\code{runs}}{default 1000; simulation runs.}
 
-\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
+\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance.}
+
+\item{\code{verbose}}{default TRUE; whether show the calculation process message.}
 }
 \if{html}{\out{</div>}}
 }
@@ -274,7 +298,9 @@ res_ses_betampd in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_ses_betampd(runs=1000, abundance.weighted = FALSE)
+\preformatted{\donttest{
+t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -290,7 +316,8 @@ Calculate ses.betaMNTD (betaNTI).
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betamntd(
   runs = 1000,
   abundance.weighted = FALSE,
-  exclude.conspecifics = FALSE
+  exclude.conspecifics = FALSE,
+  verbose = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -301,7 +328,9 @@ Calculate ses.betaMNTD (betaNTI).
 
 \item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
 
-\item{\code{exclude.conspecifics}}{default FALSE; see \code{\link{comdistnt}} in picante package.}
+\item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
+
+\item{\code{verbose}}{default TRUE; whether show the calculation process message.}
 }
 \if{html}{\out{</div>}}
 }
@@ -310,7 +339,9 @@ res_ses_betamntd in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_ses_betamntd(runs=1000, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+\preformatted{\donttest{
+t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -323,13 +354,15 @@ res_ses_betamntd in object.
 \subsection{Method \code{cal_rcbray()}}{
 Calculate rcbray.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_rcbray(runs = 1000)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_rcbray(runs = 1000, verbose = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{runs}}{default 1000; simulation runs.}
+
+\item{\code{verbose}}{default TRUE; whether show the calculation process message.}
 }
 \if{html}{\out{</div>}}
 }
@@ -338,7 +371,9 @@ res_rcbray in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_rcbray(runs=1000)
+\preformatted{\donttest{
+t1$cal_rcbray(runs=200)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -366,7 +401,9 @@ res_rcbray in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_process(use_betamntd = TRUE)
+\preformatted{\donttest{
+t1$cal_process(use_betamntd = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 

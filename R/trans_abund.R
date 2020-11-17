@@ -2,7 +2,9 @@
 #' Create trans_abund object to transform taxonomic abundance for plotting.
 #'
 #' @description
-#' This class is a wrapper for the taxonomic abundance transformations and plotting.
+#' This class is a wrapper for the taxonomic abundance transformations and plotting. 
+#' The transformed data style is the long-format for ggplot2 plotting.
+#' The plotting approaches include the bar plot, boxplot, heatmap and pie chart based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 #'
 #' @export
 trans_abund <- R6Class(classname = "trans_abund",
@@ -17,8 +19,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
 		#' @return abund_data and other file for plotting. 
 		#' @examples
+		#' data(dataset)
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+		#' # t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 		initialize = function(dataset = NULL, taxrank = "Phylum", show = 0, ntaxa = 10, groupmean = NULL, use_percentage = TRUE, order_x = NULL, 
 			input_taxaname = NULL){
 			self$sample_table <- dataset$sample_table
@@ -39,7 +42,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(!is.null(groupmean)){
 				abund_data$Sample %<>% as.character
 				mdf <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
-				cat(paste0(groupmean, " column is used to calculate mean abundance"))
+				message(paste0(groupmean, " column is used to calculate mean abundance."))
 				abund_data <- dplyr::group_by_(mdf, "Taxonomy", groupmean) %>% 
 					dplyr::summarise(Abundance = mean(Abundance)) %>% 
 					as.data.frame
@@ -109,7 +112,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param base_font default NULL; ggplot font family in the plot.
 		#' @param ylab_title default NULL; y axis title.
 		#' @return ggplot2 plot. 
-		#' @examples 
+		#' @examples
 		#' t1$plot_bar(bar_type = "full", others_color = "grey90")
 		plot_bar = function(
 			use_colors = RColorBrewer::brewer.pal(12, "Paired"),
@@ -413,8 +416,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param strip_text default 11; sample title size.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
 		#' @return ggplot2 plot. 
-		#' @examples 
+		#' @examples
+		#' \donttest{
 		#' t1$plot_pie(facet_nrow = 2)
+		#' }
 		plot_pie = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), facet_nrow = 1, strip_text = 11, legend_text_italic = FALSE
 			){
 			plot_data <- self$abund_data
@@ -435,6 +440,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
+		#' @description
+		#' Print the trans_abund object.
 		print = function() {
 			cat("trans_abund class:\n")
 			cat(paste("abund_data have", ncol(self$abund_data), "columns: ", paste0(colnames(self$abund_data), collapse = ", "), "\n"))

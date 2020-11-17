@@ -4,7 +4,8 @@
 \alias{trans_venn}
 \title{Create trans_venn object.}
 \description{
-This class is a wrapper for a series of venn analysis related methods.
+This class is a wrapper for a series of venn analysis related methods, including venn result, 2- to 5-way venn diagram, 
+more than 5-way petal plot and venn result transformations based on David et al. (2012) <doi:10.1128/AEM.01459-12>.
 }
 \examples{
 
@@ -12,19 +13,23 @@ This class is a wrapper for a series of venn analysis related methods.
 ## Method `trans_venn$new`
 ## ------------------------------------------------
 
-trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
+data(dataset)
+t1 <- dataset$merge_samples(use_group = "Group")
+t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 
 ## ------------------------------------------------
 ## Method `trans_venn$plot_venn`
 ## ------------------------------------------------
 
-dataset$plot_venn()
+t1$plot_venn()
 
 ## ------------------------------------------------
 ## Method `trans_venn$trans_venn_com`
 ## ------------------------------------------------
 
-dataset$trans_venn_com()
+\donttest{
+t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -51,7 +56,7 @@ dataset$trans_venn_com()
 
 \item{\code{sample_names}}{default NULL; if provided, filter the samples.}
 
-\item{\code{ratio}}{default "numratio"; "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage.}
+\item{\code{ratio}}{default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; NULL: no additional percentage.}
 }
 \if{html}{\out{</div>}}
 }
@@ -60,7 +65,9 @@ venn_table venn_count_abund stored in trans_venn object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "seqratio")
+\preformatted{data(dataset)
+t1 <- dataset$merge_samples(use_group = "Group")
+t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 }
 \if{html}{\out{</div>}}
 
@@ -71,18 +78,18 @@ venn_table venn_count_abund stored in trans_venn object.
 \if{html}{\out{<a id="method-plot_venn"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_venn}{}}}
 \subsection{Method \code{plot_venn()}}{
-Plot venn.
+Plot venn diagram.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$plot_venn(
-  petal_color = "skyblue",
+  color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
+  fill_color = TRUE,
   text_size = 4.5,
   text_name_size = 6,
   text_name_position = NULL,
-  color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
   alpha = 0.3,
-  fill_color = TRUE,
   linesize = 1.1,
   petal_plot = FALSE,
+  petal_color = "skyblue",
   petal_a = 4,
   petal_r = 1,
   petal_use_lim = c(-12, 12),
@@ -97,23 +104,23 @@ Plot venn.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{petal_color}}{default "skyblue"; color of the petal}
+\item{\code{color_circle}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete}
+
+\item{\code{fill_color}}{default TRUE; whether fill the area color}
 
 \item{\code{text_size}}{default 4.5; text size in plot}
 
 \item{\code{text_name_size}}{default 6; name size in plot}
 
-\item{\code{text_name_position}}{default NULL; name position in plot; use default, if NULL.}
-
-\item{\code{color_circle}}{color pallete}
+\item{\code{text_name_position}}{default NULL; name position in plot}
 
 \item{\code{alpha}}{default .3; alpha for transparency}
-
-\item{\code{fill_color}}{default TRUE; whether fill the area color}
 
 \item{\code{linesize}}{default 1.1; cycle line size}
 
 \item{\code{petal_plot}}{default FALSE; whether use petal plot.}
+
+\item{\code{petal_color}}{default "skyblue"; color of the petal}
 
 \item{\code{petal_a}}{default 4; the length of the ellipse}
 
@@ -138,7 +145,7 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$plot_venn()
+\preformatted{t1$plot_venn()
 }
 \if{html}{\out{</div>}}
 
@@ -157,7 +164,7 @@ Transform venn result for the composition analysis.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_OTUs_frequency}}{default TRUE; whether only use OTUs occurrence frequency, if FALSE, use abundance.}
+\item{\code{use_OTUs_frequency}}{default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.}
 }
 \if{html}{\out{</div>}}
 }
@@ -166,7 +173,9 @@ a new \code{\link{microtable}} class.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$trans_venn_com()
+\preformatted{\donttest{
+t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -177,6 +186,7 @@ a new \code{\link{microtable}} class.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_venn object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$print()}\if{html}{\out{</div>}}
 }

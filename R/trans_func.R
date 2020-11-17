@@ -2,7 +2,7 @@
 #' Create trans_func object for functional analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of functional analysis on species and communities.
+#' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, functional redundancy calculation and metabolic pathway abundance prediction Aßhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 #'
 #' @export
 trans_func <- R6Class(classname = "trans_func",
@@ -10,8 +10,9 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified according to the Kingdom information, 
 		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
-		#' @examples 
-		#' t1 <- trans_diff$new(dataset = dataset)
+		#' @examples
+		#' data(dataset)
+		#' t1 <- trans_func$new(dataset = dataset)
 		initialize = function(dataset = NULL
 			){
 			self$tax_table <- dataset$tax_table
@@ -38,14 +39,16 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @description
 		#' Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
 		#' Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
-		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507;
+		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
 		#' Fungi, based on the FUNGuild database, please also cite:
 		#' Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
-		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248.
+		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248. <doi:10.1016/j.funeco.2015.06.006>
 		#'
 		#' @return res_spe_func in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_spe_func()
+		#' }
 		cal_spe_func = function(){
 			for_what <- self$for_what
 			if(is.na(for_what)){
@@ -58,8 +61,8 @@ trans_func <- R6Class(classname = "trans_func",
 				# Copyright (c) 2019, Stilianos Louca
 				# All rights reserved.
 				# prok_func is a database developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
-				data(prok_func)
-				cat("This prokaryotic database is developed based on the FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507\n")
+				data("prok_func", envir=environment())
+				message("This prokaryotic database is developed based on the FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 				# collapse taxonomy
 				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
 				# reduce computational cost
@@ -92,7 +95,7 @@ trans_func <- R6Class(classname = "trans_func",
 				otu_func_table$anaerobic_chemoheterotrophy[otu_func_table$chemoheterotrophy != 0 & otu_func_table$aerobic_chemoheterotrophy == 0] <- 1
 			}
 			if(for_what == "fungi"){
-				data(fungi_func)
+				data("fungi_func", envir=environment())
 				tax1 <- self$tax_table
 				tax1[] <- lapply(tax1, function(x) gsub(".*__", "", x))
 				tax1 %<>% dropallfactors
@@ -144,11 +147,13 @@ trans_func <- R6Class(classname = "trans_func",
 		#' The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
 		#'
 		#' @param use_community default TRUE; whether calculate community; if FALSE, use module.
-		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of \code{\link{cal_node_type}}.
+		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.
 		#' @param abundance_weighted default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.
 		#' @return res_spe_func_perc in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_spe_func_perc(use_community = TRUE)
+		#' }
 		cal_spe_func_perc = function(use_community = TRUE, node_type_table = NULL, abundance_weighted = FALSE){
 			res_spe_func <- self$res_spe_func
 			otu_table <- self$otu_table
@@ -206,22 +211,27 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param use_func default NULL; the function name.
 		#' @return None.
 		#' @examples
+		#' \donttest{
 		#' t1$show_prok_func(use_func = "methanotrophy")
+		#' }
 		show_prok_func = function(use_func = NULL){
+			data("prok_func", envir=environment())
 			if(!is.null(use_func)){
-				spe_func$func_annotation[[use_func]]
+				prok_func$func_annotation[[use_func]]
 			}
 		},
 		#' @description
 		#' Plot the percentages of species with specific trait in communities or modules.
 		#'
 		#' @param filter_func default NULL; a vector of function names.
-		#' @param use_group_list default TRUE; If TRUE, use default group list; If use personalized group list, first set \code{\link{trans_func$func_group_list}} object with a list of group names and functions.
-		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see \code{\link{trans_func$func_group_list}} object.
+		#' @param use_group_list default TRUE; If TRUE, use default group list; If use personalized group list, first set trans_func$func_group_list object with a list of group names and functions.
+		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.
 		#' @param select_samples default NULL; character vector, select partial samples to show
 		#' @return ggplot2.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_spe_func_perc(use_group_list = TRUE)
+		#' }
 		plot_spe_func_perc = function(filter_func = NULL, use_group_list = TRUE, add_facet = TRUE, select_samples = NULL){
 			plot_data <- self$res_spe_func_perc
 			if(!is.null(filter_func)){
@@ -265,13 +275,16 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @description
 		#' Predict functional potential of communities using FAPROTAX.
 		#' please also cite the original FAPROTAX paper: 
-		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507;
+		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
+		#' @param Ref_folder default "./FAPROTAX_1.2.1"; see http://www.loucalab.com/archive/FAPROTAX
 		#' @return res_FAPROTAX in object.
 		#' @examples
-		#' t1$cal_FAPROTAX()
-		cal_FAPROTAX = function(keep_tem = TRUE) {
+		#' \donttest{
+		#' t1$cal_FAPROTAX(Ref_folder = "./FAPROTAX_1.2.1")
+		#' }
+		cal_FAPROTAX = function(keep_tem = TRUE, Ref_folder = "./FAPROTAX_1.2.1") {
 			message("This is FAPROTAX database 1.2.1 with python 2.7. The newer versions may exist in http://www.loucalab.com/archive/FAPROTAX ")
 			otu_file <- self$otu_table
 			tax_file <- self$tax_table
@@ -279,30 +292,34 @@ trans_func <- R6Class(classname = "trans_func",
 			tax_file <- apply(tax_file, 1, function(x){paste0(x, collapse = ";")})
 			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
 			# save to local place
-			cat("writing the otu_table_for_FAPROTAX.txt for FAPROTAX prediction ...")
-			write.table(otu_file, "otu_table_for_FAPROTAX.txt", sep = "\t", row.names = FALSE, quote = FALSE)
-			code_path <- system.file("extdata", "FAPROTAX_1.2.1", package="microeco")
-			use_command <- paste0("python ", code_path, "/collapse_table.py -i otu_table_for_FAPROTAX", ".txt -o ", "FAPROTAX_prediction.tsv -g ", 
+			pathfilename <- "otu_table_for_FAPROTAX"
+			pathfilename <- tempfile(pathfilename, fileext = ".txt")
+			message("writing the otu_table_for_FAPROTAX to temporary file ", pathfilename, " ...")
+			write.table(otu_file, pathfilename, sep = "\t", row.names = FALSE, quote = FALSE)
+			code_path <- Ref_folder
+			use_command <- paste0("python ", code_path, "/collapse_table.py -i ", pathfilename, " -o ", "FAPROTAX_prediction.tsv -g ", 
 				code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
-			cat("run python to predict...")
+			message("run python to predict...")
 			system(use_command)
-			cat("save prediction result FAPROTAX_prediction.tsv ...")
+			message("save prediction result in FAPROTAX_prediction.tsv ...")
 			self$res_FAPROTAX <- read.delim("FAPROTAX_prediction.tsv", check.names = FALSE, row.names = 1)
 			if(keep_tem == F){
-				cat("remove intermediate file otu_table_for_FAPROTAX.txt ...")
-				unlink("otu_table_for_FAPROTAX.txt", recursive = FALSE, force = TRUE)
+				message("remove intermediate file otu_table_for_FAPROTAX.txt ...")
+				unlink(pathfilename, recursive = FALSE, force = TRUE)
 			}
 		},
 		#' @description
 		#' Predict functional potential of communities using tax4fun.
 		#' please also cite: Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). 
-		#' Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
+		#' Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884. <doi:10.1093/bioinformatics/btv287>
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
-		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.
+		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and Tax4Fun function in Tax4Fun package.
 		#' @return tax4fun_KO and tax4fun_path in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_tax4fun(folderReferenceData = "./SILVA123")
+		#' }
 		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
 			if(is.null(folderReferenceData)){
 				stop("No folderReferenceData provided! Please see the help document!")
@@ -318,7 +335,8 @@ trans_func <- R6Class(classname = "trans_func",
 			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
 			otu_file$taxonomy %<>% gsub(".__", "", .) %>% paste0(., ";") %>% gsub(";{1, }$", ";", .)
 
-			pathfilename <- "otu_table_filter_tax4fun.txt"
+			pathfilename <- "otu_table_filter_tax4fun"
+			pathfilename <- tempfile(pathfilename, fileext = ".txt")
 			output <- file(pathfilename, open = "wb")
 			# must write this line, otherwise sample line will disappear
 			cat("# Constructed from biom file\n", file = output)
@@ -333,6 +351,8 @@ trans_func <- R6Class(classname = "trans_func",
 				unlink(pathfilename, recursive = FALSE, force = TRUE)
 			}
 		},
+		#' @description
+		#' Print the trans_func object.
 		print = function(){
 			cat("trans_func class:\n")
 			if(!is.null(self$env_data)){
@@ -342,13 +362,9 @@ trans_func <- R6Class(classname = "trans_func",
 		}
 	),
 	active = list(
-		#' @description
-		#' Functional group list for the plot_spe_func_perc function.
-		#'
-		#' @param func_list list; If missing, use the built-in functional group list automatically.
-		#' @return list with group names and group functions.
-		#' @examples
-		#' t1$func_group_list()
+		#### Active ----
+		
+		#' @field func_group_list store and show the function group list
 		func_group_list = function(func_list) {
 			if (missing(func_list)){
 				switch(self$for_what, prok = private$default_prok_func_group, fungi = private$default_fungi_func_group, NA)

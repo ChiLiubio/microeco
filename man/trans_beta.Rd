@@ -4,7 +4,9 @@
 \alias{trans_beta}
 \title{Create trans_beta object for the analysis of distance matrix of beta-diversity.}
 \description{
-This class is a wrapper for a series of beta-diversity related analysis.
+This class is a wrapper for a series of beta-diversity related analysis, 
+including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
+clustering and perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
 }
 \examples{
 
@@ -12,6 +14,7 @@ This class is a wrapper for a series of beta-diversity related analysis.
 ## Method `trans_beta$new`
 ## ------------------------------------------------
 
+data(dataset)
 t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 
 ## ------------------------------------------------
@@ -80,7 +83,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 
 \item{\code{ordination}}{default NULL; PCA, PCoA or NMDS.}
 
-\item{\code{measure}}{default NULL; beta diversity index used for ordination, manova or group distance.}
+\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; beta diversity index used for ordination, manova or group distance.}
 
 \item{\code{group}}{default NULL; sample group used for manova or group distance.}
 
@@ -97,7 +100,8 @@ res_ordination stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
+\preformatted{data(dataset)
+t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
 }
 \if{html}{\out{</div>}}
 
@@ -108,7 +112,7 @@ res_ordination stored in the object.
 \if{html}{\out{<a id="method-plot_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_ordination}{}}}
 \subsection{Method \code{plot_ordination()}}{
-Plotting the ordination result.
+Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_ordination(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -183,7 +187,7 @@ ggplot.
 \if{html}{\out{<a id="method-cal_manova"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
-Calculate perMANOVA.
+Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
   cal_manova_all = FALSE,
@@ -258,7 +262,6 @@ Plotting the distance between samples within or between groups.
   distance_pair_stat = FALSE,
   pair_compare_filter = "",
   pair_compare_method = "wilcox.test",
-  map_signif_level = TRUE,
   plot_distance_xtype = NULL
 )}\if{html}{\out{</div>}}
 }
@@ -275,8 +278,6 @@ Plotting the distance between samples within or between groups.
 \item{\code{pair_compare_filter}}{default ""; if provided, remove the matched groups.}
 
 \item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
-
-\item{\code{map_signif_level}}{default TRUE; whether indicate the significance level.}
 
 \item{\code{plot_distance_xtype}}{default NULL; number used to make x axis text generate angle.}
 }
@@ -337,6 +338,7 @@ ggplot.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_beta object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$print()}\if{html}{\out{</div>}}
 }

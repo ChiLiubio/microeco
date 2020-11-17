@@ -4,7 +4,9 @@
 \alias{trans_abund}
 \title{Create trans_abund object to transform taxonomic abundance for plotting.}
 \description{
-This class is a wrapper for the taxonomic abundance transformations and plotting.
+This class is a wrapper for the taxonomic abundance transformations and plotting. 
+The transformed data style is the long-format for ggplot2 plotting.
+The plotting approaches include the bar plot, boxplot, heatmap and pie chart based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 }
 \examples{
 
@@ -12,8 +14,9 @@ This class is a wrapper for the taxonomic abundance transformations and plotting
 ## Method `trans_abund$new`
 ## ------------------------------------------------
 
+data(dataset)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+# t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 
 ## ------------------------------------------------
 ## Method `trans_abund$plot_bar`
@@ -37,7 +40,9 @@ t1$plot_heatmap(withmargin = FALSE)
 ## Method `trans_abund$plot_pie`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_pie(facet_nrow = 2)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -94,8 +99,9 @@ abund_data and other file for plotting.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+\preformatted{data(dataset)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
+# t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
 }
 \if{html}{\out{</div>}}
 
@@ -165,7 +171,7 @@ Plot the bar plot with the object of trans_abund Class.
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
-\item{\code{base_font}}{default NULL; font in the plot.}
+\item{\code{base_font}}{default NULL; ggplot font family in the plot.}
 
 \item{\code{ylab_title}}{default NULL; y axis title.}
 }
@@ -378,7 +384,9 @@ ggplot2 plot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_pie(facet_nrow = 2)
+\preformatted{\donttest{
+t1$plot_pie(facet_nrow = 2)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -389,6 +397,7 @@ ggplot2 plot.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_abund object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$print()}\if{html}{\out{</div>}}
 }

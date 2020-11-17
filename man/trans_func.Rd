@@ -4,7 +4,7 @@
 \alias{trans_func}
 \title{Create trans_func object for functional analysis.}
 \description{
-This class is a wrapper for a series of functional analysis for species and communities.
+This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, functional redundancy calculation and metabolic pathway abundance prediction Aßhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 }
 \examples{
 
@@ -12,43 +12,63 @@ This class is a wrapper for a series of functional analysis for species and comm
 ## Method `trans_func$new`
 ## ------------------------------------------------
 
-t1 <- trans_diff$new(dataset = dataset)
+data(dataset)
+t1 <- trans_func$new(dataset = dataset)
 
 ## ------------------------------------------------
 ## Method `trans_func$cal_spe_func`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_spe_func()
+}
 
 ## ------------------------------------------------
 ## Method `trans_func$cal_spe_func_perc`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_spe_func_perc(use_community = TRUE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_func$show_prok_func`
 ## ------------------------------------------------
 
+\donttest{
 t1$show_prok_func(use_func = "methanotrophy")
+}
 
 ## ------------------------------------------------
 ## Method `trans_func$plot_spe_func_perc`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_spe_func_perc(use_group_list = TRUE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_func$cal_FAPROTAX`
 ## ------------------------------------------------
 
-t1$cal_FAPROTAX()
+\donttest{
+t1$cal_FAPROTAX(Ref_folder = "./FAPROTAX_1.2.1")
+}
 
 ## ------------------------------------------------
 ## Method `trans_func$cal_tax4fun`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_tax4fun(folderReferenceData = "./SILVA123")
+}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{func_group_list}}{store and show the function group list}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -80,11 +100,13 @@ t1$cal_tax4fun(folderReferenceData = "./SILVA123")
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified.
+for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified according to the Kingdom information, 
+at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_diff$new(dataset = dataset)
+\preformatted{data(dataset)
+t1 <- trans_func$new(dataset = dataset)
 }
 \if{html}{\out{</div>}}
 
@@ -96,7 +118,11 @@ for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" repres
 \if{latex}{\out{\hypertarget{method-cal_spe_func}{}}}
 \subsection{Method \code{cal_spe_func()}}{
 Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
-for prokaryotes, use FAPROTAX database; for fungi, use FUNGuild database.
+Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
+Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
+Fungi, based on the FUNGuild database, please also cite:
+Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
+FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248. <doi:10.1016/j.funeco.2015.06.006>
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func()}\if{html}{\out{</div>}}
 }
@@ -106,7 +132,9 @@ res_spe_func in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_spe_func()
+\preformatted{\donttest{
+t1$cal_spe_func()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -132,7 +160,7 @@ The percentages of the OTUs with specific trait can reflect the potential of the
 \describe{
 \item{\code{use_community}}{default TRUE; whether calculate community; if FALSE, use module.}
 
-\item{\code{node_type_table}}{default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of \code{\link{cal_node_type}}.}
+\item{\code{node_type_table}}{default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.}
 
 \item{\code{abundance_weighted}}{default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.}
 }
@@ -143,7 +171,9 @@ res_spe_func_perc in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_spe_func_perc(use_community = TRUE)
+\preformatted{\donttest{
+t1$cal_spe_func_perc(use_community = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -171,7 +201,9 @@ None.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$show_prok_func(use_func = "methanotrophy")
+\preformatted{\donttest{
+t1$show_prok_func(use_func = "methanotrophy")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -197,9 +229,9 @@ Plot the percentages of species with specific trait in communities or modules.
 \describe{
 \item{\code{filter_func}}{default NULL; a vector of function names.}
 
-\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If use personalized group list, first set \code{\link{trans_func$func_group_list}} object with a list of group names and functions.}
+\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If use personalized group list, first set trans_func$func_group_list object with a list of group names and functions.}
 
-\item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see \code{\link{trans_func$func_group_list}} object.}
+\item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.}
 
 \item{\code{select_samples}}{default NULL; character vector, select partial samples to show}
 }
@@ -210,7 +242,9 @@ ggplot2.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_spe_func_perc(use_group_list = TRUE)
+\preformatted{\donttest{
+t1$plot_spe_func_perc(use_group_list = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -222,14 +256,18 @@ ggplot2.
 \if{latex}{\out{\hypertarget{method-cal_FAPROTAX}{}}}
 \subsection{Method \code{cal_FAPROTAX()}}{
 Predict functional potential of communities using FAPROTAX.
+please also cite the original FAPROTAX paper: 
+Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_FAPROTAX(keep_tem = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_FAPROTAX(keep_tem = TRUE, Ref_folder = "./FAPROTAX_1.2.1")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.}
+
+\item{\code{Ref_folder}}{default "./FAPROTAX_1.2.1"; see http://www.loucalab.com/archive/FAPROTAX}
 }
 \if{html}{\out{</div>}}
 }
@@ -238,7 +276,9 @@ res_FAPROTAX in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_FAPROTAX()
+\preformatted{\donttest{
+t1$cal_FAPROTAX(Ref_folder = "./FAPROTAX_1.2.1")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -250,6 +290,8 @@ res_FAPROTAX in object.
 \if{latex}{\out{\hypertarget{method-cal_tax4fun}{}}}
 \subsection{Method \code{cal_tax4fun()}}{
 Predict functional potential of communities using tax4fun.
+please also cite: Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). 
+Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884. <doi:10.1093/bioinformatics/btv287>
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun(keep_tem = FALSE, folderReferenceData = NULL)}\if{html}{\out{</div>}}
 }
@@ -259,7 +301,7 @@ Predict functional potential of communities using tax4fun.
 \describe{
 \item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the otu table in local place.}
 
-\item{\code{folderReferenceData}}{default NULL; the folder, see http://tax4fun.gobics.de/ and \code{\link{Tax4Fun}} function in Tax4Fun package.}
+\item{\code{folderReferenceData}}{default NULL; the folder, see http://tax4fun.gobics.de/ and Tax4Fun function in Tax4Fun package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -268,7 +310,9 @@ tax4fun_KO and tax4fun_path in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_tax4fun(folderReferenceData = "./SILVA123")
+\preformatted{\donttest{
+t1$cal_tax4fun(folderReferenceData = "./SILVA123")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -279,6 +323,7 @@ tax4fun_KO and tax4fun_path in object.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_func object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$print()}\if{html}{\out{</div>}}
 }

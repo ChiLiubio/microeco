@@ -2,7 +2,8 @@
 #' Create trans_venn object.
 #'
 #' @description
-#' This class is a wrapper for a series of venn analysis related methods.
+#' This class is a wrapper for a series of venn analysis related methods, including venn result, 2- to 5-way venn diagram, 
+#' more than 5-way petal plot and venn result transformations based on David et al. (2012) <doi:10.1128/AEM.01459-12>.
 #'
 #' @export
 trans_venn <- R6Class(classname = "trans_venn",
@@ -11,8 +12,10 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param sample_names default NULL; if provided, filter the samples.
 		#' @param ratio default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; NULL: no additional percentage.
 		#' @return venn_table venn_count_abund stored in trans_venn object.
-		#' @examples 
-		#' trans_venn$new(dataset = dataset, sample_names = NULL, ratio = "numratio")
+		#' @examples
+		#' data(dataset)
+		#' t1 <- dataset$merge_samples(use_group = "Group")
+		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = "numratio"
 			) {
 			use_dataset <- clone(dataset)
@@ -85,7 +88,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param petal_text_move default 40; the distance between two data text
 		#' @return ggplot.
 		#' @examples
-		#' dataset$plot_venn()
+		#' t1$plot_venn()
 		plot_venn = function(
 			color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
 			fill_color = TRUE,
@@ -257,7 +260,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param use_OTUs_frequency default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.
 		#' @return a new \code{\link{microtable}} class.
 		#' @examples
-		#' dataset$trans_venn_com()
+		#' \donttest{
+		#' t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
+		#' }
 		trans_venn_com = function(use_OTUs_frequency = TRUE){
 			otudata <- self$otu_table
 			venn_table <- self$venn_table
@@ -278,6 +283,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 			}
 			microtable$new(sample_table = sampledata, otu_table = tt, tax_table = taxdata)
 		},
+		#' @description
+		#' Print the trans_venn object.
 		print = function() {
 			print(self$venn_count_abund)
 		}

@@ -4,7 +4,7 @@
 \alias{trans_alpha}
 \title{Create trans_alpha object for alpha diveristy statistics and plotting.}
 \description{
-This class is a wrapper for a series of alpha diveristy related analysis.
+This class is a wrapper for a series of alpha diveristy related analysis, including the statistics and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 }
 \examples{
 
@@ -12,6 +12,7 @@ This class is a wrapper for a series of alpha diveristy related analysis.
 ## Method `trans_alpha$new`
 ## ------------------------------------------------
 
+data(dataset)
 t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 
 ## ------------------------------------------------
@@ -25,7 +26,8 @@ t1$cal_diff(method = "anova")
 ## Method `trans_alpha$plot_alpha`
 ## ------------------------------------------------
 
-t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
+t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", 
+  group = "Group", pair_compare = TRUE)
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -61,7 +63,8 @@ alpha_data and alpha_stat stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+\preformatted{data(dataset)
+t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 }
 \if{html}{\out{</div>}}
 
@@ -82,7 +85,7 @@ Test the difference of alpha diveristy across groups. If use anova, require agri
 \describe{
 \item{\code{method}}{default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.}
 
-\item{\code{measures}}{default NULL; a vector, if null, all indexes will be calculated.}
+\item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 }
 \if{html}{\out{</div>}}
 }
@@ -113,7 +116,6 @@ Plotting the alpha diveristy.
   pair_compare = FALSE,
   pair_compare_filter = "",
   pair_compare_method = "wilcox.test",
-  map_signif_level = TRUE,
   xtext_type = NULL,
   xtext_size = 10,
   ytitle_size = 17,
@@ -127,7 +129,7 @@ Plotting the alpha diveristy.
 \describe{
 \item{\code{color_values}}{colors used for presentation.}
 
-\item{\code{measure}}{default Shannon; alpha diveristy measurement that will be used.}
+\item{\code{measure}}{default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
@@ -139,8 +141,6 @@ Plotting the alpha diveristy.
 
 \item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
 
-\item{\code{map_signif_level}}{default TRUE; whether indicate the significance level.}
-
 \item{\code{xtext_type}}{default NULL; number used to make x axis text generate angle.}
 
 \item{\code{xtext_size}}{default 10, x axis text size.}
@@ -149,7 +149,7 @@ Plotting the alpha diveristy.
 
 \item{\code{base_font}}{default NULL, font in the plot.}
 
-\item{\code{...}}{parameters pass to \code{\link{ggpubr::ggboxplot}}.}
+\item{\code{...}}{parameters pass to ggpubr::ggboxplot.}
 }
 \if{html}{\out{</div>}}
 }
@@ -158,7 +158,8 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
+\preformatted{t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", 
+  group = "Group", pair_compare = TRUE)
 }
 \if{html}{\out{</div>}}
 
@@ -169,6 +170,7 @@ ggplot.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_alpha object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$print()}\if{html}{\out{</div>}}
 }

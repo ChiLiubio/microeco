@@ -4,7 +4,9 @@
 \alias{trans_network}
 \title{Create trans_network object for co-occurrence network analysis.}
 \description{
-This class is a wrapper for a series of network analysis related methods.
+This class is a wrapper for a series of network analysis related methods, 
+including the correlation based <doi:10.1186/1471-2105-13-113>, SpiecEasi <doi:10.1371/journal.pcbi.1004226>,
+and Probabilistic Graphical Models based <doi:10.1016/j.cels.2019.08.002> network construction approaches, network and node attributes analysis and other network operations.
 }
 \examples{
 
@@ -12,73 +14,103 @@ This class is a wrapper for a series of network analysis related methods.
 ## Method `trans_network$new`
 ## ------------------------------------------------
 
+\donttest{
+data(dataset)
 # correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.001)
-# non correlation-based network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+  taxa_level = "OTU", filter_thres = 0.001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", 
+  taxa_level = "OTU", filter_thres = 0.001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", 
+  taxa_level = "OTU", filter_thres = 0.0001)
+# SpiecEasi or PGM network
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU",
+  filter_thres = 0.0001)
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$replace_name`
 ## ------------------------------------------------
 
+\donttest{
 t1$replace_name()
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$cal_network`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
+t1$cal_network(network_method = "PGM")
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$save_network`
 ## ------------------------------------------------
 
+\donttest{
 t1$save_network(filepath = "network.gexf")
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$cal_network_attr`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_network_attr()
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$cal_node_type`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_node_type()
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$cal_eigen`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_eigen()
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$plot_taxa_roles`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_taxa_roles()
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$cal_sum_links`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_sum_links(taxa_level = "Phylum")
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$plot_sum_links`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+}
 
 ## ------------------------------------------------
 ## Method `trans_network$subset_network`
 ## ------------------------------------------------
 
-t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% rownames, rm_single = TRUE)
+\donttest{
+t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% 
+  rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -121,9 +153,9 @@ t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% rown
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm.}
+\item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation based network.}
 
-\item{\code{cal_cor}}{default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represent do not calculate.}
+\item{\code{cal_cor}}{default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represent do not calculate correlations, used for non-correlation based network.}
 
 \item{\code{taxa_level}}{default "OTU"; taxonomic rank.}
 
@@ -144,12 +176,19 @@ res_cor_p list.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{# correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", taxa_level = "OTU", filter_thres = 0.0001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", taxa_level = "OTU", filter_thres = 0.0001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", taxa_level = "OTU", filter_thres = 0.001)
-# non correlation-based network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0001)
+\preformatted{\donttest{
+data(dataset)
+# correlation network
+t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+  taxa_level = "OTU", filter_thres = 0.001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", 
+  taxa_level = "OTU", filter_thres = 0.001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", 
+  taxa_level = "OTU", filter_thres = 0.0001)
+# SpiecEasi or PGM network
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU",
+  filter_thres = 0.0001)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -170,7 +209,9 @@ a new res_cor_p in trans_network object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$replace_name()
+\preformatted{\donttest{
+t1$replace_name()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -181,10 +222,13 @@ a new res_cor_p in trans_network object.
 \if{html}{\out{<a id="method-cal_network"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
-Calculate network either based on the correlation method or based on the Probabilistic Graphical Models in julia FlashWeave.
+Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
+see Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method; 
+see Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method; 
+see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
-  network_method = c("COR", "PGM")[1],
+  network_method = c("COR", "SpiecEasi", "PGM")[1],
   p_thres = 0.01,
   COR_weight = TRUE,
   COR_p_adjust = "fdr",
@@ -194,16 +238,18 @@ Calculate network either based on the correlation method or based on the Probabi
   PGM_meta_data = FALSE,
   PGM_sensitive = "true",
   PGM_heterogeneous = "true",
+  SpiecEasi_method = "mb",
   with_module = TRUE,
   add_taxa_name = "Phylum",
-  usename_rawtaxa_when_taxalevel_notOTU = FALSE
+  usename_rawtaxa_when_taxalevel_notOTU = FALSE,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{network_method}}{default "COR"; "COR" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method; doi: 10.1016/j.cels.2019.08.002}
+\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method.}
 
 \item{\code{p_thres}}{default .01; the p value threshold.}
 
@@ -223,11 +269,15 @@ Calculate network either based on the correlation method or based on the Probabi
 
 \item{\code{PGM_heterogeneous}}{default "true"; whether use heterogeneous type in the PGM model.}
 
+\item{\code{SpiecEasi_method}}{default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.}
+
 \item{\code{with_module}}{default TRUE; whether calculate modules.}
 
 \item{\code{add_taxa_name}}{default "Phylum"; add taxonomic rank name to the result.}
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
+
+\item{\code{...}}{paremeters pass to spiec.easi in package SpiecEasi.}
 }
 \if{html}{\out{</div>}}
 }
@@ -236,7 +286,11 @@ res_network in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+\preformatted{\donttest{
+t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
+t1$cal_network(network_method = "PGM")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -247,7 +301,7 @@ res_network in object.
 \if{html}{\out{<a id="method-save_network"></a>}}
 \if{latex}{\out{\hypertarget{method-save_network}{}}}
 \subsection{Method \code{save_network()}}{
-Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
+Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf")}\if{html}{\out{</div>}}
 }
@@ -264,7 +318,9 @@ None.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$save_network(filepath = "network.gexf")
+\preformatted{\donttest{
+t1$save_network(filepath = "network.gexf")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -285,7 +341,9 @@ res_network_attr in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_network_attr()
+\preformatted{\donttest{
+t1$cal_network_attr()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -306,7 +364,9 @@ res_node_type in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_node_type()
+\preformatted{\donttest{
+t1$cal_node_type()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -327,7 +387,9 @@ res_eigen and res_eigen_expla in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_eigen()
+\preformatted{\donttest{
+t1$cal_eigen()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -387,7 +449,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_taxa_roles()
+\preformatted{\donttest{
+t1$plot_taxa_roles()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -398,7 +462,8 @@ ggplot.
 \if{html}{\out{<a id="method-cal_sum_links"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_sum_links}{}}}
 \subsection{Method \code{cal_sum_links()}}{
-Sum the linkages among taxa.
+This function is used to sum the links number from one taxa to another or in the same taxa, for example, at Phylum level.
+This is very useful to fast see how many nodes are connected between different taxa or within the taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_sum_links(taxa_level = "Phylum")}\if{html}{\out{</div>}}
 }
@@ -415,7 +480,9 @@ res_sum_links_pos and res_sum_links_neg in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_sum_links(taxa_level = "Phylum")
+\preformatted{\donttest{
+t1$cal_sum_links(taxa_level = "Phylum")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -426,7 +493,7 @@ res_sum_links_pos and res_sum_links_neg in object.
 \if{html}{\out{<a id="method-plot_sum_links"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_sum_links}{}}}
 \subsection{Method \code{plot_sum_links()}}{
-Plot the summed linkages among taxa.
+Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_sum_links(
   plot_pos = TRUE,
@@ -451,7 +518,9 @@ chorddiag plot
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+\preformatted{\donttest{
+t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -481,8 +550,11 @@ a new network
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% rownames, rm_single = TRUE)
+\preformatted{\donttest{
+t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% 
+  rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
+}
 }
 \if{html}{\out{</div>}}
 
@@ -493,6 +565,7 @@ a new network
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_network object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$print()}\if{html}{\out{</div>}}
 }

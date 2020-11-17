@@ -4,7 +4,7 @@
 \alias{trans_env}
 \title{Create trans_env object for the analysis of the effects of environmental factors on communities.}
 \description{
-This class is a wrapper for a series of operations associated with environmental measurements.
+This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 }
 \examples{
 
@@ -12,7 +12,9 @@ This class is a wrapper for a series of operations associated with environmental
 ## Method `trans_env$new`
 ## ------------------------------------------------
 
-t1 <- trans_env$new(dataset = dataset, add_data = env_data)
+data(dataset)
+data(env_data_16S)
+t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 
 ## ------------------------------------------------
 ## Method `trans_env$cal_rda`
@@ -24,33 +26,43 @@ t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 ## Method `trans_env$trans_rda`
 ## ------------------------------------------------
 
+\donttest{
 t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+}
 
 ## ------------------------------------------------
 ## Method `trans_env$plot_rda`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_rda(plot_color = "Group")
+}
 
 ## ------------------------------------------------
 ## Method `trans_env$cal_mantel`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_mantel(use_measure = "bray")
+}
 
 ## ------------------------------------------------
 ## Method `trans_env$cal_cor`
 ## ------------------------------------------------
 
+\donttest{
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
-t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
+t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+}
 
 ## ------------------------------------------------
 ## Method `trans_env$plot_corr`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_corr(pheatmap = FALSE)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -97,7 +109,9 @@ env_data and dataset in trans_env object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1 <- trans_env$new(dataset = dataset, add_data = env_data)
+\preformatted{data(dataset)
+data(env_data_16S)
+t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 }
 \if{html}{\out{</div>}}
 
@@ -108,7 +122,7 @@ env_data and dataset in trans_env object.
 \if{html}{\out{<a id="method-cal_rda"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_rda}{}}}
 \subsection{Method \code{cal_rda()}}{
-Redundancy analysis (RDA).
+Redundancy analysis (RDA) based on the rda function in vegan package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_rda(
   use_dbrda = TRUE,
@@ -187,7 +201,9 @@ res_rda_trans in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+\preformatted{\donttest{
+t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -232,7 +248,9 @@ ggplot object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_rda(plot_color = "Group")
+\preformatted{\donttest{
+t1$plot_rda(plot_color = "Group")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -277,7 +295,9 @@ res_mantel in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_mantel(use_measure = "bray")
+\preformatted{\donttest{
+t1$cal_mantel(use_measure = "bray")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -288,7 +308,7 @@ res_mantel in object.
 \if{html}{\out{<a id="method-cal_cor"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_cor}{}}}
 \subsection{Method \code{cal_cor()}}{
-Calculating the correlations between taxa abundance and environmental variables. 
+Calculating the correlations between taxa abundance and environmental variables.
 Indeed, it can also be used for calculating other correlation between any two variables from two tables.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
@@ -299,6 +319,7 @@ Indeed, it can also be used for calculating other correlation between any two va
   p_adjust_type = c("Type", "Taxa", "Env")[3],
   add_abund_table = NULL,
   by_group = NULL,
+  use_taxa_num = NULL,
   other_taxa = NULL,
   group_use = NULL,
   group_select = NULL,
@@ -309,7 +330,7 @@ Indeed, it can also be used for calculating other correlation between any two va
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa abundance, other: provide additional data with other_taxa parameter.}
+\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa, other: provide additional taxa name with other_taxa parameter.}
 
 \item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
 
@@ -322,6 +343,8 @@ Indeed, it can also be used for calculating other correlation between any two va
 \item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
 
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate correlations for different groups separately.}
+
+\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g. "Genus".}
 
 \item{\code{other_taxa}}{default NULL; provide additional taxa, see use_data parameter.}
 
@@ -338,9 +361,11 @@ res_cor in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
-t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
+\preformatted{\donttest{
+t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
+t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+}
 }
 \if{html}{\out{</div>}}
 
@@ -392,7 +417,9 @@ plot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_corr(pheatmap = FALSE)
+\preformatted{\donttest{
+t1$plot_corr(pheatmap = FALSE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -403,6 +430,7 @@ plot.
 \if{html}{\out{<a id="method-print"></a>}}
 \if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
+Print the trans_env object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$print()}\if{html}{\out{</div>}}
 }

@@ -2,7 +2,7 @@
 #' Create trans_env object for the analysis of the effects of environmental factors on communities.
 #'
 #' @description
-#' This class is a wrapper for a series of operations associated with environmental measurements.
+#' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 #'
 #' @export
 trans_env <- R6Class(classname = "trans_env",
@@ -13,7 +13,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
 		#' @return env_data and dataset in trans_env object.
 		#' @examples
-		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data)
+		#' data(dataset)
+		#' data(env_data_16S)
+		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 		initialize = function(dataset = NULL, env_cols = NULL, add_data = NULL, complete_na = FALSE
 			){
 			if(is.null(add_data)){
@@ -44,7 +46,7 @@ trans_env <- R6Class(classname = "trans_env",
 			self$dataset <- dataset1
 			},
 		#' @description
-		#' Redundancy analysis (RDA).
+		#' Redundancy analysis (RDA) based on the rda function in vegan package.
 		#'
 		#' @param use_dbrda default TRUE; whether use db-RDA, if FALSE, use RDA.
 		#' @param add_matrix default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset.
@@ -76,7 +78,7 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("No abundance dataset provided; please set dataset parameter in creating Class")
 				}
 				if(is.null(taxa_level)){
-					cat("No taxa_level provided, Genus used automatically!")
+					message("No taxa_level provided, Genus used automatically!")
 					taxa_level <- "Genus"
 				}
 				newdat <- self$dataset$merge_taxa(taxa_level)
@@ -121,7 +123,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param max_perc_tax default 100; maximum scale value for tax arrow, relatively.
 		#' @return res_rda_trans in object.
 		#' @examples
+		#' \donttest{
 		#' t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+		#' }
 		trans_rda = function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env = 1, max_perc_env = 100, min_perc_tax = 1, max_perc_tax = 100){
 			res_rda <- self$res_rda
 			scrs <- scores(res_rda ,choices = c(1, 2), display = c("sp", "wa", "cn"))
@@ -177,7 +181,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_text_type default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.
 		#' @return ggplot object.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_rda(plot_color = "Group")
+		#' }
 		plot_rda = function(
 			plot_color = NULL,
 			plot_shape = NULL,
@@ -228,7 +234,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ... paremeters pass to \code{\link{mantel}}.
 		#' @return res_mantel in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_mantel(use_measure = "bray")
+		#' }
 		cal_mantel = function(select_env_data = NULL, partial_mantel = FALSE, add_matrix = NULL, use_measure = NULL, method = "pearson", ...){
 			if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
 				stop("No distance matrix provided; please use set add_matrix parameter or use provide dataset in creating Class")
@@ -276,7 +284,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' Calculating the correlations between taxa abundance and environmental variables. 
+		#' Calculating the correlations between taxa abundance and environmental variables.
 		#' Indeed, it can also be used for calculating other correlation between any two variables from two tables.
 		#'
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa, other: provide additional taxa name with other_taxa parameter.
@@ -293,9 +301,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_name_full default TRUE; Whether retain the complete taxonomic name of taxa.
 		#' @return res_cor in object.
 		#' @examples
+		#' \donttest{
 		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
-		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data[, 4:11])
+		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 		#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
 			select_env_data = NULL,
@@ -367,10 +377,12 @@ trans_env <- R6Class(classname = "trans_env",
 			choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
 			comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% 
 				unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
-			invisible(lapply(comb_names2, function(x){
-				row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)));
-				res$AdjPvalue[row_sel] <<- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
-			}))
+			# p value adjust by groups
+			for(i in seq_len(ncol(comb_names2))){
+				x <- comb_names2[, i]
+				row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)))
+				res$AdjPvalue[row_sel] <- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
+			}
 			res$Significance <- cut(res$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
 			res <- res[complete.cases(res), ]
 			res$Env <- factor(res$Env, levels = unique(as.character(res$Env)))
@@ -393,7 +405,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
 		#' @return plot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_corr(pheatmap = FALSE)
+		#' }
 		plot_corr = function(
 			color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
 			pheatmap = FALSE,
@@ -472,6 +486,8 @@ trans_env <- R6Class(classname = "trans_env",
 				p
 			}
 		},
+		#' @description
+		#' Print the trans_env object.
 		print = function(){
 			cat("trans_env class:\n")
 			if(!is.null(self$env_data)){

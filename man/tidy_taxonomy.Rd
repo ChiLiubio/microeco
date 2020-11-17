@@ -19,5 +19,6 @@ taxonomic table.
 Clear up the taxonomic table to make taxonomic assignments consistent.
 }
 \examples{
-tidy_taxonomy(taxonomy_table)
+data("taxonomy_table_16S")
+tidy_taxonomy(taxonomy_table_16S)
 }

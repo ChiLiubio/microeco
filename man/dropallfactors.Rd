@@ -18,5 +18,7 @@ data frame without factor
 Remove all factors in a data frame
 }
 \examples{
-dropallfactors(x)
+data("taxonomy_table_16S")
+taxonomy_table_16S[, 1] <- as.factor(taxonomy_table_16S[, 1])
+dropallfactors(taxonomy_table_16S)
 }

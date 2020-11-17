@@ -1,7 +1,7 @@
 #' @title Create trans_alpha object for alpha diveristy statistics and plotting.
 #'
 #' @description
-#' This class is a wrapper for a series of alpha diveristy related analysis.
+#' This class is a wrapper for a series of alpha diveristy related analysis, including the statistics and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 #'
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
@@ -11,6 +11,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param order_x default:null; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
 		#' @return alpha_data and alpha_stat stored in the object.
 		#' @examples
+		#' data(dataset)
 		#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 		initialize = function(dataset = NULL, group = NULL, order_x = NULL) {
 			self$group <- group
@@ -108,15 +109,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param pair_compare default FALSE; whether perform paired comparisons.
 		#' @param pair_compare_filter default ""; groups that will be removed.
 		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
-		#' @param map_signif_level default TRUE; whether indicate the significance level.
 		#' @param xtext_type default NULL; number used to make x axis text generate angle.
 		#' @param xtext_size default 10, x axis text size.
 		#' @param ytitle_size default 17, y axis title size.
 		#' @param base_font default NULL, font in the plot.
-		#' @param ... parameters pass to \code{\link{ggpubr::ggboxplot}}.
+		#' @param ... parameters pass to ggpubr::ggboxplot.
 		#' @return ggplot.
 		#' @examples
-		#' t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", group = "Group", pair_compare = TRUE)
+		#' t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", 
+		#'   group = "Group", pair_compare = TRUE)
 		plot_alpha = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			measure = "Shannon",
@@ -125,7 +126,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			pair_compare = FALSE,
 			pair_compare_filter = "",
 			pair_compare_method = "wilcox.test",
-			map_signif_level = TRUE,
 			xtext_type = NULL,
 			xtext_size = 10,
 			ytitle_size = 17,
@@ -174,7 +174,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						combn(., 2) %>% 
 						{.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter, x)))), drop = FALSE]} %>% 
 						{lapply(seq_len(ncol(.)), function(x) .[, x])}
-					p <- p + stat_compare_signif(comparisons = comparisons_list, method = pair_compare_method, map_signif_level = map_signif_level)
+#					p <- p + stat_compare_signif(comparisons = comparisons_list, method = pair_compare_method, map_signif_level = map_signif_level)
+					p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, paired = TRUE, method = pair_compare_method, 
+						tip.length=0.01, label = "p.signif", symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), 
+						symbols = c("****", "***", "**", "*", "ns")))
 				}
 				p <- p + ylab(measure) + xlab("")
 				p <- p + theme(legend.position="none", axis.title.y= element_text(size=ytitle_size), axis.text.x = element_text(colour = "black", size = xtext_size))
@@ -188,6 +191,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 
 		},
+		#' @description
+		#' Print the trans_alpha object.
 		print = function() {
 			cat("trans_alpha class:\n")
 			cat(paste("alpha_data have", ncol(self$alpha_data), "columns: ", paste0(colnames(self$alpha_data), collapse = ", "), "\n"))

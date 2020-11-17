@@ -1,25 +1,25 @@
 # microeco
-An R package for data analysis in microbial community ecology
+An R package for data mining in microbial community ecology
 
 ## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
 the increasing data amount and complexity make the community data analysis and management a challenge.
-There has been a lot of R packages created for the community data analysis in microbial ecology, such as phyloseq,
+There has been a lot of R packages created for the microbiome profiling analysis, such as phyloseq,
 microbiomeSeq, ampvis2, mare and microbiome.
 However, it is still difficult to perform data mining fast and efficiently.
-Based on this, we created R package microeco.
+Based on this, we created an R package microeco.
 
 ## Main Features
   + R6 Class to store and analyze data; fast, flexible and modularized
-  + Plotting the taxonomic abundance
+  + Taxonomic abundance analysis
   + Venn diagram
   + Alpha diversity
   + Beta diversity
   + Differential abundance analysis
   + Indicator species analysis
   + Environmental data analysis
-  + Network analysis
   + Null model analysis
+  + Network analysis
   + Functional analysis
 
 
@@ -28,13 +28,19 @@ If you do not already have R/RStudio installed, do as follows.
 
 1. Install [R](https://www.r-project.org/)
 2. Install [RStudio](https://rstudio.com/)
-3. With Windows, install also [Rtools](https://cran.r-project.org/bin/windows/Rtools/)  
 
-Put R and Rtools in the computer env PATH, for example your_directory\R-3.6.3\bin\x64, your_directory\Rtools\bin and your_directory\Rtools\mingw_64\bin  
+Put R and Rtools in the computer env PATH, for example your_directory\R-4.0.0\bin\x64 .
 Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
 
 ## Install microeco
-Directly install microeco online.
+Directly install microeco online from CRAN.
+
+```r
+install.packages("microeco")
+```
+
+Install microeco from github (beta version).
+
 ```r
 # If devtools package is not installed, first install it
 install.packages("devtools")
@@ -50,43 +56,42 @@ devtools::install_local("microeco-master.zip")
 See the detailed package tutorial (https://chiliubio.github.io/microeco/) and the help documentations.
 If the tutorial website can not be opened because of bad internet connection, you can download the microeco-master.zip and open the index.html to see the tutorial 
 using your browser directly.
-If you want to run the codes in the tutorial completely, you need to install some additional packages, see the following **Notes** part.
-
+If you want to run the codes in the tutorial and REMDME completely, you need to install some additional packages, see the following **Notes** part.
 
 
 ## Notes
 
 ### packages important
 To keep the start and use of microeco package simplified, 
-the installation of microeco only depend on several packages, which are compulsory-installed and very useful in the data analysis.
-These packages include R6, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, RColorBrewer, Rcpp, RcppArmadillo and RcppEigen.
+the installation of microeco depend on some packages, which are compulsory-installed from CRAN and useful in the data analysis.
+These packages include
+R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, VGAM, MASS, RColorBrewer.
 So the question is that you may encounter an error when using a class or function that invoke an additional package like this:
 
 ```r
 library(microeco)
-data(sample_info_16S)
-data(otu_table_16S)
-data(taxonomy_table_16S)
-data(phylo_tree_16S)
-dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
-dataset$tidy_dataset()
-dataset$cal_betadiv(unifrac = TRUE)
+data(dataset)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0005)
+t1$cal_network(network_method = "SpiecEasi")
 ```
 
 
 ```html
-Error in loadNamespace(name) : there is no package called ‘GUniFrac’ ...
+Error in t1$cal_network(network_method = "SpiecEasi"): igraph package not installed ...
 ```
 
 
 <br>
-The reason is that calculating unifrac distance require ‘GUniFrac’ package.
+The reason is that network construction require igraph package. We donot put the igraph and some other packages (in bioconductor or github) on the "Imports" part of microeco package.
 
 The solutions:
 
-1. install the package when encounter such an error. Indeed, it's very easy to install in Rstudio. Just try it.
+1. install the package when encounter such an error. Indeed, it's very easy to install the packages of CRAN in Rstudio. Just try it.
 
-2. install the packages in advance. We recommend this solution if you are interest in many methods of the microeco package. We first show some packages that are necessary in some functions.
+2. install the packages in advance. We recommend this solution if you are interest in most of the methods in the microeco package.
+
+We show several packages that are published in CRAN and not installed automatically.
+
 
 
 <div id="content-wrapper">
@@ -106,15 +111,30 @@ The solutions:
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr class="even">
 <td align="center">GUniFrac</td>
-<td align="center">cal_betadiv</td>
+<td align="center">cal_betadiv()</td>
 <td align="center">UniFrac distance matrix</td>
 </tr>
+<tr class="odd">
+<td align="center">ggpubr</td>
+<td align="center">plot_alpha()</td>
+<td align="center">some plotting functions</td>
+</tr>
 <tr class="even">
-<td align="center">picante</td>
-<td align="center">cal_alphadiv</td>
-<td align="center">Faith’s phylogenetic alpha diversity</td>
+<td align="center">randomForest</td>
+<td align="center">trans_diff$new(method = “rf”,…)</td>
+<td align="center">random forest analysis</td>
+</tr>
+<tr class="odd">
+<td align="center">ggdendro</td>
+<td align="center">plot_clustering()</td>
+<td align="center">plotting clustering dendrogram</td>
+</tr>
+<tr class="even">
+<td align="center">ggrepel</td>
+<td align="center">trans_rda class</td>
+<td align="center">reduce the text overlap in the plot</td>
 </tr>
 <tr class="odd">
 <td align="center">agricolae</td>
@@ -122,49 +142,49 @@ The solutions:
 <td align="center">multiple comparisons</td>
 </tr>
 <tr class="even">
-<td align="center">ggpubr</td>
-<td align="center">plot_alpha</td>
-<td align="center">some plotting functions</td>
+<td align="center">gridExtra</td>
+<td align="center">trans_diff class</td>
+<td align="center">merge plots</td>
 </tr>
 <tr class="odd">
-<td align="center">ggdendro</td>
-<td align="center">plot_clustering</td>
-<td align="center">plotting clustering dendrogram</td>
+<td align="center">picante</td>
+<td align="center">cal_alphadiv()</td>
+<td align="center">Faith’s phylogenetic alpha diversity</td>
 </tr>
 <tr class="even">
-<td align="center">MASS</td>
-<td align="center">trans_diff$new(method = “lefse”,…)</td>
-<td align="center">linear discriminant analysis</td>
-</tr>
-<tr class="odd">
-<td align="center">randomForest</td>
-<td align="center">trans_diff$new(method = “rf”,…)</td>
-<td align="center">random forest analysis</td>
-</tr>
-<tr class="even">
-<td align="center">ggrepel</td>
-<td align="center">trans_rda</td>
-<td align="center">reduce the text overlap in the plot</td>
-</tr>
-<tr class="odd">
 <td align="center">pheatmap</td>
 <td align="center">plot_corr(pheatmap = TRUE)</td>
 <td align="center">correlation heatmap with clustering dendrogram</td>
 </tr>
+<tr class="odd">
+<td align="center">tidytree</td>
+<td align="center">trans_diff class</td>
+<td align="center">plot the taxonomic tree</td>
+</tr>
 <tr class="even">
+<td align="center">mice</td>
+<td align="center">trans_env class</td>
+<td align="center">Insert missing value in env data</td>
+</tr>
+<tr class="odd">
+<td align="center">phyloseq</td>
+<td align="center">meco2phyloseq()</td>
+<td align="center">convert between microtable and phyloseq</td>
+</tr>
+<tr class="even">
+<td align="center">qiime2R</td>
+<td align="center">qiimed2meco()</td>
+<td align="center">QIIME2 files to microtable object</td>
+</tr>
+<tr class="odd">
 <td align="center">igraph</td>
 <td align="center">trans_network class</td>
 <td align="center">network related operations</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="center">rgexf</td>
 <td align="center">save_network</td>
 <td align="center">save network with gexf style</td>
-</tr>
-<tr class="even">
-<td align="center">VGAM</td>
-<td align="center">trans_network class</td>
-<td align="center">generate Dirichlet random variates in SparCC</td>
 </tr>
 <tr class="odd">
 <td align="center">RJSONIO</td>
@@ -188,14 +208,16 @@ Then, if you want to install these packages or some of them, you can do like thi
 ```r
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
-packages <- c("GUniFrac", "picante", "agricolae", "ggpubr", "ggdendro", "MASS", "randomForest", 
-	"ggrepel", "pheatmap", "igraph", "rgexf", "VGAM", "RJSONIO", "ggalluvial")
+packages <- c("GUniFrac", "ggpubr", "randomForest", "ggdendro", "ggrepel", "agricolae", "gridExtra", "picante", "pheatmap", "igraph", "rgexf", "RJSONIO", "ggalluvial")
 # Now check or install
 lapply(packages, function(x) {
 	if(!require(x, character.only = TRUE)) {
 		install.packages(x, dependencies = TRUE)
 	}})
 ```
+
+There are also some packages that may be useful in some parameters or functions. These packages may be R packages published in github or bioconductor,
+or packages written by other languages.
 
 #### WGCNA
 In the correlation-based network, when the species number is large,
@@ -223,9 +245,16 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocMana
 BiocManager::install("ggtree")
 ```
 
+
+#### SpiecEasi
+
+The R package SpiecEasi can be used for the network construction using SPIEC-EASI (SParse InversE Covariance Estimation for Ecological Association Inference) approach.
+The package can be installed from Github https://github.com/zdk123/SpiecEasi
+
 #### chorddiag
 
 The R package chorddiag is used for the chord plot in the network analysis and can be installed from Github https://github.com/mattflor/chorddiag
+
 
 #### Tax4Fun
 Tax4Fun is an R package used for the prediction of functional potential of microbial communities.
@@ -270,7 +299,7 @@ through statistical co-occurrence.
 3. Open terminal or cmd or Powershell, input julia, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
 
 #### Gephi
-Gephi is used to open saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
+Gephi is an excellent network visualization tool and used to open the saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
 
 ## plotting
@@ -279,8 +308,8 @@ We provide some parameters to change the corresponding plot.
 If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
 Of course, you can also directly modify the function or class to reload them.
 
-## read the raw files
-In this part, we show how to construct the object of microtable class using the raw otu file from QIIME.
+## read QIIME files
+In this part, we show how to construct the object of microtable class using the raw OTU file from QIIME.
 
 ```r
 # use the raw data files stored inside the package
@@ -316,9 +345,66 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 ?microtable
 ```
 
-## QQ
-If the user has problems or suggestions, feel free to join the QQ group for discussions.  
-QQ group: 207510995
+## read the QIIME2 files
+We provide a function qiimed2meco() to convert QIIME2 file to microtable object directly.
+If you want to run the codes, first download the QIIME2 files from https://docs.qiime2.org/2020.8/tutorials/pd-mice/
+
+
+```r
+# Please first install qiime2R from github, see https://github.com/jbisanz/qiime2R
+libraray(qiime2R)
+library(magrittr)
+qiimed2meco <- function(ASV_data, sample_data, taxonomy_data, phylo_tree = NULL){
+	# Read ASV data
+	ASV <- as.data.frame(read_qza(ASV_data)$data)
+	#  Read metadata
+	metadata <- read_q2metadata(sample_data)
+	rownames(metadata) <- as.character(metadata[, 1])
+	# Read taxonomy table
+	taxa_table <- read_qza(taxonomy_data)
+	taxa_table <- parse_taxonomy(taxa_table$data)
+	# Make the taxonomic table clean, this is very important.
+	taxa_table %<>% tidy_taxonomy
+	# Read phylo tree
+	if(!is.null(phylo_tree)){
+		phylo_tree <- read_qza(phylo_tree)$data
+	}
+	dataset <- microtable$new(sample_table = metadata, tax_table = taxa_table, otu_table = ASV, phylo_tree = phylo_tree)
+	dataset
+}
+# first download QIIME2 files from https://docs.qiime2.org/2020.8/tutorials/pd-mice/
+library(microeco)
+meco_dataset <- qiimed2meco(ASV_data = "dada2_table.qza", sample_data = "sample-metadata.tsv", taxonomy_data = "taxonomy.qza", phylo_tree = "tree.qza")
+meco_dataset
+```
+
+
+## conversion between microtable and phyloseq
+We provide two functions meco2phyloseq() and phyloseq2meco() for the conversion between microtable object and phyloseq object (phyloseq package).
+
+```r
+# Please first install phyloseq
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install("phyloseq")
+```
+
+```r
+# from microtable to phyloseq object
+library(microeco)
+library(phyloseq)
+data("dataset")
+physeq <- meco2phyloseq(dataset)
+physeq
+```
+
+```r
+# from phyloseq to microtable object
+library(phyloseq)
+library(microeco)
+data("GlobalPatterns")
+meco_dataset <- phyloseq2meco(GlobalPatterns)
+meco_dataset
+```
 
 
 ## Acknowledgement
@@ -333,9 +419,6 @@ QQ group: 207510995
   - [microbiomeSeq](https://github.com/umerijaz/microbiomeSeq), 
     the method that calculates the roles of nodes within- and among- modules connectivity is 
     modified from the package **microbiomeSeq**.
-  - [SpiecEasi](https://github.com/zdk123/SpiecEasi), 
-    the method that calculates SparCC is
-    modified from the package **SpiecEasi**.
   - [microbiomeMarker](https://github.com/yiluheihei/microbiomeMarker), 
     the method that plots the LEfSe cladogram is
     modified from the package **microbiomeMarker**.

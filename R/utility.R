@@ -1,10 +1,69 @@
 
+
+
+#' Transform microtable object in microeco package to the phyloseq object in phyloseq package.
+#'
+#' @param dataset a microtable object.
+#' @return phyloseq object.
+#' @examples
+#' \donttest{
+#' data("dataset")
+#' meco2phyloseq(dataset)
+#' }
+#' @export
+meco2phyloseq <- function(dataset){
+	otu_table_trans <- dataset$otu_table
+	sample_table_trans <- dataset$sample_table
+	tax_table_trans <- dataset$tax_table
+	phylo_tree_trans <- dataset$phylo_tree
+	# OTU table for phyloseq
+	otu_table_trans <- phyloseq::otu_table(otu_table_trans, taxa_are_rows = TRUE)
+	sampledata <- phyloseq::sample_data(sample_table_trans)
+	rownames(sampledata) <- rownames(sample_table_trans)
+	# Taxonomic table for phyloseq
+	if(!is.null(tax_table_trans)){
+		tax_table_trans <- phyloseq::tax_table(as.matrix(tax_table_trans))
+	}
+	physeq <- phyloseq::phyloseq(otu_table_trans, tax_table_trans, sampledata, phylo_tree_trans)
+	physeq
+}
+
+
+#' Transform the phyloseq object in phyloseq package to microtable object in microeco package.
+#'
+#' @param physeq a phyloseq object.
+#' @return microtable object.
+#' @examples
+#' \donttest{
+#' library(phyloseq)
+#' data("GlobalPatterns")
+#' phyloseq2meco(GlobalPatterns)
+#' }
+#' @export
+phyloseq2meco <- function(physeq){
+	if(physeq@otu_table@taxa_are_rows){
+		otu_table_trans <- as.data.frame(physeq@otu_table@.Data, check.names = FALSE, stringsAsFactors = FALSE)
+	}else{
+		otu_table_trans <- as.data.frame(t(physeq@otu_table@.Data), check.names = FALSE, stringsAsFactors = FALSE)
+	}
+	sample_table_trans <- data.frame(phyloseq::sample_data(physeq), check.names = FALSE, stringsAsFactors = FALSE)
+	tax_table_trans <- as.data.frame(physeq@tax_table@.Data, check.names = FALSE, stringsAsFactors = FALSE)
+	tax_table_trans %<>% tidy_taxonomy
+	phylo_tree_trans <- physeq@phy_tree
+	
+	dataset <- microtable$new(sample_table = sample_table_trans, otu_table = otu_table_trans, tax_table = tax_table_trans, phylo_tree = phylo_tree_trans)
+	dataset
+}
+
+
+
 #' Copy an R6 class object completely
 #'
 #' @param x R6 class object
 #' @param deep default TRUE; deep copy
 #' @return identical but unrelated R6 object.
 #' @examples
+#' data("dataset")
 #' clone(dataset)
 #' @export
 clone <- function(x, deep = TRUE){
@@ -18,7 +77,9 @@ clone <- function(x, deep = TRUE){
 #' @param unfac2num default FALSE; whether try to convert all character to numeric; if FALSE, only try to convert column with factor attribute.
 #' @return data frame without factor
 #' @examples
-#' dropallfactors(x)
+#' data("taxonomy_table_16S")
+#' taxonomy_table_16S[, 1] <- as.factor(taxonomy_table_16S[, 1])
+#' dropallfactors(taxonomy_table_16S)
 #' @export
 dropallfactors <- function(x, unfac2num = FALSE){
 	# check x class
@@ -47,37 +108,29 @@ dropallfactors <- function(x, unfac2num = FALSE){
 #' @param taxonomy_table a data.frame with taxonomic information.
 #' @return taxonomic table.
 #' @format \code{\link{data.frame}} object.
-#' @examples 
-#' tidy_taxonomy(taxonomy_table)
+#' @examples
+#' data("taxonomy_table_16S")
+#' tidy_taxonomy(taxonomy_table_16S)
 #' @export
 tidy_taxonomy <- function(taxonomy_table){
-	tidy_taxonomy_raw <- function(taxonomy_table, i){
-		taxonomy_table[,i] %<>% 
-			gsub(".*No blast hit.*", "", ., ignore.case = TRUE) %>%
-			gsub(".*Unknown.*", "", ., ignore.case = TRUE) %>%
-			gsub(".*unidentif.*", "", ., ignore.case = TRUE) %>%
-			gsub(".*sp\\.$", "", ., ignore.case = TRUE) %>%
-			gsub(".*Unclassified.*", "", ., ignore.case = TRUE) %>%
-			gsub(".*metagenome.*", "", ., ignore.case = TRUE) %>%
-			gsub(".*uncultur.*|.*cultivar.*", "", ., ignore.case = TRUE) %>%
-			gsub("D_6__synthetic.*", "", ., ignore.case = TRUE) %>%
-			gsub(".*archaeon$", "", ., ignore.case = TRUE) %>%
-			gsub("^\\s+", "", .) %>%
-			gsub("\\s+$", "", .) %>%
-			gsub('"', "", ., fixed = TRUE) %>%
-			gsub(".*\\sbacterium$|.*bacterium\\s.*", "", .)
-		taxonomy_table[,i] <- gsub("^.*__", paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__"), taxonomy_table[,i])
-		taxonomy_table[,i][is.na(taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
-		taxonomy_table[,i][grepl("^$",taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
-		taxonomy_table[,i]
-	}
-	taxonomy_table[] <- lapply(seq_len(ncol(taxonomy_table)), function(x) tidy_taxonomy_raw(taxonomy_table, x))
+	taxonomy_table[] <- lapply(seq_len(ncol(taxonomy_table)), function(x) tidy_taxonomy_column(taxonomy_table, x))
 	taxonomy_table
 }
 
+# inner function
+tidy_taxonomy_column <- function(taxonomy_table, i){
+	taxonomy_table[,i] <- gsub(".*No blast hit.*|.*Unknown.*|.*unidentif.*|.*sp\\.$|.*Unclassified.*", "", taxonomy_table[,i], ignore.case = TRUE)
+	taxonomy_table[,i] <- gsub(".*metagenome.*|.*uncultur.*|.*cultivar.*|D_6__synthetic.*|.*archaeon$", "", taxonomy_table[,i], ignore.case = TRUE)
+	taxonomy_table[,i] <- gsub(".*metagenome.*|.*uncultur.*|.*cultivar.*|D_6__synthetic.*|.*archaeon$", "", taxonomy_table[,i], ignore.case = TRUE)
+	taxonomy_table[,i] <- gsub('"', "", taxonomy_table[,i], fixed = TRUE)
+	taxonomy_table[,i] <- gsub("^\\s+|\\s+$|.*\\sbacterium$|.*bacterium\\s.*", "", taxonomy_table[,i])
+	taxonomy_table[,i] <- gsub("^.*__", paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__"), taxonomy_table[,i])
+	taxonomy_table[,i][is.na(taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
+	taxonomy_table[,i][grepl("^$",taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
+	taxonomy_table[,i]
+}
 
 
-##################################################################################
 
 
 # inner function
@@ -85,530 +138,18 @@ summarySE_inter = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE)
 	length2 <- function(x, na.rm=TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
 	datac <- usedata %>% 
 			dplyr::grouped_df(groupvars) %>% 
-			dplyr::summarise(N = length2(!!sym(measurevar), na.rm=na.rm), Mean = mean(!!sym(measurevar), na.rm=na.rm), SD = sd(!!sym(measurevar), na.rm=na.rm)) %>%
+			dplyr::summarise(N = length2(!!sym(measurevar), na.rm=na.rm), Mean = mean(!!sym(measurevar), na.rm=na.rm), SD = stats::sd(!!sym(measurevar), na.rm=na.rm)) %>%
 			as.data.frame
 	datac$SE <- datac$SD / sqrt(datac$N)
 	datac
 }
 
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-
-#' sparcc wrapper
-#'
-#' An implementation of SparCC R code from https://github.com/zdk123/SpiecEasi
-#' @param data Community count data matrix
-#' @param iter Number of iterations in the outer loop
-#' @param inner_iter Number of iterations in the inner loop
-#' @param th absolute value of correlations below this threshold are considered zero by the inner SparCC loop.
-#' @seealso \code{\link{sparccboot}}
-#' @export
-sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
-#  without all the 'frills'
-    sparccs <- lapply(1:iter, function(i)
-                      sparccinner(t(apply(data, 1, norm_diric)),
-                                  iter=inner_iter, th=th))
-    # collect
-    cors <- array(unlist(lapply(sparccs, function(x) x$Cor)),
-                 c(ncol(data),ncol(data),iter))
-    corMed <- apply(cors, 1:2, median)
-    covs <- array(unlist(lapply(sparccs, function(x) x$Cov)),
-                 c(ncol(data),ncol(data),iter))
-    covMed <- apply(covs, 1:2, median)
-    covMed <- cor2cov(corMed, sqrt(diag(covMed)))
-    list(Cov=covMed, Cor=corMed)
-}
-
-#' Bootstrap SparCC
-#'
-#' Get bootstrapped estimates of SparCC correlation coefficients. To get empirical p-values, pass this output to \code{pval.sparccboot}. 
-#'
-#' @param data Community count data
-#' @param sparcc.params named list of parameters to pass to \code{sparcc}
-#' @param statisticboot function which takes data and bootstrap sample indices and results the upper triangle of the bootstapped correlation matrix
-#' @param statisticperm function which takes data and permutated sample indices and results the upper triangle of the null correlation matrix
-#' @param R number of bootstraps
-#' @param ncpus number of cores to use for parallelization
-#' @param ... additional arguments that are passed to \code{boot::boot}
-#' @export
-sparccboot <- function(data, sparcc.params=list(),
-                        statisticboot=function(data, indices) tril(do.call("sparcc",
-                      c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor),
-                statisticperm=function(data, indices) tril(do.call("sparcc",  c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor),
-                      R, ncpus=1, ...) {
-
-    if (!requireNamespace('boot', quietly=TRUE))
-      stop('\'boot\' package is not installed')
-
-    res     <- boot::boot(data, statisticboot, R=R, parallel="multicore", ncpus=ncpus, ...)
-    null_av <- boot::boot(data, statisticperm, sim='permutation', R=R, parallel="multicore", ncpus=ncpus)
-    class(res) <- 'list'
-    structure(c(res, list(null_av=null_av)), class='sparccboot')
-}
-
-#' SparCC p-vals
-#'
-#' Get empirical p-values from bootstrap SparCC output, modified based on https://github.com/zdk123/SpiecEasi
-#'
-#' @param x output from \code{sparccboot}
-#' @param sided type of p-value to compute. Only two sided (sided="both") is implemented.
-#' @export
-pval.sparccboot <- function(x, sided='both') {
-# calculate 1 or 2 way pseudo p-val from boot object
-# Args: a boot object
-    if (sided != "both") stop("only two-sided currently supported")
-    nparams  <- ncol(x$t)
-    tmeans   <- colMeans(x$null_av$t)
-#    check to see whether correlations are unstable -- confirm
-#    that sample correlations are in 95% confidence interval of
-#    bootstrapped samples
-    niters   <- nrow(x$t)
-    ind95    <- max(1,round(.025*niters)):round(.975*niters)
-    boot_ord <- apply(x$t, 2, sort)
-    boot_ord95 <- boot_ord[ind95,]
-    outofrange <- unlist(lapply(1:length(x$t0), function(i) {
-            aitvar <- x$t0[i]
-            range  <- range(boot_ord95[,i])
-            range[1] > aitvar || range[2] < aitvar
-        }))
-    # calc whether center of mass is above or below the mean
-    bs_above <- unlist(lapply(1:nparams, function(i)
-                    length(which(x$t[, i] > tmeans[i]))))
-    is_above <- bs_above > x$R/2
-    cors <- x$t0
-#    signedAV[is_above] <- -signedAV[is_above]
-    pvals    <- ifelse(is_above, 2*(1-bs_above/x$R), 2*bs_above/x$R)
-    pvals[pvals > 1]  <- 1
-    pvals[outofrange] <- NaN
-	# reshape
-	use_names <- colnames(x$data)
-	com_res <- t(combn(use_names, 2))
-	res <- cbind.data.frame(com_res, cors, pvals, stringsAsFactors = FALSE)
-	colnames(res) <- c("t1", "t2", "cor", "p")
-	res <- rbind.data.frame(res, data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), 
-		data.frame(t1 = use_names, t2 = use_names, cor = rep(1, length(use_names)), p = rep(0, length(use_names))))
-	res$cor %<>% as.numeric
-	res$p %<>% as.numeric
-	res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
-	res_p <- reshape2::dcast(res, t1~t2, value.var = "p") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
-	res <- list(cor = res_cor, p = res_p)
-	res
-}
-
-
-
-#' @keywords internal
-sparccinner <- function(data.f, T=NULL, iter=10, th=0.1) {
-    if (is.null(T))   T  <- av(data.f)
-    res.bv <- basis_var(T)
-    Vbase  <- res.bv$Vbase
-    M      <- res.bv$M
-    cbase  <- C_from_V(T, Vbase)
-    Cov    <- cbase$Cov
-    Cor    <- cbase$Cor
-
-    ## do iterations here
-    excluded <- NULL
-    for (i in 1:iter) {
-        res.excl <- exclude_pairs(Cor, M, th, excluded)
-        M <- res.excl$M
-        excluded <- res.excl$excluded
-        if (res.excl$break_flag) break
-        res.bv <- basis_var(T, M=M, excluded=excluded)
-        Vbase  <- res.bv$Vbase
-        M      <- res.bv$M
-        K <- M
-        diag(K) <- 1
-        cbase  <- C_from_V(T, Vbase)
-        Cov    <- cbase$Cov
-        Cor    <- cbase$Cor
-    }
-    list(Cov=Cov, Cor=Cor, i=i, M=M, excluded=excluded)
-}
-
-#' @keywords internal
-exclude_pairs <- function(Cor, M, th=0.1, excluded=NULL) {
-# exclude pairs with high correlations
-    break_flag <- FALSE
-    C_temp <- abs(Cor - diag(diag(Cor)) )  # abs value / remove diagonal
-    if (!is.null(excluded)) C_temp[excluded] <- 0 # set previously excluded correlations to 0
-    exclude <- which(abs(C_temp - max(C_temp)) < .Machine$double.eps*100)[1:2]
-    if (max(C_temp) > th)  {
-        i <- na.exclude(arrayInd(exclude, c(nrow(M), ncol(M)))[,1])
-        M[i,i] <- M[i,i] - 1
-        excluded_new <- c(excluded, exclude)
-    } else {
-        excluded_new <- excluded
-        break_flag   <- TRUE
-    }
-    list(M=M, excluded=excluded_new, break_flag=break_flag)
-}
-
-#' @keywords internal
-basis_cov <- function(data.f) {
-# data.f -> relative abundance data
-# OTUs in columns, samples in rows (yes, I know this is transpose of normal)
-    # first compute aitchison variation
-    T <- av(data.f)
-    res.bv <- basis_var(T)
-    Vbase  <- res.bv$Vbase
-    M      <- res.bv$M
-    cbase  <- C_from_V(T, Vbase)
-    Cov    <- cbase$Cov
-    Cor    <- cbase$Cor
-    list(Cov=Cov, M=M)
-}
-
-#' @keywords internal
-basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
-                      M = matrix(1, nrow(T), ncol(T)) + (diag(ncol(T))*(ncol(T)-2)),
-                      excluded = NULL, Vmin=1e-4) {
-
-    if (!is.null(excluded)) {
-        T[excluded] <- 0
-     #   CovMat[excluded] <- 0
-    }
-    Ti     <- matrix(rowSums(T))
-    CovVec <- matrix(rowSums(CovMat - diag(diag(CovMat)))) # row sum of off diagonals
-    M.I <- tryCatch(solve(M), error=function(e) MASS::ginv(M))
-    Vbase <- M.I %*% (Ti + 2*CovVec)
-    Vbase[Vbase < Vmin] <- Vmin
-    list(Vbase=Vbase, M=M)
-}
-
-#' @keywords internal
-C_from_V <- function(T, Vbase) {
-    J      <- matrix(1, nrow(T), ncol(T))
-    Vdiag  <- diag(c(Vbase))
-    CovMat <- .5*((J %*% Vdiag) + (Vdiag %*% J) - T)
-    CovMat <- (CovMat + t(CovMat))/2  # enforce symmetry
-    # check that correlations are within -1,1
-    CorMat <- cov2cor(CovMat)
-    CorMat[abs(CorMat) > 1] <- sign(CorMat[abs(CorMat) > 1])
-    CovMat <- cor2cov(CorMat, sqrt(as.vector(Vbase)))
-    list(Cov=CovMat, Cor=CorMat)
-}
-
-#' @keywords internal
-av <- function(data) {
-    cov.clr <- cov(clr(data))
-    J <- matrix(1, ncol(data), ncol(data))
-    (J %*% diag(diag(cov.clr))) + (diag(diag(cov.clr)) %*% J) - (2*cov.clr)
-}
-
-#' @keywords internal
-norm_diric   <- function(x, rep=1) {
-    dmat <- VGAM::rdiric(rep, x+1)
-    norm_to_total(colMeans(dmat))
-}
-
-#' Centered log-ratio functions
-#' @export
-clr <- function(x, ...) {
-  UseMethod('clr', x)
-}
-
-#' @method clr default
-#' @export
-clr.default <- function(x.f, base=exp(1), tol=.Machine$double.eps) {
-  nzero <- (x.f >= tol)
-  LOG <- log(ifelse(nzero, x.f, 1), base)
-  ifelse(nzero, LOG - mean(LOG)/mean(nzero), 0.0)
-}
-
-#' @method clr matrix
-#' @export
-clr.matrix <- function(x.f, mar=2, ...) {
-  apply(x.f, mar, clr, ...)
-}
-
-#' @method clr data.frame
-#' @export
-clr.data.frame <- function(x.f, mar=2, ...) {
-  clr(as.matrix(x.f), mar, ...)
-}
-
-#' Total sum normalization of a (presumably positive) data vector
-norm_to_total <- function(x) x/sum(x)
-
-#' @keywords internal
-tril <- function(x) x[lower.tri(x)]
-
-#' Convert a symmetric correlation matrix to a covariance matrix
-#' given the standard deviation
-#'
-#' @param cor a symmetric correlation matrix
-#' @param sds standard deviations of the resulting covariance.
-#' @return Covariance matrix of sample dimension as cor
-cor2cov <- function(cor, sds) {
-  if (length(sds) != length(diag(cor))) stop("inputs are of mismatched dimension")
-  cor * sds * rep(sds, each=nrow(cor))
-}
-
-
 
 
 ##################################################################################
 ##################################################################################
-##################################################################################
-##################################################################################
 
-# add significance label
-#' @keywords internal
-stat_compare_signif <- function(mapping = NULL, data = NULL,
-                     method = "wilcox.test", paired = FALSE, ref.group = NULL,
-                     comparisons = NULL, hide.ns = TRUE, label.sep = ", ",
-                     label = NULL, label.x.npc = "left", label.y.npc = "top",
-                     label.x = NULL, label.y = NULL, increase_signif = 0.15, tip_length = 0.008,
-                     geom = "text", position = "identity",  na.rm = FALSE, show.legend = NA,
-                    inherit.aes = TRUE, map_signif_level = TRUE, ...) {
-
-    method.info <- .method_info(method)
-    method <- method.info$method
-
-    test.args <- list(paired = paired)
-    if(method == "wilcox.test")
-      test.args$exact <- FALSE
-
-    pms <- list(...)
-    size <- ifelse(is.null(pms$size), 0.3, pms$size)
-    color <- ifelse(is.null(pms$color), "black", pms$color)
-
-    step_increase <- ifelse(is.null(label.y), increase_signif, 0)
-    geom_signif(comparisons = comparisons, y_position = label.y,
-                          test = method, test.args = test.args, tip_length = tip_length,
-                          step_increase = step_increase, size = size, color = color,
-                          map_signif_level = map_signif_level)
-
-}
-
-#' @keywords internal
-geom_signif <- function(mapping = NULL, data = NULL, stat = "signif",
-                        position = "identity", na.rm = FALSE, show.legend = NA,
-                        inherit.aes = TRUE, comparisons=NULL, test="wilcox.test", test.args=NULL,
-                        annotations=NULL, map_signif_level=TRUE, y_position=NULL,xmin=NULL, xmax=NULL,
-                        margin_top=0.1, step_increase=0, tip_length=0.008,
-                        size=0.5, textsize = 3.88, family="", vjust = 0,
-                        ...) {
-  params <- list(na.rm = na.rm, ...)
-  if (identical(stat, "signif")) {
-    params <- c(params, list(comparisons=comparisons, test=test, test.args=test.args,
-                   annotations=annotations, map_signif_level=map_signif_level,
-                   y_position=y_position,xmin=xmin, xmax=xmax,
-                   margin_top=margin_top, step_increase=step_increase,
-                   tip_length=tip_length))
-  }
-  ggplot2::layer(
-    stat = StatSignif, geom = GeomSignif, mapping = mapping,  data = data,
-    position = position, show.legend = show.legend, inherit.aes = inherit.aes,
-    params = params
-  )
-}
-
-#' @keywords internal
-GeomSignif <- ggplot2::ggproto("GeomSignif", ggplot2::Geom,
-                           required_aes = c("x", "xend", "y", "yend", "annotation"),
-                           default_aes = ggplot2::aes(shape = 19, colour = "black", textsize = 3.88, angle = 0, hjust = 0.5,
-                                             vjust = 0, alpha = NA, family = "", fontface = 1, lineheight = 1.2, linetype=1, size=0.5),
-                           draw_key = ggplot2::draw_key_point,
-
-                           draw_group = function(data, panel_params, coord) {
-                             coords <- coord$transform(data, panel_params)
-                             grid::gList(
-                               grid::textGrob(
-                                 label=as.character(coords$annotation),
-                                 x=mean(c(coords$x[1], tail(coords$xend, n=1))),
-                                 y=max(c(coords$y, coords$yend)) - 0.045,
-                                 default.units = "native",
-                                 hjust = coords$hjust, vjust = coords$vjust,
-                                 rot = coords$angle,
-                                 gp = grid::gpar(
-                                   col = scales::alpha(coords$colour, coords$alpha),
-                                   fontsize = coords$textsize * ggplot2::.pt,
-                                   fontfamily = coords$family,
-                                   fontface = coords$fontface,
-                                   lineheight = coords$lineheight
-                                 )
-                               ),
-                               grid::segmentsGrob(
-                                 coords$x, coords$y-0.05,
-                                 default.units = "native",
-                                 coords$xend, coords$yend-0.05,
-                                 gp = grid::gpar(
-                                   col = scales::alpha(coords$colour, coords$alpha),
-                                   lty = coords$linetype,
-                                   lwd = coords$size * ggplot2::.pt
-                                 )
-                               )
-                             )
-                           }
-)
-
-
-
-
-
-#' @keywords internal
-StatSignif <- ggplot2::ggproto("StatSignif", ggplot2::Stat,
-                  required_aes = c("x", "y", "group"),
-                  setup_params = function(data, params) {
-                    # if(any(data$group == -1)|| any(data$group != data$x)){
-                    if(any(data$group == -1)){
-                      stop("Can only handle data with groups that are plotted on the x-axis")
-                    }
-
-                    if (is.character(params$test)) params$test <- match.fun(params$test)
-                    params$complete_data <- data
-                    if(is.null(params$xmin) != is.null(params$xmax) || length(params$xmin) != length(params$xmax))
-                      stop("If xmin or xmax is set, the other one also needs to be set and they need to contain the same number of values")
-                    if(!is.null(params$xmin) && !is.null(params$comparisons))
-                      stop("Set either the xmin, xmax values or the comparisons")
-                    if(!is.null(params$xmin) && is.null(params$y_position))
-                      stop("If xmin, xmax are defined also define y_position")
-                    if(! is.null(params$y_position) && length(params$y_position) == 1)
-                      params$y_position <- rep(params$y_position, max(length(params$comparisons), length(params$xmin)))
-                    if(length(params$margin_top) == 1) params$margin_top <- rep(params$margin_top, max(length(params$comparisons),length(params$xmin)))
-                    if(length(params$step_increase) == 1) params$step_increase <- rep(params$step_increase, max(length(params$comparisons),length(params$xmin)))
-                    if(length(params$tip_length) == 1) params$tip_length <- rep(params$tip_length, max(length(params$comparisons),length(params$xmin)) * 2)
-                    if(length(params$tip_length) == length(params$comparisons)) params$tip_length <- rep(params$tip_length, each=2)
-                    if(length(params$tip_length) == length(params$xmin)) params$tip_length <- rep(params$tip_length, each=2)
-                    if(! is.null(params$annotations) && length(params$annotations) == 1)
-                      params$annotations <- rep(params$annotations, max(length(params$comparisons),length(params$xmin)))
-                    if(! is.null(params$annotations) && length(params$annotations) != max(length(params$comparisons),length(params$xmin)))
-                      stop(paste0("annotations contains a different number of elements (", length(params$annotations),
-                                  ") than comparisons or xmin (", max(length(params$comparisons),length(params$xmin)), ")."))
-
-                    if(all(params$map_signif_level == TRUE)){
-                      params$map_signif_level <- c("***"=0.001, "**"=0.01, "*"=0.05)
-                    }else if(is.numeric(params$map_signif_level)){
-                      if(is.null(names(params$map_signif_level)) ){
-                        if(length(params$map_signif_level) <= 3){
-                          names(params$map_signif_level) <- tail(c("***", "**", "*"), n=length(params$map_signif_level))
-                        }else{
-                          stop('Cannot handle un-named map for significance values, please provide in the following format: c("***"=0.001, "**"=0.01, "*"=0.05)')
-                        }
-                      }
-                    }
-                    return(params)
-                  },
-                  compute_group = function(data, scales, comparisons, test, test.args, complete_data,
-                                           annotations, map_signif_level, y_position, xmax, xmin,
-                                           margin_top, step_increase, tip_length) {
-                    if(! is.null(comparisons)){
-                      i <- 0
-                      result <- lapply(comparisons, function(comp){
-                        i <<- i + 1
-                        # All entries in group should be the same
-                        if(scales$x$map(comp[1]) == data$group[1]){
-                          test_result <- if(is.null(annotations)){
-                            group_1 <- complete_data$y[complete_data$x == scales$x$map(comp[1]) & complete_data$PANEL == data$PANEL[1]]
-                            group_2 <- complete_data$y[complete_data$x == scales$x$map(comp[2]) & complete_data$PANEL == data$PANEL[1]]
-                            p_value <- do.call(test, c(list(group_1, group_2), test.args))$p.value
-                            if(is.numeric(map_signif_level)){
-                              temp_value <- names(which.min(map_signif_level[which(map_signif_level > p_value)]))
-                              if(is.null(temp_value)){
-                                "ns"
-                              }else{
-                                temp_value
-                              }
-                            }else{
-                              if(p_value < 2.2e-16){
-                                "< 2.2e-16"
-                              }else{
-                                as.character(signif(p_value, digits=2))
-                              }
-
-                            }
-                          }else{
-                            annotations[i]
-                          }
-                          y_scale_range <- (scales$y$range$range[2] - scales$y$range$range[1])
-                          y_pos <- if(is.null(y_position)){
-                            scales$y$range$range[2] + y_scale_range * margin_top[i] + y_scale_range * step_increase[i] * (i-1)
-                          }else{
-                            y_pos <- y_position[i]
-                          }
-                          data.frame(x=c(min(comp[1],comp[2]),min(comp[1],comp[2]),max(comp[1],comp[2])),
-                                     xend=c(min(comp[1],comp[2]),max(comp[1],comp[2]),max(comp[1],comp[2])),
-                                     y=c(y_pos - y_scale_range*tip_length[(i-1)*2+1], y_pos, y_pos),
-                                     yend=c(y_pos, y_pos, y_pos-y_scale_range*tip_length[(i-1)*2+2]),
-                                     annotation=test_result, group=paste(c(comp, i), collapse = "-"))
-                        }
-                      })
-                      do.call(rbind, result)
-                    }else{
-                      if(data$x[1] == min(complete_data$x) & data$group[1] == min(complete_data$group)){
-                        y_scale_range <- (scales$y$range$range[2] - scales$y$range$range[1])
-                        data.frame(x=c(xmin, xmin, xmax),
-                                   xend=c(xmin, xmax, xmax),
-                                   y=c(y_position - y_scale_range*tip_length[seq_len(length(tip_length))%% 2 == 1], y_position, y_position),
-                                   yend=c(y_position, y_position, y_position-y_scale_range*tip_length[seq_len(length(tip_length))%% 2 == 0]),
-                                   annotation=rep(annotations, times=3), group=rep(seq_along(xmin), times=3))
-                      }
-                    }
-                  }
-)
-
-
-
-
-# Check and get test method info
-#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-# return a list(method, name)
-.method_info <- function(method){
-
-  if(is.null(method))
-    method = "wilcox.test"
-
-  allowed.methods <- list(
-    t = "t.test", t.test = "t.test", student = "t.test",
-    wiloxon = "wilcox.test", wilcox = "wilcox.test", wilcox.test = "wilcox.test",
-    anova = "anova", aov = "anova",
-    kruskal = "kruskal.test", kruskal.test = "kruskal.test")
-
-  method.names <- list(
-    t.test = "T-test", wilcox.test = "Wilcoxon",
-    anova = "Anova", kruskal.test = "Kruskal-Wallis")
-
-  if(!(method %in% names(allowed.methods)))
-    stop("Non-supported method specified. Allowed methods are one of: ",
-         .collapse(allowed.methods, sep =", "))
-  method <- allowed.methods[[method]]
-  method.name <- method.names[[method]]
-
-  list(method = method, name = method.name)
-}
-
-
-
-# Collapse one or two vectors
-#:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-.collapse <- function(x, y = NULL, sep = "."){
-  if(missing(y))
-    paste(x, collapse = sep)
-  else if(is.null(x) & is.null(y))
-    return(NULL)
-  else if(is.null(x))
-    return (as.character(y))
-  else if(is.null(y))
-    return(as.character(x))
-  else
-    paste0(x, sep, y)
-}
-
-
-
-
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-
-# metastat code from Statistical methods for detecting differentially abundant features in clinical metagenomic samples
+# metastat code from White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 #************************************************************************
 # ************************** SUBROUTINES ********************************
 #************************************************************************
@@ -625,11 +166,11 @@ calc_twosample_ts <- function(Pmatrix, g, nrows, ncols)
 
 	if (nrows == 1){
 		C1[1,1] = mean(Pmatrix[1:g-1]);
-		C1[1,2] = var(Pmatrix[1:g-1]); # variance
+		C1[1,2] = stats::var(Pmatrix[1:g-1]); # variance
 		C1[1,3] = C1[1,2]/(g-1);    # std err^2
 
 		C2[1,1] = mean(Pmatrix[g:ncols]);
-		C2[1,2] = var(Pmatrix[g:ncols]);  # variance
+		C2[1,2] = stats::var(Pmatrix[g:ncols]);  # variance
 		C2[1,3] = C2[1,2]/(ncols-g+1); # std err^2
 	}else{
 		# generate statistic profiles for both groups
@@ -637,11 +178,11 @@ calc_twosample_ts <- function(Pmatrix, g, nrows, ncols)
 		for (i in 1:nrows){ # for each taxa
 			# find the mean of each group
 			C1[i,1] = mean(Pmatrix[i, 1:g-1]);  
-			C1[i,2] = var(Pmatrix[i, 1:g-1]); # variance
+			C1[i,2] = stats::var(Pmatrix[i, 1:g-1]); # variance
 			C1[i,3] = C1[i,2]/(g-1);    # std err^2
 
 			C2[i,1] = mean(Pmatrix[i, g:ncols]);  
-			C2[i,2] = var(Pmatrix[i, g:ncols]);  # variance
+			C2[i,2] = stats::var(Pmatrix[i, g:ncols]);  # variance
 			C2[i,3] = C2[i,2]/(ncols-g+1); # std err^2
 		}
 	}
@@ -681,7 +222,7 @@ calc_qvalues <- function(pvalues)
 		}
 	}
 
-	f <- unclass(smooth.spline(lambdas,pi0_hat,df=3));
+	f <- unclass(stats::smooth.spline(lambdas,pi0_hat,df=3));
 	f_spline <- f$y;
 	pi0 = f_spline[length(lambdas)];   # this is the essential pi0_hat value
 
@@ -899,10 +440,10 @@ detect_differentially_abundant_features <- function(jobj, g, pflag = NULL, thres
 			contingencytable[2,2] = f22;
 
 			if (f11 > 20 && f22 > 20){
-				csqt <- chisq.test(contingencytable);
+				csqt <- stats::chisq.test(contingencytable);
 				pvalues[i] = csqt$p.value;
 			}else{
-				ft <- fisher.test(contingencytable, workspace = 8e6, alternative = "two.sided", conf.int = FALSE);
+				ft <- stats::fisher.test(contingencytable, workspace = 8e6, alternative = "two.sided", conf.int = FALSE);
 				pvalues[i] = ft$p.value;
 			}
 
@@ -921,11 +462,11 @@ detect_differentially_abundant_features <- function(jobj, g, pflag = NULL, thres
 		for (i in 1:nrows){ # for each taxa
 			# find the mean of each group
 			C1[i,1] = mean(Pmatrix[i, 1:g-1]);  
-			C1[i,2] = var(Pmatrix[i, 1:g-1]); # variance
+			C1[i,2] = stats::var(Pmatrix[i, 1:g-1]); # variance
 			C1[i,3] = C1[i,2]/(g-1);    # std err^2 (will change to std err at end)
 
 			C2[i,1] = mean(Pmatrix[i, g:ncols]);  
-			C2[i,2] = var(Pmatrix[i, g:ncols]);  # variance
+			C2[i,2] = stats::var(Pmatrix[i, g:ncols]);  # variance
 			C2[i,3] = C2[i,2]/(ncols-g+1); # std err^2 (will change to std err at end)
 		}
 
@@ -1054,13 +595,4 @@ calculate_metastat <- function(inputdata, g, pflag = FALSE, threshold = NULL, B 
 	res <- detect_differentially_abundant_features(jobj = trans_data, g = g, pflag = pflag, threshold = threshold, B = B)
 	res
 }
-
-
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-##################################################################################
-
 

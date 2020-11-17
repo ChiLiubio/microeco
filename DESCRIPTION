@@ -1,20 +1,26 @@
 Package: microeco
 Type: Package
-Title: Microbial community ecology analysis
-Version: 0.2.0
-Author: Chi Liu
+Title: Microbial Community Ecology Data Analysis
+Version: 0.3.0
+Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
+              person("Minjie", "Yao", role = "aut", email = "yaomj@fafu.edu.cn"),
+              person("Xiangzhen", "Li", role = "aut", email = "lixz@cib.ac.cn"),
+              person("Paul J.", "McMurdie", role = "ctb", email = "joey711@gmail.com"),
+              person("Yang", "Cao", role = "ctb", email = "yiluheihei@gmail.com"),
+              person("James Robert", "White", role = "ctb", email = "whitej@umd.edu"),
+              person("Stilianos", "Louca", role = "cph", email = "slouca@uoregon.edu"),
+              person("Nhu H.", "Nguyen", role = "cph", email = "nhnguyen@umn.edu")
+			  )
+Author: Chi Liu [aut, cre], Minjie Yao [aut], Xiangzhen Li [aut], Paul J. McMurdie [ctb], Yang Cao [ctb], James Robert White [ctb], Stilianos Louca [cph], Nhu H. Nguyen [cph]
 Maintainer: Chi Liu <liuchi0426@126.com>
-Description: A series of approaches for statistics and plotting in microbial community ecology.
-Depends: R (>= 3.5.0), R6, ape, vegan, rlang, data.table, magrittr,
-        dplyr, tibble, reshape2, scales, grid, ggplot2, RColorBrewer,
-        Rcpp, RcppArmadillo, RcppEigen
-Suggests: GUniFrac, igraph, picante, randomForest, MASS, WGCNA,
-        pheatmap, ggpubr, gridExtra, ggrepel, ggdendro, mice
-LinkingTo: Rcpp, RcppArmadillo, RcppEigen
+Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis and functional analysis.
+Depends: R (>= 3.5.0)
+Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, VGAM, MASS, RColorBrewer
+Suggests: GUniFrac, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, tidytree, mice, phyloseq
 License: GPL-3
 Encoding: UTF-8
-NeedsCompilation: yes
-Packaged: 2020-07-06 04:40:53 UTC; Chi
+NeedsCompilation: no
+Packaged: 2020-11-14
 Repository: CRAN
-Date/Publication: 2020-07-06
+Date/Publication: 2020-11-14
 RoxygenNote: 7.1.0
