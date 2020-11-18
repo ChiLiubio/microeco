@@ -127,6 +127,7 @@ tidy_taxonomy_column <- function(taxonomy_table, i){
 	taxonomy_table[,i] <- gsub("^.*__", paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__"), taxonomy_table[,i])
 	taxonomy_table[,i][is.na(taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
 	taxonomy_table[,i][grepl("^$",taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
+	taxonomy_table[,i][!grepl("__",taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[,i][!grepl("__",taxonomy_table[,i])])
 	taxonomy_table[,i]
 }
 
