@@ -19,21 +19,6 @@ data(dataset)
 # correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
   taxa_level = "OTU", filter_thres = 0.001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", 
-  taxa_level = "OTU", filter_thres = 0.001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", 
-  taxa_level = "OTU", filter_thres = 0.0001)
-# SpiecEasi or PGM network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU",
-  filter_thres = 0.0001)
-}
-
-## ------------------------------------------------
-## Method `trans_network$replace_name`
-## ------------------------------------------------
-
-\donttest{
-t1$replace_name()
 }
 
 ## ------------------------------------------------
@@ -42,16 +27,6 @@ t1$replace_name()
 
 \donttest{
 t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
-t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-t1$cal_network(network_method = "PGM")
-}
-
-## ------------------------------------------------
-## Method `trans_network$save_network`
-## ------------------------------------------------
-
-\donttest{
-t1$save_network(filepath = "network.gexf")
 }
 
 ## ------------------------------------------------
@@ -95,14 +70,6 @@ t1$cal_sum_links(taxa_level = "Phylum")
 }
 
 ## ------------------------------------------------
-## Method `trans_network$plot_sum_links`
-## ------------------------------------------------
-
-\donttest{
-t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
-}
-
-## ------------------------------------------------
 ## Method `trans_network$subset_network`
 ## ------------------------------------------------
 
@@ -116,7 +83,6 @@ t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\%
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_network$new()}}
-\item \href{#method-replace_name}{\code{trans_network$replace_name()}}
 \item \href{#method-cal_network}{\code{trans_network$cal_network()}}
 \item \href{#method-save_network}{\code{trans_network$save_network()}}
 \item \href{#method-cal_network_attr}{\code{trans_network$cal_network_attr()}}
@@ -181,36 +147,6 @@ data(dataset)
 # correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
   taxa_level = "OTU", filter_thres = 0.001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", 
-  taxa_level = "OTU", filter_thres = 0.001)
-t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", 
-  taxa_level = "OTU", filter_thres = 0.0001)
-# SpiecEasi or PGM network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU",
-  filter_thres = 0.0001)
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-replace_name"></a>}}
-\if{latex}{\out{\hypertarget{method-replace_name}{}}}
-\subsection{Method \code{replace_name()}}{
-Replace names in res_cor_p of trans_network object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$replace_name()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-a new res_cor_p in trans_network object.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$replace_name()
 }
 }
 \if{html}{\out{</div>}}
@@ -288,8 +224,6 @@ res_network in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
-t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-t1$cal_network(network_method = "PGM")
 }
 }
 \if{html}{\out{</div>}}
@@ -316,16 +250,6 @@ Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
 \subsection{Returns}{
 None.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$save_network(filepath = "network.gexf")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_network_attr"></a>}}
@@ -516,16 +440,6 @@ Plot the summed linkages among taxa using chorddiag package <https://github.com/
 \subsection{Returns}{
 chorddiag plot
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset_network"></a>}}

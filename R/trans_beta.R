@@ -200,7 +200,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
 		#' @return res_group_distance stored in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_group_distance(within_group = TRUE)
+		#' }
 		cal_group_distance = function(within_group = TRUE){
 			if(within_group == T){
 				self$res_group_distance <- private$within_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
@@ -219,7 +221,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_group_distance(distance_pair_stat = TRUE)
+		#' }
 		plot_group_distance = function(plot_group_order = NULL,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			distance_pair_stat = FALSE,

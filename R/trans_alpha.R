@@ -11,8 +11,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param order_x default:null; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
 		#' @return alpha_data and alpha_stat stored in the object.
 		#' @examples
+		#' \donttest{
 		#' data(dataset)
 		#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+		#' }
 		initialize = function(dataset = NULL, group = NULL, order_x = NULL) {
 			self$group <- group
 			alpha_data <- dataset$alpha_diversity %>% cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE)
@@ -41,8 +43,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @return res_alpha_diff in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_diff(method = "KW")
 		#' t1$cal_diff(method = "anova")
+		#' }
 		cal_diff = function(method = c("KW", "anova")[1], measures = NULL){
 			group <- self$group
 			alpha_data <- self$alpha_data
@@ -116,8 +120,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param ... parameters pass to ggpubr::ggboxplot.
 		#' @return ggplot.
 		#' @examples
-		#' t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", 
-		#'   group = "Group", pair_compare = TRUE)
+		#' \donttest{
+		#' t1$plot_alpha(measure = "Shannon", group = "Group", pair_compare = TRUE)
+		#' }
 		plot_alpha = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			measure = "Shannon",

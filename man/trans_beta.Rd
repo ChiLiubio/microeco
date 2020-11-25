@@ -33,13 +33,17 @@ t1$cal_manova(cal_manova_all = TRUE)
 ## Method `trans_beta$cal_group_distance`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_group_distance(within_group = TRUE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_beta$plot_group_distance`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_group_distance(distance_pair_stat = TRUE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_beta$plot_clustering`
@@ -243,7 +247,9 @@ res_group_distance stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_group_distance(within_group = TRUE)
+\preformatted{\donttest{
+t1$cal_group_distance(within_group = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -288,7 +294,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_group_distance(distance_pair_stat = TRUE)
+\preformatted{\donttest{
+t1$plot_group_distance(distance_pair_stat = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 

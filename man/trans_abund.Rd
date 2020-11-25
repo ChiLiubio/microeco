@@ -14,34 +14,43 @@ The plotting approaches include the bar plot, boxplot, heatmap and pie chart bas
 ## Method `trans_abund$new`
 ## ------------------------------------------------
 
+\donttest{
 data(dataset)
-t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-# t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
+}
 
 ## ------------------------------------------------
 ## Method `trans_abund$plot_bar`
 ## ------------------------------------------------
 
-t1$plot_bar(bar_type = "full", others_color = "grey90")
+\donttest{
+t1$plot_bar(facet = "Group", xtext_keep = FALSE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_abund$plot_box`
 ## ------------------------------------------------
 
-t1$plot_box(group = "Group", show_point = FALSE)
+\donttest{
+t1$plot_box(group = "Group")
+}
 
 ## ------------------------------------------------
 ## Method `trans_abund$plot_heatmap`
 ## ------------------------------------------------
 
-t1$plot_heatmap(withmargin = FALSE)
+\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
+t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_abund$plot_pie`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_pie(facet_nrow = 2)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
+t1$plot_pie(facet_nrow = 1)
 }
 }
 \section{Methods}{
@@ -99,9 +108,10 @@ abund_data and other file for plotting.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(dataset)
-t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-# t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+\preformatted{\donttest{
+data(dataset)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -182,7 +192,9 @@ ggplot2 plot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_bar(bar_type = "full", others_color = "grey90")
+\preformatted{\donttest{
+t1$plot_bar(facet = "Group", xtext_keep = FALSE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -260,7 +272,9 @@ ggplot2 plot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_box(group = "Group", show_point = FALSE)
+\preformatted{\donttest{
+t1$plot_box(group = "Group")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -345,7 +359,10 @@ ggplot2 plot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_heatmap(withmargin = FALSE)
+\preformatted{\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
+t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -385,7 +402,8 @@ ggplot2 plot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_pie(facet_nrow = 2)
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
+t1$plot_pie(facet_nrow = 1)
 }
 }
 \if{html}{\out{</div>}}

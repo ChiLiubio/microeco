@@ -154,7 +154,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
 		#' @return res_betampd in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_betampd(abundance.weighted=FALSE)
+		#' }
 		cal_betampd = function(abundance.weighted=FALSE){
 			dis <- self$dis
 			if(is.null(dis)){
@@ -174,7 +176,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
 		#' @return res_betamntd in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_betamntd(abundance.weighted=FALSE)
+		#' }
 		cal_betamntd = function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
 			dis <- self$dis
 			if(is.null(dis)){

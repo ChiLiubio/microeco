@@ -37,13 +37,17 @@ t1$plot_mantel_corr()
 ## Method `trans_nullmodel$cal_betampd`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_betampd(abundance.weighted=FALSE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_betamntd`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_betamntd(abundance.weighted=FALSE)
+}
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_ses_betampd`
@@ -229,7 +233,9 @@ res_betampd in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_betampd(abundance.weighted=FALSE)
+\preformatted{\donttest{
+t1$cal_betampd(abundance.weighted=FALSE)
+}
 }
 \if{html}{\out{</div>}}
 
@@ -262,7 +268,9 @@ res_betamntd in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_betamntd(abundance.weighted=FALSE)
+\preformatted{\donttest{
+t1$cal_betamntd(abundance.weighted=FALSE)
+}
 }
 \if{html}{\out{</div>}}
 

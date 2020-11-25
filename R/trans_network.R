@@ -25,13 +25,6 @@ trans_network <- R6Class(classname = "trans_network",
 		#' # correlation network
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		#'   taxa_level = "OTU", filter_thres = 0.001)
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "SparCC", 
-		#'   taxa_level = "OTU", filter_thres = 0.001)
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "WGCNA", 
-		#'   taxa_level = "OTU", filter_thres = 0.0001)
-		#' # SpiecEasi or PGM network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU",
-  		#'   filter_thres = 0.0001)
 		#' }
 		initialize = function(
 			dataset = NULL,
@@ -95,30 +88,6 @@ trans_network <- R6Class(classname = "trans_network",
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Replace names in res_cor_p of trans_network object.
-		#'
-		#' @return a new res_cor_p in trans_network object.
-		#' @examples 
-		#' \donttest{
-		#' t1$replace_name()
-		#' }
-		replace_name = function(){
-			res_cor <- self$res_cor_p$cor
-			res_p <- self$res_cor_p$p
-			tax <- self$use_tax[rownames(res_cor), ]
-			replace_table <- data.frame(otuname = rownames(tax), taxa = tax[, self$taxa_level], stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
-			replace_table %<>% .[!grepl("__$|uncultured", .$taxa), ]
-			replace_table$taxa %<>% gsub(".__", "", .)
-			test1 <- replace_table$taxa
-			if(any(duplicated(test1))){
-				replace_table <- replace_table[!duplicated(test1), ]
-			}
-			res_cor %<>% .[rownames(replace_table), rownames(replace_table)]
-			res_p %<>% .[rownames(replace_table), rownames(replace_table)]
-			colnames(res_cor) <- rownames(res_cor) <- colnames(res_p) <- rownames(res_p) <- replace_table$taxa
-			self$res_cor_p <- list(cor = res_cor, p = res_p)
-		},
-		#' @description
 		#' Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
 		#' see Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method; 
 		#' see Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method; 
@@ -143,8 +112,6 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @examples
 		#' \donttest{
 		#' t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
-		#' t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-		#' t1$cal_network(network_method = "PGM")
 		#' }
 		cal_network = function(
 			network_method = c("COR", "SpiecEasi", "PGM")[1],
@@ -285,10 +252,6 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @param filepath default "network.gexf"; file path.
 		#' @return None.
-		#' @examples
-		#' \donttest{
-		#' t1$save_network(filepath = "network.gexf")
-		#' }
 		save_network = function(filepath = "network.gexf"){
 			if(!require(rgexf)){
 				stop("Please install rgexf package")
@@ -436,10 +399,6 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param plot_num default NULL; number of taxa presented in the plot.
 		#' @param color_values default NULL; If not provided, use default.
 		#' @return chorddiag plot
-		#' @examples
-		#' \donttest{
-		#' t1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
-		#' }
 		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = NULL){
 			if(plot_pos == T){
 				if(is.null(self$res_sum_links_pos)){

@@ -458,7 +458,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_lefse_bar(LDA_score = 2)
+		#' t1$plot_lefse_bar(LDA_score = 4)
 		#' }
 		plot_lefse_bar = function(
 			use_number = 1:10,
@@ -551,7 +551,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+		#' t1$plot_lefse_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 		#' }
 		plot_lefse_cladogram = function(
 			color = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -807,8 +807,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			feature <- use_marker_table$Taxa
 			label <- strsplit(feature, split = sep, fixed = TRUE) %>% purrr::map_chr(utils::tail, n =1)
 			plot_color <- use_marker_table$Group
-			for(i in seq_along(unique(plot_color))){
-				plot_color %<>% gsub(unique(use_marker_table$Group)[i], color[i], .)
+			color_groups <- unique(plot_color)
+			for(i in seq_along(color_groups)){
+				plot_color[plot_color == color_groups[i]] <- color[i]
 			}
 			annotation <- data.frame(
 				node = label,

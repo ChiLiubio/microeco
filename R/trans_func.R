@@ -280,10 +280,6 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
 		#' @param Ref_folder default "./FAPROTAX_1.2.1"; see http://www.loucalab.com/archive/FAPROTAX
 		#' @return res_FAPROTAX in object.
-		#' @examples
-		#' \donttest{
-		#' t1$cal_FAPROTAX(Ref_folder = "./FAPROTAX_1.2.1")
-		#' }
 		cal_FAPROTAX = function(keep_tem = TRUE, Ref_folder = "./FAPROTAX_1.2.1") {
 			message("This is FAPROTAX database 1.2.1 with python 2.7. The newer versions may exist in http://www.loucalab.com/archive/FAPROTAX ")
 			otu_file <- self$otu_table
@@ -316,10 +312,6 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
 		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and Tax4Fun function in Tax4Fun package.
 		#' @return tax4fun_KO and tax4fun_path in object.
-		#' @examples
-		#' \donttest{
-		#' t1$cal_tax4fun(folderReferenceData = "./SILVA123")
-		#' }
 		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
 			if(is.null(folderReferenceData)){
 				stop("No folderReferenceData provided! Please see the help document!")

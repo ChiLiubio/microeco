@@ -56,36 +56,36 @@ dataset$cal_abund()
 }
 
 ## ------------------------------------------------
-## Method `microtable$save_abund`
-## ------------------------------------------------
-
-\donttest{
-dataset$save_abund(dirpath = "taxa_abund")
-}
-
-## ------------------------------------------------
 ## Method `microtable$sample_sums`
 ## ------------------------------------------------
 
+\donttest{
 dataset$sample_sums()
+}
 
 ## ------------------------------------------------
 ## Method `microtable$taxa_sums`
 ## ------------------------------------------------
 
+\donttest{
 dataset$taxa_sums()
+}
 
 ## ------------------------------------------------
 ## Method `microtable$sample_names`
 ## ------------------------------------------------
 
+\donttest{
 dataset$sample_names()
+}
 
 ## ------------------------------------------------
 ## Method `microtable$taxa_names`
 ## ------------------------------------------------
 
+\donttest{
 dataset$taxa_names()
+}
 
 ## ------------------------------------------------
 ## Method `microtable$merge_samples`
@@ -113,29 +113,12 @@ class(dataset$alpha_diversity)
 }
 
 ## ------------------------------------------------
-## Method `microtable$save_alphadiv`
-## ------------------------------------------------
-
-# save alpha diversity table in the alpha_diversity directory
-\donttest{
-dataset$save_alphadiv(dirpath = "alpha_diversity")
-}
-
-## ------------------------------------------------
 ## Method `microtable$cal_betadiv`
 ## ------------------------------------------------
 
 \donttest{
 dataset$cal_betadiv(unifrac = FALSE)
 class(dataset$beta_diversity)
-}
-
-## ------------------------------------------------
-## Method `microtable$save_betadiv`
-## ------------------------------------------------
-
-\donttest{
-dataset$save_betadiv(dirpath = "beta_diversity")
 }
 }
 \section{Methods}{
@@ -357,16 +340,6 @@ Save taxonomic abundance to the computer local place.
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-dataset$save_abund(dirpath = "taxa_abund")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sample_sums"></a>}}
@@ -382,7 +355,9 @@ species number of samples.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$sample_sums()
+\preformatted{\donttest{
+dataset$sample_sums()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -403,7 +378,9 @@ species number of taxa.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$taxa_sums()
+\preformatted{\donttest{
+dataset$taxa_sums()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -424,7 +401,9 @@ sample names.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$sample_names()
+\preformatted{\donttest{
+dataset$sample_names()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -445,7 +424,9 @@ taxa names.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$taxa_names()
+\preformatted{\donttest{
+dataset$taxa_names()
+}
 }
 \if{html}{\out{</div>}}
 
@@ -561,17 +542,6 @@ Save alpha diversity table to the computer.
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{# save alpha diversity table in the alpha_diversity directory
-\donttest{
-dataset$save_alphadiv(dirpath = "alpha_diversity")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_betadiv"></a>}}
@@ -621,16 +591,6 @@ Save beta diversity matrix to the computer.
 }
 \if{html}{\out{</div>}}
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-dataset$save_betadiv(dirpath = "beta_diversity")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

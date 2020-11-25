@@ -52,11 +52,17 @@ If the installation of microeco is failed because of the bad internet, download 
 devtools::install_local("microeco-master.zip")
 ```
 
-## Use
+## Tutorial
 See the detailed package tutorial (https://chiliubio.github.io/microeco/) and the help documentations.
 If the tutorial website can not be opened because of bad internet connection, you can download the microeco-master.zip and open the index.html to see the tutorial 
 using your browser directly.
 If you want to run the codes in the tutorial and REMDME completely, you need to install some additional packages, see the following **Notes** part.
+It is notable that there are some features that exist in other microbiome analysis software or platforms and currently not implemented in microeco package.
+In the microeco package, we provide the functions for the conversions between microtable object and phyloseq object.
+Beside the data conversion for the basic object, we suggest that users save the intermediate files in the operations of other objects in microeco package and
+apply those files to other tools according to the format requirement.
+The main files stored in the objects of microeco package is the commonly used data.frame format.
+So the intermediate and result files are easily saved and checked for the use of other tools in microbial ecology.
 
 
 ## Notes
@@ -112,6 +118,16 @@ We show several packages that are published in CRAN and not installed automatica
 </thead>
 <tbody>
 <tr class="even">
+<td align="center">reshape2</td>
+<td align="center">microtable class</td>
+<td align="center">data transformation</td>
+</tr>
+<tr class="odd">
+<td align="center">MASS</td>
+<td align="center">trans_diff$new(method = "lefse",…)</td>
+<td align="center">linear discriminant analysis</td>
+</tr>
+<tr class="even">
 <td align="center">GUniFrac</td>
 <td align="center">cal_betadiv()</td>
 <td align="center">UniFrac distance matrix</td>
@@ -123,7 +139,7 @@ We show several packages that are published in CRAN and not installed automatica
 </tr>
 <tr class="even">
 <td align="center">randomForest</td>
-<td align="center">trans_diff$new(method = “rf”,…)</td>
+<td align="center">trans_diff$new(method = "rf",…)</td>
 <td align="center">random forest analysis</td>
 </tr>
 <tr class="odd">
@@ -208,7 +224,7 @@ Then, if you want to install these packages or some of them, you can do like thi
 ```r
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
-packages <- c("GUniFrac", "ggpubr", "randomForest", "ggdendro", "ggrepel", "agricolae", "gridExtra", "picante", "pheatmap", "igraph", "rgexf", "RJSONIO", "ggalluvial")
+packages <- c("reshape2", "GUniFrac", "MASS", "ggpubr", "randomForest", "ggdendro", "ggrepel", "agricolae", "gridExtra", "picante", "pheatmap", "igraph", "rgexf", "RJSONIO", "ggalluvial")
 # Now check or install
 lapply(packages, function(x) {
 	if(!require(x, character.only = TRUE)) {
@@ -218,6 +234,15 @@ lapply(packages, function(x) {
 
 There are also some packages that may be useful in some parameters or functions. These packages may be R packages published in github or bioconductor,
 or packages written by other languages.
+
+
+#### ggtree
+Plotting the cladogram from the LEfSe result requires the ggtree package in bioconductor (https://bioconductor.org/packages/release/bioc/html/ggtree.html).
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install("ggtree")
+```
+
 
 #### WGCNA
 In the correlation-based network, when the species number is large,
@@ -236,13 +261,6 @@ BiocManager::install("impute")
 BiocManager::install("preprocessCore")
 # then install WGCNA.
 install.packages("WGCNA", dependencies = TRUE)
-```
-
-#### ggtree
-Plotting the cladogram from the LEfSe result requires the ggtree package in bioconductor (https://bioconductor.org/packages/release/bioc/html/ggtree.html).
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install("ggtree")
 ```
 
 
@@ -269,26 +287,6 @@ install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microec
 　unzip SILVA123.zip , move it to a place you can remember
 
 
-#### python
-Predicting the functional potential on the biogeochemical cycles require python 2.7 and several packages.
-
-1. download python 2.7 from https://www.python.org/downloads/release
-2. With windows, put python in the computer env PATH manually, 
-　such as your_directory_path\python and your_directory_path\python\Scripts
-3. Open terminal or cmd or Powershell , run
-
-```python
-pip install numpy
-pip install argparse
-```
-
-If the installation is too slow and failed, use -i select the appropriate mirror, for example, in China, you can use:
-
-```python
-pip install numpy -i https://pypi.douban.com/simple/
-pip install argparse -i https://pypi.douban.com/simple/
-```
-
 #### FlashWeave
 FlashWeave is a julia package used for network analysis.
 It predicts ecological interactions among microbes from large-scale compositional abundance data (i.e. OTU tables constructed from sequencing data) 
@@ -302,14 +300,15 @@ through statistical co-occurrence.
 Gephi is an excellent network visualization tool and used to open the saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
 
-## plotting
+## Plotting
 Most of the plotting in the package rely on the ggplot2 package system.
 We provide some parameters to change the corresponding plot.
 If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
+Each data table used for plotting is stored in the object and can be downloaded for the personalized analysis and plotting.
 Of course, you can also directly modify the function or class to reload them.
 
-## read QIIME files
-In this part, we show how to construct the object of microtable class using the raw OTU file from QIIME.
+## Read QIIME files
+In this part, we first show how to construct the object of microtable class using the raw OTU file from QIIME.
 
 ```r
 # use the raw data files stored inside the package
@@ -345,9 +344,9 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 ?microtable
 ```
 
-## read the QIIME2 files
+## Read QIIME2 files
 We provide a function qiimed2meco() to convert QIIME2 file to microtable object directly.
-If you want to run the codes, first download the QIIME2 files from https://docs.qiime2.org/2020.8/tutorials/pd-mice/
+If you want to run the codes, first download the QIIME2 data files from https://docs.qiime2.org/2020.8/tutorials/pd-mice/
 
 
 ```r
@@ -379,7 +378,7 @@ meco_dataset
 ```
 
 
-## conversion between microtable and phyloseq
+## Conversion between microtable and phyloseq
 We provide two functions meco2phyloseq() and phyloseq2meco() for the conversion between microtable object and phyloseq object (phyloseq package).
 
 ```r
@@ -405,6 +404,8 @@ data("GlobalPatterns")
 meco_dataset <- phyloseq2meco(GlobalPatterns)
 meco_dataset
 ```
+
+
 
 
 ## Acknowledgement
@@ -439,7 +440,7 @@ meco_dataset
   - Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
   - Tackmann, J., Matias Rodrigues, J. F., & Mering, C. von. (2019). Rapid inference of direct interactions in large-scale ecological networks from heterogeneous microbial sequencing data. Cell Systems, 9(3), 286–296 e8.
   - White, J., Nagarajan, N., & Pop, M. (2009). Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Computational Biology, 5(4), e1000352. 
-
+  - Kurtz ZD, Muller CL, Miraldi ER, Littman DR, Blaser MJ, Bonneau RA. Sparse and compositionally robust inference of microbial ecological networks. PLoS Comput Biol 2015; 11: e1004226. 
 
 
 

@@ -12,22 +12,27 @@ This class is a wrapper for a series of alpha diveristy related analysis, includ
 ## Method `trans_alpha$new`
 ## ------------------------------------------------
 
+\donttest{
 data(dataset)
 t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+}
 
 ## ------------------------------------------------
 ## Method `trans_alpha$cal_diff`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_diff(method = "KW")
 t1$cal_diff(method = "anova")
+}
 
 ## ------------------------------------------------
 ## Method `trans_alpha$plot_alpha`
 ## ------------------------------------------------
 
-t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", 
-  group = "Group", pair_compare = TRUE)
+\donttest{
+t1$plot_alpha(measure = "Shannon", group = "Group", pair_compare = TRUE)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -63,8 +68,10 @@ alpha_data and alpha_stat stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(dataset)
+\preformatted{\donttest{
+data(dataset)
 t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -94,8 +101,10 @@ res_alpha_diff in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_diff(method = "KW")
+\preformatted{\donttest{
+t1$cal_diff(method = "KW")
 t1$cal_diff(method = "anova")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -158,8 +167,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_alpha(color_values = RColorBrewer::brewer.pal(12, "Paired"), measure = "Shannon", 
-  group = "Group", pair_compare = TRUE)
+\preformatted{\donttest{
+t1$plot_alpha(measure = "Shannon", group = "Group", pair_compare = TRUE)
+}
 }
 \if{html}{\out{</div>}}
 

@@ -30,7 +30,7 @@ citEntry(entry="article",
          doi = "",
          url = "",
          textVersion =
-         paste("Chi Liu, Xiangzhen Li*, Minjie Yao*.",
+         paste("Chi Liu, Yaoming Cui, Xiangzhen Li*, Minjie Yao*.",
                "microeco: An R package for data mining in microbial community ecology.",
         "Submitted")
 )

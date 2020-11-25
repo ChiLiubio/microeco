@@ -13,9 +13,11 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param ratio default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; NULL: no additional percentage.
 		#' @return venn_table venn_count_abund stored in trans_venn object.
 		#' @examples
+		#' \donttest{
 		#' data(dataset)
 		#' t1 <- dataset$merge_samples(use_group = "Group")
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
+		#' }
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = "numratio"
 			) {
 			use_dataset <- clone(dataset)
@@ -88,7 +90,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param petal_text_move default 40; the distance between two data text
 		#' @return ggplot.
 		#' @examples
+		#' \donttest{
 		#' t1$plot_venn()
+		#' }
 		plot_venn = function(
 			color_circle = RColorBrewer::brewer.pal(8, "Dark2"),
 			fill_color = TRUE,

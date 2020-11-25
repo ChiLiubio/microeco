@@ -181,10 +181,6 @@ microtable <- R6Class(classname = "microtable",
 		#' Save taxonomic abundance to the computer local place.
 		#'
 		#' @param dirpath default "taxa_abund"; directory name to save the taxonomic abundance files.
-		#' @examples
-		#' \donttest{
-		#' dataset$save_abund(dirpath = "taxa_abund")
-		#' }
 		save_abund = function(dirpath = "taxa_abund"){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
@@ -198,7 +194,9 @@ microtable <- R6Class(classname = "microtable",
 		#'
 		#' @return species number of samples.
 		#' @examples
+		#' \donttest{
 		#' dataset$sample_sums()
+		#' }
 		sample_sums = function(){
 			colSums(self$otu_table)
 		},
@@ -207,7 +205,9 @@ microtable <- R6Class(classname = "microtable",
 		#'
 		#' @return species number of taxa.
 		#' @examples
+		#' \donttest{
 		#' dataset$taxa_sums()
+		#' }
 		taxa_sums = function(){
 			rowSums(self$otu_table)
 		},
@@ -216,7 +216,9 @@ microtable <- R6Class(classname = "microtable",
 		#'
 		#' @return sample names.
 		#' @examples
+		#' \donttest{
 		#' dataset$sample_names()
+		#' }
 		sample_names = function(){
 			rownames(self$sample_table)
 		},
@@ -225,7 +227,9 @@ microtable <- R6Class(classname = "microtable",
 		#'
 		#' @return taxa names.
 		#' @examples
+		#' \donttest{
 		#' dataset$taxa_names()
+		#' }
 		taxa_names = function(){
 			rownames(self$tax_table)
 		},
@@ -372,11 +376,6 @@ microtable <- R6Class(classname = "microtable",
 		#' Save alpha diversity table to the computer.
 		#'
 		#' @param dirpath default "alpha_diversity"; directory name to save the alpha_diversity.csv file.
-		#' @examples
-		#' # save alpha diversity table in the alpha_diversity directory
-		#' \donttest{
-		#' dataset$save_alphadiv(dirpath = "alpha_diversity")
-		#' }
 		save_alphadiv = function(dirpath = "alpha_diversity"){
 			if(!dir.exists(dirpath)){
 				stop("The directory is not found, please first create it!")
@@ -421,10 +420,6 @@ microtable <- R6Class(classname = "microtable",
 		#' Save beta diversity matrix to the computer.
 		#'
 		#' @param dirpath default "beta_diversity"; directory name to save the beta diversity matrix files.
-		#' @examples
-		#' \donttest{
-		#' dataset$save_betadiv(dirpath = "beta_diversity")
-		#' }
 		save_betadiv = function(dirpath = "beta_diversity"){
 			if(!dir.exists(dirpath)){
 				stop("The directory is not found, please first create it!")

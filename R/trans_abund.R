@@ -19,9 +19,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
 		#' @return abund_data and other file for plotting. 
 		#' @examples
+		#' \donttest{
 		#' data(dataset)
-		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0, ntaxa = 10)
-		#' # t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", show = 0.1)
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
+		#' }
 		initialize = function(dataset = NULL, taxrank = "Phylum", show = 0, ntaxa = 10, groupmean = NULL, use_percentage = TRUE, order_x = NULL, 
 			input_taxaname = NULL){
 			self$sample_table <- dataset$sample_table
@@ -113,7 +114,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param ylab_title default NULL; y axis title.
 		#' @return ggplot2 plot. 
 		#' @examples
-		#' t1$plot_bar(bar_type = "full", others_color = "grey90")
+		#' \donttest{
+		#' t1$plot_bar(facet = "Group", xtext_keep = FALSE)
+		#' }
 		plot_bar = function(
 			use_colors = RColorBrewer::brewer.pal(12, "Paired"),
 			bar_type = "full",
@@ -239,7 +242,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param ... parameters pass to \code{\link{geom_boxplot}}.
 		#' @return ggplot2 plot. 
 		#' @examples
-		#' t1$plot_box(group = "Group", show_point = FALSE)
+		#' \donttest{
+		#' t1$plot_box(group = "Group")
+		#' }
 		plot_box = function(
 			use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
 			group = NULL,
@@ -331,8 +336,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
 		#' @param base_font default NULL; font in the plot.
 		#' @return ggplot2 plot.
-		#' @examples 
-		#' t1$plot_heatmap(withmargin = FALSE)
+		#' @examples
+		#' \donttest{
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
+		#' t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
+		#' }
 		plot_heatmap = function(
 			use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
 			withmargin = TRUE,
@@ -418,7 +426,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @return ggplot2 plot. 
 		#' @examples
 		#' \donttest{
-		#' t1$plot_pie(facet_nrow = 2)
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
+		#' t1$plot_pie(facet_nrow = 1)
 		#' }
 		plot_pie = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), facet_nrow = 1, strip_text = 11, legend_text_italic = FALSE
 			){

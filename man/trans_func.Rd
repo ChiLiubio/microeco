@@ -46,22 +46,6 @@ t1$show_prok_func(use_func = "methanotrophy")
 \donttest{
 t1$plot_spe_func_perc(use_group_list = TRUE)
 }
-
-## ------------------------------------------------
-## Method `trans_func$cal_FAPROTAX`
-## ------------------------------------------------
-
-\donttest{
-t1$cal_FAPROTAX(Ref_folder = "./FAPROTAX_1.2.1")
-}
-
-## ------------------------------------------------
-## Method `trans_func$cal_tax4fun`
-## ------------------------------------------------
-
-\donttest{
-t1$cal_tax4fun(folderReferenceData = "./SILVA123")
-}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -274,16 +258,6 @@ Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonom
 \subsection{Returns}{
 res_FAPROTAX in object.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$cal_FAPROTAX(Ref_folder = "./FAPROTAX_1.2.1")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_tax4fun"></a>}}
@@ -308,16 +282,6 @@ Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinfor
 \subsection{Returns}{
 tax4fun_KO and tax4fun_path in object.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$cal_tax4fun(folderReferenceData = "./SILVA123")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}

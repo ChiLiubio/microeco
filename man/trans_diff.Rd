@@ -31,7 +31,7 @@ t1$plot_diff_abund(use_number = 1:10)
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_lefse_bar(LDA_score = 2)
+t1$plot_lefse_bar(LDA_score = 4)
 }
 
 ## ------------------------------------------------
@@ -39,7 +39,7 @@ t1$plot_lefse_bar(LDA_score = 2)
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+t1$plot_lefse_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
 
 ## ------------------------------------------------
@@ -250,7 +250,7 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_lefse_bar(LDA_score = 2)
+t1$plot_lefse_bar(LDA_score = 4)
 }
 }
 \if{html}{\out{</div>}}
@@ -324,7 +324,7 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_lefse_cladogram(use_taxa_num = 200, use_feature_num = 50, select_show_labels = NULL)
+t1$plot_lefse_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
 }
 \if{html}{\out{</div>}}

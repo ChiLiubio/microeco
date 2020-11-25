@@ -13,15 +13,19 @@ more than 5-way petal plot and venn result transformations based on David et al.
 ## Method `trans_venn$new`
 ## ------------------------------------------------
 
+\donttest{
 data(dataset)
 t1 <- dataset$merge_samples(use_group = "Group")
 t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
+}
 
 ## ------------------------------------------------
 ## Method `trans_venn$plot_venn`
 ## ------------------------------------------------
 
+\donttest{
 t1$plot_venn()
+}
 
 ## ------------------------------------------------
 ## Method `trans_venn$trans_venn_com`
@@ -65,9 +69,11 @@ venn_table venn_count_abund stored in trans_venn object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(dataset)
+\preformatted{\donttest{
+data(dataset)
 t1 <- dataset$merge_samples(use_group = "Group")
 t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
+}
 }
 \if{html}{\out{</div>}}
 
@@ -145,7 +151,9 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_venn()
+\preformatted{\donttest{
+t1$plot_venn()
+}
 }
 \if{html}{\out{</div>}}
 
