@@ -56,7 +56,7 @@ devtools::install_local("microeco-master.zip")
 See the detailed package tutorial (https://chiliubio.github.io/microeco/) and the help documentations.
 If the tutorial website can not be opened because of bad internet connection, you can download the microeco-master.zip and open the index.html to see the tutorial 
 using your browser directly.
-If you want to run the codes in the tutorial and REMDME completely, you need to install some additional packages, see the following **Notes** part.
+If you want to run the codes in the tutorial and README completely, you need to install some additional packages, see the following **Notes** part.
 It is notable that there are some features that exist in other microbiome analysis software or platforms and currently not implemented in microeco package.
 In the microeco package, we provide the functions for the conversions between microtable object and phyloseq object.
 Beside the data conversion for the basic object, we suggest that users save the intermediate files in the operations of other objects in microeco package and
