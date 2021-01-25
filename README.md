@@ -40,6 +40,7 @@ install.packages("microeco")
 ```
 
 Install microeco from github (beta version).
+We suggest this method because there are some minor improvements compared to the version in CRAN.
 
 ```r
 # If devtools package is not installed, first install it
