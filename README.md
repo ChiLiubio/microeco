@@ -30,6 +30,7 @@ If you do not already have R/RStudio installed, do as follows.
 2. Install [RStudio](https://rstudio.com/)
 
 Put R in the computer env PATH, for example your_directory\R-4.0.0\bin\x64 
+
 Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
 
 ## Install microeco
