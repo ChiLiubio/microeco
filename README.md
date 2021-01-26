@@ -77,7 +77,7 @@ Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: An R package for data 
 To keep the start and use of microeco package simplified, 
 the installation of microeco depend on some packages, which are compulsory-installed from CRAN and useful in the data analysis.
 These packages include
-R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, reshape2, scales, grid, ggplot2, VGAM, MASS, RColorBrewer.
+R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer.
 So the question is that you may encounter an error when using a class or function that invoke an additional package like this:
 
 ```r
