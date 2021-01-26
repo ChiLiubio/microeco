@@ -36,9 +36,13 @@ microtable <- R6Class(classname = "microtable",
 		#' dataset$tidy_dataset()
 		initialize = function(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL)
 			{
-			self$otu_table <- otu_table
+			if(!all(sapply(otu_table, is.numeric))){
+				stop("Some columns in otu_table are not numeric vector! Please check the otu_table and try again.")
+			}else{
+				self$otu_table <- otu_table			
+			}
 			if(is.null(sample_table)){
-				message("No sample_table provided, automatically use colnames of otu_table to create one.")
+				message("No sample_table provided, automatically use colnames of otu_table to create it.")
 				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% `row.names<-`(.$SampleID)
 			}else{
 				self$sample_table <- sample_table

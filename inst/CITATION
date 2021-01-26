@@ -23,15 +23,15 @@ citEntry(entry="article",
                               as.person("Yaoming Cui"),
                               as.person("Xiangzhen Li*"),
                               as.person("Minjie Yao*")),
-         year = "2020",
-         journal = "XX",
+         year = "2021",
+         journal = "FEMS Microbiology Ecology",
          volume = "",
-         pages = "",
-         doi = "",
+         pages = "fiaa255",
+         doi = "10.1093/femsec/fiaa255",
          url = "",
          textVersion =
          paste("Chi Liu, Yaoming Cui, Xiangzhen Li*, Minjie Yao*.",
                "microeco: An R package for data mining in microbial community ecology.",
-        "Submitted")
+        "Accepted")
 )
 

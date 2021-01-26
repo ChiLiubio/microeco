@@ -65,6 +65,10 @@ apply those files to other tools according to the format requirement.
 The main files stored in the objects of microeco package is the commonly used data.frame format.
 So the intermediate and result files are easily saved and checked for the use of other tools in microbial ecology.
 
+## Citation
+Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: An R package for data mining in microbial community ecology, FEMS Microbiology Ecology, 
+2020;, fiaa255, https://doi.org/10.1093/femsec/fiaa255
+
 
 ## Notes
 
