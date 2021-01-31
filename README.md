@@ -67,8 +67,8 @@ The main files stored in the objects of microeco package is the commonly used da
 So the intermediate and result files are easily saved and checked for the use of other tools in microbial ecology.
 
 ## Citation
-Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: An R package for data mining in microbial community ecology, FEMS Microbiology Ecology, 
-2020;, fiaa255, https://doi.org/10.1093/femsec/fiaa255
+Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: an R package for data mining in microbial community ecology, 
+FEMS Microbiology Ecology, Volume 97, Issue 2, February 2021, fiaa255, https://doi.org/10.1093/femsec/fiaa255
 
 
 ## Notes
