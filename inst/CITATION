@@ -1,4 +1,4 @@
-citHeader("Please cite the package as follows:")
+citHeader("To cite microeco in publications use:")
 
 citEntry(entry="article",
          title = "microeco: An R package for data mining in microbial community ecology",
@@ -11,6 +11,8 @@ citEntry(entry="article",
          volume = "97",
 		 number = "2",
          pages = "fiaa255",
-         doi = "10.1093/femsec/fiaa255"
+         doi = "10.1093/femsec/fiaa255",
+         url = "https://doi.org/10.1093/femsec/fiaa255",
+         textVersion = "Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: an R package for data mining in microbial community ecology, FEMS Microbiology Ecology, Volume 97, Issue 2, February 2021, fiaa255."
 )
 
