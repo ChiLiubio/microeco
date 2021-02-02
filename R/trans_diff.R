@@ -98,7 +98,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# resampling
 					sample_names_resample <- rownames(predictors)[base::sample(1:nrow(predictors), size = ceiling(nrow(predictors) * nresam))]
 					predictors_sub <- predictors[sample_names_resample, ]
-					sampleinfo_resample <- sampleinfo[sample_names_resample, ]
+					sampleinfo_resample <- sampleinfo[sample_names_resample, , drop = FALSE]
 					# make sure the groups and samples numbers right
 					if(length(unique(sampleinfo_resample[, group])) != length(unique(sampleinfo[, group])) | min(table(sampleinfo_resample[, group])) < 2){
 						next
@@ -189,7 +189,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# resampling samples
 					sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * nresam))]
 					abund_table_sub_resample <- abund_table_sub[, sample_names_resample]
-					sampleinfo_resample <- sampleinfo[sample_names_resample, ]
+					sampleinfo_resample <- sampleinfo[sample_names_resample, , drop = FALSE]
 					# make sure the groups and samples numbers available					
 					if(sum(table(as.character(sampleinfo_resample[, group])) > 1) < 2){
 						res_lda[[num]] <- NA
