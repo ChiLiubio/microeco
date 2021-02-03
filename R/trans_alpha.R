@@ -178,7 +178,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						{.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter, x)))), drop = FALSE]} %>% 
 						{lapply(seq_len(ncol(.)), function(x) .[, x])}
 #					p <- p + stat_compare_signif(comparisons = comparisons_list, method = pair_compare_method, map_signif_level = map_signif_level)
-					p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, paired = TRUE, method = pair_compare_method, 
+					p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, method = pair_compare_method, 
 						tip.length=0.01, label = "p.signif", symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), 
 						symbols = c("****", "***", "**", "*", "ns")))
 				}
