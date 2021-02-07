@@ -41,7 +41,7 @@ install.packages("microeco")
 ```
 
 Install microeco from github (beta version).
-We suggest this method because there are some minor improvements compared to the version in CRAN.
+We **suggest** using this method because there are some minor improvements compared to the version in CRAN.
 
 ```r
 # If devtools package is not installed, first install it
@@ -250,26 +250,6 @@ BiocManager::install("ggtree")
 ```
 
 
-#### WGCNA
-In the correlation-based network, when the species number is large,
-the correlation algorithm in WGCNA is very fast compared to the cor function in R base.
-WGCNA depends on several packages in Bioconductor, including GO.db and impute.
-So if you want to install WGCNA, first install  GO.db (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
-and impute (http://www.bioconductor.org/packages/release/bioc/html/impute.html) with the following code.
-
-```r
-# install GO.db and impute
-# First check and install BiocManager package
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-# install GO.db and impute
-BiocManager::install("GO.db")
-BiocManager::install("impute")
-BiocManager::install("preprocessCore")
-# then install WGCNA.
-install.packages("WGCNA", dependencies = TRUE)
-```
-
-
 #### SpiecEasi
 
 The R package SpiecEasi can be used for the network construction using SPIEC-EASI (SParse InversE Covariance Estimation for Ecological Association Inference) approach.
@@ -305,6 +285,26 @@ through statistical co-occurrence.
 #### Gephi
 Gephi is an excellent network visualization tool and used to open the saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
+
+
+#### WGCNA
+In the correlation-based network, when the species number is large,
+the correlation algorithm in WGCNA is very fast compared to the cor function in R base.
+WGCNA depends on several packages in Bioconductor, including GO.db and impute.
+So if you want to install WGCNA, first install  GO.db (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
+and impute (http://www.bioconductor.org/packages/release/bioc/html/impute.html) with the following code.
+
+```r
+# install GO.db and impute
+# First check and install BiocManager package
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+# install GO.db and impute
+BiocManager::install("GO.db")
+BiocManager::install("impute")
+BiocManager::install("preprocessCore")
+# then install WGCNA.
+install.packages("WGCNA", dependencies = TRUE)
+```
 
 ## Plotting
 Most of the plotting in the package rely on the ggplot2 package system.
@@ -442,6 +442,7 @@ meco_dataset
     Liu, C., Yao, M., Stegen, J. C., Rui, J., Li, J., & Li, X. (2017). Long-term nitrogen addition affects the phylogenetic turnover of soil microbial community responding to moisture pulse. Scientific Reports, 7(1), 17492. Journal Article.
   - If the user use LefSe method in trans_diff class, please also cite the original paper:
     Segata, N., Izard, J., Waldron, L., Gevers, D., Miropolsky, L., Garrett, W. S., & Huttenhower, C. (2011). Metagenomic biomarker discovery and explanation. Genome Biology, 12(6), R60.
+  - Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: an R package for data mining in microbial community ecology, FEMS Microbiology Ecology, Volume 97, Issue 2, February 2021, fiaa255.
   - An, J., Liu, C., Wang, Q., Yao, M., Rui, J., Zhang, S., & Li, X. (2019). Soil bacterial community structure in Chinese wetlands. Geoderma, 337, 290–299.
   - Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
   - Tackmann, J., Matias Rodrigues, J. F., & Mering, C. von. (2019). Rapid inference of direct interactions in large-scale ecological networks from heterogeneous microbial sequencing data. Cell Systems, 9(3), 286–296 e8.
