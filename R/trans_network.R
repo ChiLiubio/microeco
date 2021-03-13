@@ -77,6 +77,18 @@ trans_network <- R6Class(classname = "trans_network",
 				if(cal_cor == "SparCC"){
 					bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
 					cor_result <- SpiecEasi::pval.sparccboot(bootres)
+					# reshape the results
+					use_names <- colnames(bootres$data)
+					com_res <- t(combn(use_names, 2))
+					res <- cbind.data.frame(com_res, cor_result$cors, cor_result$pvals, stringsAsFactors = FALSE)
+					colnames(res) <- c("t1", "t2", "cor", "p")
+					res <- rbind.data.frame(res, data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), 
+						data.frame(t1 = use_names, t2 = use_names, cor = rep(1, length(use_names)), p = rep(0, length(use_names))))
+					res$cor %<>% as.numeric
+					res$p %<>% as.numeric
+					res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
+					res_p <- reshape2::dcast(res, t1~t2, value.var = "p") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
+					cor_result <- list(cor = res_cor, p = res_p)
 				}
 				self$res_cor_p <- cor_result
 			}else{
@@ -636,6 +648,9 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		assign_module_roles = function(zp){
 			zp <- na.omit(zp)
+			if(nrow(zp) == 0){
+				stop("No valid result obtained for this network!")
+			}
 			zp$taxa_roles <- rep(0, dim(zp)[1])
 			outdf <- NULL
 			for(i in 1:dim(zp)[1]){

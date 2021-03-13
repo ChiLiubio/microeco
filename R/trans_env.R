@@ -8,7 +8,7 @@
 trans_env <- R6Class(classname = "trans_env",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table.
+		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. Either numeric vector or character vector of colnames.
 		#' @param add_data default NULL; provide the environmental data frame individually.
 		#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
 		#' @return env_data and dataset in trans_env object.
