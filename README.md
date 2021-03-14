@@ -317,6 +317,9 @@ Of course, you can also directly modify the function or class to reload them.
 In this part, we first show how to construct the object of microtable class using the raw OTU file from QIIME.
 
 ```r
+# ape package used for phylogenetic tree reading
+library(ape)
+library(magrittr)
 # use the raw data files stored inside the package
 otu_file_path <- system.file("extdata", "otu_table_raw.txt", package="microeco")
 # the example sample table is csv style

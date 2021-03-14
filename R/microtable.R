@@ -136,6 +136,9 @@ microtable <- R6Class(classname = "microtable",
 		#' dataset$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = TRUE){
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
+			if(length(sample_names) == 0){
+				stop("No same sample name found between rownames of sample_table and colnames of otu_table! Please check whether the rownames of sample_table are sample names!")
+			}
 			# keep the sample order same with raw sample table
 			sample_names <- rownames(self$sample_table) %>% .[. %in% sample_names]
 			self$sample_table %<>% .[sample_names, , drop = FALSE]
@@ -495,5 +498,3 @@ microtable <- R6Class(classname = "microtable",
 	lock_objects = FALSE,
 	lock_class = FALSE
 )
-
-
