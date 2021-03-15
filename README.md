@@ -336,7 +336,7 @@ otu_table_1 <- as.data.frame(otu_raw_table[[3]])
 colnames(otu_table_1) <- unlist(otu_raw_table[[1]])
 # obtain the taxonomic table  data.frame
 taxonomy_table_1 <- as.data.frame(split_assignments(unlist(otu_raw_table[[4]])))
-# read sample metadata table, data.frame
+# read sample metadata table, data.frame, row.names = 1 set rownames
 sample_info <- read.csv(sample_file_path, row.names = 1, stringsAsFactors = FALSE)
 # read the phylogenetic tree
 phylo_tree <- read.tree(phylo_file_path)
@@ -386,6 +386,9 @@ meco_dataset <- qiimed2meco(ASV_data = "dada2_table.qza", sample_data = "sample-
 meco_dataset
 ```
 
+## sample_table
+The rownames of sample_table are used for selecting samples/groups in all the related operations in the package.
+Before you create microtable object, make sure that the rownames of sample_table are the sample names.
 
 ## Conversion between microtable and phyloseq
 We provide two functions meco2phyloseq() and phyloseq2meco() for the conversion between microtable object and phyloseq object (phyloseq package).

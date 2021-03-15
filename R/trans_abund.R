@@ -54,7 +54,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
 			}
 			if(!is.null(order_x)){
-				if(length(order_x == 1)){
+				if(length(order_x) == 1){
 					abund_data$Sample %<>% factor(., levels = unique(self$sample_table[, order_x]))
 				} else {
 					abund_data$Sample %<>% factor(., levels = order_x)

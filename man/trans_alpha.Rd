@@ -128,7 +128,7 @@ Plotting the alpha diveristy.
   xtext_type = NULL,
   xtext_size = 10,
   ytitle_size = 17,
-  base_font = NULL,
+  base_font = "sans",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -156,7 +156,7 @@ Plotting the alpha diveristy.
 
 \item{\code{ytitle_size}}{default 17, y axis title size.}
 
-\item{\code{base_font}}{default NULL, font in the plot.}
+\item{\code{base_font}}{default "sans", font in the plot.}
 
 \item{\code{...}}{parameters pass to ggpubr::ggboxplot.}
 }

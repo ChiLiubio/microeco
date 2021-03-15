@@ -96,7 +96,7 @@ t1$plot_corr(pheatmap = FALSE)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table.}
+\item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. Either numeric vector or character vector of colnames.}
 
 \item{\code{add_data}}{default NULL; provide the environmental data frame individually.}
 
