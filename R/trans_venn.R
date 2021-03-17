@@ -147,9 +147,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(1,9) +	ylim(1,9) + private$main_theme
 				if(fill_color == T){
 					p <- p + 
-					 geom_polygon(data = private$plotcircle(center = c(4, 6)),aes(x = x,y = y), fill=color_circle[1], alpha = alpha) +
-					 geom_polygon(data = private$plotcircle(center = c(6, 6)),aes(x = x,y = y), fill=color_circle[2], alpha = alpha) +
-					 geom_polygon(data = private$plotcircle(center = c(5, 4)),aes(x = x,y = y), fill=color_circle[3], alpha = alpha)
+					 geom_polygon(data = private$plotcircle(center = c(4, 6)), aes(x = x,y = y), fill=color_circle[1], alpha = alpha) +
+					 geom_polygon(data = private$plotcircle(center = c(6, 6)), aes(x = x,y = y), fill=color_circle[2], alpha = alpha) +
+					 geom_polygon(data = private$plotcircle(center = c(5, 4)), aes(x = x,y = y), fill=color_circle[3], alpha = alpha)
 				} else {
 					p <- p +
 					annotate("path", x = private$plotcircle(center = c(4, 6))$x, y = private$plotcircle(center = c(4, 6))$y, 
@@ -186,15 +186,15 @@ trans_venn <- R6Class(classname = "trans_venn",
 				if(fill_color == T){
 					p <- p + 
 					 geom_polygon(data = private$plotellipse(center = c(4.83, 6.2), radius = c(1.43, 4.11), rotate = 0),
-						aes(x = x,y = y), fill=color_circle[1], alpha = alpha)+
+						aes(x = x, y = y), fill=color_circle[1], alpha = alpha)+
 					 geom_polygon(data = private$plotellipse(center = c(6.25, 5.4), radius = c(1.7, 3.6), rotate = 66),
-						aes(x = x,y = y), fill=color_circle[2], alpha = alpha)+
+						aes(x = x, y = y), fill=color_circle[2], alpha = alpha)+
 					 geom_polygon(data = private$plotellipse(center = c(6.1, 3.5), radius = c(1.55, 3.9), rotate = 150),
-						aes(x = x,y = y), fill=color_circle[3], alpha = alpha)+
+						aes(x = x, y = y), fill=color_circle[3], alpha = alpha)+
 					 geom_polygon(data = private$plotellipse(center = c(4.48, 3.15), radius = c(1.55, 3.92), rotate = 210),
-						aes(x = x,y = y), fill=color_circle[4], alpha = alpha)+
+						aes(x = x, y = y), fill=color_circle[4], alpha = alpha)+
 					 geom_polygon(data = private$plotellipse(center = c(3.7, 4.8), radius = c(1.7, 3.6), rotate = 293.5), 
-						aes(x = x,y = y), fill=color_circle[5], alpha = alpha)
+						aes(x = x, y = y), fill=color_circle[5], alpha = alpha)
 				} else {
 					p <- p +
 					annotate("path", x = private$plotellipse(center = c(4.83, 6.2),  radius = c(1.43, 4.11), rotate = 0)$x, 

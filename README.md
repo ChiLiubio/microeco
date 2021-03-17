@@ -34,14 +34,9 @@ Put R in the computer env PATH, for example your_directory\R-4.0.0\bin\x64
 Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
 
 ## Install microeco
-Directly install microeco online from CRAN.
-
-```r
-install.packages("microeco")
-```
 
 Install microeco from github (beta version).
-We **suggest** using this method because there are some minor improvements compared to the version in CRAN.
+This is the **best** way as there are some minor improvements here compared to the version in CRAN.
 
 ```r
 # If devtools package is not installed, first install it
@@ -49,9 +44,17 @@ install.packages("devtools")
 # then install microeco
 devtools::install_github("ChiLiubio/microeco")
 ```
-If the installation of microeco is failed because of the bad internet, download the package first, then install it.
+
+If the installation from github is failed because of the bad internet, download the package first, then install it locally.
+
 ```r
 devtools::install_local("microeco-master.zip")
+```
+
+Currently, directly install microeco online from CRAN is not encouraged because of the update delay.
+
+```r
+install.packages("microeco")
 ```
 
 ## Tutorial
