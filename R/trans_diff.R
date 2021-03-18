@@ -537,6 +537,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance 
 		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance
 		#' @param use_feature_num default NULL; integer; The feature number used in the plot; select the features according to the LDA score
+		#' @param group_order default NULL; a vector to order the legend in plot.
 		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest
 		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters
 		#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels
@@ -558,6 +559,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			use_taxa_num = 200,
 			filter_taxa = NULL,
 			use_feature_num = NULL,
+			group_order = NULL,
 			clade_label_level = 4,
 			select_show_labels = NULL,
 			only_select_show = FALSE,
@@ -634,8 +636,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 			mapping$node_class <- label_levels
 			tree <- tidytree::treedata(phylo = phylo, data = tibble::as_tibble(mapping))
 			tree <- ggtree::ggtree(tree, size = 0.2, layout = 'circular')
-			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color)
-			
+			# color legend order settings
+			if(is.null(group_order)){
+				color_groups <- marker_table$Group %>% as.character %>% as.factor %>% levels
+			}else{
+				color_groups <- group_order
+			}
+			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color, color_groups = color_groups)			
 			# backgroup hilight
 			annotation_info <- dplyr::left_join(annotation, tree$data, by = c("node" = "label")) %>%
 				dplyr::mutate(label = .data$node, id = .data$node.y, level = as.numeric(.data$node_class))
@@ -653,7 +660,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 			hilights_df <- dplyr::distinct(annotation_info, .data$enrich_group, .data$color)
 			hilights_df$x <- 0
 			hilights_df$y <- 1
-			# set_hilight_legend
+			# resort the table used for the legend color and text
+			rownames(hilights_df) <- hilights_df$enrich_group
+			hilights_df <- hilights_df[color_groups, ]
+			# make sure the right order in legend
+			hilights_df$enrich_group %<>% factor(., levels = color_groups)
+
+			# add legend
 			tree <- tree + geom_rect(aes_(xmin = ~x, xmax = ~x, ymax = ~y, ymin = ~y, fill = ~enrich_group), data = hilights_df, inherit.aes = FALSE) +
 				guides(fill = guide_legend(title = NULL, order = 1, override.aes = list(fill = hilights_df$color)))
 
@@ -802,12 +815,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 		},
-		generate_cladogram_annotation = function(marker_table, tree, color, sep = "|") {
+		# generate the cladogram annotation table
+		generate_cladogram_annotation = function(marker_table, tree, color, color_groups, sep = "|") {
 			use_marker_table <- marker_table
 			feature <- use_marker_table$Taxa
 			label <- strsplit(feature, split = sep, fixed = TRUE) %>% purrr::map_chr(utils::tail, n =1)
-			plot_color <- use_marker_table$Group
-			color_groups <- unique(plot_color)
+			plot_color <- use_marker_table$Group %>% as.character
 			for(i in seq_along(color_groups)){
 				plot_color[plot_color == color_groups[i]] <- color[i]
 			}

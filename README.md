@@ -51,7 +51,7 @@ If the installation from github is failed because of the bad internet, download 
 devtools::install_local("microeco-master.zip")
 ```
 
-Currently, directly install microeco online from CRAN is not encouraged because of the update delay.
+Currently, install microeco from CRAN is not encouraged because of the update delay.
 
 ```r
 install.packages("microeco")

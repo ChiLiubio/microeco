@@ -269,6 +269,7 @@ Plot the cladogram for LEfSe result similar with the python version. Codes are m
   use_taxa_num = 200,
   filter_taxa = NULL,
   use_feature_num = NULL,
+  group_order = NULL,
   clade_label_level = 4,
   select_show_labels = NULL,
   only_select_show = FALSE,
@@ -293,6 +294,8 @@ Plot the cladogram for LEfSe result similar with the python version. Codes are m
 \item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance}
 
 \item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; select the features according to the LDA score}
+
+\item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
 
 \item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest}
 
