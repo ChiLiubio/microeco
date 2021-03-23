@@ -5,7 +5,8 @@
 \title{Create trans_diff object for the differential analysis on the taxonomic abundance.}
 \description{
 This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
-LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest and metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
+LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
+the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>.
 }
 \examples{
 
@@ -70,7 +71,7 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
-  method = c("lefse", "rf", "metastat")[1],
+  method = c("lefse", "rf", "metastat", "mseq")[1],
   group = NULL,
   lefse_subgroup = NULL,
   alpha = 0.05,
@@ -81,7 +82,9 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
   rf_taxa_level = "all",
   rf_ntree = 1000,
   metastat_taxa_level = "Genus",
-  metastat_group_choose = NULL
+  group_choose_paired = NULL,
+  mseq_adjustMethod = "fdr",
+  mseq_count = 1
 )}\if{html}{\out{</div>}}
 }
 
@@ -90,7 +93,8 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{method}}{default "lefse"; "lefse", "rf" or "metastat".}
+\item{\code{method}}{default "lefse"; "lefse", "rf", "metastat" or "mseq". "lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
+"rf" represents random forest; metastat: White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; "mseq" represents the method in metagenomeSeq package.}
 
 \item{\code{group}}{default NULL; sample group used for main comparision.}
 
@@ -112,12 +116,17 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 
 \item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.}
 
-\item{\code{metastat_group_choose}}{default NULL; a vector used for selecting the required groups for testing.}
+\item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing, only used for metastat or mseq.}
+
+\item{\code{mseq_adjustMethod}}{default "fdr"; Method to adjust p-values by. Default is "fdr". 
+Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".}
+
+\item{\code{mseq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rf res_lefse res_abund or res_metastat in trans_diff object.
+res_rf, res_lefse, res_abund, res_metastat, or res_mseq in trans_diff object, depending on the method.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

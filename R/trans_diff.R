@@ -3,13 +3,15 @@
 #'
 #' @description
 #' This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
-#' LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest and metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
+#' LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
+#' the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>.
 #'
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param method default "lefse"; "lefse", "rf" or "metastat".
+		#' @param method default "lefse"; "lefse", "rf", "metastat" or "mseq". "lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
+		#' 	  "rf" represents random forest; metastat: White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; "mseq" represents the method in metagenomeSeq package.
 		#' @param group default NULL; sample group used for main comparision.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param alpha default .05; significance threshold.
@@ -20,8 +22,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package.
 		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
-		#' @param metastat_group_choose default NULL; a vector used for selecting the required groups for testing.
-		#' @return res_rf res_lefse res_abund or res_metastat in trans_diff object.
+		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for metastat or mseq.
+		#' @param mseq_adjustMethod default "fdr"; Method to adjust p-values by. Default is "fdr". 
+		#'   Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
+		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
+		#' @return res_rf, res_lefse, res_abund, res_metastat, or res_mseq in trans_diff object, depending on the method.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -29,7 +34,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "metastat")[1],
+			method = c("lefse", "rf", "metastat", "mseq")[1],
 			group = NULL,
 			lefse_subgroup = NULL,
 			alpha = 0.05,
@@ -40,7 +45,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			rf_taxa_level = "all",
 			rf_ntree = 1000,
 			metastat_taxa_level = "Genus",
-			metastat_group_choose = NULL
+			group_choose_paired = NULL,
+			mseq_adjustMethod = "fdr",
+			mseq_count = 1
 			){
 			if(is.null(dataset)){
 				stop("No dataset provided!")
@@ -269,6 +276,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				self$res_abund <- res_abund
 			}
+			if(grepl("metastat|mseq", method, ignore.case = TRUE)){
+				if(is.null(group_choose_paired)){
+					all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
+				}else{
+					all_name <- combn(unique(group_choose_paired), 2)
+				}
+				output <- data.frame()			
+			}
 			if(grepl("metastat", method, ignore.case = TRUE)){
 				self$metastat_taxa_level <- metastat_taxa_level
 				# transform data
@@ -283,12 +298,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
 					`row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
 				new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
-				if(is.null(metastat_group_choose)){
-					all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
-				}else{
-					all_name <- combn(unique(metastat_group_choose), 2)
-				}
-				output <- data.frame()
+
 				message("Total ", ncol(all_name), " paired group for calculation ...")
 				for(i in 1:ncol(all_name)) {
 					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
@@ -306,6 +316,53 @@ trans_diff <- R6Class(classname = "trans_diff",
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_metastat <- output
 				self$res_metastat_group_matrix <- all_name
+			}
+			if(grepl("mseq", method, ignore.case = TRUE)){
+				if(!require(metagenomeSeq)){
+					stop("metagenomeSeq package not installed")
+				}
+				message("Total ", ncol(all_name), " paired group for calculation ...")
+				for(i in 1:ncol(all_name)) {
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
+					use_dataset <- clone(dataset)
+					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+					use_dataset$tidy_dataset()
+					obj <- newMRexperiment(use_dataset$otu_table, phenoData= AnnotatedDataFrame(use_dataset$sample_table), featureData = AnnotatedDataFrame(use_dataset$tax_table))
+					## Normalization and Statistical testing
+					obj_1 <- cumNorm(obj)
+					pd <- pData(obj)
+					colnames(pd)[which(colnames(pd) == group)] <- "Group"
+					# construct linear model
+					mod <- model.matrix(~1 + Group, data = pd)
+					objres1 <- fitFeatureModel(obj_1, mod)
+					# extract the result
+					tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
+					p <- objres1@pvalues
+					if (mseq_adjustMethod == "ihw-ubiquity" | mseq_adjustMethod == "ihw-abundance") {
+						padj = MRihw(objres1, p, mseq_adjustMethod, 0.1)
+					} else {
+						padj = p.adjust(p, method = mseq_adjustMethod)
+					}
+					srt <- order(p, decreasing = FALSE)
+					valid <- 1:length(padj)
+					if (mseq_count > 0) {
+						np = rowSums(objres1@counts)
+						valid = intersect(valid, which(np >= mseq_count))
+					}
+					srt <- srt[which(srt %in% valid)]
+					res <- cbind(tb[, 1:2], p)
+					res <- cbind(res, padj)
+					res <- as.data.frame(res[srt, ])
+					colnames(res) <- c(colnames(tb)[1:2], "pvalues", "adjPvalues")
+					res <- cbind.data.frame(feature = rownames(res), res)
+					rownames(res) <- NULL
+					add_name <- paste0(as.character(all_name[, i]), collapse = " vs ") %>% rep(., nrow(res))
+					res <- cbind.data.frame(compare = add_name, res)
+					output <- rbind.data.frame(output, res)
+				}
+				output %<>% dropallfactors(unfac2num = TRUE)
+				self$res_mseq <- output
+				self$res_mseq_group_matrix <- all_name
 			}
 		},
 		#' @description

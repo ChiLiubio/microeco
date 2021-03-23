@@ -104,13 +104,22 @@ t1 <- trans_func$new(dataset = dataset)
 Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
 Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
 Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
-Fungi, based on the FUNGuild database, please also cite:
-Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
+Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
+FUNGuild: Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
 FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248. <doi:10.1016/j.funeco.2015.06.006>
+FungalTraits: Põlme, S., Abarenkov, K., Henrik Nilsson, R. et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
+Fungal Diversity 105, 1–16 (2020). <doi:10.1007/s13225-020-00466-2>
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(fungi_database = c("FUNGuild", "FungalTraits")[1])}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{fungi_database}}{default "FUNGuild"; select a fungi trait database for the trait identification, "FUNGuild" or "FungalTraits"; see the description in this function.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 res_spe_func in object.
 }
@@ -211,9 +220,10 @@ Plot the percentages of species with specific trait in communities or modules.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{filter_func}}{default NULL; a vector of function names.}
+\item{\code{filter_func}}{default NULL; a vector of function names used to show in the plot.}
 
-\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If use personalized group list, first set trans_func$func_group_list object with a list of group names and functions.}
+\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If use personalized group list, 
+first set trans_func$func_group_list object with a list of group names and functions.}
 
 \item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.}
 
