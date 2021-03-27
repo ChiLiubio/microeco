@@ -28,25 +28,6 @@ NULL
 #' @usage data(env_data_16S)
 NULL
 
-#' The fungi function database in the microeco package
-#'
-#'
-#' @docType data
-#' @keywords data.frame
-#' @name fungi_func
-#' @usage data(fungi_func)
-NULL
-
-
-#' The KEGG pathway annotation database in the microeco package
-#'
-#'
-#' @docType data
-#' @keywords data.frame
-#' @name ko_map
-#' @usage data(ko_map)
-NULL
-
 
 #' The OTU table of the 16S dataset in the microeco package
 #'
@@ -78,7 +59,8 @@ NULL
 #' @usage data(phylo_tree_16S)
 NULL
 
-#' The prokaryotic function database in the microeco package
+
+#' The prokaryotic trait database in the microeco package
 #'
 #'
 #' @docType data
@@ -87,6 +69,35 @@ NULL
 #' @usage data(prok_func)
 NULL
 
+
+#' The FUNGuild database for fungi trait identification in the microeco package
+#'
+#'
+#' @docType data
+#' @keywords data.frame
+#' @name fungi_func_FUNGuild
+#' @usage data(fungi_func_FUNGuild)
+NULL
+
+
+#' The FungalTraits database for fungi trait identification in the microeco package
+#'
+#'
+#' @docType data
+#' @keywords data.frame
+#' @name fungi_func_FungalTraits
+#' @usage data(fungi_func_FungalTraits)
+NULL
+
+
+#' The KEGG pathway annotation database in the microeco package
+#'
+#'
+#' @docType data
+#' @keywords data.frame
+#' @name ko_map
+#' @usage data(ko_map)
+NULL
 
 
 #' The sample information of 16S dataset in the microeco package
@@ -129,23 +140,6 @@ NULL
 #' @name taxonomy_table_ITS
 #' @usage data(taxonomy_table_ITS)
 NULL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

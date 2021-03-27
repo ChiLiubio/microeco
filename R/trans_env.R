@@ -517,5 +517,3 @@ trans_env <- R6Class(classname = "trans_env",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
-

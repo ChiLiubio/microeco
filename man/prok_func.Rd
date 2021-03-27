@@ -3,11 +3,11 @@
 \docType{data}
 \name{prok_func}
 \alias{prok_func}
-\title{The prokaryotic function database in the microeco package}
+\title{The prokaryotic trait database in the microeco package}
 \usage{
 data(prok_func)
 }
 \description{
-The prokaryotic function database in the microeco package
+The prokaryotic trait database in the microeco package
 }
 \keyword{data.frame}
