@@ -332,7 +332,7 @@ Ref99NR/Ref100NR:
   \-\-\-\-\-\-Ref99NR.fasta  
   \-\-\-\-\-\-Ref99NR.tre  
 
-The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be required in the cal_tax4fun2() function.
+The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be required in the trans_func$cal_tax4fun2() function.
 
 ```r
 # seqinr should be installed for reading and writing fasta file
