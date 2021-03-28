@@ -51,7 +51,7 @@ If the installation from github is failed because of the bad internet, download 
 devtools::install_local("microeco-master.zip")
 ```
 
-Currently, install microeco from CRAN is not encouraged because of the update delay.
+It is OK to install microeco from CRAN directly. There may be some update delay in the CRAN version.
 
 ```r
 install.packages("microeco")
@@ -101,7 +101,7 @@ The reason is that network construction require igraph package. We donot put the
 
 The solutions:
 
-1. install the package when encounter such an error. Indeed, it's very easy to install the packages of CRAN in Rstudio. Just try it.
+1. install the package when encounter such an error. Actually, it's very easy to install the packages of CRAN in Rstudio. Just try it.
 
 2. install the packages in advance. We recommend this solution if you are interest in most of the methods in the microeco package.
 
@@ -252,29 +252,10 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocMana
 BiocManager::install("ggtree")
 ```
 
-
 #### SpiecEasi
 
 The R package SpiecEasi can be used for the network construction using SPIEC-EASI (SParse InversE Covariance Estimation for Ecological Association Inference) approach.
 The package can be installed from Github https://github.com/zdk123/SpiecEasi
-
-#### chorddiag
-
-The R package chorddiag is used for the chord plot in the network analysis and can be installed from Github https://github.com/mattflor/chorddiag
-
-
-#### Tax4Fun
-Tax4Fun is an R package used for the prediction of functional potential of microbial communities.
-
-1. install Tax4Fun package
-```r
-install.packages(system.file("extdata", "biom_0.3.12.tar.gz", package="microeco"), repos = NULL, type = "source")
-install.packages(system.file("extdata", "qiimer_0.9.4.tar.gz", package="microeco"), repos = NULL, type = "source")
-install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microeco"), repos = NULL, type = "source")
-```
-2. download SILVA123 reference data from http://tax4fun.gobics.de/
-　unzip SILVA123.zip , move it to a place you can remember
-
 
 #### FlashWeave
 FlashWeave is a julia package used for network analysis.
@@ -289,6 +270,9 @@ through statistical co-occurrence.
 Gephi is an excellent network visualization tool and used to open the saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
 
+#### chorddiag
+
+The R package chorddiag is used for the chord plot in the network analysis and can be installed from Github https://github.com/mattflor/chorddiag
 
 #### WGCNA
 In the correlation-based network, when the species number is large,
@@ -307,6 +291,52 @@ BiocManager::install("impute")
 BiocManager::install("preprocessCore")
 # then install WGCNA.
 install.packages("WGCNA", dependencies = TRUE)
+```
+
+
+#### Tax4Fun
+Tax4Fun is an R package used for the prediction of functional potential of prokaryotic communities.
+
+1. install Tax4Fun package
+```r
+install.packages(system.file("extdata", "biom_0.3.12.tar.gz", package="microeco"), repos = NULL, type = "source")
+install.packages(system.file("extdata", "qiimer_0.9.4.tar.gz", package="microeco"), repos = NULL, type = "source")
+install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microeco"), repos = NULL, type = "source")
+```
+2. download SILVA123 reference data from http://tax4fun.gobics.de/
+　unzip SILVA123.zip , move it to a place you can remember
+
+
+#### Tax4Fun2
+Tax4Fun2 is another R package for the the prediction of functional profiles and functional gene redundancies of prokaryotic communities.
+It has higher accuracies than PICRUSt and Tax4Fun. The Tax4Fun2 approach implemented in microeco is a little different from the original package.
+Using Tax4Fun2 approach require the representative fasta file.
+The user do not need to install Tax4Fun2 R package.
+The only thing need to do is to download the blast tool and Ref99NR/Ref100NR.
+Downlaod blast tools from "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+" ; e.g. ncbi-blast-\*\*\*\*-x64-win64.tar.gz  for windows system.
+Downlaod Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
+Uncompress all the folders. The final folders should be like these structures:
+
+blast tools:
+  \-\-ncbi-blast-2.11.0+
+  \-\-\-\-bin
+  \-\-\-\-\-\-blastn.exe
+  \-\-\-\-\-\-makeblastdb.exe
+  \-\-\-\-\-\-......
+
+Ref99NR/Ref100NR:
+  \-\-Tax4Fun2_ReferenceData_v2
+  \-\-\-\-Ref99NR
+  \-\-\-\-\-\-otu000001.tbl.gz
+  \-\-\-\-\-\-......
+  \-\-\-\-\-\-Ref99NR.fasta
+  \-\-\-\-\-\-Ref99NR.tre
+
+The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be required in the cal_tax4fun2() function.
+
+```r
+# seqinr should be installed for reading and writing fasta file
+install.packages("seqinr", dependencies = TRUE)
 ```
 
 ## Plotting
@@ -354,7 +384,14 @@ dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, t
 # for other operations, see the tutorial (https://chiliubio.github.io/microeco/) and the help documentations
 # the class documentation include the function links, see the microtable class, input:
 ?microtable
+# if you want to use Tax4Fun2 approach, you need read the representative sequences and add it to the microtable object.
+# this is a test file
+rep_fasta_path <- system.file("extdata", "rep.fna", package="microeco")
+rep_fasta <- seqinr::read.fasta(rep_fasta_path)
+dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, tax_table = taxonomy_table_1, phylo_tree = phylo_tree, rep_fasta = rep_fasta)
 ```
+
+
 
 ## Read QIIME2 files
 We provide a function qiimed2meco() to convert QIIME2 file to microtable object directly.
@@ -420,47 +457,27 @@ meco_dataset <- phyloseq2meco(GlobalPatterns)
 meco_dataset
 ```
 
-
-
-
-## Acknowledgement
-  - [R6](https://github.com/r-lib/R6), The
-    main class system in this package.
-  - [lefse python
-    script](https://bitbucket.org/biobakery/biobakery/wiki/lefse), The
-    main lefse codes are translated from **lefse python script**.
-  - [phyloseq](https://github.com/joey711/phyloseq), the idea of data
-    structures of microtable class in microeco comes from
-    `phyloseq-class` in package **phyloseq**.
-  - [microbiomeSeq](https://github.com/umerijaz/microbiomeSeq), 
-    the method that calculates the roles of nodes within- and among- modules connectivity is 
-    modified from the package **microbiomeSeq**.
-  - [microbiomeMarker](https://github.com/yiluheihei/microbiomeMarker), 
-    the method that plots the LEfSe cladogram is
-    modified from the package **microbiomeMarker**.
-
 ## References
-  - If the user use cal_spe_func function for the functional identification of prokaryotes or cal_FAPROTAX function in trans_func class, 
-    please also cite the original FAPROTAX database paper: 
-    Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507.
-  - If the user use cal_spe_func function for the functional identification of fungi,
-    please also cite the original FUNGuild database paper: 
-    Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
+  - Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507
+  - Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
     FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248.
-  - If the user use trans_nullmodel class, please also cite the original paper: 
-    Liu, C., Yao, M., Stegen, J. C., Rui, J., Li, J., & Li, X. (2017). Long-term nitrogen addition affects the phylogenetic turnover of soil microbial community responding to moisture pulse. Scientific Reports, 7(1), 17492. Journal Article.
-  - If the user use LefSe method in trans_diff class, please also cite the original paper:
-    Segata, N., Izard, J., Waldron, L., Gevers, D., Miropolsky, L., Garrett, W. S., & Huttenhower, C. (2011). Metagenomic biomarker discovery and explanation. Genome Biology, 12(6), R60.
+  - Põlme, S., Abarenkov, K., Henrik Nilsson, R. et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1–16 (2020). DOI: 10.1007/s13225-020-00466-2
+  - Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
+  - Wemheuer, F., Taylor, J.A., Daniel, R. et al. Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020). DOI: 10.1186/s40793-020-00358-7
+  - Liu, C., Yao, M., Stegen, J. C., Rui, J., Li, J., & Li, X. (2017). Long-term nitrogen addition affects the phylogenetic turnover of soil microbial community responding to moisture pulse. Scientific Reports, 7(1), 17492.
+  - Segata, N., Izard, J., Waldron, L., Gevers, D., Miropolsky, L., Garrett, W. S., & Huttenhower, C. (2011). Metagenomic biomarker discovery and explanation. Genome Biology, 12(6), R60.
   - Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: an R package for data mining in microbial community ecology, FEMS Microbiology Ecology, Volume 97, Issue 2, February 2021, fiaa255.
   - An, J., Liu, C., Wang, Q., Yao, M., Rui, J., Zhang, S., & Li, X. (2019). Soil bacterial community structure in Chinese wetlands. Geoderma, 337, 290–299.
-  - Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884.
   - Tackmann, J., Matias Rodrigues, J. F., & Mering, C. von. (2019). Rapid inference of direct interactions in large-scale ecological networks from heterogeneous microbial sequencing data. Cell Systems, 9(3), 286–296 e8.
   - White, J., Nagarajan, N., & Pop, M. (2009). Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Computational Biology, 5(4), e1000352. 
   - Kurtz ZD, Muller CL, Miraldi ER, Littman DR, Blaser MJ, Bonneau RA. Sparse and compositionally robust inference of microbial ecological networks. PLoS Comput Biol 2015; 11: e1004226. 
-
-
-
-
+  - McMurdie PJ, Holmes S (2013) phyloseq: An R Package for Reproducible Interactive Analysis and Graphics of Microbiome Census Data. PLOS ONE 8(4): e61217. 
+  - Paulson, J., Stine, O., Bravo, H. et al. Differential abundance analysis for microbial marker-gene surveys. Nat Methods 10, 1200–1202 (2013). DOI: 10.1038/nmeth.2658
+  - Deng Y, Jiang Y-H, Yang Y, He Z, Luo F, Zhou J. Molecular ecological network analyses. BMC bioinformatics 2012; 13: 113. 
+  - Oksanen J, Blanchet FG, Friendly M, Kindt R, Legendre P, McGlinn D, et al. Vegan: Community ecology package. 2019. 
+  - Picante: R tools for integrating phylogenies and ecology. Bioinformatics 2010; 26: 1463–1464. 
+  - [microbiomeSeq](https://github.com/umerijaz/microbiomeSeq)
+  - [microbiomeMarker](https://github.com/yiluheihei/microbiomeMarker)
 
 
 

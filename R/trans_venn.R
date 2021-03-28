@@ -67,6 +67,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			self$ratio <- ratio
 			self$otu_table <- abund
 			self$tax_table <- use_dataset$tax_table
+			message('The result is stored in object$venn_table and object$venn_count_abund !')
 		},
 		#' @description
 		#' Plot venn diagram.

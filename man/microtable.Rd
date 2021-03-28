@@ -153,7 +153,8 @@ class(dataset$beta_diversity)
   otu_table = NULL,
   sample_table = NULL,
   tax_table = NULL,
-  phylo_tree = NULL
+  phylo_tree = NULL,
+  rep_fasta = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -166,7 +167,9 @@ class(dataset$beta_diversity)
 
 \item{\code{tax_table}}{data.frame; default NULL; The taxonomic information table, rows are species, cols are taxonomic classes.}
 
-\item{\code{phylo_tree}}{phylo; default NULL; If provided, the phylogenetic tree can be used for some analysis, for example, phylogenetic diversity.}
+\item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree; read with read.tree function in ape package.}
+
+\item{\code{rep_fasta}}{list; default NULL; The representative sequences; read with read.fasta function in seqinr package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -176,10 +179,11 @@ an object of class "microtable" with the following components:
   \item{\code{sample_table}}{The sample information table.}
   \item{\code{otu_table}}{The OTU table.}
   \item{\code{tax_table}}{The taxonomic table.}
-  \item{\code{phylo_tree}}{The phylogenetic tree}
-  \item{\code{taxa_abund}}{default NULL; use cal_abund function to calculate}
-  \item{\code{alpha_diversity}}{default NULL; use cal_alphadiv function to calculate}
-  \item{\code{beta_diversity}}{default NULL; use cal_betadiv function to calculate}
+  \item{\code{phylo_tree}}{The phylogenetic tree.}
+  \item{\code{rep_fasta}}{The representative sequence.}
+  \item{\code{taxa_abund}}{default NULL; use cal_abund function to calculate.}
+  \item{\code{alpha_diversity}}{default NULL; use cal_alphadiv function to calculate.}
+  \item{\code{beta_diversity}}{default NULL; use cal_betadiv function to calculate.}
 }
 }
 \subsection{Examples}{

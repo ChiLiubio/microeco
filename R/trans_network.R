@@ -91,6 +91,7 @@ trans_network <- R6Class(classname = "trans_network",
 					cor_result <- list(cor = res_cor, p = res_p)
 				}
 				self$res_cor_p <- cor_result
+				message('The correlation result list is stored in object$res_cor_p !')
 			}else{
 				self$res_cor_p <- NULL
 			}
@@ -258,6 +259,7 @@ trans_network <- R6Class(classname = "trans_network",
 				network <- set_vertex_attr(network, "module", value = mod1)
 			}
 			self$res_network <- network
+			message('The result network is stored in object$res_network !')
 		},
 		#' @description
 		#' Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
@@ -280,6 +282,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_network_attr = function(){
 			self$res_network_attr <- private$network_attribute(self$res_network)
+			message('The result is stored in object$res_network_attr !')
 		},
 		#' @description
 		#' Calculate node properties.
@@ -304,6 +307,7 @@ trans_network <- R6Class(classname = "trans_network",
 			node_type$betweenness <- betweenness(network)[rownames(node_type)]
 			node_type$Abundance <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))[rownames(node_type)]
 			self$res_node_type <- node_type
+			message('The result is stored in object$res_node_type !')
 		},
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
@@ -336,6 +340,7 @@ trans_network <- R6Class(classname = "trans_network",
 			res_eigen <- do.call(cbind, res_eigen)
 			self$res_eigen <- res_eigen
 			self$res_eigen_expla <- res_eigen_expla
+			message('The result is stored in object$res_eigen and object$res_eigen_expla !')
 		},
 		#' @description
 		#' Plot the classification and importance of nodes.
@@ -403,6 +408,7 @@ trans_network <- R6Class(classname = "trans_network",
 				link_table_1 <- link_table[link_table[, 3] %in% "-", ]
 				self$res_sum_links_neg <- private$sum_link(taxa_table = taxa_table, link_table = link_table_1, taxa_level = taxa_level)
 			}
+			message('The result is stored in object$res_sum_links_pos and/or object$res_sum_links_neg !')
 		},
 		#' @description
 		#' Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.

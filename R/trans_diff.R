@@ -128,6 +128,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				rownames(imp_sort) <- imp_sort$Taxa
 				imp_sort$pvalue <- pvalue_sub[as.character(imp_sort$Taxa)]
 				self$res_rf <- imp_sort
+				message('The result is stored in object$res_rf !')
 			}
 			if(grepl("lefse", method, ignore.case = TRUE)){
 				class_taxa_median_sub <- lapply(res_class, function(x) x$med) %>% do.call(cbind, .) %>% .[, sel_taxa]
@@ -263,6 +264,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res1 <- cbind.data.frame(Taxa = rownames(res1), res1)
 				message("Finished, minimum LDA score: ", range(res1$LDA)[1], " maximum LDA score: ", range(res1$LDA)[2])
 				self$res_lefse <- res1
+				message('The lefse result is stored in object$res_lefse !')
 			}
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
 				if(grepl("lefse", method, ignore.case = TRUE)){
@@ -275,6 +277,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
 				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				self$res_abund <- res_abund
+				message('The abundance is stored in object$res_abund !')
 			}
 			if(grepl("metastat|mseq", method, ignore.case = TRUE)){
 				if(is.null(group_choose_paired)){
@@ -315,7 +318,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_metastat <- output
+				message('The metastat result is stored in object$res_metastat !')
 				self$res_metastat_group_matrix <- all_name
+				message('The metastat group information is stored in object$res_metastat_group_matrix !')
 			}
 			if(grepl("mseq", method, ignore.case = TRUE)){
 				if(!require(metagenomeSeq)){
@@ -362,7 +367,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_mseq <- output
+				message('The result is stored in object$res_mseq !')
 				self$res_mseq_group_matrix <- all_name
+				message('The group information is stored in object$res_mseq_group_matrix !')
 			}
 		},
 		#' @description

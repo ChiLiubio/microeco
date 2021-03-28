@@ -106,6 +106,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result %<>% `row.names<-`(.[,1]) %>% .[,-1]
 			}
 			self$res_alpha_diff <- compare_result
+			message('The result is stored in object$res_alpha_diff !')
 		},
 		#' @description
 		#' Plotting the alpha diveristy.

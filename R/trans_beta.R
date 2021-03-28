@@ -79,6 +79,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					outlist <- list(model = model, scores = combined)
 				}
 				self$res_ordination <- outlist
+				message('The ordination result is stored in object$res_ordination !')
 			}
 			self$ordination <- ordination
 		},
@@ -193,6 +194,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				self$res_manova <- private$paired_group_manova(sample_info_use = self$sample_table, use_matrix = use_matrix, 
 					group = self$group, measure = self$measure, permutations = permutations)
 			}
+			message('The result is stored in object$res_manova !')
 		},
 		#' @description
 		#' Transform sample distances within groups or between groups.
@@ -209,6 +211,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}else{
 				self$res_group_distance <- private$between_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
 			}
+			message('The result is stored in object$res_group_distance !')
 		},
 		#' @description
 		#' Plotting the distance between samples within or between groups.

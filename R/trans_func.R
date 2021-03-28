@@ -18,6 +18,7 @@ trans_func <- R6Class(classname = "trans_func",
 			self$tax_table <- dataset$tax_table
 			self$otu_table <- dataset$otu_table
 			self$sample_table <- dataset$sample_table
+			self$rep_fasta <- dataset$rep_fasta
 			# confirm the taxonomy automatically, for prokaryotes or fungi
 			for_what <- NA
 			if(!is.null(self$tax_table$Kingdom)){
@@ -205,6 +206,7 @@ trans_func <- R6Class(classname = "trans_func",
 				self$fungi_database <- fungi_database
 			}
 			self$res_spe_func <- otu_func_table
+			message('The functional table is stored in object$res_spe_func!')
 		},
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities or modules.
@@ -267,6 +269,7 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 			res_spe_func_perc %<>% t %>% as.data.frame %>% `colnames<-`(colnames(res_spe_func)) %>% .[, apply(., 2, sum) != 0]
 			self$res_spe_func_perc <- res_spe_func_perc
+			message('The result table is stored in object$res_spe_func_perc!')
 		},
 		#' @description
 		#' Show the basic information for a specific function of prokaryotes.
@@ -421,19 +424,345 @@ trans_func <- R6Class(classname = "trans_func",
 
 			x1 <- importQIIMEData(pathfilename)
 			self$tax4fun_KO <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = TRUE)
+			message('The KO abundance result is stored in object$tax4fun_KO!')
 			self$tax4fun_path <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = FALSE)
-		
+			message('The pathway abundance result is stored in object$tax4fun_path!')
+
 			if(keep_tem == F){
 				unlink(pathfilename, recursive = FALSE, force = TRUE)
 			}
 		},
 		#' @description
+		#' Predict functional potential of communities with Tax4Fun2 method.
+		#' please also cite: 
+		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020). <doi:10.1186/s40793-020-00358-7>
+		#'
+		#' @param blast_tool_path default NULL; the folder path, e.g. ncbi-blast-2.11.0+/bin ; blast tools folder downloaded from 
+		#'   "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.11.0+-x64-win64.tar.gz  for windows system; 
+		#'   if blast_tool_path is NULL, search the tools in the environmental path variable.
+		#' @param path_to_reference_data default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
+		#'   The directory must contain the Ref99NR/Ref100NR folder; 
+		#'   download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
+		#' @param path_to_temp_folder default "Tax4Fun2_prediction"; The temporary folder to store the logfile, intermediate file and result files.
+		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR" .
+		#' @param normalize_by_copy_number default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes. 
+		#' @param min_identity_to_reference default 97; the idenity threshold used for finding the nearest species.
+		#' @param use_uproc default TRUE; UProC was used to functionally anotate the genomes in the reference data.
+		#' @param num_threads default 1; the threads used in the blastn calculation.
+		#' @param normalize_pathways default FALSE; Different to Tax4Fun, when converting from KEGG functions to KEGG pathways, 
+		#' 	 Tax4Fun2 does not equally split KO gene abundances between pathways a functions is affiliated to. The full predicted abundance is affiliated to each pathway. 
+		#'   Use TRUE to split the abundances (default is FALSE).
+		#' @return res_tax4fun2_KO and res_tax4fun2_pathway in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
+		#' }
+		cal_tax4fun2 = function(
+			blast_tool_path = NULL,
+			path_to_reference_data = "Tax4Fun2_ReferenceData_v2",
+			path_to_temp_folder = "Tax4Fun2_prediction",
+			database_mode = 'Ref99NR',
+			normalize_by_copy_number = T,
+			min_identity_to_reference = 97, 
+			use_uproc = T,
+			num_threads = 1,
+			normalize_pathways = F
+			){
+			if(!dir.exists(path_to_temp_folder)){
+				stop(paste0("Temporay folder--", path_to_temp_folder, " is not existed! Please first create it using dir.create function!"))
+			}
+			if(!dir.exists(path_to_reference_data)){
+				stop(paste0("Tax4Fun2 ReferenceData folder--", path_to_temp_folder, " is not existed!"))
+			}
+			if(is.null(self$rep_fasta)){
+				stop("The rep_fasta is NULL in the trans_func object! Please check the fasta data!")
+			}
+			# first check whether blastn tool is available
+			if(is.null(blast_tool_path)){
+				blast_bin <- "blastn"
+			}else{
+				blast_bin <- file.path(blast_tool_path, "blastn")
+				if (tolower(Sys.info()[["sysname"]]) != "windows"){
+					system(paste("chmod +x", blast_bin))
+				}else{
+					blast_bin <- file.path(blast_tool_path, "blastn.exe")
+				}
+			}
+			res <- system(command = paste(blast_bin, "-help"), intern = T)
+			if(length(res) == 0){
+				blast_bin <- "blastn"
+				res <- system(command = paste(blast_bin, "-help"), intern = T)
+				if(length(res) == 0){
+					stop(paste0(blast_bin, " not found! Please check the file path!"))
+				}
+			}
+			# Choose which refernence data set is used
+			if(! database_mode %in% c("Ref99NR", "Ref100NR")){
+				stop('Database mode unknown! valid choices are Ref99NR, Ref100NR')
+			}else{
+				path_to_ref_db <- file.path(path_to_reference_data, paste0(database_mode, "/", database_mode,'.fasta'))
+				path_to_ref_dir <- file.path(path_to_reference_data, database_mode)
+			}
+			
+			self$res_tax4fun2_database_mode <- database_mode
+			message('database_mode is stored in object$res_tax4fun2_database_mode!')
+			self$res_tax4fun2_path_to_ref_dir <- path_to_ref_dir
+
+			if(!file.exists(path_to_ref_db)){
+				stop(paste("Reference database", path_to_ref_db, "not found!"))
+			}
+			# check whether the blastdb is available!
+			check_files <- paste0(database_mode, '.fasta.', c("ndb", "nhr", "nin", "not", "nsq", "ntf", "nto"))
+			check_files_path <- file.path(path_to_reference_data, paste0(database_mode, "/", check_files))
+			if(!all(file.exists(check_files_path))){
+				# use makeblastdb
+				if(is.null(blast_tool_path)){
+					makeblastdb_bin <- "makeblastdb"
+				}else{
+					makeblastdb_bin <- file.path(blast_tool_path, "makeblastdb")
+					if (tolower(Sys.info()[["sysname"]]) != "windows"){
+						system(paste("chmod +x", makeblastdb_bin))
+					}else{
+						makeblastdb_bin <- file.path(blast_tool_path, "makeblastdb.exe")
+					}
+				}
+				res <- system(command = paste(makeblastdb_bin, "-help"), intern = T)
+				if(length(res) == 0){
+					makeblastdb_bin <- "makeblastdb"
+					res <- system(command = paste(makeblastdb_bin, "-help"), intern = T)
+					if(length(res) == 0){
+						stop(paste0(makeblastdb_bin, " not found! Please check the file path!"))
+					}
+				}
+				# use refernence db
+				message('Generate blast reference database.')
+				cmd <- paste(makeblastdb_bin, '-dbtype nucl -in', path_to_ref_db)
+				if (tolower(Sys.info()[["sysname"]]) == "windows"){
+					system(cmd, show.output.on.console = F)
+				}else{
+					system(cmd, ignore.stdout = T, ignore.stderr = T)
+				}
+				message('Reference database finished.')
+			}
+			# write the fasta file
+			rep_fasta_path <- file.path(path_to_temp_folder, "rep_fasta.tmp.fasta")
+			seqinr::write.fasta(self$rep_fasta, names = names(self$rep_fasta), file.out = rep_fasta_path)
+			res_blast_path <- file.path(path_to_temp_folder, 'ref_blast.txt')
+			message('Blast start.')
+			cmd <- paste(blast_bin, '-db', path_to_ref_db, '-query', rep_fasta_path, '-evalue 1e-20 -max_target_seqs 100 -outfmt 6 -out', res_blast_path, '-num_threads', num_threads)
+			if (tolower(Sys.info()[["sysname"]]) == "windows"){
+				system(cmd, show.output.on.console = F)
+			}else{
+				system(cmd, ignore.stdout = T, ignore.stderr = T)
+			}
+			message('Blast finished')
+
+			# Write to log file
+			path_to_log_file = file.path(path_to_temp_folder, 'logfile.txt')
+			write(x = "RefBlast", file = path_to_log_file, append = F)
+			write(x = date(), file = path_to_log_file, append = T)
+			write(x = database_mode, file = path_to_log_file, append = T)
+			write(x = rep_fasta_path, file = path_to_log_file, append = T)
+
+			# filter redundant data
+			private$blastTableReducer(path_to_blast_file = res_blast_path)
+			message('Cleanup finished')
+
+			# parse file and make the prediction
+			write(x = "Functional prediction", file = path_to_log_file, append = T)
+			if(min_identity_to_reference < 90){
+				warning("Minimum identity of less than 90% will likly results in inaccurate predictions!")
+			}
+			message(paste0("Using minimum idenity cutoff of ", min_identity_to_reference, "% to nearest neighbor"))
+			ref_blast_result <- read.delim(res_blast_path, h = F)
+			ref_blast_result_reduced <- ref_blast_result[which(ref_blast_result$V3 >= min_identity_to_reference), 1:2]
+
+			# Reading and filtering the otu table
+			otu_table <- self$otu_table %>% tibble::rownames_to_column()
+			otu_table_reduced <- merge(x = ref_blast_result_reduced, y = otu_table, by.x = "V1", by.y = "rowname")[,-1]
+			otu_table_reduced_aggregated <- aggregate(x = otu_table_reduced[, -1, drop = FALSE], by = list(otu_table_reduced[,1]), sum)
+			message('otu_table_reduced_aggregated is stored in object$res_tax4fun2_otu_table_reduced_aggregated!')
+			self$res_tax4fun2_otu_table_reduced_aggregated <- otu_table_reduced_aggregated
+
+			# Write unknown fraction to log file
+			if((ncol(otu_table) - 1) == 1){
+				unknown_fraction1 = as.data.frame(round(1 - sum(ifelse(otu_table_reduced[,-1]>0,1,0)) / sum(ifelse(otu_table[,-1]>0,1,0)), digits = 5))
+				write(x = 'Unknown fraction (amount of otus unused in the prediction) for each sample:', file = path_to_log_file, append = T)
+				write.table(x = unknown_fraction1, file = path_to_log_file, append = T, quote = F, sep = ': ', row.names = T, col.names = F)
+				unknown_fraction2 = as.data.frame(round(1 - sum(otu_table_reduced_aggregated[,-1]) / sum(otu_table[,-1]), digits = 5))
+				write(x = 'Unknown fraction (amount of sequences unused in the prediction) for each sample:', file = path_to_log_file, append = T)
+				write.table(x = unknown_fraction2, file = path_to_log_file, append = T, quote = F, sep = ': ', row.names = T, col.names = F)
+			} else {
+				unknown_fraction1 = as.data.frame(round(1 - colSums(ifelse(otu_table_reduced[,-1]>0,1,0)) / colSums(ifelse(otu_table[,-1]>0,1,0)), digits = 5))
+				write(x = 'Unknown fraction (amount of otus unused in the prediction) for each sample:', file = path_to_log_file, append = T)
+				write.table(x = unknown_fraction1, file = path_to_log_file, append = T, quote = F, sep = ': ', row.names = T, col.names = F)
+				unknown_fraction2 = as.data.frame(round(1 - colSums(otu_table_reduced_aggregated[,-1]) / colSums(otu_table[,-1]), digits = 5))
+				write(x = 'Unknown fraction (amount of sequences unused in the prediction) for each sample:', file = path_to_log_file, append = T)
+				write.table(x = unknown_fraction2, file = path_to_log_file, append = T, quote = F, sep = ': ', row.names = T, col.names = F)
+			}
+
+			# normalize or not normalize is the question
+			n = 1
+			if(use_uproc) n = 3
+			if(normalize_by_copy_number) n = n + 1
+
+			# Generate reference profile
+			message('Generating reference profile')
+			reference_profile = NULL
+			for(reference_id in otu_table_reduced_aggregated$Group.1){
+				reference_file_path <- file.path(path_to_ref_dir, paste0(reference_id, '.tbl.gz'))
+				reference_file <- read.delim(file = reference_file_path)
+				reference_profile <- rbind(reference_profile, as.numeric(reference_file[, n]))
+			}
+			
+			self$res_tax4fun2_reference_profile <- reference_profile
+			message('Reference profile file is stored in object$res_tax4fun2_reference_profile!')
+			
+			# all the required KEGG files are stored in Tax4Fun2_KEGG Rdata
+			data("Tax4Fun2_KEGG", envir=environment())
+			ko_list <- Tax4Fun2_KEGG$ko_list
+			
+			# Calculate functional profiles sample-wise
+			message('Generating functional profile for samples')
+			functional_prediction = NULL
+			for(sample_num in 2:ncol(otu_table_reduced_aggregated)){
+				functional_prediction_sample <- reference_profile * as.numeric(otu_table_reduced_aggregated[, sample_num])
+				functional_prediction_sample <- colMeans(functional_prediction_sample)
+				functional_prediction_sample <- functional_prediction_sample / sum(functional_prediction_sample)
+				if(is.na(sum(functional_prediction_sample))){
+					functional_prediction_sample[1:nrow(ko_list)] <- 0
+				}
+				functional_prediction <- cbind(functional_prediction, functional_prediction_sample)
+			}
+
+			colnames(functional_prediction) <- names(otu_table)[2:ncol(otu_table_reduced_aggregated)]
+			functional_prediction_final <- data.frame(KO = ko_list$ko, functional_prediction, description = ko_list$description)
+			if(ncol(functional_prediction) >= 2) keep <- which(rowSums(functional_prediction) > 0)
+			if(ncol(functional_prediction) == 1) keep <- which(functional_prediction > 0)
+			if (length(keep) == 0){
+				stop("No functional prediction possible!\nEither no nearest neighbor found or your table is empty!")
+			}
+			functional_prediction_final <- functional_prediction_final[keep,]
+			write.table(x = functional_prediction_final, file = file.path(path_to_temp_folder, 'functional_prediction.txt'), append = F, quote = F, sep = "\t", row.names = F, col.names = T)
+			self$res_tax4fun2_KO <- functional_prediction_final
+			message('Result KO abundance is stored in object$res_tax4fun2_KO!')
+
+			# Converting the KO profile to a profile of KEGG pathways
+			message('Converting functions to pathways')
+			ko2ptw <- Tax4Fun2_KEGG$ko2ptw
+			if(normalize_pathways){
+				functional_prediction_norm <- functional_prediction / ko_list$pathway_count
+			}
+			pathway_prediction <- aggregate(x = functional_prediction[ko2ptw$nrow,], by = list(ko2ptw$ptw), sum)
+			if(ncol(pathway_prediction) >= 3){
+				col_sums <- colSums(pathway_prediction[,-1])
+				col_sums[col_sums == 0] <- 1
+				pathway_prediction[,-1] <- t(t(pathway_prediction[,-1]) / col_sums)
+				keep <- which(rowSums(pathway_prediction[,-1]) > 0)
+			} else {
+				pathway_prediction[,-1] <- t(t(pathway_prediction[,-1]) / sum(pathway_prediction[,-1]))
+				keep <- which(pathway_prediction[,2] > 0)
+			}
+			if(sum(pathway_prediction[,-1]) == 0) stop("Conversion to pathway failed!")
+			names(pathway_prediction) <- names(otu_table)
+			names(pathway_prediction)[1] <- 'pathway'
+
+			ptw_desc <- Tax4Fun2_KEGG$ptw_desc
+			pathway_prediction_final <- merge(pathway_prediction, ptw_desc)[keep,]
+			write.table(x = pathway_prediction_final, file = file.path(path_to_temp_folder, 'pathway_prediction.txt'), append = F, quote = F, sep = "\t", row.names = F, col.names = T)
+			self$res_tax4fun2_pathway <- pathway_prediction_final
+			message('Result pathway abundance is stored in object$res_tax4fun2_pathway!')
+		},
+		#' @description
+		#' Calculate (multi-) functional redundancy index (FRI) of prokaryotic community with Tax4Fun2 method.
+		#' This function is used to calculating aFRI and rFRI use the intermediate files generated by the function cal_tax4fun2().
+		#' please also cite: 
+		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020). <doi:10.1186/s40793-020-00358-7>
+		#'
+		#' @return res_tax4fun2_aFRI and res_tax4fun2_rFRI in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_tax4fun2_FRI()
+		#' }
+		cal_tax4fun2_FRI = function(){
+			if(is.null(self$res_tax4fun2_reference_profile) | is.null(self$res_tax4fun2_database_mode) | is.null(self$res_tax4fun2_path_to_ref_dir)){
+				stop("Please first run cal_tax4fun2()!")
+			}else{
+				reference_profile <- self$res_tax4fun2_reference_profile
+				database_mode <- self$res_tax4fun2_database_mode
+				path_to_ref_dir <- self$res_tax4fun2_path_to_ref_dir
+			}
+
+			path_to_ref_tree <- file.path(path_to_ref_dir, paste0(database_mode, ".tre"))
+			otu_table_reduced_aggregated <- self$res_tax4fun2_otu_table_reduced_aggregated
+			# Reading reference tree
+			reference_tree <- ape::read.tree(path_to_ref_tree)
+			distance_matrix <- cophenetic(reference_tree)
+
+			rownumber <- NULL
+			for(reference_id in otu_table_reduced_aggregated$Group.1){
+				rownumber <- c(rownumber, which(row.names(distance_matrix) == reference_id))
+			}
+			distance_matrix_reduced <- distance_matrix[rownumber,rownumber]
+			distance_matrix_mean <- mean(as.dist(distance_matrix))
+			distance_matrix_reduced_mean <- mean(as.dist(distance_matrix_reduced))
+			rm(distance_matrix)
+			
+			data("Tax4Fun2_KEGG", envir=environment())
+			ko_list <- Tax4Fun2_KEGG$ko_list
+
+			# Calculate functional redundancy sample-wise
+			abs_functional_redundancy_tab <- NULL
+			rel_functional_redundancy_tab <- NULL
+			for(sample_use in 2:ncol(otu_table_reduced_aggregated)){
+				print(paste('Calculate functional redundancy for sample', names(otu_table_reduced_aggregated[sample_use])))
+				functional_prediction_sample <- reference_profile * as.numeric(otu_table_reduced_aggregated[,sample_use])
+				functional_prediction_sample_mod <- ifelse(functional_prediction_sample>=1,1,0)
+
+				abs_functional_redundancy_sample <- NULL
+				rel_functional_redundancy_sample <- NULL
+				for(i in 1:nrow(ko_list))
+				{
+				  ko_count <- functional_prediction_sample_mod[,i]
+				  aFRI <- (mean(as.dist(distance_matrix_reduced * ko_count)) * (sum(ko_count) / length(ko_count))) / distance_matrix_mean
+				  rFRI <- (mean(as.dist(distance_matrix_reduced * ko_count)) * (sum(ko_count) / length(ko_count))) / distance_matrix_reduced_mean
+				  abs_functional_redundancy_sample <- c(abs_functional_redundancy_sample, aFRI)
+				  rel_functional_redundancy_sample <- c(rel_functional_redundancy_sample, rFRI)
+				}
+				abs_functional_redundancy_tab <- cbind(abs_functional_redundancy_tab, abs_functional_redundancy_sample)
+				rel_functional_redundancy_tab <- cbind(rel_functional_redundancy_tab, rel_functional_redundancy_sample)
+			}
+
+			abs_functional_redundancy_tab <- data.frame(abs_functional_redundancy_tab)
+			rel_functional_redundancy_tab <- data.frame(rel_functional_redundancy_tab)
+
+			colnames(abs_functional_redundancy_tab) <- names(otu_table)[2:ncol(otu_table_reduced_aggregated)]
+			colnames(rel_functional_redundancy_tab) <- names(otu_table)[2:ncol(otu_table_reduced_aggregated)]
+
+			abs_functional_redundancy_final <- data.frame(KO = ko_list$ko, abs_functional_redundancy_tab, description = ko_list$description)
+			rel_functional_redundancy_final <- data.frame(KO = ko_list$ko, rel_functional_redundancy_tab, description = ko_list$description)
+
+			self$res_tax4fun2_aFRI <- abs_functional_redundancy_final
+			message('Absolute functional redundancy is stored in object$res_tax4fun2_aFRI!')
+			self$res_tax4fun2_rFRI <- rel_functional_redundancy_final
+			message('Relative functional redundancy is stored in object$res_tax4fun2_rFRI!')
+		},
+		#' @description
 		#' Print the trans_func object.
 		print = function(){
 			cat("trans_func class:\n")
-			if(!is.null(self$env_data)){
-				cat(paste("otu_func_table have", nrow(self$otu_func_table), "rows and", ncol(self$otu_func_table), "columns\n"))
-				cat("\n")
+			cat(paste("An object for", self$for_what, "analysis.\n"))
+			if(!is.null(self$sample_table)){
+				cat("sample_table is available.\n")
+			}
+			if(!is.null(self$otu_table)){
+				cat("otu_table is available.\n")
+			}
+			if(!is.null(self$tax_table)){
+				cat("tax_table is available.\n")
+			}
+			if(!is.null(self$rep_fasta)){
+				cat("rep_fasta is available.\n")
 			}
 		}
 	),
@@ -510,7 +839,29 @@ trans_func <- R6Class(classname = "trans_func",
 					"short-distance_coarse", "short-distance_delicate", "unknown"),
 				"primary_photobiont" = c("chlorococcoid", "cyanobacterial", "trentepohlioid")
 			)
-		)
+		),
+		blastTableReducer = function(path_to_blast_file = '') {
+			if(file.size(path_to_blast_file) == 0) stop('Blast result file empty!')
+			id1 = ""
+			file_in = file(description = path_to_blast_file, open = "r")
+			file_out = file(description = paste0(path_to_blast_file, ".tmp"), open = "w")
+			while (TRUE) 
+			{
+			  line = readLines(con = file_in, n = 1)
+			  if (length(line) == 0) break
+			  id2 = strsplit(x = line, split = "\t", fixed = T)[[1]][1]
+			  if(id1 != id2)
+			  {
+				id1 = id2
+				write(x = line, file = file_out, append = T)
+			  }
+			}
+			close(file_in)
+			close(file_out)
+			# Remove old file and rename tmp file
+			file.remove(path_to_blast_file)
+			file.rename(from = paste0(path_to_blast_file, ".tmp"), to = path_to_blast_file)
+		}
 	),
 	lock_class = FALSE,
 	lock_objects = FALSE

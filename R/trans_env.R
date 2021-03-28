@@ -111,6 +111,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				self$res_rda <- rda(use_data ~ ., env_data)
 			}
+			message('The result is stored in object$res_rda !')
 		},
 		#' @description
 		#' transform RDA result for the following plotting.
@@ -169,6 +170,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			self$res_rda_trans = list(df_sites = df_sites, df_arrows = df_arrows, eigval = eigval, df_species = df_species, df_arrows_spe = df_arrows_spe)
+			message('The result list is stored in object$res_rda_trans !')
 		},
 		#' @description
 		#' plot RDA result.
@@ -282,6 +284,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				self$res_mantel <- res_mantel
 			}
+			message('The result is stored in object$res_mantel or object$res_mantel_partial !')
 		},
 		#' @description
 		#' Calculating the correlations between taxa abundance and environmental variables.
@@ -390,6 +393,7 @@ trans_env <- R6Class(classname = "trans_env",
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}
 			self$res_cor <- res
+			message('The correlation result is stored in object$res_cor !')
 			self$cor_method <- cor_method
 		},
 		#' @description

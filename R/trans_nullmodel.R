@@ -111,6 +111,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			trenic_matrix <- as.matrix(dis)[rownames(niche_matrix), rownames(niche_matrix)]
 			res_mantel_corr <- mantel.correlog(niche_matrix, trenic_matrix, break.pts = break.pts, cutoff = cutoff, ...)
 			self$res_mantel_corr <- res_mantel_corr
+			message('The result is stored in object$res_mantel_corr !')
 		},
 		#' @description
 		#' Plot mantel correlogram.
@@ -168,6 +169,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 			comm <- decostand(comm, method="total", MARGIN=1)
 			self$res_betampd <- private$betampd(comm = comm, dis = dis)
+			message('The result is stored in object$res_betampd !')
 		},
 		#' @description
 		#' Calculate betaMNTD. Faster than comdistnt in picante package.
@@ -186,6 +188,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 			comm <- self$comm
 			self$res_betamntd <- private$betamntd(comm = comm, dis = dis, abundance.weighted=abundance.weighted, exclude.conspecifics = exclude.conspecifics)
+			message('The result is stored in object$res_betamntd !')
 		},
 		#' @description
 		#' Calculate ses.betaMPD (betaNRI).
@@ -228,6 +231,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
 			self$res_ses_betampd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
+			message('The result is stored in object$res_ses_betampd !')
 		},
 		#' @description
 		#' Calculate ses.betaMNTD (betaNTI).
@@ -267,6 +271,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
 			self$res_ses_betamntd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
+			message('The result is stored in object$res_ses_betamntd !')
 		},
 		#' @description
 		#' Calculate rcbray.
@@ -292,6 +297,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x > x[length(x)])/length(x)})
 			beta_obs_z <- (beta_obs_z - 0.5) * 2
 			self$res_rcbray <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
+			message('The result is stored in object$res_rcbray !')
 		},
 		#' @description
 		#' Infer the processes according to ses.betaMNTD ses.betaMPD and rcbray.
@@ -319,6 +325,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				stop("RCbray not calculated!")
 			}
 			self$res_process <- private$percen_proc(ses_phylo_beta = ses_phylo_beta, ses_comm = ses_comm)
+			message('The result is stored in object$res_process !')
 		}
 	),
 	private = list(
