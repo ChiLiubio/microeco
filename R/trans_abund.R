@@ -13,9 +13,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param taxrank default "Phylum"; taxonomic rank.
 		#' @param show default 0; the relative abundance threshold.
 		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low.
-		#' @param groupmean default NULL; for calculating mean abundance, select a group column in sample_table .
+		#' @param groupmean default NULL; for calculating mean abundance, select a group column name in sample_table .
 		#' @param use_percentage default TRUE; showing the abundance percentage.
-		#' @param order_x default NULL; character vector; if x xais is ordered, input the samples or group vector or the column name in sample table.
 		#' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
 		#' @return abund_data and other file for plotting. 
 		#' @examples
@@ -23,8 +22,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' data(dataset)
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
 		#' }
-		initialize = function(dataset = NULL, taxrank = "Phylum", show = 0, ntaxa = 10, groupmean = NULL, use_percentage = TRUE, order_x = NULL, 
-			input_taxaname = NULL){
+		initialize = function(
+			dataset = NULL, 
+			taxrank = "Phylum", 
+			show = 0, 
+			ntaxa = 10, 
+			groupmean = NULL, 
+			use_percentage = TRUE, 
+			input_taxaname = NULL)
+			{
 			self$sample_table <- dataset$sample_table
 			self$taxrank <- taxrank
 			self$use_percentage <- use_percentage
@@ -52,13 +58,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 					dplyr::summarise(Abundance = mean(Abundance)) %>% 
 					as.data.frame
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
-			}
-			if(!is.null(order_x)){
-				if(length(order_x) == 1){
-					abund_data$Sample %<>% factor(., levels = unique(self$sample_table[, order_x]))
-				} else {
-					abund_data$Sample %<>% factor(., levels = order_x)
-				}
 			}
 			abund_data$Taxonomy %<>% as.character
 			# sort according to the abundance
@@ -91,6 +90,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			} else {
 				ylabname <- paste0("Relative abundance (", self$taxrank," > ", show*100, "%)")
 			}
+			abund_data <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
 			self$ylabname <- ylabname
 			self$abund_data <- abund_data
 			self$use_taxanames <- use_taxanames
@@ -101,8 +101,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
-		#' @param facet default NULL; if using facet, providing the group name.
-		#' @param order_facet NULL; vector, used to order the facet.
+		#' @param facet default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".
+		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
+		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
+		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
 		#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
 		#' @param use_alluvium default FALSE; whether add alluvium plot
 		#' @param clustering default FALSE; whether order samples by the clustering
@@ -127,6 +129,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			others_color = "grey90",
 			facet = NULL,
 			order_facet = NULL,
+			x_axis_name = NULL,
+			order_x = NULL,
 			barwidth = NULL,
 			use_alluvium = FALSE,
 			clustering = FALSE,
@@ -141,13 +145,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 			base_font = NULL,
 			ylab_title = NULL
 			){
-			plot_data <- self$abund_data		
-			if(!is.null(facet)){
-				plot_data <- suppressWarnings(dplyr::left_join(plot_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
-				if(!is.null(order_facet)){
-					plot_data[, facet] %<>% factor(., levels = order_facet)
-				}
-			}
+			plot_data <- self$abund_data
+			
+			# order x axis samples and facet
+			plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
+
 			if(use_alluvium){
 				bar_type <- "notfull"
 			}
@@ -165,8 +167,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(clustering){
 				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance") %>% 
 					`row.names<-`(.[,1]) %>% .[, -1]
-				order_x <- hclust(dist(data_clustering)) %>% {.$labels[.$order]} %>% as.character
-				plot_data$Sample %<>% factor(., levels = order_x)
+				order_x_clustering <- hclust(dist(data_clustering)) %>% {.$labels[.$order]} %>% as.character
+				plot_data$Sample %<>% factor(., levels = order_x_clustering)
 			}
 			if(use_alluvium){
 				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy", color = "Taxonomy",  weight = "Abundance", 
@@ -221,6 +223,114 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p <- p + guides(fill=guide_legend(title=self$taxrank))
 			if(use_alluvium){
 			p <- p + guides(color = guide_legend(title=self$taxrank))
+			}
+			p
+		},
+		#' @description
+		#' Plot the heatmap with the object of trans_abund Class.
+		#'
+		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
+		#' @param facet default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".
+		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
+		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
+		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
+		#' @param withmargin default TRUE; whether retain the tile margin.
+		#' @param plot_numbers default FALSE; whether plot the number in heatmap.
+		#' @param plot_text_size default 4; If plot_numbers TRUE, text size in plot.
+		#' @param plot_breaks default NULL; The legend breaks.
+		#' @param margincolor default "white"; If withmargin TRUE, use this as the margin color.
+		#' @param plot_colorscale default "log10"; color scale.
+		#' @param min_abundance default .01; the minimum abundance percentage in plot.
+		#' @param max_abundance default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.
+		#' @param strip_text default 11; facet text size.
+		#' @param xtext_size default 10; x axis text size.
+		#' @param ytext_size default 11; y axis text size.
+		#' @param xtext_keep default TRUE; whether retain x text.
+		#' @param xtitle_keep default TRUE; whether retain x title.
+		#' @param grid_clean default TRUE; whether remove grid lines.
+		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param base_font default NULL; font in the plot.
+		#' @return ggplot2 plot.
+		#' @examples
+		#' \donttest{
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
+		#' t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
+		#' }
+		plot_heatmap = function(
+			use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
+			facet = NULL,
+			order_facet = NULL,
+			x_axis_name = NULL,
+			order_x = NULL,
+			withmargin = TRUE,
+			plot_numbers = FALSE,
+			plot_text_size = 4,
+			plot_breaks = NULL,
+			margincolor = "white",
+			plot_colorscale = "log10",
+			min_abundance = 0.01,
+			max_abundance = NULL,
+			strip_text = 11,
+			xtext_size = 10,
+			ytext_size = 11,
+			xtext_keep = TRUE,
+			xtitle_keep = TRUE,
+			grid_clean = TRUE,
+			xtext_type_hor = TRUE,
+			base_font =NULL
+			){
+			plot_data <- self$abund_data
+			# order x axis samples and facet
+			plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
+
+			if (is.null(min_abundance)){
+				min_abundance <- ifelse(min(plot_data$Abundance) > 0.001, min(plot_data$Abundance), 0.001)
+			}
+			if (is.null(max_abundance)){
+				max_abundance <- max(plot_data$Abundance)
+			}
+			plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
+			plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
+
+			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
+			if(withmargin == T){
+				p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
+			}else{
+				p <- p + geom_tile(aes(fill = Abundance))
+			}
+			p <- p + theme(axis.text.y = element_text(size = 12)) + theme(plot.margin = unit(c(0.3, 0.3, 0.3, 0.3), "cm"))
+
+			if (plot_numbers == T){
+				abund <- plot_data
+				abund$Abundance <- round(abund$Abundance, 1)
+				p <- p + geom_text(data = abund, size = plot_text_size, colour = "grey10")  
+			}
+			if (is.null(plot_breaks)){
+				p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
+			}else{
+				p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
+					limits = c(min_abundance, max_abundance))
+			}
+			if(!is.null(order_facet)) {
+				plot_data[, facet] <- factor(plot_data[, facet], levels = unique(order_facet))
+			}
+			if(!is.null(facet)){
+				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+				p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
+			}
+			p <- p + labs(x = "", y = "", fill = "% Read\nAbundance")
+			if (!is.null(ytext_size)){
+				p <- p + theme(axis.text.y = element_text(size = ytext_size))
+			}
+			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
+			if(!xtext_keep) {
+				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
+			}
+			if(grid_clean){
+				p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
+			}			
+			if(!is.null(base_font)){
+				p <- p + theme(text=element_text(family=base_font))
 			}
 			p
 		},
@@ -318,109 +428,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p
 		},
 		#' @description
-		#' Plot the heatmap with the object of trans_abund Class.
-		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-		#' @param withmargin default TRUE; whether retain the tile margin.
-		#' @param plot_numbers default FALSE; whether plot the number in heatmap.
-		#' @param plot_text_size default 4; If plot_numbers TRUE, text size in plot.
-		#' @param plot_breaks default NULL; The legend breaks.
-		#' @param margincolor default "white"; If withmargin TRUE, use this as the margin color.
-		#' @param plot_colorscale default "log10"; color scale.
-		#' @param min_abundance default .01; the minimum abundance percentage in plot.
-		#' @param max_abundance default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.
-		#' @param facet default NULL; if using facet, providing the group name.
-		#' @param order_facet default NULL; if reorder facet, provide the vector.
-		#' @param strip_text default 11; facet text size.
-		#' @param xtext_size default 10; x axis text size.
-		#' @param ytext_size default 11; y axis text size.
-		#' @param xtext_keep default TRUE; whether retain x text.
-		#' @param xtitle_keep default TRUE; whether retain x title.
-		#' @param grid_clean default TRUE; whether remove grid lines.
-		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-		#' @param base_font default NULL; font in the plot.
-		#' @return ggplot2 plot.
-		#' @examples
-		#' \donttest{
-		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
-		#' t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
-		#' }
-		plot_heatmap = function(
-			use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
-			withmargin = TRUE,
-			plot_numbers = FALSE,
-			plot_text_size = 4,
-			plot_breaks = NULL,
-			margincolor = "white",
-			plot_colorscale = "log10",
-			min_abundance = 0.01,
-			max_abundance = NULL,
-			facet = NULL,
-			order_facet = NULL,
-			strip_text = 11,
-			xtext_size = 10,
-			ytext_size = 11,
-			xtext_keep = TRUE,
-			xtitle_keep = TRUE,
-			grid_clean = TRUE,
-			xtext_type_hor = TRUE,
-			base_font =NULL
-			){
-			plot_data <- self$abund_data
-			if (is.null(min_abundance)){
-				min_abundance <- ifelse(min(plot_data$Abundance) > 0.001, min(plot_data$Abundance), 0.001)
-			}
-			if (is.null(max_abundance)){
-				max_abundance <- max(plot_data$Abundance)
-			}
-			plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
-			plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
-			if(!is.null(facet)){
-				plot_data <- suppressWarnings(dplyr::left_join(plot_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
-			}
-			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
-			if(withmargin == T){
-				p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
-			}else{
-				p <- p + geom_tile(aes(fill = Abundance))
-			}
-			p <- p + theme(axis.text.y = element_text(size = 12)) + theme(plot.margin = unit(c(0.3, 0.3, 0.3, 0.3), "cm"))
-
-			if (plot_numbers == T){
-				abund <- plot_data
-				abund$Abundance <- round(abund$Abundance, 1)
-				p <- p + geom_text(data = abund, size = plot_text_size, colour = "grey10")  
-			}
-			if (is.null(plot_breaks)){
-				p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
-			}else{
-				p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
-					limits = c(min_abundance, max_abundance))
-			}
-			if(!is.null(order_facet)) {
-				plot_data[, facet] <- factor(plot_data[, facet], levels = unique(order_facet))
-			}
-			if(!is.null(facet)){
-				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
-				p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
-			}
-			p <- p + labs(x = "", y = "", fill = "% Read\nAbundance")
-			if (!is.null(ytext_size)){
-				p <- p + theme(axis.text.y = element_text(size = ytext_size))
-			}
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
-			if(!xtext_keep) {
-				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
-			}
-			if(grid_clean){
-				p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
-			}			
-			if(!is.null(base_font)){
-				p <- p + theme(text=element_text(family=base_font))
-			}
-			p
-		},
-		#' @description
 		#' Plot pie chart with the object of trans_abund Class.
 		#'
 		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.
@@ -470,6 +477,32 @@ trans_abund <- R6Class(classname = "trans_abund",
 		}
 		),
 	private = list(
+		adjust_axis_facet = function(plot_data, x_axis_name, order_x, facet, order_facet){
+			# order x axis samples and facet
+			if(!is.null(x_axis_name)){
+				colnames(plot_data)[colnames(plot_data) == "Sample"] <- "Sample_rownames_before"
+				if(! x_axis_name %in% colnames(plot_data)){
+					stop(paste("No", x_axis_name, "found in the column names of sample_table!"))
+				}else{
+					colnames(plot_data)[colnames(plot_data) == x_axis_name] <- "Sample"
+				}
+			}
+			if(!is.null(order_x)){
+				if(length(order_x) == 1){
+					stop("This may be wrong. Only one sample used to order the samples!")
+				}else{
+					plot_data$Sample %<>% factor(., levels = order_x)
+				}
+			}
+			if(!is.null(order_facet)){
+				if(is.null(facet)){
+					stop("You provide order_facet. It is necessary to provide facet!")
+				}else{
+					plot_data[, facet] %<>% factor(., levels = order_facet)
+				}
+			}
+			plot_data
+		},
 		ggplot_xtext_type = function(xtext_type_hor, xtext_size){
 			if(xtext_type_hor == T){
 				theme(axis.text.x = element_text(colour = "black", size = xtext_size))

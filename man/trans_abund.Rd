@@ -28,20 +28,20 @@ t1$plot_bar(facet = "Group", xtext_keep = FALSE)
 }
 
 ## ------------------------------------------------
-## Method `trans_abund$plot_box`
-## ------------------------------------------------
-
-\donttest{
-t1$plot_box(group = "Group")
-}
-
-## ------------------------------------------------
 ## Method `trans_abund$plot_heatmap`
 ## ------------------------------------------------
 
 \donttest{
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
 t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
+}
+
+## ------------------------------------------------
+## Method `trans_abund$plot_box`
+## ------------------------------------------------
+
+\donttest{
+t1$plot_box(group = "Group")
 }
 
 ## ------------------------------------------------
@@ -58,8 +58,8 @@ t1$plot_pie(facet_nrow = 1)
 \itemize{
 \item \href{#method-new}{\code{trans_abund$new()}}
 \item \href{#method-plot_bar}{\code{trans_abund$plot_bar()}}
-\item \href{#method-plot_box}{\code{trans_abund$plot_box()}}
 \item \href{#method-plot_heatmap}{\code{trans_abund$plot_heatmap()}}
+\item \href{#method-plot_box}{\code{trans_abund$plot_box()}}
 \item \href{#method-plot_pie}{\code{trans_abund$plot_pie()}}
 \item \href{#method-print}{\code{trans_abund$print()}}
 \item \href{#method-clone}{\code{trans_abund$clone()}}
@@ -77,7 +77,6 @@ t1$plot_pie(facet_nrow = 1)
   ntaxa = 10,
   groupmean = NULL,
   use_percentage = TRUE,
-  order_x = NULL,
   input_taxaname = NULL
 )}\if{html}{\out{</div>}}
 }
@@ -93,11 +92,9 @@ t1$plot_pie(facet_nrow = 1)
 
 \item{\code{ntaxa}}{default 10; how many taxa will be used, ordered by abundance from high to low.}
 
-\item{\code{groupmean}}{default NULL; for calculating mean abundance, select a group column in sample_table .}
+\item{\code{groupmean}}{default NULL; for calculating mean abundance, select a group column name in sample_table .}
 
 \item{\code{use_percentage}}{default TRUE; showing the abundance percentage.}
-
-\item{\code{order_x}}{default NULL; character vector; if x xais is ordered, input the samples or group vector or the column name in sample table.}
 
 \item{\code{input_taxaname}}{default NULL; if some taxa are selected, input taxa names.}
 }
@@ -130,6 +127,8 @@ Plot the bar plot with the object of trans_abund Class.
   others_color = "grey90",
   facet = NULL,
   order_facet = NULL,
+  x_axis_name = NULL,
+  order_x = NULL,
   barwidth = NULL,
   use_alluvium = FALSE,
   clustering = FALSE,
@@ -155,9 +154,13 @@ Plot the bar plot with the object of trans_abund Class.
 
 \item{\code{others_color}}{default "grey90"; the color for "others" taxa.}
 
-\item{\code{facet}}{default NULL; if using facet, providing the group name.}
+\item{\code{facet}}{default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".}
 
-\item{\code{order_facet}}{NULL; vector, used to order the facet.}
+\item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").}
+
+\item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
+
+\item{\code{order_x}}{default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").}
 
 \item{\code{barwidth}}{default NULL; bar width, see width in \code{\link{geom_bar}}.}
 
@@ -194,6 +197,100 @@ ggplot2 plot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_bar(facet = "Group", xtext_keep = FALSE)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_heatmap"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_heatmap}{}}}
+\subsection{Method \code{plot_heatmap()}}{
+Plot the heatmap with the object of trans_abund Class.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
+  use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
+    "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"),
+  facet = NULL,
+  order_facet = NULL,
+  x_axis_name = NULL,
+  order_x = NULL,
+  withmargin = TRUE,
+  plot_numbers = FALSE,
+  plot_text_size = 4,
+  plot_breaks = NULL,
+  margincolor = "white",
+  plot_colorscale = "log10",
+  min_abundance = 0.01,
+  max_abundance = NULL,
+  strip_text = 11,
+  xtext_size = 10,
+  ytext_size = 11,
+  xtext_keep = TRUE,
+  xtitle_keep = TRUE,
+  grid_clean = TRUE,
+  xtext_type_hor = TRUE,
+  base_font = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+
+\item{\code{facet}}{default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".}
+
+\item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").}
+
+\item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
+
+\item{\code{order_x}}{default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").}
+
+\item{\code{withmargin}}{default TRUE; whether retain the tile margin.}
+
+\item{\code{plot_numbers}}{default FALSE; whether plot the number in heatmap.}
+
+\item{\code{plot_text_size}}{default 4; If plot_numbers TRUE, text size in plot.}
+
+\item{\code{plot_breaks}}{default NULL; The legend breaks.}
+
+\item{\code{margincolor}}{default "white"; If withmargin TRUE, use this as the margin color.}
+
+\item{\code{plot_colorscale}}{default "log10"; color scale.}
+
+\item{\code{min_abundance}}{default .01; the minimum abundance percentage in plot.}
+
+\item{\code{max_abundance}}{default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.}
+
+\item{\code{strip_text}}{default 11; facet text size.}
+
+\item{\code{xtext_size}}{default 10; x axis text size.}
+
+\item{\code{ytext_size}}{default 11; y axis text size.}
+
+\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+
+\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
+
+\item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
+
+\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+
+\item{\code{base_font}}{default NULL; font in the plot.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
+t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 }
 }
 \if{html}{\out{</div>}}
@@ -274,94 +371,6 @@ ggplot2 plot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_box(group = "Group")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_heatmap"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_heatmap}{}}}
-\subsection{Method \code{plot_heatmap()}}{
-Plot the heatmap with the object of trans_abund Class.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
-  use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
-    "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"),
-  withmargin = TRUE,
-  plot_numbers = FALSE,
-  plot_text_size = 4,
-  plot_breaks = NULL,
-  margincolor = "white",
-  plot_colorscale = "log10",
-  min_abundance = 0.01,
-  max_abundance = NULL,
-  facet = NULL,
-  order_facet = NULL,
-  strip_text = 11,
-  xtext_size = 10,
-  ytext_size = 11,
-  xtext_keep = TRUE,
-  xtitle_keep = TRUE,
-  grid_clean = TRUE,
-  xtext_type_hor = TRUE,
-  base_font = NULL
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
-
-\item{\code{withmargin}}{default TRUE; whether retain the tile margin.}
-
-\item{\code{plot_numbers}}{default FALSE; whether plot the number in heatmap.}
-
-\item{\code{plot_text_size}}{default 4; If plot_numbers TRUE, text size in plot.}
-
-\item{\code{plot_breaks}}{default NULL; The legend breaks.}
-
-\item{\code{margincolor}}{default "white"; If withmargin TRUE, use this as the margin color.}
-
-\item{\code{plot_colorscale}}{default "log10"; color scale.}
-
-\item{\code{min_abundance}}{default .01; the minimum abundance percentage in plot.}
-
-\item{\code{max_abundance}}{default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.}
-
-\item{\code{facet}}{default NULL; if using facet, providing the group name.}
-
-\item{\code{order_facet}}{default NULL; if reorder facet, provide the vector.}
-
-\item{\code{strip_text}}{default 11; facet text size.}
-
-\item{\code{xtext_size}}{default 10; x axis text size.}
-
-\item{\code{ytext_size}}{default 11; y axis text size.}
-
-\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
-
-\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
-
-\item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
-
-\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
-
-\item{\code{base_font}}{default NULL; font in the plot.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-ggplot2 plot.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
-t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 }
 }
 \if{html}{\out{</div>}}

@@ -41,13 +41,21 @@ microtable <- R6Class(classname = "microtable",
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric vector! Please check the otu_table and try again.")
 			}else{
-				self$otu_table <- otu_table			
+				otu_table <- otu_table[apply(otu_table, 1, sum) > 0, ]
+				otu_table <- otu_table[, apply(otu_table, 2, sum) > 0, drop = FALSE]
+				self$otu_table <- otu_table
 			}
 			if(is.null(sample_table)){
-				message("No sample_table provided, automatically use colnames of otu_table to create it.")
+				message("No sample_table provided, automatically use colnames of otu_table to create it!")
 				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% `row.names<-`(.$SampleID)
 			}else{
 				self$sample_table <- sample_table
+			}
+			# check whether phylogenetic tree is rooted
+			if(!is.null(phylo_tree)){
+				if(!ape::is.rooted(phylo_tree)){
+					phylo_tree <- ape::multi2di(phylo_tree)
+				}
 			}
 			self$tax_table <- tax_table
 			self$phylo_tree <- phylo_tree
