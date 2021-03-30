@@ -62,12 +62,15 @@ See the detailed package tutorial (https://chiliubio.github.io/microeco/) and th
 If the tutorial website can not be opened because of bad internet connection, you can download the microeco-master.zip and open the index.html to see the tutorial 
 using your browser directly.
 If you want to run the codes in the tutorial and README completely, you need to install some additional packages, see the following **Notes** part.
-It is notable that there are some features that exist in other microbiome analysis software or platforms and currently not implemented in microeco package.
-In the microeco package, we provide the functions for the conversions between microtable object and phyloseq object.
-Beside the data conversion for the basic object, we suggest that users save the intermediate files in the operations of other objects in microeco package and
+Beside the demonstration in the tutorial, users can also save the intermediate files in each object and
 apply those files to other tools according to the format requirement.
-The main files stored in the objects of microeco package is the commonly used data.frame format.
-So the intermediate and result files are easily saved and checked for the use of other tools in microbial ecology.
+Main files stored in the objects of microeco package is the commonly used data.frame format.
+So the intermediate and result files are easily saved and used for other tools in microbial ecology.
+Contructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2 and phyloseq) 
+can be easily achieved using the package file2meco (https://github.com/ChiLiubio/file2meco).
+There are some important features and approaches that exist in other microbiome analysis software/platforms and currently not implemented in microeco package.
+More approaches for the file conversion will be provided in the package file2meco.
+
 
 ## Citation
 Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: an R package for data mining in microbial community ecology, 
