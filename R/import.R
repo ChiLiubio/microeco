@@ -4,7 +4,6 @@
 #' @import ggplot2
 #' @import grid
 #' @import scales
-#' @import grid
 #' @import RColorBrewer
 #' @importFrom magrittr %<>%
 #' @importFrom magrittr %>%

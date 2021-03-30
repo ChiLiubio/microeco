@@ -318,7 +318,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 				p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
 			}
-			p <- p + labs(x = "", y = "", fill = "% Read\nAbundance")
+			p <- p + labs(x = "", y = "", fill = "% Relative\nAbundance")
 			if (!is.null(ytext_size)){
 				p <- p + theme(axis.text.y = element_text(size = ytext_size))
 			}

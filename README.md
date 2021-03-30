@@ -346,116 +346,15 @@ If you want to change the output plot, you can also assign the output a name and
 Each data table used for plotting is stored in the object and can be downloaded for the personalized analysis and plotting.
 Of course, you can also directly modify the function or class to reload them.
 
-## Read QIIME files
-In this part, we first show how to construct the object of microtable class using the raw OTU file from QIIME.
-
-```r
-# ape package used for phylogenetic tree reading
-library(ape)
-library(magrittr)
-# use the raw data files stored inside the package
-otu_file_path <- system.file("extdata", "otu_table_raw.txt", package="microeco")
-# the example sample table is csv style
-sample_file_path <- system.file("extdata", "sample_info.csv", package="microeco")
-# phylogenetic tree
-phylo_file_path <- system.file("extdata", "rep_phylo.tre", package="microeco")
-# load microeco and qiimer, if qiimer is not installed, see Tax4Fun part to install qiimer package
-library(microeco)
-library(qiimer)
-# read and parse otu_table_raw.txt; this file does not have the first commented line, so we use commented = FALSE
-otu_raw_table <- read_qiime_otu_table(otu_file_path, commented=FALSE)
-# obtain the otu table data.frame
-otu_table_1 <- as.data.frame(otu_raw_table[[3]])
-colnames(otu_table_1) <- unlist(otu_raw_table[[1]])
-# obtain the taxonomic table  data.frame
-taxonomy_table_1 <- as.data.frame(split_assignments(unlist(otu_raw_table[[4]])))
-# read sample metadata table, data.frame, row.names = 1 set rownames
-sample_info <- read.csv(sample_file_path, row.names = 1, stringsAsFactors = FALSE)
-# read the phylogenetic tree
-phylo_tree <- read.tree(phylo_file_path)
-# check whether the tree is rooted, if unrooted, transform to rooted
-if(!is.rooted(phylo_tree)){
-	phylo_tree <- multi2di(phylo_tree)
-}
-# make the taxonomic table clean, this is very important
-taxonomy_table_1 %<>% tidy_taxonomy
-# create a microtable object
-dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, tax_table = taxonomy_table_1, phylo_tree = phylo_tree)
-# for other operations, see the tutorial (https://chiliubio.github.io/microeco/) and the help documentations
-# the class documentation include the function links, see the microtable class, input:
-?microtable
-# if you want to use Tax4Fun2 approach, you need read the representative sequences and add it to the microtable object.
-# this is a test file
-rep_fasta_path <- system.file("extdata", "rep.fna", package="microeco")
-rep_fasta <- seqinr::read.fasta(rep_fasta_path)
-dataset <- microtable$new(sample_table = sample_info, otu_table = otu_table_1, tax_table = taxonomy_table_1, phylo_tree = phylo_tree, rep_fasta = rep_fasta)
-```
+## Transform files from Other tools into microtable object
+Previous descriptions on how to construct microtable object from QIIME, QIIME2 and phyloseq have been moved to the package file2meco (https://github.com/ChiLiubio/file2meco)
+The package file2meco is designed to transform files from some tools/platforms into microtable object.
 
 
-
-## Read QIIME2 files
-We provide a function qiimed2meco() to convert QIIME2 file to microtable object directly.
-If you want to run the codes, first download the QIIME2 data files from https://docs.qiime2.org/2020.8/tutorials/pd-mice/
-
-
-```r
-# Please first install qiime2R from github, see https://github.com/jbisanz/qiime2R
-libraray(qiime2R)
-library(magrittr)
-qiimed2meco <- function(ASV_data, sample_data, taxonomy_data, phylo_tree = NULL){
-	# Read ASV data
-	ASV <- as.data.frame(read_qza(ASV_data)$data)
-	#  Read metadata
-	metadata <- read_q2metadata(sample_data)
-	rownames(metadata) <- as.character(metadata[, 1])
-	# Read taxonomy table
-	taxa_table <- read_qza(taxonomy_data)
-	taxa_table <- parse_taxonomy(taxa_table$data)
-	# Make the taxonomic table clean, this is very important.
-	taxa_table %<>% tidy_taxonomy
-	# Read phylo tree
-	if(!is.null(phylo_tree)){
-		phylo_tree <- read_qza(phylo_tree)$data
-	}
-	dataset <- microtable$new(sample_table = metadata, tax_table = taxa_table, otu_table = ASV, phylo_tree = phylo_tree)
-	dataset
-}
-# first download QIIME2 files from https://docs.qiime2.org/2020.8/tutorials/pd-mice/
-library(microeco)
-meco_dataset <- qiimed2meco(ASV_data = "dada2_table.qza", sample_data = "sample-metadata.tsv", taxonomy_data = "taxonomy.qza", phylo_tree = "tree.qza")
-meco_dataset
-```
-
-## sample_table
+## sample_table in microtable
 The rownames of sample_table are used for selecting samples/groups in all the related operations in the package.
 Before you create microtable object, make sure that the rownames of sample_table are the sample names.
 
-## Conversion between microtable and phyloseq
-We provide two functions meco2phyloseq() and phyloseq2meco() for the conversion between microtable object and phyloseq object (phyloseq package).
-
-```r
-# Please first install phyloseq
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install("phyloseq")
-```
-
-```r
-# from microtable to phyloseq object
-library(microeco)
-library(phyloseq)
-data("dataset")
-physeq <- meco2phyloseq(dataset)
-physeq
-```
-
-```r
-# from phyloseq to microtable object
-library(phyloseq)
-library(microeco)
-data("GlobalPatterns")
-meco_dataset <- phyloseq2meco(GlobalPatterns)
-meco_dataset
-```
 
 ## References
   - Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507
