@@ -25,6 +25,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			alpha_data %<>% .[, !grepl("^se", colnames(.))]
 			alpha_data <- reshape2::melt(alpha_data, id.vars = "Sample")
 			colnames(alpha_data) <- c("Sample", "Measure", "Value")
+			alpha_data <- dplyr::left_join(alpha_data, rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
 			if(!is.null(order_x)){
 				if(length(order_x == 1)){
 					alpha_data$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
@@ -32,13 +33,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					alpha_data$Sample %<>% factor(., levels = order_x)
 				}
 			}
-			alpha_data <- dplyr::left_join(alpha_data, rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
 			if(!is.null(group)){
 				self$alpha_stat <- microeco:::summarySE_inter(alpha_data, measurevar = "Value", groupvars = c(self$group, "Measure"))
+				message('The group statistics are stored in object$alpha_stat !')
 			}else{
 				self$alpha_stat <- NULL
 			}			
 			self$alpha_data <- alpha_data
+			message('The transformed diversity data is stored in object$alpha_data !')
 		},
 		#' @description
 		#' Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
@@ -178,10 +180,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						combn(., 2) %>% 
 						{.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter, x)))), drop = FALSE]} %>% 
 						{lapply(seq_len(ncol(.)), function(x) .[, x])}
-#					p <- p + stat_compare_signif(comparisons = comparisons_list, method = pair_compare_method, map_signif_level = map_signif_level)
-					p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, method = pair_compare_method, 
-						tip.length=0.01, label = "p.signif", symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), 
-						symbols = c("****", "***", "**", "*", "ns")))
+					# 
+					p <- p + ggpubr::stat_compare_means(
+							comparisons = comparisons_list,
+							method = pair_compare_method, 
+							tip.length=0.01,
+							label = "p.signif",
+							symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns")))
 				}
 			}
 			p <- p + ylab(measure) + xlab("") + theme(legend.position="none")

@@ -141,7 +141,3 @@ NULL
 #' @usage data(taxonomy_table_ITS)
 NULL
 
-
-
-
-

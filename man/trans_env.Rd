@@ -152,7 +152,7 @@ Redundancy analysis (RDA) based on the rda function in vegan package.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rda in object.
+res_rda, res_rda_R2, res_rda_terms and res_rda_axis in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

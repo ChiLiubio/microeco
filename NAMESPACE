@@ -2,9 +2,7 @@
 
 export(clone)
 export(dropallfactors)
-export(meco2phyloseq)
 export(microtable)
-export(phyloseq2meco)
 export(tidy_taxonomy)
 export(trans_abund)
 export(trans_alpha)
