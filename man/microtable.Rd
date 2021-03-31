@@ -150,7 +150,7 @@ class(dataset$beta_diversity)
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$new(
-  otu_table = NULL,
+  otu_table,
   sample_table = NULL,
   tax_table = NULL,
   phylo_tree = NULL,
@@ -161,7 +161,7 @@ class(dataset$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame; default NULL; necessary; The species or OTU table, rows are species, cols are samples.}
+\item{\code{otu_table}}{data.frame; necessary; The species or OTU table, rows are species, cols are samples.}
 
 \item{\code{sample_table}}{data.frame; default NULL; The sample information table, rows are samples, cols are sample metadata.}
 
@@ -311,9 +311,19 @@ None, Object of microtable itself cleaned up.
 \subsection{Method \code{cal_abund()}}{
 Calculate the taxonomic abundance at each taxonomic ranks.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(select_cols = NULL, rel = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{select_cols}}{default NULL; numeric vector or character vector of colnames of tax_table; used to select columns to merge and calculate abundances.
+This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
+
+\item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 taxa_abund in object.
 }

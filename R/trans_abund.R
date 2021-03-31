@@ -13,8 +13,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param taxrank default "Phylum"; taxonomic rank.
 		#' @param show default 0; the relative abundance threshold.
 		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low.
-		#' @param groupmean default NULL; for calculating mean abundance, select a group column name in sample_table .
+		#' @param groupmean default NULL; for calculating mean abundance, select a group column name in sample_table.
 		#' @param use_percentage default TRUE; showing the abundance percentage.
+		#' @param delete_full_prefix default TRUE; whether delete the prefix and the character in front of them.
+		#' @param delete_part_prefix default TRUE; whether only delete the prefix.
+		#' @param prefix default NULL; character string; used when delete_full_prefix = T or delete_part_prefix = T; 
+		#'   default reprensents using the "letter+__", e.g. "k__" for Phylum level.
 		#' @param input_taxaname default NULL; if some taxa are selected, input taxa names.
 		#' @return abund_data and other file for plotting. 
 		#' @examples
@@ -27,7 +31,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 			taxrank = "Phylum", 
 			show = 0, 
 			ntaxa = 10, 
-			groupmean = NULL, 
+			groupmean = NULL,
+			delete_full_prefix = TRUE,
+			delete_part_prefix = FALSE,
+			prefix = NULL,
 			use_percentage = TRUE, 
 			input_taxaname = NULL)
 			{
@@ -46,18 +53,32 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(any(grepl("__$", abund_data$Taxonomy))){
 				abund_data$Taxonomy[grepl("__$", abund_data$Taxonomy)] <- paste0(abund_data$Taxonomy[grepl("__$", abund_data$Taxonomy)],"unidentified")
 			}
-			abund_data$Taxonomy %<>% gsub(paste0(".*", tolower(substr(self$taxrank, 1, 1)), "__(.*)"), "\\1", .)
-			abund_data %<>% dplyr::group_by_("Taxonomy", "Sample") %>% 
-				dplyr::summarise(Abundance = sum(Abundance)) %>% 
-				as.data.frame
+			if(delete_full_prefix == T | delete_part_prefix == T){
+				if(is.null(prefix)){
+					prefix <- paste0(tolower(substr(self$taxrank, 1, 1)), "__")
+				}
+				if(delete_part_prefix == T){
+					delete_full_prefix <- FALSE
+				}
+				if(delete_full_prefix == T){
+					abund_data$Taxonomy %<>% gsub(paste0(".*", prefix, "(.*)"), "\\1", .)
+				}else{
+					abund_data$Taxonomy %<>% gsub(prefix, "", .)
+				}
+			}
+			abund_data %<>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
+				dplyr::summarise(Abundance = sum(Abundance)) %>%
+				as.data.frame(stringsAsFactors = FALSE)
 			if(!is.null(groupmean)){
 				abund_data$Sample %<>% as.character
 				mdf <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
 				message(paste0(groupmean, " column is used to calculate mean abundance."))
-				abund_data <- dplyr::group_by_(mdf, "Taxonomy", groupmean) %>% 
+				abund_data <- mdf %>% dplyr::group_by(!!! syms(c("Taxonomy", groupmean))) %>% 
 					dplyr::summarise(Abundance = mean(Abundance)) %>% 
 					as.data.frame
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
+			}else{
+				abund_data <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
 			}
 			abund_data$Taxonomy %<>% as.character
 			# sort according to the abundance
@@ -90,7 +111,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			} else {
 				ylabname <- paste0("Relative abundance (", self$taxrank," > ", show*100, "%)")
 			}
-			abund_data <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
 			self$ylabname <- ylabname
 			self$abund_data <- abund_data
 			self$use_taxanames <- use_taxanames
@@ -338,7 +358,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' Plot the box plot with the object of trans_abund Class.
 		#'
 		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-		#' @param group default NULL; sample table column name.
+		#' @param group default NULL; column name of sample table to show abundance across groups.
 		#' @param show_point default FALSE; whether show points in plot.
 		#' @param point_color default "black"; If show_point TRUE; use the color
 		#' @param point_size default 3; If show_point TRUE; use the size
@@ -380,11 +400,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			plot_data <- self$abund_data
 			plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
-			if(!is.null(group)){
-				plot_data <- suppressWarnings(dplyr::left_join(plot_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
-				plot_data <- plot_data[, c("Taxonomy", group, "Abundance")]
-				colnames(plot_data) <- c("Taxonomy", "Sample", "Abundance")
-			}
+
 			plot_data$Taxonomy %<>% factor(., levels = self$use_taxanames)
 
 			p <- ggplot(plot_data, aes_string(x = "Taxonomy", y = "Abundance")) 
@@ -396,14 +412,14 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + geom_boxplot(color = use_colors[1], ...)
 			} else {
 				if(boxfill == T){
-					p <- p + geom_boxplot(aes(color = Sample, fill = Sample), ...)
+					p <- p + geom_boxplot(aes_string(color = group, fill = group), ...)
 					p <- p + scale_fill_manual(values = use_colors)
 					p <- p + scale_color_manual(values = use_colors) + guides(color = FALSE)
 					## Change the default middle line
 					dat <- ggplot_build(p)$data[[1]]
 					p <- p + geom_segment(data=dat, aes(x=xmin, xend=xmax, y=middle, yend=middle), colour = middlecolor, size=middlesize)
 				} else {	 
-					p <- p + geom_boxplot(aes(color = Sample), ...) + scale_color_manual(values = use_colors)
+					p <- p + geom_boxplot(aes_string(color = group), ...) + scale_color_manual(values = use_colors)
 				}
 			}
 			if(show_point == T){

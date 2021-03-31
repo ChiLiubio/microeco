@@ -76,6 +76,9 @@ t1$plot_pie(facet_nrow = 1)
   show = 0,
   ntaxa = 10,
   groupmean = NULL,
+  delete_full_prefix = TRUE,
+  delete_part_prefix = FALSE,
+  prefix = NULL,
   use_percentage = TRUE,
   input_taxaname = NULL
 )}\if{html}{\out{</div>}}
@@ -92,7 +95,14 @@ t1$plot_pie(facet_nrow = 1)
 
 \item{\code{ntaxa}}{default 10; how many taxa will be used, ordered by abundance from high to low.}
 
-\item{\code{groupmean}}{default NULL; for calculating mean abundance, select a group column name in sample_table .}
+\item{\code{groupmean}}{default NULL; for calculating mean abundance, select a group column name in sample_table.}
+
+\item{\code{delete_full_prefix}}{default TRUE; whether delete the prefix and the character in front of them.}
+
+\item{\code{delete_part_prefix}}{default TRUE; whether only delete the prefix.}
+
+\item{\code{prefix}}{default NULL; character string; used when delete_full_prefix = T or delete_part_prefix = T; 
+default reprensents using the "letter+__", e.g. "k__" for Phylum level.}
 
 \item{\code{use_percentage}}{default TRUE; showing the abundance percentage.}
 
@@ -330,7 +340,7 @@ Plot the box plot with the object of trans_abund Class.
 \describe{
 \item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
 
-\item{\code{group}}{default NULL; sample table column name.}
+\item{\code{group}}{default NULL; column name of sample table to show abundance across groups.}
 
 \item{\code{show_point}}{default FALSE; whether show points in plot.}
 
