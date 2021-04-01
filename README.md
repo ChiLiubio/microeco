@@ -1,6 +1,8 @@
 # microeco
 An R package for data mining in microbial community ecology
 
+![](https://img.shields.io/badge/Release-Ver0.3.3-blue.svg) ![](https://img.shields.io/badge/Test-Ver0.3.4-red.svg)
+
 ## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
 the increasing data amount and complexity make the community data analysis and management a challenge.
@@ -349,9 +351,9 @@ If you want to change the output plot, you can also assign the output a name and
 Each data table used for plotting is stored in the object and can be downloaded for the personalized analysis and plotting.
 Of course, you can also directly modify the function or class to reload them.
 
-## Transform files from Other tools into microtable object
+## Files from other tools to microtable object
 Previous descriptions on how to construct microtable object from QIIME, QIIME2 and phyloseq have been moved to the package file2meco (https://github.com/ChiLiubio/file2meco)
-The package file2meco is designed to transform files from some tools/platforms into microtable object.
+The package file2meco is designed to transform files from other tools/platforms into microtable object.
 
 
 ## sample_table in microtable
