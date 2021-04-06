@@ -174,8 +174,13 @@ trans_abund <- R6Class(classname = "trans_abund",
 				bar_type <- "notfull"
 			}
 			if(bar_type == "full"){
-				plot_data$Taxonomy[!plot_data$Taxonomy %in% self$use_taxanames] <- "Others"
-				plot_data$Taxonomy %<>% factor(., levels = rev(c(self$use_taxanames, "Others")))
+				# make sure whether taxonomy info are all in selected use_taxanames in case of special data
+				if(!all(plot_data$Taxonomy %in% self$use_taxanames)){
+					plot_data$Taxonomy[!plot_data$Taxonomy %in% self$use_taxanames] <- "Others"
+					plot_data$Taxonomy %<>% factor(., levels = rev(c(self$use_taxanames, "Others")))
+				}else{
+					plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
+				}
 			}else{
 				plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
 				plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
@@ -183,7 +188,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
 			bar_colors_use <- use_colors[1:length(unique(plot_data$Taxonomy))]
-			if(any(grepl("Others", as.character(plot_data$Taxonomy)))) bar_colors_use[length(bar_colors_use)] <- others_color
+			if(any(grepl("Others", as.character(plot_data$Taxonomy)))){
+				bar_colors_use[length(bar_colors_use)] <- others_color
+			}
 			if(clustering){
 				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance") %>% 
 					`row.names<-`(.[,1]) %>% .[, -1]

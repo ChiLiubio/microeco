@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 0.3.4
+Version: 0.4.0
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre", "cph"), email = "liuchi0426@126.com"),
               person("Minjie", "Yao", role = c("aut", "cph"), email = "yaomj@fafu.edu.cn"),
               person("Xiangzhen", "Li", role = "aut", email = "lixz@cib.ac.cn"),
@@ -17,7 +17,7 @@ Suggests: reshape2, GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agr
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2021-03-03
+Packaged: 2021-04-06
 Repository: CRAN
-Date/Publication: 2021-03-03
+Date/Publication: 2021-04-06
 RoxygenNote: 7.1.1

@@ -197,12 +197,17 @@ microtable <- R6Class(classname = "microtable",
 		#' @param select_cols default NULL; numeric vector or character vector of colnames of tax_table; used to select columns to merge and calculate abundances.
 		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
 		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.
+		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in tax_table. Very useful when multiple mapping info exist.
+		#' @param split_by default "&&"; Separator delimiting collapsed values; only used when split_group == TRUE; see sep in separate_rows function.
+		#' @param split_column default NULL; character vector or list; only used when split_group == TRUE; character vector: 
+		#'     fixed column or columns used for the splitting in tax_table in each abundance calculation; 
+		#'     list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
 		#' @return taxa_abund in object.
 		#' @examples
 		#' \donttest{
 		#' dataset$cal_abund()
 		#' }
-		cal_abund = function(select_cols = NULL, rel = TRUE){
+		cal_abund = function(select_cols = NULL, rel = TRUE, split_group = FALSE, split_by = "&&", split_column = NULL){
 			taxa_abund = list()
 			if(is.null(select_cols)){
 				select_cols <- 1:ncol(self$tax_table)
@@ -215,9 +220,28 @@ microtable <- R6Class(classname = "microtable",
 					}
 				}
 			}
+			if(split_group){
+				if(is.null(split_column)){
+					stop("Spliting rows by one or more columns require split_column parameter! Please set split_column and try again!")
+				}
+			}
 			for(i in seq_along(select_cols)) {
 				taxrank <- colnames(self$tax_table)[select_cols[i]]
-				taxa_abund[[taxrank]] <- private$transform_data_proportion(self, columns = select_cols[1:i], rel = rel)
+				# assign the columns used for the splitting.
+				if(!is.null(split_column)){
+					if(is.list(split_column)){
+						use_split_column <- split_column[[i]]
+					}else{
+						use_split_column <- split_column
+					}
+				}
+				taxa_abund[[taxrank]] <- private$transform_data_proportion(
+											self, 
+											columns = select_cols[1:i], 
+											rel = rel, 
+											split_group = split_group, 
+											split_by = split_by, 
+											split_column = use_split_column)
 			}
 			self$taxa_abund <- taxa_abund
 			message('The result is stored in object$taxa_abund.')
@@ -482,14 +506,24 @@ microtable <- R6Class(classname = "microtable",
 		}
 		),
 	private = list(
-		transform_data_proportion = function(input, columns, rel){
+		transform_data_proportion = function(input, columns, rel, split_group = FALSE, split_by = "&&", split_column){
 			sampleinfo <- input$sample_table
 			abund <- input$otu_table
 			tax <- input$tax_table
 			tax <- tax[, columns, drop=FALSE]
+			# split rows to multiple rows if multiple correspondence
+			if(split_group){
+				merge_abund <- cbind.data.frame(tax, abund)
+				split_merge_abund <- tidyr::separate_rows(merge_abund, all_of(split_column), sep = split_by)
+				new_tax <- split_merge_abund[, columns, drop = FALSE]
+				new_abund <- split_merge_abund[, (ncol(tax) + 1):(ncol(merge_abund)), drop = FALSE]
+				abund1 <- cbind.data.frame(Display = apply(new_tax, 1, paste, collapse="|"), new_abund)
+			}else{
+				abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse="|"), abund)
+			}
 			# first transform table to long format
 			# then sum abundance by sample and taxonomy
-			abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse="|"), abund) %>% 
+			abund1 <- abund1 %>% 
 				data.table() %>% 
 				data.table::melt(id.vars = "Display", value.name= "Abundance", variable.name = "Sample") %>%
 				.[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 

@@ -311,7 +311,13 @@ None, Object of microtable itself cleaned up.
 \subsection{Method \code{cal_abund()}}{
 Calculate the taxonomic abundance at each taxonomic ranks.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(select_cols = NULL, rel = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(
+  select_cols = NULL,
+  rel = TRUE,
+  split_group = FALSE,
+  split_by = "&&",
+  split_column = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -321,6 +327,14 @@ Calculate the taxonomic abundance at each taxonomic ranks.
 This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
 
 \item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.}
+
+\item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in tax_table. Very useful when multiple mapping info exist.}
+
+\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only used when split_group == TRUE; see sep in separate_rows function.}
+
+\item{\code{split_column}}{default NULL; character vector or list; only used when split_group == TRUE; character vector: 
+fixed column or columns used for the splitting in tax_table in each abundance calculation; 
+list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).}
 }
 \if{html}{\out{</div>}}
 }
