@@ -122,6 +122,10 @@ Plotting the alpha diveristy.
   measure = "Shannon",
   group = NULL,
   add_letter = FALSE,
+  use_boxplot = TRUE,
+  boxplot_color = TRUE,
+  boxplot_add = "jitter",
+  order_x_mean = TRUE,
   pair_compare = FALSE,
   pair_compare_filter = "",
   pair_compare_method = "wilcox.test",
@@ -144,9 +148,17 @@ Plotting the alpha diveristy.
 
 \item{\code{add_letter}}{default FALSE; If TRUE, the letters of duncan test will be added in the plot.}
 
+\item{\code{use_boxplot}}{default TRUE; TRUE: boxplot, FALSE：mean_se plot.}
+
+\item{\code{boxplot_color}}{default TRUE; TRUE: use color_values, FALSE: use "black".}
+
+\item{\code{boxplot_add}}{default "jitter"; points type, see the add parameter in \code{\link{ggpubr::ggboxplot}}.}
+
+\item{\code{order_x_mean}}{default FALSE; whether order x axis by the means of groups from large to small.}
+
 \item{\code{pair_compare}}{default FALSE; whether perform paired comparisons.}
 
-\item{\code{pair_compare_filter}}{default ""; groups that will be removed.}
+\item{\code{pair_compare_filter}}{default ""; groups that need to be removed in the comparisons.}
 
 \item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
 
@@ -158,7 +170,7 @@ Plotting the alpha diveristy.
 
 \item{\code{base_font}}{default "sans", font in the plot.}
 
-\item{\code{...}}{parameters pass to ggpubr::ggboxplot.}
+\item{\code{...}}{parameters pass to \code{\link{ggpubr::ggboxplot}}.}
 }
 \if{html}{\out{</div>}}
 }

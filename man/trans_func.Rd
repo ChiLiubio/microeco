@@ -78,7 +78,6 @@ t1$cal_tax4fun2_FRI()
 \item \href{#method-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
 \item \href{#method-show_prok_func}{\code{trans_func$show_prok_func()}}
 \item \href{#method-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
-\item \href{#method-cal_FAPROTAX}{\code{trans_func$cal_FAPROTAX()}}
 \item \href{#method-cal_tax4fun}{\code{trans_func$cal_tax4fun()}}
 \item \href{#method-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
 \item \href{#method-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
@@ -262,30 +261,6 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_FAPROTAX"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_FAPROTAX}{}}}
-\subsection{Method \code{cal_FAPROTAX()}}{
-Predict functional potential of communities using FAPROTAX.
-please also cite the original FAPROTAX paper: 
-Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_FAPROTAX(keep_tem = TRUE, Ref_folder = "./FAPROTAX_1.2.1")}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.}
-
-\item{\code{Ref_folder}}{default "./FAPROTAX_1.2.1"; see http://www.loucalab.com/archive/FAPROTAX}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-res_FAPROTAX in object.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_tax4fun"></a>}}

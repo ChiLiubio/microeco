@@ -360,38 +360,6 @@ trans_func <- R6Class(classname = "trans_func",
 			g1
 		},
 		#' @description
-		#' Predict functional potential of communities using FAPROTAX.
-		#' please also cite the original FAPROTAX paper: 
-		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
-		#'
-		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu_table_for_FAPROTAX.txt in local place.
-		#' @param Ref_folder default "./FAPROTAX_1.2.1"; see http://www.loucalab.com/archive/FAPROTAX
-		#' @return res_FAPROTAX in object.
-		cal_FAPROTAX = function(keep_tem = TRUE, Ref_folder = "./FAPROTAX_1.2.1") {
-			message("This is FAPROTAX database 1.2.1 with python 2.7. The newer versions may exist in http://www.loucalab.com/archive/FAPROTAX ")
-			otu_file <- self$otu_table
-			tax_file <- self$tax_table
-			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
-			tax_file <- apply(tax_file, 1, function(x){paste0(x, collapse = ";")})
-			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
-			# save to local place
-			pathfilename <- "otu_table_for_FAPROTAX"
-			pathfilename <- tempfile(pathfilename, fileext = ".txt")
-			message("writing the otu_table_for_FAPROTAX to temporary file ", pathfilename, " ...")
-			write.table(otu_file, pathfilename, sep = "\t", row.names = FALSE, quote = FALSE)
-			code_path <- Ref_folder
-			use_command <- paste0("python ", code_path, "/collapse_table.py -i ", pathfilename, " -o ", "FAPROTAX_prediction.tsv -g ", 
-				code_path, "/FAPROTAX.txt -d taxonomy --omit_columns 0 --column_names_are_in last_comment_line -f")
-			message("run python to predict...")
-			system(use_command)
-			message("save prediction result in FAPROTAX_prediction.tsv ...")
-			self$res_FAPROTAX <- read.delim("FAPROTAX_prediction.tsv", check.names = FALSE, row.names = 1)
-			if(keep_tem == F){
-				message("remove intermediate file otu_table_for_FAPROTAX.txt ...")
-				unlink(pathfilename, recursive = FALSE, force = TRUE)
-			}
-		},
-		#' @description
 		#' Predict functional potential of communities using tax4fun.
 		#' please also cite: Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). 
 		#' Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884. <doi:10.1093/bioinformatics/btv287>

@@ -37,7 +37,7 @@ Open RStudio...Tools...Global Options...Packages, select the appropriate mirror 
 
 ## Install microeco
 
-Install microeco from github (beta version).
+Install the latest microeco from github.
 This is the **best** way as there are some minor improvements here compared to the version in CRAN.
 
 ```r
@@ -53,7 +53,7 @@ If the installation from github is failed because of the bad internet, download 
 devtools::install_local("microeco-master.zip")
 ```
 
-It is OK to install microeco from CRAN directly. There may be some update delay in the CRAN version.
+It is also good to install the microeco from CRAN directly. There may be some update delay in the CRAN version.
 
 ```r
 install.packages("microeco")
@@ -323,19 +323,19 @@ Downlaod Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzS
 Uncompress all the folders. The final folders should be like these structures:
 
 blast tools:  
-  \-\-ncbi-blast-2.11.0+  
-  \-\-\-\-bin  
-  \-\-\-\-\-\-blastn.exe  
-  \-\-\-\-\-\-makeblastdb.exe  
-  \-\-\-\-\-\-......  
+　\-\-ncbi-blast-2.11.0+  
+　\-\-\-\-bin  
+　\-\-\-\-\-\-blastn.exe  
+　\-\-\-\-\-\-makeblastdb.exe  
+　\-\-\-\-\-\-......  
 
 Ref99NR/Ref100NR:  
-  \-\-Tax4Fun2_ReferenceData_v2  
-  \-\-\-\-Ref99NR  
-  \-\-\-\-\-\-otu000001.tbl.gz  
-  \-\-\-\-\-\-......  
-  \-\-\-\-\-\-Ref99NR.fasta  
-  \-\-\-\-\-\-Ref99NR.tre  
+　\-\-Tax4Fun2_ReferenceData_v2  
+　\-\-\-\-Ref99NR  
+　\-\-\-\-\-\-otu000001.tbl.gz  
+　\-\-\-\-\-\-......  
+　\-\-\-\-\-\-Ref99NR.fasta  
+　\-\-\-\-\-\-Ref99NR.tre  
 
 The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be required in the trans_func$cal_tax4fun2() function.
 
