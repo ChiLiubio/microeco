@@ -443,7 +443,7 @@ trans_func <- R6Class(classname = "trans_func",
 				stop(paste0("Tax4Fun2 ReferenceData folder--", path_to_temp_folder, " is not existed!"))
 			}
 			if(is.null(self$rep_fasta)){
-				stop("The rep_fasta is NULL in the trans_func object! Please check the fasta data!")
+				stop("The rep_fasta is missing in your dataset object! The fasta file is necessary in Tax4Fun2! Use help(microtable) to see the rep_fasta description!")
 			}
 			# first check whether blastn tool is available
 			if(is.null(blast_tool_path)){

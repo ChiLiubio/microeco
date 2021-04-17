@@ -342,6 +342,11 @@ The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be requir
 ```r
 # seqinr should be installed for reading and writing fasta file
 install.packages("seqinr", dependencies = TRUE)
+# Now we show how to read the fasta file
+# see https://github.com/ChiLiubio/file2meco if you do not have installed file2meco
+rep_fasta_path <- system.file("extdata", "rep.fna", package="file2meco")
+rep_fasta <- seqinr::read.fasta(rep_fasta_path)
+# then see the help document of microtable class about the rep_fasta in microtable$new().
 ```
 
 ## Plotting
