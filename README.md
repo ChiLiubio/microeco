@@ -323,8 +323,8 @@ Downlaod Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzS
 Uncompress all the folders. The final folders should be like these structures:
 
 blast tools:  
-　\-\-ncbi-blast-2.11.0+  
-　\-\-\-\-bin  
+　├─ ncbi-blast-2.11.0+  
+　\|-\-\-\-bin  
 　\-\-\-\-\-\-blastn.exe  
 　\-\-\-\-\-\-makeblastdb.exe  
 　\-\-\-\-\-\-......  
