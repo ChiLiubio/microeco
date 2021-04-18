@@ -323,19 +323,19 @@ Downlaod Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzS
 Uncompress all the folders. The final folders should be like these structures:
 
 blast tools:  
-　\|\-\-\-\- ncbi-blast-2.11.0+  
-　\|---- bin  
-　|---- blastn.exe  
-　\|\-\-\-\-\-\-makeblastdb.exe  
-　\-\-\-\-\-\-......  
+　|-- ncbi-blast-2.11.0+  
+　　|---- bin  
+　　　|------ blastn.exe  
+　　　|------ makeblastdb.exe  
+　　　|------ ......  
 
 Ref99NR/Ref100NR:  
-　\-\-Tax4Fun2_ReferenceData_v2  
-　\-\-\-\-Ref99NR  
-　\-\-\-\-\-\-otu000001.tbl.gz  
-　\-\-\-\-\-\-......  
-　\-\-\-\-\-\-Ref99NR.fasta  
-　\-\-\-\-\-\-Ref99NR.tre  
+　|-- Tax4Fun2_ReferenceData_v2  
+　　|---- Ref99NR  
+　　　|------ otu000001.tbl.gz  
+　　　|------ ......  
+　　　|------ Ref99NR.fasta  
+　　　|------ Ref99NR.tre  
 
 The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be required in the trans_func$cal_tax4fun2() function.
 
