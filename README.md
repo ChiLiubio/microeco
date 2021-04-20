@@ -192,34 +192,14 @@ We show several packages that are published in CRAN and not installed automatica
 <td align="center">plot the taxonomic tree</td>
 </tr>
 <tr class="even">
-<td align="center">mice</td>
-<td align="center">trans_env class</td>
-<td align="center">Insert missing value in env data</td>
-</tr>
-<tr class="odd">
-<td align="center">phyloseq</td>
-<td align="center">meco2phyloseq()</td>
-<td align="center">convert between microtable and phyloseq</td>
-</tr>
-<tr class="even">
-<td align="center">qiime2R</td>
-<td align="center">qiimed2meco()</td>
-<td align="center">QIIME2 files to microtable object</td>
-</tr>
-<tr class="odd">
 <td align="center">igraph</td>
 <td align="center">trans_network class</td>
 <td align="center">network related operations</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="center">rgexf</td>
 <td align="center">save_network</td>
 <td align="center">save network with gexf style</td>
-</tr>
-<tr class="odd">
-<td align="center">RJSONIO</td>
-<td align="center">trans_func</td>
-<td align="center">the dependency of biom package</td>
 </tr>
 <tr class="even">
 <td align="center">ggalluvial</td>
@@ -238,7 +218,7 @@ Then, if you want to install these packages or some of them, you can do like thi
 ```r
 # If a package is not installed, it will be installed from CRAN.
 # First select the packages of interest
-packages <- c("reshape2", "GUniFrac", "MASS", "ggpubr", "randomForest", "ggdendro", "ggrepel", "agricolae", "gridExtra", "picante", "pheatmap", "igraph", "rgexf", "RJSONIO", "ggalluvial")
+packages <- c("reshape2", "MASS", "GUniFrac", "ggpubr", "randomForest", "ggdendro", "ggrepel", "agricolae", "gridExtra", "picante", "pheatmap", "igraph", "rgexf", "ggalluvial")
 # Now check or install
 lapply(packages, function(x) {
 	if(!require(x, character.only = TRUE)) {
@@ -304,6 +284,7 @@ Tax4Fun is an R package used for the prediction of functional potential of proka
 
 1. install Tax4Fun package
 ```r
+install.packages("RJSONIO")
 install.packages(system.file("extdata", "biom_0.3.12.tar.gz", package="microeco"), repos = NULL, type = "source")
 install.packages(system.file("extdata", "qiimer_0.9.4.tar.gz", package="microeco"), repos = NULL, type = "source")
 install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microeco"), repos = NULL, type = "source")
