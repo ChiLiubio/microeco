@@ -768,7 +768,7 @@ trans_func <- R6Class(classname = "trans_func",
 				"Guild" = c("Bryophyte Parasite", "Dung Saprotroph", "Ectomycorrhizal", "Fungal Parasite", "Leaf Saprotroph", "Plant Parasite",
 					"Wood Saprotroph", "Animal Pathogen", "Endophyte", "Plant Pathogen", "Lichen Parasite", "Litter Saprotroph", "Soil Saprotroph",
 					"Plant Saprotroph", "Epiphyte", "Lichenized", "Arbuscular Mycorrhizal", "Endomycorrhizal", "Ericoid Mycorrhizal", "Orchid Mycorrhizal", 
-					"Root Associated Biotroph", "Clavicipitaceous Endophyte", "Animal Endosymbiont", "Wood Saprotrop")
+					"Root Associated Biotroph", "Clavicipitaceous Endophyte", "Animal Endosymbiont")
 			),
 			FungalTraits = list(
 				"primary_lifestyle" = c("algal_ectosymbiont", "algal_parasite", "algivorous/protistivorous", "animal-associated", "animal_endosymbiont", "animal_parasite", 
