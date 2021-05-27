@@ -1,14 +1,12 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 0.4.0
+Version: 0.4.1
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre", "cph"), email = "liuchi0426@126.com"),
               person("Minjie", "Yao", role = c("aut", "cph"), email = "yaomj@fafu.edu.cn"),
-              person("Xiangzhen", "Li", role = "aut", email = "lixz@cib.ac.cn"),
-              person("Stilianos", "Louca", role = "cph", email = "slouca@uoregon.edu"),
-              person("Nhu H.", "Nguyen", role = "cph", email = "nhnguyen@umn.edu")
+              person("Xiangzhen", "Li", role = "aut", email = "lixz@cib.ac.cn")
 			  )
-Author: Chi Liu [aut, cre, cph], Minjie Yao [aut, cph], Xiangzhen Li [aut], Stilianos Louca [cph], Nhu H. Nguyen [cph]
+Author: Chi Liu [aut, cre, cph], Minjie Yao [aut, cph], Xiangzhen Li [aut]
 Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis and functional analysis.
 Depends: R (>= 3.5.0)
@@ -17,7 +15,7 @@ Suggests: reshape2, GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agr
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2021-04-06
+Packaged: 2021-05-27
 Repository: CRAN
-Date/Publication: 2021-04-06
+Date/Publication: 2021-05-27
 RoxygenNote: 7.1.1
