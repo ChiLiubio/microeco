@@ -30,6 +30,14 @@ t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
 }
 
 ## ------------------------------------------------
+## Method `trans_network$cal_module`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_module()
+}
+
+## ------------------------------------------------
 ## Method `trans_network$cal_network_attr`
 ## ------------------------------------------------
 
@@ -84,6 +92,7 @@ t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\%
 \itemize{
 \item \href{#method-new}{\code{trans_network$new()}}
 \item \href{#method-cal_network}{\code{trans_network$cal_network()}}
+\item \href{#method-cal_module}{\code{trans_network$cal_module()}}
 \item \href{#method-save_network}{\code{trans_network$save_network()}}
 \item \href{#method-cal_network_attr}{\code{trans_network$cal_network_attr()}}
 \item \href{#method-cal_node_type}{\code{trans_network$cal_node_type()}}
@@ -175,7 +184,6 @@ see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method
   PGM_sensitive = "true",
   PGM_heterogeneous = "true",
   SpiecEasi_method = "mb",
-  with_module = TRUE,
   add_taxa_name = "Phylum",
   usename_rawtaxa_when_taxalevel_notOTU = FALSE,
   ...
@@ -207,8 +215,6 @@ see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method
 
 \item{\code{SpiecEasi_method}}{default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.}
 
-\item{\code{with_module}}{default TRUE; whether calculate modules.}
-
 \item{\code{add_taxa_name}}{default "Phylum"; add taxonomic rank name to the result.}
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
@@ -224,6 +230,37 @@ res_network in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_module"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_module}{}}}
+\subsection{Method \code{cal_module()}}{
+Calculate and add network modules.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_module(module_name_prefix = "M")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{module_name_prefix}}{default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
+numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a network with modules, stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_module()
 }
 }
 \if{html}{\out{</div>}}
@@ -447,13 +484,15 @@ chorddiag plot
 \subsection{Method \code{subset_network()}}{
 Subset of the network.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$subset_network(node = NULL, rm_single = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$subset_network(node = NULL, edge = NULL, rm_single = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{node}}{default NULL; provide the names of the nodes that you want to use in the sub-network.}
+\item{\code{node}}{default NULL; provide the node names that you want to use in the sub-network.}
+
+\item{\code{edge}}{default NULL; provide the edge name needed; must be one of "+" or "-".}
 
 \item{\code{rm_single}}{default TRUE; whether remove the nodes without any edge in the sub-network.}
 }

@@ -117,7 +117,6 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param PGM_sensitive default "true"; whether use sensitive type in the PGM model.
 		#' @param PGM_heterogeneous default "true"; whether use heterogeneous type in the PGM model.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
-		#' @param with_module default TRUE; whether calculate modules.
 		#' @param add_taxa_name default "Phylum"; add taxonomic rank name to the result.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
 		#' @param ... paremeters pass to spiec.easi in package SpiecEasi.
@@ -138,7 +137,6 @@ trans_network <- R6Class(classname = "trans_network",
 			PGM_sensitive = "true",
 			PGM_heterogeneous = "true",
 			SpiecEasi_method = "mb",
-			with_module = TRUE,
 			add_taxa_name = "Phylum",
 			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
 			...
@@ -249,17 +247,31 @@ trans_network <- R6Class(classname = "trans_network",
 					network <- set_vertex_attr(network, "name", value = V(network)$name %>% taxa_table[., taxa_level] %>% gsub("^.__", "", .))
 				}
 			}
-			if(with_module == T){
-				# add module information
-				mod1 <- as.character(cluster_fast_greedy(network)$membership)
-				mod2 <- sort(table(mod1), decreasing = TRUE)
-				for(i in seq_along(mod2)){
-					mod1[mod1 == names(mod2)[i]] <- paste0("M", i)
-				}
-				network <- set_vertex_attr(network, "module", value = mod1)
-			}
 			self$res_network <- network
 			message('The result network is stored in object$res_network !')
+		},
+		#' @description
+		#' Calculate and add network modules.
+		#'
+		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
+		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
+		#' @return a network with modules, stored in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_module()
+		#' }
+		cal_module = function(module_name_prefix = "M"){
+			# add modules
+			network <- self$res_network
+			mod1 <- as.character(cluster_fast_greedy(network)$membership)
+			mod2 <- sort(table(mod1), decreasing = TRUE)
+			for(i in seq_along(mod2)){
+				mod1[mod1 == names(mod2)[i]] <- paste0(module_name_prefix, i)
+			}
+			message('Totally, ', length(mod2), ' modules are idenfified')
+			network <- set_vertex_attr(network, "module", value = mod1)
+			message('Modules are assigned in network with attribute name -- module')
+			self$res_network <- network
 		},
 		#' @description
 		#' Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
@@ -282,7 +294,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_network_attr = function(){
 			self$res_network_attr <- private$network_attribute(self$res_network)
-			message('The result is stored in object$res_network_attr !')
+			message('Result is stored in object$res_network_attr !')
 		},
 		#' @description
 		#' Calculate node properties.
@@ -307,7 +319,7 @@ trans_network <- R6Class(classname = "trans_network",
 			node_type$betweenness <- betweenness(network)[rownames(node_type)]
 			node_type$Abundance <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))[rownames(node_type)]
 			self$res_node_type <- node_type
-			message('The result is stored in object$res_node_type !')
+			message('Result is stored in object$res_node_type !')
 		},
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
@@ -340,7 +352,7 @@ trans_network <- R6Class(classname = "trans_network",
 			res_eigen <- do.call(cbind, res_eigen)
 			self$res_eigen <- res_eigen
 			self$res_eigen_expla <- res_eigen_expla
-			message('The result is stored in object$res_eigen and object$res_eigen_expla !')
+			message('Result is stored in object$res_eigen and object$res_eigen_expla !')
 		},
 		#' @description
 		#' Plot the classification and importance of nodes.
@@ -446,7 +458,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Subset of the network.
 		#'
-		#' @param node default NULL; provide the names of the nodes that you want to use in the sub-network.
+		#' @param node default NULL; provide the node names that you want to use in the sub-network.
+		#' @param edge default NULL; provide the edge name needed; must be one of "+" or "-".
 		#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
 		#' @return a new network
 		#' @examples
@@ -455,25 +468,30 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }
-		subset_network = function(node = NULL, rm_single = TRUE){
+		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE){
+			network <- self$res_network
 			if(!is.null(node)){
-				network <- self$res_network
 				nodes_raw <- V(network)$name
 				delete_nodes <- nodes_raw %>% .[! . %in% node]
 				sub_network <- delete_vertices(network, delete_nodes)
-				# whether remove the single node without edges
-				if(rm_single == T){
+			}
+			if(!is.null(edge)){
+				label_raw <- E(network)$label
+				sub_network <- delete_edges(network, which(label_raw != edge))
+			}
+			if(is.null(node) & is.null(edge)){
+				stop("Please provide the retained nodes name using node parameter!")
+			}
+			# whether remove the single node without edges
+			if(rm_single == T){
 				nodes_raw <- V(sub_network)$name
 				edges <- t(sapply(1:ecount(sub_network), function(x) ends(sub_network, x)))
 				delete_nodes <- nodes_raw %>% .[! . %in% as.character(c(edges[,1], edges[,2]))]
-					if(length(delete_nodes) > 0){
-						sub_network %<>% delete_vertices(delete_nodes)
-					}
+				if(length(delete_nodes) > 0){
+					sub_network %<>% delete_vertices(delete_nodes)
 				}
-				sub_network
-			}else{
-				stop("Please provide the retained nodes name using node parameter!")
 			}
+			sub_network
 		},
 		#' @description
 		#' Print the trans_network object.
@@ -790,5 +808,3 @@ trans_network <- R6Class(classname = "trans_network",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
-

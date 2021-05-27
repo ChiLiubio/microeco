@@ -530,11 +530,9 @@ load_frequency_matrix <- function(input){
 	return(jobj)
 }
 
-
-
+# metastat input
 calculate_metastat <- function(inputdata, g, pflag = FALSE, threshold = NULL, B = NULL){
 	trans_data <- load_frequency_matrix(input = inputdata)
 	res <- detect_differentially_abundant_features(jobj = trans_data, g = g, pflag = pflag, threshold = threshold, B = B)
 	res
 }
-

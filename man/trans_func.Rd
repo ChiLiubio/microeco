@@ -160,8 +160,8 @@ The percentages of the OTUs with specific trait can reflect the potential of the
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
   use_community = TRUE,
-  node_type_table = NULL,
-  abundance_weighted = FALSE
+  abundance_weighted = FALSE,
+  node_type_table = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -170,9 +170,9 @@ The percentages of the OTUs with specific trait can reflect the potential of the
 \describe{
 \item{\code{use_community}}{default TRUE; whether calculate community; if FALSE, use module.}
 
-\item{\code{node_type_table}}{default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.}
-
 \item{\code{abundance_weighted}}{default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.}
+
+\item{\code{node_type_table}}{default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.}
 }
 \if{html}{\out{</div>}}
 }
