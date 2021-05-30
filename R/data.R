@@ -100,6 +100,16 @@ NULL
 NULL
 
 
+#' The KEGG data files used in the cal_tax4fun2 function of trans_func class.
+#'
+#'
+#' @docType data
+#' @keywords list
+#' @name Tax4Fun2_KEGG
+#' @usage data(Tax4Fun2_KEGG)
+NULL
+
+
 #' The sample information of 16S dataset in the microeco package
 #'
 #'
@@ -139,5 +149,17 @@ NULL
 #' @keywords data.frame
 #' @name taxonomy_table_ITS
 #' @usage data(taxonomy_table_ITS)
+NULL
+
+
+#' The fasta file of 16S dataset used in tax4fun2 method.
+#'
+#' @description
+#' See the document of microtable class for more details. This file is with read.fasta function in seqinr package.
+#'
+#' @docType data
+#' @keywords list
+#' @name rep_fasta_16S
+#' @usage data(rep_fasta_16S)
 NULL
 

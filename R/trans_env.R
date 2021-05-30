@@ -56,7 +56,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
 		#' @return res_rda, res_rda_R2, res_rda_terms and res_rda_axis in object.
 		#' @examples
+		#' \donttest{
 		#' t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+		#' }
 		cal_rda = function(use_dbrda = TRUE, add_matrix = NULL, use_measure = NULL, feature_sel = FALSE, taxa_level = NULL, taxa_filter_thres = NULL){
 			env_data <- self$env_data
 			if(use_dbrda == T){

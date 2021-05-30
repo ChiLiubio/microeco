@@ -2,7 +2,9 @@
 #' Create trans_func object for functional analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, functional redundancy calculation and metabolic pathway abundance prediction Aßhauer et al. (2015) <10.1093/bioinformatics/btv287>.
+#' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) 
+#' <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, 
+#' functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 #'
 #' @export
 trans_func <- R6Class(classname = "trans_func",
@@ -42,10 +44,10 @@ trans_func <- R6Class(classname = "trans_func",
 		#' Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
 		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
 		#' Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
-		#' FUNGuild: Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
-		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248. <doi:10.1016/j.funeco.2015.06.006>
-		#' FungalTraits: Põlme, S., Abarenkov, K., Henrik Nilsson, R. et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
-		#' Fungal Diversity 105, 1–16 (2020). <doi:10.1007/s13225-020-00466-2>
+		#' FUNGuild: Nguyen et al. (2016). 
+		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>
+		#' FungalTraits: Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
+		#' Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
 		#'
 		#' @param fungi_database default "FUNGuild"; select a fungi trait database for the trait identification, "FUNGuild" or "FungalTraits"; see the description in this function.
 		#' @return res_spe_func in object.
@@ -149,7 +151,7 @@ trans_func <- R6Class(classname = "trans_func",
 						stop("No Genus column found in tax_table of dataset!")
 					}
 					data("fungi_func_FungalTraits", envir=environment())
-					message("This fungi database is developed based on the FungalTraits. Please also cite the original paper: FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1–16 (2020). <doi:10.1007/s13225-020-00466-2>.\n")
+					message("This fungi database is developed based on the FungalTraits. Please also cite the original paper: FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>.\n")
 					# remove the redundant data
 					fungi_func_FungalTraits %<>% .[- c(3109, 3288, 4741, 7092), ]
 					fungi_func_FungalTraits$Decay_type %<>% gsub("white-rot", "white_rot", .)
@@ -213,14 +215,14 @@ trans_func <- R6Class(classname = "trans_func",
 		#' The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
 		#'
 		#' @param use_community default TRUE; whether calculate community; if FALSE, use module.
-		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.
 		#' @param abundance_weighted default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.
+		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.
 		#' @return res_spe_func_perc in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func_perc(use_community = TRUE)
 		#' }
-		cal_spe_func_perc = function(use_community = TRUE, node_type_table = NULL, abundance_weighted = FALSE){
+		cal_spe_func_perc = function(use_community = TRUE, abundance_weighted = FALSE, node_type_table = NULL){
 			res_spe_func <- self$res_spe_func
 			otu_table <- self$otu_table
 			if(use_community){
@@ -361,8 +363,7 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Predict functional potential of communities using tax4fun.
-		#' please also cite: Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). 
-		#' Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884. <doi:10.1093/bioinformatics/btv287>
+		#' please also cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
 		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and Tax4Fun function in Tax4Fun package.
@@ -411,7 +412,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param path_to_reference_data default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
 		#'   The directory must contain the Ref99NR/Ref100NR folder; 
 		#'   download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
-		#' @param path_to_temp_folder default "Tax4Fun2_prediction"; The temporary folder to store the logfile, intermediate file and result files.
+		#' @param path_to_temp_folder default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, use the default temporary in the computer.
 		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR" .
 		#' @param normalize_by_copy_number default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes. 
 		#' @param min_identity_to_reference default 97; the idenity threshold used for finding the nearest species.
@@ -423,12 +424,13 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @return res_tax4fun2_KO and res_tax4fun2_pathway in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
+		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
+		#'     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 		#' }
 		cal_tax4fun2 = function(
 			blast_tool_path = NULL,
 			path_to_reference_data = "Tax4Fun2_ReferenceData_v2",
-			path_to_temp_folder = "Tax4Fun2_prediction",
+			path_to_temp_folder = NULL,
 			database_mode = 'Ref99NR',
 			normalize_by_copy_number = T,
 			min_identity_to_reference = 97, 
@@ -436,8 +438,12 @@ trans_func <- R6Class(classname = "trans_func",
 			num_threads = 1,
 			normalize_pathways = F
 			){
+			if(is.null(path_to_temp_folder)){
+				path_to_temp_folder <- tempdir()
+				message("The intermediate files are saved in the temporary directory --- ", path_to_temp_folder)
+			}
 			if(!dir.exists(path_to_temp_folder)){
-				stop(paste0("Temporay folder--", path_to_temp_folder, " is not existed! Please first create it using dir.create function!"))
+				stop(paste0("Temporay folder--", path_to_temp_folder, " is not existed! Please check it!"))
 			}
 			if(!dir.exists(path_to_reference_data)){
 				stop(paste0("Tax4Fun2 ReferenceData folder--", path_to_temp_folder, " is not existed!"))

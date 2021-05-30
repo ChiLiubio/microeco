@@ -4,7 +4,9 @@
 \alias{trans_func}
 \title{Create trans_func object for functional analysis.}
 \description{
-This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, functional redundancy calculation and metabolic pathway abundance prediction Aßhauer et al. (2015) <10.1093/bioinformatics/btv287>.
+This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) 
+<doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, 
+functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 }
 \examples{
 
@@ -52,7 +54,8 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
+t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
+    path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 }
 
 ## ------------------------------------------------
@@ -122,10 +125,10 @@ Confirm traits of each OTU by matching the taxonomic assignments to the function
 Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
 Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
 Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
-FUNGuild: Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
-FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241–248. <doi:10.1016/j.funeco.2015.06.006>
-FungalTraits: Põlme, S., Abarenkov, K., Henrik Nilsson, R. et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
-Fungal Diversity 105, 1–16 (2020). <doi:10.1007/s13225-020-00466-2>
+FUNGuild: Nguyen et al. (2016). 
+FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>
+FungalTraits: Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
+Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(fungi_database = c("FUNGuild", "FungalTraits")[1])}\if{html}{\out{</div>}}
 }
@@ -267,8 +270,7 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 \if{latex}{\out{\hypertarget{method-cal_tax4fun}{}}}
 \subsection{Method \code{cal_tax4fun()}}{
 Predict functional potential of communities using tax4fun.
-please also cite: Aßhauer, K. P., Wemheuer, B., Daniel, R., & Meinicke, P. (2015). 
-Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882–2884. <doi:10.1093/bioinformatics/btv287>
+please also cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun(keep_tem = FALSE, folderReferenceData = NULL)}\if{html}{\out{</div>}}
 }
@@ -297,7 +299,7 @@ Tax4Fun2: prediction of habitat-specific functional profiles and functional redu
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun2(
   blast_tool_path = NULL,
   path_to_reference_data = "Tax4Fun2_ReferenceData_v2",
-  path_to_temp_folder = "Tax4Fun2_prediction",
+  path_to_temp_folder = NULL,
   database_mode = "Ref99NR",
   normalize_by_copy_number = T,
   min_identity_to_reference = 97,
@@ -318,7 +320,7 @@ if blast_tool_path is NULL, search the tools in the environmental path variable.
 The directory must contain the Ref99NR/Ref100NR folder; 
 download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .}
 
-\item{\code{path_to_temp_folder}}{default "Tax4Fun2_prediction"; The temporary folder to store the logfile, intermediate file and result files.}
+\item{\code{path_to_temp_folder}}{default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, use the default temporary in the computer.}
 
 \item{\code{database_mode}}{default 'Ref99NR'; "Ref99NR" or "Ref100NR" .}
 
@@ -342,7 +344,8 @@ res_tax4fun2_KO and res_tax4fun2_pathway in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
+t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
+    path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 }
 }
 \if{html}{\out{</div>}}

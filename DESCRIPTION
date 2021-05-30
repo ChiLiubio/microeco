@@ -11,11 +11,11 @@ Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis and functional analysis.
 Depends: R (>= 3.5.0)
 Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer
-Suggests: reshape2, GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, tidytree, mice, ggtree, phyloseq
+Suggests: reshape2, GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, tidytree, mice, ggtree
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2021-05-27
+Packaged: 2021-05-30
 Repository: CRAN
-Date/Publication: 2021-05-27
+Date/Publication: 2021-05-30
 RoxygenNote: 7.1.1

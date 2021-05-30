@@ -117,9 +117,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
 		#' @param add_letter default FALSE; If TRUE, the letters of duncan test will be added in the plot.
-		#' @param use_boxplot default TRUE; TRUE: boxplot, FALSE：mean_se plot.
+		#' @param use_boxplot default TRUE; TRUE: boxplot, FALSE: mean_se plot.
 		#' @param boxplot_color default TRUE; TRUE: use color_values, FALSE: use "black".
-		#' @param boxplot_add default "jitter"; points type, see the add parameter in \code{\link{ggpubr::ggboxplot}}.
+		#' @param boxplot_add default "jitter"; points type, see the add parameter in ggpubr::ggboxplot.
 		#' @param order_x_mean default FALSE; whether order x axis by the means of groups from large to small.
 		#' @param pair_compare default FALSE; whether perform paired comparisons.
 		#' @param pair_compare_filter default ""; groups that need to be removed in the comparisons.
@@ -128,7 +128,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param xtext_size default 10, x axis text size.
 		#' @param ytitle_size default 17, y axis title size.
 		#' @param base_font default "sans", font in the plot.
-		#' @param ... parameters pass to \code{\link{ggpubr::ggboxplot}}.
+		#' @param ... parameters pass to ggpubr::ggboxplot function.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{

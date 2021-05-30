@@ -20,7 +20,9 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 ## Method `trans_env$cal_rda`
 ## ------------------------------------------------
 
+\donttest{
 t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+}
 
 ## ------------------------------------------------
 ## Method `trans_env$trans_rda`
@@ -156,7 +158,9 @@ res_rda, res_rda_R2, res_rda_terms and res_rda_axis in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+\preformatted{\donttest{
+t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+}
 }
 \if{html}{\out{</div>}}
 

@@ -1,7 +1,7 @@
 # microeco
 An R package for data mining in microbial community ecology
 
-![](https://img.shields.io/badge/CRAN-Ver0.3.3-green.svg) ![](https://img.shields.io/badge/Release-Ver0.4.0-blue.svg) ![](https://img.shields.io/badge/Test-Ver0.4.1-red.svg)
+![](https://img.shields.io/badge/CRAN-Ver0.4.0-green.svg) ![](https://img.shields.io/badge/Release-Ver0.4.0-blue.svg) ![](https://img.shields.io/badge/Test-Ver0.4.1-red.svg)
 
 ## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
