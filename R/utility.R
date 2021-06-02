@@ -63,12 +63,15 @@ tidy_taxonomy <- function(taxonomy_table){
 tidy_taxonomy_column <- function(taxonomy_table, i){
 	taxonomy_table[,i] <- gsub(".*No blast hit.*|.*Unknown.*|.*unidentif.*|.*sp\\.$|.*Unclassified.*", "", taxonomy_table[,i], ignore.case = TRUE)
 	taxonomy_table[,i] <- gsub(".*metagenome.*|.*uncultur.*|.*cultivar.*|D_6__synthetic.*|.*archaeon$", "", taxonomy_table[,i], ignore.case = TRUE)
-	taxonomy_table[,i] <- gsub(".*metagenome.*|.*uncultur.*|.*cultivar.*|D_6__synthetic.*|.*archaeon$", "", taxonomy_table[,i], ignore.case = TRUE)
 	taxonomy_table[,i] <- gsub('"', "", taxonomy_table[,i], fixed = TRUE)
 	taxonomy_table[,i] <- gsub("^\\s+|\\s+$|.*\\sbacterium$|.*bacterium\\s.*", "", taxonomy_table[,i])
-	taxonomy_table[,i] <- gsub("^.*__", paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__"), taxonomy_table[,i])
-	taxonomy_table[,i][is.na(taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
-	taxonomy_table[,i][grepl("^$",taxonomy_table[,i])] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__")
+	taxonomy_table[,i] <- gsub("^.*__", "", taxonomy_table[,i])
+	# some data have single underline
+	taxonomy_table[,i] <- gsub("^._", "", taxonomy_table[,i])
+	# check the missing data
+	taxonomy_table[,i][is.na(taxonomy_table[,i])] <- ""
+	# paste the final result with double underlines
+	taxonomy_table[,i] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[,i])
 	taxonomy_table[,i]
 }
 

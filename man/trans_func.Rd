@@ -53,7 +53,7 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 ## Method `trans_func$cal_tax4fun2`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 }
@@ -62,7 +62,7 @@ t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin",
 ## Method `trans_func$cal_tax4fun2_FRI`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_tax4fun2_FRI()
 }
 }
@@ -343,7 +343,7 @@ res_tax4fun2_KO and res_tax4fun2_pathway in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 }
@@ -370,7 +370,7 @@ res_tax4fun2_aFRI and res_tax4fun2_rFRI in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_tax4fun2_FRI()
 }
 }
