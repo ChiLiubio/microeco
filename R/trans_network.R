@@ -192,7 +192,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			if(grepl("PGM", network_method, ignore.case = TRUE)){
 				use_abund <- self$use_abund
-				# make sure the working directory can not be changed by the function when quit.
+				# make sure working directory can not be changed by the function when quit.
 				oldwd <- getwd()
 				on.exit(setwd(oldwd))
 				#use_abund <- cbind.data.frame(SampleID = rownames(use_abund), use_abund)

@@ -5,7 +5,8 @@
 \title{Create trans_func object for functional analysis.}
 \description{
 This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) 
-<doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, 
+<doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and 
+Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>, 
 functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 }
 \examples{
@@ -104,7 +105,7 @@ t1$cal_tax4fun2_FRI()
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified according to the Kingdom information, 
+for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
 at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
 }
 \subsection{Examples}{

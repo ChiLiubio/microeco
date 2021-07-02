@@ -334,7 +334,8 @@ Indeed, it can also be used for calculating other correlation between any two va
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa, other: provide additional taxa name with other_taxa parameter.}
+\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
+"all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.}
 
 \item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
 

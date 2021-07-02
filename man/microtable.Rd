@@ -22,6 +22,7 @@ data(otu_table_16S)
 data(taxonomy_table_16S)
 data(sample_info_16S)
 data(phylo_tree_16S)
+dataset <- microtable$new(otu_table = otu_table_16S)
 dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 # trim the dataset
@@ -192,6 +193,7 @@ an object of class "microtable" with the following components:
 data(taxonomy_table_16S)
 data(sample_info_16S)
 data(phylo_tree_16S)
+dataset <- microtable$new(otu_table = otu_table_16S)
 dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 # trim the dataset
@@ -330,9 +332,9 @@ This is very useful if there are commented columns or some columns with multiple
 
 \item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in tax_table. Very useful when multiple mapping info exist.}
 
-\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only used when split_group == TRUE; see sep in separate_rows function.}
+\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only useful when split_group == TRUE; see sep in separate_rows function.}
 
-\item{\code{split_column}}{default NULL; character vector or list; only used when split_group == TRUE; character vector: 
+\item{\code{split_column}}{default NULL; character vector or list; only useful when split_group == TRUE; character vector: 
 fixed column or columns used for the splitting in tax_table in each abundance calculation; 
 list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).}
 }

@@ -32,6 +32,7 @@ microtable <- R6Class(classname = "microtable",
 		#' data(taxonomy_table_16S)
 		#' data(sample_info_16S)
 		#' data(phylo_tree_16S)
+		#' dataset <- microtable$new(otu_table = otu_table_16S)
 		#' dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
 		#'   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 		#' # trim the dataset
@@ -39,14 +40,14 @@ microtable <- R6Class(classname = "microtable",
 		initialize = function(otu_table, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, rep_fasta = NULL)
 			{
 			if(!all(sapply(otu_table, is.numeric))){
-				stop("Some columns in otu_table are not numeric vector! Please check the otu_table and try again.")
+				stop("Some columns in otu_table are not numeric vector! Please check the otu_table!")
 			}else{
 				otu_table <- otu_table[apply(otu_table, 1, sum) > 0, ]
 				otu_table <- otu_table[, apply(otu_table, 2, sum) > 0, drop = FALSE]
 				self$otu_table <- otu_table
 			}
 			if(is.null(sample_table)){
-				message("No sample_table provided, automatically use colnames of otu_table to create it!")
+				message("No sample_table provided, automatically use colnames in otu_table to create it!")
 				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% `row.names<-`(.$SampleID)
 			}else{
 				self$sample_table <- sample_table
@@ -198,8 +199,8 @@ microtable <- R6Class(classname = "microtable",
 		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
 		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.
 		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in tax_table. Very useful when multiple mapping info exist.
-		#' @param split_by default "&&"; Separator delimiting collapsed values; only used when split_group == TRUE; see sep in separate_rows function.
-		#' @param split_column default NULL; character vector or list; only used when split_group == TRUE; character vector: 
+		#' @param split_by default "&&"; Separator delimiting collapsed values; only useful when split_group == TRUE; see sep in separate_rows function.
+		#' @param split_column default NULL; character vector or list; only useful when split_group == TRUE; character vector: 
 		#'     fixed column or columns used for the splitting in tax_table in each abundance calculation; 
 		#'     list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
 		#' @return taxa_abund in object.
@@ -244,7 +245,7 @@ microtable <- R6Class(classname = "microtable",
 											split_column = use_split_column)
 			}
 			self$taxa_abund <- taxa_abund
-			message('The result is stored in object$taxa_abund.')
+			message('The result is stored in object$taxa_abund ')
 		},
 		#' @description
 		#' Save taxonomic abundance to the computer local place.
@@ -441,10 +442,10 @@ microtable <- R6Class(classname = "microtable",
 					outlist <- c(outlist, list(PD = picante::pd(OTU, self$phylo_tree)[,"PD", drop=TRUE]))
 				}
 			}
-			out <- do.call("cbind", outlist)
-			namechange <- base::intersect(colnames(out), names(renamevec))
-			colnames(out)[colnames(out) %in% namechange] <- renamevec[namechange]
-			self$alpha_diversity <- as.data.frame(out)
+			res <- do.call("cbind", outlist)
+			namechange <- base::intersect(colnames(res), names(renamevec))
+			colnames(res)[colnames(res) %in% namechange] <- renamevec[namechange]
+			self$alpha_diversity <- as.data.frame(res)
 			message('The result is stored in object$alpha_diversity.')
 		},
 		#' @description
@@ -521,7 +522,7 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse="|"), abund)
 			}
-			# first transform table to long format
+			# first convert table to long format
 			# then sum abundance by sample and taxonomy
 			abund1 <- abund1 %>% 
 				data.table() %>% 

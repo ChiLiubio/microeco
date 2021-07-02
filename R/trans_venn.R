@@ -36,8 +36,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 			setmatrix <- abund
 			setmatrix[setmatrix >= 1] <- 1
 			## Create all possible sample combinations within requested complexity levels
-			allcombl <- lapply(1:colnumber, function(x) combn(colnames(setmatrix), m=x, simplify=FALSE)) %>% unlist(recursive=FALSE)
-			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix=setmatrix, allcombl=allcombl, index=x, setunion = setunion))
+			allcombl <- lapply(1:colnumber, function(x) combn(colnames(setmatrix), m = x, simplify = FALSE)) %>% unlist(recursive=FALSE)
+			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix = setmatrix, allcombl = allcombl, index = x, setunion = setunion))
 			names(venn_list) <- sapply(allcombl, paste, collapse= "-")
 			venn_abund <- sapply(venn_list, function(x){
 				subset(abund2, OTU %in% x) %>% 
@@ -46,14 +46,17 @@ trans_venn <- R6Class(classname = "trans_venn",
 				unname()
 			})
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
-			if(!is.null(ratio)) {
-				if(ratio == "seqratio") {
-					venn_count_abund[,2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[,2]), 3) * 100, "%")
+			if(!is.null(ratio)){
+				if(!ratio %in% c("seqratio", "numratio")){
+					stop("The parameter ratio must be one of seqratio or numratio!")
 				}
-				if(ratio == "numratio") {
+				if(ratio == "seqratio"){
+					venn_count_abund[,2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[,2]), 3) * 100, "%")
+				}else{
 					venn_count_abund[,2] <- paste0(round(venn_count_abund[,1]/sum(venn_count_abund[,1]), 3) * 100, "%")
 				}
 			}
+			# make sure the length of elements are same
 			venn_maxlen <- max(sapply(venn_list, length))
 			venn_table <- lapply(venn_list, function (x) {
 				fill_length <- venn_maxlen - length(x)
@@ -67,7 +70,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			self$ratio <- ratio
 			self$otu_table <- abund
 			self$tax_table <- use_dataset$tax_table
-			message('The result is stored in object$venn_table and object$venn_count_abund !')
+			message('The result is stored in object$venn_table and object$venn_count_abund.')
 		},
 		#' @description
 		#' Plot venn diagram.
@@ -123,34 +126,42 @@ trans_venn <- R6Class(classname = "trans_venn",
 				text_name_position <- switch(switch_num, 
 					data.frame(x = c(1.5, 8.5), y = c(6, 6)),
 					data.frame(x = c(2, 8, 5), y = c(7.9, 7.9, 1.6)),
-					data.frame(x=c(1, 2.6, 6.8, 9), y = c(7.4, 8.2, 8.2,7.4)),
-					data.frame(x=c(4.8, 9.2, 8.8, 1.65, 0.72), y = c(10.6, 7.7, 0.3, 0.2, 7.05))
+					data.frame(x = c(1, 2.6, 6.8, 9), y = c(7.4, 8.2, 8.2,7.4)),
+					data.frame(x = c(4.8, 9.2, 8.8, 1.65, 0.72), y = c(10.6, 7.7, 0.3, 0.2, 7.05))
 				)
 			}
 			if(colnumber %in% 2:5 & petal_plot == F){
 				plot_data <- data.frame(self$venn_count_abund, private$pos_fun(switch_num))
 			}
 			if(colnumber == 2) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(1,9) + ylim(2.5,9) + private$main_theme
+				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) + 
+					xlim(1, 9) + 
+					ylim(2.5, 9) + 
+					private$main_theme
+				
 				if(fill_color == T){
-				p <- p + 
-					geom_polygon(data = private$plotcircle(center = c(4, 6)),aes(x = x,y = y), fill=color_circle[1], alpha = alpha) +
-					geom_polygon(data = private$plotcircle(center = c(6, 6)),aes(x = x,y = y), fill=color_circle[2], alpha = alpha)
+					p <- p + 
+						geom_polygon(data = private$plotcircle(center = c(4, 6)), aes(x = x, y = y), fill=color_circle[1], alpha = alpha) +
+						geom_polygon(data = private$plotcircle(center = c(6, 6)), aes(x = x, y = y), fill=color_circle[2], alpha = alpha)
 				} else {
-				p <- p +
-					annotate("path", x = private$plotcircle(center = c(4, 6))$x, y = private$plotcircle(center = c(4, 6))$y, 
-						color = color_circle[1], size = linesize) +
-					annotate("path", x = private$plotcircle(center = c(6, 6))$x, y = private$plotcircle(center = c(6, 6))$y, 
-						color = color_circle[2], size = linesize)
+					p <- p +
+						annotate("path", x = private$plotcircle(center = c(4, 6))$x, y = private$plotcircle(center = c(4, 6))$y, 
+							color = color_circle[1], size = linesize) +
+						annotate("path", x = private$plotcircle(center = c(6, 6))$x, y = private$plotcircle(center = c(6, 6))$y, 
+							color = color_circle[2], size = linesize)
 				}
 			}
 			if(colnumber == 3) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(1,9) +	ylim(1,9) + private$main_theme
+				p <- ggplot(data.frame(), aes(x=c(5, 5), y = 0)) +
+					xlim(1,9) +	
+					ylim(1,9) + 
+					private$main_theme
+				
 				if(fill_color == T){
 					p <- p + 
-					 geom_polygon(data = private$plotcircle(center = c(4, 6)), aes(x = x,y = y), fill=color_circle[1], alpha = alpha) +
-					 geom_polygon(data = private$plotcircle(center = c(6, 6)), aes(x = x,y = y), fill=color_circle[2], alpha = alpha) +
-					 geom_polygon(data = private$plotcircle(center = c(5, 4)), aes(x = x,y = y), fill=color_circle[3], alpha = alpha)
+					 geom_polygon(data = private$plotcircle(center = c(4, 6)), aes(x = x, y = y), fill = color_circle[1], alpha = alpha) +
+					 geom_polygon(data = private$plotcircle(center = c(6, 6)), aes(x = x, y = y), fill = color_circle[2], alpha = alpha) +
+					 geom_polygon(data = private$plotcircle(center = c(5, 4)), aes(x = x, y = y), fill = color_circle[3], alpha = alpha)
 				} else {
 					p <- p +
 					annotate("path", x = private$plotcircle(center = c(4, 6))$x, y = private$plotcircle(center = c(4, 6))$y, 
@@ -162,14 +173,17 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber == 4) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(0,10) + ylim(0,10) + private$main_theme
+				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + 
+					xlim(0,10) + 
+					ylim(0,10) + 
+					private$main_theme
 
 				if(fill_color == T){
 					p <- p + 
-					 geom_polygon(data = private$plotellipse(center = c(3.5, 3.6), rotate = -35),aes(x = x,y = y), fill=color_circle[1], alpha = alpha)+
-					geom_polygon(data = private$plotellipse(center = c(4.7, 4.4), rotate = -35),aes(x = x,y = y), fill=color_circle[2], alpha = alpha) +
-					geom_polygon(data = private$plotellipse(center = c(5.3, 4.4), rotate = 35),aes(x = x,y = y), fill=color_circle[3], alpha = alpha) +
-					geom_polygon(data = private$plotellipse(center = c(6.5, 3.6), rotate = 35),aes(x = x,y = y), fill=color_circle[4], alpha = alpha)
+					 geom_polygon(data = private$plotellipse(center = c(3.5, 3.6), rotate = -35), aes(x = x, y = y), fill = color_circle[1], alpha = alpha)+
+					geom_polygon(data = private$plotellipse(center = c(4.7, 4.4), rotate = -35), aes(x = x, y = y), fill = color_circle[2], alpha = alpha) +
+					geom_polygon(data = private$plotellipse(center = c(5.3, 4.4), rotate = 35), aes(x = x, y = y), fill = color_circle[3], alpha = alpha) +
+					geom_polygon(data = private$plotellipse(center = c(6.5, 3.6), rotate = 35), aes(x = x, y = y), fill = color_circle[4], alpha = alpha)
 				} else {
 					p <- p +
 					annotate("path", x = private$plotellipse(center = c(3.5, 3.6), rotate = -35)$x, 
@@ -183,7 +197,11 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber == 5 & petal_plot == F) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + xlim(0,10.4) + ylim(-0.5,10.8) + private$main_theme
+				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + 
+					xlim(0,10.4) + 
+					ylim(-0.5,10.8) + 
+					private$main_theme
+				
 				if(fill_color == T){
 					p <- p + 
 					 geom_polygon(data = private$plotellipse(center = c(4.83, 6.2), radius = c(1.43, 4.11), rotate = 0),
@@ -233,6 +251,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 					  xlim(petal_use_lim[1], petal_use_lim[2]) +
 					  ylim(petal_use_lim[1], petal_use_lim[2]) +
 					  private$main_theme
+				
 				for(i in 1:nPetals){
 					rotate <- 90 - (i-1)*360/nPetals
 					rotate2 <- rotate*pi/180
@@ -245,7 +264,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 
 					p <- p + geom_polygon(data = petal_data, aes(x = x, y = y), fill = petal_color_use[i], alpha = alpha)
 					p <- p + annotate("text", x = petal_move_k * mx, y = petal_move_k * my, label = rownames(plot_data)[i], size = text_name_size)
-					p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count *my, label = plot_data[i, 1], size = text_size)
+					p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count * my, label = plot_data[i, 1], size = text_size)
 					if(!is.null(ratio)){
 						p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count *my - sum(abs(petal_use_lim))/petal_text_move, 
 							label = plot_data[i, 2], size = text_size)
@@ -274,14 +293,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 			sampledata <- data.frame(SampleID = colnames(venn_table), Group = colnames(venn_table)) %>% 'rownames<-'(colnames(venn_table))
 			taxdata <- self$tax_table
 			sum_table <- data.frame(apply(otudata, 1, sum))
-			tt <- dplyr::full_join(rownames_to_column(sum_table[venn_table[,1] %>% as.character %>% .[. != ""], ,drop=FALSE]),
-				rownames_to_column(sum_table[venn_table[,2] %>% as.character %>% .[. != ""], , drop=FALSE]), by=c("rowname" = "rowname"))
+			tt <- dplyr::full_join(rownames_to_column(sum_table[venn_table[,1] %>% as.character %>% .[. != ""], ,drop = FALSE]),
+				rownames_to_column(sum_table[venn_table[,2] %>% as.character %>% .[. != ""], , drop = FALSE]), 
+				by=c("rowname" = "rowname"))
 			for(i in 3:ncol(venn_table)){
-				tt <- dplyr::full_join(tt, rownames_to_column(sum_table[venn_table[, i] %>% 
-					as.character %>% .[. != ""], , drop=FALSE]), by=c("rowname" = "rowname"))
+				tt <- dplyr::full_join(tt, 
+						rownames_to_column(sum_table[venn_table[, i] %>% as.character %>% .[. != ""], , drop=FALSE]), 
+						by=c("rowname" = "rowname"))
 			}
 			tt[is.na(tt)] <- 0
-			tt %<>% 'rownames<-'(.[,1]) %>% .[,-1,drop = FALSE]
+			tt %<>% 'rownames<-'(.[, 1]) %>% .[, -1, drop = FALSE]
 			colnames(tt) <- colnames(venn_table)
 			if(use_OTUs_frequency == T){
 				tt[tt != 0] <- 1
@@ -318,7 +339,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				)
 			)
 		},
-		# Circle function for 2 or 3-way Venn
+		# Circle function for 2 or 3-way
 		plotcircle = function(center = c(1, 1), diameter = 4, segments_split = 360) {
 			r <- diameter / 2
 			tt <- seq(0, 2*pi, length.out = segments_split)
@@ -326,7 +347,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			yy <- center[2] + r * sin(tt)
 			return(data.frame(x = xx, y = yy))
 		},
-		# Ellipse function for 4 or 5-way Venn
+		# Ellipse function for 4 or 5-way
 		plotellipse = function(center = c(1, 1), radius = c(2, 4), rotate = 1, segments_split = 360) {
 			angles <- (0:segments_split) * 2 * pi/segments_split
 			rotate <- rotate * pi/180
@@ -336,8 +357,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 			colnames(ellipse) <- c("x", "y")
 			return(as.data.frame(ellipse))
 		},
-		petal = function(r = 1, n= 1000, a = 4, b = 1.2, mx = 0, my = 0, rotate = 0){
-			ang <- seq(0, 360, len=n+1)
+		petal = function(r = 1, n = 1000, a = 4, b = 1.2, mx = 0, my = 0, rotate = 0){
+			ang <- seq(0, 360, len = n+1)
 			ang <- ang[1:n]
 			ang <- ang*pi/180
 			x <- r * cos(ang)
@@ -369,5 +390,3 @@ trans_venn <- R6Class(classname = "trans_venn",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
-

@@ -30,6 +30,12 @@ t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellips
 t1$cal_manova(cal_manova_all = TRUE)
 
 ## ------------------------------------------------
+## Method `trans_beta$cal_betadisper`
+## ------------------------------------------------
+
+t1$cal_betadisper()
+
+## ------------------------------------------------
 ## Method `trans_beta$cal_group_distance`
 ## ------------------------------------------------
 
@@ -57,6 +63,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \item \href{#method-new}{\code{trans_beta$new()}}
 \item \href{#method-plot_ordination}{\code{trans_beta$plot_ordination()}}
 \item \href{#method-cal_manova}{\code{trans_beta$cal_manova()}}
+\item \href{#method-cal_betadisper}{\code{trans_beta$cal_betadisper()}}
 \item \href{#method-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
 \item \href{#method-plot_group_distance}{\code{trans_beta$plot_group_distance()}}
 \item \href{#method-plot_clustering}{\code{trans_beta$plot_clustering()}}
@@ -89,7 +96,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 
 \item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; beta diversity index used for ordination, manova or group distance.}
 
-\item{\code{group}}{default NULL; sample group used for manova or group distance.}
+\item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance.}
 
 \item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed, used for PCA.}
 
@@ -220,6 +227,34 @@ res_manova stored in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{t1$cal_manova(cal_manova_all = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_betadisper"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_betadisper}{}}}
+\subsection{Method \code{cal_betadisper()}}{
+A wrapper for betadisper function in vegan package for multivariate homogeneity test of groups dispersions.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_betadisper(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters passed to \code{\link{betadisper}} function.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_betadisper stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_betadisper()
 }
 \if{html}{\out{</div>}}
 

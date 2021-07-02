@@ -1,7 +1,8 @@
 #' @title Create trans_alpha object for alpha diveristy statistics and plotting.
 #'
 #' @description
-#' This class is a wrapper for a series of alpha diveristy related analysis, including the statistics and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
+#' This class is a wrapper for a series of alpha diveristy related analysis, including the statistics and plotting based on 
+#' An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 #'
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",

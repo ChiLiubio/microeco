@@ -115,14 +115,14 @@ trans_env <- R6Class(classname = "trans_env",
 				res_rda <- rda(use_data ~ ., env_data)
 			}
 			self$res_rda <- res_rda
-			message('The rda total result is stored in object$res_rda !')
+			message('The rda total result is stored in object$res_rda')
 			self$res_rda_R2 <- unlist(RsquareAdj(res_rda))
-			message('The R2 is stored in object$res_rda_R2 !')
+			message('The R2 is stored in object$res_rda_R2')
 			# test for sig.environ.variables
 			self$res_rda_terms <- anova(res_rda, by = "terms", permu = 1000)
-			message('The terms anova result is stored in object$res_rda_terms !')
+			message('The terms anova result is stored in object$res_rda_terms')
 			self$res_rda_axis <- anova(res_rda, by = "axis", perm.max = 1000)
-			message('The axis anova result is stored in object$res_rda_axis !')
+			message('The axis anova result is stored in object$res_rda_axis')
 		},
 		#' @description
 		#' transform RDA result for the following plotting.
@@ -181,7 +181,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			self$res_rda_trans = list(df_sites = df_sites, df_arrows = df_arrows, eigval = eigval, df_species = df_species, df_arrows_spe = df_arrows_spe)
-			message('The result list is stored in object$res_rda_trans !')
+			message('The result list is stored in object$res_rda_trans')
 		},
 		#' @description
 		#' plot RDA result.
@@ -301,7 +301,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Calculating the correlations between taxa abundance and environmental variables.
 		#' Indeed, it can also be used for calculating other correlation between any two variables from two tables.
 		#'
-		#' @param use_data default "Genus"; "Genus", "all" or "other"; Genus: genus abundance, all: all taxa, other: provide additional taxa name with other_taxa parameter.
+		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
+		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.
 		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method.
@@ -352,6 +353,8 @@ trans_env <- R6Class(classname = "trans_env",
 							}
 							abund_table <- abund_table[other_taxa, ]
 						}
+					}else{
+						stop("Unknown use_data parameter provided!")
 					}
 				}
 				abund_table %<>% .[!grepl("__$|__uncultured$", rownames(.)), ]

@@ -11,7 +11,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param ordination default NULL; PCA, PCoA or NMDS.
 		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; beta diversity index used for ordination, manova or group distance.
-		#' @param group default NULL; sample group used for manova or group distance.
+		#' @param group default NULL; sample group used for manova, betadisper or group distance.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
 		#' @param ncomp default 3; the returned dimensions.
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
@@ -195,6 +195,20 @@ trans_beta <- R6Class(classname = "trans_beta",
 					group = self$group, measure = self$measure, permutations = permutations)
 			}
 			message('The result is stored in object$res_manova !')
+		},
+		#' @description
+		#' A wrapper for betadisper function in vegan package for multivariate homogeneity test of groups dispersions.
+		#'
+		#' @param ... parameters passed to \code{\link{betadisper}} function.
+		#' @return res_betadisper stored in object.
+		#' @examples
+		#' t1$cal_betadisper()
+		cal_betadisper = function(...){
+			use_matrix <- self$use_matrix
+			res1 <- betadisper(as.dist(use_matrix), self$sample_table[, self$group], ...)
+			res2 <- permutest(res1, pairwise = TRUE)
+			self$res_betadisper <- res2
+			message('The result is stored in object$res_betadisper')
 		},
 		#' @description
 		#' Transform sample distances within groups or between groups.

@@ -3,14 +3,15 @@
 #'
 #' @description
 #' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) 
-#' <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006>, 
+#' <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and 
+#' Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>, 
 #' functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 #'
 #' @export
 trans_func <- R6Class(classname = "trans_func",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA represent not identified according to the Kingdom information, 
+		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
 		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
 		#' @examples
 		#' data(dataset)
@@ -31,11 +32,11 @@ trans_func <- R6Class(classname = "trans_func",
 					if(any(grepl("Fungi", all_Kingdom, ignore.case = TRUE))){
 						for_what <- "fungi"
 					}else{
-						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table, please set the for_what object use prok or fungi manually!")
+						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table, please assign for_what object use prok or fungi manually!")
 					}
 				}
 			}else{
-				message("No Kingdom found in the tax_table, please set the for_what object use prok or fungi manually!")
+				message("No Kingdom found in the tax_table, please assign for_what object use prok or fungi manually!")
 			}
 			self$for_what <- for_what
 		},
@@ -58,19 +59,20 @@ trans_func <- R6Class(classname = "trans_func",
 		cal_spe_func = function(fungi_database = c("FUNGuild", "FungalTraits")[1]){
 			for_what <- self$for_what
 			if(is.na(for_what)){
-				stop("No for_what object found, please set the for_what object use prok or fungi manually!")
+				stop("No for_what object found, please assign the for_what object use prok or fungi manually!")
 			}
 			if(! for_what %in% c("prok", "fungi")){
-				stop("Wrong for_what found, please set the for_what object use prok or fungi !")
+				stop("Wrong for_what found, please make sure for_what object is one of prok and fungi !")
 			}
 			if(for_what == "prok"){
-				# Copyright (c) 2020, Stilianos Louca
-				# All rights reserved.
+				# Copyright (c) 2021, Stilianos Louca. All rights reserved.
 				# prok_func is a database developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 				data("prok_func", envir=environment())
-				message("The prokaryotic database is developed based on the FAPROTAX database Version: 1.2.4. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
+				message("The prokaryotic database is developed based on the recent FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 				# collapse taxonomy
-				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% gsub(".__", "", .) %>% gsub(";{1, }$", "", .)
+				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% 
+					gsub(".__", "", .) %>% 
+					gsub(";{1, }$", "", .)
 				# reduce computational cost
 				tax2 <- unique(tax1)
 				# first create result matrix of tax2, then tax1-OTU
@@ -92,9 +94,8 @@ trans_func <- R6Class(classname = "trans_func",
 						}
 					}
 				}
-				# only use 1 represent exist
+				# only use 1 to represent existence
 				res[res > 1] <- 1
-
 				otu_func_table <- res[tax1, ]
 				rownames(otu_func_table) <- names(tax1)
 				otu_func_table$anaerobic_chemoheterotrophy <- 0
@@ -138,10 +139,7 @@ trans_func <- R6Class(classname = "trans_func",
 						otu_func_table[, i] <- grepl(i, res_table[, "trophicMode"]) %>% as.numeric
 					}
 					# generate Guild binary information
-					Guild <- c("Bryophyte Parasite", "Dung Saprotroph", "Ectomycorrhizal", "Fungal Parasite", "Leaf Saprotroph", "Plant Parasite",
-							"Wood Saprotroph", "Animal Pathogen", "Endophyte", "Plant Pathogen", "Lichen Parasite", "Litter Saprotroph", "Soil Saprotroph",
-							"Plant Saprotroph", "Epiphyte", "Lichenized", "Arbuscular Mycorrhizal", "Endomycorrhizal", "Ericoid Mycorrhizal", "Orchid Mycorrhizal", 
-							"Root Associated Biotroph", "Clavicipitaceous Endophyte", "Animal Endosymbiont", "Wood Saprotrop")
+					Guild <- private$default_fungi_func_group$FUNGuild[["Guild"]]
 					for(i in Guild){
 						otu_func_table[, i] <- grepl(i, res_table[, "guild"]) %>% as.numeric
 					}
@@ -208,7 +206,7 @@ trans_func <- R6Class(classname = "trans_func",
 				self$fungi_database <- fungi_database
 			}
 			self$res_spe_func <- otu_func_table
-			message('The functional table is stored in object$res_spe_func!')
+			message('The functional table is stored in object$res_spe_func')
 		},
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities or modules.
@@ -246,7 +244,7 @@ trans_func <- R6Class(classname = "trans_func",
 				})
 			}else{
 				if(is.null(node_type_table)){
-					stop("No node_type_table provided! parameter: node_type_table !")
+					stop("No node_type_table provided! see parameter: node_type_table !")
 				}else{
 					if(abundance_weighted){
 						otu_total_abund <- apply(otu_table, 1, sum)
@@ -423,7 +421,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'   Use TRUE to split the abundances (default is FALSE).
 		#' @return res_tax4fun2_KO and res_tax4fun2_pathway in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
 		#'     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 		#' }
@@ -655,7 +653,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @return res_tax4fun2_aFRI and res_tax4fun2_rFRI in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_tax4fun2_FRI()
 		#' }
 		cal_tax4fun2_FRI = function(){
@@ -840,6 +838,3 @@ trans_func <- R6Class(classname = "trans_func",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
-
-

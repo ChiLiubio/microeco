@@ -1,3 +1,25 @@
+##########################################################
+#
+#                        _oo0oo_
+#                       o8888888o
+#                       88" . "88
+#                       (| -_- |)
+#                       0\  =  /0
+#                     ___/`---'\___
+#                   .' \\|     |// '.
+#                  / \\|||  :  |||// \
+#                 / _||||| -:- |||||- \
+#                |   | \\\  - /// |   |
+#                | \_|  ''\---/''  |_/ |
+#                \  .-\__  '-'  ___/-. /
+#              ___'. .'  /--.--\  `. .'___
+#           ."" '<  `.___\_<|>_/___.' >' "".
+#          | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+#          \  \ `_.   \_ __\ /__ _/   .-` /  /
+#      =====`-.____`.___ \_____/___.-`___.-'=====
+#                        `=---='
+# 
+##########################################################
 
 #' Copy an R6 class object completely
 #'
@@ -21,20 +43,12 @@ clone <- function(x, deep = TRUE){
 #' @examples
 #' data("taxonomy_table_16S")
 #' taxonomy_table_16S[, 1] <- as.factor(taxonomy_table_16S[, 1])
-#' dropallfactors(taxonomy_table_16S)
+#' str(dropallfactors(taxonomy_table_16S))
 #' @export
 dropallfactors <- function(x, unfac2num = FALSE){
 	# check x class
 	if(!is.data.frame(x)){
 		stop("input data must be data.frame class")
-	}
-	trycharnum <- function(x){
-		if(suppressWarnings(sum(is.na(as.numeric(as.character(x)))) != sum(is.na(x)))) {
-			x <- as.character(x)
-		} else {
-			x <- as.numeric(as.character(x))
-		}
-		x
 	}
 	if(unfac2num == T){
 		x[] <- lapply(x, function(x) trycharnum(x))
@@ -44,6 +58,15 @@ dropallfactors <- function(x, unfac2num = FALSE){
 	x
 }
 
+# inner function
+trycharnum <- function(x){
+	if(suppressWarnings(sum(is.na(as.numeric(as.character(x)))) != sum(is.na(x)))) {
+		x <- as.character(x)
+	} else {
+		x <- as.numeric(as.character(x))
+	}
+	x
+}
 
 #' Clear up the taxonomic table to make taxonomic assignments consistent.
 #'
@@ -75,9 +98,6 @@ tidy_taxonomy_column <- function(taxonomy_table, i){
 	taxonomy_table[,i]
 }
 
-
-
-
 # inner function
 summarySE_inter = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE) {
 	length2 <- function(x, na.rm=TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
@@ -90,10 +110,8 @@ summarySE_inter = function(usedata=NULL, measurevar, groupvars=NULL, na.rm=TRUE)
 }
 
 
-
 ##################################################################################
 ##################################################################################
-
 # metastat code from White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 #************************************************************************
 # ************************** SUBROUTINES ********************************
@@ -256,7 +274,6 @@ permuted_pvalues <- function(Imatrix, tstats, B, g, Fmatrix)
 	return (ps);
 }
 
-
 #*****************************************************************************************************
 # takes a matrix, a permutation vector, and a group division g.
 # returns a set of ts based on the permutation.
@@ -271,8 +288,6 @@ permute_and_calc_ts <- function(Imatrix, y, g)
 
 	return (Ts);
 }
-
-
 
 # http://metastats.cbcb.umd.edu/detect_DA_features.r
 #*****************************************************************************************************
