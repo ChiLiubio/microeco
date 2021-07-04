@@ -853,6 +853,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 		# group test in lefse or rf
 		test_mark = function(dataset, group, nonpara = TRUE, para = "anova", min_num_nonpara = 1){
 			d1 <- as.data.frame(t(dataset))
+			num_vals <- as.numeric(d1[,1])
+			#shapiro test function  - check normality
+			if(length(unique((num_vals[!is.na(num_vals)]))) > 3 
+			   & length(unique((num_vals[!is.na(num_vals)]))) < 5000 ){
+			  d1.shapiro <- shapiro.test(num_vals)$p.value
+			  if (d1.shapiro > 0.05){
+			    nonpara = F
+			  }
+			}else{
+			  message("It was not possible to verify the normality of the taxa ", colnames(d1)[1], " !")
+			} 
+
 			if(nonpara == T){
 				if(any(table(as.character(group))) < min_num_nonpara){
 					list(p_value = NA, med = NA)
@@ -871,11 +883,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}else{
 				if(para == "anova"){
-					rownames(d1)[1] <- "Abundance"
+				  colnames(d1)[1] <- "Abundance" #dataframe of 1 col
 					d2 <- cbind.data.frame(d1, Group = group)
 					res1 <- aov(Abundance ~ Group, d2)
 					pvalue <- as.numeric(unlist(summary(res1))[9])
-					pvalue
+					list(p_value = pvalue) #default return is list
 				}
 			}
 		},
