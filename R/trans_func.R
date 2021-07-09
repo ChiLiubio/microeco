@@ -267,7 +267,10 @@ trans_func <- R6Class(classname = "trans_func",
 					})
 				}
 			}
-			res_spe_func_perc %<>% t %>% as.data.frame %>% `colnames<-`(colnames(res_spe_func)) %>% .[, apply(., 2, sum) != 0]
+			res_spe_func_perc %<>% t %>% 
+				as.data.frame %>% 
+				`colnames<-`(colnames(res_spe_func)) %>% 
+				.[, apply(., 2, sum) != 0]
 			self$res_spe_func_perc <- res_spe_func_perc
 			message('The result table is stored in object$res_spe_func_perc!')
 		},
@@ -391,9 +394,9 @@ trans_func <- R6Class(classname = "trans_func",
 
 			x1 <- importQIIMEData(pathfilename)
 			self$tax4fun_KO <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = TRUE)
-			message('The KO abundance result is stored in object$tax4fun_KO!')
+			message('The KO abundance result is stored in object$tax4fun_KO')
 			self$tax4fun_path <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = FALSE)
-			message('The pathway abundance result is stored in object$tax4fun_path!')
+			message('The pathway abundance result is stored in object$tax4fun_path')
 
 			if(keep_tem == F){
 				unlink(pathfilename, recursive = FALSE, force = TRUE)
@@ -715,9 +718,9 @@ trans_func <- R6Class(classname = "trans_func",
 			rel_functional_redundancy_final <- data.frame(KO = ko_list$ko, rel_functional_redundancy_tab, description = ko_list$description)
 
 			self$res_tax4fun2_aFRI <- abs_functional_redundancy_final
-			message('Absolute functional redundancy is stored in object$res_tax4fun2_aFRI!')
+			message('Absolute functional redundancy is stored in object$res_tax4fun2_aFRI')
 			self$res_tax4fun2_rFRI <- rel_functional_redundancy_final
-			message('Relative functional redundancy is stored in object$res_tax4fun2_rFRI!')
+			message('Relative functional redundancy is stored in object$res_tax4fun2_rFRI')
 		},
 		#' @description
 		#' Print the trans_func object.

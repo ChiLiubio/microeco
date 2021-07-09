@@ -613,6 +613,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#compute within-module degree for each of the features
 		within_module_degree = function(comm_graph){
 			mods <- get.vertex.attribute(comm_graph, "module")
+			if(is.null(mods)){
+				stop("No modules found! Please first calculate network modules using function cal_module!")
+			}
 			modvs <- data.frame("taxon"= V(comm_graph)$name, "mod"=mods, stringsAsFactors = FALSE)
 			sg1 <- decompose.graph(comm_graph, mode="strong")
 			res <- data.frame()

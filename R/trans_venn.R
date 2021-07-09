@@ -48,7 +48,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
 			if(!is.null(ratio)){
 				if(!ratio %in% c("seqratio", "numratio")){
-					stop("The parameter ratio must be one of seqratio or numratio!")
+					stop("The parameter ratio must be one of seqratio or numratio !")
 				}
 				if(ratio == "seqratio"){
 					venn_count_abund[,2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[,2]), 3) * 100, "%")

@@ -49,7 +49,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 					scores <- scores(model, choices = 1:ncomp)$sites
 					combined <- cbind.data.frame(scores, dataset$sample_table)
 
-					loading <- cbind.data.frame(scores(model, choices = 1:ncomp)$species, dataset$tax_table)
+					if(is.null(dataset$tax_table)){
+						loading <- scores(model, choices = 1:ncomp)$species
+					}else{
+						loading <- cbind.data.frame(scores(model, choices = 1:ncomp)$species, dataset$tax_table)
+					}
 					loading <- cbind.data.frame(loading, rownames(loading))
 
 					if(scale_species == T){

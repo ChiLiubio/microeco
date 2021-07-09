@@ -73,7 +73,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				# differential test
 				group_vec <- sampleinfo[, group] %>% as.factor
 				message("Start differential test for ", group, " ...")
-				res_class <- lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x,], group_vec))
+				res_class <- lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec))
 				pvalue <- unlist(lapply(res_class, function(x) x$p_value))
 				pvalue[is.nan(pvalue)] <- 1
 				# select significant taxa
@@ -344,15 +344,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 					tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
 					p <- objres1@pvalues
 					if (mseq_adjustMethod == "ihw-ubiquity" | mseq_adjustMethod == "ihw-abundance") {
-						padj = MRihw(objres1, p, mseq_adjustMethod, 0.1)
+						padj <- MRihw(objres1, p, mseq_adjustMethod, 0.1)
 					} else {
-						padj = p.adjust(p, method = mseq_adjustMethod)
+						padj <- p.adjust(p, method = mseq_adjustMethod)
 					}
 					srt <- order(p, decreasing = FALSE)
 					valid <- 1:length(padj)
 					if (mseq_count > 0) {
-						np = rowSums(objres1@counts)
-						valid = intersect(valid, which(np >= mseq_count))
+						np <- rowSums(objres1@counts)
+						valid <- intersect(valid, which(np >= mseq_count))
 					}
 					srt <- srt[which(srt %in% valid)]
 					res <- cbind(tb[, 1:2], p)
@@ -367,9 +367,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_mseq <- output
-				message('The result is stored in object$res_mseq !')
+				message('The result is stored in object$res_mseq')
 				self$res_mseq_group_matrix <- all_name
-				message('The group information is stored in object$res_mseq_group_matrix !')
+				message('The group information is stored in object$res_mseq_group_matrix')
 			}
 		},
 		#' @description
@@ -851,8 +851,22 @@ trans_diff <- R6Class(classname = "trans_diff",
 		),
 	private = list(
 		# group test in lefse or rf
-		test_mark = function(dataset, group, nonpara = TRUE, para = "anova", min_num_nonpara = 1){
-			d1 <- as.data.frame(t(dataset))
+		test_mark = function(dataframe, group, nonpara = TRUE, para = "anova", min_num_nonpara = 1){
+			d1 <- as.data.frame(t(dataframe))
+			# check normality for parametric test
+			if(nonpara == F){
+				num_vals <- as.numeric(d1[,1])
+				#shapiro test function
+				if(length(unique((num_vals[!is.na(num_vals)]))) > 3 & length(unique((num_vals[!is.na(num_vals)]))) < 5000 ){
+					d1.shapiro <- shapiro.test(num_vals)$p.value
+					if(d1.shapiro > 0.05){
+						nonpara = F
+					}
+				}else{
+					message("It was impossible to verify the normality of the taxa ", colnames(d1)[1], " !")
+				}
+			}
+
 			if(nonpara == T){
 				if(any(table(as.character(group))) < min_num_nonpara){
 					list(p_value = NA, med = NA)
@@ -867,15 +881,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					med <- tapply(d1[,1], group, median) %>% as.data.frame
 					colnames(med) <- colnames(d1)
-					list(p_value = res1$p.value, med = med)		
+					list(p_value = res1$p.value, med = med)
 				}
 			}else{
+				# Currently, anova is not used in the whole class
 				if(para == "anova"){
-					rownames(d1)[1] <- "Abundance"
+					colnames(d1)[1] <- "Abundance"
 					d2 <- cbind.data.frame(d1, Group = group)
 					res1 <- aov(Abundance ~ Group, d2)
 					pvalue <- as.numeric(unlist(summary(res1))[9])
-					pvalue
+					list(p_value = pvalue)
 				}
 			}
 		},
