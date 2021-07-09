@@ -650,6 +650,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			# filter the taxa with unidentified classification or with space, in case of the unexpected error in the following operations
 			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]}
 			abund_table %<>% {.[!grepl("\\s", rownames(.)), ]}
+			# also filter uncleared classification to make it in line with the lefse above
+			abund_table %<>% {.[!grepl("Incertae_sedis", rownames(.)), ]}
+			abund_table %<>% {.[!grepl("unculture", rownames(.)), ]}
 
 			if(!is.null(use_taxa_num)){
 				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
@@ -700,6 +703,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			mapping$node_class <- label_levels
 			tree <- tidytree::treedata(phylo = phylo, data = tibble::as_tibble(mapping))
 			tree <- ggtree::ggtree(tree, size = 0.2, layout = 'circular')
+			
 			# color legend order settings
 			if(is.null(group_order)){
 				color_groups <- marker_table$Group %>% as.character %>% as.factor %>% levels
