@@ -123,21 +123,27 @@ t1 <- trans_func$new(dataset = dataset)
 \if{latex}{\out{\hypertarget{method-cal_spe_func}{}}}
 \subsection{Method \code{cal_spe_func()}}{
 Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
-Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
-Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
+Prokaryotes, based on the FAPROTAX database or NJC19 database, please also cite: 
+FAPROTAX: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>; 
+NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. Scientific Data, 7(1). <10.1038/s41597-020-0516-5>.
 Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
 FUNGuild: Nguyen et al. (2016). 
-FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>
+FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>; 
 FungalTraits: Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
 Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(fungi_database = c("FUNGuild", "FungalTraits")[1])}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(
+  prok_database = c("FAPROTAX", "NJC19")[1],
+  fungi_database = c("FUNGuild", "FungalTraits")[1]
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{fungi_database}}{default "FUNGuild"; select a fungi trait database for the trait identification, "FUNGuild" or "FungalTraits"; see the description in this function.}
+\item{\code{prok_database}}{default "FAPROTAX"; "FAPROTAX" or "NJC19", selecting a prokaryotic trait database; see the description in this function.}
+
+\item{\code{fungi_database}}{default "FUNGuild"; "FUNGuild" or "FungalTraits", a fungi trait database for the identification; see the description in this function.}
 }
 \if{html}{\out{</div>}}
 }

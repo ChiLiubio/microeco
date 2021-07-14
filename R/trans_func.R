@@ -42,21 +42,23 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
-		#' Prokaryotes: based on the FAPROTAX database, please also cite the original FAPROTAX paper: 
-		#' Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>;
+		#' Prokaryotes, based on the FAPROTAX database or NJC19 database, please also cite: 
+		#' FAPROTAX: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>; 
+		#' NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. Scientific Data, 7(1). <10.1038/s41597-020-0516-5>.
 		#' Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
 		#' FUNGuild: Nguyen et al. (2016). 
-		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>
+		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>; 
 		#' FungalTraits: Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
 		#' Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
 		#'
-		#' @param fungi_database default "FUNGuild"; select a fungi trait database for the trait identification, "FUNGuild" or "FungalTraits"; see the description in this function.
+		#' @param prok_database default "FAPROTAX"; "FAPROTAX" or "NJC19", selecting a prokaryotic trait database; see the description in this function.
+		#' @param fungi_database default "FUNGuild"; "FUNGuild" or "FungalTraits", a fungi trait database for the identification; see the description in this function.
 		#' @return res_spe_func in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func()
 		#' }
-		cal_spe_func = function(fungi_database = c("FUNGuild", "FungalTraits")[1]){
+		cal_spe_func = function(prok_database = c("FAPROTAX", "NJC19")[1], fungi_database = c("FUNGuild", "FungalTraits")[1]){
 			for_what <- self$for_what
 			if(is.na(for_what)){
 				stop("No for_what object found, please assign the for_what object use prok or fungi manually!")
@@ -64,47 +66,81 @@ trans_func <- R6Class(classname = "trans_func",
 			if(! for_what %in% c("prok", "fungi")){
 				stop("Wrong for_what found, please make sure for_what object is one of prok and fungi !")
 			}
+			tax1 <- self$tax_table
 			if(for_what == "prok"){
-				# Copyright (c) 2021, Stilianos Louca. All rights reserved.
-				# prok_func is a database developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
-				data("prok_func", envir=environment())
-				message("The prokaryotic database is developed based on the recent FAPROTAX database. Please also cite the original FAPROTAX paper: Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
-				# collapse taxonomy
-				tax1 <- apply(self$tax_table, 1, function(x){paste0(x, collapse = ";")}) %>% 
-					gsub(".__", "", .) %>% 
-					gsub(";{1, }$", "", .)
-				# reduce computational cost
-				tax2 <- unique(tax1)
-				# first create result matrix of tax2, then tax1-OTU
-				res <- matrix(nrow = length(tax2), ncol = length(prok_func$func_tax))
-				rownames(res) <- tax2
-				colnames(res) <- names(prok_func$func_tax)
-				# match taxa
-				for(i in seq_len(ncol(res))){
-					res[, i] <- grepl(prok_func$func_tax[i], tax2) %>% as.numeric
-				}
-				res %<>% as.data.frame
-				# identify the inclusion part among groups
-				for(i in names(prok_func$func_groups)){
-					if(length(prok_func$func_groups[[i]]) == 0){
-						next
-					}else{
-						for(j in seq_along(prok_func$func_groups[[i]])){
-							res[, i] <- res[, i] + res[, prok_func$func_groups[[i]][j]]
+				if(grepl("FAPROTAX", prok_database, ignore.case = TRUE)){
+					# Copyright (c) 2021, Stilianos Louca. All rights reserved.
+					# developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
+					data("prok_func_FAPROTAX", envir=environment())
+					message("This database is developed based on the recent FAPROTAX database. Please also cite the original FAPROTAX paper: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
+					# collapse taxonomy
+					tax1 <- apply(tax1, 1, function(x){paste0(x, collapse = ";")}) %>% 
+						gsub(".__", "", .) %>% 
+						gsub(";{1, }$", "", .)
+					# reduce computational cost
+					tax2 <- unique(tax1)
+					# first create result matrix of tax2, then tax1-OTU
+					res <- matrix(nrow = length(tax2), ncol = length(prok_func_FAPROTAX$func_tax))
+					rownames(res) <- tax2
+					colnames(res) <- names(prok_func_FAPROTAX$func_tax)
+					# match taxa
+					for(i in seq_len(ncol(res))){
+						res[, i] <- grepl(prok_func_FAPROTAX$func_tax[i], tax2) %>% as.numeric
+					}
+					res %<>% as.data.frame
+					# identify the inclusion part among groups
+					for(i in names(prok_func_FAPROTAX$func_groups)){
+						if(length(prok_func_FAPROTAX$func_groups[[i]]) == 0){
+							next
+						}else{
+							for(j in seq_along(prok_func_FAPROTAX$func_groups[[i]])){
+								res[, i] <- res[, i] + res[, prok_func_FAPROTAX$func_groups[[i]][j]]
+							}
 						}
 					}
+					# only use 1 to represent existence
+					res[res > 1] <- 1
+					otu_func_table <- res[tax1, ]
+					rownames(otu_func_table) <- names(tax1)
+					otu_func_table$anaerobic_chemoheterotrophy <- 0
+					otu_func_table$anaerobic_chemoheterotrophy[otu_func_table$chemoheterotrophy != 0 & otu_func_table$aerobic_chemoheterotrophy == 0] <- 1
+				}else{
+					tax1[] <- lapply(tax1, function(x) gsub(".*__", "", x))
+					if(!any(grepl("Species", colnames(tax1)))){
+						stop("No Species column in the tax_table !")
+					}
+					if(all(tax1$Species == "")){
+						stop("No species name exist in the Species column!")
+					}
+					if(!any(grepl("\\s", tax1$Species))){
+						stop("No blank space found in the Species column! Please check whether species names are right!")
+					}
+					
+					data("prok_func_NJC19_list", envir=environment())
+					# list to frame
+					frame1 <- data.frame()
+					for(i in names(prok_func_NJC19_list)){
+						x1 <- prok_func_NJC19_list[[i]]
+						for(j in names(x1)){
+							x2 <- data.frame(i, x1[[j]], j, stringsAsFactors = FALSE)
+							colnames(x2) <- c("Species", "trait", "Type")
+							frame1 <- rbind(frame1, x2)
+						}
+					}
+					frame1$use_trait <- paste(frame1[, 2], frame1[, 3], sep = " -- ")
+					frame1$value <- 1
+					frame1 <- frame1[, -c(2:3)]
+					frame2 <- suppressMessages(reshape2::dcast(frame1, Species ~ use_trait, value.var="value"))
+
+					otu_func_table <- dplyr::left_join(tax1, frame2, by = c("Species" = "Species"))
+					rownames(otu_func_table) <- rownames(tax1)
+					otu_func_table <- otu_func_table[, -c(1:which(colnames(otu_func_table) == "Species"))]
+					otu_func_table[is.na(otu_func_table)] <- 0
 				}
-				# only use 1 to represent existence
-				res[res > 1] <- 1
-				otu_func_table <- res[tax1, ]
-				rownames(otu_func_table) <- names(tax1)
-				otu_func_table$anaerobic_chemoheterotrophy <- 0
-				otu_func_table$anaerobic_chemoheterotrophy[otu_func_table$chemoheterotrophy != 0 & otu_func_table$aerobic_chemoheterotrophy == 0] <- 1
 			}
 			if(for_what == "fungi"){
 				if(grepl("FUNGuild", fungi_database, ignore.case = TRUE)){
 					data("fungi_func_FUNGuild", envir=environment())
-					tax1 <- self$tax_table
 					tax1[] <- lapply(tax1, function(x) gsub(".*__", "", x))
 					tax1 %<>% dropallfactors
 					# add taxon column to store the target taxon
@@ -144,7 +180,6 @@ trans_func <- R6Class(classname = "trans_func",
 						otu_func_table[, i] <- grepl(i, res_table[, "guild"]) %>% as.numeric
 					}
 				}else{
-					tax1 <- self$tax_table
 					if(!any(grepl("Genus", colnames(tax1), fixed = TRUE))){
 						stop("No Genus column found in tax_table of dataset!")
 					}
@@ -206,7 +241,7 @@ trans_func <- R6Class(classname = "trans_func",
 				self$fungi_database <- fungi_database
 			}
 			self$res_spe_func <- otu_func_table
-			message('The functional table is stored in object$res_spe_func')
+			message('The functional table is stored in object$res_spe_func ...')
 		},
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities or modules.

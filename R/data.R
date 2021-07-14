@@ -60,13 +60,23 @@ NULL
 NULL
 
 
-#' The prokaryotic trait database in the microeco package
+#' The modified FAPROTAX trait database in the microeco package
 #'
 #'
 #' @docType data
 #' @keywords data.frame
-#' @name prok_func
-#' @usage data(prok_func)
+#' @name prok_func_FAPROTAX
+#' @usage data(prok_func_FAPROTAX)
+NULL
+
+
+#' The modified NJC19 database in the microeco package
+#'
+#'
+#' @docType data
+#' @keywords data.frame
+#' @name prok_func_NJC19_list
+#' @usage data(prok_func_NJC19_list)
 NULL
 
 
