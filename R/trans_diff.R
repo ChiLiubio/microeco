@@ -318,9 +318,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_metastat <- output
-				message('The metastat result is stored in object$res_metastat !')
+				message('The metastat result is stored in object$res_metastat ...')
 				self$res_metastat_group_matrix <- all_name
-				message('The metastat group information is stored in object$res_metastat_group_matrix !')
+				message('The metastat group information is stored in object$res_metastat_group_matrix ...')
 			}
 			if(grepl("mseq", method, ignore.case = TRUE)){
 				if(!require(metagenomeSeq)){
@@ -367,9 +367,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				self$res_mseq <- output
-				message('The result is stored in object$res_mseq')
+				message('The result is stored in object$res_mseq ...')
 				self$res_mseq_group_matrix <- all_name
-				message('The group information is stored in object$res_mseq_group_matrix')
+				message('The group information is stored in object$res_mseq_group_matrix ...')
 			}
 		},
 		#' @description
@@ -821,7 +821,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			){
 			use_data <- self$res_metastat
 			group_char <- self$res_metastat_group_matrix[, choose_group]
-			use_group <- use_data[,1] %>% unique %>% .[1]
+			# updated, collapsed use_group
+			use_group <- paste0(as.character(group_char), collapse = " vs ")
 			use_data %<>% .[.$qvalue < qvalue & .[,1] == use_group, ]
 			use_data[,2] %<>% gsub(paste0(".*", tolower(substr(self$metastat_taxa_level, 1, 1)), "__(.*)$"), "\\1", .)
 			use_data %<>% .[.[,2] != "", ]
