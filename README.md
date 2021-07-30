@@ -330,19 +330,19 @@ rep_fasta <- seqinr::read.fasta(rep_fasta_path)
 # then see the help document of microtable class about the rep_fasta in microtable$new().
 ```
 
-## Plotting
+### Plotting
 Most of the plotting in the package rely on the ggplot2 package system.
 We provide some parameters to change the corresponding plot.
 If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
 Each data table used for plotting is stored in the object and can be downloaded for the personalized analysis and plotting.
 Of course, you can also directly modify the function or class to reload them.
 
-## Files from other tools to microtable object
+### Files from other tools to microtable object
 Previous descriptions on how to construct microtable object from QIIME, QIIME2 and phyloseq have been moved to the package file2meco (https://github.com/ChiLiubio/file2meco)
 The package file2meco is designed to transform files from other tools/platforms into microtable object.
 
 
-## sample_table in microtable
+### sample_table in microtable
 The rownames of sample_table are used for selecting samples/groups in all the related operations in the package.
 Before you create microtable object, make sure that the rownames of sample_table are the sample names.
 
