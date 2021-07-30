@@ -11,7 +11,7 @@ the increasing data amount and complexity make the community data analysis and m
 There has been a lot of R packages created for the microbiome profiling analysis, such as phyloseq,
 microbiomeSeq, ampvis2, mare and microbiome.
 However, it is still difficult to perform data mining fast and efficiently.
-Based on this, we created an R package microeco.
+Based on this, we created R package microeco.
 
 ## Main Features
   + R6 Class to store and analyze data; fast, flexible and modularized
@@ -345,6 +345,13 @@ The package file2meco is designed to transform files from other tools/platforms 
 ## sample_table in microtable
 The rownames of sample_table are used for selecting samples/groups in all the related operations in the package.
 Before you create microtable object, make sure that the rownames of sample_table are the sample names.
+
+
+## Contributing
+
+We welcome any contribution \! 
+Any idea/suggestion will be considered.
+By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
 
 
 ## References
