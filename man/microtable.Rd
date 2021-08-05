@@ -218,7 +218,7 @@ Print the microtable object.
 \if{html}{\out{<a id="method-filter_pollution"></a>}}
 \if{latex}{\out{\hypertarget{method-filter_pollution}{}}}
 \subsection{Method \code{filter_pollution()}}{
-Filter the taxa considered as pollution.
+Filter the taxa considered as pollution from tax_table.
 This operation will remove any line of the tax_table containing any the word in taxa parameter regardless of word case.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$filter_pollution(taxa = c("mitochondria", "chloroplast"))}\if{html}{\out{</div>}}
@@ -283,7 +283,7 @@ dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 \if{latex}{\out{\hypertarget{method-tidy_dataset}{}}}
 \subsection{Method \code{tidy_dataset()}}{
 Tidy the object of microtable Class.
-Trim the dataset to make OTUs and samples consistent across all files in the object.
+Trim the dataset to make taxa and samples consistent across all files in the object. So the results are intersections.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$tidy_dataset(main_data = TRUE)}\if{html}{\out{</div>}}
 }

@@ -42,12 +42,20 @@ microtable <- R6Class(classname = "microtable",
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric vector! Please check the otu_table!")
 			}else{
-				otu_table <- otu_table[apply(otu_table, 1, sum) > 0, ]
-				otu_table <- otu_table[, apply(otu_table, 2, sum) > 0, drop = FALSE]
+				if(any(apply(otu_table, 1, sum) == 0)){
+					remove_num <- sum(apply(otu_table, 1, sum) == 0)
+					message(remove_num, " taxa are removed from the otu_table, as abundance is 0 ...")
+					otu_table <- otu_table[apply(otu_table, 1, sum) > 0, ]
+				}
+				if(any(apply(otu_table, 2, sum) == 0)){
+					remove_num <- sum(apply(otu_table, 2, sum) == 0)
+					message(remove_num, " samples are removed from the otu_table, as abundance is 0 ...")
+					otu_table <- otu_table[, apply(otu_table, 2, sum) > 0, drop = FALSE]
+				}
 				self$otu_table <- otu_table
 			}
 			if(is.null(sample_table)){
-				message("No sample_table provided, automatically use colnames in otu_table to create it!")
+				message("No sample_table provided, automatically use colnames in otu_table to create it ...")
 				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% `row.names<-`(.$SampleID)
 			}else{
 				self$sample_table <- sample_table
@@ -80,7 +88,7 @@ microtable <- R6Class(classname = "microtable",
 			invisible(self)
 		},
 		#' @description
-		#' Filter the taxa considered as pollution.
+		#' Filter the taxa considered as pollution from tax_table.
 		#' This operation will remove any line of the tax_table containing any the word in taxa parameter regardless of word case.
 		#'
 		#' @param taxa default: c("mitochondria", "chloroplast"); filter mitochondria and chloroplast, or others as needed.
@@ -98,7 +106,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			tax_table_use %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case=TRUE)))))
 			filter_num <- nrow(self$tax_table) - nrow(tax_table_use)
-			message(paste("Total", filter_num, "taxa are removed!"))
+			message(paste("Total", filter_num, "taxa are removed from tax_table !"))
 			self$tax_table <- tax_table_use
 		},
 		#' @description
@@ -121,13 +129,13 @@ microtable <- R6Class(classname = "microtable",
 				message("Use the minimum number across samples: ", sample.size)
 			}
 			if (length(sample.size) > 1) {
-				stop("`sample.size` had more than one value. ")
+				stop("`sample.size` had more than one value !")
 			}
 			if (sample.size <= 0) {
-				stop("sample.size less than or equal to zero. ", "Need positive sample size to work.")
+				stop("sample.size less than or equal to zero. ", "Need positive sample size to work !")
 			}
 			if (max(self$sample_sums()) < sample.size){
-				stop("sample.size is larger than the maximum of sample sums, pleasure check input sample.size")
+				stop("sample.size is larger than the maximum of sample sums, pleasure check input sample.size !")
 			}
 			if (min(self$sample_sums()) < sample.size) {
 				rmsamples <- self$sample_names()[self$sample_sums() < sample.size]
@@ -149,7 +157,7 @@ microtable <- R6Class(classname = "microtable",
 		},
 		#' @description
 		#' Tidy the object of microtable Class.
-		#' Trim the dataset to make OTUs and samples consistent across all files in the object.
+		#' Trim the dataset to make taxa and samples consistent across all files in the object. So the results are intersections.
 		#'
 		#' @param main_data TRUE or FALSE, if TRUE, only basic files in microtable object is tidied, otherwise, all files, including taxa_abund, alpha_diversity and beta_diversity, are all trimed.
 		#' @return None, Object of microtable itself cleaned up. 
@@ -460,7 +468,7 @@ microtable <- R6Class(classname = "microtable",
 			namechange <- base::intersect(colnames(res), names(renamevec))
 			colnames(res)[colnames(res) %in% namechange] <- renamevec[namechange]
 			self$alpha_diversity <- as.data.frame(res)
-			message('The result is stored in object$alpha_diversity.')
+			message('The result is stored in object$alpha_diversity ...')
 		},
 		#' @description
 		#' Save alpha diversity table to the computer.
@@ -505,7 +513,7 @@ microtable <- R6Class(classname = "microtable",
 				res$unwei_unifrac <- unwei_unifrac
 			}
 			self$beta_diversity <- res
-			message('The result is stored in object$beta_diversity.')
+			message('The result is stored in object$beta_diversity ...')
 		},
 		#' @description
 		#' Save beta diversity matrix to the computer.
