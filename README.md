@@ -1,4 +1,5 @@
-# microeco
+# microeco <a href="https://chiliubio.github.io/microeco_tutorial/"><img src="https://user-images.githubusercontent.com/20815519/128353984-942c7dad-ccc6-4e5b-8672-8325d3d576f8.png" width=160 align="right" ></a>
+
 An R package for data mining in microbial community ecology
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
