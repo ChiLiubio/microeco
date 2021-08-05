@@ -210,6 +210,20 @@ microtable <- R6Class(classname = "microtable",
 		#' }
 		cal_abund = function(select_cols = NULL, rel = TRUE, split_group = FALSE, split_by = "&&", split_column = NULL){
 			taxa_abund = list()
+			if(is.null(self$tax_table)){
+				stop("No tax_table found! Please check your data!")
+			}
+			# check data corresponding
+			if(nrow(self$tax_table) != nrow(self$otu_table)){
+				message("The row number of tax_table is not equal to that of otu_table !")
+				message("Automatically applying tidy_dataset() function to trim the data ...")
+				self$tidy_dataset()
+				print(self)
+			}
+			# check whether 0 rows in tax_table
+			if(nrow(self$tax_table) == 0){
+				stop("0 rows in tax_table! Please check your data!")
+			}
 			if(is.null(select_cols)){
 				select_cols <- 1:ncol(self$tax_table)
 			}else{
@@ -245,7 +259,7 @@ microtable <- R6Class(classname = "microtable",
 											split_column = use_split_column)
 			}
 			self$taxa_abund <- taxa_abund
-			message('The result is stored in object$taxa_abund ')
+			message('The result is stored in object$taxa_abund ...')
 		},
 		#' @description
 		#' Save taxonomic abundance to the computer local place.
@@ -437,7 +451,7 @@ microtable <- R6Class(classname = "microtable",
 			outlist <- c(outlist, list(coverage = private$goods(OTU)))
 			if(PD == T){
 				if(is.null(self$phylo_tree)){
-					stop("Please provide phylogenetic tree for PD calculation")
+					stop("Please provide phylogenetic tree for PD calculation!")
 				}else{
 					outlist <- c(outlist, list(PD = picante::pd(OTU, self$phylo_tree)[,"PD", drop=TRUE]))
 				}
