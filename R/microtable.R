@@ -106,7 +106,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			tax_table_use %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case=TRUE)))))
 			filter_num <- nrow(self$tax_table) - nrow(tax_table_use)
-			message(paste("Total", filter_num, "taxa are removed from tax_table !"))
+			message(paste("Total", filter_num, "taxa are removed from tax_table ..."))
 			self$tax_table <- tax_table_use
 		},
 		#' @description
@@ -150,7 +150,7 @@ microtable <- R6Class(classname = "microtable",
 			# remove OTUs with 0 sequence
 			rmtaxa <- self$taxa_names()[self$taxa_sums() == 0]
 			if (length(rmtaxa) > 0) {
-				message(length(rmtaxa), " OTUs were removed because they are no longer present in any sample after random subsampling\n")
+				message(length(rmtaxa), " OTUs were removed because they are no longer present in any sample after random subsampling ...")
 				self$tax_table <- base::subset(self$tax_table, ! self$taxa_names() %in% rmtaxa)
 				self$tidy_dataset()
 			}

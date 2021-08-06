@@ -115,14 +115,31 @@ trans_env <- R6Class(classname = "trans_env",
 				res_rda <- rda(use_data ~ ., env_data)
 			}
 			self$res_rda <- res_rda
-			message('The rda total result is stored in object$res_rda')
+			message('The rda total result is stored in object$res_rda ...')
 			self$res_rda_R2 <- unlist(RsquareAdj(res_rda))
-			message('The R2 is stored in object$res_rda_R2')
+			message('The R2 is stored in object$res_rda_R2 ...')
 			# test for sig.environ.variables
 			self$res_rda_terms <- anova(res_rda, by = "terms", permu = 1000)
-			message('The terms anova result is stored in object$res_rda_terms')
+			message('The terms anova result is stored in object$res_rda_terms ...')
 			self$res_rda_axis <- anova(res_rda, by = "axis", perm.max = 1000)
-			message('The axis anova result is stored in object$res_rda_axis')
+			message('The axis anova result is stored in object$res_rda_axis ...')
+		},
+		#' @description
+		#' Fits each environmental vector onto the RDA ordination to obtain the contribution of each variable.
+		#'
+		#' @param ... the parameters passing to vegan::envfit function.
+		#' @return res_rda_envsquare in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_rda_envsquare()
+		#' }
+		cal_rda_envsquare = function(...){
+			if(is.null(self$res_rda)){
+				stop("Please first calculate RDA !")
+			}else{
+				self$res_rda_envsquare <- vegan::envfit(self$res_rda, self$env_data, ...)
+				message('Result is stored in object$res_rda_envsquare ...')
+			}
 		},
 		#' @description
 		#' transform RDA result for the following plotting.
@@ -456,7 +473,6 @@ trans_env <- R6Class(classname = "trans_env",
 					lim_x <- hclust(dist(t(clu_data_1))) %>% {.$labels[.$order]}
 				}
 			}
-
 			if(pheatmap == T){
 				if(!require(pheatmap)){
 					stop("pheatmap package not installed")
@@ -505,6 +521,82 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
+		#' Scatter plot and add fitting.
+		#'
+		#' @param x default NULL; a single numeric or character value or a vector used for the x axis.
+		#'     If x is a single value, it will be used to select the column of env_data inside.
+		#' @param y default NULL; a single numeric or character value or a vector used for the y axis.
+		#'     If y is a single value, it will be used to select the column of env_data inside.
+		#' @param use_cor default TRUE; TRUE for correlation; FALSE for regression; 
+		#' @param use_se default TRUE; Whether show the confidence interval for the fitting; 
+		#' @param text_x_pos default NULL; the central x axis position of the fitting text.
+		#' @param text_y_pos default NULL; the central y axis position of the fitting text.
+		#' @param x_axis_title default ""; the title of x axis.
+		#' @param y_axis_title default ""; the title of y axis.
+		#' @param pvalue_trim default 4; trim the decimal places of p value.
+		#' @param cor_coef_trim default 3; trim the decimal places of correlation coefficient.
+		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
+		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
+		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
+		#' @param ... the parameters passing to ggplot2::geom_point function.
+		#' @return plot.
+		#' @examples
+		#' \donttest{
+		#' t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
+		#' }
+		plot_scatterfit = function(
+			x = NULL, 
+			y = NULL, 
+			use_cor = TRUE, 
+			use_se = TRUE,
+			text_x_pos = NULL, 
+			text_y_pos = NULL, 
+			x_axis_title = "", 
+			y_axis_title = "",
+			pvalue_trim = 4, 
+			cor_coef_trim = 3,
+			lm_fir_trim = 2,
+			lm_sec_trim = 2,
+			lm_squ_trim = 2,
+			...
+			){
+			if(length(x) == 1){
+				x <- self$env_data[, x]
+			}
+			if(length(y) == 1){
+				y <- self$env_data[, y]
+			}
+			if(length(x) != length(y)){
+				stop("The length of x axis vector is not equal to the length of y axis vector!")
+			}
+			use_data <- data.frame(x, y)
+			if(use_cor == T){
+				fit <- cor.test(x, y)
+			}else{
+				fit <- lm(y ~ x)
+			}
+			if(is.null(text_x_pos)){
+				text_x_pos <- max(use_data$x) * 0.2
+			}
+			if(is.null(text_y_pos)){
+				text_y_pos <- max(use_data$y) * 0.8
+			}
+
+			p <- ggplot(use_data, aes(x = x, y = y)) + 
+				theme_bw() + 
+				geom_point(shape = 20, size = 4, ...) +
+				theme(panel.grid = element_blank()) +
+				geom_smooth(method = "lm", size = .8, colour = "black", se = use_se) +
+				annotate("text", x = text_x_pos, y = text_y_pos, 
+					label = private$equation(fit, use_cor = use_cor, pvalue_trim = pvalue_trim, cor_coef_trim = cor_coef_trim, 
+					lm_fir_trim = lm_fir_trim, lm_sec_trim = lm_sec_trim, lm_squ_trim = lm_squ_trim), parse = TRUE) +
+#				scale_x_continuous(limits = c(min(x2) - 0.2 * (range(x2)[2] - range(x2)[1]), NA)) +
+				xlab(x_axis_title) + 
+				ylab(y_axis_title) +
+				theme(axis.text=element_text(size=13), axis.title=element_text(size=15))
+			p
+		},
+		#' @description
 		#' Print the trans_env object.
 		print = function(){
 			cat("trans_env class:\n")
@@ -530,6 +622,25 @@ trans_env <- R6Class(classname = "trans_env",
 			res <- data.frame(newx, newy)
 			colnames(res) <- colnames(x)
 			res
+		},
+		equation = function(equat, use_cor = TRUE, pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2) {
+			if(class(equat) == "lm" & use_cor == T){
+				stop("Input is lm class! Please check the use_cor parameter!")
+			}
+			pvalue <- ifelse(use_cor == T, equat$p.value, anova(equat)$`Pr(>F)`[1])
+			if(use_cor == T){
+				estimate = equat$estimate
+				all_coef <- list(R1 = unname(round(estimate, digits = cor_coef_trim)), P1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim))))
+				res <- substitute(italic(R)~"="~R1*";"~~italic(P)*P1, all_coef)
+			}else{
+				inte <- round(unname(coef(equat))[1], digits = lm_sec_trim)
+				lm_coef <- list(a = ifelse(inte < 0, paste0(" - ", abs(inte)), paste0(" + ", as.character(inte))),
+							  b = round(unname(coef(equat))[2], digits = lm_fir_trim),
+							  r2 = round(summary(equat)$r.squared, digits = lm_squ_trim),
+							  p1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim))))
+				res <- substitute(italic(y) == b %.% italic(x)*a*","~~italic(R)^2~"="~r2*","~~italic(P)*p1,lm_coef)	
+			}
+			as.character(as.expression(res))
 		}
 	),
 	lock_class = FALSE,

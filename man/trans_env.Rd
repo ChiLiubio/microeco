@@ -25,6 +25,14 @@ t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 }
 
 ## ------------------------------------------------
+## Method `trans_env$cal_rda_envsquare`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_rda_envsquare()
+}
+
+## ------------------------------------------------
 ## Method `trans_env$trans_rda`
 ## ------------------------------------------------
 
@@ -65,17 +73,27 @@ t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$T
 \donttest{
 t1$plot_corr(pheatmap = FALSE)
 }
+
+## ------------------------------------------------
+## Method `trans_env$plot_scatterfit`
+## ------------------------------------------------
+
+\donttest{
+t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_env$new()}}
 \item \href{#method-cal_rda}{\code{trans_env$cal_rda()}}
+\item \href{#method-cal_rda_envsquare}{\code{trans_env$cal_rda_envsquare()}}
 \item \href{#method-trans_rda}{\code{trans_env$trans_rda()}}
 \item \href{#method-plot_rda}{\code{trans_env$plot_rda()}}
 \item \href{#method-cal_mantel}{\code{trans_env$cal_mantel()}}
 \item \href{#method-cal_cor}{\code{trans_env$cal_cor()}}
 \item \href{#method-plot_corr}{\code{trans_env$plot_corr()}}
+\item \href{#method-plot_scatterfit}{\code{trans_env$plot_scatterfit()}}
 \item \href{#method-print}{\code{trans_env$print()}}
 \item \href{#method-clone}{\code{trans_env$clone()}}
 }
@@ -160,6 +178,36 @@ res_rda, res_rda_R2, res_rda_terms and res_rda_axis in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_rda_envsquare"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_rda_envsquare}{}}}
+\subsection{Method \code{cal_rda_envsquare()}}{
+Fits each environmental vector onto the RDA ordination to obtain the contribution of each variable.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_rda_envsquare(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{the parameters passing to vegan::envfit function.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_rda_envsquare in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_rda_envsquare()
 }
 }
 \if{html}{\out{</div>}}
@@ -424,6 +472,77 @@ plot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_corr(pheatmap = FALSE)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_scatterfit"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_scatterfit}{}}}
+\subsection{Method \code{plot_scatterfit()}}{
+Scatter plot and add fitting.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_scatterfit(
+  x = NULL,
+  y = NULL,
+  use_cor = TRUE,
+  pvalue_trim = 4,
+  cor_coef_trim = 3,
+  lm_fir_trim = 2,
+  lm_sec_trim = 2,
+  lm_squ_trim = 2,
+  use_se = TRUE,
+  text_x_pos = NULL,
+  text_y_pos = NULL,
+  x_axis_title = "",
+  y_axis_title = "",
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{default NULL; a single numeric or character value or a vector used for the x axis.
+If x is a single value, it will be used to select the column of env_data inside.}
+
+\item{\code{y}}{default NULL; a single numeric or character value or a vector used for the y axis.
+If y is a single value, it will be used to select the column of env_data inside.}
+
+\item{\code{use_cor}}{default TRUE; TRUE for correlation; FALSE for regression;}
+
+\item{\code{pvalue_trim}}{default 4; trim the decimal places of p value.}
+
+\item{\code{cor_coef_trim}}{default 3; trim the decimal places of correlation coefficient.}
+
+\item{\code{lm_fir_trim}}{default 2; trim the decimal places of regression first coefficient.}
+
+\item{\code{lm_sec_trim}}{default 2; trim the decimal places of regression second coefficient.}
+
+\item{\code{lm_squ_trim}}{default 2; trim the decimal places of regression R square.}
+
+\item{\code{text_x_pos}}{default NULL; the central x axis position of the fitting text.}
+
+\item{\code{text_y_pos}}{default NULL; the central y axis position of the fitting text.}
+
+\item{\code{x_axis_title}}{default ""; the title of x axis.}
+
+\item{\code{y_axis_title}}{default ""; the title of y axis.}
+
+\item{\code{...}}{the parameters passing to ggplot2::geom_point function.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 }
 }
 \if{html}{\out{</div>}}
