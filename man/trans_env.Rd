@@ -483,22 +483,25 @@ t1$plot_corr(pheatmap = FALSE)
 \if{html}{\out{<a id="method-plot_scatterfit"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_scatterfit}{}}}
 \subsection{Method \code{plot_scatterfit()}}{
-Scatter plot and add fitting.
+Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
+ have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
+ Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
+ assigned according to the column selection of the env_data inside.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_scatterfit(
   x = NULL,
   y = NULL,
   use_cor = TRUE,
-  pvalue_trim = 4,
-  cor_coef_trim = 3,
-  lm_fir_trim = 2,
-  lm_sec_trim = 2,
-  lm_squ_trim = 2,
   use_se = TRUE,
   text_x_pos = NULL,
   text_y_pos = NULL,
   x_axis_title = "",
   y_axis_title = "",
+  pvalue_trim = 4,
+  cor_coef_trim = 3,
+  lm_fir_trim = 2,
+  lm_sec_trim = 2,
+  lm_squ_trim = 2,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -506,13 +509,25 @@ Scatter plot and add fitting.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{default NULL; a single numeric or character value or a vector used for the x axis.
-If x is a single value, it will be used to select the column of env_data inside.}
+\item{\code{x}}{default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
+If x is a single value, it will be used to select the column of env_data inside.
+If x is a distance matrix, it will be transformed to be a vector.}
 
-\item{\code{y}}{default NULL; a single numeric or character value or a vector used for the y axis.
-If y is a single value, it will be used to select the column of env_data inside.}
+\item{\code{y}}{default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
+If y is a single value, it will be used to select the column of env_data inside.
+If y is a distance matrix, it will be transformed to be a vector.}
 
-\item{\code{use_cor}}{default TRUE; TRUE for correlation; FALSE for regression;}
+\item{\code{use_cor}}{default TRUE; TRUE for correlation; FALSE for regression.}
+
+\item{\code{use_se}}{default TRUE; Whether show the confidence interval for the fitting.}
+
+\item{\code{text_x_pos}}{default NULL; the central x axis position of the fitting text.}
+
+\item{\code{text_y_pos}}{default NULL; the central y axis position of the fitting text.}
+
+\item{\code{x_axis_title}}{default ""; the title of x axis.}
+
+\item{\code{y_axis_title}}{default ""; the title of y axis.}
 
 \item{\code{pvalue_trim}}{default 4; trim the decimal places of p value.}
 
@@ -523,14 +538,6 @@ If y is a single value, it will be used to select the column of env_data inside.
 \item{\code{lm_sec_trim}}{default 2; trim the decimal places of regression second coefficient.}
 
 \item{\code{lm_squ_trim}}{default 2; trim the decimal places of regression R square.}
-
-\item{\code{text_x_pos}}{default NULL; the central x axis position of the fitting text.}
-
-\item{\code{text_y_pos}}{default NULL; the central y axis position of the fitting text.}
-
-\item{\code{x_axis_title}}{default ""; the title of x axis.}
-
-\item{\code{y_axis_title}}{default ""; the title of y axis.}
 
 \item{\code{...}}{the parameters passing to ggplot2::geom_point function.}
 }

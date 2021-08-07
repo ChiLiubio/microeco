@@ -521,14 +521,19 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' Scatter plot and add fitting.
+		#' Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
+		#'  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
+		#'  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
+		#'  assigned according to the column selection of the env_data inside.
 		#'
-		#' @param x default NULL; a single numeric or character value or a vector used for the x axis.
+		#' @param x default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
 		#'     If x is a single value, it will be used to select the column of env_data inside.
-		#' @param y default NULL; a single numeric or character value or a vector used for the y axis.
+		#'     If x is a distance matrix, it will be transformed to be a vector.
+		#' @param y default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
 		#'     If y is a single value, it will be used to select the column of env_data inside.
-		#' @param use_cor default TRUE; TRUE for correlation; FALSE for regression; 
-		#' @param use_se default TRUE; Whether show the confidence interval for the fitting; 
+		#'     If y is a distance matrix, it will be transformed to be a vector.
+		#' @param use_cor default TRUE; TRUE for correlation; FALSE for regression.
+		#' @param use_se default TRUE; Whether show the confidence interval for the fitting.
 		#' @param text_x_pos default NULL; the central x axis position of the fitting text.
 		#' @param text_y_pos default NULL; the central y axis position of the fitting text.
 		#' @param x_axis_title default ""; the title of x axis.
@@ -547,7 +552,7 @@ trans_env <- R6Class(classname = "trans_env",
 		plot_scatterfit = function(
 			x = NULL, 
 			y = NULL, 
-			use_cor = TRUE, 
+			use_cor = TRUE,
 			use_se = TRUE,
 			text_x_pos = NULL, 
 			text_y_pos = NULL, 
@@ -560,11 +565,34 @@ trans_env <- R6Class(classname = "trans_env",
 			lm_squ_trim = 2,
 			...
 			){
+			if(!(is.vector(x) | is.matrix(x))){
+				stop("The input x is neither a vector nor a matrix !")
+			}
+			if(!(is.vector(y) | is.matrix(y))){
+				stop("The input y is neither a vector nor a matrix !")
+			}
 			if(length(x) == 1){
 				x <- self$env_data[, x]
 			}
 			if(length(y) == 1){
 				y <- self$env_data[, y]
+			}
+			# Matrix is transformed to be a vector
+			if(is.matrix(x) | is.matrix(y)){
+				if(is.matrix(x) & is.matrix(y)){
+					x <- as.vector(as.dist(x))
+					y <- as.vector(as.dist(y))
+				}else{
+					if(is.matrix(x)){
+						x <- as.vector(as.dist(x))
+						y1 <- as.data.frame(as.numeric(as.character(y)))
+						y <- as.vector(vegdist(y1, "euclidean"))
+					}else{
+						y <- as.vector(as.dist(y))
+						x1 <- as.data.frame(as.numeric(as.character(x)))
+						x <- as.vector(vegdist(x1, "euclidean"))
+					}
+				}
 			}
 			if(length(x) != length(y)){
 				stop("The length of x axis vector is not equal to the length of y axis vector!")
@@ -588,7 +616,7 @@ trans_env <- R6Class(classname = "trans_env",
 				theme(panel.grid = element_blank()) +
 				geom_smooth(method = "lm", size = .8, colour = "black", se = use_se) +
 				annotate("text", x = text_x_pos, y = text_y_pos, 
-					label = private$equation(fit, use_cor = use_cor, pvalue_trim = pvalue_trim, cor_coef_trim = cor_coef_trim, 
+					label = private$fit_equat(fit, use_cor = use_cor, pvalue_trim = pvalue_trim, cor_coef_trim = cor_coef_trim, 
 					lm_fir_trim = lm_fir_trim, lm_sec_trim = lm_sec_trim, lm_squ_trim = lm_squ_trim), parse = TRUE) +
 #				scale_x_continuous(limits = c(min(x2) - 0.2 * (range(x2)[2] - range(x2)[1]), NA)) +
 				xlab(x_axis_title) + 
@@ -623,7 +651,7 @@ trans_env <- R6Class(classname = "trans_env",
 			colnames(res) <- colnames(x)
 			res
 		},
-		equation = function(equat, use_cor = TRUE, pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2) {
+		fit_equat = function(equat, use_cor = TRUE, pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2) {
 			if(class(equat) == "lm" & use_cor == T){
 				stop("Input is lm class! Please check the use_cor parameter!")
 			}
