@@ -70,7 +70,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			self$ratio <- ratio
 			self$otu_table <- abund
 			self$tax_table <- use_dataset$tax_table
-			message('The result is stored in object$venn_table and object$venn_count_abund.')
+			message('The result is stored in object$venn_table and object$venn_count_abund ...')
 		},
 		#' @description
 		#' Plot venn diagram.
@@ -276,7 +276,10 @@ trans_venn <- R6Class(classname = "trans_venn",
 					p <- p + annotate("text", x = 0, y = 0 - sum(abs(petal_use_lim))/(petal_text_move*2), label = plot_data[nrow(plot_data), 2], size = text_size)
 				}
 			}
-			return(p)
+			if(colnumber > 5 & petal_plot == F){
+				stop("This colnumber > 5! Please use petal_plot = TRUE !")
+			}
+			p
 		},
 		#' @description
 		#' Transform venn result for the composition analysis.

@@ -9,7 +9,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param group default NULL; the sample column used for the statistics; If provided, can return alpha_stat.
-		#' @param order_x default:null; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
+		#' @param order_x default NULL; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
 		#' @return alpha_data and alpha_stat stored in the object.
 		#' @examples
 		#' \donttest{
@@ -36,15 +36,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			if(!is.null(group)){
 				self$alpha_stat <- microeco:::summarySE_inter(alpha_data, measurevar = "Value", groupvars = c(self$group, "Measure"))
-				message('The group statistics are stored in object$alpha_stat !')
+				message('The group statistics are stored in object$alpha_stat ...')
 			}else{
 				self$alpha_stat <- NULL
 			}			
 			self$alpha_data <- alpha_data
-			message('The transformed diversity data is stored in object$alpha_data !')
+			message('The transformed diversity data is stored in object$alpha_data ...')
 		},
 		#' @description
-		#' Test the difference of alpha diveristy across groups. If use anova, require agricolae package.
+		#' Test the difference of alpha diversity across groups. If use anova, require agricolae package.
 		#'
 		#' @param method default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.
 		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
