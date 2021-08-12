@@ -1,4 +1,4 @@
-# microeco <a href="https://chiliubio.github.io/microeco_tutorial/"><img src="https://user-images.githubusercontent.com/20815519/128353984-942c7dad-ccc6-4e5b-8672-8325d3d576f8.png" width=160 align="right" ></a>
+# microeco <a href="https://chiliubio.github.io/microeco_tutorial/"><img src="https://user-images.githubusercontent.com/20815519/128353984-942c7dad-ccc6-4e5b-8672-8325d3d576f8.png" width=150 align="right" ></a>
 
 An R package for data mining in microbial community ecology
 
@@ -350,8 +350,7 @@ Before you create microtable object, make sure that the rownames of sample_table
 
 ## Contributing
 
-We welcome any contribution \! 
-Any idea/suggestion will be considered.
+We welcome any contribution, including but not limited to code, idea, tutorial. \! 
 By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
 
 
