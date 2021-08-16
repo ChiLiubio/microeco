@@ -40,8 +40,13 @@ Open RStudio...Tools...Global Options...Packages, select the appropriate mirror 
 
 ## Install microeco
 
-Install the latest microeco from github.
-This is the **best** way as there are some minor improvements here compared to the version in CRAN.
+Install microeco package from CRAN directly.
+
+```r
+install.packages("microeco")
+```
+
+Or install the latest development version from github. There are some minor improvements here compared to the version in CRAN.
 
 ```r
 # If devtools package is not installed, first install it
@@ -54,12 +59,6 @@ If the installation from github is failed because of the bad internet, download 
 
 ```r
 devtools::install_local("microeco-master.zip")
-```
-
-It is also good to install the microeco from CRAN directly. There may be some update delay in the CRAN version.
-
-```r
-install.packages("microeco")
 ```
 
 ## Tutorial
