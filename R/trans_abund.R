@@ -438,7 +438,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(!xtext_keep){
 				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 			}
-			p <- p + theme(axis.title.y= element_text(size=ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
+			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
 
 			if(xtitle_keep == F) {
 				p <- p + theme(axis.title.x = element_blank())

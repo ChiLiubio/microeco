@@ -255,10 +255,6 @@ through statistical co-occurrence.
 Gephi is an excellent network visualization tool and used to open the saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
 
-#### chorddiag
-
-The R package chorddiag is used for the chord plot in the network analysis and can be installed from Github https://github.com/mattflor/chorddiag
-
 #### WGCNA
 In the correlation-based network, when the species number is large,
 the correlation algorithm in WGCNA is very fast compared to the cor function in R base.

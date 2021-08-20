@@ -91,7 +91,7 @@ trans_network <- R6Class(classname = "trans_network",
 					cor_result <- list(cor = res_cor, p = res_p)
 				}
 				self$res_cor_p <- cor_result
-				message('The correlation result list is stored in object$res_cor_p !')
+				message('The correlation result list is stored in object$res_cor_p ...')
 			}else{
 				self$res_cor_p <- NULL
 			}
@@ -117,7 +117,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param PGM_sensitive default "true"; whether use sensitive type in the PGM model.
 		#' @param PGM_heterogeneous default "true"; whether use heterogeneous type in the PGM model.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
-		#' @param add_taxa_name default "Phylum"; add taxonomic rank name to the result.
+		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
 		#' @param ... paremeters pass to spiec.easi in package SpiecEasi.
 		#' @return res_network in object.
@@ -397,63 +397,6 @@ trans_network <- R6Class(classname = "trans_network",
 				)
 			}
 			res
-		},
-		#' @description
-		#' This function is used to sum the links number from one taxa to another or in the same taxa, for example, at Phylum level.
-		#' This is very useful to fast see how many nodes are connected between different taxa or within the taxa.
-		#'
-		#' @param taxa_level default "Phylum"; taxonomic rank.
-		#' @return res_sum_links_pos and res_sum_links_neg in object.
-		#' @examples
-		#' \donttest{
-		#' t1$cal_sum_links(taxa_level = "Phylum")
-		#' }
-		cal_sum_links = function(taxa_level = "Phylum"){
-			taxa_table <- self$use_tax
-			network <- self$res_network
-			link_table <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), label = E(network)$label, stringsAsFactors = FALSE)
-			if("+" %in% link_table[, 3]){
-				link_table_1 <- link_table[link_table[, 3] %in% "+", ]
-				self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table_1, taxa_level = taxa_level)
-			}
-			if("-" %in% link_table[, 3]){
-				link_table_1 <- link_table[link_table[, 3] %in% "-", ]
-				self$res_sum_links_neg <- private$sum_link(taxa_table = taxa_table, link_table = link_table_1, taxa_level = taxa_level)
-			}
-			message('The result is stored in object$res_sum_links_pos and/or object$res_sum_links_neg !')
-		},
-		#' @description
-		#' Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
-		#'
-		#' @param plot_pos default TRUE; plot the summed positive or negative linkages.
-		#' @param plot_num default NULL; number of taxa presented in the plot.
-		#' @param color_values default NULL; If not provided, use default.
-		#' @return chorddiag plot
-		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = NULL){
-			if(plot_pos == T){
-				if(is.null(self$res_sum_links_pos)){
-					stop("No res_sum_links_pos found!\n")
-				}else{
-					use_data <- self$res_sum_links_pos
-				}
-			}else{
-				if(is.null(self$res_sum_links_neg)){
-					stop("No res_sum_links_neg found!\n")
-				}else{
-					use_data <- self$res_sum_links_neg
-				}
-			}
-			if(!is.null(plot_num)){
-				use_data %<>% .[1:plot_num, 1:plot_num]
-			}
-			if(is.null(color_values)){
-				if(nrow(use_data) <= 14){
-					groupColors <- c(RColorBrewer::brewer.pal(12, "Paired"), "#FDE0EF", "#C51B7D")
-				}else{
-					groupColors <- unname(randomcoloR::distinctColorPalette(nrow(use_data)))
-				}
-			}
-			chorddiag::chorddiag(use_data, groupColors = groupColors)
 		},
 		#' @description
 		#' Subset of the network.
@@ -772,40 +715,6 @@ trans_network <- R6Class(classname = "trans_network",
 				p <- p + guides(size = guide_legend(title = "Abundance(%)"))
 			}
 			p
-		},
-		sum_link = function(taxa_table, link_table, taxa_level){
-			# first obtain the taxa names
-			all_names <- taxa_table[rownames(taxa_table) %in% unique(c(link_table[,1], link_table[,2])), ] %>%
-				{table(.[, taxa_level])} %>%
-				sort(., decreasing = TRUE) %>% 
-				rownames
-			com_group <- expand.grid(all_names, all_names)
-			colnames(com_group) <- c("C1", "C2")
-			# assign rownames irrespective of the order
-			rownames(com_group) <- apply(com_group, 1, function(x) paste0(x, collapse = "-"))
-			# get the unifrom combined name without regard to the order
-			com_group$uni_name <- apply(com_group, 1, function(x) paste0(sort(x), collapse = "-"))
-			com_group1 <- com_group[, -c(1,2), drop = FALSE]
-			res <- link_table
-			# use taxa name to replace the species name
-			res[, 1] <- taxa_table[res[, 1], taxa_level]
-			res[, 2] <- taxa_table[res[, 2], taxa_level]
-			res$pname <- paste(res[, 1], res[, 2], sep = "-")
-			res %<>% dplyr::group_by(pname) %>% 
-				dplyr::summarise(count = dplyr::n()) %>%
-				as.data.frame(stringsAsFactors = FALSE)
-			res <- dplyr::left_join(res, rownames_to_column(com_group1), by = c("pname" = "rowname")) %>%
-				dplyr::group_by(uni_name) %>% 
-				dplyr::summarise(sum_count = sum(count)) %>%
-				as.data.frame(stringsAsFactors = FALSE)
-			res <- dplyr::left_join(res, com_group, by = c("uni_name" = "uni_name"))
-			res <- reshape2::dcast(res, C1~C2, value.var = "sum_count") %>%
-				`row.names<-`(.[,1]) %>%
-				.[, -1, drop = FALSE] %>%
-				.[all_names, all_names] %>%
-				as.matrix
-			res[is.na(res)] <- 0			
-			res
 		}
 	),
 	lock_class = FALSE,
