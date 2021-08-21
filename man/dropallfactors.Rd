@@ -4,12 +4,15 @@
 \alias{dropallfactors}
 \title{Remove all factors in a data frame}
 \usage{
-dropallfactors(x, unfac2num = FALSE)
+dropallfactors(x, unfac2num = FALSE, char2num = FALSE)
 }
 \arguments{
 \item{x}{data frame}
 
-\item{unfac2num}{default FALSE; whether try to convert all character to numeric; if FALSE, only try to convert column with factor attribute.}
+\item{unfac2num}{default FALSE; whether try to convert all character to numeric; if FALSE, only try to convert column with factor attribute.
+Note that this can only transform the columns that may be transformed to numeric without using factor.}
+
+\item{char2num}{default FALSE; whether force all the character to be numeric class by using factor as an intermediate.}
 }
 \value{
 data frame without factor

@@ -17,13 +17,15 @@ clone <- function(x, deep = TRUE){
 #'
 #' @param x data frame
 #' @param unfac2num default FALSE; whether try to convert all character to numeric; if FALSE, only try to convert column with factor attribute.
+#'   Note that this can only transform the columns that may be transformed to numeric without using factor.
+#' @param char2num default FALSE; whether force all the character to be numeric class by using factor as an intermediate.
 #' @return data frame without factor
 #' @examples
 #' data("taxonomy_table_16S")
 #' taxonomy_table_16S[, 1] <- as.factor(taxonomy_table_16S[, 1])
 #' str(dropallfactors(taxonomy_table_16S))
 #' @export
-dropallfactors <- function(x, unfac2num = FALSE){
+dropallfactors <- function(x, unfac2num = FALSE, char2num = FALSE){
 	# check x class
 	if(!is.data.frame(x)){
 		stop("input data must be data.frame class")
@@ -32,6 +34,10 @@ dropallfactors <- function(x, unfac2num = FALSE){
 		x[] <- lapply(x, function(x) trycharnum(x))
 	}else{
 		x[] <- lapply(x, function(x) if(is.factor(x)) trycharnum(x) else x)
+	}
+	if(char2num == T){
+		x[] <- lapply(x, function(x) if(is.character(x)) as.factor(x) else x)
+		x[] <- lapply(x, function(x) as.numeric(x))
 	}
 	x
 }

@@ -2,26 +2,33 @@
 #' Create trans_env object for the analysis of the effects of environmental factors on communities.
 #'
 #' @description
-#' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+#' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
+#' mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 #'
 #' @export
 trans_env <- R6Class(classname = "trans_env",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. Either numeric vector or character vector of colnames.
-		#' @param add_data default NULL; provide the environmental data frame individually.
+		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. 
+		#'   Either numeric vector or character vector of colnames.
+		#' @param add_data default NULL; data.frame format; provide the environmental data frame individually.
+		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
 		#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
-		#' @return env_data and dataset in trans_env object.
+		#' @return env_data in trans_env object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
 		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
-		initialize = function(dataset = NULL, env_cols = NULL, add_data = NULL, complete_na = FALSE
+		initialize = function(dataset = NULL, env_cols = NULL, add_data = NULL, character2numeric = TRUE, complete_na = FALSE
 			){
 			if(is.null(add_data)){
-				env_data <- dataset$sample_table[, env_cols, drop = FALSE]
+				if(is.null(env_cols)){
+					stop("Please select env_cols or add_data!")
+				}else{
+					env_data <- dataset$sample_table[, env_cols, drop = FALSE]
+				}
 			}else{
-				env_data <- add_data[rownames(add_data) %in% rownames(dataset$sample_table), ]
+				env_data <- add_data[rownames(add_data) %in% rownames(dataset$sample_table), , drop = FALSE]
 			}
 			if(!is.null(dataset)){
 				dataset1 <- clone(dataset)
@@ -34,13 +41,16 @@ trans_env <- R6Class(classname = "trans_env",
 					dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
 					dataset1$tidy_dataset(main_data = FALSE)
 				}
-				env_data %<>% .[rownames(dataset1$sample_table), ]
+				env_data %<>% .[rownames(dataset1$sample_table), , drop = FALSE]
 			}
 			if(complete_na == T){
 				env_data[env_data == ""] <- NA
 				env_data <- dropallfactors(env_data, unfac2num = TRUE)
 				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 				env_data %<>% mice::mice(print = FALSE) %>% mice::complete(., 1)
+			}
+			if(character2numeric == T){
+				env_data <- dropallfactors(env_data, unfac2num = TRUE, char2num = TRUE)
 			}
 			self$env_data <- env_data
 			self$dataset <- dataset1
@@ -198,7 +208,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			self$res_rda_trans = list(df_sites = df_sites, df_arrows = df_arrows, eigval = eigval, df_species = df_species, df_arrows_spe = df_arrows_spe)
-			message('The result list is stored in object$res_rda_trans')
+			message('The result list is stored in object$res_rda_trans ...')
 		},
 		#' @description
 		#' plot RDA result.
@@ -269,7 +279,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' }
 		cal_mantel = function(select_env_data = NULL, partial_mantel = FALSE, add_matrix = NULL, use_measure = NULL, method = "pearson", ...){
 			if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
-				stop("No distance matrix provided; please use set add_matrix parameter or use provide dataset in creating Class")
+				stop("No distance matrix provided; please use set add_matrix parameter or use provide dataset in creating Class !")
 			}
 			if(is.null(add_matrix)){
 				if(!is.null(use_measure)){
@@ -312,7 +322,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				self$res_mantel <- res_mantel
 			}
-			message('The result is stored in object$res_mantel or object$res_mantel_partial !')
+			message('The result is stored in object$res_mantel or object$res_mantel_partial ...')
 		},
 		#' @description
 		#' Calculating the correlations between taxa abundance and environmental variables.
@@ -354,7 +364,7 @@ trans_env <- R6Class(classname = "trans_env",
 			){
 			env_data <- self$env_data
 			if(is.null(select_env_data)){
-				env_data <- env_data[, unlist(lapply(env_data, is.numeric))]
+				env_data <- env_data[, unlist(lapply(env_data, is.numeric)), drop = FALSE]
 			}
 			if(!is.null(add_abund_table)){
 				abund_table <- add_abund_table
@@ -390,7 +400,7 @@ trans_env <- R6Class(classname = "trans_env",
 				sel_sample_names <- self$dataset$sample_table %>% .[.[, group_use] %in% group_select, ] %>% rownames
 				abund_table <- abund_table[sel_sample_names, ]
 			}
-			env_data %<>% .[rownames(.) %in% rownames(abund_table), ]
+			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
 			abund_table <- abund_table[rownames(env_data), ]
 			if(is.null(by_group)){
 				groups <- rep("All", nrow(env_data))
@@ -424,7 +434,7 @@ trans_env <- R6Class(classname = "trans_env",
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}
 			self$res_cor <- res
-			message('The correlation result is stored in object$res_cor !')
+			message('The correlation result is stored in object$res_cor ...')
 			self$cor_method <- cor_method
 		},
 		#' @description

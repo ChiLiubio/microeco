@@ -4,7 +4,8 @@
 \alias{trans_env}
 \title{Create trans_env object for the analysis of the effects of environmental factors on communities.}
 \description{
-This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
+mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 }
 \examples{
 
@@ -107,6 +108,7 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
   dataset = NULL,
   env_cols = NULL,
   add_data = NULL,
+  character2numeric = TRUE,
   complete_na = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -116,16 +118,19 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. Either numeric vector or character vector of colnames.}
+\item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. 
+Either numeric vector or character vector of colnames.}
 
-\item{\code{add_data}}{default NULL; provide the environmental data frame individually.}
+\item{\code{add_data}}{default NULL; data.frame format; provide the environmental data frame individually.}
+
+\item{\code{character2numeric}}{default TRUE; whether transform the characters or factors to numeric attributes.}
 
 \item{\code{complete_na}}{default FALSE; Whether fill the NA in the environmental data.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-env_data and dataset in trans_env object.
+env_data in trans_env object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
