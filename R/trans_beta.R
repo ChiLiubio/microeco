@@ -27,7 +27,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			self$group <- group
 			if(!is.null(self$measure)){
 				if(!self$measure %in% c(names(dataset$beta_diversity), 1:length(dataset$beta_diversity))){
-					stop("Input measure should be one of beta_diversity distance in dataset")
+					stop("Input measure should be one of beta_diversity distance in dataset !")
 				}else{
 					self$use_matrix <- dataset$beta_diversity[[self$measure]]
 				}
@@ -83,7 +83,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					outlist <- list(model = model, scores = combined)
 				}
 				self$res_ordination <- outlist
-				message('The ordination result is stored in object$res_ordination !')
+				message('The ordination result is stored in object$res_ordination ...')
 			}
 			self$ordination <- ordination
 		},

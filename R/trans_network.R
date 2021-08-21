@@ -57,8 +57,9 @@ trans_network <- R6Class(classname = "trans_network",
 			if(taxa_level != "OTU"){
 				dataset1 <- dataset1$merge_taxa(taxa = taxa_level)
 			}
-			# transform data
+			# transform each object
 			sampleinfo <- dataset1$sample_table
+			# store taxonomic table for the following analysis
 			self$use_tax <- dataset1$tax_table
 			use_abund <- dataset1$otu_table
 			use_abund <- use_abund[apply(use_abund, 1, sum)/sum(use_abund) > filter_thres, ]
@@ -228,6 +229,7 @@ trans_network <- R6Class(classname = "trans_network",
 				E(network)$weight <- abs(E(network)$weight)
 			}
 			nodes_raw <- data.frame(cbind(V(network), V(network)$name))
+			# delete uncultured taxa when the taxa level is not OTU
 			if(taxa_level != "OTU"){
 				delete_nodes <- taxa_table %>% .[grepl("__$|uncultured", .[, taxa_level]), ] %>% rownames %>% .[. %in% rownames(nodes_raw)]
 				network %<>% delete_vertices(delete_nodes)
@@ -248,7 +250,7 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 			}
 			self$res_network <- network
-			message('The result network is stored in object$res_network !')
+			message('The result network is stored in object$res_network ...')
 		},
 		#' @description
 		#' Calculate and add network modules.
@@ -294,7 +296,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_network_attr = function(){
 			self$res_network_attr <- private$network_attribute(self$res_network)
-			message('Result is stored in object$res_network_attr !')
+			message('Result is stored in object$res_network_attr ...')
 		},
 		#' @description
 		#' Calculate node properties.
@@ -308,6 +310,7 @@ trans_network <- R6Class(classname = "trans_network",
 			network <- self$res_network
 			node_type <- private$module_roles(network)
 			use_abund <- self$use_abund
+			# create a replace_table to match the taxa name and marker name when taxa_level is not "OTU"
 			if(self$taxa_level != "OTU"){
 				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
 				node_type <- cbind.data.frame(node_type, 
@@ -317,9 +320,17 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			node_type$degree <- degree(network)[rownames(node_type)]
 			node_type$betweenness <- betweenness(network)[rownames(node_type)]
-			node_type$Abundance <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))[rownames(node_type)]
+			# Add abundance info
+			sum_abund <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))
+			# Same with the above operation to make the names corresponded
+			if(self$taxa_level != "OTU"){
+				node_type$Abundance <- sum_abund[replace_table[rownames(node_type), 2]]
+			}else{
+				node_type$Abundance <- sum_abund[rownames(node_type)]
+			}
+			
 			self$res_node_type <- node_type
-			message('Result is stored in object$res_node_type !')
+			message('Result is stored in object$res_node_type ...')
 		},
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
@@ -340,6 +351,11 @@ trans_network <- R6Class(classname = "trans_network",
 				if(length(tax_names) < 3){
 					next
 				}
+				if(self$taxa_level != "OTU"){
+					network <- self$res_network
+					replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
+					tax_names <- replace_table[tax_names, 2]
+				}
 				sel_abund <- use_abund[, tax_names]
 				pca_model <- rda(sel_abund)
 				sel_scores <- scores(pca_model, choices = 1)$sites %>% as.data.frame
@@ -352,12 +368,12 @@ trans_network <- R6Class(classname = "trans_network",
 			res_eigen <- do.call(cbind, res_eigen)
 			self$res_eigen <- res_eigen
 			self$res_eigen_expla <- res_eigen_expla
-			message('Result is stored in object$res_eigen and object$res_eigen_expla !')
+			message('Result is stored in object$res_eigen and object$res_eigen_expla ...')
 		},
 		#' @description
-		#' Plot the classification and importance of nodes.
+		#' Plot the classification and importance of nodes, see object$res_node_type for the variable names used in the parameters.
 		#'
-		#' @param use_type default 1; 1 or 2; 1 represent the traditional taxa roles plot; 2 represent the plot with taxa names as x axis.
+		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot; 2 represents the layered plot with taxa as x axis.
 		#' @param roles_colors default NULL; for use_type 1; colors for each group.
 		#' @param plot_module default FALSE; for use_type 1; whether plot the modules information.
 		#' @param use_level default "Phylum"; for use_type 2; used taxonomic level in x axis.
@@ -365,7 +381,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param show_number default 1:10; for use_type 2; showed number in x axis, sorting according to the nodes number.
 		#' @param plot_color default "Phylum"; for use_type 2; used variable for color.
 		#' @param plot_shape default "taxa_roles"; for use_type 2; used variable for shape.
-		#' @param plot_size default NULL; for use_type 2; used variable for shape.
+		#' @param plot_size default "Abundance"; for use_type 2; used for size; fixed number (e.g. 5) is also available.
 		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); for use_type 2; color vector
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type 2; shape vector, see ggplot2 tutorial for the shape meaning.
 		#' @return ggplot.
@@ -382,7 +398,7 @@ trans_network <- R6Class(classname = "trans_network",
 			show_number = 1:10,
 			plot_color = "Phylum",
 			plot_shape = "taxa_roles",
-			plot_size = NULL,
+			plot_size = "Abundance",
 			color_values = RColorBrewer::brewer.pal(12, "Paired"),
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14)
 			){
@@ -391,9 +407,14 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			if(use_type == 2){
 				res <- private$plot_roles_2(node_roles = self$res_node_type, 
-					plot_color = plot_color, plot_shape = plot_shape,
-					use_level = use_level, show_value = show_value, show_number = show_number, 
-					color_values = color_values, shape_values = shape_values
+					plot_color = plot_color,
+					plot_shape = plot_shape,
+					use_level = use_level, 
+					show_value = show_value, 
+					show_number = show_number,
+					plot_size = plot_size,
+					color_values = color_values, 
+					shape_values = shape_values
 				)
 			}
 			res
