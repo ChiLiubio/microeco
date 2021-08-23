@@ -4,7 +4,7 @@ An R package for data mining in microbial community ecology
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
-![](https://img.shields.io/badge/Release-0.4.0-orange.svg) ![](https://img.shields.io/badge/Test-0.4.1-red.svg)
+![](https://img.shields.io/badge/Release-0.4.0-orange.svg) ![](https://img.shields.io/badge/Test-0.5.0-red.svg)
 
 ## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
@@ -64,14 +64,11 @@ devtools::install_local("microeco-master.zip")
 ## Tutorial
 See the detailed package tutorial (https://chiliubio.github.io/microeco_tutorial/) and the help documentations.
 If you want to run the codes in the tutorial and README completely, you need to install some additional packages, see the following **Notes** part.
-Beside the demonstration in the tutorial, users can also save the intermediate files in each object and
-apply those files to other tools according to the format requirement.
-Main files stored in the objects of microeco package is the commonly used data.frame format.
-So the intermediate and result files are easily saved and used for other tools in microbial ecology.
 Contructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2 and phyloseq) 
 can be easily achieved using the package file2meco (https://github.com/ChiLiubio/file2meco).
 There are some important features and approaches that exist in other microbiome analysis software/platforms and currently not implemented in microeco package.
 More approaches for the file conversion will be provided in the package file2meco.
+The mecodev package (https://github.com/ChiLiubio/mecodev/) is designed to develop more classes for data analysis based on the microeco package.
 
 
 ## Citation

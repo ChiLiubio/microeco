@@ -543,6 +543,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#'     If y is a single value, it will be used to select the column of env_data inside.
 		#'     If y is a distance matrix, it will be transformed to be a vector.
 		#' @param use_cor default TRUE; TRUE for correlation; FALSE for regression.
+		#' @param cor_method default "pearson"; one of "pearson", "kendall" and "spearman".
+		#' @param add_line default TRUE; whether add the fitted line in the plot.
 		#' @param use_se default TRUE; Whether show the confidence interval for the fitting.
 		#' @param text_x_pos default NULL; the central x axis position of the fitting text.
 		#' @param text_y_pos default NULL; the central y axis position of the fitting text.
@@ -563,6 +565,8 @@ trans_env <- R6Class(classname = "trans_env",
 			x = NULL, 
 			y = NULL, 
 			use_cor = TRUE,
+			cor_method = "pearson",
+			add_line = TRUE,
 			use_se = TRUE,
 			text_x_pos = NULL, 
 			text_y_pos = NULL, 
@@ -609,12 +613,12 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			use_data <- data.frame(x, y)
 			if(use_cor == T){
-				fit <- cor.test(x, y)
+				fit <- cor.test(x, y, method = cor_method)
 			}else{
 				fit <- lm(y ~ x)
 			}
 			if(is.null(text_x_pos)){
-				text_x_pos <- max(use_data$x) * 0.2
+				text_x_pos <- max(use_data$x) * 0.8
 			}
 			if(is.null(text_y_pos)){
 				text_y_pos <- max(use_data$y) * 0.8
@@ -623,15 +627,26 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- ggplot(use_data, aes(x = x, y = y)) + 
 				theme_bw() + 
 				geom_point(shape = 20, size = 4, ...) +
-				theme(panel.grid = element_blank()) +
-				geom_smooth(method = "lm", size = .8, colour = "black", se = use_se) +
-				annotate("text", x = text_x_pos, y = text_y_pos, 
-					label = private$fit_equat(fit, use_cor = use_cor, pvalue_trim = pvalue_trim, cor_coef_trim = cor_coef_trim, 
-					lm_fir_trim = lm_fir_trim, lm_sec_trim = lm_sec_trim, lm_squ_trim = lm_squ_trim), parse = TRUE) +
+				theme(panel.grid = element_blank())
+			if(add_line == T){
+				p <- p + geom_smooth(method = "lm", size = .8, colour = "black", se = use_se)
+			}
+			p <- p + annotate("text", 
+					x = text_x_pos, 
+					y = text_y_pos, 
+					label = private$fit_equat(fit, 
+						use_cor = use_cor, 
+						pvalue_trim = pvalue_trim, 
+						cor_coef_trim = cor_coef_trim, 
+						lm_fir_trim = lm_fir_trim, 
+						lm_sec_trim = lm_sec_trim, 
+						lm_squ_trim = lm_squ_trim), 
+					parse = TRUE) +
 #				scale_x_continuous(limits = c(min(x2) - 0.2 * (range(x2)[2] - range(x2)[1]), NA)) +
 				xlab(x_axis_title) + 
 				ylab(y_axis_title) +
 				theme(axis.text=element_text(size=13), axis.title=element_text(size=15))
+			
 			p
 		},
 		#' @description

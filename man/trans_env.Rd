@@ -497,6 +497,8 @@ Scatter plot and add fitted line. The most important thing is to make sure that 
   x = NULL,
   y = NULL,
   use_cor = TRUE,
+  cor_method = "pearson",
+  add_line = TRUE,
   use_se = TRUE,
   text_x_pos = NULL,
   text_y_pos = NULL,
@@ -523,6 +525,10 @@ If y is a single value, it will be used to select the column of env_data inside.
 If y is a distance matrix, it will be transformed to be a vector.}
 
 \item{\code{use_cor}}{default TRUE; TRUE for correlation; FALSE for regression.}
+
+\item{\code{cor_method}}{default "pearson"; one of "pearson", "kendall" and "spearman".}
+
+\item{\code{add_line}}{default TRUE; whether add the fitted line in the plot.}
 
 \item{\code{use_se}}{default TRUE; Whether show the confidence interval for the fitting.}
 

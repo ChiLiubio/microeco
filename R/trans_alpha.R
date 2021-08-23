@@ -22,8 +22,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(is.null(dataset$alpha_diversity)){
 				stop("The alpha diversity has not been calculated in dataset! Please first calculate it using cal_alphadiv() function in microtable class!")
 			}
-			alpha_data <- dataset$alpha_diversity %>% cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE)
+			alpha_data <- dataset$alpha_diversity %>% 
+				cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE)
 			alpha_data %<>% .[, !grepl("^se", colnames(.))]
+			# to long format
 			alpha_data <- reshape2::melt(alpha_data, id.vars = "Sample")
 			colnames(alpha_data) <- c("Sample", "Measure", "Value")
 			alpha_data <- dplyr::left_join(alpha_data, rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
