@@ -9,7 +9,7 @@
 #' @export
 trans_abund <- R6Class(classname = "trans_abund",
 	public = list(
-		#' @param dataset The microtable class.
+		#' @param dataset default NULL; microtable object.
 		#' @param taxrank default "Phylum"; taxonomic rank.
 		#' @param show default 0; the relative abundance threshold used for filtering.
 		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low; 
@@ -37,15 +37,18 @@ trans_abund <- R6Class(classname = "trans_abund",
 			delete_part_prefix = FALSE,
 			prefix = NULL,
 			use_percentage = TRUE, 
-			input_taxaname = NULL)
-			{
+			input_taxaname = NULL
+			){
+
+			if(is.null(dataset)){
+				stop("No dataset provided!")
+			}
+			if(is.null(dataset$taxa_abund)){
+				stop("The taxonomic abundance has not been calculated! Please first calculate it using cal_abund() function in microtable class!")
+			}
 			self$sample_table <- dataset$sample_table
 			self$taxrank <- taxrank
 			self$use_percentage <- use_percentage
-			
-			if(is.null(dataset$taxa_abund)){
-				stop("The taxonomic abundance has not been calculated in dataset! Please first calculate it using cal_abund() function in microtable class!")
-			}
 			
 			abund_data <- dataset$taxa_abund[[self$taxrank]] %>% 
 				cbind.data.frame(Taxonomy = rownames(.), ., stringsAsFactors = FALSE)
@@ -70,10 +73,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 			abund_data %<>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
 				dplyr::summarise(Abundance = sum(Abundance)) %>%
 				as.data.frame(stringsAsFactors = FALSE)
+			# calculate mean vlaues for each group
 			if(!is.null(groupmean)){
 				abund_data$Sample %<>% as.character
 				mdf <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
-				message(paste0(groupmean, " column is used to calculate mean abundance."))
+				message(paste0(groupmean, " column is used to calculate mean abundance ..."))
 				abund_data <- mdf %>% dplyr::group_by(!!! syms(c("Taxonomy", groupmean))) %>% 
 					dplyr::summarise(Abundance = mean(Abundance)) %>% 
 					as.data.frame
@@ -95,7 +99,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			# filter useless taxa
 			use_taxanames <- use_taxanames[!grepl("unidentified|unculture|Incertae.sedis", use_taxanames)]
-			# identify the used taxa
+			# identify used taxa
 			if(is.null(input_taxaname)){
 				if(length(use_taxanames) > ntaxa_use) use_taxanames <- use_taxanames[1:ntaxa_use]
 			} else {
@@ -117,7 +121,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			self$use_taxanames <- use_taxanames
 		},
 		#' @description
-		#' Plot the bar plot with the object of trans_abund Class.
+		#' Bar plot in trans_abund object.
 		#'
 		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
@@ -255,7 +259,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p
 		},
 		#' @description
-		#' Plot the heatmap with the object of trans_abund Class.
+		#' Plot the heatmap in trans_abund object.
 		#'
 		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
 		#' @param facet default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".
@@ -363,7 +367,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p
 		},
 		#' @description
-		#' Plot the box plot with the object of trans_abund Class.
+		#' Box plot in trans_abund object.
 		#'
 		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
 		#' @param group default NULL; column name of sample table to show abundance across groups.
@@ -452,7 +456,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p
 		},
 		#' @description
-		#' Plot pie chart with the object of trans_abund Class.
+		#' Plot pie chart in trans_abund class.
 		#'
 		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.
 		#' @param facet_nrow default 1; how many rows in the plot.
@@ -464,7 +468,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
 		#' t1$plot_pie(facet_nrow = 1)
 		#' }
-		plot_pie = function(use_colors = RColorBrewer::brewer.pal(8, "Dark2"), facet_nrow = 1, strip_text = 11, legend_text_italic = FALSE
+		plot_pie = function(
+			use_colors = RColorBrewer::brewer.pal(8, "Dark2"), 
+			facet_nrow = 1, 
+			strip_text = 11, 
+			legend_text_italic = FALSE
 			){
 			plot_data <- self$abund_data
 			plot_data$Taxonomy[!plot_data$Taxonomy %in% self$use_taxanames] <- "Others"

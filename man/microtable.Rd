@@ -25,7 +25,7 @@ data(phylo_tree_16S)
 dataset <- microtable$new(otu_table = otu_table_16S)
 dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
-# trim the dataset
+# trim the files in the dataset
 dataset$tidy_dataset()
 
 ## ------------------------------------------------
@@ -54,6 +54,14 @@ dataset$tidy_dataset(main_data = TRUE)
 
 \donttest{
 dataset$cal_abund()
+}
+
+## ------------------------------------------------
+## Method `microtable$save_abund`
+## ------------------------------------------------
+
+\dontrun{
+dataset$save_abund(dirpath = "taxa_abund")
 }
 
 ## ------------------------------------------------
@@ -162,15 +170,16 @@ class(dataset$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame; necessary; The species or OTU table, rows are species, cols are samples.}
+\item{\code{otu_table}}{data.frame; necessary; The feature abundance table, rows are features, e.g. species, cols are samples.}
 
-\item{\code{sample_table}}{data.frame; default NULL; The sample information table, rows are samples, cols are sample metadata.}
+\item{\code{sample_table}}{data.frame; default NULL; The sample information table, rows are samples, cols are sample metadata; 
+If not provided, the function can generate a table automatically according to the sample names in otu_table.}
 
 \item{\code{tax_table}}{data.frame; default NULL; The taxonomic information table, rows are species, cols are taxonomic classes.}
 
-\item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree; read with read.tree function in ape package.}
+\item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree; use read.tree function in ape package for input.}
 
-\item{\code{rep_fasta}}{list; default NULL; The representative sequences; read with read.fasta function in seqinr package.}
+\item{\code{rep_fasta}}{list; default NULL; The representative sequences; use read.fasta function in seqinr package for input.}
 }
 \if{html}{\out{</div>}}
 }
@@ -196,7 +205,7 @@ data(phylo_tree_16S)
 dataset <- microtable$new(otu_table = otu_table_16S)
 dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
-# trim the dataset
+# trim the files in the dataset
 dataset$tidy_dataset()
 }
 \if{html}{\out{</div>}}
@@ -256,7 +265,7 @@ see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{sample.size}}{default:NULL; the required species number, If not provided, use minimum number of all samples.}
+\item{\code{sample.size}}{default:NULL; species number, If not provided, use minimum number of all samples.}
 
 \item{\code{rngseed}}{random seed; default: 123.}
 
@@ -283,7 +292,7 @@ dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 \if{latex}{\out{\hypertarget{method-tidy_dataset}{}}}
 \subsection{Method \code{tidy_dataset()}}{
 Tidy the object of microtable Class.
-Trim the dataset to make taxa and samples consistent across all files in the object. So the results are intersections.
+Trim files in the object to make taxa and samples consistent across all files in the object. So the results are intersections.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$tidy_dataset(main_data = TRUE)}\if{html}{\out{</div>}}
 }
@@ -291,7 +300,8 @@ Trim the dataset to make taxa and samples consistent across all files in the obj
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{main_data}}{TRUE or FALSE, if TRUE, only basic files in microtable object is tidied, otherwise, all files, including taxa_abund, alpha_diversity and beta_diversity, are all trimed.}
+\item{\code{main_data}}{TRUE or FALSE, if TRUE, only basic files in microtable object is trimmed, otherwise, all files, 
+including taxa_abund, alpha_diversity and beta_diversity, are all trimed.}
 }
 \if{html}{\out{</div>}}
 }
@@ -311,7 +321,7 @@ None, Object of microtable itself cleaned up.
 \if{html}{\out{<a id="method-cal_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_abund}{}}}
 \subsection{Method \code{cal_abund()}}{
-Calculate the taxonomic abundance at each taxonomic ranks.
+Calculate the taxonomic abundance at each taxonomic rank.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(
   select_cols = NULL,
@@ -370,6 +380,16 @@ Save taxonomic abundance to the computer local place.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+dataset$save_abund(dirpath = "taxa_abund")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-sample_sums"></a>}}
@@ -421,7 +441,7 @@ dataset$taxa_sums()
 \if{html}{\out{<a id="method-sample_names"></a>}}
 \if{latex}{\out{\hypertarget{method-sample_names}{}}}
 \subsection{Method \code{sample_names()}}{
-Sample names.
+Show sample names.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$sample_names()}\if{html}{\out{</div>}}
 }
@@ -444,7 +464,7 @@ dataset$sample_names()
 \if{html}{\out{<a id="method-taxa_names"></a>}}
 \if{latex}{\out{\hypertarget{method-taxa_names}{}}}
 \subsection{Method \code{taxa_names()}}{
-Taxa names.
+Show taxa names.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$taxa_names()}\if{html}{\out{</div>}}
 }
@@ -480,7 +500,7 @@ Merge samples according to specific group to generate a new microtable.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a new created merged microtable object.
+a new merged microtable object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -510,7 +530,7 @@ Merge taxa according to specific taxonomic rank to generate a new microtable.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a new created merged microtable object.
+a new merged microtable object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -527,7 +547,7 @@ dataset$merge_taxa(taxa = "Genus")
 \if{html}{\out{<a id="method-cal_alphadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_alphadiv}{}}}
 \subsection{Method \code{cal_alphadiv()}}{
-Calculate alpha diversity in microtable Class.
+Calculate alpha diversity in microtable object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_alphadiv(measures = NULL, PD = FALSE)}\if{html}{\out{</div>}}
 }
@@ -535,7 +555,8 @@ Calculate alpha diversity in microtable Class.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{measures}}{one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; default NULL, using all those measures.}
+\item{\code{measures}}{default NULL; one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; 
+If null, use all those measures.}
 
 \item{\code{PD}}{TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.}
 }
@@ -577,8 +598,8 @@ Save alpha diversity table to the computer.
 \if{html}{\out{<a id="method-cal_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
-Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac, 
-see An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
+Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac.
+See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(unifrac = FALSE)}\if{html}{\out{</div>}}
 }
@@ -586,7 +607,7 @@ see An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{unifrac}}{TRUE or FALSE, whether unifrac index should be calculated, default FALSE.}
+\item{\code{unifrac}}{default FALSE; TRUE or FALSE, whether unifrac index should be calculated.}
 }
 \if{html}{\out{</div>}}
 }

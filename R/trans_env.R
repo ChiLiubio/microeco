@@ -19,7 +19,12 @@ trans_env <- R6Class(classname = "trans_env",
 		#' data(dataset)
 		#' data(env_data_16S)
 		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
-		initialize = function(dataset = NULL, env_cols = NULL, add_data = NULL, character2numeric = TRUE, complete_na = FALSE
+		initialize = function(
+			dataset = NULL, 
+			env_cols = NULL, 
+			add_data = NULL, 
+			character2numeric = TRUE, 
+			complete_na = FALSE
 			){
 			if(is.null(add_data)){
 				if(is.null(env_cols)){
@@ -69,7 +74,14 @@ trans_env <- R6Class(classname = "trans_env",
 		#' \donttest{
 		#' t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 		#' }
-		cal_rda = function(use_dbrda = TRUE, add_matrix = NULL, use_measure = NULL, feature_sel = FALSE, taxa_level = NULL, taxa_filter_thres = NULL){
+		cal_rda = function(
+			use_dbrda = TRUE, 
+			add_matrix = NULL, 
+			use_measure = NULL, 
+			feature_sel = FALSE, 
+			taxa_level = NULL, 
+			taxa_filter_thres = NULL
+			){
 			env_data <- self$env_data
 			if(use_dbrda == T){
 				if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
@@ -90,7 +102,7 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("No abundance dataset provided; please set dataset parameter in creating Class")
 				}
 				if(is.null(taxa_level)){
-					message("No taxa_level provided, Genus used automatically!")
+					message("No taxa_level provided, use Genus level automatically !")
 					taxa_level <- "Genus"
 				}
 				newdat <- self$dataset$merge_taxa(taxa_level)
@@ -101,7 +113,7 @@ trans_env <- R6Class(classname = "trans_env",
 				use_data <- as.data.frame(t(use_abund))
 			}
 			if(feature_sel == T){
-				message('Start forward selection.')
+				message('Start forward selection ...')
 				if(use_dbrda == T){
 					mod0 <- dbrda(use_data ~ 1, env_data)
 					mod1 <- dbrda(use_data ~ ., env_data)
@@ -145,7 +157,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' }
 		cal_rda_envsquare = function(...){
 			if(is.null(self$res_rda)){
-				stop("Please first calculate RDA !")
+				stop("Please first use cal_rda function to calculate RDA !")
 			}else{
 				self$res_rda_envsquare <- vegan::envfit(self$res_rda, self$env_data, ...)
 				message('Result is stored in object$res_rda_envsquare ...')
@@ -165,16 +177,27 @@ trans_env <- R6Class(classname = "trans_env",
 		#' \donttest{
 		#' t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
 		#' }
-		trans_rda = function(show_taxa = 10, adjust_arrow_length = FALSE, min_perc_env = 1, max_perc_env = 100, min_perc_tax = 1, max_perc_tax = 100){
+		trans_rda = function(
+			show_taxa = 10, 
+			adjust_arrow_length = FALSE, 
+			min_perc_env = 1, 
+			max_perc_env = 100, 
+			min_perc_tax = 1, 
+			max_perc_tax = 100
+			){
+			if(is.null(self$res_rda)){
+				stop("Please first use cal_rda function to calculate RDA !")
+			}
 			res_rda <- self$res_rda
 			scrs <- scores(res_rda ,choices = c(1, 2), display = c("sp", "wa", "cn"))
 			scrs$biplot <- scores(res_rda, choices=c(1, 2), "bp", scaling="sites")
 			df_sites <- cbind.data.frame(scrs$sites, self$dataset$sample_table[rownames(scrs$sites), ])
 			colnames(df_sites)[1:2] <- c("x","y")
+			
 			multiplier <- vegan:::ordiArrowMul(scrs$biplot)
 			df_arrows<- scrs$biplot * multiplier
 			colnames(df_arrows)<-c("x","y")
-			df_arrows=as.data.frame(df_arrows)
+			df_arrows <- as.data.frame(df_arrows)
 			eigval <- res_rda$CCA$eig/sum(res_rda$CCA$eig)
 			eigval <- round(100 * eigval, 1)
 			eigval[1] <- paste0("RDA1", " [", eigval[1], "%]")
@@ -187,7 +210,10 @@ trans_env <- R6Class(classname = "trans_env",
 				multiplier_spe <- vegan:::ordiArrowMul(scrs$biplot_spe)
 				df_arrows_spe <- scrs$biplot_spe * multiplier_spe
 				colnames(df_arrows_spe)<-c("x","y")
-				df_arrows_spe <- dropallfactors(cbind.data.frame(df_arrows_spe, self$dataset$tax_table[rownames(df_arrows_spe), self$taxa_level, drop = FALSE]))
+				df_arrows_spe <- dropallfactors(cbind.data.frame(
+					df_arrows_spe, 
+					self$dataset$tax_table[rownames(df_arrows_spe), self$taxa_level, drop = FALSE]
+					))
 				df_arrows_spe %<>% .[!grepl("__$|__uncultured|sp$", .[, 3]), ]
 				df_arrows_spe <- df_arrows_spe %>% 
 					{.[,1]^2 + .[,2]^2} %>% 
@@ -197,8 +223,8 @@ trans_env <- R6Class(classname = "trans_env",
 					names %>% 
 					df_arrows_spe[., ]
 			}else{
-				df_species = NULL
-				df_arrows_spe = NULL
+				df_species <- NULL
+				df_arrows_spe <- NULL
 			}
 			if(adjust_arrow_length == T){
 				df_arrows[,1:2] <- private$stand_fun(df_arrows[,1:2], min_perc = min_perc_env, max_perc = max_perc_env)
@@ -207,7 +233,13 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 			}
 			
-			self$res_rda_trans = list(df_sites = df_sites, df_arrows = df_arrows, eigval = eigval, df_species = df_species, df_arrows_spe = df_arrows_spe)
+			self$res_rda_trans <- list(
+				df_sites = df_sites, 
+				df_arrows = df_arrows, 
+				eigval = eigval, 
+				df_species = df_species, 
+				df_arrows_spe = df_arrows_spe
+				)
 			message('The result list is stored in object$res_rda_trans ...')
 		},
 		#' @description
@@ -229,19 +261,28 @@ trans_env <- R6Class(classname = "trans_env",
 			plot_shape = NULL,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
-			taxa_text_color = "firebrick1", 
+			taxa_text_color = "firebrick1",
 			taxa_text_type = "italic"
 			){
+			if(is.null(self$res_rda_trans)){
+				stop("Please first use trans_rda function to get plot data !")
+			}
+			
 			p <- ggplot()
 			p <- p + theme_bw()
 			p <- p + theme(panel.grid=element_blank())
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
-			p <- p + geom_point(data=self$res_rda_trans$df_sites, aes_string("x", "y", colour = plot_color, shape = plot_shape),size= 3.5)
+			p <- p + geom_point(data=self$res_rda_trans$df_sites, aes_string("x", "y", colour = plot_color, shape = plot_shape), size= 3.5)
 			# plot arrows
 			p <- p + geom_segment(data=self$res_rda_trans$df_arrows, aes(x = 0, y = 0, xend = x, yend = y), arrow = arrow(length = unit(0.2, "cm")), color = "grey30")
-			p <- p + ggrepel::geom_text_repel(data=as.data.frame(self$res_rda_trans$df_arrows*1), 
-				aes(x, y, label = gsub("`", "", rownames(self$res_rda_trans$df_arrows))),size=3.7, color = "black", segment.color = "white")
+			p <- p + ggrepel::geom_text_repel(
+				data = as.data.frame(self$res_rda_trans$df_arrows * 1), 
+				aes(x, y, label = gsub("`", "", rownames(self$res_rda_trans$df_arrows))), 
+				size=3.7, 
+				color = "black", 
+				segment.color = "white"
+				)
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)
 			}
@@ -252,14 +293,25 @@ trans_env <- R6Class(classname = "trans_env",
 			
 			if(self$use_dbrda == F){
 				df_arrows_spe1 <- self$res_rda_trans$df_arrows_spe
-				p <- p + geom_segment(data=df_arrows_spe1, aes(x = 0, y = 0, xend = x, yend = y), 
-					arrow = arrow(length = unit(0.2, "cm")), color = "firebrick1", alpha = .6)
+				p <- p + geom_segment(
+					data=df_arrows_spe1, 
+					aes(x = 0, y = 0, xend = x, yend = y), 
+					arrow = arrow(length = unit(0.2, "cm")), 
+					color = "firebrick1", 
+					alpha = .6
+					)
 				df_arrows_spe1[, self$taxa_level] %<>% gsub(".*__", "", .) %>% gsub("Candidatus ", "", .) 
 				if(taxa_text_type == "italic"){
 					df_arrows_spe1[, self$taxa_level] %<>%  paste0("italic('", .,"')")
 				}
-				p <- p + ggrepel::geom_text_repel(data=df_arrows_spe1, aes_string("x", "y", label = self$taxa_level), size=3, 
-					color = taxa_text_color, segment.alpha = .01, parse = TRUE)
+				p <- p + ggrepel::geom_text_repel(
+					data = df_arrows_spe1, 
+					aes_string("x", "y", label = self$taxa_level), 
+					size=3, 
+					color = taxa_text_color, 
+					segment.alpha = .01, 
+					parse = TRUE
+					)
 			}
 			p
 		},
@@ -270,14 +322,21 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param partial_mantel default FALSE; whether use partial mantel test.
 		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-		#' @param method default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.
+		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method.
 		#' @param ... paremeters pass to \code{\link{mantel}}.
 		#' @return res_mantel in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_mantel(use_measure = "bray")
 		#' }
-		cal_mantel = function(select_env_data = NULL, partial_mantel = FALSE, add_matrix = NULL, use_measure = NULL, method = "pearson", ...){
+		cal_mantel = function(
+			select_env_data = NULL, 
+			partial_mantel = FALSE, 
+			add_matrix = NULL, 
+			use_measure = NULL, 
+			method = "pearson", 
+			...
+			){
 			if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
 				stop("No distance matrix provided; please use set add_matrix parameter or use provide dataset in creating Class !")
 			}
@@ -397,7 +456,9 @@ trans_env <- R6Class(classname = "trans_env",
 				if(is.null(group_select)){
 					stop("You select group_use parameter, but no group_select parameter provided!")
 				}
-				sel_sample_names <- self$dataset$sample_table %>% .[.[, group_use] %in% group_select, ] %>% rownames
+				sel_sample_names <- self$dataset$sample_table %>% 
+					.[.[, group_use] %in% group_select, ] %>% 
+					rownames
 				abund_table <- abund_table[sel_sample_names, ]
 			}
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
@@ -406,9 +467,11 @@ trans_env <- R6Class(classname = "trans_env",
 				groups <- rep("All", nrow(env_data))
 			}else{
 				groups <- self$dataset$sample_table[, by_group] %>% as.character
-				message("Calculate the corr by the groups in ", by_group, " of sample_table, respectively")
+				message("Calculate the corr by the groups in ", by_group, " of sample_table, respectively ...")
 			}
-			comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% t %>% as.data.frame(stringsAsFactors = FALSE)
+			comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% 
+				t %>% 
+				as.data.frame(stringsAsFactors = FALSE)
 			res <- sapply(comb_names, function(x){
 				suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
 				{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
@@ -419,8 +482,12 @@ trans_env <- R6Class(classname = "trans_env",
 			res$Correlation %<>% as.numeric
 			res$AdjPvalue <- rep(0, nrow(res))
 			choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
-			comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% 
-				unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
+			comb_names2 <- comb_names[choose_col, ] %>% 
+				t %>% 
+				as.data.frame %>% 
+				unique %>% 
+				t %>% 
+				as.data.frame(stringsAsFactors = FALSE)
 			# p value adjust by groups
 			for(i in seq_len(ncol(comb_names2))){
 				x <- comb_names2[, i]
@@ -448,12 +515,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param plot_x_size default 9; x axis text size.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
 		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
+		#' @param ... paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.
 		#' @return plot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_corr(pheatmap = FALSE)
+		#' t1$plot_cor(pheatmap = FALSE)
 		#' }
-		plot_corr = function(
+		plot_cor = function(
 			color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
 			pheatmap = FALSE,
 			ylab_type_italic = FALSE,
@@ -461,8 +529,12 @@ trans_env <- R6Class(classname = "trans_env",
 			keep_prefix = TRUE,
 			plot_x_size = 9,
 			mylabels_x = NULL,
-			font_family = NULL
+			font_family = NULL,
+			...
 			){
+			if(is.null(self$res_cor)){
+				stop("Please first use cal_cor to get plot data !")
+			}
 			use_data <- self$res_cor
 			if(keep_full_name == F){
 				use_data$Taxa %<>% gsub(".*\\|", "", .)
@@ -474,9 +546,13 @@ trans_env <- R6Class(classname = "trans_env",
 				use_data$Env <- paste0(use_data$Type, ": ", use_data$Env)
 			}
 			if(length(unique(use_data$Type)) == 1 | pheatmap){
-				clu_data_1 <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
+				clu_data_1 <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% 
+					`row.names<-`(.[,1]) %>% 
+					.[, -1, drop = FALSE]
 				clu_data_1[is.na(clu_data_1)] <- 0
-				sig_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Significance") %>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
+				sig_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Significance") %>% 
+					`row.names<-`(.[,1]) %>% 
+					.[, -1, drop = FALSE]
 				sig_data[is.na(sig_data)] <- ""
 				if(length(unique(use_data$Type)) == 1 & pheatmap == F){
 					lim_y <- hclust(dist(clu_data_1)) %>% {.$labels[.$order]}
@@ -494,23 +570,37 @@ trans_env <- R6Class(classname = "trans_env",
 					sig_data %<>% {.[select_rows, ]}
 				}
 				if(ylab_type_italic == T){
-					eval(parse(text = paste0("mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data_1),'"'), "))", collapse = ","),")", 
+					eval(parse(text = paste0(
+						"mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data_1),'"'), "))", collapse = ","),")", 
 						collapse = "")))
 				}else{
 					mylabels_y <- rownames(clu_data_1)
 				}
 				color_vector_use <- colorRampPalette(color_vector)(100)
-				p <- pheatmap(clu_data_1, clustering_distance_row = "correlation", clustering_distance_cols= "correlation",border_color = NA, scale = "none",
-						 fontsize=plot_x_size,cluster_cols=TRUE,cluster_rows=TRUE, labels_row = mylabels_y, labels_col = mylabels_x, 
-						 display_numbers = sig_data, number_color = "black",  fontsize_number = plot_x_size*1.2,
-						 color = color_vector_use)
+				p <- pheatmap(
+					clu_data_1, 
+					clustering_distance_row = "correlation", 
+					clustering_distance_cols= "correlation",
+					border_color = NA, 
+					scale = "none",
+					fontsize = plot_x_size, 
+					cluster_cols = TRUE,
+					cluster_rows = TRUE, 
+					labels_row = mylabels_y, 
+					labels_col = mylabels_x, 
+					display_numbers = sig_data, 
+					number_color = "black", 
+					fontsize_number = plot_x_size * 1.2,
+					color = color_vector_use, 
+					...
+					)
 				p$gtable
 			}else{
-				p <- ggplot(aes(x=Env, y=Taxa, fill=Correlation), data = use_data) +
+				p <- ggplot(aes(x = Env, y = Taxa, fill = Correlation), data = use_data) +
 					theme_bw() + 
-					geom_tile() + 
+					geom_tile(...) + 
 					scale_fill_gradientn(colours = color_vector) +
-					geom_text(aes(label=Significance), color="black", size=4) + 
+					geom_text(aes(label = Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = self$cor_method) +
 					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white")) +
@@ -676,22 +766,34 @@ trans_env <- R6Class(classname = "trans_env",
 			colnames(res) <- colnames(x)
 			res
 		},
-		fit_equat = function(equat, use_cor = TRUE, pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2) {
+		fit_equat = function(
+			equat, 
+			use_cor = TRUE, 
+			pvalue_trim = 4, 
+			cor_coef_trim = 3, 
+			lm_fir_trim = 2, 
+			lm_sec_trim = 2, 
+			lm_squ_trim = 2
+			){
 			if(class(equat) == "lm" & use_cor == T){
 				stop("Input is lm class! Please check the use_cor parameter!")
 			}
 			pvalue <- ifelse(use_cor == T, equat$p.value, anova(equat)$`Pr(>F)`[1])
 			if(use_cor == T){
 				estimate = equat$estimate
-				all_coef <- list(R1 = unname(round(estimate, digits = cor_coef_trim)), P1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim))))
+				all_coef <- list(
+					R1 = unname(round(estimate, digits = cor_coef_trim)), 
+					P1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
+					)
 				res <- substitute(italic(R)~"="~R1*";"~~italic(P)*P1, all_coef)
 			}else{
 				inte <- round(unname(coef(equat))[1], digits = lm_sec_trim)
 				lm_coef <- list(a = ifelse(inte < 0, paste0(" - ", abs(inte)), paste0(" + ", as.character(inte))),
 							  b = round(unname(coef(equat))[2], digits = lm_fir_trim),
 							  r2 = round(summary(equat)$r.squared, digits = lm_squ_trim),
-							  p1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim))))
-				res <- substitute(italic(y) == b %.% italic(x)*a*","~~italic(R)^2~"="~r2*","~~italic(P)*p1,lm_coef)	
+							  p1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
+							  )
+				res <- substitute(italic(y) == b %.% italic(x)*a*","~~italic(R)^2~"="~r2*","~~italic(P)*p1,lm_coef)
 			}
 			as.character(as.expression(res))
 		}
@@ -699,3 +801,4 @@ trans_env <- R6Class(classname = "trans_env",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
+

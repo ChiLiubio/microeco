@@ -6,7 +6,7 @@
 \description{
 This class is a wrapper for a series of beta-diversity related analysis, 
 including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
-clustering and perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
+clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and PERMDISP.
 }
 \examples{
 
@@ -15,7 +15,13 @@ clustering and perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2
 ## ------------------------------------------------
 
 data(dataset)
-t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
+t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
+
+## ------------------------------------------------
+## Method `trans_beta$cal_ordination`
+## ------------------------------------------------
+
+t1$cal_ordination(ordination = "PCoA")		
 
 ## ------------------------------------------------
 ## Method `trans_beta$plot_ordination`
@@ -61,6 +67,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_beta$new()}}
+\item \href{#method-cal_ordination}{\code{trans_beta$cal_ordination()}}
 \item \href{#method-plot_ordination}{\code{trans_beta$plot_ordination()}}
 \item \href{#method-cal_manova}{\code{trans_beta$cal_manova()}}
 \item \href{#method-cal_betadisper}{\code{trans_beta$cal_betadisper()}}
@@ -76,15 +83,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$new(
-  dataset = NULL,
-  ordination = NULL,
-  measure = NULL,
-  group = NULL,
-  trans_otu = FALSE,
-  ncomp = 3,
-  scale_species = FALSE
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$new(dataset = NULL, measure = NULL, group = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -92,15 +91,48 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{ordination}}{default NULL; PCA, PCoA or NMDS.}
-
-\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; beta diversity index used for ordination, manova or group distance.}
+\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; 
+beta diversity index used for ordination, manova or group distance.}
 
 \item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+parameters stored in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{data(dataset)
+t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
+}
+\if{html}{\out{</div>}}
 
-\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed, used for PCA.}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_ordination}{}}}
+\subsection{Method \code{cal_ordination()}}{
+Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
+  ordination = "PCoA",
+  ncomp = 3,
+  trans_otu = FALSE,
+  scale_species = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{ordination}}{default "PCoA"; "PCA", "PCoA" or "NMDS".}
 
 \item{\code{ncomp}}{default 3; the returned dimensions.}
+
+\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed, used for PCA.}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA will be scaled.}
 }
@@ -111,8 +143,7 @@ res_ordination stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(dataset)
-t1 <- trans_beta$new(dataset = dataset, ordination = "PCoA", measure = "bray", group = "Group")
+\preformatted{t1$cal_ordination(ordination = "PCoA")		
 }
 \if{html}{\out{</div>}}
 
@@ -357,7 +388,7 @@ Plotting clustering result. Require ggdendro package.
 \describe{
 \item{\code{use_colors}}{colors for presentation.}
 
-\item{\code{measure}}{default NULL; beta diversity index; suggest using the measure when creating object}
+\item{\code{measure}}{default NULL; beta diversity index; If NULL, using the measure when creating object}
 
 \item{\code{group}}{default NULL; if provided, use this group to assign color.}
 

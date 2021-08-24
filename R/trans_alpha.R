@@ -9,7 +9,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param group default NULL; the sample column used for the statistics; If provided, can return alpha_stat.
-		#' @param order_x default NULL; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.
+		#' @param order_x default NULL; sample_table column name or a vector containg sample names; if provided, order samples by using factor.
 		#' @return alpha_data and alpha_stat stored in the object.
 		#' @examples
 		#' \donttest{
@@ -20,7 +20,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			self$group <- group
 			
 			if(is.null(dataset$alpha_diversity)){
-				stop("The alpha diversity has not been calculated in dataset! Please first calculate it using cal_alphadiv() function in microtable class!")
+				stop("The alpha diversity has not been calculated! Please first calculate it using cal_alphadiv() function in microtable class!")
 			}
 			alpha_data <- dataset$alpha_diversity %>% 
 				cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE)
@@ -46,10 +46,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			message('The transformed diversity data is stored in object$alpha_data ...')
 		},
 		#' @description
-		#' Test the difference of alpha diversity across groups. If use anova, require agricolae package.
+		#' Test the difference of alpha diversity across groups.
 		#'
 		#' @param method default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.
-		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
+		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
+		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @return res_alpha_diff in object.
 		#' @examples
 		#' \donttest{
@@ -111,13 +112,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result %<>% `row.names<-`(.[,1]) %>% .[,-1]
 			}
 			self$res_alpha_diff <- compare_result
-			message('The result is stored in object$res_alpha_diff !')
+			message('The result is stored in object$res_alpha_diff ...')
 		},
 		#' @description
 		#' Plotting the alpha diveristy.
 		#'
 		#' @param color_values colors used for presentation.
-		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
+		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
+		#'   e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
 		#' @param add_letter default FALSE; If TRUE, the letters of duncan test will be added in the plot.
 		#' @param use_boxplot default TRUE; TRUE: boxplot, FALSE: mean_se plot.
@@ -170,11 +172,28 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}else{
 					color_use <- "black"
 				}
-				p <- ggpubr::ggboxplot(use_data, x = group, y= "Value", color = color_use, palette = color_values, add = boxplot_add, outlier.colour = "white", ...)
+				
+				p <- ggpubr::ggboxplot(
+					use_data, 
+					x = group, 
+					y= "Value", 
+					color = color_use, 
+					palette = color_values, 
+					add = boxplot_add, 
+					outlier.colour = "white", 
+					...
+					)
+				
 				if(add_letter){
 					order_groups <- names(tapply(use_data$Value, use_data[, group], max))
-					group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% {. + max(.)/30}
-					textdata <- data.frame(x = order_groups, y = group_position[order_groups], add = self$res_alpha_diff[order_groups, measure], stringsAsFactors = FALSE)
+					group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
+						{. + max(.)/30}
+					textdata <- data.frame(
+						x = order_groups, 
+						y = group_position[order_groups], 
+						add = self$res_alpha_diff[order_groups, measure], 
+						stringsAsFactors = FALSE
+						)
 					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = 7)
 				}
 				if(pair_compare){
@@ -183,7 +202,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						combn(., 2) %>% 
 						{.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter, x)))), drop = FALSE]} %>% 
 						{lapply(seq_len(ncol(.)), function(x) .[, x])}
-					# 
+					
 					p <- p + ggpubr::stat_compare_means(
 							comparisons = comparisons_list,
 							method = pair_compare_method, 

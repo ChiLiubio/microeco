@@ -68,11 +68,11 @@ t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$T
 }
 
 ## ------------------------------------------------
-## Method `trans_env$plot_corr`
+## Method `trans_env$plot_cor`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_corr(pheatmap = FALSE)
+t1$plot_cor(pheatmap = FALSE)
 }
 
 ## ------------------------------------------------
@@ -93,7 +93,7 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \item \href{#method-plot_rda}{\code{trans_env$plot_rda()}}
 \item \href{#method-cal_mantel}{\code{trans_env$cal_mantel()}}
 \item \href{#method-cal_cor}{\code{trans_env$cal_cor()}}
-\item \href{#method-plot_corr}{\code{trans_env$plot_corr()}}
+\item \href{#method-plot_cor}{\code{trans_env$plot_cor()}}
 \item \href{#method-plot_scatterfit}{\code{trans_env$plot_scatterfit()}}
 \item \href{#method-print}{\code{trans_env$print()}}
 \item \href{#method-clone}{\code{trans_env$clone()}}
@@ -341,7 +341,7 @@ Mantel test between beta diversity matrix and environmental data.
 
 \item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
 
-\item{\code{method}}{default "pearson"; one of c("pearson", "spearman", "kendall"); correlation method.}
+\item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method.}
 
 \item{\code{...}}{paremeters pass to \code{\link{mantel}}.}
 }
@@ -431,12 +431,12 @@ t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$T
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_corr"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_corr}{}}}
-\subsection{Method \code{plot_corr()}}{
+\if{html}{\out{<a id="method-plot_cor"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_cor}{}}}
+\subsection{Method \code{plot_cor()}}{
 Plot correlation heatmap.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_corr(
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_cor(
   color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
     "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
   pheatmap = FALSE,
@@ -445,7 +445,8 @@ Plot correlation heatmap.
   keep_prefix = TRUE,
   plot_x_size = 9,
   mylabels_x = NULL,
-  font_family = NULL
+  font_family = NULL,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -467,6 +468,8 @@ Plot correlation heatmap.
 \item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
 
 \item{\code{font_family}}{default NULL; font family used in ggplot2; only available when pheatmap = FALSE.}
+
+\item{\code{...}}{paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.}
 }
 \if{html}{\out{</div>}}
 }
@@ -476,7 +479,7 @@ plot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_corr(pheatmap = FALSE)
+t1$plot_cor(pheatmap = FALSE)
 }
 }
 \if{html}{\out{</div>}}

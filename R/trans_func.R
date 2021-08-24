@@ -2,14 +2,17 @@
 #' Create trans_func object for functional analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on Louca et al. (2016) 
-#' <doi:10.1126/science.aaf4507> or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and 
-#' Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>, 
+#' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on 
+#' Louca et al. (2016) <doi:10.1126/science.aaf4507> and Lim et al. (2020) <10.1038/s41597-020-0516-5>, 
+#' or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>; 
 #' functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 #'
 #' @export
 trans_func <- R6Class(classname = "trans_func",
 	public = list(
+		#' @description
+		#' Create the trans_func object. This function can identify the data type for Prokaryotes or Fungi automatically.
+		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
 		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
@@ -58,13 +61,16 @@ trans_func <- R6Class(classname = "trans_func",
 		#' \donttest{
 		#' t1$cal_spe_func()
 		#' }
-		cal_spe_func = function(prok_database = c("FAPROTAX", "NJC19")[1], fungi_database = c("FUNGuild", "FungalTraits")[1]){
+		cal_spe_func = function(
+			prok_database = c("FAPROTAX", "NJC19")[1], 
+			fungi_database = c("FUNGuild", "FungalTraits")[1]
+			){
 			for_what <- self$for_what
-			if(is.na(for_what)){
+			if(is.na(for_what) | is.null(for_what)){
 				stop("No for_what object found, please assign the for_what object use prok or fungi manually!")
 			}
 			if(! for_what %in% c("prok", "fungi")){
-				stop("Wrong for_what found, please make sure for_what object is one of prok and fungi !")
+				stop("Wrong for_what, please make sure for_what object is one of prok and fungi !")
 			}
 			tax1 <- self$tax_table
 			if(for_what == "prok"){
@@ -72,7 +78,8 @@ trans_func <- R6Class(classname = "trans_func",
 					# Copyright (c) 2021, Stilianos Louca. All rights reserved.
 					# developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 					data("prok_func_FAPROTAX", envir=environment())
-					message("This database is developed based on the recent FAPROTAX database. Please also cite the original FAPROTAX paper: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
+					message("Please also cite the original FAPROTAX paper: Louca et al. (2016).")
+					message("Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 					# collapse taxonomy
 					tax1 <- apply(tax1, 1, function(x){paste0(x, collapse = ";")}) %>% 
 						gsub(".__", "", .) %>% 
@@ -141,6 +148,8 @@ trans_func <- R6Class(classname = "trans_func",
 			if(for_what == "fungi"){
 				if(grepl("FUNGuild", fungi_database, ignore.case = TRUE)){
 					data("fungi_func_FUNGuild", envir=environment())
+					message("Please also cite the original paper: Nguyen et al. (2016).")
+					message("FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248. \n")
 					tax1[] <- lapply(tax1, function(x) gsub(".*__", "", x))
 					tax1 %<>% dropallfactors
 					# add taxon column to store the target taxon
@@ -152,7 +161,8 @@ trans_func <- R6Class(classname = "trans_func",
 							Order = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "7", ], 
 							Family = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "9", ],
 							Genus = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "13", ],
-							Species = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel %in% c("20", "21", "22", "24"), ])
+							Species = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel %in% c("20", "21", "22", "24"), ]
+						)
 						# search each OTU even though it has been matched
 						for(j in rownames(tax1)){
 							if(tax1[j, i] %in% use_database[, "taxon"]){
@@ -184,7 +194,8 @@ trans_func <- R6Class(classname = "trans_func",
 						stop("No Genus column found in tax_table of dataset!")
 					}
 					data("fungi_func_FungalTraits", envir=environment())
-					message("This fungi database is developed based on the FungalTraits. Please also cite the original paper: FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>.\n")
+					message("Please also cite the original FungalTraits paper: <doi:10.1007/s13225-020-00466-2>. ")
+					message("FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1-16 (2020).\n")
 					# remove the redundant data
 					fungi_func_FungalTraits %<>% .[- c(3109, 3288, 4741, 7092), ]
 					fungi_func_FungalTraits$Decay_type %<>% gsub("white-rot", "white_rot", .)
@@ -221,13 +232,25 @@ trans_func <- R6Class(classname = "trans_func",
 					# then parse the result for calculation
 					filter_data <- res_table
 					colnames(filter_data) %<>% gsub("_template", "", .)
-					keep_cols <- c("Genus", "primary_lifestyle", "Secondary_lifestyle", "Endophytic_interaction_capability", "Plant_pathogenic_capacity", "Decay_substrate", 
-						"Decay_type", "Aquatic_habitat", "Animal_biotrophic_capacity", "Growth_form", "Fruitbody_type", "Hymenium_type", 
-						"Ectomycorrhiza_exploration_type", "primary_photobiont")
+					keep_cols <- c(
+						"Genus", 
+						"primary_lifestyle", 
+						"Secondary_lifestyle", 
+						"Endophytic_interaction_capability", 
+						"Plant_pathogenic_capacity", 
+						"Decay_substrate", 
+						"Decay_type", 
+						"Aquatic_habitat", 
+						"Animal_biotrophic_capacity", 
+						"Growth_form", 
+						"Fruitbody_type", 
+						"Hymenium_type", 
+						"Ectomycorrhiza_exploration_type", 
+						"primary_photobiont")
 					filter_data <- filter_data[, keep_cols]
 					filter_data[is.na(filter_data)] <- ""
 
-					# generate a data frame store the binary data
+					# generate data frame store the binary data
 					otu_func_table <- filter_data[, c("Genus"), drop = FALSE]
 					# generate binary information
 					for(i in names(private$default_fungi_func_group$FungalTraits)){
@@ -248,14 +271,22 @@ trans_func <- R6Class(classname = "trans_func",
 		#' The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
 		#'
 		#' @param use_community default TRUE; whether calculate community; if FALSE, use module.
-		#' @param abundance_weighted default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, calculate the functional individual percentage.
+		#' @param abundance_weighted default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, 
+		#' 	  calculate the functional individual percentage.
 		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.
 		#' @return res_spe_func_perc in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func_perc(use_community = TRUE)
 		#' }
-		cal_spe_func_perc = function(use_community = TRUE, abundance_weighted = FALSE, node_type_table = NULL){
+		cal_spe_func_perc = function(
+			use_community = TRUE, 
+			abundance_weighted = FALSE, 
+			node_type_table = NULL
+			){
+			if(is.null(self$res_spe_func)){
+				stop("Please first run cal_spe_func function !")
+			}
 			res_spe_func <- self$res_spe_func
 			otu_table <- self$otu_table
 			if(use_community){
@@ -307,10 +338,10 @@ trans_func <- R6Class(classname = "trans_func",
 				`colnames<-`(colnames(res_spe_func)) %>% 
 				.[, apply(., 2, sum) != 0]
 			self$res_spe_func_perc <- res_spe_func_perc
-			message('The result table is stored in object$res_spe_func_perc!')
+			message('The result table is stored in object$res_spe_func_perc ...')
 		},
 		#' @description
-		#' Show the basic information for a specific function of prokaryotes.
+		#' Show the annotation information for a function of prokaryotes from FAPROTAX database.
 		#'
 		#'
 		#' @param use_func default NULL; the function name.
@@ -320,9 +351,9 @@ trans_func <- R6Class(classname = "trans_func",
 		#' t1$show_prok_func(use_func = "methanotrophy")
 		#' }
 		show_prok_func = function(use_func = NULL){
-			data("prok_func", envir=environment())
+			data("prok_func_FAPROTAX", envir=environment())
 			if(!is.null(use_func)){
-				prok_func$func_annotation[[use_func]]
+				prok_func_FAPROTAX$func_annotation[[use_func]]
 			}
 		},
 		#' @description
@@ -338,7 +369,15 @@ trans_func <- R6Class(classname = "trans_func",
 		#' \donttest{
 		#' t1$plot_spe_func_perc(use_group_list = TRUE)
 		#' }
-		plot_spe_func_perc = function(filter_func = NULL, use_group_list = TRUE, add_facet = TRUE, select_samples = NULL){
+		plot_spe_func_perc = function(
+			filter_func = NULL, 
+			use_group_list = TRUE, 
+			add_facet = TRUE, 
+			select_samples = NULL
+			){
+			if(is.null(self$res_spe_func_perc)){
+				stop("Please first run cal_spe_func and cal_spe_func_perc function !")
+			}
 			plot_data <- self$res_spe_func_perc
 			if(!is.null(filter_func)){
 				plot_data <- plot_data[, colnames(plot_data) %in% filter_func]
@@ -429,9 +468,9 @@ trans_func <- R6Class(classname = "trans_func",
 
 			x1 <- importQIIMEData(pathfilename)
 			self$tax4fun_KO <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = TRUE)
-			message('The KO abundance result is stored in object$tax4fun_KO')
+			message('The KO abundance result is stored in object$tax4fun_KO ...')
 			self$tax4fun_path <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = FALSE)
-			message('The pathway abundance result is stored in object$tax4fun_path')
+			message('The pathway abundance result is stored in object$tax4fun_path ...')
 
 			if(keep_tem == F){
 				unlink(pathfilename, recursive = FALSE, force = TRUE)
@@ -440,15 +479,18 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @description
 		#' Predict functional potential of communities with Tax4Fun2 method.
 		#' please also cite: 
-		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020). <doi:10.1186/s40793-020-00358-7>
+		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
+		#' 	 <doi:10.1186/s40793-020-00358-7>
 		#'
 		#' @param blast_tool_path default NULL; the folder path, e.g. ncbi-blast-2.11.0+/bin ; blast tools folder downloaded from 
 		#'   "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.11.0+-x64-win64.tar.gz  for windows system; 
 		#'   if blast_tool_path is NULL, search the tools in the environmental path variable.
 		#' @param path_to_reference_data default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
 		#'   The directory must contain the Ref99NR/Ref100NR folder; 
-		#'   download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
-		#' @param path_to_temp_folder default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, use the default temporary in the computer.
+		#'   download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or 
+		#'   Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
+		#' @param path_to_temp_folder default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, 
+		#' 	 use the default temporary in the computer.
 		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR" .
 		#' @param normalize_by_copy_number default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes. 
 		#' @param min_identity_to_reference default 97; the idenity threshold used for finding the nearest species.
@@ -653,7 +695,8 @@ trans_func <- R6Class(classname = "trans_func",
 				stop("No functional prediction possible!\nEither no nearest neighbor found or your table is empty!")
 			}
 			functional_prediction_final <- functional_prediction_final[keep,]
-			write.table(x = functional_prediction_final, file = file.path(path_to_temp_folder, 'functional_prediction.txt'), append = F, quote = F, sep = "\t", row.names = F, col.names = T)
+			write.table(x = functional_prediction_final, file = file.path(path_to_temp_folder, 'functional_prediction.txt'), append = F, quote = F, 
+				sep = "\t", row.names = F, col.names = T)
 			self$res_tax4fun2_KO <- functional_prediction_final
 			message('Result KO abundance is stored in object$res_tax4fun2_KO!')
 
@@ -679,7 +722,8 @@ trans_func <- R6Class(classname = "trans_func",
 
 			ptw_desc <- Tax4Fun2_KEGG$ptw_desc
 			pathway_prediction_final <- merge(pathway_prediction, ptw_desc)[keep,]
-			write.table(x = pathway_prediction_final, file = file.path(path_to_temp_folder, 'pathway_prediction.txt'), append = F, quote = F, sep = "\t", row.names = F, col.names = T)
+			write.table(x = pathway_prediction_final, file = file.path(path_to_temp_folder, 'pathway_prediction.txt'), 
+				append = F, quote = F, sep = "\t", row.names = F, col.names = T)
 			self$res_tax4fun2_pathway <- pathway_prediction_final
 			message('Result pathway abundance is stored in object$res_tax4fun2_pathway!')
 		},
@@ -687,7 +731,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#' Calculate (multi-) functional redundancy index (FRI) of prokaryotic community with Tax4Fun2 method.
 		#' This function is used to calculating aFRI and rFRI use the intermediate files generated by the function cal_tax4fun2().
 		#' please also cite: 
-		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020). <doi:10.1186/s40793-020-00358-7>
+		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. 
+		#' 	 Environmental Microbiome 15, 11 (2020). <doi:10.1186/s40793-020-00358-7>
 		#'
 		#' @return res_tax4fun2_aFRI and res_tax4fun2_rFRI in object.
 		#' @examples
@@ -829,10 +874,12 @@ trans_func <- R6Class(classname = "trans_func",
 					"moss-associated", "no_endophytic_capacity", "root-associated", "root_endophyte", "root_endophyte_dark_septate"),
 				"Plant_pathogenic_capacity" = c("algal_parasite", "leaf/fruit/seed_pathogen", "moss-associated", "moss_parasite", "other_plant_pathogen", "root-associated", 
 					"root_pathogen", "wood_pathogen"),
-				"Decay_substrate" = c("algal_material", "animal_material", "pollen", "dung", "protist_material", "soil", "sugar-rich_substrates", "fungal_material", "leaf/fruit/seed", 
+				"Decay_substrate" = c("algal_material", "animal_material", "pollen", "dung", "protist_material", "soil", 
+					"sugar-rich_substrates", "fungal_material", "leaf/fruit/seed", 
 					"burnt_material", "hydrocarbon-rich_substrates_(fuel)", "roots", "wood", "resins"),
 				"Decay_type" = c("blue-staining", "brown_rot", "chitinolytic", "keratinolytic", "mold", "other", "soft_rot", "white_rot"),
-				"Aquatic_habitat" = c("aquatic", "freshwater", "marine", "non-aquatic", "partly_aquatic", "partly_freshwater_(partly_non-aquatic)", "partly_marine_(partly_non-aquatic)"),
+				"Aquatic_habitat" = c("aquatic", "freshwater", "marine", "non-aquatic", "partly_aquatic", "partly_freshwater_(partly_non-aquatic)", 
+					"partly_marine_(partly_non-aquatic)"),
 				"Animal_biotrophic_capacity" = c("animal-associated", "opportunistic_human_parasite", "animal_endosymbiont", "animal_parasite", 
 					 "arthropod-associated", "arthropod_ectosymbiont", "arthropod_parasite", "coral-associated", "fish_parasite", "invertebrate-associated", 
 					 "invertebrate_parasite", "nematophagous", "opportunistic_animal_parasite", "opportunistic_animal_parasite_G._destructans", 

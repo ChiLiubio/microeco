@@ -52,13 +52,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(is.null(dataset)){
 				stop("No dataset provided!")
 			}
-			if(is.null(dataset$taxa_abund)){
-				stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
-			}
 			sampleinfo <- dataset$sample_table
 			sampleinfo[, group] %<>% as.character
 #			self$method <- method
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
+				if(is.null(dataset$taxa_abund)){
+					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
+				}
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(lapply(dataset$taxa_abund, function(x) x * lefse_norm)))
 					self$lefse_norm <- lefse_norm
@@ -82,7 +82,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(sum(sel_taxa) == 0){
 					stop("No significant biomarkers found! stop running!")
 				}
-				# save abund_table in self for the cladogram
+				# save abund_table for the cladogram
 				self$abund_table <- abund_table
 				abund_table_sub <- abund_table[sel_taxa, ]
 				pvalue_sub <- pvalue[sel_taxa]
@@ -128,7 +128,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				rownames(imp_sort) <- imp_sort$Taxa
 				imp_sort$pvalue <- pvalue_sub[as.character(imp_sort$Taxa)]
 				self$res_rf <- imp_sort
-				message('The result is stored in object$res_rf !')
+				message('The result is stored in object$res_rf ...')
 			}
 			if(grepl("lefse", method, ignore.case = TRUE)){
 				class_taxa_median_sub <- lapply(res_class, function(x) x$med) %>% do.call(cbind, .) %>% .[, sel_taxa]
@@ -142,10 +142,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					remove_list_total <- list()
 					# for each group paires
-					for(i in 1:ncol(all_class_pairs)){
+					for(i in seq_len(ncol(all_class_pairs))){
 						y1 <- all_class_pairs[, i]
-						y1_sub_pairs <- expand.grid(unique(sampleinfo[sampleinfo[, group] == y1[1], lefse_subgroup]), 
-							unique(sampleinfo[sampleinfo[, group] == y1[2], lefse_subgroup]), stringsAsFactors = FALSE) %>% t
+						y1_sub_pairs <- expand.grid(
+							unique(sampleinfo[sampleinfo[, group] == y1[1], lefse_subgroup]), 
+							unique(sampleinfo[sampleinfo[, group] == y1[2], lefse_subgroup]), 
+							stringsAsFactors = FALSE
+							) %>% t
 						y1_sub_pairs <- y1_sub_pairs[, unlist(lapply(1:ncol(y1_sub_pairs), function(x){
 							ifelse(any(c(sum(sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y1_sub_pairs[1, x]) < lefse_min_subsam, 
 								sum(sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y1_sub_pairs[2, x]) < lefse_min_subsam)), FALSE, TRUE)
@@ -155,14 +158,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 						# check each subgroup pairs under fixed group pair condition
 						for(j in 1:ncol(y1_sub_pairs)){
 							y2 <- y1_sub_pairs[, j]
-							abund_table_sub_y2 <- abund_table_sub[, c(rownames(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], ]), 
-								rownames(sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], ]))]
+							abund_table_sub_y2 <- abund_table_sub[, c(
+								rownames(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], ]), 
+								rownames(sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], ])
+								)]
 							group_vec_sub2 <- c(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], group], 
 								sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], group])
 							res_sub <- lapply(seq_len(nrow(abund_table_sub_y2)), function(x) private$test_mark(abund_table_sub_y2[x,], group_vec_sub2))
 							res_sub_total[[j]] <- res_sub
 						}
-						raw_median <- class_taxa_median_sub[y1, ] %>% {.[1, ] > .[2, ]} %>% as.vector
+						raw_median <- class_taxa_median_sub[y1, ] %>% 
+							{.[1, ] > .[2, ]} %>% 
+							as.vector
 						check_median_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) {y$med[y1, 1] %>% {.[1] > .[2]}}))) %>% as.data.frame
 						check_median_sub[] <- lapply(check_median_sub, function(x) x == raw_median)
 						check_p_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) y$p_value))) %>% as.data.frame
@@ -255,7 +262,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res <- sapply(rownames(abund_table_sub), function(k){
 					unlist(lapply(seq_len(ncol(all_class_pairs)), function(p){
 						unlist(lapply(res_lda, function(x){ x[[p]][k]})) %>% .[!is.na(.)] %>% mean
-					})) %>% .[!is.na(.)] %>% .[!is.nan(.)] %>% max
+					})) %>% 
+					.[!is.na(.)] %>% 
+					.[!is.nan(.)] %>% 
+					max
 				})
 				res <- sapply(res, function(x) {log10(1 + abs(x)) * ifelse(x > 0, 1, -1)})
 				res1 <- cbind.data.frame(Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)]), 
@@ -264,7 +274,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res1 <- cbind.data.frame(Taxa = rownames(res1), res1)
 				message("Finished, minimum LDA score: ", range(res1$LDA)[1], " maximum LDA score: ", range(res1$LDA)[2])
 				self$res_lefse <- res1
-				message('The lefse result is stored in object$res_lefse !')
+				message('The lefse result is stored in object$res_lefse ...')
 			}
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){
 				if(grepl("lefse", method, ignore.case = TRUE)){
@@ -277,7 +287,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
 				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				self$res_abund <- res_abund
-				message('The abundance is stored in object$res_abund !')
+				message('The abundance is stored in object$res_abund ...')
 			}
 			if(grepl("metastat|mseq", method, ignore.case = TRUE)){
 				if(is.null(group_choose_paired)){
@@ -297,9 +307,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 				abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
 					reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
 				abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
-					.[, c("Abundance"):=NULL] %>% setkey(Display, Sample) %>% unique() %>% as.data.frame()
+					.[, c("Abundance"):=NULL] %>% 
+					setkey(Display, Sample) %>% 
+					unique() %>% 
+					as.data.frame()
 				new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
-					`row.names<-`(.[,1]) %>% .[,-1, drop = FALSE]
+					`row.names<-`(.[,1]) %>% 
+					.[,-1, drop = FALSE]
 				new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
 
 				message("Total ", ncol(all_name), " paired group for calculation ...")
@@ -332,7 +346,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 					use_dataset <- clone(dataset)
 					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
 					use_dataset$tidy_dataset()
-					obj <- newMRexperiment(use_dataset$otu_table, phenoData= AnnotatedDataFrame(use_dataset$sample_table), featureData = AnnotatedDataFrame(use_dataset$tax_table))
+					obj <- newMRexperiment(
+						use_dataset$otu_table, 
+						phenoData= AnnotatedDataFrame(use_dataset$sample_table), 
+						featureData = AnnotatedDataFrame(use_dataset$tax_table)
+						)
 					## Normalization and Statistical testing
 					obj_1 <- cumNorm(obj)
 					pd <- pData(obj)
@@ -467,7 +485,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				xlab("") +
 				ylab(p1_xtile) +
 				theme(panel.border = element_blank(), panel.background=element_rect(fill="white")) +
-				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) + #, panel.grid.minor.x = element_blank())
+				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) + 
+				#, panel.grid.minor.x = element_blank())
 				theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
 				theme(plot.margin = unit(c(.1, 0, .1, 0), "cm"))
 
@@ -681,7 +700,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			nodes <- c("r__Root", nodes)
 			# levels used for extend of clade label
 			label_levels <- purrr::map_chr(nodes, ~ gsub("__.*$", "", .x)) %>%
-				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% .[!duplicated(.)]))
+				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% 
+				.[!duplicated(.)]))
 
 			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1])
 			# root must be a parent node
@@ -697,9 +717,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			edges <- edges[!is.na(edges[, 1]), ]
 			# not label the tips
 			node_label <- nodes[!is_tip]
-			phylo <- structure(list(edge = edges, node.label = node_label, tip.label = nodes[is_tip], edge.length = rep(1, nrow(edges)), Nnode = length(node_label)),
-				class = "phylo")
-			mapping <- data.frame(node = index, abd = c(100, tree_table$abd), node_label = nodes, stringsAsFactors = FALSE)
+			phylo <- structure(list(
+				edge = edges, 
+				node.label = node_label, 
+				tip.label = nodes[is_tip], 
+				edge.length = rep(1, nrow(edges)), 
+				Nnode = length(node_label)
+				), class = "phylo")
+			mapping <- data.frame(
+				node = index, 
+				abd = c(100, tree_table$abd),
+				node_label = nodes, 
+				stringsAsFactors = FALSE)
 			mapping$node_class <- label_levels
 			tree <- tidytree::treedata(phylo = phylo, data = tibble::as_tibble(mapping))
 			tree <- ggtree::ggtree(tree, size = 0.2, layout = 'circular')
@@ -735,7 +764,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			hilights_df$enrich_group %<>% factor(., levels = color_groups)
 
 			# add legend
-			tree <- tree + geom_rect(aes_(xmin = ~x, xmax = ~x, ymax = ~y, ymin = ~y, fill = ~enrich_group), data = hilights_df, inherit.aes = FALSE) +
+			tree <- tree + 
+				geom_rect(aes_(xmin = ~x, xmax = ~x, ymax = ~y, ymin = ~y, fill = ~enrich_group), data = hilights_df, inherit.aes = FALSE) +
 				guides(fill = guide_legend(title = NULL, order = 1, override.aes = list(fill = hilights_df$color)))
 
 			# set nodes color and size
@@ -826,12 +856,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			use_data %<>% .[.$qvalue < qvalue & .[,1] == use_group, ]
 			use_data[,2] %<>% gsub(paste0(".*", tolower(substr(self$metastat_taxa_level, 1, 1)), "__(.*)$"), "\\1", .)
 			use_data %<>% .[.[,2] != "", ]
+			
 			if(nrow(use_data) > length(use_number)){
 				use_data %<>% .[use_number, ]
 			}
-			plot_data <- data.frame(taxa = rep(use_data[,2], 2), Mean = c(use_data[,3], use_data[,6]), SE = c(use_data[,5], use_data[,8]), 
-				Group = rep(group_char, times = 1, each = nrow(use_data)))
+			plot_data <- data.frame(
+				taxa = rep(use_data[,2], 2), 
+				Mean = c(use_data[,3], use_data[,6]), 
+				SE = c(use_data[,5], use_data[,8]), 
+				Group = rep(group_char, times = 1, each = nrow(use_data))
+				)
 			plot_data$taxa %<>% factor(., levels = unique(.))
+			
 			p <- ggplot(plot_data, aes(x=taxa, y=Mean, color = Group, fill = Group, group = Group)) +
 				geom_bar(stat="identity", position = position_dodge()) +
 				geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(.9), color = "black") +
@@ -842,6 +878,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 9), legend.position = "top") +
 				theme(axis.title = element_text(size = 15)) +
 				xlab(self$metastat_taxa_level)
+			
 			p
 		},
 		#' @description
@@ -871,7 +908,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					message("It was impossible to verify the normality of the taxa ", colnames(d1)[1], " !")
 				}
 			}
-
 			if(nonpara == T){
 				if(any(table(as.character(group))) < min_num_nonpara){
 					list(p_value = NA, med = NA)
@@ -903,8 +939,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 		generate_cladogram_annotation = function(marker_table, tree, color, color_groups, sep = "|") {
 			use_marker_table <- marker_table
 			feature <- use_marker_table$Taxa
-			label <- strsplit(feature, split = sep, fixed = TRUE) %>% purrr::map_chr(utils::tail, n =1)
-			plot_color <- use_marker_table$Group %>% as.character
+			label <- strsplit(feature, split = sep, fixed = TRUE) %>% 
+				purrr::map_chr(utils::tail, n =1)
+			plot_color <- use_marker_table$Group %>% 
+				as.character
 			for(i in seq_along(color_groups)){
 				plot_color[plot_color == color_groups[i]] <- color[i]
 			}
@@ -936,7 +974,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			res
 		},
 		#*****************************************************************************************************
-		#  load up the frequency matrix from a file
+		#Modified from raw metastat code
+		#load up the frequency matrix from a file
 		#*****************************************************************************************************
 		# Note sep
 		load_frequency_matrix = function(input){
@@ -960,7 +999,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			jobj <- list(matrix=matrix, taxa=taxa)
 			return(jobj)
 		},
-		#  modified from metastat raw codes
+		#  Modified from metastat raw codes
 		# http://metastats.cbcb.umd.edu/detect_DA_features.r
 		#*****************************************************************************************************
 		#  Author: james robert white, whitej@umd.edu, Center for Bioinformatics and Computational Biology.
@@ -1062,7 +1101,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 						ft <- stats::fisher.test(contingencytable, workspace = 8e6, alternative = "two.sided", conf.int = FALSE);
 						pvalues[i] = ft$p.value;
 					}
-
 				}
 				#*************************************
 				#  calculate q values from p values
@@ -1121,7 +1159,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 				#  calculate q values from p values
 				#*************************************
 				qvalues <- private$calc_qvalues(pvalues);
-
 				#*************************************
 				#  convert stderr^2 to std error
 				#*************************************

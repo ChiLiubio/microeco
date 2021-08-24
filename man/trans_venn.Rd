@@ -60,12 +60,13 @@ t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
 
 \item{\code{sample_names}}{default NULL; if provided, filter the samples.}
 
-\item{\code{ratio}}{default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; NULL: no additional percentage.}
+\item{\code{ratio}}{default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
+NULL: no additional percentage.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-venn_table venn_count_abund stored in trans_venn object.
+venn_table and venn_count_abund stored in trans_venn object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

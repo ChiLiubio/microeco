@@ -4,7 +4,8 @@
 \alias{trans_nullmodel}
 \title{Create trans_nullmodel object.}
 \description{
-This class is a wrapper for a series of null model and phylogeny related approaches, including the mantel correlogram analysis of phylogenetic signal, betaNTI, betaNRI and RCbray calculations;
+This class is a wrapper for a series of null model and phylogeny related approaches, 
+including the mantel correlogram analysis of phylogenetic signal, betaNTI, betaNRI and RCbray calculations;
 see Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w>.
 }
 \examples{

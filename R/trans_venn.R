@@ -10,8 +10,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param sample_names default NULL; if provided, filter the samples.
-		#' @param ratio default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; NULL: no additional percentage.
-		#' @return venn_table venn_count_abund stored in trans_venn object.
+		#' @param ratio default numratio; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
+		#' 	 NULL: no additional percentage.
+		#' @return venn_table and venn_count_abund stored in trans_venn object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -19,7 +20,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		#' }
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = "numratio"
-			) {
+			){
+			# first clone the dataset
 			use_dataset <- clone(dataset)
 			if(!is.null(sample_names)){
 				use_dataset$sample_table %<>% .[rownames(.) %in% sample_names, ]
@@ -36,6 +38,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			setmatrix <- abund
 			setmatrix[setmatrix >= 1] <- 1
 			## Create all possible sample combinations within requested complexity levels
+			# modified from the code of systemPipeR package 
 			allcombl <- lapply(1:colnumber, function(x) combn(colnames(setmatrix), m = x, simplify = FALSE)) %>% unlist(recursive=FALSE)
 			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix = setmatrix, allcombl = allcombl, index = x, setunion = setunion))
 			names(venn_list) <- sapply(allcombl, paste, collapse= "-")
@@ -319,6 +322,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		}
 		),
 	private = list(
+		# modified from vennSets function in systemPipeR package
 		vennSets = function(setmatrix, allcombl, index, setunion){
 			mycol1 <- which(colnames(setmatrix) %in% allcombl[[index]])
 			mycol2 <- which(!colnames(setmatrix) %in% allcombl[[index]])
@@ -326,6 +330,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			cond2 <- rowSums(setmatrix[, rep(mycol2, 2)]) == 0
 			return(setunion[cond1 & cond2])
 		},
+		# fix the position for 2-5 way
 		pos_fun = function(num){
 			switch(num, 
 				data.frame(x = c(3.1, 7, 5), y = c(6, 6, 6)),
@@ -360,6 +365,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			colnames(ellipse) <- c("x", "y")
 			return(as.data.frame(ellipse))
 		},
+		# inspired by the code from Xu brother
 		petal = function(r = 1, n = 1000, a = 4, b = 1.2, mx = 0, my = 0, rotate = 0){
 			ang <- seq(0, 360, len = n+1)
 			ang <- ang[1:n]

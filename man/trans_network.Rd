@@ -6,7 +6,8 @@
 \description{
 This class is a wrapper for a series of network analysis related methods, 
 including the correlation based <doi:10.1186/1471-2105-13-113>, SpiecEasi <doi:10.1371/journal.pcbi.1004226>,
-and Probabilistic Graphical Models based <doi:10.1016/j.cels.2019.08.002> network construction approaches, network and node attributes analysis and other network operations.
+and Probabilistic Graphical Models based <doi:10.1016/j.cels.2019.08.002> network construction approaches, network and node attributes analysis
+eigengene analysis, network subsetting and other network operations.
 }
 \examples{
 
@@ -17,8 +18,11 @@ and Probabilistic Graphical Models based <doi:10.1016/j.cels.2019.08.002> networ
 \donttest{
 data(dataset)
 # correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-  taxa_level = "OTU", filter_thres = 0.001)
+t1 <- trans_network$new(
+		dataset = dataset, 
+		cal_cor = "base", 
+		taxa_level = "OTU", 
+		filter_thres = 0.001)
 }
 
 ## ------------------------------------------------
@@ -99,6 +103,8 @@ t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\%
 \if{html}{\out{<a id="method-new"></a>}}
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
+This function is used to create the trans_network object, store the important intermediate data 
+  and calculate correlations if cal_cor parameter is selected.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
   dataset = NULL,
@@ -144,8 +150,11 @@ res_cor_p list.
 \preformatted{\donttest{
 data(dataset)
 # correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-  taxa_level = "OTU", filter_thres = 0.001)
+t1 <- trans_network$new(
+		dataset = dataset, 
+		cal_cor = "base", 
+		taxa_level = "OTU", 
+		filter_thres = 0.001)
 }
 }
 \if{html}{\out{</div>}}
@@ -158,9 +167,9 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "base",
 \if{latex}{\out{\hypertarget{method-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
 Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
-see Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method; 
-see Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method; 
-see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
+See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
+Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
+Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
   network_method = c("COR", "SpiecEasi", "PGM")[1],
@@ -231,7 +240,7 @@ t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
 \if{html}{\out{<a id="method-cal_module"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_module}{}}}
 \subsection{Method \code{cal_module()}}{
-Calculate and add network modules.
+Add network modules to the network.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_module(module_name_prefix = "M")}\if{html}{\out{</div>}}
 }
@@ -387,7 +396,7 @@ Plot the classification and importance of nodes, see object$res_node_type for th
 
 \item{\code{plot_shape}}{default "taxa_roles"; for use_type 2; used variable for shape.}
 
-\item{\code{plot_size}}{default "Abundance"; for use_type 2; used for size; fixed number (e.g. 5) is also available.}
+\item{\code{plot_size}}{default "Abundance"; for use_type 2; used for point size; a fixed number (e.g. 5) is also available.}
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); for use_type 2; color vector}
 

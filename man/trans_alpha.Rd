@@ -60,7 +60,7 @@ t1$plot_alpha(measure = "Shannon", group = "Group", pair_compare = TRUE)
 
 \item{\code{group}}{default NULL; the sample column used for the statistics; If provided, can return alpha_stat.}
 
-\item{\code{order_x}}{default NULL; sample_table column name or a vector containg sample names; if provided, make samples ordered by using factor.}
+\item{\code{order_x}}{default NULL; sample_table column name or a vector containg sample names; if provided, order samples by using factor.}
 }
 \if{html}{\out{</div>}}
 }
@@ -83,7 +83,7 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \if{html}{\out{<a id="method-cal_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
-Test the difference of alpha diversity across groups. If use anova, require agricolae package.
+Test the difference of alpha diversity across groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(method = c("KW", "anova")[1], measures = NULL)}\if{html}{\out{</div>}}
 }
@@ -93,7 +93,8 @@ Test the difference of alpha diversity across groups. If use anova, require agri
 \describe{
 \item{\code{method}}{default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.}
 
-\item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+\item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
+e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 }
 \if{html}{\out{</div>}}
 }
@@ -143,7 +144,8 @@ Plotting the alpha diveristy.
 \describe{
 \item{\code{color_values}}{colors used for presentation.}
 
-\item{\code{measure}}{default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+\item{\code{measure}}{default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
+e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
