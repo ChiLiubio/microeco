@@ -45,7 +45,7 @@ Install microeco package from CRAN directly.
 install.packages("microeco")
 ```
 
-Or install the latest development version from github. There are some minor improvements here compared to the version in CRAN.
+Or install the latest development version from github.
 
 ```r
 # If devtools package is not installed, first install it
@@ -54,11 +54,6 @@ install.packages("devtools")
 devtools::install_github("ChiLiubio/microeco")
 ```
 
-If the installation from github is failed because of the bad internet, download the package first, then install it locally.
-
-```r
-devtools::install_local("microeco-master.zip")
-```
 
 ## Tutorial
 See the detailed package tutorial (https://chiliubio.github.io/microeco_tutorial/) and the help documentations.
