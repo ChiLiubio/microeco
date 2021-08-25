@@ -111,6 +111,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					value_use <- as.matrix(env_data[, use_env, drop = FALSE])
 				}
 			}
+			
+			message("---------------- ", Sys.time()," : Start ----------------")
 			value_use <- decostand(value_use, method = "range", MARGIN = 2)
 			niche_matrix <- t(comm) %*% value_use
 			niche_matrix <- as.matrix(dist(niche_matrix))
@@ -122,6 +124,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				cutoff = cutoff, 
 				...
 				)
+			message("---------------- ", Sys.time()," : Finish ----------------")
+
 			self$res_mantel_corr <- res_mantel_corr
 			message('The result is stored in object$res_mantel_corr ...')
 		},
@@ -233,7 +237,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				comm <- decostand(comm, method="pa")
 			}
 			comm <- decostand(comm, method="total", MARGIN=1)
-			message(Sys.time()," : start ...")
+			
+			message("---------------- ", Sys.time()," : Start ----------------")
 			if(verbose){
 				cat("Calculate observed betaMPD.\n")
 			}
@@ -249,7 +254,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				}
 				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis)))
 			}, simplify = "array")
-			message(Sys.time()," : finished ...")
+			message("---------------- ", Sys.time()," : Finish ----------------")
 			
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
@@ -281,8 +286,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				stop("Phylogenetic tree is required!")
 			}
 			all_samples <- rownames(comm)
-			message(Sys.time()," : start ...")
 
+			message("---------------- ", Sys.time()," : Start ----------------")
 			if(verbose){
 				cat("Calculate observed betaMNTD ...\n")
 			}
@@ -308,7 +313,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					)
 				)
 			}, simplify = "array")
-			message(Sys.time()," : finished ...")
+			message("---------------- ", Sys.time()," : Finish ----------------")
 
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)

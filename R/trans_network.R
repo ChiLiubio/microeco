@@ -139,7 +139,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
-		#' @param ... paremeters pass to spiec.easi in package SpiecEasi.
+		#' @param ... paremeters pass to spiec.easi in package SpiecEasi for network_method = "SpiecEasi".
 		#' @return res_network in object.
 		#' @examples
 		#' \donttest{
@@ -170,7 +170,8 @@ trans_network <- R6Class(classname = "trans_network",
 			if(!grepl("COR|PGM|SpiecEasi", network_method, ignore.case = TRUE)){
 				stop("Unknown network method in network_method parameter!")
 			}
-			message(Sys.time()," calculate network: start ...")
+			
+			message("---------------- ", Sys.time()," : Start ----------------")
 			if(grepl("COR", network_method, ignore.case = TRUE)){
 				cortable <- self$res_cor_p$cor
 				adp <- apply(self$res_cor_p$p, 2, p.adjust, method = COR_p_adjust)
@@ -246,7 +247,8 @@ trans_network <- R6Class(classname = "trans_network",
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 				E(network)$weight <- abs(E(network)$weight)
 			}
-			message(Sys.time()," calculate network: finished ...")
+			message("---------------- ", Sys.time()," : Finish ----------------")
+			
 			nodes_raw <- data.frame(cbind(V(network), V(network)$name))
 			# delete uncultured taxa when the taxa level is not OTU
 			if(taxa_level != "OTU"){

@@ -9,10 +9,9 @@ An R package for data mining in microbial community ecology
 ## Background
 In microbial community ecology, with the development of the high-throughput sequencing techniques,
 the increasing data amount and complexity make the community data analysis and management a challenge.
-There has been a lot of R packages created for the microbiome profiling analysis, such as phyloseq,
-microbiomeSeq, ampvis2, mare and microbiome.
+There has been a lot of R packages created for the microbiome profiling analysis.
 However, it is still difficult to perform data mining fast and efficiently.
-Based on this, we created R package microeco.
+Based on this, we created R microeco package.
 
 ## Main Features
   + R6 Class to store and analyze data; fast, flexible and modularized
@@ -239,18 +238,12 @@ BiocManager::install("ggtree")
 The R package SpiecEasi can be used for the network construction using SPIEC-EASI (SParse InversE Covariance Estimation for Ecological Association Inference) approach.
 The package can be installed from Github https://github.com/zdk123/SpiecEasi
 
-#### FlashWeave
-FlashWeave is a julia package used for network analysis.
-It predicts ecological interactions among microbes from large-scale compositional abundance data (i.e. OTU tables constructed from sequencing data) 
-through statistical co-occurrence.
-
-1. download and install julia from https://julialang.org/downloads/
-2. Put julia in the computer env PATH, such as  your_directory_path\Julia\bin
-3. Open terminal or cmd or Powershell, input julia, install FlashWeave following the operation in https://github.com/meringlab/FlashWeave.jl  
 
 #### Gephi
-Gephi is an excellent network visualization tool and used to open the saved network file, i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco/).
+Gephi is an excellent network visualization tool and used to open the saved network file, 
+i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco_tutorial/extended-class.html#trans_network-class).
 You can download Gephi and learn how to use it from https://gephi.org/users/download/
+
 
 #### WGCNA
 In the correlation-based network, when the species number is large,
@@ -333,11 +326,6 @@ Of course, you can also directly modify the function or class to reload them.
 ### Files from other tools to microtable object
 Previous descriptions on how to construct microtable object from QIIME, QIIME2 and phyloseq have been moved to the package file2meco (https://github.com/ChiLiubio/file2meco)
 The package file2meco is designed to transform files from other tools/platforms into microtable object.
-
-
-### sample_table in microtable
-The rownames of sample_table are used for selecting samples/groups in all the related operations in the package.
-Before you create microtable object, make sure that the rownames of sample_table are the sample names.
 
 
 ## Contributing
