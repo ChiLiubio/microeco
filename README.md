@@ -323,9 +323,12 @@ Previous descriptions on how to construct microtable object from QIIME, QIIME2 a
 The package file2meco is designed to transform files from other tools/platforms into microtable object.
 
 
+
 ## Contributing
 
-We welcome any contribution, including but not limited to code, idea, tutorial. \! 
+We welcome any contribution, including but not limited to code, idea and [tutorial](https://chiliubio.github.io/microeco_tutorial/). \! 
+Please report errors and questions on github [Issues](https://github.com/ChiLiubio/microeco/issues).
+Any contribution via [Pull requests](https://github.com/ChiLiubio/microeco/pulls) or Email(liuchi0426@126.com) will be appreciated.
 By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
 
 
