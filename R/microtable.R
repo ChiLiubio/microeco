@@ -499,21 +499,27 @@ microtable <- R6Class(classname = "microtable",
 		#' Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac.
 		#' See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 		#'
+		#' @param method default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
+		#'   see \code{\link{vegdist}} function and method parameter in vegan package. 
 		#' @param unifrac default FALSE; TRUE or FALSE, whether unifrac index should be calculated.
+		#' @param ... parameters passed to \code{\link{vegdist}} function.
 		#' @return beta_diversity stored in object.
 		#' @examples
 		#' \donttest{
 		#' dataset$cal_betadiv(unifrac = FALSE)
 		#' class(dataset$beta_diversity)
 		#' }
-		cal_betadiv = function(unifrac = FALSE){
+		cal_betadiv = function(method = NULL, unifrac = FALSE, ...){
 			res <- list()
 			eco_table <- t(self$otu_table)
 			sample_table <- self$sample_table
-			bray <- as.matrix(vegan::vegdist(eco_table, method="bray"))
-			jaccard <- as.matrix(vegan::vegdist(eco_table, method="jaccard"))
-			res$bray <- bray
-			res$jaccard <- jaccard
+			if(is.null(method)){
+				method <- c("bray", "jaccard")
+			}
+			for(i in method){
+				res[[i]] <- as.matrix(vegan::vegdist(eco_table, method = i, ...))
+			}
+			
 			if(unifrac == T){
 				if(is.null(self$phylo_tree)){
 					stop("No phylogenetic tree provided, please change the parameter unifrac to FALSE")

@@ -218,7 +218,7 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
 
-\item{\code{...}}{paremeters pass to spiec.easi in package SpiecEasi.}
+\item{\code{...}}{paremeters pass to spiec.easi in package SpiecEasi for network_method = "SpiecEasi".}
 }
 \if{html}{\out{</div>}}
 }

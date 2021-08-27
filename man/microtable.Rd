@@ -601,13 +601,18 @@ Save alpha diversity table to the computer.
 Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac.
 See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(unifrac = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(method = NULL, unifrac = FALSE, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{method}}{default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
+see \code{\link{vegdist}} function and method parameter in vegan package.}
+
 \item{\code{unifrac}}{default FALSE; TRUE or FALSE, whether unifrac index should be calculated.}
+
+\item{\code{...}}{parameters passed to \code{\link{vegdist}} function.}
 }
 \if{html}{\out{</div>}}
 }

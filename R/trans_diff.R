@@ -827,9 +827,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(ind_num > 0){
 				guide_label <- clade_label_new[ind, ] %>%
 					dplyr::mutate(color = annotation_info$color[match(.data$label_raw, annotation_info$label)])
-				p <- p + geom_point(data = guide_label, inherit.aes = FALSE, aes_(x = 0, y = 0, shape = ~label_legend), size = 0, stroke = 0) +
+				p <- p + 
+					geom_point(data = guide_label, 
+						inherit.aes = FALSE, 
+						aes_(x = 0, y = 0, shape = ~label_legend), 
+						size = 0, 
+						stroke = 0) +
 					scale_shape_manual(values = rep(annotation_shape, nrow(guide_label))) +
-					guides(shape = guide_legend(override.aes = list(size = annotation_shape_size, shape = annotation_shape, fill = guide_label$color)))
+					guides(shape = guide_legend(override.aes = list(
+						size = annotation_shape_size, 
+						shape = annotation_shape, 
+						fill = guide_label$color
+						)))
 			}
 			p <- p + theme(legend.position = "right", legend.title = element_blank())
 			p
