@@ -82,6 +82,14 @@ t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\%
   rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
 }
+
+## ------------------------------------------------
+## Method `trans_network$get_edge_table`
+## ------------------------------------------------
+
+\donttest{
+t1$get_edge_table()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -95,6 +103,7 @@ t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\%
 \item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-subset_network}{\code{trans_network$subset_network()}}
+\item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
 \item \href{#method-print}{\code{trans_network$print()}}
 \item \href{#method-clone}{\code{trans_network$clone()}}
 }
@@ -447,6 +456,29 @@ a new network
 t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% 
   rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_edge_table"></a>}}
+\if{latex}{\out{\hypertarget{method-get_edge_table}{}}}
+\subsection{Method \code{get_edge_table()}}{
+Get the table of edges, including connected nodes, labels and weight.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_edge_table()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+data.frame
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$get_edge_table()
 }
 }
 \if{html}{\out{</div>}}

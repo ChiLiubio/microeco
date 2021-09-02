@@ -490,6 +490,27 @@ trans_network <- R6Class(classname = "trans_network",
 			sub_network
 		},
 		#' @description
+		#' Get the table of edges, including connected nodes, labels and weight.
+		#'
+		#' @return data.frame
+		#' @examples
+		#' \donttest{
+		#' t1$get_edge_table()
+		#' }
+		get_edge_table = function(){
+			network <- self$res_network
+			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
+			edge_label <- E(network)$label
+			if(!is.null(E(network)$weight)){
+				edge_weight <- E(network)$weight
+			}else{
+				edge_weight <- rep(NA, times = length(edge_label))
+			}
+			res_edge_table <- data.frame(edges, edge_label, edge_weight)
+			colnames(res_edge_table) <- c("node1", "node2", "label", "weight")
+			res_edge_table
+		},
+		#' @description
 		#' Print the trans_network object.
 		print = function() {
 			cat("trans_network class:\n")

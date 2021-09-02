@@ -7,11 +7,11 @@ An R package for data mining in microbial community ecology
 ![](https://img.shields.io/badge/Release-0.5.0-orange.svg) ![](https://img.shields.io/badge/Test-0.5.2-red.svg)
 
 ## Background
-In microbial community ecology, with the development of the high-throughput sequencing techniques,
+In microbial community ecology, with the development of high-throughput sequencing techniques,
 the increasing data amount and complexity make the community data analysis and management a challenge.
 There has been a lot of R packages created for the microbiome profiling analysis.
 However, it is still difficult to perform data mining fast and efficiently.
-Based on this, we created R microeco package.
+Therefore, we created R microeco package.
 
 ## Main Features
   + R6 Class to store and analyze data; fast, flexible and modularized
@@ -56,12 +56,10 @@ devtools::install_github("ChiLiubio/microeco")
 
 
 ## Tutorial
-See the detailed package tutorial (https://chiliubio.github.io/microeco_tutorial/) and the help documentations.
-If you want to run the codes in the tutorial and README completely, you need to install some additional packages, see the following **Notes** part.
-Contructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2 and phyloseq) 
-can be easily achieved using the package file2meco (https://github.com/ChiLiubio/file2meco).
-There are some important features and approaches that exist in other microbiome analysis software/platforms and currently not implemented in microeco package.
-More approaches for the file conversion will be provided in the package file2meco.
+See the detailed package tutorial (https://chiliubio.github.io/microeco_tutorial/) and the help documentations (e.g. ?microtable).
+If you want to run the codes in the tutorial completely, you need to install some additional packages. Please see the following **Notes** part.
+Contructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2, HUMAnN and phyloseq) 
+can be easily achieved with the package file2meco (https://github.com/ChiLiubio/file2meco).
 The mecodev package (https://github.com/ChiLiubio/mecodev/) is designed to develop more classes for data analysis based on the microeco package.
 
 
@@ -73,9 +71,7 @@ FEMS Microbiology Ecology, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa25
 
 ### packages important
 To keep the start and use of microeco package simplified, 
-the installation of microeco depend on some packages, which are compulsory-installed from CRAN and useful in the data analysis.
-These packages include
-R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer.
+the installation of microeco only depend on several packages, which are compulsory-installed from CRAN and important in the data analysis.
 So the question is that you may encounter an error when using a class or function that invoke an additional package like this:
 
 ```r
@@ -92,16 +88,15 @@ Error in t1$cal_network(network_method = "SpiecEasi"): igraph package not instal
 
 
 <br>
-The reason is that network construction require igraph package. We donot put the igraph and some other packages (in bioconductor or github) on the "Imports" part of microeco package.
+The reason is that network construction require igraph package. We donot put the igraph and some other packages (e.g. SpiecEasi in github) on the "Imports" part of microeco package.
 
 The solutions:
 
-1. install the package when encounter such an error. Actually, it's very easy to install the packages of CRAN in Rstudio. Just try it.
+1. install the package when encounter such an error. Actually, it's very easy to install the packages from CRAN or bioconductor. Just try it.
 
-2. install the packages in advance. We recommend this solution if you are interest in most of the methods in the microeco package.
+2. install the packages in advance. We recommend this solution if you are interest in most of the methods in the microeco package and want to repeat the analysis in tutorial.
 
 We show several packages that are published in CRAN and not installed automatically.
-
 
 
 <div id="content-wrapper">
@@ -216,7 +211,7 @@ lapply(packages, function(x) {
 	}})
 ```
 
-There are also some packages that may be useful in some parameters or functions. These packages may be R packages published in github or bioconductor,
+There are also some packages that are useful in some functions. These packages may be R packages published in github or bioconductor,
 or packages written by other languages.
 
 
@@ -240,21 +235,10 @@ You can download Gephi and learn how to use it from https://gephi.org/users/down
 
 
 #### WGCNA
-In the correlation-based network, when the species number is large,
-the correlation algorithm in WGCNA is very fast compared to the cor function in R base.
-WGCNA depends on several packages in Bioconductor, including GO.db and impute.
-So if you want to install WGCNA, first install  GO.db (https://bioconductor.org/packages/release/data/annotation/html/GO.db.html)
-and impute (http://www.bioconductor.org/packages/release/bioc/html/impute.html) with the following code.
+In the correlation-based network, when the species number is very large,
+the correlation algorithm in WGCNA is very fast compared to the 'cor' option in trans_network.
 
 ```r
-# install GO.db and impute
-# First check and install BiocManager package
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-# install GO.db and impute
-BiocManager::install("GO.db")
-BiocManager::install("impute")
-BiocManager::install("preprocessCore")
-# then install WGCNA.
 install.packages("WGCNA", dependencies = TRUE)
 ```
 
@@ -270,7 +254,7 @@ install.packages(system.file("extdata", "qiimer_0.9.4.tar.gz", package="microeco
 install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microeco"), repos = NULL, type = "source")
 ```
 2. download SILVA123 reference data from http://tax4fun.gobics.de/
-　unzip SILVA123.zip , move it to a place you can remember
+　unzip SILVA123.zip , move it to a place that you can remember.
 
 
 #### Tax4Fun2
@@ -278,7 +262,7 @@ Tax4Fun2 is another R package for the the prediction of functional profiles and 
 It has higher accuracies than PICRUSt and Tax4Fun. The Tax4Fun2 approach implemented in microeco is a little different from the original package.
 Using Tax4Fun2 approach require the representative fasta file.
 The user do not need to install Tax4Fun2 R package.
-The only thing need to do is to download the blast tool and Ref99NR/Ref100NR.
+The only thing need to do is to download the blast tool and Ref99NR/Ref100NR database.
 Downlaod blast tools from "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+" ; e.g. ncbi-blast-\*\*\*\*-x64-win64.tar.gz  for windows system.
 Downlaod Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
 Uncompress all the folders. The final folders should be like these structures:
@@ -313,15 +297,13 @@ rep_fasta <- seqinr::read.fasta(rep_fasta_path)
 ### Plotting
 Most of the plotting in the package rely on the ggplot2 package system.
 We provide some parameters to change the corresponding plot.
-If you want to change the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
+If you want to modify the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
 Each data table used for plotting is stored in the object and can be downloaded for the personalized analysis and plotting.
-Of course, you can also directly modify the function or class to reload them.
+Of course, you can also directly modify the class and reload them.
 
 ### Files from other tools to microtable object
 Previous descriptions on how to construct microtable object from QIIME, QIIME2 and phyloseq have been moved to the package file2meco (https://github.com/ChiLiubio/file2meco)
-The package file2meco is designed to transform files from other tools/platforms into microtable object.
-
-
+The package file2meco is designed to convert files between other tools/platforms and microtable object.
 
 ## Contributing
 
@@ -349,19 +331,7 @@ By participating in this project you agree to abide by the terms outlined in the
   - Paulson, J., Stine, O., Bravo, H. et al. Differential abundance analysis for microbial marker-gene surveys. Nat Methods 10, 1200–1202 (2013). DOI: 10.1038/nmeth.2658
   - Deng Y, Jiang Y-H, Yang Y, He Z, Luo F, Zhou J. Molecular ecological network analyses. BMC bioinformatics 2012; 13: 113. 
   - Oksanen J, Blanchet FG, Friendly M, Kindt R, Legendre P, McGlinn D, et al. Vegan: Community ecology package. 2019. 
-  - Picante: R tools for integrating phylogenies and ecology. Bioinformatics 2010; 26: 1463–1464. 
-  - [microbiomeSeq](https://github.com/umerijaz/microbiomeSeq)
-  - [microbiomeMarker](https://github.com/yiluheihei/microbiomeMarker)
-
-
-
-
-
-
-
-
-
-
+  - Picante: R tools for integrating phylogenies and ecology. Bioinformatics 2010; 26: 1463–1464.
 
 
 
