@@ -242,6 +242,7 @@ trans_network <- R6Class(classname = "trans_network",
 				close(openfile)
 				system("julia calculate_network.jl")
 				setwd('..')
+				message("The temporary files are in ", tem_dir)
 				network <- read_graph(paste0(tem_dir, "/network_PGM.gml"), format = "gml")
 				network <- set_vertex_attr(network, "name", value = V(network)$label)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))

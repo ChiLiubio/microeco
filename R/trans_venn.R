@@ -155,9 +155,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber == 3) {
-				p <- ggplot(data.frame(), aes(x=c(5, 5), y = 0)) +
-					xlim(1,9) +	
-					ylim(1,9) + 
+				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) +
+					xlim(1, 9) +	
+					ylim(1, 9) + 
 					private$main_theme
 				
 				if(fill_color == T){
@@ -176,9 +176,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber == 4) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + 
-					xlim(0,10) + 
-					ylim(0,10) + 
+				p <- ggplot(data.frame(), aes(x = c(5,5), y = 0)) + 
+					xlim(0, 10) + 
+					ylim(0, 10) + 
 					private$main_theme
 
 				if(fill_color == T){
@@ -200,9 +200,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber == 5 & petal_plot == F) {
-				p <- ggplot(data.frame(), aes(x=c(5,5), y=0)) + 
-					xlim(0,10.4) + 
-					ylim(-0.5,10.8) + 
+				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) + 
+					xlim(0, 10.4) + 
+					ylim(-0.5, 10.8) + 
 					private$main_theme
 				
 				if(fill_color == T){

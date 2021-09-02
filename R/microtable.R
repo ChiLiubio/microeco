@@ -551,7 +551,14 @@ microtable <- R6Class(classname = "microtable",
 		}
 		),
 	private = list(
-		transform_data_proportion = function(input, columns, rel, split_group = FALSE, split_by = "&&", split_column){
+		transform_data_proportion = function(
+			input, 
+			columns, 
+			rel, 
+			split_group = FALSE, 
+			split_by = "&&", 
+			split_column
+			){
 			sampleinfo <- input$sample_table
 			abund <- input$otu_table
 			tax <- input$tax_table

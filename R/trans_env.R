@@ -273,9 +273,16 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + theme(panel.grid=element_blank())
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
-			p <- p + geom_point(data=self$res_rda_trans$df_sites, aes_string("x", "y", colour = plot_color, shape = plot_shape), size= 3.5)
+			p <- p + geom_point(
+				data=self$res_rda_trans$df_sites, 
+				aes_string("x", "y", colour = plot_color, shape = plot_shape), 
+				size= 3.5)
 			# plot arrows
-			p <- p + geom_segment(data=self$res_rda_trans$df_arrows, aes(x = 0, y = 0, xend = x, yend = y), arrow = arrow(length = unit(0.2, "cm")), color = "grey30")
+			p <- p + geom_segment(
+				data=self$res_rda_trans$df_arrows, 
+				aes(x = 0, y = 0, xend = x, yend = y), 
+				arrow = arrow(length = unit(0.2, "cm")), 
+				color = "grey30")
 			p <- p + ggrepel::geom_text_repel(
 				data = as.data.frame(self$res_rda_trans$df_arrows * 1), 
 				aes(x, y, label = gsub("`", "", rownames(self$res_rda_trans$df_arrows))), 
@@ -302,7 +309,7 @@ trans_env <- R6Class(classname = "trans_env",
 					)
 				df_arrows_spe1[, self$taxa_level] %<>% gsub(".*__", "", .) %>% gsub("Candidatus ", "", .) 
 				if(taxa_text_type == "italic"){
-					df_arrows_spe1[, self$taxa_level] %<>%  paste0("italic('", .,"')")
+					df_arrows_spe1[, self$taxa_level] %<>% paste0("italic('", .,"')")
 				}
 				p <- p + ggrepel::geom_text_repel(
 					data = df_arrows_spe1, 
@@ -311,7 +318,7 @@ trans_env <- R6Class(classname = "trans_env",
 					color = taxa_text_color, 
 					segment.alpha = .01, 
 					parse = TRUE
-					)
+				)
 			}
 			p
 		},
@@ -707,6 +714,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				fit <- lm(y ~ x)
 			}
+			# default position max * .8
 			if(is.null(text_x_pos)){
 				text_x_pos <- max(use_data$x) * 0.8
 			}
@@ -716,7 +724,7 @@ trans_env <- R6Class(classname = "trans_env",
 
 			p <- ggplot(use_data, aes(x = x, y = y)) + 
 				theme_bw() + 
-				geom_point(shape = 20, size = 4, ...) +
+				geom_point(shape = 20, ...) +
 				theme(panel.grid = element_blank())
 			if(add_line == T){
 				p <- p + geom_smooth(method = "lm", size = .8, colour = "black", se = use_se)
@@ -724,13 +732,15 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + annotate("text", 
 					x = text_x_pos, 
 					y = text_y_pos, 
-					label = private$fit_equat(fit, 
+					label = private$fit_equat(
+						fit, 
 						use_cor = use_cor, 
 						pvalue_trim = pvalue_trim, 
 						cor_coef_trim = cor_coef_trim, 
 						lm_fir_trim = lm_fir_trim, 
 						lm_sec_trim = lm_sec_trim, 
-						lm_squ_trim = lm_squ_trim), 
+						lm_squ_trim = lm_squ_trim
+						), 
 					parse = TRUE) +
 #				scale_x_continuous(limits = c(min(x2) - 0.2 * (range(x2)[2] - range(x2)[1]), NA)) +
 				xlab(x_axis_title) + 
@@ -750,9 +760,10 @@ trans_env <- R6Class(classname = "trans_env",
 		}
 	),
 	private = list(
+		# transformation function
 		stand_fun = function(x, min_perc = 1, max_perc = 10) {
 			# x must be a two column data.frame or matrix
-			t1 <- x[,1]^2 + x[,2]^2
+			t1 <- x[, 1]^2 + x[, 2]^2
 			a <- min_perc * max(t1)
 			b <- max_perc * max(t1)
 			Ymax <- max(t1)
@@ -766,6 +777,7 @@ trans_env <- R6Class(classname = "trans_env",
 			colnames(res) <- colnames(x)
 			res
 		},
+		# parse the equation and add the statistics
 		fit_equat = function(
 			equat, 
 			use_cor = TRUE, 
@@ -793,7 +805,7 @@ trans_env <- R6Class(classname = "trans_env",
 							  r2 = round(summary(equat)$r.squared, digits = lm_squ_trim),
 							  p1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
 							  )
-				res <- substitute(italic(y) == b %.% italic(x)*a*","~~italic(R)^2~"="~r2*","~~italic(P)*p1,lm_coef)
+				res <- substitute(italic(y) == b %.% italic(x)*a*","~~italic(R)^2~"="~r2*","~~italic(P)*p1, lm_coef)
 			}
 			as.character(as.expression(res))
 		}
