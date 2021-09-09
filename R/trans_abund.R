@@ -325,6 +325,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
 
 			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
+			
 			if(withmargin == T){
 				p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
 			}else{

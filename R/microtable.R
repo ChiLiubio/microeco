@@ -43,16 +43,7 @@ microtable <- R6Class(classname = "microtable",
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric vector! Please check the otu_table!")
 			}else{
-				if(any(apply(otu_table, 1, sum) == 0)){
-					remove_num <- sum(apply(otu_table, 1, sum) == 0)
-					message(remove_num, " taxa are removed from the otu_table, as the abundance is 0 ...")
-					otu_table <- otu_table[apply(otu_table, 1, sum) > 0, , drop = FALSE]
-				}
-				if(any(apply(otu_table, 2, sum) == 0)){
-					remove_num <- sum(apply(otu_table, 2, sum) == 0)
-					message(remove_num, " samples are removed from the otu_table, as the abundance is 0 ...")
-					otu_table <- otu_table[, apply(otu_table, 2, sum) > 0, drop = FALSE]
-				}
+				otu_table <- private$check_abund_table(otu_table)
 				self$otu_table <- otu_table
 			}
 			if(is.null(sample_table)){
@@ -141,7 +132,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			if (min(self$sample_sums()) < sample.size) {
 				rmsamples <- self$sample_names()[self$sample_sums() < sample.size]
-				message(length(rmsamples), " samples removed", "because they contained fewer reads than `sample.size`.")
+				message(length(rmsamples), " samples removed, ", "because they contained fewer reads than `sample.size`.")
 				self$sample_table <- base::subset(self$sample_table, ! self$sample_names() %in% rmsamples)
 				self$tidy_dataset()
 			}
@@ -167,6 +158,9 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' dataset$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = TRUE){
+			# check whether there is 0 abundance in otu_table
+			self$otu_table <- private$check_abund_table(self$otu_table)
+			
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
 			if(length(sample_names) == 0){
 				stop("No same sample name found between rownames of sample_table and colnames of otu_table! Please check whether the rownames of sample_table are sample names!")
@@ -551,6 +545,28 @@ microtable <- R6Class(classname = "microtable",
 		}
 		),
 	private = list(
+		# check whether there is OTU or sample with 0 abundance
+		# input and return are both otu_table
+		check_abund_table = function(otu_table){
+			if(any(apply(otu_table, 1, sum) == 0)){
+				remove_num <- sum(apply(otu_table, 1, sum) == 0)
+				message(remove_num, " taxa are removed from the otu_table, as the abundance is 0 ...")
+				otu_table %<>% .[apply(., 1, sum) > 0, , drop = FALSE]
+			}
+			if(any(apply(otu_table, 2, sum) == 0)){
+				remove_num <- sum(apply(otu_table, 2, sum) == 0)
+				message(remove_num, " samples are removed from the otu_table, as the abundance is 0 ...")
+				otu_table %<>% .[, apply(., 2, sum) > 0, drop = FALSE]
+			}
+			if(ncol(otu_table) == 0){
+				stop("No sample have abundance! Please check you data!")
+			}
+			if(nrow(otu_table) == 0){
+				stop("No taxon have abundance! Please check you data!")
+			}
+			otu_table
+		},
+		# taxa abundance calculation function
 		transform_data_proportion = function(
 			input, 
 			columns, 
