@@ -251,12 +251,29 @@ t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
 \subsection{Method \code{cal_module()}}{
 Add network modules to the network.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_module(module_name_prefix = "M")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_module(
+  method = "cluster_fast_greedy",
+  module_name_prefix = "M"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{method}}{default "cluster_fast_greedy"; the method used to find the optimal community structure of a graph;
+     The following available options from from igraph package: \cr 
+\itemize{
+     \code{\link{cluster_fast_greedy}} \cr 
+     \code{\link{cluster_optimal}} \cr 
+     \code{\link{cluster_edge_betweenness}} \cr 
+     \code{\link{cluster_infomap}} \cr 
+     \code{\link{cluster_label_prop}} \cr 
+     \code{\link{cluster_leading_eigen}} \cr 
+     \code{\link{cluster_louvain}} \cr 
+     \code{\link{cluster_spinglass}} \cr 
+     \code{\link{cluster_walktrap}} \cr 
+}}
+
 \item{\code{module_name_prefix}}{default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.}
 }

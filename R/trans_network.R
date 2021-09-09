@@ -287,6 +287,19 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Add network modules to the network.
 		#'
+		#' @param method default "cluster_fast_greedy"; the method used to find the optimal community structure of a graph;
+		#' 	 The following available options from from igraph package: \cr 
+		#' \itemize{
+		#' 	 \code{\link{cluster_fast_greedy}} \cr 
+		#' 	 \code{\link{cluster_optimal}} \cr 
+		#' 	 \code{\link{cluster_edge_betweenness}} \cr 
+		#' 	 \code{\link{cluster_infomap}} \cr 
+		#' 	 \code{\link{cluster_label_prop}} \cr 
+		#' 	 \code{\link{cluster_leading_eigen}} \cr 
+		#' 	 \code{\link{cluster_louvain}} \cr 
+		#' 	 \code{\link{cluster_spinglass}} \cr 
+		#' 	 \code{\link{cluster_walktrap}} \cr 
+		#' }
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
 		#' @return a network with modules, stored in object.
@@ -294,10 +307,16 @@ trans_network <- R6Class(classname = "trans_network",
 		#' \donttest{
 		#' t1$cal_module()
 		#' }
-		cal_module = function(module_name_prefix = "M"){
+		cal_module = function(method = "cluster_fast_greedy", module_name_prefix = "M"){
 			# add modules
 			network <- self$res_network
-			mod1 <- as.character(cluster_fast_greedy(network)$membership)
+			if(!is.character(method)){
+				stop("The parameter method must be character!")
+			}
+			# use NSE
+			res_member <- parse(text = paste0(method, "(network)")) %>% eval
+			
+			mod1 <- as.character(res_member$membership)
 			mod2 <- sort(table(mod1), decreasing = TRUE)
 			for(i in seq_along(mod2)){
 				mod1[mod1 == names(mod2)[i]] <- paste0(module_name_prefix, i)
