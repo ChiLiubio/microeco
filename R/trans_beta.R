@@ -305,7 +305,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param plot_group_order default NULL; a vector used to order the groups in the plot.
 		#' @param color_values colors for presentation.
 		#' @param distance_pair_stat default FALSE; whether do the paired comparisions.
-		#' @param pair_compare_filter default ""; if provided, remove the matched groups.
+		#' @param pair_compare_filter_match default NULL; if provided, remove the matched groups; use the regular express to match the paired groups.
+		#' @param pair_compare_filter_select default NULL; numeric vector; if provided, only select those input groups.
+		#'   This parameter must be a numeric vector used to select the paired combination of groups. For example, pair_compare_filter_select = c(1, 3) 
+		#'   can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
+		#'   The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together.
 		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
 		#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
 		#' @return ggplot.
@@ -317,7 +321,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 			plot_group_order = NULL,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			distance_pair_stat = FALSE,
-			pair_compare_filter = "",
+			pair_compare_filter_match = NULL,
+			pair_compare_filter_select = NULL,
 			pair_compare_method = "wilcox.test",
 			plot_distance_xtype = NULL
 			){
@@ -335,7 +340,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			if (!is.null(plot_group_order)) {
 				group_distance[, group] %<>% factor(., levels = plot_group_order)
+			}else{
+				group_distance[, group] %<>% as.factor
 			}
+			message("The ordered groups are ", paste0(levels(group_distance[, group]), collapse = " "), " ...")
 			
 			p <- ggplot(group_distance, aes_string(x = group, y = "value", color = group)) +
 				theme_bw() +
@@ -352,14 +360,33 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			if(distance_pair_stat == T){
 				# remove some groups
-				comparisons_list <- unique(as.character(group_distance[, group])) %>% 
-					combn(., 2) %>% 
-					{.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter, x)))), drop = FALSE]} %>% 
-					{lapply(seq_len(ncol(.)), function(x) .[, x])}
+				comparisons_list <- levels(group_distance[, group]) %>% 
+					combn(., 2)
+				if(!is.null(pair_compare_filter_match) & !is.null(pair_compare_filter_select)){
+					stop("The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together!")
+				}
+				if(!is.null(pair_compare_filter_match)){
+					comparisons_list %<>% {.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter_match, x)))), drop = FALSE]}
+				}
+				if(!is.null(pair_compare_filter_select)){
+					if(!is.numeric(pair_compare_filter_select)){
+						stop("The parameter pair_compare_filter_select must be numeric !")
+					}
+					messages_use <- unlist(lapply(as.data.frame(comparisons_list[, pair_compare_filter_select, drop = FALSE]), 
+						function(x){paste0(x, collapse = "-")}))
+					
+					message("Selected groups are ", paste0(messages_use, collapse = " "), " ...")
+					comparisons_list %<>% .[, pair_compare_filter_select, drop = FALSE]
+				}
+				
+				# generate the list
+				comparisons_list %<>% {lapply(seq_len(ncol(.)), function(x) .[, x])}
+				
 				p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, method = pair_compare_method, 
 						tip.length=0.01, label = "p.signif", symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1),
 						symbols = c("****", "***", "**", "*", "ns")))
 			}
+			
 			p
 		},
 		#' @description

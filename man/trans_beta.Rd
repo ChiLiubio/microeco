@@ -332,7 +332,8 @@ Plotting the distance between samples within or between groups.
   plot_group_order = NULL,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   distance_pair_stat = FALSE,
-  pair_compare_filter = "",
+  pair_compare_filter_match = NULL,
+  pair_compare_filter_select = NULL,
   pair_compare_method = "wilcox.test",
   plot_distance_xtype = NULL
 )}\if{html}{\out{</div>}}
@@ -347,7 +348,12 @@ Plotting the distance between samples within or between groups.
 
 \item{\code{distance_pair_stat}}{default FALSE; whether do the paired comparisions.}
 
-\item{\code{pair_compare_filter}}{default ""; if provided, remove the matched groups.}
+\item{\code{pair_compare_filter_match}}{default NULL; if provided, remove the matched groups; use the regular express to match the paired groups.}
+
+\item{\code{pair_compare_filter_select}}{default NULL; numeric vector; if provided, only select those input groups.
+This parameter must be a numeric vector used to select the paired combination of groups. For example, pair_compare_filter_select = c(1, 3) 
+can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
+The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together.}
 
 \item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
 
