@@ -51,7 +51,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
 			if(!is.null(ratio)){
 				if(!ratio %in% c("seqratio", "numratio")){
-					stop("The parameter ratio must be one of seqratio or numratio !")
+					stop("Provided parameter ratio must be 'seqratio' or 'numratio' !")
 				}
 				if(ratio == "seqratio"){
 					venn_count_abund[,2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[,2]), 3) * 100, "%")
@@ -175,28 +175,30 @@ trans_venn <- R6Class(classname = "trans_venn",
 						color = color_circle[3], size = linesize)
 				}
 			}
+			
 			if(colnumber == 4) {
 				p <- ggplot(data.frame(), aes(x = c(5,5), y = 0)) + 
 					xlim(0, 10) + 
 					ylim(0, 10) + 
 					private$main_theme
-
+				
+				map_data_1 <- private$plotellipse(center = c(3.5, 3.6), rotate = -35)
+				map_data_2 <- private$plotellipse(center = c(4.7, 4.4), rotate = -35)
+				map_data_3 <- private$plotellipse(center = c(5.3, 4.4), rotate = 35)
+				map_data_4 <- private$plotellipse(center = c(6.5, 3.6), rotate = 35)
+			
 				if(fill_color == T){
 					p <- p + 
-					 geom_polygon(data = private$plotellipse(center = c(3.5, 3.6), rotate = -35), aes(x = x, y = y), fill = color_circle[1], alpha = alpha)+
-					geom_polygon(data = private$plotellipse(center = c(4.7, 4.4), rotate = -35), aes(x = x, y = y), fill = color_circle[2], alpha = alpha) +
-					geom_polygon(data = private$plotellipse(center = c(5.3, 4.4), rotate = 35), aes(x = x, y = y), fill = color_circle[3], alpha = alpha) +
-					geom_polygon(data = private$plotellipse(center = c(6.5, 3.6), rotate = 35), aes(x = x, y = y), fill = color_circle[4], alpha = alpha)
+						geom_polygon(data = map_data_1, aes(x = x, y = y), fill = color_circle[1], alpha = alpha) +
+						geom_polygon(data = map_data_2, aes(x = x, y = y), fill = color_circle[2], alpha = alpha) +
+						geom_polygon(data = map_data_3, aes(x = x, y = y), fill = color_circle[3], alpha = alpha) +
+						geom_polygon(data = map_data_4, aes(x = x, y = y), fill = color_circle[4], alpha = alpha)
 				} else {
-					p <- p +
-					annotate("path", x = private$plotellipse(center = c(3.5, 3.6), rotate = -35)$x, 
-						y = private$plotellipse(center = c(3.5, 3.6), rotate = -35)$y, color = color_circle[1], size = linesize) +
-					annotate("path", x = private$plotellipse(center = c(4.7, 4.4), rotate = -35)$x, 
-						y = private$plotellipse(center = c(4.7, 4.4), rotate = -35)$y, color = color_circle[2], size = linesize) +
-					annotate("path", x = private$plotellipse(center = c(5.3, 4.4), rotate = 35)$x, 
-						y = private$plotellipse(center = c(5.3, 4.4), rotate = 35)$y, color = color_circle[3], size = linesize) +
-					annotate("path", x = private$plotellipse(center = c(6.5, 3.6), rotate = 35)$x, 
-						y = private$plotellipse(center = c(6.5, 3.6), rotate = 35)$y, color = color_circle[4], size = linesize)
+					p <- p + 
+						annotate("path", x = map_data_1$x, y = map_data_1$y, color = color_circle[1], size = linesize) +
+						annotate("path", x = map_data_2$x, y = map_data_2$y, color = color_circle[2], size = linesize) +
+						annotate("path", x = map_data_3$x, y = map_data_3$y, color = color_circle[3], size = linesize) +
+						annotate("path", x = map_data_4$x, y = map_data_4$y, color = color_circle[4], size = linesize)
 				}
 			}
 			if(colnumber == 5 & petal_plot == F) {
@@ -205,44 +207,44 @@ trans_venn <- R6Class(classname = "trans_venn",
 					ylim(-0.5, 10.8) + 
 					private$main_theme
 				
+				map_data_1 <- private$plotellipse(center = c(4.83, 6.2), radius = c(1.43, 4.11), rotate = 0)
+				map_data_2 <- private$plotellipse(center = c(6.25, 5.4), radius = c(1.7, 3.6), rotate = 66)
+				map_data_3 <- private$plotellipse(center = c(6.1, 3.5), radius = c(1.55, 3.9), rotate = 150)
+				map_data_4 <- private$plotellipse(center = c(4.48, 3.15), radius = c(1.55, 3.92), rotate = 210)
+				map_data_5 <- private$plotellipse(center = c(3.7, 4.8), radius = c(1.7, 3.6), rotate = 293.5)
+			
 				if(fill_color == T){
 					p <- p + 
-					 geom_polygon(data = private$plotellipse(center = c(4.83, 6.2), radius = c(1.43, 4.11), rotate = 0),
-						aes(x = x, y = y), fill=color_circle[1], alpha = alpha)+
-					 geom_polygon(data = private$plotellipse(center = c(6.25, 5.4), radius = c(1.7, 3.6), rotate = 66),
-						aes(x = x, y = y), fill=color_circle[2], alpha = alpha)+
-					 geom_polygon(data = private$plotellipse(center = c(6.1, 3.5), radius = c(1.55, 3.9), rotate = 150),
-						aes(x = x, y = y), fill=color_circle[3], alpha = alpha)+
-					 geom_polygon(data = private$plotellipse(center = c(4.48, 3.15), radius = c(1.55, 3.92), rotate = 210),
-						aes(x = x, y = y), fill=color_circle[4], alpha = alpha)+
-					 geom_polygon(data = private$plotellipse(center = c(3.7, 4.8), radius = c(1.7, 3.6), rotate = 293.5), 
-						aes(x = x, y = y), fill=color_circle[5], alpha = alpha)
+						geom_polygon(data = map_data_1, aes(x = x, y = y), fill=color_circle[1], alpha = alpha)+
+						geom_polygon(data = map_data_2, aes(x = x, y = y), fill=color_circle[2], alpha = alpha)+
+						geom_polygon(data = map_data_3, aes(x = x, y = y), fill=color_circle[3], alpha = alpha)+
+						geom_polygon(data = map_data_4, aes(x = x, y = y), fill=color_circle[4], alpha = alpha)+
+						geom_polygon(data = map_data_5, aes(x = x, y = y), fill=color_circle[5], alpha = alpha)
 				} else {
-					p <- p +
-					annotate("path", x = private$plotellipse(center = c(4.83, 6.2),  radius = c(1.43, 4.11), rotate = 0)$x, 
-						y = private$plotellipse(center = c(4.83, 6.2), 
-						radius = c(1.43, 4.11), rotate = 0)$y, color = color_circle[1], size = linesize)    +
-					annotate("path", x = private$plotellipse(center = c(6.25, 5.4),  radius = c(1.7, 3.6), rotate = 66)$x, 
-						y = private$plotellipse(center = c(6.25, 5.4), 
-						radius = c(1.7, 3.6), rotate = 66)$y, color = color_circle[2], size = linesize)    +
-					annotate("path", x = private$plotellipse(center = c(6.1, 3.5), radius = c(1.55, 3.9), rotate = 150)$x, 
-						y = private$plotellipse(center = c(6.1, 3.5), 
-						radius = c(1.55, 3.9), rotate = 150)$y, color = color_circle[3], size = linesize)    +
-					annotate("path", x = private$plotellipse(center = c(4.48, 3.15), radius = c(1.55, 3.92), rotate = 210)$x, 
-						y = private$plotellipse(center = c(4.48, 3.15), 
-						radius = c(1.55, 3.92), rotate = 210)$y, color = color_circle[4], size = linesize)    +
-					annotate("path", x = private$plotellipse(center = c(3.7, 4.8),   radius = c(1.7, 3.6), rotate = 293.5)$x, 
-						y = private$plotellipse(center = c(3.7, 4.8), 
-						radius = c(1.7, 3.6), rotate = 293.5)$y, color = color_circle[5], size = linesize)
+					p <- p + 
+						annotate("path", x = map_data_1$x, y = map_data_1$y, color = color_circle[1], size = linesize) +
+						annotate("path", x = map_data_2$x, y = map_data_2$y, color = color_circle[2], size = linesize) +
+						annotate("path", x = map_data_3$x, y = map_data_3$y, color = color_circle[3], size = linesize) +
+						annotate("path", x = map_data_4$x, y = map_data_4$y, color = color_circle[4], size = linesize) +
+						annotate("path", x = map_data_5$x, y = map_data_5$y, color = color_circle[5], size = linesize)
 				}
 			}
 			if(colnumber %in% 2:5 & petal_plot == F){
 				p <- p + annotate("text", x = text_name_position$x, y = text_name_position$y, label = col_names, size = text_name_size)
 				if(!is.null(ratio)){
-					p <- p + annotate("text", x = plot_data[,3], y = plot_data[,4], label = c(paste(plot_data[,1], "\n(", plot_data[,2],")", sep = "")), 
-						size = text_size)
+					p <- p + annotate("text", 
+							x = plot_data[,3], 
+							y = plot_data[,4], 
+							label = c(paste(plot_data[,1], "\n(", plot_data[,2],")", sep = "")), 
+							size = text_size
+							)
 				}else{
-					p <- p + annotate("text", x = plot_data[,3], y = plot_data[,4], label = plot_data[,1], size = text_size)
+					p <- p + annotate("text", 
+							x = plot_data[,3], 
+							y = plot_data[,4], 
+							label = plot_data[,1], 
+							size = text_size
+							)
 				}
 			}
 			if(colnumber > 4 & petal_plot == T) {
@@ -269,14 +271,26 @@ trans_venn <- R6Class(classname = "trans_venn",
 					p <- p + annotate("text", x = petal_move_k * mx, y = petal_move_k * my, label = rownames(plot_data)[i], size = text_name_size)
 					p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count * my, label = plot_data[i, 1], size = text_size)
 					if(!is.null(ratio)){
-						p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count *my - sum(abs(petal_use_lim))/petal_text_move, 
-							label = plot_data[i, 2], size = text_size)
+						p <- p + annotate("text", 
+							x = petal_move_k_count * mx, 
+							y = petal_move_k_count * my - sum(abs(petal_use_lim))/petal_text_move, 
+							label = plot_data[i, 2], 
+							size = text_size)
 					}
 				}
 				p <- p + geom_point(aes(x = 0, y = 0), shape = 16, size = petal_center_size, colour = petal_color)
-				p <- p + annotate("text", x = 0, y = 0 + sum(abs(petal_use_lim))/(petal_text_move*2), label = plot_data[nrow(plot_data), 1], size = text_size)
+				p <- p + annotate("text", 
+					x = 0, 
+					y = 0 + sum(abs(petal_use_lim))/(petal_text_move*2), 
+					label = plot_data[nrow(plot_data), 1], 
+					size = text_size)
+				
 				if(!is.null(ratio)){
-					p <- p + annotate("text", x = 0, y = 0 - sum(abs(petal_use_lim))/(petal_text_move*2), label = plot_data[nrow(plot_data), 2], size = text_size)
+					p <- p + annotate("text", 
+						x = 0, 
+						y = 0 - sum(abs(petal_use_lim))/(petal_text_move * 2), 
+						label = plot_data[nrow(plot_data), 2], 
+						size = text_size)
 				}
 			}
 			if(colnumber > 5 & petal_plot == F){
@@ -353,7 +367,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			tt <- seq(0, 2*pi, length.out = segments_split)
 			xx <- center[1] + r * cos(tt)
 			yy <- center[2] + r * sin(tt)
-			return(data.frame(x = xx, y = yy))
+			data.frame(x = xx, y = yy)
 		},
 		# Ellipse function for 4 or 5-way
 		plotellipse = function(center = c(1, 1), radius = c(2, 4), rotate = 1, segments_split = 360) {
@@ -363,7 +377,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			ellipse <- cbind(ellipse[, 1] * cos(rotate) + ellipse[, 2] * sin(rotate), ellipse[, 2] * cos(rotate) - ellipse[, 1] * sin(rotate))
 			ellipse <- cbind(center[1] + ellipse[, 1], center[2] + ellipse[, 2])
 			colnames(ellipse) <- c("x", "y")
-			return(as.data.frame(ellipse))
+			as.data.frame(ellipse)
 		},
 		# inspired by the code from Xu brother
 		petal = function(r = 1, n = 1000, a = 4, b = 1.2, mx = 0, my = 0, rotate = 0){
@@ -383,7 +397,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			xy[2, ] <- xy[2, ] + my
 			xy <- as.data.frame(t(xy))
 			colnames(xy) <- c("x", "y")
-			return(xy)
+			xy
 		},
 		main_theme = theme(panel.grid.major=element_blank(), 
 			panel.grid.minor=element_blank(), 
