@@ -81,6 +81,14 @@ t1$cal_rcbray(runs=200)
 \donttest{
 t1$cal_process(use_betamntd = TRUE)
 }
+
+## ------------------------------------------------
+## Method `trans_nullmodel$cal_Cscore`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_Cscore()
+}		
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -94,6 +102,7 @@ t1$cal_process(use_betamntd = TRUE)
 \item \href{#method-cal_ses_betamntd}{\code{trans_nullmodel$cal_ses_betamntd()}}
 \item \href{#method-cal_rcbray}{\code{trans_nullmodel$cal_rcbray()}}
 \item \href{#method-cal_process}{\code{trans_nullmodel$cal_process()}}
+\item \href{#method-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
 \item \href{#method-clone}{\code{trans_nullmodel$clone()}}
 }
 }
@@ -413,6 +422,38 @@ res_rcbray in object.
 \preformatted{\donttest{
 t1$cal_process(use_betamntd = TRUE)
 }
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_Cscore"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_Cscore}{}}}
+\subsection{Method \code{cal_Cscore()}}{
+Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_Cscore(by_group = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate C-score for different groups separately.}
+
+\item{\code{...}}{paremeters pass to \code{\link{C.score}} in bipartite package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+results directly.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_Cscore()
+}		
 }
 \if{html}{\out{</div>}}
 

@@ -374,6 +374,30 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 			self$res_process <- private$percen_proc(ses_phylo_beta = ses_phylo_beta, ses_comm = ses_comm)
 			message('The result is stored in object$res_process ...')
+		},
+		#' @description
+		#' Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
+		#'
+		#' @param by_group default NULL; one column name or number in sample_table; calculate C-score for different groups separately.
+		#' @param ... paremeters pass to \code{\link{C.score}} in bipartite package.
+		#' @return results directly.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_Cscore()
+		#' }		
+		cal_Cscore = function(by_group = NULL, ...){
+			comm <- self$comm
+			
+			if(is.null(by_group)){
+				bipartite::C.score(comm, ...)
+			}else{
+				sample_table <- self$sample_table
+				lapply(unique(sample_table[, by_group]), function(x){
+					use_comm <- comm[sample_table[, by_group] %in% x, ]
+					use_comm %<>% .[, apply(., 2, sum) >0, drop = FALSE]
+					bipartite::C.score(use_comm, ...)
+				})
+			}
 		}
 	),
 	private = list(
