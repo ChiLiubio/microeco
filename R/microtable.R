@@ -496,6 +496,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @param method default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
 		#'   see \code{\link{vegdist}} function and method parameter in vegan package. 
 		#' @param unifrac default FALSE; TRUE or FALSE, whether unifrac index should be calculated.
+		#' @param binary default FALSE; TRUE is used for jaccard and unweighted unifrac; optional for other indexes.
 		#' @param ... parameters passed to \code{\link{vegdist}} function.
 		#' @return beta_diversity stored in object.
 		#' @examples
@@ -503,7 +504,7 @@ microtable <- R6Class(classname = "microtable",
 		#' dataset$cal_betadiv(unifrac = FALSE)
 		#' class(dataset$beta_diversity)
 		#' }
-		cal_betadiv = function(method = NULL, unifrac = FALSE, ...){
+		cal_betadiv = function(method = NULL, unifrac = FALSE, binary = FALSE, ...){
 			res <- list()
 			eco_table <- t(self$otu_table)
 			sample_table <- self$sample_table
@@ -511,7 +512,12 @@ microtable <- R6Class(classname = "microtable",
 				method <- c("bray", "jaccard")
 			}
 			for(i in method){
-				res[[i]] <- as.matrix(vegan::vegdist(eco_table, method = i, ...))
+				if(i == "jaccard"){
+					binary_use <- TRUE
+				}else{
+					binary_use <- binary
+				}
+				res[[i]] <- as.matrix(vegan::vegdist(eco_table, method = i, binary = binary_use, ...))
 			}
 			
 			if(unifrac == T){
