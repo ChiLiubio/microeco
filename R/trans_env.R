@@ -39,7 +39,7 @@ trans_env <- R6Class(classname = "trans_env",
 				dataset1 <- clone(dataset)
 				inter_sum <- sum(rownames(dataset1$sample_table) %in% rownames(env_data))
 				if(inter_sum == 0){
-					stop("No sample names of sample_table found in env_data! Please chech the names of env_data!")
+					stop("No sample names of sample_table found in env_data! Please check the names of env_data!")
 				}
 				if(inter_sum < nrow(dataset1$sample_table)){
 					message(nrow(dataset1$sample_table)-inter_sum, " samples not found in env_data and removed!")
@@ -516,6 +516,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param color_vector color pallete.
 		#' @param pheatmap default FALSE; whether use heatmap with clustering plot.
+		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
+		#'   For example, filter_feature = "" can be used to filter features that only have "", no any "*".
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
@@ -531,6 +533,7 @@ trans_env <- R6Class(classname = "trans_env",
 		plot_cor = function(
 			color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
 			pheatmap = FALSE,
+			filter_feature = NULL,
 			ylab_type_italic = FALSE,
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
@@ -543,6 +546,17 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("Please first use cal_cor to get plot data !")
 			}
 			use_data <- self$res_cor
+			
+			# filter features
+			if(!is.null(filter_feature)){
+				x1 <- unlist(lapply(unique(use_data$Taxa), function(x){
+					t2 <- use_data %>% .[.$Taxa == x, "Significance"] %>% {all(. %in% filter_feature)}
+					if(t2 == F){
+						x
+					}
+				}))
+				use_data %<>% .[.$Taxa %in% x1, ]
+			}
 			if(keep_full_name == F){
 				use_data$Taxa %<>% gsub(".*\\|", "", .)
 			}

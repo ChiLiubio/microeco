@@ -312,6 +312,9 @@ trans_func <- R6Class(classname = "trans_func",
 				if(is.null(node_type_table)){
 					stop("No node_type_table provided! see parameter: node_type_table !")
 				}else{
+					# if(!colnames(node_type_table) %in% c("module")){
+						# stop("No column name is 'module'! Please check the input node_type_table")
+					# }
 					if(abundance_weighted){
 						otu_total_abund <- apply(otu_table, 1, sum)
 					}
@@ -419,10 +422,10 @@ trans_func <- R6Class(classname = "trans_func",
 					plot_data$variable %<>% gsub(".*\\|", "", .)
 				}
 			}
-			g1 <- ggplot(aes(x=sampname, y=variable, fill=value), data=plot_data) + 
+			g1 <- ggplot(aes(x = sampname, y = variable, fill = value), data = plot_data) + 
 				theme_bw() + 
 				geom_tile() + 
-				scale_fill_gradient2(low="#00008B", high="#9E0142") +
+				scale_fill_gradient2(low = "#00008B", high = "#9E0142") +
 				scale_y_discrete(position = "right") + 
 				labs(y=NULL, x=NULL, fill="Percentage (%)") +
 				theme(axis.text.x = element_text(angle = 35, colour = "black", vjust = 1, hjust = 1, size = 14), axis.text.y = element_text(size = 10)) +
@@ -625,7 +628,7 @@ trans_func <- R6Class(classname = "trans_func",
 			if(min_identity_to_reference < 90){
 				warning("Minimum identity of less than 90% will likly results in inaccurate predictions!")
 			}
-			message(paste0("Using minimum idenity cutoff of ", min_identity_to_reference, "% to nearest neighbor"))
+			message(paste0("Using minimum identity cutoff of ", min_identity_to_reference, "% to nearest neighbor"))
 			ref_blast_result <- read.delim(res_blast_path, h = F)
 			ref_blast_result_reduced <- ref_blast_result[which(ref_blast_result$V3 >= min_identity_to_reference), 1:2]
 

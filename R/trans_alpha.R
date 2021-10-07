@@ -51,13 +51,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param method default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.
 		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
-		#' @return res_alpha_diff in object.
+		#' @param anova_set default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.
+		#' @return res_alpha_diff in object. A data.frame for method = 'KW' or 'anova'. A list for method = 'anova' and anova_set is assigned.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(method = "KW")
 		#' t1$cal_diff(method = "anova")
 		#' }
-		cal_diff = function(method = c("KW", "anova")[1], measures = NULL){
+		cal_diff = function(method = c("KW", "anova")[1], measures = NULL, anova_set = NULL){
 			group <- self$group
 			alpha_data <- self$alpha_data
 			if(is.null(measures)){
@@ -94,22 +95,34 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				colnames(compare_result) <- c("Groups", "Measure", "Test method", "p.value", "Significance")
 			}else{
 				# library(agricolae)
-				compare_result <- NULL
+				if(is.null(anova_set)){
+					compare_result <- NULL
+				}else{
+					compare_result <- list()
+				}
+				
 				for(i in measures){
-					use_data <- alpha_data[alpha_data$Measure == i, c(group, "Value")]
-					model <- aov(reformulate(group, "Value"), use_data)
-					out <- agricolae::duncan.test(model, group, main = i)
-					res2 <- out$groups[, "groups", drop = FALSE]
-					res2$groups <- as.character(res2$groups)
-					res2 <- data.frame(rownames(res2), res2, stringsAsFactors = FALSE, check.names = FALSE)
-					colnames(res2) <- c("name", i)
-					if(is.null(compare_result)){
-						compare_result <- res2
-					} else {
-						compare_result <- dplyr::full_join(compare_result, res2, by = c("name" = "name"))
+					use_data <- alpha_data[alpha_data$Measure == i, ]
+					if(is.null(anova_set)){
+						model <- aov(reformulate(group, "Value"), use_data)
+						out <- agricolae::duncan.test(model, group, main = i)
+						res2 <- out$groups[, "groups", drop = FALSE]
+						res2$groups <- as.character(res2$groups)
+						res2 <- data.frame(rownames(res2), res2, stringsAsFactors = FALSE, check.names = FALSE)
+						colnames(res2) <- c("name", i)
+						if(is.null(compare_result)){
+							compare_result <- res2
+						} else {
+							compare_result <- dplyr::full_join(compare_result, res2, by = c("name" = "name"))
+						}
+					}else{
+						model <- aov(reformulate(anova_set, "Value"), use_data)
+						compare_result[[i]] <- summary(model)
 					}
 				}
-				compare_result %<>% `row.names<-`(.[,1]) %>% .[,-1]
+				if(is.null(anova_set)){
+					compare_result %<>% `row.names<-`(.[,1]) %>% .[,-1]
+				}
 			}
 			self$res_alpha_diff <- compare_result
 			message('The result is stored in object$res_alpha_diff ...')

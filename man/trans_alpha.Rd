@@ -85,7 +85,11 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \subsection{Method \code{cal_diff()}}{
 Test the difference of alpha diversity across groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(method = c("KW", "anova")[1], measures = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
+  method = c("KW", "anova")[1],
+  measures = NULL,
+  anova_set = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -95,11 +99,13 @@ Test the difference of alpha diversity across groups.
 
 \item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+
+\item{\code{anova_set}}{default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_alpha_diff in object.
+res_alpha_diff in object. A data.frame for method = 'KW' or 'anova'. A list for method = 'anova' and anova_set is assigned.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
