@@ -198,6 +198,29 @@ microtable <- R6Class(classname = "microtable",
 			}
 		},
 		#' @description
+		#' Add the rownames of tax_table as the last column of tax_table. 
+		#' This is especially useful when the rownames of tax_table are required as a taxonomic level for the following taxa_abund calculation and biomarker idenfification.
+		#'
+		#' @param use_name default "OTU"; The column name used in the tax_table.
+		#' @return new tax_table stored in object.
+		#' @examples
+		#' \donttest{
+		#' dataset$add_rownames2taxonomy()
+		#' }
+		add_rownames2taxonomy = function(use_name = "OTU"){
+			if(is.null(self$tax_table)){
+				stop("The tax_table in the microtable object is NULL ! However it is necessary!")
+			}else{
+				tax_table_use <- self$tax_table
+			}
+			tax_table_use <- data.frame(tax_table_use, rownames(tax_table_use), check.names = FALSE, stringsAsFactors = FALSE)
+			if(use_name %in% colnames(tax_table_use)){
+				stop("The input use_name: ", use_name, " has been used in the raw tax_table! Please check it!")
+			}
+			colnames(tax_table_use)[ncol(tax_table_use)] <- use_name
+			self$tax_table <- tax_table_use
+		},
+		#' @description
 		#' Calculate the taxonomic abundance at each taxonomic rank.
 		#'
 		#' @param select_cols default NULL; numeric vector or character vector of colnames of tax_table; used to select columns to merge and calculate abundances.

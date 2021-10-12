@@ -49,6 +49,14 @@ dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 dataset$tidy_dataset(main_data = TRUE)
 
 ## ------------------------------------------------
+## Method `microtable$add_rownames2taxonomy`
+## ------------------------------------------------
+
+\donttest{
+dataset$add_rownames2taxonomy()
+}
+
+## ------------------------------------------------
 ## Method `microtable$cal_abund`
 ## ------------------------------------------------
 
@@ -138,6 +146,7 @@ class(dataset$beta_diversity)
 \item \href{#method-filter_pollution}{\code{microtable$filter_pollution()}}
 \item \href{#method-rarefy_samples}{\code{microtable$rarefy_samples()}}
 \item \href{#method-tidy_dataset}{\code{microtable$tidy_dataset()}}
+\item \href{#method-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
 \item \href{#method-cal_abund}{\code{microtable$cal_abund()}}
 \item \href{#method-save_abund}{\code{microtable$save_abund()}}
 \item \href{#method-sample_sums}{\code{microtable$sample_sums()}}
@@ -311,6 +320,37 @@ None, Object of microtable itself cleaned up.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{dataset$tidy_dataset(main_data = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-add_rownames2taxonomy"></a>}}
+\if{latex}{\out{\hypertarget{method-add_rownames2taxonomy}{}}}
+\subsection{Method \code{add_rownames2taxonomy()}}{
+Add the rownames of tax_table as the last column of tax_table. 
+This is especially useful when the rownames of tax_table are required as a taxonomic level for the following taxa_abund calculation and biomarker idenfification.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$add_rownames2taxonomy(use_name = "OTU")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_name}}{default "OTU"; The column name used in the tax_table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+new tax_table stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+dataset$add_rownames2taxonomy()
+}
 }
 \if{html}{\out{</div>}}
 
