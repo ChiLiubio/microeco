@@ -577,16 +577,16 @@ trans_network <- R6Class(classname = "trans_network",
 			res <- list(cor = res_cor, p = res_p)
 			res
 		},
-		rmt = function(cormat,lcor=0.4, hcor=0.8){
+		# RMT optimization
+		rmt = function(cormat, lcor = 0.4, hcor = 0.8){
 			s <- seq(0, 3, 0.1)
 			pois <- exp(-s)
-			geo <- 0.5 * pi * s * exp(-0.25 * pi * s^2)
 			ps <- NULL  
 			for(i in seq(lcor, hcor, 0.01)){
 				cormat1 <- abs(cormat)
 				cormat1[cormat1 < i] <- 0  
-				eigen <- sort(eigen(cormat1)$value)
-				ssp <- smooth.spline(eigen, control.spar = list(low = 0, high = 3)) 
+				eigen_res <- sort(eigen(cormat1)$value)
+				ssp <- smooth.spline(eigen_res, control.spar = list(low = 0, high = 3)) 
 				nnsd1 <- density(private$nnsd(ssp$y))
 				nnsdpois <- density(private$nnsd(pois))
 				chival1 <- sum((nnsd1$y - nnsdpois$y)^2/nnsdpois$y/512)
@@ -645,6 +645,10 @@ trans_network <- R6Class(classname = "trans_network",
 			td <- degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)
 			z <- private$zscore(wmd)
+			# NaN may generate in Zi for modules with very few nodes
+			if(any(is.nan(z$z))){
+				message('The nodes (', sum(is.nan(z$z)),') with NaN in z will be filtered ...')
+			}
 			amd <- private$among_module_connectivity(comm_graph)
 			pc <- private$participation_coeffiecient(amd, td)
 			zp <- data.frame(z, pc)
@@ -774,7 +778,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			p <- p + theme(strip.background = element_rect(fill = "white")) + 
 				xlab("Among-module connectivity") + 
-				ylab(" Within-module connectivity")
+				ylab("Within-module connectivity")
 			p
 		},
 		# plot z and p according to the taxonomic levels
