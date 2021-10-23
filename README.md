@@ -67,243 +67,6 @@ The mecodev package (https://github.com/ChiLiubio/mecodev/) is designed to devel
 Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. 2021. microeco: an R package for data mining in microbial community ecology.
 FEMS Microbiology Ecology, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
 
-## Notes
-
-### packages important
-To keep the start and use of microeco package simplified, 
-the installation of microeco only depend on several packages, which are compulsory-installed from CRAN and important in the data analysis.
-So the question is that you may encounter an error when using a class or function that invoke an additional package like this:
-
-```r
-library(microeco)
-data(dataset)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, taxa_level = "OTU", filter_thres = 0.0005)
-t1$cal_network(network_method = "SpiecEasi")
-```
-
-
-```html
-Error in t1$cal_network(network_method = "SpiecEasi"): igraph package not installed ...
-```
-
-
-<br>
-The reason is that network construction require igraph package. We donot put the igraph and some other packages (e.g. SpiecEasi in github) on the "Imports" part of microeco package.
-
-The solutions:
-
-1. install the package when encounter such an error. Actually, it's very easy to install the packages from CRAN or bioconductor. Just try it.
-
-2. install the packages in advance. We recommend this solution if you are interest in most of the methods in the microeco package and want to repeat the analysis in tutorial.
-
-We show several packages that are published in CRAN and not installed automatically.
-
-
-<div id="content-wrapper">
-  <div class="inner clearfix">
-    <section id="main-content">
-<table>
-<colgroup>
-<col width="19%"></col>
-<col width="38%"></col>
-<col width="42%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">Package</th>
-<th align="center">where</th>
-<th align="center">description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="even">
-<td align="center">reshape2</td>
-<td align="center">microtable class</td>
-<td align="center">data transformation</td>
-</tr>
-<tr class="odd">
-<td align="center">MASS</td>
-<td align="center">trans_diff$new(method = "lefse",…)</td>
-<td align="center">linear discriminant analysis</td>
-</tr>
-<tr class="even">
-<td align="center">GUniFrac</td>
-<td align="center">cal_betadiv()</td>
-<td align="center">UniFrac distance matrix</td>
-</tr>
-<tr class="odd">
-<td align="center">ggpubr</td>
-<td align="center">plot_alpha()</td>
-<td align="center">some plotting functions</td>
-</tr>
-<tr class="even">
-<td align="center">randomForest</td>
-<td align="center">trans_diff$new(method = "rf",…)</td>
-<td align="center">random forest analysis</td>
-</tr>
-<tr class="odd">
-<td align="center">ggdendro</td>
-<td align="center">plot_clustering()</td>
-<td align="center">plotting clustering dendrogram</td>
-</tr>
-<tr class="even">
-<td align="center">ggrepel</td>
-<td align="center">trans_rda class</td>
-<td align="center">reduce the text overlap in the plot</td>
-</tr>
-<tr class="odd">
-<td align="center">agricolae</td>
-<td align="center">cal_diff(method = anova)</td>
-<td align="center">multiple comparisons</td>
-</tr>
-<tr class="even">
-<td align="center">gridExtra</td>
-<td align="center">trans_diff class</td>
-<td align="center">merge plots</td>
-</tr>
-<tr class="odd">
-<td align="center">picante</td>
-<td align="center">cal_alphadiv()</td>
-<td align="center">Faith’s phylogenetic alpha diversity</td>
-</tr>
-<tr class="even">
-<td align="center">pheatmap</td>
-<td align="center">plot_corr(pheatmap = TRUE)</td>
-<td align="center">correlation heatmap with clustering dendrogram</td>
-</tr>
-<tr class="odd">
-<td align="center">tidytree</td>
-<td align="center">trans_diff class</td>
-<td align="center">plot the taxonomic tree</td>
-</tr>
-<tr class="even">
-<td align="center">igraph</td>
-<td align="center">trans_network class</td>
-<td align="center">network related operations</td>
-</tr>
-<tr class="odd">
-<td align="center">rgexf</td>
-<td align="center">save_network</td>
-<td align="center">save network with gexf style</td>
-</tr>
-<tr class="even">
-<td align="center">ggalluvial</td>
-<td align="center">plot_bar(use_alluvium = TRUE)</td>
-<td align="center">alluvial plot</td>
-</tr>
-</tbody>
-</table>
-    </section>
-  </div>
-</div>
-
-
-Then, if you want to install these packages or some of them, you can do like this:
-
-```r
-# If a package is not installed, it will be installed from CRAN.
-# First select the packages of interest
-packages <- c("reshape2", "MASS", "GUniFrac", "ggpubr", "randomForest", "ggdendro", "ggrepel", "agricolae", "gridExtra", "picante", "pheatmap", "igraph", "rgexf", "ggalluvial")
-# Now check or install
-lapply(packages, function(x) {
-	if(!require(x, character.only = TRUE)) {
-		install.packages(x, dependencies = TRUE)
-	}})
-```
-
-There are also some packages that are useful in some functions. These packages may be R packages published in github or bioconductor,
-or packages written by other languages.
-
-
-#### ggtree
-Plotting the cladogram from the LEfSe result requires the ggtree package in bioconductor (https://bioconductor.org/packages/release/bioc/html/ggtree.html).
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install("ggtree")
-```
-
-#### SpiecEasi
-
-The R package SpiecEasi can be used for the network construction using SPIEC-EASI (SParse InversE Covariance Estimation for Ecological Association Inference) approach.
-The package can be installed from Github https://github.com/zdk123/SpiecEasi
-
-
-#### Gephi
-Gephi is an excellent network visualization tool and used to open the saved network file, 
-i.e. network.gexf in the [tutorial](https://chiliubio.github.io/microeco_tutorial/extended-class.html#trans_network-class).
-You can download Gephi and learn how to use it from https://gephi.org/users/download/
-
-
-#### WGCNA
-In the correlation-based network, when the species number is very large,
-the correlation algorithm in WGCNA is very fast compared to the 'cor' option in trans_network.
-
-```r
-install.packages("WGCNA", dependencies = TRUE)
-```
-
-
-#### Tax4Fun
-Tax4Fun is an R package used for the prediction of functional potential of prokaryotic communities.
-
-1. install Tax4Fun package
-```r
-install.packages("RJSONIO")
-install.packages(system.file("extdata", "biom_0.3.12.tar.gz", package="microeco"), repos = NULL, type = "source")
-install.packages(system.file("extdata", "qiimer_0.9.4.tar.gz", package="microeco"), repos = NULL, type = "source")
-install.packages(system.file("extdata", "Tax4Fun_0.3.1.tar.gz", package="microeco"), repos = NULL, type = "source")
-```
-2. download SILVA123 reference data from http://tax4fun.gobics.de/
-　unzip SILVA123.zip , move it to a place that you can remember.
-
-
-#### Tax4Fun2
-Tax4Fun2 is another R package for the the prediction of functional profiles and functional gene redundancies of prokaryotic communities.
-It has higher accuracies than PICRUSt and Tax4Fun. The Tax4Fun2 approach implemented in microeco is a little different from the original package.
-Using Tax4Fun2 approach require the representative fasta file.
-The user do not need to install Tax4Fun2 R package.
-The only thing need to do is to download the blast tool and Ref99NR/Ref100NR database.
-Downlaod blast tools from "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+" ; e.g. ncbi-blast-\*\*\*\*-x64-win64.tar.gz  for windows system.
-Downlaod Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
-Uncompress all the folders. The final folders should be like these structures:
-
-blast tools:  
-　|-- ncbi-blast-2.11.0+  
-　　|---- bin  
-　　　|------ blastn.exe  
-　　　|------ makeblastdb.exe  
-　　　|------ ......  
-
-Ref99NR/Ref100NR:  
-　|-- Tax4Fun2_ReferenceData_v2  
-　　|---- Ref99NR  
-　　　|------ otu000001.tbl.gz  
-　　　|------ ......  
-　　　|------ Ref99NR.fasta  
-　　　|------ Ref99NR.tre  
-
-The path "ncbi-blast-2.11.0+/bin" and "Tax4Fun2_ReferenceData_v2" will be required in the trans_func$cal_tax4fun2() function.
-
-```r
-# seqinr should be installed for reading and writing fasta file
-install.packages("seqinr", dependencies = TRUE)
-# Now we show how to read the fasta file
-# see https://github.com/ChiLiubio/file2meco if you do not have installed file2meco
-rep_fasta_path <- system.file("extdata", "rep.fna", package="file2meco")
-rep_fasta <- seqinr::read.fasta(rep_fasta_path)
-# then see the help document of microtable class about the rep_fasta in microtable$new().
-```
-
-### Plotting
-Most of the plotting in the package rely on the ggplot2 package system.
-We provide some parameters to change the corresponding plot.
-If you want to modify the output plot, you can also assign the output a name and use the ggplot2-style grammer to modify it as you need.
-Each data table used for plotting is stored in the object and can be downloaded for the personalized analysis and plotting.
-Of course, you can also directly modify the class and reload them.
-
-### Files from other tools to microtable object
-Previous descriptions on how to construct microtable object from QIIME, QIIME2 and phyloseq have been moved to the package file2meco (https://github.com/ChiLiubio/file2meco)
-The package file2meco is designed to convert files between other tools/platforms and microtable object.
 
 ## Contributing
 
@@ -311,6 +74,20 @@ We welcome any contribution, including but not limited to code, idea and [tutori
 Please report errors and questions on github [Issues](https://github.com/ChiLiubio/microeco/issues).
 Any contribution via [Pull requests](https://github.com/ChiLiubio/microeco/pulls) or Email(liuchi0426@126.com) will be appreciated.
 By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
+
+
+## Contributors by now
+
+Chi Liu					Fujian Agriculture and Forestry University
+Felipe Mansoldo			Federal University of Rio de Janeiro
+Umer Zeeshan Ijaz		University of Glasgow
+Chenhao Li				Massachusetts General Hospital
+Yang Cao				Beijing Institute of Radiation Medicine
+Jarrod J. Scott			Smithsonian Tropical Research Institute
+Yaoming Cui				Henan University of Technology
+Alane B. Vermelho		Federal University of Rio de Janeiro
+Xiangzhen Li			Chengdu Institute of Biology, Chinese Academy of Sciences
+Minjie Yao				Fujian Agriculture and Forestry University
 
 
 ## References
