@@ -78,16 +78,16 @@ By participating in this project you agree to abide by the terms outlined in the
 
 ## Contributors by now
 
-Chi Liu					Fujian Agriculture and Forestry University
-Felipe Mansoldo			Federal University of Rio de Janeiro
-Umer Zeeshan Ijaz		University of Glasgow
-Chenhao Li				Massachusetts General Hospital
-Yang Cao				Beijing Institute of Radiation Medicine
-Jarrod J. Scott			Smithsonian Tropical Research Institute
-Yaoming Cui				Henan University of Technology
-Alane B. Vermelho		Federal University of Rio de Janeiro
-Xiangzhen Li			Chengdu Institute of Biology, Chinese Academy of Sciences
-Minjie Yao				Fujian Agriculture and Forestry University
+Chi Liu					Fujian Agriculture and Forestry University  
+Felipe Mansoldo			Federal University of Rio de Janeiro  
+Umer Zeeshan Ijaz		University of Glasgow  
+Chenhao Li				Massachusetts General Hospital  
+Yang Cao				Beijing Institute of Radiation Medicine  
+Jarrod J. Scott			Smithsonian Tropical Research Institute  
+Yaoming Cui				Henan University of Technology  
+Alane B. Vermelho		Federal University of Rio de Janeiro  
+Xiangzhen Li			Chengdu Institute of Biology, Chinese Academy of Sciences  
+Minjie Yao				Fujian Agriculture and Forestry University  
 
 
 ## References
