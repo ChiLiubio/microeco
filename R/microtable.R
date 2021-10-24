@@ -103,12 +103,11 @@ microtable <- R6Class(classname = "microtable",
 			self$tax_table <- tax_table_use
 		},
 		#' @description
-		#' Rarefy communities to make all samples have same species number, modified from the rarefy_even_depth() in phyloseq package, 
-		#' see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
+		#' Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} for the alternative method.
 		#'
 		#' @param sample.size default:NULL; species number, If not provided, use minimum number of all samples.
 		#' @param rngseed random seed; default: 123.
-		#' @param replace default: TRUE; see \code{\link{sample}} for the random sampling.
+		#' @param replace default: TRUE; See \code{\link{sample}} for the random sampling.
 		#' @return None; rarefied dataset.
 		#' @examples
 		#' \donttest{
@@ -641,26 +640,25 @@ microtable <- R6Class(classname = "microtable",
 			abund2
 		},
 		rarefaction_subsample = function(x, sample.size, replace=FALSE){
+			# Adapted from the rarefy_even_depth() in phyloseq package, see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
+			# All rights reserved.
 			# Create replacement species vector
 			rarvec <- numeric(length(x))
 			# Perform the sub-sampling. Suppress warnings due to old R compat issue.
-			# Also, make sure to avoid errors from x summing to zero, 
-			# and there are no observations to sample.
-			# The initialization of rarvec above is already sufficient.
 			if(sum(x) <= 0){
 				# Protect against, and quickly return an empty vector, 
 				# if x is already an empty count vector
 				return(rarvec)
 			}
 			if(replace){
-				suppressWarnings(subsample <- sample(1:length(x), sample.size, replace=TRUE, prob=x))
+				suppressWarnings(subsample <- sample(1:length(x), sample.size, replace = TRUE, prob=x))
 			} else {
 				# resample without replacement
 				obsvec <- apply(data.frame(OTUi=1:length(x), times=x), 1, function(x){
 					rep_len(x["OTUi"], x["times"])
 				})
 				obsvec <- unlist(obsvec, use.names=FALSE)
-				suppressWarnings(subsample <- sample(obsvec, sample.size, replace=FALSE))
+				suppressWarnings(subsample <- sample(obsvec, sample.size, replace = FALSE))
 			}
 			sstab <- table(subsample)
 			# Assign the tabulated random subsample values to the species vector

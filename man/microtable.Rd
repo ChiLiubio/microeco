@@ -265,8 +265,7 @@ None
 \if{html}{\out{<a id="method-rarefy_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
-Rarefy communities to make all samples have same species number, modified from the rarefy_even_depth() in phyloseq package, 
-see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
+Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} for the alternative method.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(sample.size = NULL, rngseed = 123, replace = TRUE)}\if{html}{\out{</div>}}
 }
@@ -278,7 +277,7 @@ see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 
 \item{\code{rngseed}}{random seed; default: 123.}
 
-\item{\code{replace}}{default: TRUE; see \code{\link{sample}} for the random sampling.}
+\item{\code{replace}}{default: TRUE; See \code{\link{sample}} for the random sampling.}
 }
 \if{html}{\out{</div>}}
 }

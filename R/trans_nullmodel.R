@@ -326,12 +326,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param verbose default TRUE; whether show the calculation process message.
+		#' @param null.model default "independentswap"; see more available options in \code{\link{randomizeMatrix }}
 		#' @return res_rcbray in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_rcbray(runs=200)
 		#' }
-		cal_rcbray = function(runs=1000, verbose = TRUE) {
+		cal_rcbray = function(runs=1000, verbose = TRUE, null.model = "independentswap") {
 			comm <- self$comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
@@ -339,7 +340,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
-				vegdist(picante::randomizeMatrix(comm, "independentswap"), "bray")
+				vegdist(picante::randomizeMatrix(comm, null.model = null.model), "bray")
 			}, simplify = "array") %>% as.data.frame
 			beta_rand[, (runs + 1)] <- betaobs_vec
 			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x > x[length(x)])/length(x)})

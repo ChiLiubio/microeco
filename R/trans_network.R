@@ -530,6 +530,47 @@ trans_network <- R6Class(classname = "trans_network",
 			res_edge_table
 		},
 		#' @description
+		#' Perform a bootstrapping hypothesis test to determine whether degrees follows a power law distribution;
+		#' a significant p represents the distribution does not follow power law.
+		#'
+		#' @param ... paremeters pass to \code{\link{bootstrap_p}} in poweRlaw package.
+		#' @return two lists stored in object; see \code{\link{estimate_xmin}} and \code{\link{bootstrap_p}} for the details.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_powerlaw_p()
+		#' }
+		cal_powerlaw_p = function(...){
+			network <- self$res_network
+			degree_dis <- degree(network)
+			if(!require(poweRlaw)){
+				stop("Please first install poweRlaw package from CRAN !")
+			}
+			resdispl <- poweRlaw::displ$new(degree_dis + 1)
+			est_xmin <- poweRlaw::estimate_xmin(resdispl)
+			resdispl$setXmin(est_xmin)
+			res <- poweRlaw::bootstrap_p(resdispl, ...)
+			self$res_powerlaw_min <- est_xmin
+			message('Estimated lower bound result is stored in object$res_powerlaw_min ...')
+			self$res_powerlaw_p <- res
+			message('Bootstrap p value is stored in object$res_powerlaw_p ...')			
+		},
+		#' @description
+		#' Fit degrees to a power law distribution.
+		#'
+		#' @param xmin default NULL; See xmin in \code{\link{fit_power_law}}; suggest using the result res_powerlaw_min from cal_powerlaw_p function.
+		#' @param ... paremeters pass to \code{\link{fit_power_law}} in igraph package.
+		#' @return list stored in object; see \code{\link{fit_power_law}} for the details.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_powerlaw_fit()
+		#' }
+		cal_powerlaw_fit = function(xmin = NULL, ...){
+			network <- self$res_network
+			degree_dis <- degree(network, mode="in")
+			self$res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = xmin, ...)
+			message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')
+		},
+		#' @description
 		#' Print the trans_network object.
 		print = function() {
 			cat("trans_network class:\n")

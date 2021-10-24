@@ -372,7 +372,11 @@ t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics
 \subsection{Method \code{cal_rcbray()}}{
 Calculate rcbray.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_rcbray(runs = 1000, verbose = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_rcbray(
+  runs = 1000,
+  verbose = TRUE,
+  null.model = "independentswap"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -381,6 +385,8 @@ Calculate rcbray.
 \item{\code{runs}}{default 1000; simulation runs.}
 
 \item{\code{verbose}}{default TRUE; whether show the calculation process message.}
+
+\item{\code{null.model}}{default "independentswap"; see more available options in \code{\link{randomizeMatrix }}}
 }
 \if{html}{\out{</div>}}
 }
