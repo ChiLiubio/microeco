@@ -80,7 +80,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				sel_taxa <- pvalue < alpha
 				message("Total ", sum(sel_taxa), " biomarkers found ...")
 				if(sum(sel_taxa) == 0){
-					stop("No significant biomarkers found! stop running!")
+					stop("No significant biomarkers found! Stop running!")
 				}
 				# save abund_table for the cladogram
 				self$abund_table <- abund_table

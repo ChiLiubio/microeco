@@ -335,7 +335,7 @@ Mantel test between beta diversity matrix and environmental data.
 \describe{
 \item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
 
-\item{\code{partial_mantel}}{default FALSE; whether use partial mantel test.}
+\item{\code{partial_mantel}}{default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.}
 
 \item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.}
 

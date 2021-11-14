@@ -3,14 +3,14 @@ Type: Package
 Title: Microbial Community Ecology Data Analysis
 Version: 0.5.2
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
-              person("Felipe", "Mansoldo", role = "cph", email = "mansoldo@micro.ufrj.br"),
-			  person("Umer Zeeshan", "Ijaz", role = "cph", email = "Umer.Ijaz@glasgow.ac.uk"),
-			  person("Chenhao", "Li", role = "cph", email = "CLI40@mgh.harvard.edu"),
-			  person("Yang", "Cao", role = "cph", email = "yiluheihei@gmail.com"),
-              person("Minjie", "Yao", role = "cph", email = "yaomj@fafu.edu.cn"),
-              person("Xiangzhen", "Li", role = "cph", email = "lixz@cib.ac.cn")
+              person("Felipe", "Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
+			  person("Umer Zeeshan", "Ijaz", role = "ctb", email = "Umer.Ijaz@glasgow.ac.uk"),
+			  person("Chenhao", "Li", role = "ctb", email = "CLI40@mgh.harvard.edu"),
+			  person("Yang", "Cao", role = "ctb", email = "yiluheihei@gmail.com"),
+              person("Minjie", "Yao", role = "ctb", email = "yaomj@fafu.edu.cn"),
+              person("Xiangzhen", "Li", role = "ctb", email = "lixz@cib.ac.cn")
 			  )
-Author: Chi Liu [aut, cre], Felipe Mansoldo [cph], Umer Zeeshan Ijaz [cph], Chenhao Li [cph], Yang Cao [cph], Minjie Yao [cph], Xiangzhen Li [cph]
+Author: Chi Liu [aut, cre], Felipe Mansoldo [ctb], Umer Zeeshan Ijaz [ctb], Chenhao Li [ctb], Yang Cao [ctb], Minjie Yao [ctb], Xiangzhen Li [ctb]
 Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis and functional analysis.
 Depends: R (>= 3.5.0)

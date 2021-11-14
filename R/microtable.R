@@ -344,7 +344,7 @@ microtable <- R6Class(classname = "microtable",
 			rownames(self$sample_table)
 		},
 		#' @description
-		#' Show taxa names.
+		#' Show taxa names of tax_table.
 		#'
 		#' @return taxa names.
 		#' @examples
@@ -353,6 +353,31 @@ microtable <- R6Class(classname = "microtable",
 		#' }
 		taxa_names = function(){
 			rownames(self$tax_table)
+		},
+		#' @description
+		#' Rename the taxa, including the rownames of otu_table, rownames of tax_table, tip labels of phylogenetic tree and representative sequences.
+		#'
+		#' @param newname_prefix default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rowname order of otu_table.
+		#' @return renamed dataset.
+		#' @examples
+		#' \donttest{
+		#' dataset$rename_taxa()
+		#' }
+		rename_taxa = function(newname_prefix = "ASV_"){
+			self$tidy_dataset()
+			# extract old names for futher matching
+			old_names <- rownames(self$otu_table)
+			new_names <- paste0(newname_prefix, seq_len(nrow(self$otu_table)))
+			rownames(self$otu_table) <- new_names
+			if(!is.null(self$tax_table)){
+				rownames(self$tax_table) <- new_names
+			}
+			if(!is.null(self$phylo_tree)){
+				self$phylo_tree$tip.label[match(old_names, self$phylo_tree$tip.label)] <- new_names
+			}
+			if(!is.null(self$rep_fasta)){
+				names(self$rep_fasta)[match(old_names, names(self$rep_fasta))] <- new_names
+			}
 		},
 		#' @description
 		#' Merge samples according to specific group to generate a new microtable.

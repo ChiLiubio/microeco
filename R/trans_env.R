@@ -326,7 +326,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Mantel test between beta diversity matrix and environmental data.
 		#'
 		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
-		#' @param partial_mantel default FALSE; whether use partial mantel test.
+		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.
 		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
 		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method.
@@ -367,7 +367,7 @@ trans_env <- R6Class(classname = "trans_env",
 			variable_name <- c()
 			corr_res <- c()
 			p_res <- c()
-
+			# with Scaling and Centering normalization
 			for(i in 1:ncol(env_data)){
 				env.dist <- vegdist(scale(env_data[, i, drop=FALSE]), "euclid")
 				if(partial_mantel == T){

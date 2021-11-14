@@ -105,6 +105,14 @@ dataset$taxa_names()
 }
 
 ## ------------------------------------------------
+## Method `microtable$rename_taxa`
+## ------------------------------------------------
+
+\donttest{
+dataset$rename_taxa()
+}
+
+## ------------------------------------------------
 ## Method `microtable$merge_samples`
 ## ------------------------------------------------
 
@@ -153,6 +161,7 @@ class(dataset$beta_diversity)
 \item \href{#method-taxa_sums}{\code{microtable$taxa_sums()}}
 \item \href{#method-sample_names}{\code{microtable$sample_names()}}
 \item \href{#method-taxa_names}{\code{microtable$taxa_names()}}
+\item \href{#method-rename_taxa}{\code{microtable$rename_taxa()}}
 \item \href{#method-merge_samples}{\code{microtable$merge_samples()}}
 \item \href{#method-merge_taxa}{\code{microtable$merge_taxa()}}
 \item \href{#method-cal_alphadiv}{\code{microtable$cal_alphadiv()}}
@@ -503,7 +512,7 @@ dataset$sample_names()
 \if{html}{\out{<a id="method-taxa_names"></a>}}
 \if{latex}{\out{\hypertarget{method-taxa_names}{}}}
 \subsection{Method \code{taxa_names()}}{
-Show taxa names.
+Show taxa names of tax_table.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$taxa_names()}\if{html}{\out{</div>}}
 }
@@ -515,6 +524,36 @@ taxa names.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 dataset$taxa_names()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-rename_taxa"></a>}}
+\if{latex}{\out{\hypertarget{method-rename_taxa}{}}}
+\subsection{Method \code{rename_taxa()}}{
+Rename the taxa, including the rownames of otu_table, rownames of tax_table, tip labels of phylogenetic tree and representative sequences.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$rename_taxa(newname_prefix = "ASV_")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{newname_prefix}}{default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rowname order of otu_table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+renamed dataset.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+dataset$rename_taxa()
 }
 }
 \if{html}{\out{</div>}}

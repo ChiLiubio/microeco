@@ -177,6 +177,7 @@ trans_func <- R6Class(classname = "trans_func",
 					res_table[is.na(res_table)] <- ""
 					# store the raw table similar with the FUNGuild results from python version
 					self$res_spe_func_raw_funguild <- res_table
+					message('Mapped raw FUNGuild result is stored in object$res_spe_func_raw_funguild ...')
 					# generate a data frame store the binary data
 					otu_func_table <- res_table[, c("taxon"), drop = FALSE]
 					# generate trophicMode binary information
@@ -228,7 +229,8 @@ trans_func <- R6Class(classname = "trans_func",
 					}
 					
 					# store the raw table for personalized use
-					self$res_spe_func_raw_FungalTraits <- res_table					
+					self$res_spe_func_raw_FungalTraits <- res_table
+					message('Mapped raw FungalTraits result is stored in object$res_spe_func_raw_FungalTraits ...')
 					# then parse the result for calculation
 					filter_data <- res_table
 					colnames(filter_data) %<>% gsub("_template", "", .)
@@ -264,7 +266,7 @@ trans_func <- R6Class(classname = "trans_func",
 				self$fungi_database <- fungi_database
 			}
 			self$res_spe_func <- otu_func_table
-			message('The functional table is stored in object$res_spe_func ...')
+			message('The functional binary table is stored in object$res_spe_func ...')
 		},
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities or modules.
@@ -441,7 +443,8 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Predict functional potential of communities using tax4fun.
-		#' please also cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>
+		#' please also cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
+		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. g__) .
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
 		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and Tax4Fun function in Tax4Fun package.
