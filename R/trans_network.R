@@ -288,18 +288,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Add network modules to the network.
 		#'
 		#' @param method default "cluster_fast_greedy"; the method used to find the optimal community structure of a graph;
-		#' 	 The following available options from from igraph package: \cr 
-		#' \itemize{
-		#' 	 \code{\link{cluster_fast_greedy}} \cr 
-		#' 	 \code{\link{cluster_optimal}} \cr 
-		#' 	 \code{\link{cluster_edge_betweenness}} \cr 
-		#' 	 \code{\link{cluster_infomap}} \cr 
-		#' 	 \code{\link{cluster_label_prop}} \cr 
-		#' 	 \code{\link{cluster_leading_eigen}} \cr 
-		#' 	 \code{\link{cluster_louvain}} \cr 
-		#' 	 \code{\link{cluster_spinglass}} \cr 
-		#' 	 \code{\link{cluster_walktrap}} \cr 
-		#' }
+		#' 	 the following are available functions (options) from igraph package: "cluster_fast_greedy", "cluster_optimal",
+		#' 	 "cluster_edge_betweenness", "cluster_infomap", "cluster_label_prop", "cluster_leading_eigen",
+		#' 	 "cluster_louvain", "cluster_spinglass", "cluster_walktrap".
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
 		#' @return a network with modules, stored in object.
@@ -533,8 +524,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Perform a bootstrapping hypothesis test to determine whether degrees follows a power law distribution;
 		#' a significant p represents the distribution does not follow power law.
 		#'
-		#' @param ... paremeters pass to \code{\link{bootstrap_p}} in poweRlaw package.
-		#' @return two lists stored in object; see \code{\link{estimate_xmin}} and \code{\link{bootstrap_p}} for the details.
+		#' @param ... paremeters pass to bootstrap_p in poweRlaw package.
+		#' @return two lists stored in object; see estimate_xmin and bootstrap_p in poweRlaw package for the details.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_powerlaw_p()
@@ -557,9 +548,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Fit degrees to a power law distribution.
 		#'
-		#' @param xmin default NULL; See xmin in \code{\link{fit_power_law}}; suggest using the result res_powerlaw_min from cal_powerlaw_p function.
-		#' @param ... paremeters pass to \code{\link{fit_power_law}} in igraph package.
-		#' @return list stored in object; see \code{\link{fit_power_law}} for the details.
+		#' @param xmin default NULL; See xmin in fit_power_law function; suggest using the result res_powerlaw_min from cal_powerlaw_p function.
+		#' @param ... paremeters pass to fit_power_law function in igraph package.
+		#' @return list stored in object; see fit_power_law function for the details explanation.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_powerlaw_fit()

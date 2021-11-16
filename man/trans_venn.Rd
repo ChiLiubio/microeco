@@ -96,7 +96,8 @@ Plot venn diagram.
   alpha = 0.3,
   linesize = 1.1,
   petal_plot = FALSE,
-  petal_color = "skyblue",
+  petal_color = "#BEAED4",
+  petal_color_center = "#BEBADA",
   petal_a = 4,
   petal_r = 1,
   petal_use_lim = c(-12, 12),
@@ -127,7 +128,9 @@ Plot venn diagram.
 
 \item{\code{petal_plot}}{default FALSE; whether use petal plot.}
 
-\item{\code{petal_color}}{default "skyblue"; color of the petal}
+\item{\code{petal_color}}{default "#BEAED4"; color of the petals.}
+
+\item{\code{petal_color_center}}{default "#BEBADA"; color of the center in the petal plot.}
 
 \item{\code{petal_a}}{default 4; the length of the ellipse}
 

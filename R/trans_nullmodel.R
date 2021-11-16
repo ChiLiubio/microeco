@@ -326,7 +326,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param verbose default TRUE; whether show the calculation process message.
-		#' @param null.model default "independentswap"; see more available options in \code{\link{randomizeMatrix }}
+		#' @param null.model default "independentswap"; see more available options in randomizeMatrix function of picante package.
 		#' @return res_rcbray in object.
 		#' @examples
 		#' \donttest{
@@ -380,12 +380,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
 		#'
 		#' @param by_group default NULL; one column name or number in sample_table; calculate C-score for different groups separately.
-		#' @param ... paremeters pass to \code{\link{C.score}} in bipartite package.
+		#' @param ... paremeters pass to C.score function in bipartite package.
 		#' @return results directly.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_Cscore()
-		#' }		
+		#' }
 		cal_Cscore = function(by_group = NULL, ...){
 			comm <- self$comm
 			

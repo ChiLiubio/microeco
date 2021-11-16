@@ -86,7 +86,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param alpha default .3; alpha for transparency
 		#' @param linesize default 1.1; cycle line size
 		#' @param petal_plot default FALSE; whether use petal plot.
-		#' @param petal_color default "skyblue"; color of the petal
+		#' @param petal_color default "#BEAED4"; color of the petals.
+		#' @param petal_color_center default "#BEBADA"; color of the center in the petal plot.
 		#' @param petal_a default 4; the length of the ellipse
 		#' @param petal_r default 1; scaling up the size of the ellipse
 		#' @param petal_use_lim default c(-12, 12); the width of the plot
@@ -109,7 +110,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 			alpha = 0.3,
 			linesize = 1.1,
 			petal_plot = FALSE,
-			petal_color = "skyblue",
+			petal_color = "#BEAED4",
+			petal_color_center = "#BEBADA",
 			petal_a = 4,
 			petal_r = 1,
 			petal_use_lim = c(-12, 12),
@@ -278,7 +280,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 							size = text_size)
 					}
 				}
-				p <- p + geom_point(aes(x = 0, y = 0), shape = 16, size = petal_center_size, colour = petal_color)
+				p <- p + geom_point(aes(x = 0, y = 0), shape = 16, size = petal_center_size, colour = petal_color_center)
 				p <- p + annotate("text", 
 					x = 0, 
 					y = 0 + sum(abs(petal_use_lim))/(petal_text_move*2), 

@@ -88,7 +88,7 @@ t1$cal_process(use_betamntd = TRUE)
 
 \donttest{
 t1$cal_Cscore()
-}		
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -386,7 +386,7 @@ Calculate rcbray.
 
 \item{\code{verbose}}{default TRUE; whether show the calculation process message.}
 
-\item{\code{null.model}}{default "independentswap"; see more available options in \code{\link{randomizeMatrix }}}
+\item{\code{null.model}}{default "independentswap"; see more available options in randomizeMatrix function of picante package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -448,7 +448,7 @@ Calculates the (normalised) mean number of checkerboard combinations (C-score) u
 \describe{
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate C-score for different groups separately.}
 
-\item{\code{...}}{paremeters pass to \code{\link{C.score}} in bipartite package.}
+\item{\code{...}}{paremeters pass to C.score function in bipartite package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -459,7 +459,7 @@ results directly.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_Cscore()
-}		
+}
 }
 \if{html}{\out{</div>}}
 

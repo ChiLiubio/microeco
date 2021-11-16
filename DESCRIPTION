@@ -1,25 +1,25 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 0.5.2
+Version: 0.6.1
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
-              person("Felipe", "Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
+              person("Felipe", "R. P. Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
 			  person("Umer Zeeshan", "Ijaz", role = "ctb", email = "Umer.Ijaz@glasgow.ac.uk"),
 			  person("Chenhao", "Li", role = "ctb", email = "CLI40@mgh.harvard.edu"),
 			  person("Yang", "Cao", role = "ctb", email = "yiluheihei@gmail.com"),
               person("Minjie", "Yao", role = "ctb", email = "yaomj@fafu.edu.cn"),
               person("Xiangzhen", "Li", role = "ctb", email = "lixz@cib.ac.cn")
 			  )
-Author: Chi Liu [aut, cre], Felipe Mansoldo [ctb], Umer Zeeshan Ijaz [ctb], Chenhao Li [ctb], Yang Cao [ctb], Minjie Yao [ctb], Xiangzhen Li [ctb]
+Author: Chi Liu [aut, cre], Felipe R. P. Mansoldo [ctb], Umer Zeeshan Ijaz [ctb], Chenhao Li [ctb], Yang Cao [ctb], Minjie Yao [ctb], Xiangzhen Li [ctb]
 Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis and functional analysis.
 Depends: R (>= 3.5.0)
-Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer
-Suggests: reshape2, GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, tidytree, mice, ggtree
+Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer, reshape2
+Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, tidytree, mice, ggtree
 License: GPL-3
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2021-08-31
+Packaged: 2021-11-16
 Repository: CRAN
-Date/Publication: 2021-0-02
+Date/Publication: 2021-11-16
 RoxygenNote: 7.1.1

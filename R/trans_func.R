@@ -195,7 +195,7 @@ trans_func <- R6Class(classname = "trans_func",
 						stop("No Genus column found in tax_table of dataset!")
 					}
 					data("fungi_func_FungalTraits", envir=environment())
-					message("Please also cite the original FungalTraits paper: <doi:10.1007/s13225-020-00466-2>. ")
+					message("Please also cite: ")
 					message("FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1-16 (2020).\n")
 					# remove the redundant data
 					fungi_func_FungalTraits %<>% .[- c(3109, 3288, 4741, 7092), ]

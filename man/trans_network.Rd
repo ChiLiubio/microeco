@@ -279,18 +279,9 @@ Add network modules to the network.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{method}}{default "cluster_fast_greedy"; the method used to find the optimal community structure of a graph;
-     The following available options from from igraph package: \cr 
-\itemize{
-     \code{\link{cluster_fast_greedy}} \cr 
-     \code{\link{cluster_optimal}} \cr 
-     \code{\link{cluster_edge_betweenness}} \cr 
-     \code{\link{cluster_infomap}} \cr 
-     \code{\link{cluster_label_prop}} \cr 
-     \code{\link{cluster_leading_eigen}} \cr 
-     \code{\link{cluster_louvain}} \cr 
-     \code{\link{cluster_spinglass}} \cr 
-     \code{\link{cluster_walktrap}} \cr 
-}}
+the following are available functions (options) from igraph package: "cluster_fast_greedy", "cluster_optimal",
+"cluster_edge_betweenness", "cluster_infomap", "cluster_label_prop", "cluster_leading_eigen",
+"cluster_louvain", "cluster_spinglass", "cluster_walktrap".}
 
 \item{\code{module_name_prefix}}{default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.}
@@ -534,12 +525,12 @@ a significant p represents the distribution does not follow power law.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{paremeters pass to \code{\link{bootstrap_p}} in poweRlaw package.}
+\item{\code{...}}{paremeters pass to bootstrap_p in poweRlaw package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-two lists stored in object; see \code{\link{estimate_xmin}} and \code{\link{bootstrap_p}} for the details.
+two lists stored in object; see estimate_xmin and bootstrap_p in poweRlaw package for the details.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -564,14 +555,14 @@ Fit degrees to a power law distribution.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{xmin}}{default NULL; See xmin in \code{\link{fit_power_law}}; suggest using the result res_powerlaw_min from cal_powerlaw_p function.}
+\item{\code{xmin}}{default NULL; See xmin in fit_power_law function; suggest using the result res_powerlaw_min from cal_powerlaw_p function.}
 
-\item{\code{...}}{paremeters pass to \code{\link{fit_power_law}} in igraph package.}
+\item{\code{...}}{paremeters pass to fit_power_law function in igraph package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-list stored in object; see \code{\link{fit_power_law}} for the details.
+list stored in object; see fit_power_law function for the details explanation.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
