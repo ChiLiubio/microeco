@@ -27,7 +27,7 @@ Therefore, we created R microeco package.
   + Functional analysis
 
 
-## Installing R/RStudio
+## Install R/RStudio
 If you do not already have R/RStudio installed, do as follows.
 
 1. Install [R](https://www.r-project.org/)
@@ -56,11 +56,9 @@ devtools::install_github("ChiLiubio/microeco")
 
 
 ## Tutorial
-See the detailed package tutorial (https://chiliubio.github.io/microeco_tutorial/) and the help documentations (e.g. ?microtable).
-If you want to run the codes in the tutorial completely, you need to install some additional packages. Please see the following **Notes** part.
-Contructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2, HUMAnN and phyloseq) 
+See the detailed package **tutorial** (https://chiliubio.github.io/microeco_tutorial/) and the help documentations (e.g. ?microtable).
+Contructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2, HUMAnN, Kraken2 and phyloseq) 
 can be easily achieved with the package file2meco (https://github.com/ChiLiubio/file2meco).
-The mecodev package (https://github.com/ChiLiubio/mecodev/) is designed to develop more classes for data analysis based on the microeco package.
 
 
 ## Citation
@@ -79,7 +77,7 @@ By participating in this project you agree to abide by the terms outlined in the
 ## Contributors by now
 
 **Chi Liu**　　　　　　　　　Fujian Agriculture and Forestry University  
-**Felipe R. P. Mansoldo**　　　　　Federal University of Rio de Janeiro  
+**Felipe R. P. Mansoldo**　　 Federal University of Rio de Janeiro  
 **Umer Zeeshan Ijaz**　　　　University of Glasgow  
 **Chenhao Li**　　　　　　　Massachusetts General Hospital  
 **Yang Cao**　　　　　　　　Beijing Institute of Radiation Medicine  
