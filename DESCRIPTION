@@ -18,6 +18,7 @@ Depends: R (>= 3.5.0)
 Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer, reshape2
 Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, tidytree, mice, ggtree
 License: GPL-3
+LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
 Packaged: 2021-11-16
