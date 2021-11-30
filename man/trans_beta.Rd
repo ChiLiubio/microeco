@@ -55,6 +55,9 @@ t1$cal_group_distance(within_group = TRUE)
 
 \donttest{
 t1$plot_group_distance(distance_pair_stat = TRUE)
+t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE)
+t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE, hide_ns_more = c("ns", "*"))
+t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3)
 }
 
 ## ------------------------------------------------
@@ -332,6 +335,8 @@ Plotting the distance between samples within or between groups.
   plot_group_order = NULL,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   distance_pair_stat = FALSE,
+  hide_ns = FALSE,
+  hide_ns_more = NULL,
   pair_compare_filter_match = NULL,
   pair_compare_filter_select = NULL,
   pair_compare_method = "wilcox.test",
@@ -348,9 +353,13 @@ Plotting the distance between samples within or between groups.
 
 \item{\code{distance_pair_stat}}{default FALSE; whether do the paired comparisions.}
 
-\item{\code{pair_compare_filter_match}}{default NULL; if provided, remove the matched groups; use the regular express to match the paired groups.}
+\item{\code{hide_ns}}{default FALSE; whether hide the "ns" pairs, i.e. non significant comparisions.}
 
-\item{\code{pair_compare_filter_select}}{default NULL; numeric vector; if provided, only select those input groups.
+\item{\code{hide_ns_more}}{default NULL; character vector; available when hide_ns = TRUE; if provided, used for the specific significance filtering, such as c("ns", "*").}
+
+\item{\code{pair_compare_filter_match}}{default NULL; only available when hide_ns = FALSE; if provided, remove the matched groups; use the regular express to match the paired groups.}
+
+\item{\code{pair_compare_filter_select}}{default NULL; numeric vector;only available when hide_ns = FALSE; if provided, only select those input groups.
 This parameter must be a numeric vector used to select the paired combination of groups. For example, pair_compare_filter_select = c(1, 3) 
 can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
 The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together.}
@@ -368,6 +377,9 @@ ggplot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_group_distance(distance_pair_stat = TRUE)
+t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE)
+t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE, hide_ns_more = c("ns", "*"))
+t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3)
 }
 }
 \if{html}{\out{</div>}}
