@@ -371,7 +371,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					combn(., 2)
 				# filter based on the significance
 				if(hide_ns){
-					pre_filter <- ggpubr::compare_means(value ~ Group, group_distance, paired = TRUE)
+					pre_filter <- ggpubr::compare_means(reformulate(group, "value"), group_distance)
 					if(is.null(hide_ns_more)){
 						filter_mark <- "ns"
 					}else{
