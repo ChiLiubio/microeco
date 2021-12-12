@@ -248,12 +248,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			if(verbose){
 				cat("Simulate betaMPD.\n")
 			}
-			beta_rand <- sapply(seq_len(runs), function(x){
+			beta_rand <- lapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
 				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis)))
-			}, simplify = "array")
+			})
+			# use lapply instead of sapply to avoid confict
+			beta_rand <- do.call("cbind", lapply(beta_rand, as.vector))
 			message("---------------- ", Sys.time()," : Finish ----------------")
 			
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
@@ -301,7 +303,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			if(verbose){
 				cat("Simulate betaMNTD.\n")
 			}
-			beta_rand <- sapply(seq_len(runs), function(x){
+			beta_rand <- lapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
@@ -312,7 +314,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					exclude.conspecifics = exclude.conspecifics
 					)
 				)
-			}, simplify = "array")
+			})
+			beta_rand <- do.call("cbind", lapply(beta_rand, as.vector))
 			message("---------------- ", Sys.time()," : Finish ----------------")
 
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
@@ -336,12 +339,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- self$comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
-			beta_rand <- sapply(seq_len(runs), function(x){
+			beta_rand <- lapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
 				vegdist(picante::randomizeMatrix(comm, null.model = null.model), "bray")
-			}, simplify = "array") %>% as.data.frame
+			})
+			beta_rand <- do.call("cbind", lapply(beta_rand, as.vector)) %>% as.data.frame
+			
 			beta_rand[, (runs + 1)] <- betaobs_vec
 			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x > x[length(x)])/length(x)})
 			beta_obs_z <- (beta_obs_z - 0.5) * 2
@@ -404,7 +409,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	private = list(
 		show_run = function(x, runs){
 			if(x %% 10 == 0){
-				cat(paste0("Runs: ", x, " of ", runs,"\n"))
+				cat(paste0("Run: ", x, " of ", runs,"\n"))
 			}
 		},
 		fin_matrix = function(all_samples, beta_obs_z){
