@@ -121,11 +121,11 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. 
 Either numeric vector or character vector of colnames.}
 
-\item{\code{add_data}}{default NULL; data.frame format; provide the environmental data frame individually.}
+\item{\code{add_data}}{default NULL; data.frame format; provide the environmental data frame individually; rownames should be sample names.}
 
 \item{\code{character2numeric}}{default TRUE; whether transform the characters or factors to numeric attributes.}
 
-\item{\code{complete_na}}{default FALSE; Whether fill the NA in the environmental data.}
+\item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data.}
 }
 \if{html}{\out{</div>}}
 }
@@ -437,8 +437,8 @@ t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$T
 Plot correlation heatmap.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_cor(
-  color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
-    "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
+  color_vector = c("#053061", "white", "#A50026"),
+  color_palette = NULL,
   pheatmap = FALSE,
   filter_feature = NULL,
   ylab_type_italic = FALSE,
@@ -454,7 +454,9 @@ Plot correlation heatmap.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_vector}}{color pallete.}
+\item{\code{color_vector}}{default c("#053061", "white", "#A50026"); colors with only three values representing low, middle and high value.}
+
+\item{\code{color_palette}}{default NULL; a customized palette with more color values; if provided, use it instead of color_vector.}
 
 \item{\code{pheatmap}}{default FALSE; whether use heatmap with clustering plot.}
 

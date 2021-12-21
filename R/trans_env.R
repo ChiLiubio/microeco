@@ -11,9 +11,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. 
 		#'   Either numeric vector or character vector of colnames.
-		#' @param add_data default NULL; data.frame format; provide the environmental data frame individually.
+		#' @param add_data default NULL; data.frame format; provide the environmental data frame individually; rownames should be sample names.
 		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
-		#' @param complete_na default FALSE; Whether fill the NA in the environmental data.
+		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data.
 		#' @return env_data in trans_env object.
 		#' @examples
 		#' data(dataset)
@@ -514,7 +514,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Plot correlation heatmap.
 		#'
-		#' @param color_vector color pallete.
+		#' @param color_vector default c("#053061", "white", "#A50026"); colors with only three values representing low, middle and high value.
+		#' @param color_palette default NULL; a customized palette with more color values; if provided, use it instead of color_vector.
 		#' @param pheatmap default FALSE; whether use heatmap with clustering plot.
 		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
 		#'   For example, filter_feature = "" can be used to filter features that only have "", no any "*".
@@ -531,7 +532,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$plot_cor(pheatmap = FALSE)
 		#' }
 		plot_cor = function(
-			color_vector = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F"),
+			color_vector = c("#053061", "white", "#A50026"),
+			color_palette = NULL,
 			pheatmap = FALSE,
 			filter_feature = NULL,
 			ylab_type_italic = FALSE,
@@ -545,6 +547,10 @@ trans_env <- R6Class(classname = "trans_env",
 			if(is.null(self$res_cor)){
 				stop("Please first use cal_cor to get plot data !")
 			}
+			if(length(color_vector) != 3){
+				stop("color_vector parameter must have three values !")
+			}			
+			
 			use_data <- self$res_cor
 			
 			# filter features
@@ -580,6 +586,10 @@ trans_env <- R6Class(classname = "trans_env",
 					lim_x <- hclust(dist(t(clu_data_1))) %>% {.$labels[.$order]}
 				}
 			}
+			# check whether the cor values all larger or smaller than 0
+			if(all(use_data$Correlation >= 0) | all(use_data$Correlation <= 0)){
+				color_palette <- color_vector
+			}
 			if(pheatmap == T){
 				if(!require(pheatmap)){
 					stop("pheatmap package not installed")
@@ -597,7 +607,21 @@ trans_env <- R6Class(classname = "trans_env",
 				}else{
 					mylabels_y <- rownames(clu_data_1)
 				}
-				color_vector_use <- colorRampPalette(color_vector)(100)
+				# create the palette
+				if(is.null(color_palette)){
+					minpiece <- max(abs(min(clu_data_1)), max(clu_data_1))/100
+					pos <- seq(from = 0, to = max(clu_data_1), by = minpiece)[-1]
+					neg <- rev(seq(from = 0, to = abs(min(clu_data_1)), by = minpiece)[-1]) * (-1)
+					posColor <- colorRampPalette(c(color_vector[2], color_vector[3]))(100)[1:length(pos)]
+					negColor <- colorRampPalette(c(color_vector[2], color_vector[1]))(100)[1:length(neg)] %>% rev
+					# make sure color_vector_use and myBreaks have same length
+					color_vector_use <- c(negColor, color_vector[2], posColor)
+					myBreaks <- c(neg, 0, pos)		
+				} else {
+					color_vector_use <- colorRampPalette(color_palette)(100)
+					myBreaks <- NA
+				}
+				
 				p <- pheatmap(
 					clu_data_1, 
 					clustering_distance_row = "correlation", 
@@ -612,16 +636,22 @@ trans_env <- R6Class(classname = "trans_env",
 					display_numbers = sig_data, 
 					number_color = "black", 
 					fontsize_number = plot_x_size * 1.2,
-					color = color_vector_use, 
+					color = color_vector_use,
+					breaks = myBreaks,
 					...
 					)
 				p$gtable
 			}else{
 				p <- ggplot(aes(x = Env, y = Taxa, fill = Correlation), data = use_data) +
 					theme_bw() + 
-					geom_tile(...) + 
-					scale_fill_gradientn(colours = color_vector) +
-					geom_text(aes(label = Significance), color="black", size=4) + 
+					geom_tile(...)
+				if(is.null(color_palette)){
+					p <- p + scale_fill_gradient2(low = color_vector[1], high = color_vector[3], mid = color_vector[2])
+				} else {
+					p <- p + scale_fill_gradientn(colours = color_palette)
+				}
+				
+				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = self$cor_method) +
 					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white")) +
