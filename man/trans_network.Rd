@@ -350,6 +350,8 @@ t1$cal_network_attr()
 \if{latex}{\out{\hypertarget{method-cal_node_type}{}}}
 \subsection{Method \code{cal_node_type()}}{
 Calculate node properties.
+
+Authors: Chi Liu, Umer Zeeshan Ijaz
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_node_type()}\if{html}{\out{</div>}}
 }

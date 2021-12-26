@@ -343,6 +343,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate node properties.
 		#'
+		#' Authors: Chi Liu, Umer Zeeshan Ijaz
+		#'
 		#' @return res_node_type in object.
 		#' @examples
 		#' \donttest{

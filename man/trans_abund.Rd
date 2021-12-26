@@ -137,6 +137,7 @@ Bar plot in trans_abund object.
   bar_type = "full",
   others_color = "grey90",
   facet = NULL,
+  facet2 = NULL,
   order_facet = NULL,
   x_axis_name = NULL,
   order_x = NULL,
@@ -165,7 +166,10 @@ Bar plot in trans_abund object.
 
 \item{\code{others_color}}{default "grey90"; the color for "others" taxa.}
 
-\item{\code{facet}}{default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".}
+\item{\code{facet}}{default NULL; if using facet, providing a group column name of sample_table, such as, "Group".}
+
+\item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
+use this parameter, please first install package ggh4x using install.packages("ggh4x")}
 
 \item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").}
 

@@ -142,7 +142,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param pair_compare default FALSE; whether perform paired comparisons.
 		#' @param pair_compare_filter default ""; groups that need to be removed in the comparisons.
 		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
-		#' @param xtext_type default NULL; number used to make x axis text generate angle.
+		#' @param xtext_angle default NULL; number (e.g. 30) used to make x axis text generate angle.
 		#' @param xtext_size default 10, x axis text size.
 		#' @param ytitle_size default 17, y axis title size.
 		#' @param base_font default "sans", font in the plot.
@@ -164,7 +164,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			pair_compare = FALSE,
 			pair_compare_filter = "",
 			pair_compare_method = "wilcox.test",
-			xtext_type = NULL,
+			xtext_angle = NULL,
 			xtext_size = 10,
 			ytitle_size = 17,
 			base_font = "sans",
@@ -253,8 +253,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					axis.text.y = element_text(size = rel(1.1)),
 					axis.title.x = element_blank()
 					)
-			if(!is.null(xtext_type)){
-				p <- p + theme(axis.text.x = element_text(angle = xtext_type, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
+			if(!is.null(xtext_angle)){
+				p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
 			}
 			if(!is.null(base_font)){
 				p <- p + theme(text=element_text(family=base_font))

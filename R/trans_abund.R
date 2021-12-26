@@ -44,7 +44,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				stop("No dataset provided!")
 			}
 			if(is.null(dataset$taxa_abund)){
-				stop("The taxonomic abundance has not been calculated! Please first calculate it using cal_abund() function in microtable class!")
+				dataset$cal_abund()
 			}
 			self$sample_table <- dataset$sample_table
 			self$taxrank <- taxrank
@@ -105,7 +105,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			} else {
 				use_taxanames <- use_taxanames[use_taxanames %in% input_taxaname]
 			}
-			
+			# generate ylab title and store it
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
 				if(self$use_percentage == T){
 					abund_data$Abundance %<>% {. * 100}
@@ -126,7 +126,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
-		#' @param facet default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".
+		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
+		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
+		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x")
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
@@ -153,6 +155,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			bar_type = "full",
 			others_color = "grey90",
 			facet = NULL,
+			facet2 = NULL,
 			order_facet = NULL,
 			x_axis_name = NULL,
 			order_x = NULL,
@@ -173,7 +176,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data <- self$abund_data
 			
 			# order x axis samples and facet
-			plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
+			plot_data <- private$adjust_axis_facet(
+				plot_data = plot_data, 
+				x_axis_name = x_axis_name, 
+				order_x = order_x, 
+				facet = facet, 
+				order_facet = order_facet)
 
 			if(use_alluvium){
 				bar_type <- "notfull"
@@ -231,7 +239,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + ylab(self$ylabname)		
 			}
 			if(!is.null(facet)) {
-				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+				if(is.null(facet2)){
+					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+				}else{
+					p <- p + ggh4x::facet_nested(reformulate(c(facet, facet2)), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+				}
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
 			}

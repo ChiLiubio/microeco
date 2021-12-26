@@ -151,12 +151,12 @@ microtable <- R6Class(classname = "microtable",
 		#' Tidy the object of microtable Class.
 		#' Trim files in the object to make taxa and samples consistent across all files in the object. So the results are intersections.
 		#'
-		#' @param main_data TRUE or FALSE, if TRUE, only basic files in microtable object is trimmed, otherwise, all files, 
+		#' @param main_data default FALSE; if TRUE, only basic files in microtable object is trimmed. Otherwise, all files, 
 		#' 	  including taxa_abund, alpha_diversity and beta_diversity, are all trimed.
 		#' @return None, Object of microtable itself cleaned up. 
 		#' @examples
 		#' dataset$tidy_dataset(main_data = TRUE)
-		tidy_dataset = function(main_data = TRUE){
+		tidy_dataset = function(main_data = FALSE){
 			# check whether there is 0 abundance in otu_table
 			self$otu_table <- private$check_abund_table(self$otu_table)
 			

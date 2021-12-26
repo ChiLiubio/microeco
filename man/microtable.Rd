@@ -311,13 +311,13 @@ dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 Tidy the object of microtable Class.
 Trim files in the object to make taxa and samples consistent across all files in the object. So the results are intersections.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$tidy_dataset(main_data = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$tidy_dataset(main_data = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{main_data}}{TRUE or FALSE, if TRUE, only basic files in microtable object is trimmed, otherwise, all files, 
+\item{\code{main_data}}{default FALSE; if TRUE, only basic files in microtable object is trimmed. Otherwise, all files, 
 including taxa_abund, alpha_diversity and beta_diversity, are all trimed.}
 }
 \if{html}{\out{</div>}}

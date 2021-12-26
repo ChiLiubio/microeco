@@ -137,7 +137,7 @@ Plotting the alpha diveristy.
   pair_compare = FALSE,
   pair_compare_filter = "",
   pair_compare_method = "wilcox.test",
-  xtext_type = NULL,
+  xtext_angle = NULL,
   xtext_size = 10,
   ytitle_size = 17,
   base_font = "sans",
@@ -171,7 +171,7 @@ e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
 
-\item{\code{xtext_type}}{default NULL; number used to make x axis text generate angle.}
+\item{\code{xtext_angle}}{default NULL; number (e.g. 30) used to make x axis text generate angle.}
 
 \item{\code{xtext_size}}{default 10, x axis text size.}
 

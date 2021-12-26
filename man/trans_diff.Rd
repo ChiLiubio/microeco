@@ -7,6 +7,8 @@
 This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
 LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
 the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>.
+
+Authors: Chi Liu, Yang Cao, Chenhao Li
 }
 \examples{
 
