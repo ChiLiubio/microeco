@@ -74,20 +74,6 @@ Any contribution via [Pull requests](https://github.com/ChiLiubio/microeco/pulls
 By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
 
 
-## Contributors by now
-
-**Chi Liu**　　　　　　　　　Fujian Agriculture and Forestry University  
-**Felipe R. P. Mansoldo**　　 Federal University of Rio de Janeiro  
-**Umer Zeeshan Ijaz**　　　　University of Glasgow  
-**Chenhao Li**　　　　　　　Massachusetts General Hospital  
-**Yang Cao**　　　　　　　　Beijing Institute of Radiation Medicine  
-**Jarrod J. Scott**　　　　　　Smithsonian Tropical Research Institute  
-**Yaoming Cui**　　　　　　　Henan University of Technology  
-**Alane B. Vermelho** 　　　 Federal University of Rio de Janeiro  
-**Xiangzhen Li**　　　　　　 Chengdu Institute of Biology, Chinese Academy of Sciences  
-**Minjie Yao**　　　　　　　 Fujian Agriculture and Forestry University  
-
-
 ## References
   - Louca, S., Parfrey, L. W., & Doebeli, M. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. DOI: 10.1126/science.aaf4507
   - Nguyen, N. H., Song, Z., Bates, S. T., Branco, S., Tedersoo, L., Menke, J., … Kennedy, P. G. (2016). 
