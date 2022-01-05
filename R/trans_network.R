@@ -362,7 +362,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				node_type <- cbind.data.frame(node_type, self$use_tax[rownames(node_type), ])
 			}
-			node_type$degree <- degree(network)[rownames(node_type)]
+			node_type$degree <- igraph::degree(network)[rownames(node_type)]
 			node_type$betweenness <- betweenness(network)[rownames(node_type)]
 			# Add abundance info
 			sum_abund <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))
@@ -534,7 +534,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_powerlaw_p = function(...){
 			network <- self$res_network
-			degree_dis <- degree(network)
+			degree_dis <- igraph::degree(network)
 			if(!require(poweRlaw)){
 				stop("Please first install poweRlaw package from CRAN !")
 			}
@@ -559,7 +559,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_powerlaw_fit = function(xmin = NULL, ...){
 			network <- self$res_network
-			degree_dis <- degree(network, mode="in")
+			degree_dis <- igraph::degree(network, mode="in")
 			self$res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = xmin, ...)
 			message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')
 		},
@@ -661,12 +661,12 @@ trans_network <- R6Class(classname = "trans_network",
 			res <- data.frame(
 				Vertex = round(vcount(x), 0), 
 				Edge = round(ecount(x), 0), 
-				Average_degree = sum(degree(x))/length(degree(x)), 
+				Average_degree = sum(igraph::degree(x))/length(igraph::degree(x)), 
 				Average_path_length = average.path.length(x), 
 				Network_diameter = round(diameter(x, directed = FALSE), 0), 
 				Clustering_coefficient = transitivity(x), 
 				Density = graph.density(x), 
-				Heterogeneity = sd(degree(x))/mean(degree(x)), 
+				Heterogeneity = sd(igraph::degree(x))/mean(igraph::degree(x)), 
 				Centralization = centr_degree(x)$centralization
 				)
 			res <- base::as.data.frame(t(res))
@@ -676,7 +676,7 @@ trans_network <- R6Class(classname = "trans_network",
 		# modified based on microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
 		module_roles = function(comm_graph){
 			require(igraph)
-			td <- degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
+			td <- igraph::degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)
 			z <- private$zscore(wmd)
 			# NaN may generate in Zi for modules with very few nodes
@@ -708,7 +708,7 @@ trans_network <- R6Class(classname = "trans_network",
 						}
 					})))
 				g3 <- induced.subgraph(graph = comm_graph, vids = neighverts)
-				mod_degree <- degree(g3)
+				mod_degree <- igraph::degree(g3)
 				for(i in mod_nodes){
 					ki <- mod_degree[which(names(mod_degree) == i)]
 					tmp <- data.frame(module = mod, taxa = names(ki), mod_links = ki)
