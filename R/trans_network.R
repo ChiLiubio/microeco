@@ -161,9 +161,8 @@ trans_network <- R6Class(classname = "trans_network",
 			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
 			...
 			){
-			if(!require(igraph)){
-				stop("igraph package not installed")
-			}
+			private$check_igraph()
+			
 			sampleinfo <- self$use_sampleinfo
 			taxa_level <- self$taxa_level
 			taxa_table <- self$use_tax
@@ -299,6 +298,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_module()
 		#' }
 		cal_module = function(method = "cluster_fast_greedy", module_name_prefix = "M"){
+			private$check_igraph()
 			# add modules
 			network <- self$res_network
 			if(!is.character(method)){
@@ -326,6 +326,7 @@ trans_network <- R6Class(classname = "trans_network",
 			if(!require(rgexf)){
 				stop("Please install rgexf package")
 			}
+			private$check_igraph()
 			private$saveAsGEXF(network = self$res_network, filepath = filepath)
 		},
 		#' @description
@@ -337,6 +338,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_network_attr()
 		#' }
 		cal_network_attr = function(){
+			private$check_igraph()
 			self$res_network_attr <- private$network_attribute(self$res_network)
 			message('Result is stored in object$res_network_attr ...')
 		},
@@ -351,6 +353,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_node_type()
 		#' }
 		cal_node_type = function(){
+			private$check_igraph()
 			network <- self$res_network
 			node_type <- private$module_roles(network)
 			use_abund <- self$use_abund
@@ -385,6 +388,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_eigen()
 		#' }
 		cal_eigen = function(){
+			private$check_igraph()
 			use_abund <- self$use_abund
 			res_node_type <- self$res_node_type
 			# calculate eigengene for each module
@@ -477,6 +481,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' # return a sub network that contains all nodes of module M1
 		#' }
 		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE){
+			private$check_igraph()
 			network <- self$res_network
 			if(!is.null(node)){
 				nodes_raw <- V(network)$name
@@ -510,6 +515,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$get_edge_table()
 		#' }
 		get_edge_table = function(){
+			private$check_igraph()
 			network <- self$res_network
 			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 			edge_label <- E(network)$label
@@ -558,6 +564,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_powerlaw_fit()
 		#' }
 		cal_powerlaw_fit = function(xmin = NULL, ...){
+			private$check_igraph()
 			network <- self$res_network
 			degree_dis <- igraph::degree(network, mode="in")
 			self$res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = xmin, ...)
@@ -589,6 +596,11 @@ trans_network <- R6Class(classname = "trans_network",
 		}
 		),
 	private = list(
+		check_igraph = function(){
+			if(!require(igraph)){
+				stop("Please first install igraph package!")
+			}
+		},
 		cal_corr = function(inputtable, cor_method) {
 			N <- ncol(inputtable)
 			use_names <- colnames(inputtable)
@@ -675,7 +687,7 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		# modified based on microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
 		module_roles = function(comm_graph){
-			require(igraph)
+			
 			td <- igraph::degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)
 			z <- private$zscore(wmd)
