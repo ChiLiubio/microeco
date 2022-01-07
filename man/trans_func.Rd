@@ -279,7 +279,7 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 \if{latex}{\out{\hypertarget{method-cal_tax4fun}{}}}
 \subsection{Method \code{cal_tax4fun()}}{
 Predict functional potential of communities using tax4fun.
-please also cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
+please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
 Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. g__) .
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun(keep_tem = FALSE, folderReferenceData = NULL)}\if{html}{\out{</div>}}
@@ -303,7 +303,7 @@ tax4fun_KO and tax4fun_path in object.
 \if{latex}{\out{\hypertarget{method-cal_tax4fun2}{}}}
 \subsection{Method \code{cal_tax4fun2()}}{
 Predict functional potential of communities with Tax4Fun2 method.
-please also cite: 
+pleas cite: 
 Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
 	 <doi:10.1186/s40793-020-00358-7>
 \subsection{Usage}{

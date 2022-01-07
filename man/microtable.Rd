@@ -197,7 +197,8 @@ If not provided, the function can generate a table automatically according to th
 
 \item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree; use read.tree function in ape package for input.}
 
-\item{\code{rep_fasta}}{list; default NULL; The representative sequences; use read.fasta function in seqinr package for input.}
+\item{\code{rep_fasta}}{list or DNAStringSet; default NULL; The representative sequences; 
+use read.fasta function in seqinr package or readDNAStringSet function in Biostrings package for input.}
 }
 \if{html}{\out{</div>}}
 }

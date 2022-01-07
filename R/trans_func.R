@@ -443,7 +443,7 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Predict functional potential of communities using tax4fun.
-		#' please also cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
+		#' please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
 		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. g__) .
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
@@ -484,7 +484,7 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Predict functional potential of communities with Tax4Fun2 method.
-		#' please also cite: 
+		#' pleas cite: 
 		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
 		#' 	 <doi:10.1186/s40793-020-00358-7>
 		#'
@@ -604,7 +604,16 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 			# write the fasta file
 			rep_fasta_path <- file.path(path_to_temp_folder, "rep_fasta.tmp.fasta")
-			seqinr::write.fasta(self$rep_fasta, names = names(self$rep_fasta), file.out = rep_fasta_path)
+			if(class(self$rep_fasta) == "list"){
+				seqinr::write.fasta(self$rep_fasta, names = names(self$rep_fasta), file.out = rep_fasta_path)
+			}else{
+				if(class(self$rep_fasta) == "DNAStringSet"){
+					Biostrings::writeXStringSet(x = self$rep_fasta, filepath = rep_fasta_path)
+				}else{
+					stop("Unknown fasta format! Must be either list or DNAStringSet !")
+				}
+			}
+			
 			res_blast_path <- file.path(path_to_temp_folder, 'ref_blast.txt')
 			message('Blast start.')
 			cmd <- paste(blast_bin, '-db', path_to_ref_db, '-query', rep_fasta_path, '-evalue 1e-20 -max_target_seqs 100 -outfmt 6 -out', res_blast_path, '-num_threads', num_threads)

@@ -15,7 +15,8 @@ microtable <- R6Class(classname = "microtable",
 		#' 	If not provided, the function can generate a table automatically according to the sample names in otu_table.
 		#' @param tax_table data.frame; default NULL; The taxonomic information table, rows are species, cols are taxonomic classes.
 		#' @param phylo_tree phylo; default NULL; The phylogenetic tree; use read.tree function in ape package for input.
-		#' @param rep_fasta list; default NULL; The representative sequences; use read.fasta function in seqinr package for input.
+		#' @param rep_fasta list or DNAStringSet; default NULL; The representative sequences; 
+		#'   use read.fasta function in seqinr package or readDNAStringSet function in Biostrings package for input.
 		#' @return an object of class "microtable" with the following components:
 		#' \describe{
 		#'   \item{\code{sample_table}}{The sample information table.}
