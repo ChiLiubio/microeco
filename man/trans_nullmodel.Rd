@@ -43,19 +43,19 @@ t1$cal_betampd(abundance.weighted=FALSE)
 }
 
 ## ------------------------------------------------
-## Method `trans_nullmodel$cal_ses_betampd`
-## ------------------------------------------------
-
-\donttest{
-t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
-}
-
-## ------------------------------------------------
 ## Method `trans_nullmodel$cal_betamntd`
 ## ------------------------------------------------
 
 \donttest{
 t1$cal_betamntd(abundance.weighted=FALSE)
+}
+
+## ------------------------------------------------
+## Method `trans_nullmodel$cal_ses_betampd`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
 }
 
 ## ------------------------------------------------
@@ -97,8 +97,8 @@ t1$cal_Cscore()
 \item \href{#method-cal_mantel_corr}{\code{trans_nullmodel$cal_mantel_corr()}}
 \item \href{#method-plot_mantel_corr}{\code{trans_nullmodel$plot_mantel_corr()}}
 \item \href{#method-cal_betampd}{\code{trans_nullmodel$cal_betampd()}}
-\item \href{#method-cal_ses_betampd}{\code{trans_nullmodel$cal_ses_betampd()}}
 \item \href{#method-cal_betamntd}{\code{trans_nullmodel$cal_betamntd()}}
+\item \href{#method-cal_ses_betampd}{\code{trans_nullmodel$cal_ses_betampd()}}
 \item \href{#method-cal_ses_betamntd}{\code{trans_nullmodel$cal_ses_betamntd()}}
 \item \href{#method-cal_rcbray}{\code{trans_nullmodel$cal_rcbray()}}
 \item \href{#method-cal_process}{\code{trans_nullmodel$cal_process()}}
@@ -253,6 +253,41 @@ t1$cal_betampd(abundance.weighted=FALSE)
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_betamntd"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_betamntd}{}}}
+\subsection{Method \code{cal_betamntd()}}{
+Calculate betaMNTD. Faster than comdistnt in picante package.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
+  abundance.weighted = FALSE,
+  exclude.conspecifics = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
+
+\item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_betamntd in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_betamntd(abundance.weighted=FALSE)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_ses_betampd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_ses_betampd}{}}}
 \subsection{Method \code{cal_ses_betampd()}}{
@@ -283,41 +318,6 @@ res_ses_betampd in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_betamntd"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_betamntd}{}}}
-\subsection{Method \code{cal_betamntd()}}{
-Calculate betaMNTD. Faster than comdistnt in picante package.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
-  abundance.weighted = FALSE,
-  exclude.conspecifics = FALSE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
-
-\item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-res_betamntd in object.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$cal_betamntd(abundance.weighted=FALSE)
 }
 }
 \if{html}{\out{</div>}}

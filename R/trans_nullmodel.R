@@ -192,6 +192,30 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_betampd ...')
 		},
 		#' @description
+		#' Calculate betaMNTD. Faster than comdistnt in picante package.
+		#'
+		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
+		#' @return res_betamntd in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_betamntd(abundance.weighted=FALSE)
+		#' }
+		cal_betamntd = function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
+			dis <- self$dis
+			if(is.null(dis)){
+				stop("Phylogenetic tree is required!")
+			}
+			comm <- self$comm
+			self$res_betamntd <- private$betamntd(
+				comm = comm, 
+				dis = dis, 
+				abundance.weighted = abundance.weighted, 
+				exclude.conspecifics = exclude.conspecifics
+				)
+			message('The result is stored in object$res_betamntd ...')
+		},
+		#' @description
 		#' Calculate ses.betaMPD (betaNRI).
 		#'
 		#' @param runs default 1000; simulation runs.
@@ -224,67 +248,19 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			if(verbose){
 				cat("Simulate betaMPD.\n")
 			}
-			beta_rand <- lapply(seq_len(runs), function(x){
+			beta_rand <- sapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
 				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis)))
-			})
-			# use lapply instead of sapply to avoid confict
-			beta_rand <- do.call("cbind", lapply(beta_rand, as.vector))
+			}, simplify = "array")
 			message("---------------- ", Sys.time()," : Finish ----------------")
 			
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
-			
-			res <- data.frame(t(combn(all_samples, 2)), beta_obs_z)
-			colnames(res) <- c("S1", "S2", "distance")
-			
-			self$res_ses_betampd <- private$fin_matrix(all_samples = all_samples, res = res)
+			self$res_ses_betampd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
 			message('The result is stored in object$res_ses_betampd ...')
-		},
-		#' @description
-		#' Calculate betaMNTD. Faster than comdistnt in picante package.
-		#'
-		#' @param abundance.weighted default FALSE; whether use weighted abundance
-		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
-		#' @return res_betamntd in object.
-		#' @examples
-		#' \donttest{
-		#' t1$cal_betamntd(abundance.weighted=FALSE)
-		#' }
-		cal_betamntd = function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
-			dis <- self$dis
-			if(is.null(dis)){
-				stop("Phylogenetic tree is required!")
-			}
-			comm <- self$comm
-			if(exclude.conspecifics == T){
-				dis[dis == 0] <- NA
-			}
-			by_tax_sum <- ifelse(abundance.weighted, private$by_tax_wei, private$by_tax_unwei)
-			by_sample_sum <- ifelse(abundance.weighted, private$by_sample_wei, private$by_sample_unwei)
-
-			all_samples <- rownames(comm)
-			comm <- private$betamntd_comm(comm)
-			
-			com_group <- combn(all_samples, 2)
-			colnames(com_group) <- unlist(lapply(seq_len(ncol(com_group)), function(x) paste0(sort(com_group[, x]), collapse = "_betamntd_")))
-
-			res1 <- private$betamntd(
-				all_samples = all_samples,
-				comm = comm,
-				dis = dis,
-				by_tax_sum = by_tax_sum,
-				by_sample_sum = by_sample_sum
-			)
-			
-			res1 <- data.frame(t(com_group[, res1$com_name]), res1$distance)
-			colnames(res1) <- c("S1", "S2", "distance")
-			
-			self$res_betamntd <- private$fin_matrix(all_samples = all_samples, res = res1)
-			message('The result is stored in object$res_betamntd ...')
 		},
 		#' @description
 		#' Calculate ses.betaMNTD (betaNTI).
@@ -309,67 +285,42 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			if(is.null(dis)){
 				stop("Phylogenetic tree is required!")
 			}
-			if(exclude.conspecifics == T){
-				dis[dis == 0] <- NA
-			}
-			by_tax_sum <- ifelse(abundance.weighted, private$by_tax_wei, private$by_tax_unwei)
-			by_sample_sum <- ifelse(abundance.weighted, private$by_sample_wei, private$by_sample_unwei)
-
 			all_samples <- rownames(comm)
-			# to a long format
-			comm <- private$betamntd_comm(comm)
-			
-			com_group <- combn(all_samples, 2)
-			colnames(com_group) <- unlist(lapply(seq_len(ncol(com_group)), function(x) paste0(sort(com_group[, x]), collapse = "_betamntd_")))
 
 			message("---------------- ", Sys.time()," : Start ----------------")
 			if(verbose){
 				cat("Calculate observed betaMNTD ...\n")
 			}
-			
 			betaobs <- private$betamntd(
-				all_samples = all_samples,
-				comm = comm,
-				dis = dis,
-				by_tax_sum = by_tax_sum,
-				by_sample_sum = by_sample_sum
-			)
-			
-			betaobs_vec <- betaobs[, 2]
-			names(betaobs_vec) <- betaobs[, 1]
+				comm = comm, 
+				dis = dis, 
+				abundance.weighted = abundance.weighted, 
+				exclude.conspecifics = exclude.conspecifics
+				) %>% as.dist
+			betaobs_vec <- as.vector(betaobs)
 			if(verbose){
 				cat("Simulate betaMNTD.\n")
 			}
-			beta_rand <- lapply(seq_len(runs), function(x){
+			beta_rand <- sapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
-				private$betamntd(
-					all_samples = all_samples,
-					comm = comm,
-					dis = picante::taxaShuffle(dis),
-					by_tax_sum = by_tax_sum,
-					by_sample_sum = by_sample_sum
+				as.dist(private$betamntd(
+					comm = comm, 
+					dis = picante::taxaShuffle(dis), 
+					abundance.weighted = abundance.weighted, 
+					exclude.conspecifics = exclude.conspecifics
+					)
 				)
-			})
-			beta_rand <- Reduce(function(x, y) dplyr::left_join(x, y, by = c("com_name" = "com_name")), beta_rand) %>%
-				`rownames<-`(.[, 1]) %>%
-				.[, -1] %>%
-				.[names(betaobs_vec), ]
-			
+			}, simplify = "array")
 			message("---------------- ", Sys.time()," : Finish ----------------")
 
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
-			
-			res1 <- data.frame(t(com_group[, names(beta_obs_z)]), beta_obs_z)
-			colnames(res1) <- c("S1", "S2", "distance")
-			
-			self$res_ses_betamntd <- private$fin_matrix(all_samples = all_samples, res = res1)
+			self$res_ses_betamntd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
 			message('The result is stored in object$res_ses_betamntd ...')
 		},
-
 		#' @description
 		#' Calculate rcbray.
 		#'
@@ -385,14 +336,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- self$comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
-			beta_rand <- lapply(seq_len(runs), function(x){
+			beta_rand <- sapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
 				vegdist(picante::randomizeMatrix(comm, null.model = null.model), "bray")
-			})
-			beta_rand <- do.call("cbind", lapply(beta_rand, as.vector)) %>% as.data.frame
-			
+			}, simplify = "array") %>% as.data.frame
 			beta_rand[, (runs + 1)] <- betaobs_vec
 			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x > x[length(x)])/length(x)})
 			beta_obs_z <- (beta_obs_z - 0.5) * 2
@@ -455,10 +404,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	private = list(
 		show_run = function(x, runs){
 			if(x %% 10 == 0){
-				cat(paste0("Run: ", x, " of ", runs,"\n"))
+				cat(paste0("Runs: ", x, " of ", runs,"\n"))
 			}
 		},
-		fin_matrix = function(all_samples, res){
+		fin_matrix = function(all_samples, beta_obs_z){
+			res <- data.frame(t(combn(all_samples, 2)), beta_obs_z)
+			colnames(res) <- c("S1", "S2", "distance")
 			res1 <- rbind.data.frame(
 				res, 
 				data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), 
@@ -503,63 +454,68 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				.[, -1, drop = FALSE]
 			as.matrix(res1[all_samples, all_samples])
 		},
-		by_tax_wei = function(x){
-			x %>% 
-			dplyr::group_by(Sample) %>% 
-			dplyr::summarise(sum_dis = weighted.mean(mindis, Abund)) %>% 
-			as.data.frame
-		},
-		by_tax_unwei = function(x){
-			x %>% 
-			dplyr::group_by(Sample) %>% 
-			dplyr::summarise(sum_dis = sum(mindis), num = dplyr::n()) %>% 
-			as.data.frame
-		},
-		by_sample_wei = function(x){
-			x %>% 
-			dplyr::group_by(com_name) %>% 
-			dplyr::summarise(distance = mean(sum_dis)) %>% 
-			as.data.frame
-		},
-		by_sample_unwei = function(x){
-			x %>% 
-			dplyr::group_by(com_name) %>% 
-			dplyr::summarise(distance = sum(sum_dis)/sum(num)) %>% 
-			as.data.frame
-		},
-		betamntd_comm = function(x){
-			decostand(x, method="total", MARGIN=1) %>%
-			as.data.frame(stringsAsFactors = FALSE) %>%
-			rownames_to_column %>%
-			reshape2::melt(id.vars = "rowname") %>%
-			`colnames<-`(c("Sample", "Taxa", "Abund")) %>%
-			dropallfactors %>% 
-			.[.$Abund != 0, ]
-		},
 		betamntd = function(
-			all_samples,
-			comm,
-			dis,
-			by_tax_sum,
-			by_sample_sum
+			comm = NULL, 
+			dis = NULL, 
+			abundance.weighted = FALSE, 
+			exclude.conspecifics = FALSE
 			){
+			all_samples <- rownames(comm)
+			comm <- decostand(comm, method="total", MARGIN=1)
+			comm <- rownames_to_column(as.data.frame(comm, stringsAsFactors = FALSE)) %>% 
+				reshape2::melt(id.vars = "rowname")
+			colnames(comm) <- c("Sample", "Taxa", "Abund")
+			comm %<>% .[.$Abund != 0, ]
+			com_group <- combn(all_samples, 2)
+			colnames(com_group) <- unlist(lapply(seq_len(ncol(com_group)), function(x) paste0(sort(com_group[, x]), collapse = "_betamntd_")))
 			res <- data.frame()
+			if(exclude.conspecifics == T){
+				dis[dis == 0] <- NA
+			}
 			for(sample_name in all_samples){
 				comm_use <- comm[comm$Sample != sample_name, ]
-				comm_use$mindis <- dis[unique(comm_use$Taxa), comm[comm$Sample == sample_name, "Taxa"]] %>%
-					apply(., 1, min, na.rm = TRUE) %>% 
-					.[comm_use$Taxa]
-				
-				inter_res <- by_tax_sum(comm_use)
+				dis_use <- dis[unique(as.character(comm_use$Taxa)), comm[comm$Sample == sample_name, "Taxa"]]
+				each_taxa <- apply(dis_use, 1, min, na.rm=TRUE)
+				comm_use$mindis <- each_taxa[as.character(comm_use$Taxa)]
+				if(abundance.weighted == T){
+					inter_res <- comm_use %>% 
+						dplyr::group_by(Sample) %>% 
+						dplyr::summarise(sum_dis = weighted.mean(mindis, Abund)) %>% 
+						as.data.frame		
+				}else{
+					inter_res <- comm_use %>% 
+						dplyr::group_by(Sample) %>% 
+						dplyr::summarise(sum_dis = sum(mindis), num = dplyr::n()) %>% 
+						as.data.frame		
+				}
 				inter_res$ag <- sample_name
 				res <- rbind.data.frame(res, inter_res)
 			}
-
 			res$com_name <- unlist(lapply(seq_len(nrow(res)), function(x) {
 				paste0(sort(unlist(res[x, c("Sample", "ag")])), collapse = "_betamntd_")
 			}))
-			res1 <- by_sample_sum(res)
-			res1
+			if(abundance.weighted == T){
+				res1 <- res %>% 
+					dplyr::group_by(com_name) %>% 
+					dplyr::summarise(distance = mean(sum_dis)) %>% 
+					as.data.frame
+			}else{
+				res1 <- res %>% 
+					dplyr::group_by(com_name) %>% 
+					dplyr::summarise(distance = sum(sum_dis)/sum(num)) %>% 
+					as.data.frame
+			}
+			res1 <- data.frame(t(com_group[, res1$com_name]), res1$distance)
+			colnames(res1) <- c("S1", "S2", "distance")
+			res1 <- rbind.data.frame(
+				res1, 
+				data.frame(S1 = res1$S2, S2 = res1$S1, distance = res1$distance), 
+				data.frame(S1 = all_samples, S2 = all_samples, distance = 0)
+				)
+			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% 
+				`row.names<-`(.[,1]) %>% 
+				.[, -1, drop = FALSE]
+			as.matrix(res1[all_samples, all_samples])
 		},
 		percen_proc = function(ses_phylo_beta, ses_comm){
 			phylo_vec <- as.vector(as.dist(ses_phylo_beta))
