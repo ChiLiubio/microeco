@@ -303,13 +303,13 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @description
 		#' Transform venn result for the composition analysis.
 		#'
-		#' @param use_OTUs_frequency default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.
+		#' @param use_frequency default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.
 		#' @return a new \code{\link{microtable}} class.
 		#' @examples
 		#' \donttest{
-		#' t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
+		#' t2 <- t1$trans_venn_com(use_frequency = TRUE)
 		#' }
-		trans_venn_com = function(use_OTUs_frequency = TRUE){
+		trans_venn_com = function(use_frequency = TRUE){
 			otudata <- self$otu_table
 			venn_table <- self$venn_table
 			sampledata <- data.frame(SampleID = colnames(venn_table), Group = colnames(venn_table)) %>% 'rownames<-'(colnames(venn_table))
@@ -326,7 +326,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			tt[is.na(tt)] <- 0
 			tt %<>% 'rownames<-'(.[, 1]) %>% .[, -1, drop = FALSE]
 			colnames(tt) <- colnames(venn_table)
-			if(use_OTUs_frequency == T){
+			if(use_frequency == T){
 				tt[tt != 0] <- 1
 			}
 			microtable$new(sample_table = sampledata, otu_table = tt, tax_table = taxdata)

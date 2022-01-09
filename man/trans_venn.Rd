@@ -32,7 +32,7 @@ t1$plot_venn()
 ## ------------------------------------------------
 
 \donttest{
-t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
+t2 <- t1$trans_venn_com(use_frequency = TRUE)
 }
 }
 \section{Methods}{
@@ -170,13 +170,13 @@ t1$plot_venn()
 \subsection{Method \code{trans_venn_com()}}{
 Transform venn result for the composition analysis.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_venn$trans_venn_com(use_OTUs_frequency = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_venn$trans_venn_com(use_frequency = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_OTUs_frequency}}{default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.}
+\item{\code{use_frequency}}{default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.}
 }
 \if{html}{\out{</div>}}
 }
@@ -186,7 +186,7 @@ a new \code{\link{microtable}} class.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t2 <- t1$trans_venn_com(use_OTUs_frequency = TRUE)
+t2 <- t1$trans_venn_com(use_frequency = TRUE)
 }
 }
 \if{html}{\out{</div>}}
