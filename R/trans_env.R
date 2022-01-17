@@ -168,10 +168,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param show_taxa default 10; taxa number shown in the plot.
 		#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clear
-		#' @param min_perc_env default 1; minimum scale value for env arrow, relatively.
-		#' @param max_perc_env default 100; maximum scale value for env arrow, relatively.
-		#' @param min_perc_tax default 1; minimum scale value for tax arrow, relatively.
-		#' @param max_perc_tax default 100; maximum scale value for tax arrow, relatively.
+		#' @param min_perc_env default 0.1; used for scaling up the minimum of env arrow; multiply by the maximum distance between samples and origin.
+		#' @param max_perc_env default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.
+		#' @param min_perc_tax default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.
+		#' @param max_perc_tax default 0.8; used for scaling up the maximum of tax arrow; multiply by the maximum distance between samples and origin.
 		#' @return res_rda_trans in object.
 		#' @examples
 		#' \donttest{
@@ -180,10 +180,10 @@ trans_env <- R6Class(classname = "trans_env",
 		trans_rda = function(
 			show_taxa = 10, 
 			adjust_arrow_length = FALSE, 
-			min_perc_env = 1, 
-			max_perc_env = 100, 
-			min_perc_tax = 1, 
-			max_perc_tax = 100
+			min_perc_env = 0.1, 
+			max_perc_env = 0.8, 
+			min_perc_tax = 0.1, 
+			max_perc_tax = 0.8
 			){
 			if(is.null(self$res_rda)){
 				stop("Please first use cal_rda function to calculate RDA !")
@@ -227,9 +227,9 @@ trans_env <- R6Class(classname = "trans_env",
 				df_arrows_spe <- NULL
 			}
 			if(adjust_arrow_length == T){
-				df_arrows[,1:2] <- private$stand_fun(df_arrows[,1:2], min_perc = min_perc_env, max_perc = max_perc_env)
+				df_arrows[,1:2] <- private$stand_fun(arr = df_arrows[,1:2], ref = df_sites, min_perc = min_perc_env, max_perc = max_perc_env)
 				if(self$use_dbrda == F){
-					df_arrows_spe[,1:2] <- private$stand_fun(df_arrows_spe[,1:2], min_perc = min_perc_tax, max_perc = max_perc_tax)
+					df_arrows_spe[,1:2] <- private$stand_fun(arr = df_arrows_spe[,1:2], ref = df_sites, min_perc = min_perc_tax, max_perc = max_perc_tax)
 				}
 			}
 			
@@ -805,20 +805,28 @@ trans_env <- R6Class(classname = "trans_env",
 	),
 	private = list(
 		# transformation function
-		stand_fun = function(x, min_perc = 1, max_perc = 10) {
-			# x must be a two column data.frame or matrix
-			t1 <- x[, 1]^2 + x[, 2]^2
-			a <- min_perc * max(t1)
-			b <- max_perc * max(t1)
-			Ymax <- max(t1)
-			Ymin <- min(t1)
-			k <- (b-a)/(Ymax-Ymin) 
-			norY <- a + k*(t1-Ymin)
-			per <- abs(x[,1]/x[,2])
-			newx <- (((norY*per^2) / (per^2 + 1)) ^ (1/2)) * sapply(x[, 1], function(y) ifelse(y > 0, 1, -1))
-			newy <- (newx/per) * sapply(x[, 2], function(y) ifelse(y > 0, 1, -1))
+		stand_fun = function(arr, ref, min_perc = NULL, max_perc = NULL) {
+			# arr and ref must be a two column data.frame or matrix
+			if(is.null(min_perc)){
+				min_perc <- 0.1
+			}
+			if(is.null(max_perc)){
+				max_perc <- 0.7
+			}
+			ref_dis <- ref[, 1]^2 + ref[, 2]^2
+			max_ref_dis <- max(ref_dis)
+			a <- max_ref_dis * min_perc
+			b <- max_ref_dis * max_perc
+			arr_dis <- arr[, 1]^2 + arr[, 2]^2
+			maxdis <- max(arr_dis)
+			mindis <- min(arr_dis)
+			k <- (b-a)/(maxdis - mindis) 
+			norDis <- a + k * (arr_dis - mindis)
+			per <- abs(arr[,1]/arr[,2])
+			newx <- (((norDis*per^2) / (per^2 + 1)) ^ (1/2)) * sapply(arr[, 1], function(y) ifelse(y > 0, 1, -1))
+			newy <- (newx/per) * sapply(arr[, 2], function(y) ifelse(y > 0, 1, -1))
 			res <- data.frame(newx, newy)
-			colnames(res) <- colnames(x)
+			colnames(res) <- colnames(arr)
 			res
 		},
 		# parse the equation and add the statistics

@@ -229,10 +229,10 @@ transform RDA result for the following plotting.
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$trans_rda(
   show_taxa = 10,
   adjust_arrow_length = FALSE,
-  min_perc_env = 1,
-  max_perc_env = 100,
-  min_perc_tax = 1,
-  max_perc_tax = 100
+  min_perc_env = 0.1,
+  max_perc_env = 0.8,
+  min_perc_tax = 0.1,
+  max_perc_tax = 0.8
 )}\if{html}{\out{</div>}}
 }
 
@@ -243,13 +243,13 @@ transform RDA result for the following plotting.
 
 \item{\code{adjust_arrow_length}}{default FALSE; whether adjust the arrow length to be clear}
 
-\item{\code{min_perc_env}}{default 1; minimum scale value for env arrow, relatively.}
+\item{\code{min_perc_env}}{default 0.1; used for scaling up the minimum of env arrow; multiply by the maximum distance between samples and origin.}
 
-\item{\code{max_perc_env}}{default 100; maximum scale value for env arrow, relatively.}
+\item{\code{max_perc_env}}{default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.}
 
-\item{\code{min_perc_tax}}{default 1; minimum scale value for tax arrow, relatively.}
+\item{\code{min_perc_tax}}{default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.}
 
-\item{\code{max_perc_tax}}{default 100; maximum scale value for tax arrow, relatively.}
+\item{\code{max_perc_tax}}{default 0.8; used for scaling up the maximum of tax arrow; multiply by the maximum distance between samples and origin.}
 }
 \if{html}{\out{</div>}}
 }
