@@ -18,35 +18,35 @@ data(env_data_16S)
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 
 ## ------------------------------------------------
-## Method `trans_env$cal_rda`
+## Method `trans_env$cal_ordination`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+t1$cal_ordination(method = "RDA", use_measure = "bray")
 }
 
 ## ------------------------------------------------
-## Method `trans_env$cal_rda_envsquare`
+## Method `trans_env$cal_ordination_envsquare`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_rda_envsquare()
+t1$cal_ordination_envsquare()
 }
 
 ## ------------------------------------------------
-## Method `trans_env$trans_rda`
+## Method `trans_env$trans_ordination`
 ## ------------------------------------------------
 
 \donttest{
-t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
 }
 
 ## ------------------------------------------------
-## Method `trans_env$plot_rda`
+## Method `trans_env$plot_ordination`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_rda(plot_color = "Group")
+t1$plot_ordination(plot_color = "Group")
 }
 
 ## ------------------------------------------------
@@ -87,10 +87,10 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_env$new()}}
-\item \href{#method-cal_rda}{\code{trans_env$cal_rda()}}
-\item \href{#method-cal_rda_envsquare}{\code{trans_env$cal_rda_envsquare()}}
-\item \href{#method-trans_rda}{\code{trans_env$trans_rda()}}
-\item \href{#method-plot_rda}{\code{trans_env$plot_rda()}}
+\item \href{#method-cal_ordination}{\code{trans_env$cal_ordination()}}
+\item \href{#method-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
+\item \href{#method-trans_ordination}{\code{trans_env$trans_ordination()}}
+\item \href{#method-plot_ordination}{\code{trans_env$plot_ordination()}}
 \item \href{#method-cal_mantel}{\code{trans_env$cal_mantel()}}
 \item \href{#method-cal_cor}{\code{trans_env$cal_cor()}}
 \item \href{#method-plot_cor}{\code{trans_env$plot_cor()}}
@@ -144,45 +144,49 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_rda"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_rda}{}}}
-\subsection{Method \code{cal_rda()}}{
-Redundancy analysis (RDA) based on the rda function in vegan package.
+\if{html}{\out{<a id="method-cal_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_ordination}{}}}
+\subsection{Method \code{cal_ordination()}}{
+Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_rda(
-  use_dbrda = TRUE,
-  add_matrix = NULL,
-  use_measure = NULL,
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination(
+  method = c("RDA", "dbRDA", "CCA")[1],
   feature_sel = FALSE,
   taxa_level = NULL,
-  taxa_filter_thres = NULL
+  taxa_filter_thres = NULL,
+  use_measure = NULL,
+  add_matrix = NULL,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_dbrda}}{default TRUE; whether use db-RDA, if FALSE, use RDA.}
-
-\item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset.}
-
-\item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
+\item{\code{method}}{default c("RDA", "dbRDA", "CCA")[1]; the ordination method.}
 
 \item{\code{feature_sel}}{default FALSE; whether perform the feature selection.}
 
 \item{\code{taxa_level}}{default NULL; If use RDA, provide the taxonomic rank.}
 
 \item{\code{taxa_filter_thres}}{default NULL; If want to filter taxa, provide the relative abundance threshold.}
+
+\item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
+
+\item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset;
+only available when method = "dbRDA".}
+
+\item{\code{...}}{paremeters pass to dbrda or rda or cca function according to the input of method.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rda, res_rda_R2, res_rda_terms and res_rda_axis in object.
+res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+t1$cal_ordination(method = "RDA", use_measure = "bray")
 }
 }
 \if{html}{\out{</div>}}
@@ -191,12 +195,12 @@ t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_rda_envsquare"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_rda_envsquare}{}}}
-\subsection{Method \code{cal_rda_envsquare()}}{
-Fits each environmental vector onto the RDA ordination to obtain the contribution of each variable.
+\if{html}{\out{<a id="method-cal_ordination_envsquare"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_ordination_envsquare}{}}}
+\subsection{Method \code{cal_ordination_envsquare()}}{
+Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_rda_envsquare(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination_envsquare(...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -207,12 +211,12 @@ Fits each environmental vector onto the RDA ordination to obtain the contributio
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rda_envsquare in object.
+res_ordination_envsquare in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_rda_envsquare()
+t1$cal_ordination_envsquare()
 }
 }
 \if{html}{\out{</div>}}
@@ -221,12 +225,12 @@ t1$cal_rda_envsquare()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_rda"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_rda}{}}}
-\subsection{Method \code{trans_rda()}}{
-transform RDA result for the following plotting.
+\if{html}{\out{<a id="method-trans_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_ordination}{}}}
+\subsection{Method \code{trans_ordination()}}{
+transform ordination result for the following plotting.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$trans_rda(
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$trans_ordination(
   show_taxa = 10,
   adjust_arrow_length = FALSE,
   min_perc_env = 0.1,
@@ -254,12 +258,12 @@ transform RDA result for the following plotting.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rda_trans in object.
+res_ordination_trans in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
 }
 }
 \if{html}{\out{</div>}}
@@ -268,12 +272,12 @@ t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_rda"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_rda}{}}}
-\subsection{Method \code{plot_rda()}}{
-plot RDA result.
+\if{html}{\out{<a id="method-plot_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_ordination}{}}}
+\subsection{Method \code{plot_ordination()}}{
+plot ordination result.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_rda(
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_ordination(
   plot_color = NULL,
   plot_shape = NULL,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -306,7 +310,7 @@ ggplot object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_rda(plot_color = "Group")
+t1$plot_ordination(plot_color = "Group")
 }
 }
 \if{html}{\out{</div>}}

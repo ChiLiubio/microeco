@@ -453,7 +453,7 @@ trans_func <- R6Class(classname = "trans_func",
 			if(is.null(folderReferenceData)){
 				stop("No folderReferenceData provided! Please see the help document!")
 			}
-			if(!require(Tax4Fun)){
+			if(!require("Tax4Fun")){
 				stop("Tax4Fun package not installed! see http://tax4fun.gobics.de/ ")
 			}
 			otu_file <- self$otu_table
@@ -610,7 +610,7 @@ trans_func <- R6Class(classname = "trans_func",
 				if(class(self$rep_fasta) == "DNAStringSet"){
 					Biostrings::writeXStringSet(x = self$rep_fasta, filepath = rep_fasta_path)
 				}else{
-					stop("Unknown fasta format! Must be either list or DNAStringSet !")
+					stop("Unknown fasta format! Must be either list (from read.fasta of seqinr package) or DNAStringSet (from readDNAStringSet of Biostrings package) !")
 				}
 			}
 			

@@ -61,29 +61,38 @@ trans_env <- R6Class(classname = "trans_env",
 			self$dataset <- dataset1
 			},
 		#' @description
-		#' Redundancy analysis (RDA) based on the rda function in vegan package.
+		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 		#'
-		#' @param use_dbrda default TRUE; whether use db-RDA, if FALSE, use RDA.
-		#' @param add_matrix default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset.
-		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
+		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
 		#' @param feature_sel default FALSE; whether perform the feature selection.
 		#' @param taxa_level default NULL; If use RDA, provide the taxonomic rank.
 		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
-		#' @return res_rda, res_rda_R2, res_rda_terms and res_rda_axis in object.
+		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
+		#' @param add_matrix default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset;
+		#'   only available when method = "dbRDA".
+		#' @param ... paremeters pass to dbrda or rda or cca function according to the input of method.
+		#' @return res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_rda(use_dbrda = TRUE, use_measure = "bray")
+		#' t1$cal_ordination(method = "RDA", use_measure = "bray")
 		#' }
-		cal_rda = function(
-			use_dbrda = TRUE, 
-			add_matrix = NULL, 
-			use_measure = NULL, 
-			feature_sel = FALSE, 
-			taxa_level = NULL, 
-			taxa_filter_thres = NULL
+		cal_ordination = function(
+			method = c("RDA", "dbRDA", "CCA")[1],
+			feature_sel = FALSE,
+			taxa_level = NULL,
+			taxa_filter_thres = NULL,
+			use_measure = NULL,
+			add_matrix = NULL,
+			...
 			){
+			if(length(method) > 1){
+				stop("The method parameter should have only one option !")
+			}
+			if(! method %in% c("RDA", "dbRDA", "CCA")){
+				stop("The method should be one of 'RDA', 'dbRDA' and 'CCA' !")
+			}
 			env_data <- self$env_data
-			if(use_dbrda == T){
+			if(method == "dbRDA"){
 				if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
 					stop("No distance matrix provided; please use add_matrix parameter to add!")
 				}
@@ -97,7 +106,8 @@ trans_env <- R6Class(classname = "trans_env",
 					use_matrix <- add_matrix
 				}
 				use_data <- use_matrix[rownames(env_data), rownames(env_data)] %>% as.dist
-			}else{
+			}
+			if(method %in% c("RDA", "CCA")){
 				if(is.null(self$dataset)){
 					stop("No abundance dataset provided; please set dataset parameter in creating Class")
 				}
@@ -114,12 +124,17 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			if(feature_sel == T){
 				message('Start forward selection ...')
-				if(use_dbrda == T){
-					mod0 <- dbrda(use_data ~ 1, env_data)
-					mod1 <- dbrda(use_data ~ ., env_data)
-				}else{
-					mod0 <- rda(use_data ~ 1, env_data)
-					mod1 <- rda(use_data ~ ., env_data)					
+				if(method == "dbRDA"){
+					mod0 <- dbrda(use_data ~ 1, env_data, ...)
+					mod1 <- dbrda(use_data ~ ., env_data, ...)
+				}
+				if(method == "RDA"){
+					mod0 <- rda(use_data ~ 1, env_data, ...)
+					mod1 <- rda(use_data ~ ., env_data, ...)					
+				}
+				if(method == "CCA"){
+					mod0 <- cca(use_data ~ 1, env_data, ...)
+					mod1 <- cca(use_data ~ ., env_data, ...)					
 				}
 				forward_res <- ordiR2step(mod0, scope = formula(mod1), direction="forward", perm.max = 999)
 				res_sign <- gsub("+ ", "", rownames(data.frame(forward_res$anova)), fixed = TRUE)
@@ -129,42 +144,46 @@ trans_env <- R6Class(classname = "trans_env",
 				res_sign <- res_sign[1:(length(res_sign) - 1)]
 				env_data <- env_data[,c(res_sign),drop=FALSE]
 			}
-			self$use_dbrda <- use_dbrda
+			self$ordination_method <- method
 			self$taxa_level <- taxa_level
-			if(use_dbrda == T){
-				res_rda <- dbrda(use_data ~ ., env_data)
-			}else{
-				res_rda <- rda(use_data ~ ., env_data)
+			if(method == "dbRDA"){
+				res_ordination <- dbrda(use_data ~ ., env_data, ...)
 			}
-			self$res_rda <- res_rda
-			message('The rda total result is stored in object$res_rda ...')
-			self$res_rda_R2 <- unlist(RsquareAdj(res_rda))
-			message('The R2 is stored in object$res_rda_R2 ...')
+			if(method == "RDA"){
+				res_ordination <- rda(use_data ~ ., env_data, ...)
+			}
+			if(method == "CCA"){
+				res_ordination <- cca(use_data ~ ., env_data, ...)
+			}
+			self$res_ordination <- res_ordination
+			message('The original ordination result is stored in object$res_ordination ...')
+			self$res_ordination_R2 <- unlist(RsquareAdj(res_ordination))
+			message('The R2 is stored in object$res_ordination_R2 ...')
 			# test for sig.environ.variables
-			self$res_rda_terms <- anova(res_rda, by = "terms", permu = 1000)
-			message('The terms anova result is stored in object$res_rda_terms ...')
-			self$res_rda_axis <- anova(res_rda, by = "axis", perm.max = 1000)
-			message('The axis anova result is stored in object$res_rda_axis ...')
+			self$res_ordination_terms <- anova(res_ordination, by = "terms", permu = 1000)
+			message('The terms anova result is stored in object$res_ordination_terms ...')
+			self$res_ordination_axis <- anova(res_ordination, by = "axis", perm.max = 1000)
+			message('The axis anova result is stored in object$res_ordination_axis ...')
 		},
 		#' @description
-		#' Fits each environmental vector onto the RDA ordination to obtain the contribution of each variable.
+		#' Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 		#'
 		#' @param ... the parameters passing to vegan::envfit function.
-		#' @return res_rda_envsquare in object.
+		#' @return res_ordination_envsquare in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_rda_envsquare()
+		#' t1$cal_ordination_envsquare()
 		#' }
-		cal_rda_envsquare = function(...){
-			if(is.null(self$res_rda)){
-				stop("Please first use cal_rda function to calculate RDA !")
+		cal_ordination_envsquare = function(...){
+			if(is.null(self$res_ordination)){
+				stop("Please first run cal_ordination function to obtain the ordination result!")
 			}else{
-				self$res_rda_envsquare <- vegan::envfit(self$res_rda, self$env_data, ...)
-				message('Result is stored in object$res_rda_envsquare ...')
+				self$res_ordination_envsquare <- vegan::envfit(self$res_ordination, self$env_data, ...)
+				message('Result is stored in object$res_ordination_envsquare ...')
 			}
 		},
 		#' @description
-		#' transform RDA result for the following plotting.
+		#' transform ordination result for the following plotting.
 		#'
 		#' @param show_taxa default 10; taxa number shown in the plot.
 		#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clear
@@ -172,12 +191,12 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param max_perc_env default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.
 		#' @param min_perc_tax default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.
 		#' @param max_perc_tax default 0.8; used for scaling up the maximum of tax arrow; multiply by the maximum distance between samples and origin.
-		#' @return res_rda_trans in object.
+		#' @return res_ordination_trans in object.
 		#' @examples
 		#' \donttest{
-		#' t1$trans_rda(adjust_arrow_length = TRUE, max_perc_env = 10)
+		#' t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
 		#' }
-		trans_rda = function(
+		trans_ordination = function(
 			show_taxa = 10, 
 			adjust_arrow_length = FALSE, 
 			min_perc_env = 0.1, 
@@ -185,12 +204,12 @@ trans_env <- R6Class(classname = "trans_env",
 			min_perc_tax = 0.1, 
 			max_perc_tax = 0.8
 			){
-			if(is.null(self$res_rda)){
-				stop("Please first use cal_rda function to calculate RDA !")
+			if(is.null(self$res_ordination)){
+				stop("Please first run cal_ordination function !")
 			}
-			res_rda <- self$res_rda
-			scrs <- scores(res_rda ,choices = c(1, 2), display = c("sp", "wa", "cn"))
-			scrs$biplot <- scores(res_rda, choices=c(1, 2), "bp", scaling="sites")
+			res_ordination <- self$res_ordination
+			scrs <- scores(res_ordination ,choices = c(1, 2), display = c("sp", "wa", "cn"))
+			scrs$biplot <- scores(res_ordination, choices=c(1, 2), "bp", scaling="sites")
 			df_sites <- cbind.data.frame(scrs$sites, self$dataset$sample_table[rownames(scrs$sites), ])
 			colnames(df_sites)[1:2] <- c("x","y")
 			
@@ -198,13 +217,13 @@ trans_env <- R6Class(classname = "trans_env",
 			df_arrows<- scrs$biplot * multiplier
 			colnames(df_arrows)<-c("x","y")
 			df_arrows <- as.data.frame(df_arrows)
-			eigval <- res_rda$CCA$eig/sum(res_rda$CCA$eig)
+			eigval <- res_ordination$CCA$eig/sum(res_ordination$CCA$eig)
 			eigval <- round(100 * eigval, 1)
 			eigval[1] <- paste0("RDA1", " [", eigval[1], "%]")
 			eigval[2] <- paste0("RDA2", " [", eigval[2], "%]")
 
-			if(self$use_dbrda == F){
-				scrs$biplot_spe <- scores(res_rda, choices=c(1, 2), "sp", scaling="species")
+			if(self$ordination_method != "dbRDA"){
+				scrs$biplot_spe <- scores(res_ordination, choices=c(1, 2), "sp", scaling="species")
 				df_species <- scrs$species
 				colnames(df_species)[1:2] <- c("x","y")
 				multiplier_spe <- vegan:::ordiArrowMul(scrs$biplot_spe)
@@ -228,22 +247,22 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			if(adjust_arrow_length == T){
 				df_arrows[,1:2] <- private$stand_fun(arr = df_arrows[,1:2], ref = df_sites, min_perc = min_perc_env, max_perc = max_perc_env)
-				if(self$use_dbrda == F){
+				if(self$ordination_method != "dbRDA"){
 					df_arrows_spe[,1:2] <- private$stand_fun(arr = df_arrows_spe[,1:2], ref = df_sites, min_perc = min_perc_tax, max_perc = max_perc_tax)
 				}
 			}
 			
-			self$res_rda_trans <- list(
+			self$res_ordination_trans <- list(
 				df_sites = df_sites, 
 				df_arrows = df_arrows, 
 				eigval = eigval, 
 				df_species = df_species, 
 				df_arrows_spe = df_arrows_spe
 				)
-			message('The result list is stored in object$res_rda_trans ...')
+			message('The result list is stored in object$res_ordination_trans ...')
 		},
 		#' @description
-		#' plot RDA result.
+		#' plot ordination result.
 		#'
 		#' @param plot_color default NULL; group used for color.
 		#' @param plot_shape default NULL; group used for shape.
@@ -254,9 +273,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @return ggplot object.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_rda(plot_color = "Group")
+		#' t1$plot_ordination(plot_color = "Group")
 		#' }
-		plot_rda = function(
+		plot_ordination = function(
 			plot_color = NULL,
 			plot_shape = NULL,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -264,8 +283,8 @@ trans_env <- R6Class(classname = "trans_env",
 			taxa_text_color = "firebrick1",
 			taxa_text_type = "italic"
 			){
-			if(is.null(self$res_rda_trans)){
-				stop("Please first use trans_rda function to get plot data !")
+			if(is.null(self$res_ordination_trans)){
+				stop("Please first run trans_ordination function !")
 			}
 			
 			p <- ggplot()
@@ -274,18 +293,18 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_point(
-				data=self$res_rda_trans$df_sites, 
+				data=self$res_ordination_trans$df_sites, 
 				aes_string("x", "y", colour = plot_color, shape = plot_shape), 
 				size= 3.5)
 			# plot arrows
 			p <- p + geom_segment(
-				data=self$res_rda_trans$df_arrows, 
+				data=self$res_ordination_trans$df_arrows, 
 				aes(x = 0, y = 0, xend = x, yend = y), 
 				arrow = arrow(length = unit(0.2, "cm")), 
 				color = "grey30")
 			p <- p + ggrepel::geom_text_repel(
-				data = as.data.frame(self$res_rda_trans$df_arrows * 1), 
-				aes(x, y, label = gsub("`", "", rownames(self$res_rda_trans$df_arrows))), 
+				data = as.data.frame(self$res_ordination_trans$df_arrows * 1), 
+				aes(x, y, label = gsub("`", "", rownames(self$res_ordination_trans$df_arrows))), 
 				size=3.7, 
 				color = "black", 
 				segment.color = "white"
@@ -296,10 +315,10 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!is.null(plot_shape)){
 				p <- p + scale_shape_manual(values = shape_values)
 			}
-			p <- p + xlab(self$res_rda_trans$eigval[1]) + ylab(self$res_rda_trans$eigval[2])
+			p <- p + xlab(self$res_ordination_trans$eigval[1]) + ylab(self$res_ordination_trans$eigval[2])
 			
-			if(self$use_dbrda == F){
-				df_arrows_spe1 <- self$res_rda_trans$df_arrows_spe
+			if(self$ordination_method != "dbRDA"){
+				df_arrows_spe1 <- self$res_ordination_trans$df_arrows_spe
 				p <- p + geom_segment(
 					data=df_arrows_spe1, 
 					aes(x = 0, y = 0, xend = x, yend = y), 
@@ -591,7 +610,7 @@ trans_env <- R6Class(classname = "trans_env",
 				color_palette <- color_vector
 			}
 			if(pheatmap == T){
-				if(!require(pheatmap)){
+				if(!require("pheatmap")){
 					stop("pheatmap package not installed")
 				}
 				# check sd for each feature, if 0, delete

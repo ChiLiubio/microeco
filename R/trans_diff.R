@@ -339,7 +339,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				message('The metastat group information is stored in object$res_metastat_group_matrix ...')
 			}
 			if(grepl("mseq", method, ignore.case = TRUE)){
-				if(!require(metagenomeSeq)){
+				if(!require("metagenomeSeq")){
 					stop("metagenomeSeq package not installed")
 				}
 				message("Total ", ncol(all_name), " paired group for calculation ...")

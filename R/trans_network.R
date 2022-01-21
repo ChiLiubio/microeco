@@ -198,8 +198,8 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 			}
 			if(grepl("SpiecEasi", network_method, ignore.case = TRUE)){
-				if(!require(SpiecEasi)){
-					stop("SpiecEasi package not installed")
+				if(!require("SpiecEasi")){
+					stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
 				}
 				use_abund <- self$use_abund
 				use_abund <- as.matrix(use_abund)
@@ -323,7 +323,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param filepath default "network.gexf"; file path.
 		#' @return None.
 		save_network = function(filepath = "network.gexf"){
-			if(!require(rgexf)){
+			if(!require("rgexf")){
 				stop("Please install rgexf package")
 			}
 			private$check_igraph()
@@ -541,7 +541,7 @@ trans_network <- R6Class(classname = "trans_network",
 		cal_powerlaw_p = function(...){
 			network <- self$res_network
 			degree_dis <- igraph::degree(network)
-			if(!require(poweRlaw)){
+			if(!require("poweRlaw")){
 				stop("Please first install poweRlaw package from CRAN !")
 			}
 			resdispl <- poweRlaw::displ$new(degree_dis + 1)
@@ -597,7 +597,7 @@ trans_network <- R6Class(classname = "trans_network",
 		),
 	private = list(
 		check_igraph = function(){
-			if(!require(igraph)){
+			if(!require("igraph")){
 				stop("Please first install igraph package!")
 			}
 		},
@@ -652,7 +652,7 @@ trans_network <- R6Class(classname = "trans_network",
 			nns
 		},
 		saveAsGEXF = function(network, filepath = "network.gexf"){
-			require(rgexf)
+			require("rgexf")
 			nodes <- data.frame(cbind(V(network), V(network)$name))
 			edges <- get.edges(network, 1:ecount(network))
 			vAttrNames <- setdiff(list.vertex.attributes(network), "name")
