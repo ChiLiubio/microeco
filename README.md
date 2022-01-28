@@ -68,10 +68,10 @@ FEMS Microbiology Ecology, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa25
 
 ## Contributing
 
-We welcome any contribution, including but not limited to code, idea and [tutorial](https://chiliubio.github.io/microeco_tutorial/). \! 
+We welcome any contribution, including but not limited to code, idea and [tutorial](https://chiliubio.github.io/microeco_tutorial/).
 Please report errors and questions on github [Issues](https://github.com/ChiLiubio/microeco/issues).
 Any contribution via [Pull requests](https://github.com/ChiLiubio/microeco/pulls) or Email(liuchi0426@126.com) will be appreciated.
-By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CONDUCT.md).
+By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 
 
 ## References
