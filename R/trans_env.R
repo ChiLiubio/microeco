@@ -535,7 +535,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param color_vector default c("#053061", "white", "#A50026"); colors with only three values representing low, middle and high value.
 		#' @param color_palette default NULL; a customized palette with more color values; if provided, use it instead of color_vector.
-		#' @param pheatmap default FALSE; whether use heatmap with clustering plot.
+		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
 		#'   For example, filter_feature = "" can be used to filter features that only have "", no any "*".
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
@@ -544,6 +544,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param plot_x_size default 9; x axis text size.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
 		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
+		#' @param cluster_ggplot default "none", available options: "none", "row", "col" or "both". "none": no any clustering used;
+		#'   "row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
+		#'   Only available when pheatmap = FALSE.
+		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when cluster_ggplot != "none".
+		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".	
 		#' @param ... paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.
 		#' @return plot.
 		#' @examples
@@ -561,6 +566,9 @@ trans_env <- R6Class(classname = "trans_env",
 			plot_x_size = 9,
 			mylabels_x = NULL,
 			font_family = NULL,
+			cluster_ggplot = "none",
+			cluster_height_rows = 0.2,
+			cluster_height_cols = 0.2,
 			...
 			){
 			if(is.null(self$res_cor)){
@@ -568,7 +576,8 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			if(length(color_vector) != 3){
 				stop("color_vector parameter must have three values !")
-			}			
+			}
+			cluster_ggplot <- match.arg(cluster_ggplot, c("none", "row", "col", "both"))
 			
 			use_data <- self$res_cor
 			
@@ -592,17 +601,19 @@ trans_env <- R6Class(classname = "trans_env",
 				use_data$Env <- paste0(use_data$Type, ": ", use_data$Env)
 			}
 			if(length(unique(use_data$Type)) == 1 | pheatmap){
-				clu_data_1 <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% 
+				clu_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% 
 					`row.names<-`(.[,1]) %>% 
 					.[, -1, drop = FALSE]
-				clu_data_1[is.na(clu_data_1)] <- 0
+				clu_data[is.na(clu_data)] <- 0
 				sig_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Significance") %>% 
 					`row.names<-`(.[,1]) %>% 
 					.[, -1, drop = FALSE]
 				sig_data[is.na(sig_data)] <- ""
 				if(length(unique(use_data$Type)) == 1 & pheatmap == F){
-					lim_y <- hclust(dist(clu_data_1)) %>% {.$labels[.$order]}
-					lim_x <- hclust(dist(t(clu_data_1))) %>% {.$labels[.$order]}
+					row_cluster <- hclust(dist(clu_data)) 
+					lim_y <- row_cluster %>% {.$labels[.$order]}
+					col_cluster <- hclust(dist(t(clu_data)))
+					lim_x <- col_cluster %>% {.$labels[.$order]}
 				}
 			}
 			# check whether the cor values all larger or smaller than 0
@@ -614,23 +625,23 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("pheatmap package not installed")
 				}
 				# check sd for each feature, if 0, delete
-				if(any(apply(clu_data_1, MARGIN = 1, FUN = function(x) sd(x) == 0))){
-					select_rows <- apply(clu_data_1, MARGIN = 1, FUN = function(x) sd(x) != 0)
-					clu_data_1 %<>% {.[select_rows, ]}
+				if(any(apply(clu_data, MARGIN = 1, FUN = function(x) sd(x) == 0))){
+					select_rows <- apply(clu_data, MARGIN = 1, FUN = function(x) sd(x) != 0)
+					clu_data %<>% {.[select_rows, ]}
 					sig_data %<>% {.[select_rows, ]}
 				}
 				if(ylab_type_italic == T){
 					eval(parse(text = paste0(
-						"mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data_1),'"'), "))", collapse = ","),")", 
+						"mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data),'"'), "))", collapse = ","),")", 
 						collapse = "")))
 				}else{
-					mylabels_y <- rownames(clu_data_1)
+					mylabels_y <- rownames(clu_data)
 				}
 				# create the palette
 				if(is.null(color_palette)){
-					minpiece <- max(abs(min(clu_data_1)), max(clu_data_1))/100
-					pos <- seq(from = 0, to = max(clu_data_1), by = minpiece)[-1]
-					neg <- rev(seq(from = 0, to = abs(min(clu_data_1)), by = minpiece)[-1]) * (-1)
+					minpiece <- max(abs(min(clu_data)), max(clu_data))/100
+					pos <- seq(from = 0, to = max(clu_data), by = minpiece)[-1]
+					neg <- rev(seq(from = 0, to = abs(min(clu_data)), by = minpiece)[-1]) * (-1)
 					posColor <- colorRampPalette(c(color_vector[2], color_vector[3]))(100)[1:length(pos)]
 					negColor <- colorRampPalette(c(color_vector[2], color_vector[1]))(100)[1:length(neg)] %>% rev
 					# make sure color_vector_use and myBreaks have same length
@@ -642,14 +653,12 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 				
 				p <- pheatmap(
-					clu_data_1, 
+					clu_data, 
 					clustering_distance_row = "correlation", 
 					clustering_distance_cols= "correlation",
 					border_color = NA, 
 					scale = "none",
 					fontsize = plot_x_size, 
-					cluster_cols = TRUE,
-					cluster_rows = TRUE, 
 					labels_row = mylabels_y, 
 					labels_col = mylabels_x, 
 					display_numbers = sig_data, 
@@ -676,10 +685,37 @@ trans_env <- R6Class(classname = "trans_env",
 					theme(strip.background = element_rect(fill = "grey85", colour = "white")) +
 					theme(strip.text=element_text(size=11), panel.border = element_blank(), panel.grid = element_blank())
 				if(length(unique(use_data$Type)) == 1){
-					p <- p + scale_y_discrete(limits=lim_y, position = "left") + 
-						scale_x_discrete(limits=lim_x)
+					if(cluster_ggplot == "none"){
+						p <- p + scale_y_discrete(limits = lim_y, position = "left") + scale_x_discrete(limits = lim_x)
+					}else{
+						p <- p + scale_y_discrete(limits = lim_y, position = "right") + scale_x_discrete(limits = lim_x)
+						if(cluster_ggplot %in% c("row", "both")){
+							row_plot <- factoextra::fviz_dend(
+								row_cluster, 
+								show_labels = FALSE, 
+								labels_track_height = 0, 
+								horiz = TRUE, 
+								main = "",
+								xlab = "",
+								ylab = "",
+								ggtheme = theme_classic()) + theme(axis.text.x = element_blank(), axis.ticks = element_blank())
+							p %<>% aplot::insert_left(row_plot, width = cluster_height_rows)
+						}
+						if(cluster_ggplot %in% c("col", "both")){
+							col_plot <- factoextra::fviz_dend(
+								col_cluster, 
+								show_labels = FALSE, 
+								labels_track_height = 0, 
+								horiz = FALSE, 
+								main = "",
+								xlab = "",
+								ylab = "",
+								ggtheme = theme_classic()) + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+							p %<>% aplot::insert_top(col_plot, height = cluster_height_cols)
+						}
+					}
 				}else{
-					p <- p + facet_grid(. ~ Type, drop = TRUE,scale = "free", space = "free_x")
+					p <- p + facet_grid(. ~ Type, drop = TRUE, scale = "free", space = "free_x")
 				}
 				if(ylab_type_italic == T){
 					p <- p + theme(axis.text.y = element_text(face = 'italic'))
