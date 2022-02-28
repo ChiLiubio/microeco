@@ -294,7 +294,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param grid_clean default TRUE; whether remove grid lines.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
 		#' @param base_font default NULL; font in the plot.
-		#' @return ggplot2 plot.
+		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
+		#' @param ... paremeters pass to pheatmap when pheatmap = TRUE.
+		#' @return ggplot2 plot or grid plot based on pheatmap.
 		#' @examples
 		#' \donttest{
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 40)
@@ -321,63 +323,81 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtitle_keep = TRUE,
 			grid_clean = TRUE,
 			xtext_type_hor = TRUE,
-			base_font =NULL
+			base_font =NULL,
+			pheatmap = FALSE,
+			...
 			){
 			plot_data <- self$abund_data
-			# order x axis samples and facet
-			plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
+			if(pheatmap == FALSE){
+				# order x axis samples and facet
+				plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
+				if (is.null(min_abundance)){
+					min_abundance <- ifelse(min(plot_data$Abundance) > 0.001, min(plot_data$Abundance), 0.001)
+				}
+				if (is.null(max_abundance)){
+					max_abundance <- max(plot_data$Abundance)
+				}
+				plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
+				plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
 
-			if (is.null(min_abundance)){
-				min_abundance <- ifelse(min(plot_data$Abundance) > 0.001, min(plot_data$Abundance), 0.001)
-			}
-			if (is.null(max_abundance)){
-				max_abundance <- max(plot_data$Abundance)
-			}
-			plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
-			plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
+				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
+				
+				if(withmargin == T){
+					p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
+				}else{
+					p <- p + geom_tile(aes(fill = Abundance))
+				}
+				p <- p + theme(axis.text.y = element_text(size = 12)) + theme(plot.margin = unit(c(0.3, 0.3, 0.3, 0.3), "cm"))
 
-			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
-			
-			if(withmargin == T){
-				p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
-			}else{
-				p <- p + geom_tile(aes(fill = Abundance))
+				if (plot_numbers == T){
+					abund <- plot_data
+					abund$Abundance <- round(abund$Abundance, 1)
+					p <- p + geom_text(data = abund, size = plot_text_size, colour = "grey10")  
+				}
+				if (is.null(plot_breaks)){
+					p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
+				}else{
+					p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
+						limits = c(min_abundance, max_abundance))
+				}
+				if(!is.null(order_facet)) {
+					plot_data[, facet] <- factor(plot_data[, facet], levels = unique(order_facet))
+				}
+				if(!is.null(facet)){
+					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
+				}
+				p <- p + labs(x = "", y = "", fill = "% Relative\nAbundance")
+				if (!is.null(ytext_size)){
+					p <- p + theme(axis.text.y = element_text(size = ytext_size))
+				}
+				p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
+				if(!xtext_keep) {
+					p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
+				}
+				if(grid_clean){
+					p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
+				}			
+				if(!is.null(base_font)){
+					p <- p + theme(text=element_text(family=base_font))
+				}
+				p
+			} else {
+				# first to wide format
+				wide_table <- reshape2::dcast(plot_data, Taxonomy ~ Sample, value.var = "Abundance") %>% 
+					`row.names<-`(.[,1]) %>% 
+					.[, -1, drop = FALSE]
+				# check sd for each feature, if 0, delete
+				if(any(apply(wide_table, MARGIN = 1, FUN = function(x) sd(x) == 0))){
+					select_rows <- apply(wide_table, MARGIN = 1, FUN = function(x) sd(x) != 0)
+					wide_table %<>% {.[select_rows, ]}
+				}
+				p <- pheatmap::pheatmap(
+					wide_table,
+					...
+					)
+				p$gtable
 			}
-			p <- p + theme(axis.text.y = element_text(size = 12)) + theme(plot.margin = unit(c(0.3, 0.3, 0.3, 0.3), "cm"))
-
-			if (plot_numbers == T){
-				abund <- plot_data
-				abund$Abundance <- round(abund$Abundance, 1)
-				p <- p + geom_text(data = abund, size = plot_text_size, colour = "grey10")  
-			}
-			if (is.null(plot_breaks)){
-				p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
-			}else{
-				p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
-					limits = c(min_abundance, max_abundance))
-			}
-			if(!is.null(order_facet)) {
-				plot_data[, facet] <- factor(plot_data[, facet], levels = unique(order_facet))
-			}
-			if(!is.null(facet)){
-				p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
-				p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
-			}
-			p <- p + labs(x = "", y = "", fill = "% Relative\nAbundance")
-			if (!is.null(ytext_size)){
-				p <- p + theme(axis.text.y = element_text(size = ytext_size))
-			}
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
-			if(!xtext_keep) {
-				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
-			}
-			if(grid_clean){
-				p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
-			}			
-			if(!is.null(base_font)){
-				p <- p + theme(text=element_text(family=base_font))
-			}
-			p
 		},
 		#' @description
 		#' Box plot in trans_abund object.

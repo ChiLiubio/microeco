@@ -247,7 +247,9 @@ Plot the heatmap in trans_abund object.
   xtitle_keep = TRUE,
   grid_clean = TRUE,
   xtext_type_hor = TRUE,
-  base_font = NULL
+  base_font = NULL,
+  pheatmap = FALSE,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -295,11 +297,15 @@ Plot the heatmap in trans_abund object.
 \item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
 
 \item{\code{base_font}}{default NULL; font in the plot.}
+
+\item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
+
+\item{\code{...}}{paremeters pass to pheatmap when pheatmap = TRUE.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot2 plot.
+ggplot2 plot or grid plot based on pheatmap.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
