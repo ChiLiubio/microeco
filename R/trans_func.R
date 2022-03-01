@@ -713,7 +713,7 @@ trans_func <- R6Class(classname = "trans_func",
 			write.table(x = functional_prediction_final, file = file.path(path_to_temp_folder, 'functional_prediction.txt'), append = F, quote = F, 
 				sep = "\t", row.names = F, col.names = T)
 			self$res_tax4fun2_KO <- functional_prediction_final
-			message('Result KO abundance is stored in object$res_tax4fun2_KO!')
+			message('Result KO abundance is stored in object$res_tax4fun2_KO ...')
 
 			# Converting the KO profile to a profile of KEGG pathways
 			message('Converting functions to pathways')
@@ -731,16 +731,19 @@ trans_func <- R6Class(classname = "trans_func",
 				pathway_prediction[,-1] <- t(t(pathway_prediction[,-1]) / sum(pathway_prediction[,-1]))
 				keep <- which(pathway_prediction[,2] > 0)
 			}
-			if(sum(pathway_prediction[,-1]) == 0) stop("Conversion to pathway failed!")
+			if(sum(pathway_prediction[, -1]) == 0) stop("Conversion to pathway failed!")
+			pathway_prediction %<>% .[keep, ]
 			names(pathway_prediction) <- names(otu_table)
-			names(pathway_prediction)[1] <- 'pathway'
-
+			rownames(pathway_prediction) <- pathway_prediction[, 1]
+			pathway_prediction <- pathway_prediction[, -1, drop = FALSE]
+			
+			self$res_tax4fun2_pathway <- pathway_prediction
+			message('Pathway abundance table is stored in object$res_tax4fun2_pathway ...')			
 			ptw_desc <- Tax4Fun2_KEGG$ptw_desc
-			pathway_prediction_final <- merge(pathway_prediction, ptw_desc)[keep,]
+			pathway_prediction_final <- data.frame(pathway_prediction, ptw_desc[rownames(pathway_prediction), ])
+			pathway_prediction_final <- data.frame(pathway = rownames(pathway_prediction_final), pathway_prediction_final)
 			write.table(x = pathway_prediction_final, file = file.path(path_to_temp_folder, 'pathway_prediction.txt'), 
 				append = F, quote = F, sep = "\t", row.names = F, col.names = T)
-			self$res_tax4fun2_pathway <- pathway_prediction_final
-			message('Result pathway abundance is stored in object$res_tax4fun2_pathway!')
 		},
 		#' @description
 		#' Calculate (multi-) functional redundancy index (FRI) of prokaryotic community with Tax4Fun2 method.
