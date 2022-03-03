@@ -350,33 +350,31 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 
 		},
 		#' @description
-		#' Plot ROC curve and get the performance data.
+		#' Get ROC curve data and the performance data.
 		#' 
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
 		#' @param ... parameters pass to plot.performance function of ROCR package.
-		#' @return ggplot2 object; res_perf and res_auc_perf stored in the object.
+		#' @return a list including res_perf, res_auc_perf and all_perf_table stored in the object.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_ROC()
+		#' t1$cal_ROC()
 		#' }
-		plot_ROC = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
+		cal_ROC = function(...){
 			test_data <- self$data_test
 			fit.best <- self$res_train
 
-			set.seed(12345)
-			prediction_for_roc_curve <- predict(fit.best, test_data[,2:ncol(test_data)] , type="prob")
-			
+			prediction_for_roc_curve <- predict(fit.best, test_data[, 2:ncol(test_data)] , type="prob")
 			classes <- levels(droplevels(test_data[, 1])) #drop because sometimes there is empty classes
 			# store the results
 			all_perf <- list()
 			all_auc_perf <- list()
 			all_perf_table <- data.frame()
+			res_ROC <- list()
 			
 			for(i in 1:length(classes)){
 			  # select observations of class[i]
 			  true_values <- ifelse(test_data[, 1] == classes[i], 1, 0)
 			  # performance for class[i]
-			  pred <- prediction(prediction_for_roc_curve[, i], true_values)
+			  pred <- ROCR::prediction(prediction_for_roc_curve[, i], true_values)
 			  perf <- ROCR::performance(pred, "tpr", "fpr")
 			  all_perf[[i]] <- perf
 			  
@@ -388,16 +386,29 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			  #print(auc.perf@y.values)
 			  message('AUC of ', classes[i], " = ", auc.perf@y.values)
 			}
-
-			self$res_perf <- all_perf
-			message('Class performance of TPR-FPR is stored in object$res_perf ...')
-			self$res_auc_perf <- all_auc_perf
-			message('Class performance of AUC is stored in object$res_auc_perf ...')
-			
-			p <- ggplot(data = all_perf_table, aes(x = x, y = y, color = Group, fill = Group, group = Group)) +
-				geom_line(size = 1,alpha = 0.7) + 
+			res_ROC$res_perf <- all_perf
+			res_ROC$all_auc_perf <- all_auc_perf
+			res_ROC$all_perf_table <- all_perf_table
+			self$res_ROC <- res_ROC
+			message('Class performance of TPR-FPR is stored in object$res_ROC$res_perf ...')
+			message('Class performance of AUC is stored in object$res_ROC$res_auc_perf ...')
+			message('Class performance of AUC is stored in object$res_ROC$all_perf_table ...')
+		},
+		#' @description
+		#' Plot ROC curve.
+		#' 
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
+		#' @param ... parameters pass to geom_line function of ggplot2 package.
+		#' @return ggplot2 object; res_perf and res_auc_perf stored in the object.
+		#' @examples
+		#' \donttest{
+		#' t1$plot_ROC(size = 1, alpha = 0.7)
+		#' }
+		plot_ROC = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
+			all_perf_table <- self$res_ROC$all_perf_table
+			p <- ggplot(data = all_perf_table, aes(x = x, y = y, color = Group, group = Group)) +
+				geom_line(...) + 
 #				geom_ribbon(aes(x, ymin = 0, ymax = y)) +
-#				labs(title = paste("ROC Curve & AUC:",(perf.auc@y.values))) + 
 				scale_color_manual(values = color_values) +
 				xlab("False positive rate") +
 				ylab("True positive rate") +

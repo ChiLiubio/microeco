@@ -71,11 +71,19 @@ t1$plot_confusionMatrix()
 }
 
 ## ------------------------------------------------
+## Method `trans_classifier$cal_ROC`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_ROC()
+}
+
+## ------------------------------------------------
 ## Method `trans_classifier$plot_ROC`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_ROC()
+t1$plot_ROC(size = 1, alpha = 0.7)
 }
 }
 \section{Methods}{
@@ -88,6 +96,7 @@ t1$plot_ROC()
 \item \href{#method-cal_train}{\code{trans_classifier$cal_train()}}
 \item \href{#method-cal_predict}{\code{trans_classifier$cal_predict()}}
 \item \href{#method-plot_confusionMatrix}{\code{trans_classifier$plot_confusionMatrix()}}
+\item \href{#method-cal_ROC}{\code{trans_classifier$cal_ROC()}}
 \item \href{#method-plot_ROC}{\code{trans_classifier$plot_ROC()}}
 \item \href{#method-clone}{\code{trans_classifier$clone()}}
 }
@@ -352,10 +361,40 @@ t1$plot_confusionMatrix()
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_ROC"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_ROC}{}}}
+\subsection{Method \code{cal_ROC()}}{
+Get ROC curve data and the performance data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_ROC(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters pass to plot.performance function of ROCR package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list including res_perf, res_auc_perf and all_perf_table stored in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_ROC()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-plot_ROC"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_ROC}{}}}
 \subsection{Method \code{plot_ROC()}}{
-Plot ROC curve and get the performance data.
+Plot ROC curve.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_ROC(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -368,7 +407,7 @@ Plot ROC curve and get the performance data.
 \describe{
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.}
 
-\item{\code{...}}{parameters pass to plot.performance function of ROCR package.}
+\item{\code{...}}{parameters pass to geom_line function of ggplot2 package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -378,7 +417,7 @@ ggplot2 object; res_perf and res_auc_perf stored in the object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_ROC()
+t1$plot_ROC(size = 1, alpha = 0.7)
 }
 }
 \if{html}{\out{</div>}}
