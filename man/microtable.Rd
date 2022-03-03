@@ -181,7 +181,8 @@ class(dataset$beta_diversity)
   sample_table = NULL,
   tax_table = NULL,
   phylo_tree = NULL,
-  rep_fasta = NULL
+  rep_fasta = NULL,
+  auto_tidy = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -199,6 +200,9 @@ If not provided, the function can generate a table automatically according to th
 
 \item{\code{rep_fasta}}{list or DNAStringSet; default NULL; The representative sequences; 
 use read.fasta function in seqinr package or readDNAStringSet function in Biostrings package for input.}
+
+\item{\code{auto_tidy}}{default FALSE; Whether trim the files in dataset automatically.
+If TRUE, all other operations that}
 }
 \if{html}{\out{</div>}}
 }

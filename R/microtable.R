@@ -17,6 +17,8 @@ microtable <- R6Class(classname = "microtable",
 		#' @param phylo_tree phylo; default NULL; The phylogenetic tree; use read.tree function in ape package for input.
 		#' @param rep_fasta list or DNAStringSet; default NULL; The representative sequences; 
 		#'   use read.fasta function in seqinr package or readDNAStringSet function in Biostrings package for input.
+		#' @param auto_tidy default FALSE; Whether trim the files in dataset automatically.
+		#'   If TRUE, all other operations that 
 		#' @return an object of class "microtable" with the following components:
 		#' \describe{
 		#'   \item{\code{sample_table}}{The sample information table.}
@@ -39,7 +41,7 @@ microtable <- R6Class(classname = "microtable",
 		#'   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 		#' # trim the files in the dataset
 		#' dataset$tidy_dataset()
-		initialize = function(otu_table, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, rep_fasta = NULL)
+		initialize = function(otu_table, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, rep_fasta = NULL, auto_tidy = FALSE)
 			{
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric vector! Please check the otu_table!")
@@ -66,6 +68,8 @@ microtable <- R6Class(classname = "microtable",
 			self$taxa_abund <- NULL
 			self$alpha_diversity <- NULL
 			self$beta_diversity <- NULL
+			self$auto_tidy <- auto_tidy
+			if(self$auto_tidy) self$tidy_dataset()
 		},
 		#' @description
 		#' Print the microtable object.
@@ -102,6 +106,7 @@ microtable <- R6Class(classname = "microtable",
 			filter_num <- nrow(self$tax_table) - nrow(tax_table_use)
 			message(paste("Total", filter_num, "taxa are removed from tax_table ..."))
 			self$tax_table <- tax_table_use
+			if(self$auto_tidy) self$tidy_dataset()
 		},
 		#' @description
 		#' Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} for the alternative method.
@@ -174,6 +179,13 @@ microtable <- R6Class(classname = "microtable",
 			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
 				.[!unlist(lapply(., is.null))]
 			taxa_names <- Reduce(intersect, taxa_list)
+			if(length(taxa_names) == 0){
+				if(is.null(self$phylo_tree)){
+					stop("No same feature names found between rownames of otu_table and rownames of tax_table! Please check rownames of those tables !")
+				}else{
+					stop("No same feature name found among otu_table, tax_table and phylo_tree! Please check feature names in those objects !")
+				}
+			}
 			self$otu_table %<>% .[taxa_names, , drop = FALSE]
 			if(!is.null(self$tax_table)){
 				self$tax_table %<>% .[taxa_names, , drop = FALSE]
@@ -410,7 +422,14 @@ microtable <- R6Class(classname = "microtable",
 			otu_table_new <- rowsum(t(otu_table), as.factor(as.character(sample_table[, use_group]))) %>% t %>% as.data.frame
 			sample_table_new <- data.frame(SampleID = unique(as.character(sample_table[, use_group]))) %>% `row.names<-`(.[,1])
 			# return a new microtable object
-			microtable$new(sample_table = sample_table_new, otu_table = otu_table_new, tax_table = tax_table, phylo_tree = phylo_tree, rep_fasta = rep_fasta)
+			microtable$new(
+				sample_table = sample_table_new, 
+				otu_table = otu_table_new, 
+				tax_table = tax_table, 
+				phylo_tree = phylo_tree, 
+				rep_fasta = rep_fasta,
+				auto_tidy = self$auto_tidy
+			)
 		},
 		#' @description
 		#' Merge taxa according to specific taxonomic rank to generate a new microtable.
@@ -454,7 +473,7 @@ microtable <- R6Class(classname = "microtable",
 				`row.names<-`(.$Display)
 			rownames(new_abund) <- name1[rownames(new_abund), "otuname"]
 			new_tax <- tax[rownames(new_abund), , drop = FALSE]
-			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax)
+			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax, auto_tidy = self$auto_tidy)
 		},
 		#' @description
 		#' Calculate alpha diversity in microtable object.
