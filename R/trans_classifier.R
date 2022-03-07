@@ -250,13 +250,28 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				fit.best <- caret::train(x=train_data[,2:ncol(train_data)], y=train_data[,1], method= method, 
 										 metric=metric, tuneGrid=tunegrid, trControl=control, ntree=ntree, ...)
 				self$res_train <- fit.best
+				self$train_method <- method
 				message('The training result is stored in object$res_train ...')
 				
 				######################Optimization of RF parameters end				
 			}
- 
 			###################### ----------------
-			},
+		},
+		#' @description
+		#' Get feature importance from the training model.
+		#' @param ... parameters pass to the evaluating function; If "rf" used, pass to randomForest::importance.
+		#' @return res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_feature_imp()
+		#' }
+		cal_feature_imp = function(...){
+			if(self$train_method == "rf"){
+				res_feature_imp <- randomForest::importance(self$res_train$finalModel, ...)
+			}
+			self$res_feature_imp <- res_feature_imp
+			message('The feature importance evaluating result is stored in object$res_feature_imp ...')
+		},
 		#' @description
 		#' Run the prediction.
 		#' 
@@ -303,9 +318,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$confusion_stats <- Confusion.Sts
 			message('The statistics result of confusionMatrix is stored in object$confusion_stats ...')
 			message('Model prediction Accuracy = ',Confusion.Sts$Overall.Statistics[1])
-			
-			
-			},
+		},
 		#' @description
 		#' Plot the cross-tabulation of observed and predicted classes with associated statistics.
 		#' 
@@ -347,7 +360,6 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				gridExtra::grid.arrange(p2,nrow = 1, ncol = 1, 
 					top=grid::textGrob("Statistics",gp=grid::gpar(fontsize=15,font=0.5)))
 			}
-
 		},
 		#' @description
 		#' Get ROC curve data and the performance data.
@@ -419,6 +431,5 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
 
 

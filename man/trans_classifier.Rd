@@ -55,6 +55,14 @@ t1$cal_train()
 }
 
 ## ------------------------------------------------
+## Method `trans_classifier$cal_feature_imp`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_feature_imp()
+}
+
+## ------------------------------------------------
 ## Method `trans_classifier$cal_predict`
 ## ------------------------------------------------
 
@@ -94,6 +102,7 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 \item \href{#method-cal_split}{\code{trans_classifier$cal_split()}}
 \item \href{#method-set_trainControl}{\code{trans_classifier$set_trainControl()}}
 \item \href{#method-cal_train}{\code{trans_classifier$cal_train()}}
+\item \href{#method-cal_feature_imp}{\code{trans_classifier$cal_feature_imp()}}
 \item \href{#method-cal_predict}{\code{trans_classifier$cal_predict()}}
 \item \href{#method-plot_confusionMatrix}{\code{trans_classifier$plot_confusionMatrix()}}
 \item \href{#method-cal_ROC}{\code{trans_classifier$cal_ROC()}}
@@ -288,6 +297,36 @@ res_train in the object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_train()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_feature_imp"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_feature_imp}{}}}
+\subsection{Method \code{cal_feature_imp()}}{
+Get feature importance from the training model.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_feature_imp(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters pass to the evaluating function; If "rf" used, pass to randomForest::importance.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_feature_imp()
 }
 }
 \if{html}{\out{</div>}}

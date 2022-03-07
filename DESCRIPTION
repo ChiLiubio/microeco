@@ -21,7 +21,7 @@ License: GPL-3
 LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2022-02-27
+Packaged: 2022-03-07
 Repository: CRAN
-Date/Publication: 2022-02-27
-RoxygenNote: 7.1.1
+Date/Publication: 2022-03-07
+RoxygenNote: 7.1.2
