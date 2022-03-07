@@ -62,6 +62,7 @@ microtable <- R6Class(classname = "microtable",
 					phylo_tree <- ape::multi2di(phylo_tree)
 				}
 			}
+			
 			self$tax_table <- tax_table
 			self$phylo_tree <- phylo_tree
 			self$rep_fasta <- rep_fasta
@@ -194,6 +195,10 @@ microtable <- R6Class(classname = "microtable",
 				self$phylo_tree %<>% ape::drop.tip(., base::setdiff(.$tip.label, taxa_names))
 			}
 			if(!is.null(self$rep_fasta)){
+				# first check the relationship among names
+				if(!all(taxa_names %in% names(self$rep_fasta))){
+					stop("Some feature names are not found in the names of rep_fasta! Please provide a complete fasta file or manually check the names!")
+				}
 				self$rep_fasta %<>% .[taxa_names]
 			}
 			# other files will also be changed if main_data FALSE
