@@ -18,32 +18,41 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' }
 		initialize = function(dataset = NULL, group = NULL, order_x = NULL) {
 			self$group <- group
-			
-			if(is.null(dataset$alpha_diversity)){
-				stop("The alpha diversity has not been calculated! Please first calculate it using cal_alphadiv() function in microtable class!")
-			}
-			alpha_data <- dataset$alpha_diversity %>% 
-				cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE)
-			alpha_data %<>% .[, !grepl("^se", colnames(.))]
-			# to long format
-			alpha_data <- reshape2::melt(alpha_data, id.vars = "Sample")
-			colnames(alpha_data) <- c("Sample", "Measure", "Value")
-			alpha_data <- dplyr::left_join(alpha_data, rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
-			if(!is.null(order_x)){
-				if(length(order_x == 1)){
-					alpha_data$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
-				} else {
-					alpha_data$Sample %<>% factor(., levels = order_x)
+			if(is.null(dataset)){
+				message("Parameter dataset not provided. Please run the functions with your other customized data!")
+				self$alpha_data <- NULL
+			}else{
+				if(is.null(dataset$alpha_diversity)){
+					message("Alpha diversity not found. Calculate it automatically ...")
+					dataset$cal_alphadiv()
 				}
+				alpha_data <- dataset$alpha_diversity %>% 
+					cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE) %>%
+					.[, !grepl("^se", colnames(.))] %>%
+					# to long format
+					reshape2::melt(id.vars = "Sample") %>%
+					`colnames<-`(c("Sample", "Measure", "Value")) %>%
+					dplyr::left_join(., rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
+				if(!is.null(order_x)){
+					if(length(order_x == 1)){
+						alpha_data$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
+					} else {
+						alpha_data$Sample %<>% factor(., levels = order_x)
+					}
+				}
+				self$alpha_data <- alpha_data
+				message('The transformed diversity data is stored in object$alpha_data ...')
 			}
+
 			if(!is.null(group)){
+				if(is.null(dataset)){
+					stop("Parameter dataset not provided, but group is provided!")
+				}
 				self$alpha_stat <- microeco:::summarySE_inter(alpha_data, measurevar = "Value", groupvars = c(self$group, "Measure"))
 				message('The group statistics are stored in object$alpha_stat ...')
 			}else{
 				self$alpha_stat <- NULL
-			}			
-			self$alpha_data <- alpha_data
-			message('The transformed diversity data is stored in object$alpha_data ...')
+			}
 		},
 		#' @description
 		#' Test the difference of alpha diversity across groups.
