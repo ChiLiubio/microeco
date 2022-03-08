@@ -459,7 +459,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(boxfill == T){
 					p <- p + geom_boxplot(aes_string(color = group, fill = group), ...)
 					p <- p + scale_fill_manual(values = use_colors)
-					p <- p + scale_color_manual(values = use_colors) + guides(color = FALSE)
+					p <- p + scale_color_manual(values = use_colors) + guides(color = "none")
 					## Change the default middle line
 					dat <- ggplot_build(p)$data[[1]]
 					p <- p + geom_segment(data=dat, aes(x=xmin, xend=xmax, y=middle, yend=middle), colour = middlecolor, size=middlesize)
