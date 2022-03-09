@@ -12,7 +12,7 @@ Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@12
 			  )
 Author: Chi Liu [aut, cre], Felipe R. P. Mansoldo [ctb], Umer Zeeshan Ijaz [ctb], Chenhao Li [ctb], Yang Cao [ctb], Minjie Yao [ctb], Xiangzhen Li [ctb]
 Maintainer: Chi Liu <liuchi0426@126.com>
-Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis and functional analysis.
+Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity statistics, beta diversity statistics, differential abundance test and indicator taxon analysis, environmental data analysis, null model analysis, network analysis, machine learning and functional analysis.
 URL: https://github.com/ChiLiubio/microeco
 Depends: R (>= 3.5.0)
 Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer, reshape2
@@ -21,7 +21,7 @@ License: GPL-3
 LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2022-03-07
+Packaged: 2022-03-09
 Repository: CRAN
-Date/Publication: 2022-03-07
+Date/Publication: 2022-03-09
 RoxygenNote: 7.1.2

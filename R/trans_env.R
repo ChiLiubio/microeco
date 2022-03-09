@@ -26,49 +26,66 @@ trans_env <- R6Class(classname = "trans_env",
 			character2numeric = TRUE, 
 			complete_na = FALSE
 			){
+			# support all NULL from v0.7.0
+			# first judge dataset input
+			if(is.null(dataset)){
+				cat("The dataset not provided. Remember to provide additional data in the function ...\n")
+			}
 			if(is.null(add_data)){
-				if(is.null(env_cols)){
-					stop("Please select env_cols or add_data!")
-				}else{
+				if(!is.null(env_cols)){
 					env_data <- dataset$sample_table[, env_cols, drop = FALSE]
+				}else{
+					env_data <- NULL
 				}
 			}else{
-				env_data <- add_data[rownames(add_data) %in% rownames(dataset$sample_table), , drop = FALSE]
+				if(is.null(dataset)){
+					env_data <- add_data
+				}else{
+					env_data <- add_data[rownames(add_data) %in% rownames(dataset$sample_table), , drop = FALSE]
+				}
 			}
+			
 			if(!is.null(dataset)){
 				dataset1 <- clone(dataset)
-				inter_sum <- sum(rownames(dataset1$sample_table) %in% rownames(env_data))
-				if(inter_sum == 0){
-					stop("No sample names of sample_table found in env_data! Please check the names of env_data!")
+				if(!is.null(env_data)){
+					inter_sum <- sum(rownames(dataset1$sample_table) %in% rownames(env_data))
+					if(inter_sum == 0){
+						stop("No sample names of sample_table found in env_data! Please check the names of env_data!")
+					}
+					if(inter_sum < nrow(dataset1$sample_table)){
+						message(nrow(dataset1$sample_table)-inter_sum, " samples not found in env_data and removed!")
+						dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
+						dataset1$tidy_dataset(main_data = FALSE)
+					}
+					env_data %<>% .[rownames(dataset1$sample_table), , drop = FALSE]
 				}
-				if(inter_sum < nrow(dataset1$sample_table)){
-					message(nrow(dataset1$sample_table)-inter_sum, " samples not found in env_data and removed!")
-					dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
-					dataset1$tidy_dataset(main_data = FALSE)
-				}
-				env_data %<>% .[rownames(dataset1$sample_table), , drop = FALSE]
+				self$dataset <- dataset1
+			}else{
+				self$dataset <- NULL
 			}
 			if(complete_na == T){
 				env_data[env_data == ""] <- NA
-				env_data <- dropallfactors(env_data, unfac2num = TRUE)
+				env_data %<>% dropallfactors(., unfac2num = TRUE)
 				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 				env_data %<>% mice::mice(print = FALSE) %>% mice::complete(., 1)
 			}
 			if(character2numeric == T){
-				env_data <- dropallfactors(env_data, unfac2num = TRUE, char2num = TRUE)
+				if(!is.null(env_data)){
+					env_data %<>% dropallfactors(., unfac2num = TRUE, char2num = TRUE)
+				}
 			}
 			self$env_data <- env_data
-			self$dataset <- dataset1
-			},
+		},
 		#' @description
 		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 		#'
 		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
 		#' @param feature_sel default FALSE; whether perform the feature selection.
-		#' @param taxa_level default NULL; If use RDA, provide the taxonomic rank.
+		#' @param taxa_level default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
+		#'   If use otu_table; please input "OTU".
 		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-		#' @param add_matrix default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset;
+		#' @param add_matrix default NULL; additional distance matrix provided, when you do not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
 		#' @param ... paremeters pass to dbrda or rda or cca function according to the input of method.
 		#' @return res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis in object.
@@ -86,37 +103,68 @@ trans_env <- R6Class(classname = "trans_env",
 			...
 			){
 			if(length(method) > 1){
-				stop("The method parameter should have only one option !")
+				stop("The method parameter should have only one option!")
 			}
 			if(! method %in% c("RDA", "dbRDA", "CCA")){
 				stop("The method should be one of 'RDA', 'dbRDA' and 'CCA' !")
 			}
-			env_data <- self$env_data
+			if(is.null(self$env_data)){
+				stop("The env_data is NULL! Please check the env input when creating the object !")
+			}else{
+				env_data <- self$env_data
+			}
+			
 			if(method == "dbRDA"){
-				if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
-					stop("No distance matrix provided; please use add_matrix parameter to add!")
-				}
-				if(!is.null(self$dataset$beta_diversity)){
-					if(!is.null(use_measure)){
-						use_matrix <- self$dataset$beta_diversity[[use_measure]]
-					}else{
-						use_matrix <- self$dataset$beta_diversity[[1]]
-					}
-				}else{
+				# add_matrix is a priority
+				if(!is.null(add_matrix)){
 					use_matrix <- add_matrix
+					message("Use the additional matrix provided for dbRDA ...")
+				}else{
+					if(is.null(self$dataset)){
+						stop("No distance matrix provided and the dataset in the object is NULL! please check the input!")
+					}else{
+						if(is.null(self$dataset$beta_diversity)){
+							message("The beta_diversity in dataset is NULL; try to calculate it ...")
+							self$dataset$cal_betadiv(unifrac = FALSE)
+							message("Calculating done ...")
+						}
+						if(!is.null(use_measure)){
+							use_matrix <- self$dataset$beta_diversity[[use_measure]]
+							message("Use ", use_measure, " in dataset$beta_diversity for dbRDA ...")
+						}else{
+							use_matrix <- self$dataset$beta_diversity[[1]]
+							message("Parameter use_measure not provided; use the first matrix in dataset$beta_diversity ...")
+						}
+					}
 				}
 				use_data <- use_matrix[rownames(env_data), rownames(env_data)] %>% as.dist
 			}
 			if(method %in% c("RDA", "CCA")){
 				if(is.null(self$dataset)){
-					stop("No abundance dataset provided; please set dataset parameter in creating Class")
+					stop("The dataset in the object is NULL! Please provide dataset when creating the object!")
 				}
 				if(is.null(taxa_level)){
-					message("No taxa_level provided, use Genus level automatically !")
-					taxa_level <- "Genus"
+					if("Genus" %in% colnames(self$dataset$tax_table)){
+						taxa_level <- "Genus"
+						message("No taxa_level provided; use Genus level automatically !")
+					}else{
+						taxa_level <- "OTU"
+						message("No taxa_level provided; use otu_table as the feature abundance input!")
+					}
 				}
-				newdat <- self$dataset$merge_taxa(taxa_level)
-				use_abund <- newdat$otu_table
+				if(taxa_level == "OTU"){
+					use_abund <- self$dataset$otu_table
+					cat("The taxa_level is OTU; Use otu_table as abundance table input ...\n")
+					# add OTU as one column to make the operations concordant
+					self$dataset$add_rownames2taxonomy(use_name = "OTU")
+				}else{
+					if(! taxa_level %in% colnames(self$dataset$tax_table)){
+						stop("The taxa_level provided is neither OTU nor one of the column names of dataset$tax_table!")
+					}else{
+						newdat <- self$dataset$merge_taxa(taxa_level)
+						use_abund <- newdat$otu_table
+					}
+				}
 				if(!is.null(taxa_filter_thres)){
 					use_abund <- use_abund[apply(use_abund, 1, sum)/sum(use_abund) > taxa_filter_thres, ]
 				}
@@ -269,7 +317,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.
 		#' @param shape_values default see the function; vector used in the shape, see ggplot2 tutorial.
 		#' @param taxa_text_color default "firebrick1"; taxa text colors.
-		#' @param taxa_text_type default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.
+		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.
 		#' @return ggplot object.
 		#' @examples
 		#' \donttest{
@@ -281,7 +329,7 @@ trans_env <- R6Class(classname = "trans_env",
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
 			taxa_text_color = "firebrick1",
-			taxa_text_type = "italic"
+			taxa_text_italic = TRUE
 			){
 			if(is.null(self$res_ordination_trans)){
 				stop("Please first run trans_ordination function !")
@@ -327,7 +375,7 @@ trans_env <- R6Class(classname = "trans_env",
 					alpha = .6
 					)
 				df_arrows_spe1[, self$taxa_level] %<>% gsub(".*__", "", .) %>% gsub("Candidatus ", "", .) 
-				if(taxa_text_type == "italic"){
+				if(taxa_text_italic == T){
 					df_arrows_spe1[, self$taxa_level] %<>% paste0("italic('", .,"')")
 				}
 				p <- p + ggrepel::geom_text_repel(
@@ -501,7 +549,8 @@ trans_env <- R6Class(classname = "trans_env",
 			res <- sapply(comb_names, function(x){
 				suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
 				{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
-			})
+				}
+			)
 			res %<>% t %>% as.data.frame(stringsAsFactors = FALSE)
 			colnames(res) <- c("Type", "Taxa", "Env", "Correlation","Pvalue")
 			res$Pvalue %<>% as.numeric
@@ -522,7 +571,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			res$Significance <- cut(res$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
 			res <- res[complete.cases(res), ]
-			res$Env <- factor(res$Env, levels = unique(as.character(res$Env)))
+			res$Env %<>% factor(., levels = unique(as.character(.)))
 			if(taxa_name_full == F){
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}
@@ -578,7 +627,6 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("color_vector parameter must have three values !")
 			}
 			cluster_ggplot <- match.arg(cluster_ggplot, c("none", "row", "col", "both"))
-			
 			use_data <- self$res_cor
 			
 			# filter features
@@ -647,7 +695,7 @@ trans_env <- R6Class(classname = "trans_env",
 					# make sure color_vector_use and myBreaks have same length
 					color_vector_use <- c(negColor, color_vector[2], posColor)
 					myBreaks <- c(neg, 0, pos)		
-				} else {
+				}else{
 					color_vector_use <- colorRampPalette(color_palette)(100)
 					myBreaks <- NA
 				}
@@ -853,8 +901,9 @@ trans_env <- R6Class(classname = "trans_env",
 		print = function(){
 			cat("trans_env class:\n")
 			if(!is.null(self$env_data)){
-				cat(paste0("Env table have ", ncol(self$env_data), " variables: ", paste0(colnames(self$env_data), collapse = ",")))
-				cat("\n")
+				cat(paste0("Env table have ", ncol(self$env_data), " variables: ", paste0(colnames(self$env_data), collapse = ","), "\n"))
+			}else{
+				cat("No env table stored in the object.\n")
 			}
 		}
 	),
@@ -895,7 +944,7 @@ trans_env <- R6Class(classname = "trans_env",
 			lm_squ_trim = 2
 			){
 			if(class(equat) == "lm" & use_cor == T){
-				stop("Input is lm class! Please check the use_cor parameter!")
+				stop("Input is lm class, but use_cor is TRUE! Please check the use_cor parameter!")
 			}
 			pvalue <- ifelse(use_cor == T, equat$p.value, anova(equat)$`Pr(>F)`[1])
 			if(use_cor == T){

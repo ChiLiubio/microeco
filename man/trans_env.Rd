@@ -167,13 +167,14 @@ Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan p
 
 \item{\code{feature_sel}}{default FALSE; whether perform the feature selection.}
 
-\item{\code{taxa_level}}{default NULL; If use RDA, provide the taxonomic rank.}
+\item{\code{taxa_level}}{default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
+If use otu_table; please input "OTU".}
 
 \item{\code{taxa_filter_thres}}{default NULL; If want to filter taxa, provide the relative abundance threshold.}
 
 \item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
 
-\item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you do not want to use the beta diversity matrix within the dataset;
+\item{\code{add_matrix}}{default NULL; additional distance matrix provided, when you do not want to use the beta diversity matrix within the dataset;
 only available when method = "dbRDA".}
 
 \item{\code{...}}{paremeters pass to dbrda or rda or cca function according to the input of method.}
@@ -283,7 +284,7 @@ plot ordination result.
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
   taxa_text_color = "firebrick1",
-  taxa_text_type = "italic"
+  taxa_text_italic = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -300,7 +301,7 @@ plot ordination result.
 
 \item{\code{taxa_text_color}}{default "firebrick1"; taxa text colors.}
 
-\item{\code{taxa_text_type}}{default "italic"; taxa text style; better to use "italic" for Genus, use "normal" for others.}
+\item{\code{taxa_text_italic}}{default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.}
 }
 \if{html}{\out{</div>}}
 }
