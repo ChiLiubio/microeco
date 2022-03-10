@@ -287,7 +287,9 @@ Plot the cladogram for LEfSe result similar with the python version. Codes are m
   sep = "|",
   branch_size = 0.2,
   alpha = 0.2,
-  clade_label_size = 0.7,
+  clade_label_size = 2,
+  clade_label_size_add = 5,
+  clade_label_size_log = exp(1),
   node_size_scale = 1,
   node_size_offset = 1,
   annotation_shape = 22,
@@ -320,7 +322,14 @@ Plot the cladogram for LEfSe result similar with the python version. Codes are m
 
 \item{\code{alpha}}{default 0.2; shading of the color}
 
-\item{\code{clade_label_size}}{default 0.7; size for the clade label}
+\item{\code{clade_label_size}}{default 2; basic size for the clade label; please also see clade_label_size_add and clade_label_size_log}
+
+\item{\code{clade_label_size_add}}{default 5; added basic size for the clade label; see the formula in clade_label_size_log parameter.}
+
+\item{\code{clade_label_size_log}}{default exp(1); the base of log function for added size of the clade label; the size formula: 
+clade_label_size + log(clade_label_level + clade_label_size_add, base = clade_label_size_log); 
+so use clade_label_size_log, clade_label_size_add and clade_label_size
+can totally control the label size for different taxonomic levels.}
 
 \item{\code{node_size_scale}}{default 1; scale for the node size}
 

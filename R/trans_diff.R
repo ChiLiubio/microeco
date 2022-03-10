@@ -629,7 +629,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param sep default "|"; the seperate character in the taxonomic information
 		#' @param branch_size default 0.2; numberic, size of branch
 		#' @param alpha default 0.2; shading of the color
-		#' @param clade_label_size default 0.7; size for the clade label
+		#' @param clade_label_size default 2; basic size for the clade label; please also see clade_label_size_add and clade_label_size_log
+		#' @param clade_label_size_add default 5; added basic size for the clade label; see the formula in clade_label_size_log parameter.
+		#' @param clade_label_size_log default exp(1); the base of log function for added size of the clade label; the size formula: 
+		#'   clade_label_size + log(clade_label_level + clade_label_size_add, base = clade_label_size_log); 
+		#'   so use clade_label_size_log, clade_label_size_add and clade_label_size
+		#'   can totally control the label size for different taxonomic levels.
 		#' @param node_size_scale default 1; scale for the node size
 		#' @param node_size_offset default 1; offset for the node size
 		#' @param annotation_shape default 22; shape used in the annotation legend
@@ -651,7 +656,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			sep = "|",
 			branch_size = 0.2,
 			alpha = 0.2,
-			clade_label_size = 0.7,
+			clade_label_size = 2,
+			clade_label_size_add = 5,
+			clade_label_size_log = exp(1),
 			node_size_scale = 1,
 			node_size_offset = 1,
 			annotation_shape = 22,
@@ -669,11 +676,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 			color <- color[1:length(unique(marker_table$Group))]
 
 			# filter the taxa with unidentified classification or with space, in case of the unexpected error in the following operations
-			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]}
-			abund_table %<>% {.[!grepl("\\s", rownames(.)), ]}
-			# also filter uncleared classification to make it in line with the lefse above
-			abund_table %<>% {.[!grepl("Incertae_sedis", rownames(.)), ]}
-			abund_table %<>% {.[!grepl("unculture", rownames(.)), ]}
+			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]} %>%
+				{.[!grepl("\\s", rownames(.)), ]} %>%
+				# also filter uncleared classification to make it in line with the lefse above
+				{.[!grepl("Incertae_sedis|unculture", rownames(.)), ]}
 
 			if(!is.null(use_taxa_num)){
 				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
@@ -681,7 +687,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(!is.null(filter_taxa)){
 				abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
 			}
-			abund_table %<>% .[sort(rownames(abund_table)), ]
+			abund_table %<>% .[sort(rownames(.)), ]
 
 			tree_table <- data.frame(taxa = row.names(abund_table), abd = rowMeans(abund_table), stringsAsFactors = FALSE) %>%
 				dplyr::mutate(taxa =  paste("r__Root", .data$taxa, sep = sep), abd = .data$abd/max(.data$abd)*100)
@@ -699,15 +705,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 
 			# add root node
-			nodes <- c("r__Root", nodes)
+			nodes %<>% c("r__Root", .)
 			# levels used for extend of clade label
 			label_levels <- purrr::map_chr(nodes, ~ gsub("__.*$", "", .x)) %>%
-				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% 
-				.[!duplicated(.)]))
+				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% .[!duplicated(.)]))
 
-			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1])
 			# root must be a parent node
-			nodes_parent <- c("root", nodes_parent)
+			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1]) %>%
+				c("root", .)
 
 			## add index for nodes
 			is_tip <- !nodes %in% nodes_parent
@@ -741,7 +746,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}else{
 				color_groups <- group_order
 			}
-			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color, color_groups = color_groups)			
+			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color, color_groups = color_groups)
 			# backgroup hilight
 			annotation_info <- dplyr::left_join(annotation, tree$data, by = c("node" = "label")) %>%
 				dplyr::mutate(label = .data$node, id = .data$node.y, level = as.numeric(.data$node_class))
@@ -760,8 +765,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			hilights_df$x <- 0
 			hilights_df$y <- 1
 			# resort the table used for the legend color and text
-			rownames(hilights_df) <- hilights_df$enrich_group
-			hilights_df <- hilights_df[color_groups, ]
+			hilights_df %<>% `row.names<-`(.$enrich_group) %>%
+				.[color_groups, ]
 			# make sure the right order in legend
 			hilights_df$enrich_group %<>% factor(., levels = color_groups)
 
@@ -785,7 +790,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				offset.text = 0,
 				angle = purrr::map_dbl(.data$id, private$get_angle, tree = tree),
 				label = .data$label,
-				fontsize = clade_label_size + log(.data$level + 20),
+				fontsize = clade_label_size + log(.data$level + clade_label_size_add, base = clade_label_size_log),
 				barsize = 0,
 				extend = 0.2,
 				hjust = 0.5,
@@ -800,6 +805,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 			# add letters label to replace long taxonomic label
 			if(is.null(select_show_labels)){
+				# outer circle --> larger level; label smaller levels, i.e. finer taxonomy
 				ind <- clade_label$level < clade_label_level	
 			}else{
 				ind <- ! clade_label$label %in% select_show_labels
@@ -820,30 +826,26 @@ trans_diff <- R6Class(classname = "trans_diff",
 				clade_label_new$label_show[ind] <- use_letters[1:ind_num]
 				clade_label_new$label_legend[ind] <- paste0(clade_label_new$label_show[ind], ": ", clade_label_new$label[ind])
 				clade_label_new$label <- clade_label_new$label_show
+				# delete redundant columns to avoid warnings
+				clade_label <- clade_label_new %>% .[, which(! colnames(.) %in% c("label_raw", "label_show", "label_legend", "level"))]
 			}
 
-			clade_label_g <- purrr::pmap(clade_label_new, ggtree::geom_cladelabel)
-			p <- purrr::reduce(clade_label_g, `+`, .init = tree)
+			clade_label_g <- purrr::pmap(clade_label, ggtree::geom_cladelabel)
+			tree <- purrr::reduce(clade_label_g, `+`, .init = tree)
 
 			# if letters are used, add guide labels
 			if(ind_num > 0){
 				guide_label <- clade_label_new[ind, ] %>%
 					dplyr::mutate(color = annotation_info$color[match(.data$label_raw, annotation_info$label)])
-				p <- p + 
-					geom_point(data = guide_label, 
-						inherit.aes = FALSE, 
-						aes_(x = 0, y = 0, shape = ~label_legend), 
-						size = 0, 
-						stroke = 0) +
-					scale_shape_manual(values = rep(annotation_shape, nrow(guide_label))) +
-					guides(shape = guide_legend(override.aes = list(
-						size = annotation_shape_size, 
-						shape = annotation_shape, 
-						fill = guide_label$color
-						)))
+				tree <- tree + 
+					geom_point(data = guide_label, inherit.aes = FALSE, aes_(x = 0, y = 0, shape = ~label_legend), size = 0, stroke = 0) +
+						scale_shape_manual(values = rep(annotation_shape, nrow(guide_label))) +
+						guides(shape = guide_legend(override.aes = list(
+							size = annotation_shape_size, shape = annotation_shape, fill = guide_label$color)))
 			}
-			p <- p + theme(legend.position = "right", legend.title = element_blank())
-			p
+			tree <- tree + theme(legend.position = "right", legend.title = element_blank())
+			tree
+
 		},
 		#' @description
 		#' Bar plot for metastat.
