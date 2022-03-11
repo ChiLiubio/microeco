@@ -56,8 +56,8 @@ trans_network <- R6Class(classname = "trans_network",
 			if(!is.null(env_cols) | !is.null(add_data)){
 				dataset1$sample_table %<>% .[rownames(.) %in% rownames(env_data), ]
 				dataset1$tidy_dataset(main_data = TRUE)
-				env_data %<>% .[rownames(dataset1$sample_table), ]
-				env_data <- dropallfactors(env_data, unfac2num = TRUE)
+				env_data %<>% .[rownames(dataset1$sample_table), ] %>%
+					dropallfactors(unfac2num = TRUE)
 				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 				env_data[] <- lapply(env_data, as.numeric)
 				self$env_data <- env_data
@@ -69,10 +69,11 @@ trans_network <- R6Class(classname = "trans_network",
 			sampleinfo <- dataset1$sample_table
 			# store taxonomic table for the following analysis
 			self$use_tax <- dataset1$tax_table
-			use_abund <- dataset1$otu_table
-			use_abund <- use_abund[apply(use_abund, 1, sum)/sum(use_abund) > filter_thres, ]
+			use_abund <- dataset1$otu_table %>% 
+				{.[apply(., 1, sum)/sum(.) > filter_thres, ]} %>%
+				t %>%
+				as.data.frame
 			
-			use_abund <- as.data.frame(t(use_abund))
 			if( (!is.na(cal_cor)) & (!is.null(env_cols) | !is.null(add_data))){
 				use_abund <- cbind.data.frame(use_abund, env_data)
 			}
@@ -201,8 +202,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(!require("SpiecEasi")){
 					stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
 				}
-				use_abund <- self$use_abund
-				use_abund <- as.matrix(use_abund)
+				use_abund <- self$use_abund %>% as.matrix
 				# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
 				network <- spiec.easi(use_abund, method = SpiecEasi_method, ...)
 				network <- adj2igraph(getRefit(network))
@@ -241,8 +241,8 @@ trans_network <- R6Class(classname = "trans_network",
 				close(openfile)
 				system("julia calculate_network.jl")
 				setwd('..')
-				message("The temporary files are in ", tem_dir)
-				network <- read_graph(paste0(tem_dir, "/network_PGM.gml"), format = "gml")
+				message("The temporary files are in ", tem_dir, " ...")
+				network <- read_graph(file.path(tem_dir, "network_PGM.gml"), format = "gml")
 				network <- set_vertex_attr(network, "name", value = V(network)$label)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 				E(network)$weight <- abs(E(network)$weight)
@@ -869,10 +869,10 @@ trans_network <- R6Class(classname = "trans_network",
 				theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10))
 			
 			if(plot_color == use_level){
-				p <- p + guides(color = FALSE)
+				p <- p + guides(color = "none")
 			}
 			if(plot_shape == use_level){
-				p <- p + guides(shape = FALSE)
+				p <- p + guides(shape = "none")
 			}
 			if(!is.null(plot_size)){
 				p <- p + guides(size = guide_legend(title = "Abundance(%)"))
