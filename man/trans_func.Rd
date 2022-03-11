@@ -55,7 +55,7 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
+t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.5.0+/bin", 
     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 }
 
@@ -323,8 +323,8 @@ Tax4Fun2: prediction of habitat-specific functional profiles and functional redu
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{blast_tool_path}}{default NULL; the folder path, e.g. ncbi-blast-2.11.0+/bin ; blast tools folder downloaded from 
-"ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.11.0+-x64-win64.tar.gz  for windows system; 
+\item{\code{blast_tool_path}}{default NULL; the folder path, e.g. ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 
+"ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.5.0+-x64-win64.tar.gz  for windows system; 
 if blast_tool_path is NULL, search the tools in the environmental path variable.}
 
 \item{\code{path_to_reference_data}}{default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
@@ -357,7 +357,7 @@ res_tax4fun2_KO and res_tax4fun2_pathway in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
+t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.5.0+/bin", 
     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 }
 }

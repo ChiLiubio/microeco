@@ -488,8 +488,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
 		#' 	 <doi:10.1186/s40793-020-00358-7>
 		#'
-		#' @param blast_tool_path default NULL; the folder path, e.g. ncbi-blast-2.11.0+/bin ; blast tools folder downloaded from 
-		#'   "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.11.0+-x64-win64.tar.gz  for windows system; 
+		#' @param blast_tool_path default NULL; the folder path, e.g. ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 
+		#'   "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.5.0+-x64-win64.tar.gz  for windows system; 
 		#'   if blast_tool_path is NULL, search the tools in the environmental path variable.
 		#' @param path_to_reference_data default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
 		#'   The directory must contain the Ref99NR/Ref100NR folder; 
@@ -508,7 +508,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @return res_tax4fun2_KO and res_tax4fun2_pathway in object.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.11.0+/bin", 
+		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.5.0+/bin", 
 		#'     path_to_reference_data = "Tax4Fun2_ReferenceData_v2")
 		#' }
 		cal_tax4fun2 = function(
