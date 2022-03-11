@@ -83,6 +83,7 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
   boots = 30,
   rf_taxa_level = "all",
   rf_ntree = 1000,
+  filter_thres = 0,
   metastat_taxa_level = "Genus",
   group_choose_paired = NULL,
   mseq_adjustMethod = "fdr",
@@ -115,6 +116,8 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \item{\code{rf_taxa_level}}{default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".}
 
 \item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package.}
+
+\item{\code{filter_thres}}{default 0; the relative abundance threshold used for method = "lefse" or "rf".}
 
 \item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.}
 

@@ -23,6 +23,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param boots default 30; bootstrap test number for lefse or rf.
 		#' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package.
+		#' @param filter_thres default 0; the relative abundance threshold used for method = "lefse" or "rf". 
 		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for metastat or mseq.
 		#' @param mseq_adjustMethod default "fdr"; Method to adjust p-values by. Default is "fdr". 
@@ -46,6 +47,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			boots = 30,
 			rf_taxa_level = "all",
 			rf_ntree = 1000,
+			filter_thres = 0,
 			metastat_taxa_level = "Genus",
 			group_choose_paired = NULL,
 			mseq_adjustMethod = "fdr",
@@ -62,14 +64,24 @@ trans_diff <- R6Class(classname = "trans_diff",
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 				}
 				if(grepl("lefse", method, ignore.case = TRUE)){
-					abund_table <- do.call(rbind, unname(lapply(dataset$taxa_abund, function(x) x * lefse_norm)))
-					self$lefse_norm <- lefse_norm
+					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
 					if(grepl("all", rf_taxa_level, ignore.case = TRUE)){
 						abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 					}else{
 						abund_table <- dataset$taxa_abund[[rf_taxa_level]]
 					}
+				}
+				if(filter_thres > 0){
+					if(filter_thres >= 1){
+						stop("Parameter filter_thres represents relative abudance. It should be smaller than 1 !")
+					}else{
+						abund_table %<>% .[apply(., 1, mean) > filter_thres, ]
+					}
+				}
+				if(grepl("lefse", method, ignore.case = TRUE)){
+					abund_table %<>% {. * lefse_norm}
+					self$lefse_norm <- lefse_norm
 				}
 				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.)), ]}
 				# differential test
