@@ -590,14 +590,18 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param plot_x_size default 9; x axis text size.
-		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
+		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot the top down.
+		#' @param text_x_order default NULL; character vector; provide customized text order for x axis.
 		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
-		#' @param cluster_ggplot default "none", available options: "none", "row", "col" or "both". "none": no any clustering used;
+		#' @param cluster_ggplot default "none"; add clustering dendrogram for ggplot2 based heatmap; 
+		#'   available options: "none", "row", "col" or "both". "none": no any clustering used;
 		#'   "row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
 		#'   Only available when pheatmap = FALSE.
 		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when cluster_ggplot != "none".
-		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".	
+		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".
+		#' @param text_y_position default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.
+		#' @param fontsize default 9; base fontsize for the plot; see fontsize in pheatmap.
+		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
 		#' @param ... paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.
 		#' @return plot.
 		#' @examples
@@ -612,12 +616,15 @@ trans_env <- R6Class(classname = "trans_env",
 			ylab_type_italic = FALSE,
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
-			plot_x_size = 9,
-			mylabels_x = NULL,
+			text_y_order = NULL,
+			text_x_order = NULL,
 			font_family = NULL,
 			cluster_ggplot = "none",
 			cluster_height_rows = 0.2,
 			cluster_height_cols = 0.2,
+			text_y_position = "right",
+			fontsize = 9,
+			mylabels_x = NULL,
 			...
 			){
 			if(is.null(self$res_cor)){
@@ -664,6 +671,24 @@ trans_env <- R6Class(classname = "trans_env",
 					lim_x <- col_cluster %>% {.$labels[.$order]}
 				}
 			}
+			# the input text_y_order or text_x_order has priority
+			if(!is.null(text_y_order) | !is.null(text_x_order)){
+				if(cluster_ggplot != "none"){
+					cluster_ggplot <- "none"
+					message("Change cluster_ggplot to none, as text_y_order and/or text_x_order provided!")
+				}
+				if(!is.null(text_y_order) & !is.null(text_x_order)){
+					lim_y <- rev(text_y_order)
+					lim_x <- text_x_order
+				}else{
+					if(!is.null(text_y_order) & is.null(text_x_order)){
+						lim_y <- rev(text_y_order)
+					}else{
+						lim_x <- text_x_order
+					}
+				}
+			}
+			
 			# check whether the cor values all larger or smaller than 0
 			if(all(use_data$Correlation >= 0) | all(use_data$Correlation <= 0)){
 				color_palette <- color_vector
@@ -706,12 +731,12 @@ trans_env <- R6Class(classname = "trans_env",
 					clustering_distance_cols= "correlation",
 					border_color = NA, 
 					scale = "none",
-					fontsize = plot_x_size, 
+					fontsize = fontsize, 
 					labels_row = mylabels_y, 
 					labels_col = mylabels_x, 
 					display_numbers = sig_data, 
 					number_color = "black", 
-					fontsize_number = plot_x_size * 1.2,
+					fontsize_number = fontsize * 1.2,
 					color = color_vector_use,
 					breaks = myBreaks,
 					...
@@ -730,13 +755,13 @@ trans_env <- R6Class(classname = "trans_env",
 				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = self$cor_method) +
 					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
-					theme(strip.background = element_rect(fill = "grey85", colour = "white")) +
+					theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
 					theme(strip.text=element_text(size=11), panel.border = element_blank(), panel.grid = element_blank())
 				if(length(unique(use_data$Type)) == 1){
 					if(cluster_ggplot == "none"){
-						p <- p + scale_y_discrete(limits = lim_y, position = "left") + scale_x_discrete(limits = lim_x)
+						p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
 					}else{
-						p <- p + scale_y_discrete(limits = lim_y, position = "right") + scale_x_discrete(limits = lim_x)
+						p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
 						if(cluster_ggplot %in% c("row", "both")){
 							row_plot <- factoextra::fviz_dend(
 								row_cluster, 

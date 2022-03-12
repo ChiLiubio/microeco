@@ -449,12 +449,15 @@ Plot correlation heatmap.
   ylab_type_italic = FALSE,
   keep_full_name = FALSE,
   keep_prefix = TRUE,
-  plot_x_size = 9,
-  mylabels_x = NULL,
+  text_y_order = NULL,
+  text_x_order = NULL,
   font_family = NULL,
   cluster_ggplot = "none",
   cluster_height_rows = 0.2,
   cluster_height_cols = 0.2,
+  text_y_position = "right",
+  fontsize = 9,
+  mylabels_x = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -477,19 +480,26 @@ For example, filter_feature = "" can be used to filter features that only have "
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
-\item{\code{plot_x_size}}{default 9; x axis text size.}
+\item{\code{text_y_order}}{default NULL; character vector; provide customized text order for y axis; shown in the plot the top down.}
 
-\item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
+\item{\code{text_x_order}}{default NULL; character vector; provide customized text order for x axis.}
 
 \item{\code{font_family}}{default NULL; font family used in ggplot2; only available when pheatmap = FALSE.}
 
-\item{\code{cluster_ggplot}}{default "none", available options: "none", "row", "col" or "both". "none": no any clustering used;
+\item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for ggplot2 based heatmap; 
+available options: "none", "row", "col" or "both". "none": no any clustering used;
 "row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
 Only available when pheatmap = FALSE.}
 
 \item{\code{cluster_height_rows}}{default 0.2, the dendrogram plot height for rows; available when cluster_ggplot != "none".}
 
 \item{\code{cluster_height_cols}}{default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".}
+
+\item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.}
+
+\item{\code{fontsize}}{default 9; base fontsize for the plot; see fontsize in pheatmap.}
+
+\item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
 
 \item{\code{...}}{paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.}
 }
