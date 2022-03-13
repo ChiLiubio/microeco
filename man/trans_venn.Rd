@@ -54,7 +54,7 @@ t2 <- t1$trans_venn_com(use_frequency = TRUE)
   dataset = NULL,
   sample_names = NULL,
   ratio = NULL,
-  add_data = NULL
+  add_abund_table = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -68,7 +68,8 @@ t2 <- t1$trans_venn_com(use_frequency = TRUE)
 \item{\code{ratio}}{default NULL; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
 NULL: no additional percentage.}
 
-\item{\code{add_data}}{default NULL; data.frame or matrix format; additional data provided instead of dataset.}
+\item{\code{add_abund_table}}{default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
+Features must be rows.}
 }
 \if{html}{\out{</div>}}
 }

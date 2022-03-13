@@ -12,7 +12,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param sample_names default NULL; if provided, filter the samples.
 		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
 		#' 	 NULL: no additional percentage.
-		#' @param add_data default NULL; data.frame or matrix format; additional data provided instead of dataset.
+		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
+		#' Features must be rows.
 		#' @return venn_table and venn_count_abund stored in trans_venn object.
 		#' @examples
 		#' \donttest{
@@ -20,7 +21,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' t1 <- dataset$merge_samples(use_group = "Group")
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		#' }
-		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_data = NULL
+		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_abund_table = NULL
 			){
 			if(!is.null(dataset)){
 				# first clone the dataset
@@ -33,13 +34,13 @@ trans_venn <- R6Class(classname = "trans_venn",
 				abund <- use_dataset$otu_table
 				self$tax_table <- use_dataset$tax_table
 			}else{
-				if(is.null(add_data)){
-					stop("Either dataset or add_data should be provided !")
+				if(is.null(add_abund_table)){
+					stop("Either dataset or add_abund_table should be provided !")
 				}else{
-					if(! any(is.data.frame(add_data), is.matrix(add_data))){
-						stop("add_data must be data.frame or matrix !")
+					if(! any(is.data.frame(add_abund_table), is.matrix(add_abund_table))){
+						stop("add_abund_table must be data.frame or matrix !")
 					}
-					abund <- add_data
+					abund <- add_abund_table
 				}
 			}
 
