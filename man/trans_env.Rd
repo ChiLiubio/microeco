@@ -125,7 +125,8 @@ Either numeric vector or character vector of colnames.}
 
 \item{\code{character2numeric}}{default TRUE; whether transform the characters or factors to numeric attributes.}
 
-\item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data.}
+\item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data;
+If TRUE, the function can run the interpolation with the mice package; Please first install mice package.}
 }
 \if{html}{\out{</div>}}
 }

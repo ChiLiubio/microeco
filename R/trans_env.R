@@ -13,7 +13,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#'   Either numeric vector or character vector of colnames.
 		#' @param add_data default NULL; data.frame format; provide the environmental data frame individually; rownames should be sample names.
 		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
-		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data.
+		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
+		#'   If TRUE, the function can run the interpolation with the mice package; Please first install mice package.
 		#' @return env_data in trans_env object.
 		#' @examples
 		#' data(dataset)
