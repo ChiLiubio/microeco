@@ -24,6 +24,7 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 
 \donttest{
 t1$cal_diff(method = "KW")
+t1$cal_diff(method = "KW_dunn")
 t1$cal_diff(method = "anova")
 }
 
@@ -86,31 +87,38 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 Test the difference of alpha diversity across groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
-  method = c("KW", "anova")[1],
+  method = c("KW", "KW_dunn", "anova")[1],
   measures = NULL,
-  anova_set = NULL
+  anova_set = NULL,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "KW"; "KW" or "anova"; KW rank sum test or anova for the testing.}
+\item{\code{method}}{default "KW"; "KW_dunn" or "anova"; KW: Kruskal-Wallis Rank Sum Test;
+KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
+anova:  Duncan's multiple range test for anova;}
 
 \item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{anova_set}}{default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.}
+
+\item{\code{...}}{parameters passed to kruskal.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
+agricolae::duncan.test (method = "anova").}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_alpha_diff in object. A data.frame for method = 'KW' or 'anova'. A list for method = 'anova' and anova_set is assigned.
+res_alpha_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_diff(method = "KW")
+t1$cal_diff(method = "KW_dunn")
 t1$cal_diff(method = "anova")
 }
 }
