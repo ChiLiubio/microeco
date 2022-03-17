@@ -2,8 +2,9 @@
 #' Create trans_diff object for the differential analysis on the taxonomic abundance.
 #'
 #' @description
-#' This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
-#' LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
+#' This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric Kruskal-Wallis Rank Sum Test,
+ #' Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
+#'  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
 #' the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>.
 #' 
 #' Authors: Chi Liu, Yang Cao, Chenhao Li
@@ -12,23 +13,29 @@
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param method default "lefse"; "lefse", "rf", "metastat" or "mseq". "lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
-		#' 	  "rf" represents random forest; metastat: White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; "mseq" represents the method in metagenomeSeq package.
+		#' @param method default "lefse"; one of "lefse", "rf", "KW", "KW_dunn", "metastat" or "mseq". 
+		#'   "lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
+		#' 	 "rf" represents random forest, An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>; 
+		#' 	 "KW": Kruskal-Wallis Rank Sum Test for a specific taxonomic level or all levels of microtable$taxa_abund; 
+		#' 	 "KW_dunn": Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package;
+		#' 	 "metastat": White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; 
+		#' 	 "mseq": the method based on the zero-inflated log-normal model in metagenomeSeq package.
 		#' @param group default NULL; sample group used for main comparision.
+		#' @param taxa_level default "all"; use abundance data at all taxonomic ranks; For testing at a specific rank, provide taxonomic rank name, such as "Genus".
+		#' @param filter_thres default 0; the relative abundance threshold used for method = "lefse" or "rf". 
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param alpha default .05; significance threshold.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
 		#' @param nresam default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.
 		#' @param boots default 30; bootstrap test number for lefse or rf.
-		#' @param rf_taxa_level default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package.
-		#' @param filter_thres default 0; the relative abundance threshold used for method = "lefse" or "rf". 
 		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for metastat or mseq.
 		#' @param mseq_adjustMethod default "fdr"; Method to adjust p-values by. Default is "fdr". 
 		#'   Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
 		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
+		#' @param ... parameters passed to kruskal.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").
 		#' @return res_rf, res_lefse, res_abund, res_metastat, or res_mseq in trans_diff object, depending on the method.
 		#' @examples
 		#' \donttest{
@@ -37,40 +44,40 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "metastat", "mseq")[1],
+			method = c("lefse", "rf", "KW", "KW_dunn", "metastat", "mseq")[1],
 			group = NULL,
+			taxa_level = "all",
+			filter_thres = 0,
 			lefse_subgroup = NULL,
 			alpha = 0.05,
 			lefse_min_subsam = 10,
 			lefse_norm = 1000000,
 			nresam = 0.6667,
 			boots = 30,
-			rf_taxa_level = "all",
 			rf_ntree = 1000,
-			filter_thres = 0,
 			metastat_taxa_level = "Genus",
 			group_choose_paired = NULL,
 			mseq_adjustMethod = "fdr",
-			mseq_count = 1
+			mseq_count = 1,
+			...
 			){
 			if(is.null(dataset)){
 				stop("No dataset provided!")
 			}
+			
+			method <- match.arg(method, c("lefse", "rf", "KW", "KW_dunn", "metastat", "mseq"))
+
 			sampleinfo <- dataset$sample_table
 			sampleinfo[, group] %<>% as.character
 #			self$method <- method
-			if(grepl("lefse|rf", method, ignore.case = TRUE)){
+			if(grepl("lefse|rf|KW|KW_dunn", method, ignore.case = TRUE)){
 				if(is.null(dataset$taxa_abund)){
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 				}
-				if(grepl("lefse", method, ignore.case = TRUE)){
+				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
-					if(grepl("all", rf_taxa_level, ignore.case = TRUE)){
-						abund_table <- do.call(rbind, unname(dataset$taxa_abund))
-					}else{
-						abund_table <- dataset$taxa_abund[[rf_taxa_level]]
-					}
+					abund_table <- dataset$taxa_abund[[taxa_level]]
 				}
 				if(filter_thres > 0){
 					if(filter_thres >= 1){
@@ -83,7 +90,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 					abund_table %<>% {. * lefse_norm}
 					self$lefse_norm <- lefse_norm
 				}
-				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.)), ]}
+				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
+			}
+			if(method %in% c("KW", "KW_dunn")){
+				tem_data <- clone(dataset)
+				# use test method in trans_alpha
+				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
+				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
+				suppressMessages(tem_data1$cal_diff(method = method, ...))
+				self$res_diff <- tem_data1$res_alpha_diff
+				message('The result is stored in object$res_diff ...')
+			}
+			if(grepl("lefse|rf", method, ignore.case = TRUE)){
 				# differential test
 				group_vec <- sampleinfo[, group] %>% as.factor
 				message("Start differential test for ", group, " ...")
@@ -520,7 +538,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.border = element_blank(), 
 					panel.background=element_rect(fill="white")) +
 				theme(axis.title = element_text(size = 17)) +
-				guides(fill=guide_legend(reverse=TRUE, ncol=1), color = FALSE)
+				guides(fill=guide_legend(reverse=TRUE, ncol=1), color = "none")
 			
 			if(only_abund_plot == T){
 				p2 <- p2 + theme(axis.title.y=element_blank(), axis.text.y = element_text(size = axis_text_y, color = "black")) + 

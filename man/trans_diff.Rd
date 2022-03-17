@@ -4,8 +4,9 @@
 \alias{trans_diff}
 \title{Create trans_diff object for the differential analysis on the taxonomic abundance.}
 \description{
-This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric test, 
-LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>, random forest, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
+This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric Kruskal-Wallis Rank Sum Test,
+Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
+ random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
 the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>.
 
 Authors: Chi Liu, Yang Cao, Chenhao Li
@@ -73,21 +74,22 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
-  method = c("lefse", "rf", "metastat", "mseq")[1],
+  method = c("lefse", "rf", "KW", "KW_dunn", "metastat", "mseq")[1],
   group = NULL,
+  taxa_level = "all",
+  filter_thres = 0,
   lefse_subgroup = NULL,
   alpha = 0.05,
   lefse_min_subsam = 10,
   lefse_norm = 1e+06,
   nresam = 0.6667,
   boots = 30,
-  rf_taxa_level = "all",
   rf_ntree = 1000,
-  filter_thres = 0,
   metastat_taxa_level = "Genus",
   group_choose_paired = NULL,
   mseq_adjustMethod = "fdr",
-  mseq_count = 1
+  mseq_count = 1,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -96,10 +98,19 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{method}}{default "lefse"; "lefse", "rf", "metastat" or "mseq". "lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
-"rf" represents random forest; metastat: White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; "mseq" represents the method in metagenomeSeq package.}
+\item{\code{method}}{default "lefse"; one of "lefse", "rf", "KW", "KW_dunn", "metastat" or "mseq". 
+"lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
+   "rf" represents random forest, An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>; 
+   "KW": Kruskal-Wallis Rank Sum Test for a specific taxonomic level or all levels of microtable$taxa_abund; 
+   "KW_dunn": Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package;
+   "metastat": White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; 
+   "mseq": the method based on the zero-inflated log-normal model in metagenomeSeq package.}
 
 \item{\code{group}}{default NULL; sample group used for main comparision.}
+
+\item{\code{taxa_level}}{default "all"; use abundance data at all taxonomic ranks; For testing at a specific rank, provide taxonomic rank name, such as "Genus".}
+
+\item{\code{filter_thres}}{default 0; the relative abundance threshold used for method = "lefse" or "rf".}
 
 \item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
 
@@ -113,11 +124,7 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 
 \item{\code{boots}}{default 30; bootstrap test number for lefse or rf.}
 
-\item{\code{rf_taxa_level}}{default "all"; use all taxonomic rank data, if want to test a specific rank, provide taxonomic rank name, such as "Genus".}
-
 \item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package.}
-
-\item{\code{filter_thres}}{default 0; the relative abundance threshold used for method = "lefse" or "rf".}
 
 \item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.}
 
@@ -127,6 +134,8 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".}
 
 \item{\code{mseq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.}
+
+\item{\code{...}}{parameters passed to kruskal.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").}
 }
 \if{html}{\out{</div>}}
 }
