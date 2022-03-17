@@ -57,13 +57,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @description
 		#' Test the difference of alpha diversity across groups.
 		#'
-		#' @param method default "KW"; "KW_dunn" or "anova"; KW: Kruskal-Wallis Rank Sum Test;
-		#'   KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
+		#' @param method default "KW"; "KW_dunn" or "anova"; KW: Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum and Signed 
+		#'   Rank Tests (groups = 2); KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
 		#'   anova:  Duncan's multiple range test for anova;
-		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
+		#' @param measures default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
 		#' @param anova_set default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.
-		#' @param ... parameters passed to kruskal.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
+		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
 		#'   agricolae::duncan.test (method = "anova").
 		#' @return res_alpha_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
 		#' @examples
@@ -72,11 +73,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "KW_dunn")
 		#' t1$cal_diff(method = "anova")
 		#' }
-		cal_diff = function(method = c("KW", "KW_dunn", "anova")[1], measures = NULL, anova_set = NULL, ...){
+		cal_diff = function(method = c("KW", "KW_dunn", "anova")[1], measures = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
 			group <- self$group
 			alpha_data <- self$alpha_data
 			if(is.null(measures)){
 				measures <- unique(as.character(alpha_data$Measure))
+			}else{
+				if(! all(measures %in% as.character(alpha_data$Measure))){
+					stop("One or more measures input not in the alpha_data! Please check the input!")
+				}
 			}
 			if(method == "KW" & length(unique(as.character(alpha_data[, group]))) > 5){
 				stop("There are too many groups to do paired comparisons using KW method, please use anova!")
@@ -85,36 +90,44 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				method <- "anova"
 			}
 			if(method == "KW"){
-				comnames = c()
-				p_value = c()
-				measure_use = c()
+				comnames <- c()
+				p_value <- c()
+				measure_use <- c()
+				test_method <- c()
 				for(k in measures){
 					div_table <- alpha_data[alpha_data$Measure == k, c(group, "Value")]
 					groupvec <- as.character(div_table[, group])
 					use_comp_group_num <- unique(c(2, length(unique(groupvec))))
 					for(i in use_comp_group_num){
 						all_name <- combn(unique(groupvec), i)
+						use_method <- ifelse(i == 2, "Wilcoxon Rank Sum Test", "Kruskal-Wallis Rank Sum Test")
 						for(j in 1:ncol(all_name)){
-							table_compare <- div_table[groupvec %in% as.character(all_name[,j]), ]
-							table_compare[,group] <- factor(table_compare[,group], levels = unique(as.character(table_compare[,group])))
+							table_compare <- div_table[groupvec %in% as.character(all_name[, j]), ]
+							table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
 							formu <- reformulate(group, "Value")
-							res1 <- kruskal.test(formu, data = table_compare, ...)
+							if(i == 2){
+								res1 <- wilcox.test(formu, data = table_compare, ...)
+							}else{
+								res1 <- kruskal.test(formu, data = table_compare, ...)
+							}
 							res2 <- res1$p.value
-							comnames = c(comnames, paste0(as.character(all_name[,j]), collapse = " vs "))
-							p_value = c(p_value, res2)
-							measure_use = c(measure_use, k)
+							comnames %<>% c(., paste0(as.character(all_name[,j]), collapse = " vs "))
+							p_value %<>% c(., res2)
+							measure_use %<>% c(., k)
+							test_method %<>% c(., use_method)
 						}
 					}
 				}
-				test_method <- rep(method, length(comnames))
-				significance_label <- cut(p_value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
-				compare_result <- data.frame(comnames, measure_use, test_method, p_value, significance_label)
-				colnames(compare_result) <- c("Groups", "Measure", "Test method", "p.value", "Significance")
+				p_value_adjust <- p.adjust(p_value, method = p_adjust_method)
+				significance_label <- cut(p_value_adjust, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+				compare_result <- data.frame(comnames, measure_use, test_method, p_value, p_value_adjust, significance_label)
+				colnames(compare_result) <- c("Groups", "Measure", "Test_method", "p.value", "p.adjust", "Significance")
 			}
 			if(method == "KW_dunn"){
 				if(length(unique(alpha_data[, group])) == 2){
 					stop("There are only 2 groups. Please select other method instead of KW_dunn !")
 				}
+				use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
 				compare_result <- data.frame()
 				for(k in measures){
 					div_table <- alpha_data[alpha_data$Measure == k, c(group, "Value")]
@@ -122,7 +135,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
 					formu <- reformulate(group, "Value")
 					dunnTest_raw <- FSA::dunnTest(formu, data = table_compare, ...)
-					dunnTest_res <- data.frame(Measure = k, dunnTest_raw$res)
+					dunnTest_res <- data.frame(Measure = k, Test_method = use_method, dunnTest_raw$res)
 					compare_result %<>% rbind(., dunnTest_res)
 				}
 			}

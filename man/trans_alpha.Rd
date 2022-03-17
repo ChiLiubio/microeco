@@ -89,6 +89,7 @@ Test the difference of alpha diversity across groups.
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
   method = c("KW", "KW_dunn", "anova")[1],
   measures = NULL,
+  p_adjust_method = "fdr",
   anova_set = NULL,
   ...
 )}\if{html}{\out{</div>}}
@@ -97,16 +98,18 @@ Test the difference of alpha diversity across groups.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "KW"; "KW_dunn" or "anova"; KW: Kruskal-Wallis Rank Sum Test;
-KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
+\item{\code{method}}{default "KW"; "KW_dunn" or "anova"; KW: Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum and Signed 
+Rank Tests (groups = 2); KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
 anova:  Duncan's multiple range test for anova;}
 
-\item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of alpha_diversity of dataset, 
+\item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
 
 \item{\code{anova_set}}{default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.}
 
-\item{\code{...}}{parameters passed to kruskal.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
+\item{\code{...}}{parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
 agricolae::duncan.test (method = "anova").}
 }
 \if{html}{\out{</div>}}
