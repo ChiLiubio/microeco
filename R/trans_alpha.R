@@ -112,6 +112,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				colnames(compare_result) <- c("Groups", "Measure", "Test method", "p.value", "Significance")
 			}
 			if(method == "KW_dunn"){
+				if(length(unique(alpha_data[, group])) == 2){
+					stop("There are only 2 groups. Please select other method instead of KW_dunn !")
+				}
 				compare_result <- data.frame()
 				for(k in measures){
 					div_table <- alpha_data[alpha_data$Measure == k, c(group, "Value")]
