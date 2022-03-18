@@ -13,11 +13,16 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Create the trans_classifier object.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param x.predictors default "all"; character or data.frame; character represents "all" or other specific taxonomic rank (such as "Genus" or "level_1");
-		#'   "all" represent all the taxa stored in microtable$taxa_abund; data.frame represents customized data. If data.frame is provided, it should be have same
-		#'   format with the data.frame in microtable$taxa_abund, i.e. rows are features; cols are samples with same names in sample_table.
+		#' @param x.predictors default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
+		#'   data.frame represents other customized data. See the following available options and description:
+		#'   \describe{
+		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
+		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank}
+		#'     \item{\strong{other input}}{must be a data.frame; It should be have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
+		#'       cols are samples with same names in sample_table}
+		#'   }
 		#' @param y.response default NULL; the response variable in sample_table.
-		#' @param n.cores default 1; the thread used.
+		#' @param n.cores default 1; the CPU thread used.
 		#' @return data_feature and data_response in the object.
 		#' @examples
 		#' \donttest{
@@ -59,7 +64,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			# remove meaningless things
 			abund_table %<>% {
-				.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.)),]
+				.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]
 			}
 			
 			if (nlevels(as.factor(sampleinfo[, y.response]))==2){
@@ -266,6 +271,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' t1$cal_feature_imp()
 		#' }
 		cal_feature_imp = function(...){
+			if(is.null(self$res_train)){
+				stop("Please first run cal_train to train the model !")
+			}
 			if(self$train_method == "rf"){
 				res_feature_imp <- randomForest::importance(self$res_train$finalModel, ...)
 			}
@@ -276,7 +284,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Run the prediction.
 		#' 
 		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package.
-		#' @return res_confusion_fit in the object.
+		#' @return res_confusion_fit and res_confusion_stats stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_predict()
@@ -285,11 +293,13 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			###################### ----------------
 			######################    Evaluation for the test set
 			######################
+			if(is.null(self$res_train)){
+				stop("Please first run cal_train to train the model !")
+			}
 			fit.best <- self$res_train
 			test_data <- self$data_test
 			MapNames <- self$MapNames
 
-			set.seed(12345)
 			fit.best.predict <- predict(fit.best, test_data[, 2:ncol(test_data)])
 			self$fit.best.predict <- fit.best.predict
 			message('The result of model prediction is stored in object$fit.best.predict ...')
@@ -315,8 +325,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			confusion.data.sts <- data.frame(confusion.fit.best$overall)
 			Confusion.Sts <- data.frame("Overall Statistics" = paste0(round(confusion.data.sts[,1],2) * 100,"%")  )
 			rownames(Confusion.Sts) <- rownames(confusion.data.sts)
-			self$confusion_stats <- Confusion.Sts
-			message('The statistics result of confusionMatrix is stored in object$confusion_stats ...')
+			self$res_confusion_stats <- Confusion.Sts
+			message('The statistics of confusionMatrix is stored in object$res_confusion_stats ...')
 			message('Model prediction Accuracy = ',Confusion.Sts$Overall.Statistics[1])
 		},
 		#' @description
@@ -333,7 +343,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			plot_confusion = TRUE, 
 			plot_statistics = TRUE
 			){
-
+			if(is.null(self$res_confusion_fit)){
+				stop("Please first run cal_predict to get the prediction performance !")
+			}
 # 			color_values = RColorBrewer::brewer.pal(8, "Dark2")
 			p1 <- ggplot(data = as.data.frame(self$res_confusion_fit$table) ,
 					aes(x = Reference, y = Prediction)) +
@@ -342,9 +354,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				geom_text(aes(x = Reference, y = Prediction, label = Freq)) +
 				theme(legend.position = "none")# +
 
-			confusion.data.sts <-data.frame(self$res_confusion_fit$overall)
-			Confusion.Sts <- data.frame("Overall Statistics" = paste0(round(confusion.data.sts[,1],2) * 100,"%")  )
-			rownames(Confusion.Sts) <- rownames(confusion.data.sts)
+			Confusion.Sts <- self$res_confusion_stats
 
 			p2 <- gridExtra::tableGrob(Confusion.Sts)
 
@@ -365,12 +375,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Get ROC curve data and the performance data.
 		#' 
 		#' @param ... parameters pass to plot.performance function of ROCR package.
-		#' @return a list including res_perf, res_auc_perf and all_perf_table stored in the object.
+		#' @return a list including res_perf, all_auc_perf and all_perf_table stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ROC()
 		#' }
 		cal_ROC = function(...){
+			if(is.null(self$res_train)){
+				stop("Please first run cal_train to train the model !")
+			}
 			test_data <- self$data_test
 			fit.best <- self$res_train
 
@@ -402,8 +415,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			res_ROC$all_auc_perf <- all_auc_perf
 			res_ROC$all_perf_table <- all_perf_table
 			self$res_ROC <- res_ROC
-			message('Class performance of TPR-FPR is stored in object$res_ROC$res_perf ...')
-			message('Class performance of AUC is stored in object$res_ROC$res_auc_perf ...')
+			message('Raw class performance result of TPR-FPR is stored in the list object$res_ROC$res_perf ...')
+			message('Class performance table of TPR-FPR is stored in object$res_ROC$all_auc_perf ...')
 			message('Class performance of AUC is stored in object$res_ROC$all_perf_table ...')
 		},
 		#' @description
@@ -411,12 +424,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
 		#' @param ... parameters pass to geom_line function of ggplot2 package.
-		#' @return ggplot2 object; res_perf and res_auc_perf stored in the object.
+		#' @return ggplot2 object.
 		#' @examples
 		#' \donttest{
 		#' t1$plot_ROC(size = 1, alpha = 0.7)
 		#' }
 		plot_ROC = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
+			if(is.null(self$res_ROC)){
+				stop("Please first run cal_ROC to get the data for ROC curve !")
+			}
 			all_perf_table <- self$res_ROC$all_perf_table
 			p <- ggplot(data = all_perf_table, aes(x = x, y = y, color = Group, group = Group)) +
 				geom_line(...) + 

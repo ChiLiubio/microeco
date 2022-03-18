@@ -129,13 +129,18 @@ Create the trans_classifier object.
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{x.predictors}}{default "all"; character or data.frame; character represents "all" or other specific taxonomic rank (such as "Genus" or "level_1");
-"all" represent all the taxa stored in microtable$taxa_abund; data.frame represents customized data. If data.frame is provided, it should be have same
-format with the data.frame in microtable$taxa_abund, i.e. rows are features; cols are samples with same names in sample_table.}
+\item{\code{x.predictors}}{default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
+data.frame represents other customized data. See the following available options and description:
+\describe{
+  \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
+  \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank}
+  \item{\strong{other input}}{must be a data.frame; It should be have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
+    cols are samples with same names in sample_table}
+}}
 
 \item{\code{y.response}}{default NULL; the response variable in sample_table.}
 
-\item{\code{n.cores}}{default 1; the thread used.}
+\item{\code{n.cores}}{default 1; the CPU thread used.}
 }
 \if{html}{\out{</div>}}
 }
@@ -351,7 +356,7 @@ Run the prediction.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_confusion_fit in the object.
+res_confusion_fit and res_confusion_stats stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -416,7 +421,7 @@ Get ROC curve data and the performance data.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a list including res_perf, res_auc_perf and all_perf_table stored in the object.
+a list including res_perf, all_auc_perf and all_perf_table stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -451,7 +456,7 @@ Plot ROC curve.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot2 object; res_perf and res_auc_perf stored in the object.
+ggplot2 object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
