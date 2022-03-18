@@ -98,11 +98,10 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{method}}{default "lefse"; one of "lefse", "rf", "KW", "KW_dunn", "metastat" or "mseq". 
-"lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; 
-   "rf" represents random forest, An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>; 
-   "KW": Kruskal-Wallis Rank Sum Test for a specific taxonomic level or all levels of microtable$taxa_abund; 
-   "KW_dunn": Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package;
+\item{\code{method}}{default "lefse"; one of "lefse", "rf", "KW", "KW_dunn", "metastat" or "mseq"; 
+"lefse": Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>; "rf" represents random forest, An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>; 
+   "KW": Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum Tests (groups = 2) for a specific taxonomic level or all levels of 
+   microtable$taxa_abund; "KW_dunn": Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package;
    "metastat": White et al. (2009) <doi:10.1371/journal.pcbi.1000352>; 
    "mseq": the method based on the zero-inflated log-normal model in metagenomeSeq package.}
 
@@ -135,7 +134,7 @@ Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "
 
 \item{\code{mseq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.}
 
-\item{\code{...}}{parameters passed to kruskal.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").}
+\item{\code{...}}{parameters passed to kruskal.test function or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").}
 }
 \if{html}{\out{</div>}}
 }
