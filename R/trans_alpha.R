@@ -224,7 +224,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(order_x_mean){
 				use_data[, group] <- factor(use_data[, group], levels = names(sort(tapply(use_data$Value, use_data[, group], mean), decreasing = TRUE)))
 			}
-			
+			if(add_letter){
+				order_groups <- names(tapply(use_data$Value, use_data[, group], max))
+				add_letter_text <- self$res_alpha_diff[order_groups, measure]
+				if(is.null(add_letter_text)){
+					stop("Please first run cal_diff function with method = 'anova' ! Otherwise, no letters can be used !")
+				}
+			}
 			if(use_boxplot){
 				if(boxplot_color){
 					color_use <- group
@@ -243,14 +249,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					...
 					)
 				
-				if(add_letter){
-					order_groups <- names(tapply(use_data$Value, use_data[, group], max))
+				if(add_letter){					
 					group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
 						{. + max(.)/30}
 					textdata <- data.frame(
 						x = order_groups, 
 						y = group_position[order_groups], 
-						add = self$res_alpha_diff[order_groups, measure], 
+						add = add_letter_text, 
 						stringsAsFactors = FALSE
 						)
 					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = 7)
@@ -276,9 +281,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					stat_summary(fun.y=mean, geom="point", size = rel(3))
 
 				if(add_letter){
-					order_groups <- names(tapply(use_data$Value, use_data[, group], max))
 					group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- mean_se(x)$ymax; ifelse(is.na(res), x, res)}) %>% {. + max(.)/50}
-					textdata <- data.frame(x = order_groups, y = group_position[order_groups], add = self$res_alpha_diff[order_groups, measure], stringsAsFactors = FALSE)
+					textdata <- data.frame(x = order_groups, y = group_position[order_groups], add = add_letter_text, stringsAsFactors = FALSE)
 					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = 7)
 				}
 				p <- p + theme(
