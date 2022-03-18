@@ -815,7 +815,7 @@ trans_network <- R6Class(classname = "trans_network",
 			if(is.null(roles_colors)){roles_colors <- rev(c("grey80", RColorBrewer::brewer.pal(3, "Dark2")))}
 
 			p <- ggplot() + geom_rect(data=NULL, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2, fill=lab, alpha = .4))
-			p <- p + guides(fill=guide_legend(title="Roles"), alpha = FALSE)
+			p <- p + guides(fill=guide_legend(title="Roles"), alpha = "none")
 			p <- p + scale_fill_manual(values = roles_colors)
 			if(module == T){
 				p <- p + geom_point(data=node_roles, aes(x=p, y=z, shape= module)) + theme_bw() + guides(shape=guide_legend(title="Module"))

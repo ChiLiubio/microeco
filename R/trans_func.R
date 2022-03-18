@@ -809,8 +809,8 @@ trans_func <- R6Class(classname = "trans_func",
 			abs_functional_redundancy_tab <- data.frame(abs_functional_redundancy_tab)
 			rel_functional_redundancy_tab <- data.frame(rel_functional_redundancy_tab)
 
-			colnames(abs_functional_redundancy_tab) <- names(otu_table)[2:ncol(otu_table_reduced_aggregated)]
-			colnames(rel_functional_redundancy_tab) <- names(otu_table)[2:ncol(otu_table_reduced_aggregated)]
+			colnames(abs_functional_redundancy_tab) <- names(self$otu_table)[2:ncol(otu_table_reduced_aggregated)]
+			colnames(rel_functional_redundancy_tab) <- names(self$otu_table)[2:ncol(otu_table_reduced_aggregated)]
 
 			abs_functional_redundancy_final <- data.frame(KO = ko_list$ko, abs_functional_redundancy_tab, description = ko_list$description)
 			rel_functional_redundancy_final <- data.frame(KO = ko_list$ko, rel_functional_redundancy_tab, description = ko_list$description)
