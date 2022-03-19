@@ -39,7 +39,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
 		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
 		#' @param ... parameters passed to kruskal.test function or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").
-		#' @return res_rf, res_lefse, res_abund, res_metastat, or res_mseq in trans_diff object, depending on the method.
+		#' @return res_rf, res_lefse, res_abund, res_diff, res_metastat, or res_mseq in trans_diff object, depending on the method.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)

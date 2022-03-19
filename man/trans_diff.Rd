@@ -143,7 +143,7 @@ Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rf, res_lefse, res_abund, res_metastat, or res_mseq in trans_diff object, depending on the method.
+res_rf, res_lefse, res_abund, res_diff, res_metastat, or res_mseq in trans_diff object, depending on the method.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

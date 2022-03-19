@@ -13,4 +13,5 @@
 #' @importFrom rlang sym
 #' @importFrom stats fisher.test
 #' @importFrom stats median
+#' @importFrom reshape2 acast
 NULL
