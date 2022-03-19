@@ -377,6 +377,52 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_process ...')
 		},
 		#' @description
+		#' Calculates Nearest Relative Index (NRI), equivalent to -1 times the standardized effect size of MPD.
+		#'
+		#' @param null.model default "taxa.labels"; Null model to use; see null.model parameter in ses.mpd function of picante package for available options.
+		#' @param abundance.weighted default FALSE; Should mean nearest relative distances for each species be weighted by species abundance?
+		#' @param runs default 999; Number of randomizations.
+		#' @param ... paremeters pass to ses.mpd function in picante package.
+		#' @return res_NRI in object, equivalent to -1 times ses.mpd.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_NRI()
+		#' }
+		cal_NRI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
+			samp <- self$comm
+			dis <- self$dis
+			if(is.null(dis)){
+				stop("Phylogenetic distance is required! Please check the phylogenetic tree!")
+			}
+			res <- picante::ses.mpd(samp, dis, null.model = null.model, abundance.weighted = abundance.weighted, runs = runs, ...)
+			res$NRI <- res$mpd.obs.z * (-1)
+			self$res_NRI <- res
+			message('The result is stored in object$res_NRI ...')
+		},
+		#' @description
+		#' Calculates Nearest Taxon Index (NTI), equivalent to -1 times the standardized effect size of MNTD.
+		#'
+		#' @param null.model default "taxa.labels"; Null model to use; see null.model parameter in ses.mntd function of picante package for available options.
+		#' @param abundance.weighted default FALSE; Should mean nearest taxon distances for each species be weighted by species abundance?
+		#' @param runs default 999; Number of randomizations.
+		#' @param ... paremeters pass to ses.mntd function in picante package.
+		#' @return res_NTI in object, equivalent to -1 times ses.mntd.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_NTI()
+		#' }
+		cal_NTI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
+			samp <- self$comm
+			dis <- self$dis
+			if(is.null(dis)){
+				stop("Phylogenetic distance is required! Please check the phylogenetic tree!")
+			}
+			res <- picante::ses.mntd(samp, dis, null.model = null.model, abundance.weighted = abundance.weighted, runs = runs, ...)
+			res$NTI <- res$mntd.obs.z * (-1)
+			self$res_NTI <- res
+			message('The result is stored in object$res_NTI ...')
+		},
+		#' @description
 		#' Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
 		#'
 		#' @param by_group default NULL; one column name or number in sample_table; calculate C-score for different groups separately.

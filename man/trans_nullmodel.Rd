@@ -83,6 +83,22 @@ t1$cal_process(use_betamntd = TRUE)
 }
 
 ## ------------------------------------------------
+## Method `trans_nullmodel$cal_NRI`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_NRI()
+}
+
+## ------------------------------------------------
+## Method `trans_nullmodel$cal_NTI`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_NTI()
+}
+
+## ------------------------------------------------
 ## Method `trans_nullmodel$cal_Cscore`
 ## ------------------------------------------------
 
@@ -102,6 +118,8 @@ t1$cal_Cscore()
 \item \href{#method-cal_ses_betamntd}{\code{trans_nullmodel$cal_ses_betamntd()}}
 \item \href{#method-cal_rcbray}{\code{trans_nullmodel$cal_rcbray()}}
 \item \href{#method-cal_process}{\code{trans_nullmodel$cal_process()}}
+\item \href{#method-cal_NRI}{\code{trans_nullmodel$cal_NRI()}}
+\item \href{#method-cal_NTI}{\code{trans_nullmodel$cal_NTI()}}
 \item \href{#method-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
 \item \href{#method-clone}{\code{trans_nullmodel$clone()}}
 }
@@ -427,6 +445,88 @@ res_rcbray in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_process(use_betamntd = TRUE)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_NRI"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_NRI}{}}}
+\subsection{Method \code{cal_NRI()}}{
+Calculates Nearest Relative Index (NRI), equivalent to -1 times the standardized effect size of MPD.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_NRI(
+  null.model = "taxa.labels",
+  abundance.weighted = FALSE,
+  runs = 999,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{null.model}}{default "taxa.labels"; Null model to use; see null.model parameter in ses.mpd function of picante package for available options.}
+
+\item{\code{abundance.weighted}}{default FALSE; Should mean nearest relative distances for each species be weighted by species abundance?}
+
+\item{\code{runs}}{default 999; Number of randomizations.}
+
+\item{\code{...}}{paremeters pass to ses.mpd function in picante package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_NRI in object, equivalent to -1 times ses.mpd.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_NRI()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_NTI"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_NTI}{}}}
+\subsection{Method \code{cal_NTI()}}{
+Calculates Nearest Taxon Index (NTI), equivalent to -1 times the standardized effect size of MNTD.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_NTI(
+  null.model = "taxa.labels",
+  abundance.weighted = FALSE,
+  runs = 999,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{null.model}}{default "taxa.labels"; Null model to use; see null.model parameter in ses.mntd function of picante package for available options.}
+
+\item{\code{abundance.weighted}}{default FALSE; Should mean nearest taxon distances for each species be weighted by species abundance?}
+
+\item{\code{runs}}{default 999; Number of randomizations.}
+
+\item{\code{...}}{paremeters pass to ses.mntd function in picante package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_NTI in object, equivalent to -1 times ses.mntd.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_NTI()
 }
 }
 \if{html}{\out{</div>}}
