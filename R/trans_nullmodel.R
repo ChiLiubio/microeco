@@ -383,7 +383,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to C.score function in bipartite package.
 		#' @return results directly.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_Cscore()
 		#' }
 		cal_Cscore = function(by_group = NULL, ...){

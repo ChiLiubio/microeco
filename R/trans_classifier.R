@@ -181,7 +181,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to trainControl function of caret package.
 		#' @return trainControl in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$set_trainControl()
 		#' }
 		set_trainControl = function(
@@ -205,7 +205,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to train function of caret package.
 		#' @return res_train in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_train()
 		#' }
 		cal_train = function(
@@ -267,7 +267,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to the evaluating function; If "rf" used, pass to randomForest::importance.
 		#' @return res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_feature_imp()
 		#' }
 		cal_feature_imp = function(...){
@@ -286,7 +286,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package.
 		#' @return res_confusion_fit and res_confusion_stats stored in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_predict()
 		#' }
 		cal_predict = function(positive_class = NULL){
@@ -336,7 +336,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param plot_statistics default TRUE; whether plot the statistics.
 		#' @return ggplot object in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$plot_confusionMatrix()
 		#' }
 		plot_confusionMatrix = function(
@@ -377,7 +377,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to plot.performance function of ROCR package.
 		#' @return a list including res_perf, all_auc_perf and all_perf_table stored in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_ROC()
 		#' }
 		cal_ROC = function(...){
@@ -426,7 +426,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to geom_line function of ggplot2 package.
 		#' @return ggplot2 object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$plot_ROC(size = 1, alpha = 0.7)
 		#' }
 		plot_ROC = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){

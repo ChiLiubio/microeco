@@ -100,16 +100,6 @@ NULL
 NULL
 
 
-#' The KEGG pathway annotation database in the microeco package
-#'
-#'
-#' @docType data
-#' @keywords data.frame
-#' @name ko_map
-#' @usage data(ko_map)
-NULL
-
-
 #' The KEGG data files used in the cal_tax4fun2 function of trans_func class.
 #'
 #'

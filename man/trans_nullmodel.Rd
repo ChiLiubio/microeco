@@ -86,7 +86,7 @@ t1$cal_process(use_betamntd = TRUE)
 ## Method `trans_nullmodel$cal_Cscore`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_Cscore()
 }
 }
@@ -457,7 +457,7 @@ results directly.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_Cscore()
 }
 }

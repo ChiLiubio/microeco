@@ -42,7 +42,7 @@ t1$cal_split(prop.train = 3/4)
 ## Method `trans_classifier$set_trainControl`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$set_trainControl()
 }
 
@@ -50,7 +50,7 @@ t1$set_trainControl()
 ## Method `trans_classifier$cal_train`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_train()
 }
 
@@ -58,7 +58,7 @@ t1$cal_train()
 ## Method `trans_classifier$cal_feature_imp`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_feature_imp()
 }
 
@@ -66,7 +66,7 @@ t1$cal_feature_imp()
 ## Method `trans_classifier$cal_predict`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_predict()
 }
 
@@ -74,7 +74,7 @@ t1$cal_predict()
 ## Method `trans_classifier$plot_confusionMatrix`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$plot_confusionMatrix()
 }
 
@@ -82,7 +82,7 @@ t1$plot_confusionMatrix()
 ## Method `trans_classifier$cal_ROC`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_ROC()
 }
 
@@ -90,7 +90,7 @@ t1$cal_ROC()
 ## Method `trans_classifier$plot_ROC`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$plot_ROC(size = 1, alpha = 0.7)
 }
 }
@@ -256,7 +256,7 @@ trainControl in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$set_trainControl()
 }
 }
@@ -300,7 +300,7 @@ res_train in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_train()
 }
 }
@@ -330,7 +330,7 @@ res_feature_imp in the object. One row for each predictor variable. The column(s
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_feature_imp()
 }
 }
@@ -360,7 +360,7 @@ res_confusion_fit and res_confusion_stats stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_predict()
 }
 }
@@ -395,7 +395,7 @@ ggplot object in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$plot_confusionMatrix()
 }
 }
@@ -425,7 +425,7 @@ a list including res_perf, all_auc_perf and all_perf_table stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_ROC()
 }
 }
@@ -460,7 +460,7 @@ ggplot2 object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$plot_ROC(size = 1, alpha = 0.7)
 }
 }

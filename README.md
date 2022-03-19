@@ -4,7 +4,7 @@ An R package for data mining in microbial community ecology
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
-![](https://img.shields.io/badge/Release-0.6.5-orange.svg) ![](https://img.shields.io/badge/Test-0.7.0-red.svg)
+![](https://img.shields.io/badge/Release-0.7.0-orange.svg) ![](https://img.shields.io/badge/Test-0.7.1-red.svg)
 
 ## Background
 In microbial community ecology, with the development of high-throughput sequencing techniques,
@@ -56,7 +56,9 @@ devtools::install_github("ChiLiubio/microeco")
 
 
 ## Tutorial
-See the detailed package **tutorial** (https://chiliubio.github.io/microeco_tutorial/) and the help documents (e.g. ?microtable).
+See the detailed package **tutorial** (https://chiliubio.github.io/microeco_tutorial/).
+The backup tutorial website in gitee is also available (http://chiliubio.gitee.io/microeco_tutorial/).
+Please use the class name to search the help documents (e.g. ?microtable).
 Constructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2, HUMAnN, Kraken2 and phyloseq) 
 can be easily achieved with the package file2meco (https://github.com/ChiLiubio/file2meco).
 
@@ -93,6 +95,6 @@ By participating in this project you agree to abide by the terms outlined in the
   - Deng Y, Jiang Y-H, Yang Y, He Z, Luo F, Zhou J. Molecular ecological network analyses. BMC bioinformatics 2012; 13: 113. 
   - Oksanen J, Blanchet FG, Friendly M, Kindt R, Legendre P, McGlinn D, et al. Vegan: Community ecology package. 2019. 
   - Picante: R tools for integrating phylogenies and ecology. Bioinformatics 2010; 26: 1463–1464.
-
+  - Other references in tutorial
 
 
