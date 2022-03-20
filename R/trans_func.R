@@ -483,9 +483,10 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 		},
 		#' @description
-		#' Predict functional potential of communities with Tax4Fun2 method.
-		#' pleas cite: 
-		#' Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
+		#' Predict functional potential of communities with Tax4Fun2 method. 
+		#'   The function was adapted from the raw Tax4Fun2 package to make it compatible with the microtable object.
+		#'   Pleas cite: 
+		#'   Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
 		#' 	 <doi:10.1186/s40793-020-00358-7>
 		#'
 		#' @param blast_tool_path default NULL; the folder path, e.g. ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 

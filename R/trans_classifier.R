@@ -359,17 +359,18 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			p2 <- gridExtra::tableGrob(Confusion.Sts)
 
 			if(plot_confusion == TRUE & plot_statistics == TRUE){
-				gridExtra::grid.arrange(p1, p2,nrow = 1, ncol = 2, 
+				p3 <- gridExtra::grid.arrange(p1, p2,nrow = 1, ncol = 2, 
 					top=grid::textGrob("Confusion Matrix and Statistics",gp=grid::gpar(fontsize=15,font=0.5)))
 			}
 			if(plot_confusion == TRUE & plot_statistics == FALSE){
-				gridExtra::grid.arrange(p1,nrow = 1, ncol = 1, 
+				p3 <- gridExtra::grid.arrange(p1,nrow = 1, ncol = 1, 
 					top=grid::textGrob("Confusion Matrix",gp=grid::gpar(fontsize=15,font=0.5)))
 			}
 			if(plot_confusion == FALSE & plot_statistics == TRUE){
-				gridExtra::grid.arrange(p2,nrow = 1, ncol = 1, 
+				p3 <- gridExtra::grid.arrange(p2,nrow = 1, ncol = 1, 
 					top=grid::textGrob("Statistics",gp=grid::gpar(fontsize=15,font=0.5)))
 			}
+			p3
 		},
 		#' @description
 		#' Get ROC curve data and the performance data.
