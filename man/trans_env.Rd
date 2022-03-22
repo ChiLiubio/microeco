@@ -284,8 +284,15 @@ plot ordination result.
   plot_shape = NULL,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
+  env_text_color = "black",
+  env_arrow_color = "grey30",
   taxa_text_color = "firebrick1",
-  taxa_text_italic = TRUE
+  taxa_arrow_color = "firebrick1",
+  sample_point_size = 3.5,
+  env_text_size = 3.7,
+  taxa_text_size = 3,
+  taxa_text_italic = TRUE,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -300,9 +307,23 @@ plot ordination result.
 
 \item{\code{shape_values}}{default see the function; vector used in the shape, see ggplot2 tutorial.}
 
-\item{\code{taxa_text_color}}{default "firebrick1"; taxa text colors.}
+\item{\code{env_text_color}}{default "black"; environmental variable text color.}
+
+\item{\code{env_arrow_color}}{default "grey30"; environmental variable arrow color.}
+
+\item{\code{taxa_text_color}}{default "firebrick1"; taxa text color.}
+
+\item{\code{taxa_arrow_color}}{default "firebrick1"; taxa arrow color.}
+
+\item{\code{sample_point_size}}{default 3.5; sample point size.}
+
+\item{\code{env_text_size}}{default 3.7; environmental variable text size.}
+
+\item{\code{taxa_text_size}}{default 3; taxa text size.}
 
 \item{\code{taxa_text_italic}}{default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.}
+
+\item{\code{...}}{paremeters pass to geom_point for controlling sample points.}
 }
 \if{html}{\out{</div>}}
 }

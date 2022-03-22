@@ -317,8 +317,15 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param plot_shape default NULL; group used for shape.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.
 		#' @param shape_values default see the function; vector used in the shape, see ggplot2 tutorial.
-		#' @param taxa_text_color default "firebrick1"; taxa text colors.
+		#' @param env_text_color default "black"; environmental variable text color.
+		#' @param env_arrow_color default "grey30"; environmental variable arrow color.
+		#' @param taxa_text_color default "firebrick1"; taxa text color.
+		#' @param taxa_arrow_color default "firebrick1"; taxa arrow color.
+		#' @param sample_point_size default 3.5; sample point size.
+		#' @param env_text_size default 3.7; environmental variable text size.
+		#' @param taxa_text_size default 3; taxa text size.
 		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.
+		#' @param ... paremeters pass to geom_point for controlling sample points.
 		#' @return ggplot object.
 		#' @examples
 		#' \donttest{
@@ -329,8 +336,15 @@ trans_env <- R6Class(classname = "trans_env",
 			plot_shape = NULL,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
+			env_text_color = "black",
+			env_arrow_color = "grey30",
 			taxa_text_color = "firebrick1",
-			taxa_text_italic = TRUE
+			taxa_arrow_color = "firebrick1",
+			sample_point_size = 3.5,
+			env_text_size = 3.7,
+			taxa_text_size = 3,
+			taxa_text_italic = TRUE,
+			...
 			){
 			if(is.null(self$res_ordination_trans)){
 				stop("Please first run trans_ordination function !")
@@ -344,18 +358,21 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + geom_point(
 				data=self$res_ordination_trans$df_sites, 
 				aes_string("x", "y", colour = plot_color, shape = plot_shape), 
-				size= 3.5)
+				size = sample_point_size,
+				...
+				)
 			# plot arrows
 			p <- p + geom_segment(
 				data=self$res_ordination_trans$df_arrows, 
 				aes(x = 0, y = 0, xend = x, yend = y), 
 				arrow = arrow(length = unit(0.2, "cm")), 
-				color = "grey30")
+				color = env_arrow_color
+				)
 			p <- p + ggrepel::geom_text_repel(
 				data = as.data.frame(self$res_ordination_trans$df_arrows * 1), 
 				aes(x, y, label = gsub("`", "", rownames(self$res_ordination_trans$df_arrows))), 
-				size=3.7, 
-				color = "black", 
+				size = env_text_size, 
+				color = env_text_color, 
 				segment.color = "white"
 				)
 			if(!is.null(plot_color)){
@@ -369,10 +386,10 @@ trans_env <- R6Class(classname = "trans_env",
 			if(self$ordination_method != "dbRDA"){
 				df_arrows_spe1 <- self$res_ordination_trans$df_arrows_spe
 				p <- p + geom_segment(
-					data=df_arrows_spe1, 
+					data = df_arrows_spe1, 
 					aes(x = 0, y = 0, xend = x, yend = y), 
 					arrow = arrow(length = unit(0.2, "cm")), 
-					color = "firebrick1", 
+					color = taxa_arrow_color, 
 					alpha = .6
 					)
 				df_arrows_spe1[, self$taxa_level] %<>% gsub(".*__", "", .) %>% gsub("Candidatus ", "", .) 
@@ -382,7 +399,7 @@ trans_env <- R6Class(classname = "trans_env",
 				p <- p + ggrepel::geom_text_repel(
 					data = df_arrows_spe1, 
 					aes_string("x", "y", label = self$taxa_level), 
-					size=3, 
+					size = taxa_text_size, 
 					color = taxa_text_color, 
 					segment.alpha = .01, 
 					parse = TRUE
