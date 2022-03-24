@@ -284,7 +284,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Run the prediction.
 		#' 
 		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package.
-		#' @return res_confusion_fit and res_confusion_stats stored in the object.
+		#' @return res_predict, res_confusion_fit and res_confusion_stats stored in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_predict()
@@ -301,8 +301,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			MapNames <- self$MapNames
 
 			fit.best.predict <- predict(fit.best, test_data[, 2:ncol(test_data)])
-			self$fit.best.predict <- fit.best.predict
-			message('The result of model prediction is stored in object$fit.best.predict ...')
+			self$res_predict <- fit.best.predict
+			message('The result of model prediction is stored in object$res_predict ...')
 
 			###################### 
 			######################    end: Evaluation for the test set

@@ -356,7 +356,7 @@ Run the prediction.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_confusion_fit and res_confusion_stats stored in the object.
+res_predict, res_confusion_fit and res_confusion_stats stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
