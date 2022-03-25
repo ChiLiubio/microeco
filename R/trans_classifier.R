@@ -396,21 +396,20 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			all_perf_table <- data.frame()
 			res_ROC <- list()
 			
-			for(i in 1:length(classes)){
-			  # select observations of class[i]
-			  true_values <- ifelse(test_data[, 1] == classes[i], 1, 0)
-			  # performance for class[i]
-			  pred <- ROCR::prediction(prediction_for_roc_curve[, i], true_values)
-			  perf <- ROCR::performance(pred, "tpr", "fpr")
-			  all_perf[[i]] <- perf
-			  
-			  gg_df <- data.frame(x = attributes(perf)$x.values[[1]], y = attributes(perf)$y.values[[1]], Group = classes[i])
-			  all_perf_table <- rbind(all_perf_table, gg_df)
-			  #print(classes[i])
-			  auc.perf <- ROCR::performance(pred, measure = "auc")
-			  all_auc_perf[[i]] <- auc.perf
-			  #print(auc.perf@y.values)
-			  message('AUC of ', classes[i], " = ", auc.perf@y.values)
+			for(i in classes){
+				# select observations of classes
+				true_values <- ifelse(test_data[, 1] == i, 1, 0)
+				# performance for i
+				pred <- ROCR::prediction(prediction_for_roc_curve[, i], true_values)
+				perf <- ROCR::performance(pred, "tpr", "fpr")
+				all_perf[[i]] <- perf
+				#print(classes[i])
+				auc.perf <- ROCR::performance(pred, measure = "auc")
+				all_auc_perf[[i]] <- auc.perf
+				#print(auc.perf@y.values)
+				message('AUC of ', i, " = ", auc.perf@y.values)
+				gg_df <- data.frame(x = attributes(perf)$x.values[[1]], y = attributes(perf)$y.values[[1]], Group = paste0(i, " ", "AUC = ", auc.perf@y.values))
+				all_perf_table <- rbind(all_perf_table, gg_df)
 			}
 			res_ROC$res_perf <- all_perf
 			res_ROC$all_auc_perf <- all_auc_perf
@@ -424,24 +423,38 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Plot ROC curve.
 		#' 
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
+		#' @param abline_color default "grey50"; the color for the diagonal line.
+		#' @param abline_type default 1; the diagonal line type.
+		#' @param abline_size default 0.7; the diagonal line size.
 		#' @param ... parameters pass to geom_line function of ggplot2 package.
 		#' @return ggplot2 object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_ROC(size = 1, alpha = 0.7)
 		#' }
-		plot_ROC = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
+		plot_ROC = function(
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
+			abline_color = "grey50",
+			abline_type = 1, 
+			abline_size = 0.7,
+			...
+			){
+			
 			if(is.null(self$res_ROC)){
 				stop("Please first run cal_ROC to get the data for ROC curve !")
 			}
 			all_perf_table <- self$res_ROC$all_perf_table
 			p <- ggplot(data = all_perf_table, aes(x = x, y = y, color = Group, group = Group)) +
 				geom_line(...) + 
+				coord_equal() +
 #				geom_ribbon(aes(x, ymin = 0, ymax = y)) +
+				geom_abline(intercept = 0, slope = 1, colour = abline_color, linetype = abline_type, size = abline_size) +
 				scale_color_manual(values = color_values) +
 				xlab("False positive rate") +
 				ylab("True positive rate") +
-				theme_bw()
+				theme_bw() +
+				theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+				theme(legend.title = element_blank())
 			p
 		}
 	),

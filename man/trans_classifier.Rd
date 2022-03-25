@@ -442,6 +442,9 @@ Plot ROC curve.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_ROC(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  abline_color = "grey50",
+  abline_type = 1,
+  abline_size = 0.7,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -450,6 +453,12 @@ Plot ROC curve.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.}
+
+\item{\code{abline_color}}{default "grey50"; the color for the diagonal line.}
+
+\item{\code{abline_type}}{default 1; the diagonal line type.}
+
+\item{\code{abline_size}}{default 0.7; the diagonal line size.}
 
 \item{\code{...}}{parameters pass to geom_line function of ggplot2 package.}
 }
