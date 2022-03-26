@@ -221,15 +221,15 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 \describe{
 \item{\code{network_method}}{default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method.}
 
-\item{\code{p_thres}}{default .01; the p value threshold.}
+\item{\code{p_thres}}{default 0.01; the p value threshold.}
 
 \item{\code{COR_weight}}{default TRUE; whether use correlation coefficient as the weight of edges.}
 
-\item{\code{COR_p_adjust}}{default "fdr"; p.adjust method, see p.adjust.methods.}
+\item{\code{COR_p_adjust}}{default "fdr"; p value adjustment method, see method of p.adjust function for available options.}
 
-\item{\code{COR_cut}}{default .6; correlation coefficient threshold.}
+\item{\code{COR_cut}}{default 0.6; correlation coefficient threshold.}
 
-\item{\code{COR_low_threshold}}{default .4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.}
+\item{\code{COR_low_threshold}}{default 0.4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.}
 
 \item{\code{COR_optimization}}{default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113}
 

@@ -90,25 +90,9 @@ trans_network <- R6Class(classname = "trans_network",
 					# reshape the results
 					use_names <- colnames(bootres$data)
 					com_res <- t(combn(use_names, 2))
-					res <- cbind.data.frame(com_res, cor_result$cors, cor_result$pvals, stringsAsFactors = FALSE)
-					colnames(res) <- c("t1", "t2", "cor", "p")
-					res <- rbind.data.frame(
-						res, 
-						data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), 
-						data.frame(t1 = use_names, t2 = use_names, cor = rep(1, length(use_names)), p = rep(0, length(use_names)))
-						)
-					res$cor %<>% as.numeric
-					res$p %<>% as.numeric
-					res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% 
-						`row.names<-`(.[,1]) %>% 
-						.[, -1] %>% 
-						.[use_names, use_names] %>% 
-						as.matrix
-					res_p <- reshape2::dcast(res, t1~t2, value.var = "p") %>% 
-						`row.names<-`(.[,1]) %>% 
-						.[, -1] %>% 
-						.[use_names, use_names] %>% 
-						as.matrix
+					res <- cbind.data.frame(com_res, cor = cor_result$cors, p = cor_result$pvals, stringsAsFactors = FALSE)
+					res_cor <- private$vec2mat(datatable = res, use_names = use_names, value_var = "cor", rep_value = 1)
+					res_p <- private$vec2mat(datatable = res, use_names = use_names, value_var = "p", rep_value = 0)
 					cor_result <- list(cor = res_cor, p = res_p)
 				}
 				self$res_cor_p <- cor_result
@@ -128,11 +112,11 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 		#'
 		#' @param network_method default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method.
-		#' @param p_thres default .01; the p value threshold.
+		#' @param p_thres default 0.01; the p value threshold.
 		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges.
-		#' @param COR_p_adjust default "fdr"; p.adjust method, see p.adjust.methods.
-		#' @param COR_cut default .6; correlation coefficient threshold.
-		#' @param COR_low_threshold default .4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.
+		#' @param COR_p_adjust default "fdr"; p value adjustment method, see method of p.adjust function for available options.
+		#' @param COR_cut default 0.6; correlation coefficient threshold.
+		#' @param COR_low_threshold default 0.4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.
 		#' @param COR_optimization default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113
 		#' @param PGM_meta_data default FALSE; whether use env data for the optimization, If TRUE, will automatically find the env_data in the object.
 		#' @param PGM_sensitive default "true"; whether use sensitive type in the PGM model.
@@ -174,7 +158,22 @@ trans_network <- R6Class(classname = "trans_network",
 			message("---------------- ", Sys.time()," : Start ----------------")
 			if(grepl("COR", network_method, ignore.case = TRUE)){
 				cortable <- self$res_cor_p$cor
-				adp <- apply(self$res_cor_p$p, 2, p.adjust, method = COR_p_adjust)
+				# p adjustment for the converted vector
+				raw_p <- self$res_cor_p$p
+				if(ncol(cortable) != ncol(raw_p)){
+					stop("Correlation table and p value table have different column numbers !")
+				}
+				raw_vector_p <- raw_p %>% as.dist %>% as.numeric
+				adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
+				# to matrix
+				use_names <- colnames(raw_p)
+				names_combn <- t(combn(use_names, 2))
+				table_convert <- cbind.data.frame(names_combn, adjust.p = adp_raw, stringsAsFactors = FALSE)
+				adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
+				# make sure same names between cortable and adp
+				if(! identical(colnames(cortable), colnames(adp))){
+					adp <- adp[colnames(cortable), colnames(cortable)]
+				}
 				if(COR_optimization == T) {
 					#find out threshold of correlation 
 					tc1 <- private$rmt(cortable)
@@ -185,11 +184,11 @@ trans_network <- R6Class(classname = "trans_network",
 					tc1 <- COR_cut
 				}
 				diag(cortable) <- 0
-				am <- as.matrix(cortable)
-				am[abs(cortable) >= tc1] <- 1
-				am[adp >= p_thres] <- 0
-				am[am != 1] <- 0
-				network <- graph.adjacency(am, mode = "undirected")
+				cor_matrix <- as.matrix(cortable)
+				cor_matrix[abs(cortable) >= tc1] <- 1
+				cor_matrix[adp >= p_thres] <- 0
+				cor_matrix[cor_matrix != 1] <- 0
+				network <- graph.adjacency(cor_matrix, mode = "undirected")
 				edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 				E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
 				if(COR_weight == T){
@@ -601,8 +600,28 @@ trans_network <- R6Class(classname = "trans_network",
 				stop("Please first install igraph package!")
 			}
 		},
-		cal_corr = function(inputtable, cor_method) {
-			N <- ncol(inputtable)
+		# convert long format to symmetrical matrix
+		# The first and second columns must be names
+		vec2mat = function(datatable, use_names, value_var, rep_value){
+			if(!inherits(datatable[, value_var], "numeric")){
+				datatable[, value_var] %<>% as.numeric
+			}
+			use_table <- datatable[, c(1:2)]
+			use_table[, value_var] <- datatable[, value_var]
+			colnames(use_table) <- c("t1", "t2", "value")
+			res_table <- rbind.data.frame(
+				use_table, 
+				data.frame(t1 = use_table[, 2], t2 = use_table[, 1], value = use_table[, 3]), 
+				data.frame(t1 = use_names, t2 = use_names, value = rep(rep_value, length(use_names)))
+			)
+			res_table <- reshape2::dcast(res_table, t1~t2, value.var = "value") %>% 
+				`row.names<-`(.[,1]) %>% 
+				.[, -1] %>% 
+				.[use_names, use_names] %>% 
+				as.matrix
+			res_table
+		},
+		cal_corr = function(inputtable, cor_method){
 			use_names <- colnames(inputtable)
 			com_res <- combn(use_names, 2)
 			res <- lapply(seq_len(ncol(com_res)), function(x){
@@ -611,15 +630,9 @@ trans_network <- R6Class(classname = "trans_network",
 			})
 			res <- do.call(rbind, res) %>% 
 				as.data.frame(stringsAsFactors = FALSE)
-			res <- rbind.data.frame(
-				res, 
-				data.frame(t1 = res$t2, t2 = res$t1, cor = res$cor, p = res$p), 
-				data.frame(t1 = use_names, t2 = use_names, cor = rep(1, N), p = rep(0, N))
-				)
-			res$cor %<>% as.numeric
-			res$p %<>% as.numeric
-			res_cor <- reshape2::dcast(res, t1~t2, value.var = "cor") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
-			res_p <- reshape2::dcast(res, t1~t2, value.var = "p") %>% `row.names<-`(.[,1]) %>% .[, -1] %>% .[use_names, use_names] %>% as.matrix
+			
+			res_cor <- private$vec2mat(datatable = res, use_names = use_names, value_var = "cor", rep_value = 1)
+			res_p <- private$vec2mat(datatable = res, use_names = use_names, value_var = "p", rep_value = 0)
 			res <- list(cor = res_cor, p = res_p)
 			res
 		},
