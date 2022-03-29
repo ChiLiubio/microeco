@@ -410,7 +410,7 @@ t1$plot_confusionMatrix()
 \subsection{Method \code{cal_ROC()}}{
 Get ROC curve data and the performance data.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_ROC(input = "pred", ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_ROC(input = "pred")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -418,14 +418,11 @@ Get ROC curve data and the performance data.
 \describe{
 \item{\code{input}}{default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
 'train' represents using training results.}
-
-\item{\code{...}}{parameters pass to plot.performance function of ROCR package (for input = 'pred') or
-evalm function of MLeval package (for input = 'train').}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a list including res_perf, all_auc_perf and all_perf_table stored in the object.
+a list res_ROC stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

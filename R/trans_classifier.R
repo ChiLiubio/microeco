@@ -377,14 +377,12 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param input default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
 		#'   'train' represents using training results.
-		#' @param ... parameters pass to plot.performance function of ROCR package (for input = 'pred') or
-		#'   evalm function of MLeval package (for input = 'train').
-		#' @return a list including res_perf, all_auc_perf and all_perf_table stored in the object.
+		#' @return a list res_ROC stored in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_ROC()
 		#' }
-		cal_ROC = function(input = "pred", ...){
+		cal_ROC = function(input = "pred"){
 			input <- match.arg(input, c("pred", "train"))
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")
