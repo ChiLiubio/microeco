@@ -375,84 +375,125 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Get ROC curve data and the performance data.
 		#' 
-		#' @param ... parameters pass to plot.performance function of ROCR package.
+		#' @param input default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
+		#'   'train' represents using training results.
+		#' @param ... parameters pass to plot.performance function of ROCR package (for input = 'pred') or
+		#'   evalm function of MLeval package (for input = 'train').
 		#' @return a list including res_perf, all_auc_perf and all_perf_table stored in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_ROC()
 		#' }
-		cal_ROC = function(...){
+		cal_ROC = function(input = "pred", ...){
+			input <- match.arg(input, c("pred", "train"))
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")
 			}
-			test_data <- self$data_test
 			fit.best <- self$res_train
-
-			prediction_for_roc_curve <- predict(fit.best, test_data[, 2:ncol(test_data)] , type="prob")
-			classes <- levels(droplevels(test_data[, 1])) #drop because sometimes there is empty classes
-			# store the results
-			all_perf <- list()
-			all_auc_perf <- list()
-			all_perf_table <- data.frame()
-			res_ROC <- list()
+			train_method <- fit.best$method
 			
-			for(i in classes){
-				# select observations of classes
-				true_values <- ifelse(test_data[, 1] == i, 1, 0)
-				# performance for i
-				pred <- ROCR::prediction(prediction_for_roc_curve[, i], true_values)
-				perf <- ROCR::performance(pred, "tpr", "fpr")
-				all_perf[[i]] <- perf
-				#print(classes[i])
-				auc.perf <- ROCR::performance(pred, measure = "auc")
-				all_auc_perf[[i]] <- auc.perf
-				#print(auc.perf@y.values)
-				message('AUC of ', i, " = ", auc.perf@y.values)
-				gg_df <- data.frame(x = attributes(perf)$x.values[[1]], y = attributes(perf)$y.values[[1]], Group = paste0(i, " ", "AUC = ", auc.perf@y.values))
-				all_perf_table <- rbind(all_perf_table, gg_df)
+			if(input == "pred"){
+				test_data <- self$data_test
+				prediction_prob <- predict(fit.best, test_data[, 2:ncol(test_data)] , type="prob")
+				class_names <- levels(droplevels(test_data[, 1])) #drop because sometimes there is empty classes
+				true_label <- test_data[, 1]
+			}else{
+				# use the prediction data in the training part
+				class_names <- fit.best$levels
+				prediction_prob <- fit.best$pred[, class_names]
+				true_label <- fit.best$pred$obs
 			}
-			res_ROC$res_perf <- all_perf
-			res_ROC$all_auc_perf <- all_auc_perf
-			res_ROC$all_perf_table <- all_perf_table
+			# use multiROC package
+			label_df <- lapply(class_names, function(x){ifelse(true_label == x, 1, 0)}) %>% 
+				do.call(cbind, .) %>%
+				as.data.frame %>%
+				`colnames<-`(paste0(class_names, "_true"))
+			prob_df <- prediction_prob %>% `colnames<-`(paste0(colnames(.), "_pred_", train_method))
+			use_df <- cbind(label_df, prob_df)
+
+			roc_res <- multiROC::multi_roc(use_df, force_diag=T)
+			pr_res <- multiROC::multi_pr(use_df, force_diag=T)
+
+			plot_roc_df <- multiROC::plot_roc_data(roc_res)
+			plot_pr_df <- multiROC::plot_pr_data(pr_res)
+
+			# store the results
+			res_ROC <- list()
+			res_ROC$res_roc <- plot_roc_df
+			res_ROC$res_pr <- plot_pr_df
 			self$res_ROC <- res_ROC
-			message('Raw class performance result of TPR-FPR is stored in the list object$res_ROC$res_perf ...')
-			message('Class performance table of TPR-FPR is stored in object$res_ROC$all_auc_perf ...')
-			message('Class performance of AUC is stored in object$res_ROC$all_perf_table ...')
+			message('Specificity-sensitivity data is stored in object$res_ROC$res_roc ...')
+			message('Recall-Precision is stored in object$res_ROC$res_pr ...')
 		},
 		#' @description
 		#' Plot ROC curve.
 		#' 
+		#' @param plot_type default c("ROC", "PR")[1]; 'ROC' represents ROC curve; 'PR' represents PR curve.
+		#' @param plot_group default "all"; 'all' represents all the classes in the model;
+		#' 	 'add' represents all adding micro-average and macro-average results, see https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html ;
+		#' 	 other options should be any one of the class names.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
-		#' @param abline_color default "grey50"; the color for the diagonal line.
-		#' @param abline_type default 1; the diagonal line type.
-		#' @param abline_size default 0.7; the diagonal line size.
-		#' @param ... parameters pass to geom_line function of ggplot2 package.
+		#' @param add_AUC default TRUE; whether add AUC in the legend
+		#' @param plot_method default FALSE; If TRUE, show the method in the legend though only one method is found.
+		#' @param ... parameters pass to geom_path function of ggplot2 package.
 		#' @return ggplot2 object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_ROC(size = 1, alpha = 0.7)
 		#' }
 		plot_ROC = function(
-			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
-			abline_color = "grey50",
-			abline_type = 1, 
-			abline_size = 0.7,
+			plot_type = c("ROC", "PR")[1],
+			plot_group = "all",
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 			
+			add_AUC = TRUE,
+			plot_method = FALSE,
 			...
 			){
 			
 			if(is.null(self$res_ROC)){
 				stop("Please first run cal_ROC to get the data for ROC curve !")
 			}
-			all_perf_table <- self$res_ROC$all_perf_table
-			p <- ggplot(data = all_perf_table, aes(x = x, y = y, color = Group, group = Group)) +
-				geom_line(...) + 
+			plot_type <- match.arg(plot_type, c("ROC", "PR"))
+			if(plot_type == "ROC"){
+				plot_data <- self$res_ROC$res_roc
+			}else{
+				plot_data <- self$res_ROC$res_pr
+			}
+			if(plot_group != "add"){
+				if(plot_group == "all"){
+					plot_data %<>% .[! .$Group %in% c("Micro", "Macro"), ]
+				}else{
+					if(!any(plot_data$Group %in% plot_group)){
+						stop("Please input the correct plot_group !")
+					}else{
+						plot_data %<>% .[.$Group %in% plot_group, ]
+					}
+				}
+			}
+			if(add_AUC){
+				plot_data$Group <- paste0(plot_data$Group, "\n AUC = ", round(plot_data$AUC, 2))
+			}
+		
+			if(plot_type == "ROC"){
+				p <- ggplot(plot_data, aes(x = 1-Specificity, y = Sensitivity)) + 
+					geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1), colour = 'grey', linetype = 'dashed')
+			}else{
+				p <- ggplot(plot_data, aes(x = Recall, y = Precision))
+			}
+			if(length(unique(plot_data$Method)) > 1){
+				p <- p + geom_path(aes(color = Group, linetype = Method), ...)
+			}else{
+				if(plot_method){
+					p <- p + geom_path(aes(color = Group, linetype = Method), ...)
+				}else{
+					p <- p + geom_path(aes(color = Group), ...)
+				}
+			}
+			p <- p + theme_bw() + 
 				coord_equal() +
-#				geom_ribbon(aes(x, ymin = 0, ymax = y)) +
-				geom_abline(intercept = 0, slope = 1, colour = abline_color, linetype = abline_type, size = abline_size) +
+				xlim(0, 1) +
+				ylim(0, 1) +
 				scale_color_manual(values = color_values) +
-				xlab("False positive rate") +
-				ylab("True positive rate") +
-				theme_bw() +
 				theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 				theme(legend.title = element_blank())
 			p

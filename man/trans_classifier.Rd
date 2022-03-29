@@ -410,13 +410,17 @@ t1$plot_confusionMatrix()
 \subsection{Method \code{cal_ROC()}}{
 Get ROC curve data and the performance data.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_ROC(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_ROC(input = "pred", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to plot.performance function of ROCR package.}
+\item{\code{input}}{default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
+'train' represents using training results.}
+
+\item{\code{...}}{parameters pass to plot.performance function of ROCR package (for input = 'pred') or
+evalm function of MLeval package (for input = 'train').}
 }
 \if{html}{\out{</div>}}
 }
@@ -441,10 +445,11 @@ t1$cal_ROC()
 Plot ROC curve.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_ROC(
+  plot_type = c("ROC", "PR")[1],
+  plot_group = "all",
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  abline_color = "grey50",
-  abline_type = 1,
-  abline_size = 0.7,
+  add_AUC = TRUE,
+  plot_method = FALSE,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -452,15 +457,19 @@ Plot ROC curve.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{plot_type}}{default c("ROC", "PR")[1]; 'ROC' represents ROC curve; 'PR' represents PR curve.}
+
+\item{\code{plot_group}}{default "all"; 'all' represents all the classes in the model;
+'add' represents all adding micro-average and macro-average results, see https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html ;
+other options should be any one of the class names.}
+
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.}
 
-\item{\code{abline_color}}{default "grey50"; the color for the diagonal line.}
+\item{\code{add_AUC}}{default TRUE; whether add AUC in the legend}
 
-\item{\code{abline_type}}{default 1; the diagonal line type.}
+\item{\code{plot_method}}{default FALSE; If TRUE, show the method in the legend though only one method is found.}
 
-\item{\code{abline_size}}{default 0.7; the diagonal line size.}
-
-\item{\code{...}}{parameters pass to geom_line function of ggplot2 package.}
+\item{\code{...}}{parameters pass to geom_path function of ggplot2 package.}
 }
 \if{html}{\out{</div>}}
 }
