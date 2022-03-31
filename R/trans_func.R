@@ -447,7 +447,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. g__) .
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
-		#' @param folderReferenceData default NULL; the folder, see http://tax4fun.gobics.de/ and Tax4Fun function in Tax4Fun package.
+		#' @param folderReferenceData default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.
 		#' @return tax4fun_KO and tax4fun_path in object.
 		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
 			if(is.null(folderReferenceData)){
@@ -494,8 +494,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#'   if blast_tool_path is NULL, search the tools in the environmental path variable.
 		#' @param path_to_reference_data default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
 		#'   The directory must contain the Ref99NR/Ref100NR folder; 
-		#'   download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download"  or 
-		#'   Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download" .
+		#'   download Ref99NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download}{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download} or 
+		#'   Ref100NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}.
 		#' @param path_to_temp_folder default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, 
 		#' 	 use the default temporary in the computer.
 		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR" .

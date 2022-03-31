@@ -238,7 +238,7 @@ trans_network <- R6Class(classname = "trans_network",
 					L3 <- "\n"
 				}
 				if(PGM_meta_data == T){
-					L4 <- paste0(gsub(",$|,\\s$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", PGM_other_para)), ")\n")
+					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", PGM_other_para)), ")\n")
 				}else{
 					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", PGM_other_para)), ")\n")
 				}
@@ -326,7 +326,7 @@ trans_network <- R6Class(classname = "trans_network",
 			self$res_network <- network
 		},
 		#' @description
-		#' Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
+		#' Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
 		#'
 		#' @param filepath default "network.gexf"; file path.
 		#' @return None.

@@ -309,7 +309,7 @@ t1$cal_module()
 \if{html}{\out{<a id="method-save_network"></a>}}
 \if{latex}{\out{\hypertarget{method-save_network}{}}}
 \subsection{Method \code{save_network()}}{
-Save network as gexf style, which can be opened by Gephi <https://gephi.org/>.
+Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf")}\if{html}{\out{</div>}}
 }
