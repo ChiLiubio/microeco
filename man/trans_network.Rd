@@ -163,9 +163,9 @@ This function is used to create the trans_network object, store the important in
 
 \item{\code{SparCC_simu_num}}{default 100; SparCC simulation number for bootstrap.}
 
-\item{\code{env_cols}}{default NULL; number or name vector to select the physicochemical data in dataset$sample_table.}
+\item{\code{env_cols}}{default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table.}
 
-\item{\code{add_data}}{default NULL; provide physicochemical table additionally.}
+\item{\code{add_data}}{default NULL; provide environmental table additionally; rownames must be sample names.}
 }
 \if{html}{\out{</div>}}
 }
@@ -206,9 +206,9 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
   COR_cut = 0.6,
   COR_low_threshold = 0.4,
   COR_optimization = FALSE,
+  PGM_tempdir = NULL,
   PGM_meta_data = FALSE,
-  PGM_sensitive = "true",
-  PGM_heterogeneous = "true",
+  PGM_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
   SpiecEasi_method = "mb",
   add_taxa_name = "Phylum",
   usename_rawtaxa_when_taxalevel_notOTU = FALSE,
@@ -219,7 +219,7 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models based method.}
+\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models of FlashWeave.}
 
 \item{\code{p_thres}}{default 0.01; the p value threshold.}
 
@@ -233,11 +233,14 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 
 \item{\code{COR_optimization}}{default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113}
 
-\item{\code{PGM_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, will automatically find the env_data in the object.}
+\item{\code{PGM_tempdir}}{default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.}
 
-\item{\code{PGM_sensitive}}{default "true"; whether use sensitive type in the PGM model.}
+\item{\code{PGM_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the env_data in the object and
+generate a file for meta_data_path parameter of FlashWeave.}
 
-\item{\code{PGM_heterogeneous}}{default "true"; whether use heterogeneous type in the PGM model.}
+\item{\code{PGM_other_para}}{default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
+user can change the parameters or add more according to FlashWeave help;
+An exception is meta_data_path parameter, see PGM_meta_data for the description.}
 
 \item{\code{SpiecEasi_method}}{default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.}
 
