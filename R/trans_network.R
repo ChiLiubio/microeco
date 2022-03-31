@@ -665,13 +665,8 @@ trans_network <- R6Class(classname = "trans_network",
 			tc <- ps[ps[,1] == min(ps[,1]), 2]
 			tc
 		},
-		nnsd = function(sp){
-			nns <- NULL
-			for(j in 2:length(sp)){
-				nn <- abs(sp[j] - sp[j-1])
-				nns <- c(nns, nn)
-			}
-			nns
+		nnsd = function(x){
+			abs(diff(x))
 		},
 		saveAsGEXF = function(network, filepath = "network.gexf"){
 			require("rgexf")
