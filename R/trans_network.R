@@ -430,16 +430,19 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Plot the classification and importance of nodes, see object$res_node_type for the variable names used in the parameters.
 		#'
 		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot; 2 represents the layered plot with taxa as x axis.
-		#' @param roles_colors default NULL; for use_type 1; colors for each group.
-		#' @param plot_module default FALSE; for use_type 1; whether plot the modules information.
-		#' @param use_level default "Phylum"; for use_type 2; used taxonomic level in x axis.
-		#' @param show_value default c("z", "p"); for use_type 2; used variable in y axis.
-		#' @param show_number default 1:10; for use_type 2; showed number in x axis, sorting according to the nodes number.
-		#' @param plot_color default "Phylum"; for use_type 2; used variable for color.
-		#' @param plot_shape default "taxa_roles"; for use_type 2; used variable for shape.
-		#' @param plot_size default "Abundance"; for use_type 2; used for point size; a fixed number (e.g. 5) is also available.
-		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); for use_type 2; color vector
-		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type 2; shape vector, see ggplot2 tutorial for the shape meaning.
+		#' @param roles_color_background default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.
+		#' @param roles_color_values default NULL; for use_type=1; color palette for background or points.
+		#' @param plot_module default FALSE; for use_type=1; whether plot the modules information.
+		#' @param x_lim default c(0, 1); for use_type=1; x axis range when roles_color_background = FALSE.
+		#' @param use_level default "Phylum"; for use_type=2; used taxonomic level in x axis.
+		#' @param show_value default c("z", "p"); for use_type=2; used variable in y axis.
+		#' @param show_number default 1:10; for use_type=2; showed number in x axis, sorting according to the nodes number.
+		#' @param plot_color default "Phylum"; for use_type=2; used variable for color.
+		#' @param plot_shape default "taxa_roles"; for use_type=2; used variable for shape.
+		#' @param plot_size default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also available.
+		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector
+		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type=2; shape vector, see ggplot2 tutorial for the shape meaning.
+		#' @param ... paremeters pass to geom_point.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -447,8 +450,10 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		plot_taxa_roles = function(
 			use_type = c(1, 2)[1],
-			roles_colors = NULL,
+			roles_color_background = FALSE,
+			roles_color_values = NULL,
 			plot_module = FALSE,
+			x_lim = c(0, 1),
 			use_level = "Phylum",
 			show_value = c("z", "p"),
 			show_number = 1:10,
@@ -456,10 +461,17 @@ trans_network <- R6Class(classname = "trans_network",
 			plot_shape = "taxa_roles",
 			plot_size = "Abundance",
 			color_values = RColorBrewer::brewer.pal(12, "Paired"),
-			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14)
+			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
+			...
 			){
 			if(use_type == 1){
-				res <- private$plot_roles_1(node_roles = self$res_node_type, roles_colors = roles_colors, module = plot_module)
+				res <- private$plot_roles_1(node_roles = self$res_node_type, 
+					roles_color_background = roles_color_background,
+					roles_color_values = roles_color_values, 
+					module = plot_module,
+					x_lim = x_lim,
+					...
+				)
 			}
 			if(use_type == 2){
 				res <- private$plot_roles_2(node_roles = self$res_node_type, 
@@ -470,7 +482,8 @@ trans_network <- R6Class(classname = "trans_network",
 					show_number = show_number,
 					plot_size = plot_size,
 					color_values = color_values, 
-					shape_values = shape_values
+					shape_values = shape_values,
+					...
 				)
 			}
 			res
@@ -818,7 +831,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			outdf
 		},
-		plot_roles_1 = function(node_roles, roles_colors = NULL, module = FALSE){
+		plot_roles_1 = function(node_roles, roles_color_background, roles_color_values = NULL, module = FALSE, x_lim = c(0, 1), ...){
 			if(module == T){
 				all_modules <- unique(as.character(node_roles$module))
 				node_roles$module <- factor(as.character(node_roles$module), levels = stringr::str_sort(all_modules, numeric = TRUE))
@@ -829,19 +842,38 @@ trans_network <- R6Class(classname = "trans_network",
 			y2 <- c(2.5,2.5, Inf, Inf)
 			lab <- c("Peripheral nodes","Connectors" ,"Module hubs","Network hubs")
 			lab <- factor(lab, levels = rev(lab))
-			if(is.null(roles_colors)){roles_colors <- rev(c("grey80", RColorBrewer::brewer.pal(3, "Dark2")))}
+			if(is.null(roles_color_values)){roles_color_values <- rev(c("grey80", RColorBrewer::brewer.pal(3, "Dark2")))}
 
-			p <- ggplot() + geom_rect(data=NULL, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2, fill=lab, alpha = .4))
-			p <- p + guides(fill=guide_legend(title="Roles"), alpha = "none")
-			p <- p + scale_fill_manual(values = roles_colors)
-			if(module == T){
-				p <- p + geom_point(data=node_roles, aes(x=p, y=z, shape= module)) + theme_bw() + guides(shape=guide_legend(title="Module"))
+			p <- ggplot() + theme_bw()
+			if(roles_color_background){
+				p <- p + geom_rect(data=NULL, mapping = aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = lab, alpha = .4))
+				p <- p + guides(fill = guide_legend(title = "Roles"), alpha = "none")
+				p <- p + scale_fill_manual(values = roles_color_values)
+				if(module == T){
+					p <- p + geom_point(data = node_roles, aes(x = p, y = z, shape = module), ...) + 
+						guides(shape = guide_legend(title = "Module"))
+				}else{
+					p <- p + geom_point(data = node_roles, aes(x = p, y = z), ...)
+				}
+				p <- p + theme(strip.background = element_rect(fill = "white"))
 			}else{
-				p <- p + geom_point(data=node_roles, aes(x=p, y=z)) + theme_bw()
+				node_roles$taxa_roles %<>% factor(., levels = rev(lab))
+				if(module == T){
+					p <- p + geom_point(data = node_roles, aes(x = p, y = z, color = taxa_roles, shape = module), ...) + 
+						guides(shape = guide_legend(title = "Module"))
+				}else{
+					p <- p + geom_point(data = node_roles, aes(x = p, y = z, color = taxa_roles), ...)
+				}
+				p <- p + xlim(x_lim[1], x_lim[2])
+				p <- p + geom_hline(yintercept = 2.5, linetype = "dashed") +
+					geom_vline(xintercept = 0.62, linetype = "dashed") +
+					scale_color_manual(values = roles_color_values)
+				p <- p + guides(color = guide_legend(title = "Roles"), alpha = "none")
 			}
-			p <- p + theme(strip.background = element_rect(fill = "white")) + 
-				xlab("Among-module connectivity") + 
-				ylab("Within-module connectivity")
+			p <- p + xlab("Among-module connectivity") + 
+				ylab("Within-module connectivity") +
+				theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
 			p
 		},
 		# plot z and p according to the taxonomic levels
@@ -854,7 +886,8 @@ trans_network <- R6Class(classname = "trans_network",
 			plot_shape = "taxa_roles",
 			plot_size = "Abundance",
 			color_values = RColorBrewer::brewer.pal(12, "Paired"),
-			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14)
+			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
+			...
 			){
 			node_roles <- cbind.data.frame(ID = rownames(node_roles), node_roles)
 			use_data <- reshape2::melt(node_roles, id.vars = c("ID", use_level), measure.vars = show_value, variable.name = "variable")
@@ -879,7 +912,7 @@ trans_network <- R6Class(classname = "trans_network",
 			use_data[, use_level] %<>% factor(., levels = use_taxa)
 
 			p <- ggplot(use_data, aes_string(x = use_level, y = "value", color = plot_color, shape = plot_shape, size = plot_size)) + 
-				geom_point(position = "jitter") +
+				geom_point(position = "jitter", ...) +
 				scale_color_manual(values = color_values) +
 				scale_shape_manual(values = shape_values) +				
 				facet_grid(variable ~ ., drop = TRUE, scale = "free", space = "fixed") +

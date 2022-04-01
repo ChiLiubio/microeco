@@ -404,8 +404,10 @@ Plot the classification and importance of nodes, see object$res_node_type for th
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_taxa_roles(
   use_type = c(1, 2)[1],
-  roles_colors = NULL,
+  roles_color_background = FALSE,
+  roles_color_values = NULL,
   plot_module = FALSE,
+  x_lim = c(0, 1),
   use_level = "Phylum",
   show_value = c("z", "p"),
   show_number = 1:10,
@@ -413,7 +415,8 @@ Plot the classification and importance of nodes, see object$res_node_type for th
   plot_shape = "taxa_roles",
   plot_size = "Abundance",
   color_values = RColorBrewer::brewer.pal(12, "Paired"),
-  shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14)
+  shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -422,25 +425,31 @@ Plot the classification and importance of nodes, see object$res_node_type for th
 \describe{
 \item{\code{use_type}}{default 1; 1 or 2; 1 represents taxa roles area plot; 2 represents the layered plot with taxa as x axis.}
 
-\item{\code{roles_colors}}{default NULL; for use_type 1; colors for each group.}
+\item{\code{roles_color_background}}{default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.}
 
-\item{\code{plot_module}}{default FALSE; for use_type 1; whether plot the modules information.}
+\item{\code{roles_color_values}}{default NULL; for use_type=1; color palette for background or points.}
 
-\item{\code{use_level}}{default "Phylum"; for use_type 2; used taxonomic level in x axis.}
+\item{\code{plot_module}}{default FALSE; for use_type=1; whether plot the modules information.}
 
-\item{\code{show_value}}{default c("z", "p"); for use_type 2; used variable in y axis.}
+\item{\code{x_lim}}{default c(0, 1); for use_type=1; x axis range when roles_color_background = FALSE.}
 
-\item{\code{show_number}}{default 1:10; for use_type 2; showed number in x axis, sorting according to the nodes number.}
+\item{\code{use_level}}{default "Phylum"; for use_type=2; used taxonomic level in x axis.}
 
-\item{\code{plot_color}}{default "Phylum"; for use_type 2; used variable for color.}
+\item{\code{show_value}}{default c("z", "p"); for use_type=2; used variable in y axis.}
 
-\item{\code{plot_shape}}{default "taxa_roles"; for use_type 2; used variable for shape.}
+\item{\code{show_number}}{default 1:10; for use_type=2; showed number in x axis, sorting according to the nodes number.}
 
-\item{\code{plot_size}}{default "Abundance"; for use_type 2; used for point size; a fixed number (e.g. 5) is also available.}
+\item{\code{plot_color}}{default "Phylum"; for use_type=2; used variable for color.}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); for use_type 2; color vector}
+\item{\code{plot_shape}}{default "taxa_roles"; for use_type=2; used variable for shape.}
 
-\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type 2; shape vector, see ggplot2 tutorial for the shape meaning.}
+\item{\code{plot_size}}{default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also available.}
+
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector}
+
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type=2; shape vector, see ggplot2 tutorial for the shape meaning.}
+
+\item{\code{...}}{paremeters pass to geom_point.}
 }
 \if{html}{\out{</div>}}
 }
