@@ -74,7 +74,7 @@ Features must be rows.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-venn_table and venn_count_abund stored in trans_venn object.
+res_content and res_summary_table stored in trans_venn object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -113,7 +113,10 @@ Plot venn diagram.
   petal_move_xy = 4,
   petal_move_k = 2.3,
   petal_move_k_count = 1.3,
-  petal_text_move = 40
+  petal_text_move = 40,
+  other_text_show = NULL,
+  other_text_position = c(2, 2),
+  other_text_size = 5
 )}\if{html}{\out{</div>}}
 }
 
@@ -155,6 +158,12 @@ Plot venn diagram.
 \item{\code{petal_move_k_count}}{default 1.3; the distance of data text to circle}
 
 \item{\code{petal_text_move}}{default 40; the distance between two data text}
+
+\item{\code{other_text_show}}{default NULL; other characters used to show in the plot}
+
+\item{\code{other_text_position}}{default c(1, 1); the text position for text in other_text_show}
+
+\item{\code{other_text_size}}{default 5; the text size for text in other_text_show}
 }
 \if{html}{\out{</div>}}
 }

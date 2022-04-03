@@ -5,7 +5,7 @@
 #' This class is a wrapper for a series of operations on the original files and the basic manipulations,
 #' including the microtable object creation, data reduction, data rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxa abundance calculation, 
 #' alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
-#' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.
+#' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
 #' The tutorial website: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} or
 #' \href{http://chiliubio.gitee.io/microeco_tutorial/}{http://chiliubio.gitee.io/microeco_tutorial/}
 #' 
@@ -273,6 +273,13 @@ microtable <- R6Class(classname = "microtable",
 				self$tidy_dataset()
 				print(self)
 			}
+			if(nrow(self$sample_table) != ncol(self$otu_table)){
+				message("The sample numbers of sample_table is not equal to that of otu_table ...")
+				message("Automatically applying tidy_dataset() function to trim the data ...")
+				self$tidy_dataset()
+				print(self)
+			}
+			
 			# check whether no row in tax_table
 			if(nrow(self$tax_table) == 0){
 				stop("0 rows in tax_table! Please check your data!")

@@ -14,7 +14,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' 	 NULL: no additional percentage.
 		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
 		#' Features must be rows.
-		#' @return venn_table and venn_count_abund stored in trans_venn object.
+		#' @return res_content and res_summary_table stored in trans_venn object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -44,7 +44,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 
-			col_names <- colnames(abund)
+			res_names <- colnames(abund)
 			colnumber <- ncol(abund)
 			abund1 <- cbind.data.frame(OTU = rownames(abund), abund)
 			abund2 <- reshape2::melt(abund1, id.var = "OTU", value.name= "Abundance", variable.name = "SeqID")
@@ -81,13 +81,15 @@ trans_venn <- R6Class(classname = "trans_venn",
 				c(x, rep("", fill_length))
 			})
 			venn_table <- as.data.frame(t(do.call(rbind, venn_table)))
-			self$venn_count_abund <- venn_count_abund
-			self$venn_table <- venn_table
+			self$res_summary_table <- venn_count_abund
+			self$res_content <- venn_table
 			self$colnumber <- colnumber
-			self$col_names <- col_names
+			self$res_names <- res_names
 			self$ratio <- ratio
 			self$otu_table <- abund
-			message('The result is stored in object$venn_table and object$venn_count_abund ...')
+			message('The names is stored in object$res_names ...')
+			message('The details of each venn part is stored in object$res_content ...')
+			message('The summary table used for plot is stored in object$res_summary_table ...')
 		},
 		#' @description
 		#' Plot venn diagram.
@@ -110,6 +112,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param petal_move_k default 2.3; the distance of title to circle
 		#' @param petal_move_k_count default 1.3; the distance of data text to circle
 		#' @param petal_text_move default 40; the distance between two data text
+		#' @param other_text_show default NULL; other characters used to show in the plot
+		#' @param other_text_position default c(1, 1); the text position for text in other_text_show
+		#' @param other_text_size default 5; the text size for text in other_text_show
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -133,12 +138,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 			petal_move_xy = 4,
 			petal_move_k = 2.3,
 			petal_move_k_count = 1.3,
-			petal_text_move = 40
+			petal_text_move = 40,
+			other_text_show = NULL,
+			other_text_position = c(2, 2),
+			other_text_size = 5
 			){
 			colnumber <- self$colnumber
 			ratio <- self$ratio
-			col_names <- self$col_names
+			res_names <- self$res_names
 			switch_num <- colnumber-1
+			summary_table <- self$res_summary_table
 			
 			# text position in venn
 			if(is.null(text_name_position)){
@@ -150,7 +159,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				)
 			}
 			if(colnumber %in% 2:5 & petal_plot == F){
-				plot_data <- data.frame(self$venn_count_abund, private$pos_fun(switch_num))
+				plot_data <- data.frame(summary_table, private$pos_fun(switch_num))
 			}
 			if(colnumber == 2) {
 				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) + 
@@ -246,7 +255,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				}
 			}
 			if(colnumber %in% 2:5 & petal_plot == F){
-				p <- p + annotate("text", x = text_name_position$x, y = text_name_position$y, label = col_names, size = text_name_size)
+				p <- p + annotate("text", x = text_name_position$x, y = text_name_position$y, label = res_names, size = text_name_size)
 				if(!is.null(ratio)){
 					p <- p + annotate("text", 
 							x = plot_data[,3], 
@@ -265,7 +274,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			}
 			if(colnumber > 4 & petal_plot == T) {
 				nPetals <- colnumber
-				plot_data <- self$venn_count_abund[c(1:nPetals, nrow(self$venn_count_abund)), ]
+				plot_data <- summary_table[c(1:nPetals, nrow(summary_table)), ]
 				petal_color_use <- rep(petal_color, nPetals)
 				
 				p <- ggplot(data.frame(), aes(x=c(0, 0), y=0)) +
@@ -309,6 +318,13 @@ trans_venn <- R6Class(classname = "trans_venn",
 						size = text_size)
 				}
 			}
+			if(!is.null(other_text_show)){
+				p <- p + annotate("text", 
+					x = other_text_position[1], 
+					y = other_text_position[2], 
+					label = other_text_show, 
+					size = other_text_size)				
+			}
 			if(colnumber > 5 & petal_plot == F){
 				stop("This colnumber > 5! Please use petal_plot = TRUE !")
 			}
@@ -325,7 +341,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' }
 		trans_venn_com = function(use_frequency = TRUE){
 			otudata <- self$otu_table
-			venn_table <- self$venn_table
+			venn_table <- self$res_content
 			sampledata <- data.frame(SampleID = colnames(venn_table), Group = colnames(venn_table)) %>% 'rownames<-'(colnames(venn_table))
 			taxdata <- self$tax_table
 			sum_table <- data.frame(apply(otudata, 1, sum))
@@ -343,12 +359,12 @@ trans_venn <- R6Class(classname = "trans_venn",
 			if(use_frequency == T){
 				tt[tt != 0] <- 1
 			}
-			microtable$new(sample_table = sampledata, otu_table = tt, tax_table = taxdata)
+			microtable$new(sample_table = sampledata, otu_table = tt, tax_table = taxdata, auto_tidy = TRUE)
 		},
 		#' @description
 		#' Print the trans_venn object.
 		print = function() {
-			print(self$venn_count_abund)
+			print(self$res_summary_table)
 		}
 		),
 	private = list(
