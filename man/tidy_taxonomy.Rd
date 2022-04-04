@@ -2,21 +2,41 @@
 % Please edit documentation in R/utility.R
 \name{tidy_taxonomy}
 \alias{tidy_taxonomy}
-\title{Clear up the taxonomic table to make taxonomic assignments consistent.}
+\title{Clean up the taxonomic table to make taxonomic assignments consistent.}
 \format{
 \code{\link{data.frame}} object.
 }
 \usage{
-tidy_taxonomy(taxonomy_table)
+tidy_taxonomy(
+  taxonomy_table,
+  column = "all",
+  pattern = c(".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*",
+    ".*No blast hit.*", ".*sp\\\\.$", ".*metagenome.*", ".*cultivar.*", ".*archaeon$",
+    "__synthetic.*", ".*\\\\sbacterium$", ".*bacterium\\\\s.*"),
+  replacement = "",
+  ignore.case = TRUE,
+  na_fill = ""
+)
 }
 \arguments{
 \item{taxonomy_table}{a data.frame with taxonomic information.}
+
+\item{column}{default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.}
+
+\item{pattern}{default see the function parameter; the characters to be cleaned up or replaced; cleaned up when parameter replacement = "", 
+replaced when parameter replacement has something; Note that the capital and small letters are not distinguished.}
+
+\item{replacement}{default ""; the characters used to replace pattern parameter.}
+
+\item{ignore.case}{default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.}
+
+\item{na_fill}{default ""; used to replace the NA.}
 }
 \value{
 taxonomic table.
 }
 \description{
-Clear up the taxonomic table to make taxonomic assignments consistent.
+Clean up the taxonomic table to make taxonomic assignments consistent.
 }
 \examples{
 data("taxonomy_table_16S")

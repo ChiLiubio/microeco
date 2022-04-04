@@ -52,34 +52,56 @@ trycharnum <- function(x){
 	x
 }
 
-#' Clear up the taxonomic table to make taxonomic assignments consistent.
+#' Clean up the taxonomic table to make taxonomic assignments consistent.
 #'
 #' @param taxonomy_table a data.frame with taxonomic information.
+#' @param column default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.
+#' @param pattern default see the function parameter; the characters to be cleaned up or replaced; cleaned up when parameter replacement = "", 
+#'   replaced when parameter replacement has something; Note that the capital and small letters are not distinguished.
+#' @param replacement default ""; the characters used to replace pattern parameter.
+#' @param ignore.case default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.
+#' @param na_fill default ""; used to replace the NA.
 #' @return taxonomic table.
 #' @format \code{\link{data.frame}} object.
 #' @examples
 #' data("taxonomy_table_16S")
 #' tidy_taxonomy(taxonomy_table_16S)
 #' @export
-tidy_taxonomy <- function(taxonomy_table){
-	taxonomy_table[] <- lapply(seq_len(ncol(taxonomy_table)), function(x) tidy_taxonomy_column(taxonomy_table, x))
+tidy_taxonomy <- function(taxonomy_table, 
+	column = "all",
+	pattern = c(".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*", ".*No blast hit.*", ".*sp\\.$",
+		".*metagenome.*", ".*cultivar.*", ".*archaeon$", "__synthetic.*", ".*\\sbacterium$", ".*bacterium\\s.*"),
+	replacement = "",
+	ignore.case = TRUE,
+	na_fill = ""
+	){
+	if(column == "all"){
+		taxonomy_table[] <- lapply(seq_len(ncol(taxonomy_table)), 
+			function(x) tidy_taxonomy_column(taxonomy_table, i = x, pattern = pattern, replacement = replacement, ignore.case = ignore.case, na_fill = na_fill))
+	}else{
+		if(!inherits(column, "numeric")){
+			stop("The input column is not numeric class !")
+		}
+		taxonomy_table[, column] <- tidy_taxonomy_column(taxonomy_table, i = column, pattern = pattern, 
+			replacement = replacement, ignore.case = ignore.case, na_fill = na_fill)
+	}
 	taxonomy_table
 }
 
 # inner function
-tidy_taxonomy_column <- function(taxonomy_table, i){
-	taxonomy_table[,i] <- gsub(".*No blast hit.*|.*Unknown.*|.*unidentif.*|.*sp\\.$|.*Unclassified.*", "", taxonomy_table[,i], ignore.case = TRUE)
-	taxonomy_table[,i] <- gsub(".*metagenome.*|.*uncultur.*|.*cultivar.*|D_6__synthetic.*|.*archaeon$", "", taxonomy_table[,i], ignore.case = TRUE)
-	taxonomy_table[,i] <- gsub('"', "", taxonomy_table[,i], fixed = TRUE)
-	taxonomy_table[,i] <- gsub("^\\s+|\\s+$|.*\\sbacterium$|.*bacterium\\s.*", "", taxonomy_table[,i])
-	taxonomy_table[,i] <- gsub("^.*__", "", taxonomy_table[,i])
-	# some data have single underline
-	taxonomy_table[,i] <- gsub("^._", "", taxonomy_table[,i])
+tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore.case, na_fill){
+	taxonomy_table[, i] %<>% gsub(paste0(pattern, collapse = "|"), replacement, ., ignore.case = ignore.case)
+	# delete the blank space in beginning and end
+	taxonomy_table[, i] %<>% gsub("^\\s+|\\s+$", "", .)
+	# delete any " in the text
+	taxonomy_table[, i] %<>% gsub('"', "", ., fixed = TRUE)
+	# some data have single underline, so first double, then single
+	taxonomy_table[, i] %<>% gsub("^.*__", "", .) %>% gsub("^._", "", .)
 	# check the missing data
-	taxonomy_table[,i][is.na(taxonomy_table[,i])] <- ""
+	taxonomy_table[, i][is.na(taxonomy_table[, i])] <- na_fill
 	# paste the final result with double underlines
-	taxonomy_table[,i] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[,i])
-	taxonomy_table[,i]
+	taxonomy_table[, i] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[, i])
+	taxonomy_table[, i]
 }
 
 # inner function
