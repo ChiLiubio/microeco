@@ -237,15 +237,26 @@ t1$cal_split(prop.train = 3/4)
 \if{html}{\out{<a id="method-set_trainControl"></a>}}
 \if{latex}{\out{\hypertarget{method-set_trainControl}{}}}
 \subsection{Method \code{set_trainControl()}}{
-Set trainControl for the following training.
+Control parameters for the following training.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$set_trainControl(method = "repeatedcv", ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$set_trainControl(
+  method = "repeatedcv",
+  classProbs = TRUE,
+  savePredictions = TRUE,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default 'repeatedcv'; the method used in trainControl function of caret package.}
+\item{\code{method}}{default 'repeatedcv'; ‘repeatedcv’: Repeated k-Fold cross validation; 
+see method parameter in trainControl function of caret package for available options.}
+
+\item{\code{classProbs}}{default TRUE; should class probabilities be computed for classification models?;
+see classProbs parameter in caret::trainControl function.}
+
+\item{\code{savePredictions}}{default TRUE; see savePredictions parameter in caret::trainControl function}
 
 \item{\code{...}}{parameters pass to trainControl function of caret package.}
 }
@@ -283,13 +294,13 @@ Run the training.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "rf"; representing the random forest method; see method in train function of caret package.}
+\item{\code{method}}{default "rf"; representing the random forest method; see method in caret::train function.}
 
 \item{\code{metric}}{default "Accuracy"; see metric in train function of caret package.}
 
-\item{\code{max.mtry}}{default 2; maximum mtry.}
+\item{\code{max.mtry}}{default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.}
 
-\item{\code{max.ntree}}{default 200; Number of trees to grow; pass to the ntree parameter of randomForest function in randomForest package.}
+\item{\code{max.ntree}}{default 200; for method = "rf"; maximum number of trees used to optimize the model.}
 
 \item{\code{...}}{parameters pass to train function of caret package.}
 }
@@ -321,7 +332,7 @@ Get feature importance from the training model.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to the evaluating function; If "rf" used, pass to randomForest::importance.}
+\item{\code{...}}{parameters pass to varImp function of caret package.}
 }
 \if{html}{\out{</div>}}
 }

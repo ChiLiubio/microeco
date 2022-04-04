@@ -175,9 +175,13 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			message("Training and testing data are stored in object$data_train and object$data_test respectively ...")
 		},
 		#' @description
-		#' Set trainControl for the following training.
+		#' Control parameters for the following training.
 		#' 
-		#' @param method default 'repeatedcv'; the method used in trainControl function of caret package.
+		#' @param method default 'repeatedcv'; ‘repeatedcv’: Repeated k-Fold cross validation; 
+		#' 	 see method parameter in trainControl function of caret package for available options.
+		#' @param classProbs default TRUE; should class probabilities be computed for classification models?;
+		#' 	 see classProbs parameter in caret::trainControl function.
+		#' @param savePredictions default TRUE; see savePredictions parameter in caret::trainControl function
 		#' @param ... parameters pass to trainControl function of caret package.
 		#' @return trainControl in the object.
 		#' @examples
@@ -186,11 +190,13 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' }
 		set_trainControl = function(
 			method = 'repeatedcv',
+			classProbs = TRUE,
+			savePredictions = TRUE,
 			...
 			){
 			trainControl <- caret::trainControl(method = method,
-								   classProbs = TRUE,
-								   savePredictions = TRUE,
+								   classProbs = classProbs,
+								   savePredictions = savePredictions,
 								   ...)
 			message('Generating trainControl setting stored in object$trainControl ...')
 			self$trainControl <- trainControl
@@ -198,10 +204,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Run the training.
 		#' 
-		#' @param method default "rf"; representing the random forest method; see method in train function of caret package.
+		#' @param method default "rf"; representing the random forest method; see method in caret::train function.
 		#' @param metric default "Accuracy"; see metric in train function of caret package.
-		#' @param max.mtry default 2; maximum mtry.
-		#' @param max.ntree default 200; Number of trees to grow; pass to the ntree parameter of randomForest function in randomForest package.
+		#' @param max.mtry default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.
+		#' @param max.ntree default 200; for method = "rf"; maximum number of trees used to optimize the model.
 		#' @param ... parameters pass to train function of caret package.
 		#' @return res_train in the object.
 		#' @examples
@@ -216,21 +222,19 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			...
 			){
 			train_data <- self$data_train
-			control <- self$trainControl
+			trControl <- self$trainControl
 			
 			###################### ----------------
-			######################
 			if(method == "rf"){
 				# Optimization of RF parameters
-			  set.seed(12345)
 				message("Optimization of Random Forest parameters ...")
 
 				tunegrid <- expand.grid(.mtry=seq(from =1, to = max.mtry) )
 				modellist<- list()
 				#
 				for (ntree in c(100, max.ntree)) {
-					fit <- caret::train(Class~., data=train_data, method = method, metric=metric, 
-									  tuneGrid=tunegrid, trControl=control, ntree=ntree, ...)
+					fit <- caret::train(Class ~ ., data = train_data, method = method, metric=metric, 
+									  tuneGrid=tunegrid, trControl=trControl, ntree=ntree, ...)
 					key <- toString(ntree)
 					modellist[[key]] <- fit
 				}
@@ -240,31 +244,32 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				res.tune1 <- as.data.frame(res.tune1$statistics$Accuracy)
 				#summary(results)
 
-				ntree = as.numeric(rownames(res.tune1)[which(res.tune1$Mean == max(res.tune1$Mean))])[1]
+				ntree <- as.numeric(rownames(res.tune1)[which(res.tune1$Mean == max(res.tune1$Mean))])[1]
 				#tunegrid <- expand.grid(.mtry=seq(from = 1, to=4, by = 0.5))
 				modellist <- list()
 
-				fit <- caret::train(Class~., data=train_data, method = method, 
-					metric=metric, tuneGrid=tunegrid, 
-					trControl=control, ntree = ntree)
+				fit <- caret::train(Class ~ ., data = train_data, method = method, 
+					metric = metric, tuneGrid = tunegrid, 
+					trControl = trControl, ntree = ntree)
 
 				message("ntree used:", ntree)
 				message("best mtry:", fit$bestTune$mtry)
 
 				tunegrid <- expand.grid(.mtry=fit$bestTune$mtry)
-				fit.best <- caret::train(x=train_data[,2:ncol(train_data)], y=train_data[,1], method= method, 
-										 metric=metric, tuneGrid=tunegrid, trControl=control, ntree=ntree, ...)
-				self$res_train <- fit.best
-				self$train_method <- method
-				message('The training result is stored in object$res_train ...')
-				
+				res_train <- caret::train(x=train_data[,2:ncol(train_data)], y = train_data[,1], method = method, 
+										 metric = metric, tuneGrid = tunegrid, trControl = trControl, ntree = ntree, ...)
+
 				######################Optimization of RF parameters end				
+			}else{
+				res_train <- caret::train(Class ~ ., data = train_data, method = method, trControl = trControl, ...)
 			}
-			###################### ----------------
+			self$res_train <- res_train
+			message('The training result is stored in object$res_train ...')
+			self$train_method <- method
 		},
 		#' @description
 		#' Get feature importance from the training model.
-		#' @param ... parameters pass to the evaluating function; If "rf" used, pass to randomForest::importance.
+		#' @param ... parameters pass to varImp function of caret package.
 		#' @return res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
 		#' @examples
 		#' \dontrun{
@@ -274,11 +279,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")
 			}
-			if(self$train_method == "rf"){
-				res_feature_imp <- randomForest::importance(self$res_train$finalModel, ...)
-			}
+			res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)
+			
 			self$res_feature_imp <- res_feature_imp
-			message('The feature importance evaluating result is stored in object$res_feature_imp ...')
+			message('The feature importance is stored in object$res_feature_imp ...')
 		},
 		#' @description
 		#' Run the prediction.
