@@ -56,9 +56,9 @@ trycharnum <- function(x){
 #'
 #' @param taxonomy_table a data.frame with taxonomic information.
 #' @param column default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.
-#' @param pattern default see the function parameter; the characters to be cleaned up or replaced; cleaned up when parameter replacement = "", 
+#' @param pattern default see the function parameter; the characters (regular expression) to be cleaned up or replaced; cleaned up when parameter replacement = "", 
 #'   replaced when parameter replacement has something; Note that the capital and small letters are not distinguished.
-#' @param replacement default ""; the characters used to replace pattern parameter.
+#' @param replacement default ""; the characters used to replace the character in pattern parameter.
 #' @param ignore.case default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.
 #' @param na_fill default ""; used to replace the NA.
 #' @return taxonomic table.

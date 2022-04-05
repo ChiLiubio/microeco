@@ -23,10 +23,10 @@ tidy_taxonomy(
 
 \item{column}{default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.}
 
-\item{pattern}{default see the function parameter; the characters to be cleaned up or replaced; cleaned up when parameter replacement = "", 
+\item{pattern}{default see the function parameter; the characters (regular expression) to be cleaned up or replaced; cleaned up when parameter replacement = "", 
 replaced when parameter replacement has something; Note that the capital and small letters are not distinguished.}
 
-\item{replacement}{default ""; the characters used to replace pattern parameter.}
+\item{replacement}{default ""; the characters used to replace the character in pattern parameter.}
 
 \item{ignore.case}{default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.}
 
