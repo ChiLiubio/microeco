@@ -64,7 +64,7 @@ can be easily achieved with the package file2meco (https://github.com/ChiLiubio/
 
 
 ## Citation
-Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. 2021. microeco: an R package for data mining in microbial community ecology.
+Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. 2021. _microeco_: an R package for data mining in microbial community ecology.
 FEMS Microbiology Ecology, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
 
 
