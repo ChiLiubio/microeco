@@ -18,8 +18,16 @@ Author(s): Felipe Mansoldo and Chi Liu
 data(dataset)
 t1 <- trans_classifier$new(
 		dataset = dataset, 
-		x.predictors = "all",
+		x.predictors = "Genus",
 		y.response = "Group")
+}
+
+## ------------------------------------------------
+## Method `trans_classifier$cal_preProcess`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 
 ## ------------------------------------------------
@@ -98,6 +106,7 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_classifier$new()}}
+\item \href{#method-cal_preProcess}{\code{trans_classifier$cal_preProcess()}}
 \item \href{#method-cal_feature_sel}{\code{trans_classifier$cal_feature_sel()}}
 \item \href{#method-cal_split}{\code{trans_classifier$cal_split()}}
 \item \href{#method-set_trainControl}{\code{trans_classifier$set_trainControl()}}
@@ -133,8 +142,8 @@ Create the trans_classifier object.
 data.frame represents other customized data. See the following available options and description:
 \describe{
   \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
-  \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank}
-  \item{\strong{other input}}{must be a data.frame; It should be have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
+  \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
+  \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
     cols are samples with same names in sample_table}
 }}
 
@@ -153,8 +162,39 @@ data_feature and data_response in the object.
 data(dataset)
 t1 <- trans_classifier$new(
 		dataset = dataset, 
-		x.predictors = "all",
+		x.predictors = "Genus",
 		y.response = "Group")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_preProcess"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_preProcess}{}}}
+\subsection{Method \code{cal_preProcess()}}{
+Pre-process of the feature data based on the caret::preProcess function. 
+	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_preProcess(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters pass to preProcess function of caret package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+converted data_feature in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 }
 \if{html}{\out{</div>}}

@@ -17,8 +17,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#'   data.frame represents other customized data. See the following available options and description:
 		#'   \describe{
 		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
-		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank}
-		#'     \item{\strong{other input}}{must be a data.frame; It should be have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
+		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
+		#'     \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
 		#'       cols are samples with same names in sample_table}
 		#'   }
 		#' @param y.response default NULL; the response variable in sample_table.
@@ -29,7 +29,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' data(dataset)
 		#' t1 <- trans_classifier$new(
 		#' 		dataset = dataset, 
-		#' 		x.predictors = "all",
+		#' 		x.predictors = "Genus",
 		#' 		y.response = "Group")
 		#' }
 		initialize = function(dataset = NULL,
@@ -48,7 +48,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				stop("Response variable must have at least 2 factors!")
 			}
 			# first judge whether x.predictors is character
-			if(is.character(class(x.predictors))){
+			if(is.character(x.predictors)){
 				if (grepl("all", x.predictors, ignore.case = TRUE)) {
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
@@ -56,7 +56,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				}
 			}else{
 				# first check the data.frame
-				if(! is.data.frame(x.predictors)){
+				if(!is.data.frame(x.predictors)){
 					stop("Provided x.predictors is neither character nor data.frame !")
 				}
 				abund_table <- x.predictors
@@ -95,6 +95,23 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			message("The feature table is stored in object$data_feature ...")
 			self$data_response <- y.response
 			message("The response variable is stored in object$data_response ...")
+		},
+		#' @description
+		#' Pre-process (centering, scaling etc.) of the feature data based on the caret::preProcess function. 
+		#' 	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
+		#' 
+		#' @param ... parameters pass to preProcess function of caret package.
+		#' @return converted data_feature in the object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_preProcess(method = c("center", "scale", "nzv"))
+		#' }
+		cal_preProcess = function(...){
+			raw_feature <- self$data_feature
+			preProcess_res <- caret::preProcess(raw_feature, ...)
+			new_data <- predict(preProcess_res, newdata = raw_feature)
+			self$data_feature <- new_data
+			message("The converted feature table is stored in object$data_feature ...")		
 		},
 		#' @description
 		#' Perform feature selection.
