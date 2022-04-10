@@ -175,7 +175,7 @@ t1 <- trans_classifier$new(
 \if{html}{\out{<a id="method-cal_preProcess"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_preProcess}{}}}
 \subsection{Method \code{cal_preProcess()}}{
-Pre-process of the feature data based on the caret::preProcess function. 
+Pre-process (centering, scaling etc.) of the feature data based on the caret::preProcess function. 
 	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_preProcess(...)}\if{html}{\out{</div>}}

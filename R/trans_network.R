@@ -108,7 +108,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
 		#' See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
-		#' Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
+		#' Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
 		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 		#'
 		#' @param network_method default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models of FlashWeave.
@@ -353,39 +353,82 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate node properties.
 		#'
+		#' @return see the Return part in function get_node_table.
+		cal_node_type = function(){
+			warning('Please use get_node_table function instead of this! This function will be discarded in the next release version !')
+			self$get_node_table(node_roles = TRUE)
+		},
+		#' @description
+		#' Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
+		#'   taxonomy, within-module connectivity and among-module connectivity <doi:10.1016/j.geoderma.2022.115866>.
+		#'
 		#' Authors: Chi Liu, Umer Zeeshan Ijaz
 		#'
-		#' @return res_node_type in object.
+		#' @param node_roles default TRUE; whether calculate node roles, i.e. Module hubs, Network hubs, Connectors and Peripherals <doi:10.1016/j.geoderma.2022.115866>.
+		#' @return res_node_table in object; Abundance expressed as a percentage; z presents within-module connectivity;
+		#'   p represents among-module connectivity.		
 		#' @examples
 		#' \donttest{
-		#' t1$cal_node_type()
+		#' t1$get_node_table()
 		#' }
-		cal_node_type = function(){
+		get_node_table = function(node_roles = TRUE){
 			private$check_igraph()
 			network <- self$res_network
-			node_type <- private$module_roles(network)
 			use_abund <- self$use_abund
-			# create a replace_table to match the taxa name and marker name when taxa_level is not "OTU"
-			if(self$taxa_level != "OTU"){
-				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
-				node_type <- cbind.data.frame(node_type, 
-					self$use_tax[replace_table[rownames(node_type), 2], 1:which(colnames(self$use_tax) %in% self$taxa_level), drop = FALSE])
-			}else{
-				node_type <- cbind.data.frame(node_type, self$use_tax[rownames(node_type), ])
-			}
-			node_type$degree <- igraph::degree(network)[rownames(node_type)]
-			node_type$betweenness <- betweenness(network)[rownames(node_type)]
+
+			node_table <- data.frame(name = V(network)$name) %>% `rownames<-`(.[, 1])
+			node_table$degree <- igraph::degree(network)[rownames(node_table)]
+			node_table$betweenness <- betweenness(network)[rownames(node_table)]
 			# Add abundance info
 			sum_abund <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))
 			# Same with the above operation to make the names corresponded
 			if(self$taxa_level != "OTU"){
-				node_type$Abundance <- sum_abund[replace_table[rownames(node_type), 2]]
+				# create a replace_table to match the taxa name and marker name when taxa_level is not "OTU"
+				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
+				node_table$Abundance <- sum_abund[replace_table[rownames(node_table), 2]]
 			}else{
-				node_type$Abundance <- sum_abund[rownames(node_type)]
+				node_table$Abundance <- sum_abund[rownames(node_table)]
+			}
+			if(node_roles){
+				res_module_roles <- private$module_roles(network) %>% cbind.data.frame(name = rownames(.), .)
+				node_table %<>% dplyr::left_join(., res_module_roles, by = c("name" = "name")) %>% `rownames<-`(.$name)
+			}else{
+				if(!is.null(V(network)$module)){
+					node_table$module <- V(network)$module
+				}
+			}
+			if(self$taxa_level != "OTU"){
+				node_table %<>% cbind.data.frame(., 
+					self$use_tax[replace_table[rownames(.), 2], 1:which(colnames(self$use_tax) %in% self$taxa_level), drop = FALSE])
+			}else{
+				node_table %<>% cbind.data.frame(., self$use_tax[rownames(.), ])
 			}
 			
-			self$res_node_type <- node_type
-			message('Result is stored in object$res_node_type ...')
+			self$res_node_table <- node_table
+			message('Result is stored in object$res_node_table ...')
+		},
+		#' @description
+		#' Get the table of edges, including connected nodes, labels and weight.
+		#'
+		#' @return res_edge_table in object.
+		#' @examples
+		#' \donttest{
+		#' t1$get_edge_table()
+		#' }
+		get_edge_table = function(){
+			private$check_igraph()
+			network <- self$res_network
+			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
+			edge_label <- E(network)$label
+			if(!is.null(E(network)$weight)){
+				edge_weight <- E(network)$weight
+			}else{
+				edge_weight <- rep(NA, times = length(edge_label))
+			}
+			res_edge_table <- data.frame(edges, edge_label, edge_weight)
+			colnames(res_edge_table) <- c("node1", "node2", "label", "weight")
+			self$res_edge_table <- res_edge_table
+			message('Result is stored in object$res_edge_table ...')
 		},
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
@@ -398,12 +441,12 @@ trans_network <- R6Class(classname = "trans_network",
 		cal_eigen = function(){
 			private$check_igraph()
 			use_abund <- self$use_abund
-			res_node_type <- self$res_node_type
+			node_table <- self$res_node_table
 			# calculate eigengene for each module
 			res_eigen <- list()
 			res_eigen_expla <- c()
-			for(i in unique(as.character(res_node_type$module))){
-				tax_names <- rownames(res_node_type[as.character(res_node_type$module) == i, ])
+			for(i in unique(as.character(node_table$module))){
+				tax_names <- rownames(node_table[as.character(node_table$module) == i, ])
 				if(length(tax_names) < 3){
 					next
 				}
@@ -427,7 +470,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_eigen and object$res_eigen_expla ...')
 		},
 		#' @description
-		#' Plot the classification and importance of nodes, see object$res_node_type for the variable names used in the parameters.
+		#' Plot the classification and importance of nodes, see object$res_node_table for the variable names used in the parameters.
 		#'
 		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot; 2 represents the layered plot with taxa as x axis.
 		#' @param roles_color_background default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.
@@ -465,7 +508,7 @@ trans_network <- R6Class(classname = "trans_network",
 			...
 			){
 			if(use_type == 1){
-				res <- private$plot_roles_1(node_roles = self$res_node_type, 
+				res <- private$plot_roles_1(node_roles = self$res_node_table, 
 					roles_color_background = roles_color_background,
 					roles_color_values = roles_color_values, 
 					module = plot_module,
@@ -474,7 +517,7 @@ trans_network <- R6Class(classname = "trans_network",
 				)
 			}
 			if(use_type == 2){
-				res <- private$plot_roles_2(node_roles = self$res_node_type, 
+				res <- private$plot_roles_2(node_roles = self$res_node_table, 
 					plot_color = plot_color,
 					plot_shape = plot_shape,
 					use_level = use_level, 
@@ -497,7 +540,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return a new network
 		#' @examples
 		#' \donttest{
-		#' t1$subset_network(node = t1$res_node_type %>% .[.$module == "M1", ] %>% 
+		#' t1$subset_network(node = t1$res_node_table %>% .[.$module == "M1", ] %>% 
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }
@@ -526,28 +569,6 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 			}
 			sub_network
-		},
-		#' @description
-		#' Get the table of edges, including connected nodes, labels and weight.
-		#'
-		#' @return data.frame
-		#' @examples
-		#' \donttest{
-		#' t1$get_edge_table()
-		#' }
-		get_edge_table = function(){
-			private$check_igraph()
-			network <- self$res_network
-			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-			edge_label <- E(network)$label
-			if(!is.null(E(network)$weight)){
-				edge_weight <- E(network)$weight
-			}else{
-				edge_weight <- rep(NA, times = length(edge_label))
-			}
-			res_edge_table <- data.frame(edges, edge_label, edge_weight)
-			colnames(res_edge_table) <- c("node1", "node2", "label", "weight")
-			res_edge_table
 		},
 		#' @description
 		#' Perform a bootstrapping hypothesis test to determine whether degrees follows a power law distribution;

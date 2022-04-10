@@ -50,11 +50,19 @@ t1$cal_network_attr()
 }
 
 ## ------------------------------------------------
-## Method `trans_network$cal_node_type`
+## Method `trans_network$get_node_table`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_node_type()
+t1$get_node_table()
+}
+
+## ------------------------------------------------
+## Method `trans_network$get_edge_table`
+## ------------------------------------------------
+
+\donttest{
+t1$get_edge_table()
 }
 
 ## ------------------------------------------------
@@ -78,17 +86,9 @@ t1$plot_taxa_roles()
 ## ------------------------------------------------
 
 \donttest{
-t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% 
+t1$subset_network(node = t1$res_node_table \%>\% .[.$module == "M1", ] \%>\% 
   rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
-}
-
-## ------------------------------------------------
-## Method `trans_network$get_edge_table`
-## ------------------------------------------------
-
-\donttest{
-t1$get_edge_table()
 }
 
 ## ------------------------------------------------
@@ -116,10 +116,11 @@ t1$cal_powerlaw_fit()
 \item \href{#method-save_network}{\code{trans_network$save_network()}}
 \item \href{#method-cal_network_attr}{\code{trans_network$cal_network_attr()}}
 \item \href{#method-cal_node_type}{\code{trans_network$cal_node_type()}}
+\item \href{#method-get_node_table}{\code{trans_network$get_node_table()}}
+\item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
 \item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-subset_network}{\code{trans_network$subset_network()}}
-\item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
 \item \href{#method-cal_powerlaw_p}{\code{trans_network$cal_powerlaw_p()}}
 \item \href{#method-cal_powerlaw_fit}{\code{trans_network$cal_powerlaw_fit()}}
 \item \href{#method-print}{\code{trans_network$print()}}
@@ -195,7 +196,7 @@ t1 <- trans_network$new(
 \subsection{Method \code{cal_network()}}{
 Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
 See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
-Kurtz et al. (2015) <doi:doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
+Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
 Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
@@ -353,19 +354,64 @@ t1$cal_network_attr()
 \if{latex}{\out{\hypertarget{method-cal_node_type}{}}}
 \subsection{Method \code{cal_node_type()}}{
 Calculate node properties.
-
-Authors: Chi Liu, Umer Zeeshan Ijaz
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_node_type()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-res_node_type in object.
+see the Return part in function get_node_table.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_node_table"></a>}}
+\if{latex}{\out{\hypertarget{method-get_node_table}{}}}
+\subsection{Method \code{get_node_table()}}{
+Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
+  taxonomy, within-module connectivity and among-module connectivity <doi:10.1016/j.geoderma.2022.115866>.
+
+Authors: Chi Liu, Umer Zeeshan Ijaz
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_node_table(node_roles = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{node_roles}}{default TRUE; whether calculate node roles, i.e. Module hubs, Network hubs, Connectors and Peripherals <doi:10.1016/j.geoderma.2022.115866>.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_node_table in object; Abundance expressed as a percentage; z presents within-module connectivity;
+  p represents among-module connectivity.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_node_type()
+t1$get_node_table()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_edge_table"></a>}}
+\if{latex}{\out{\hypertarget{method-get_edge_table}{}}}
+\subsection{Method \code{get_edge_table()}}{
+Get the table of edges, including connected nodes, labels and weight.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_edge_table()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+res_edge_table in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$get_edge_table()
 }
 }
 \if{html}{\out{</div>}}
@@ -400,7 +446,7 @@ t1$cal_eigen()
 \if{html}{\out{<a id="method-plot_taxa_roles"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_taxa_roles}{}}}
 \subsection{Method \code{plot_taxa_roles()}}{
-Plot the classification and importance of nodes, see object$res_node_type for the variable names used in the parameters.
+Plot the classification and importance of nodes, see object$res_node_table for the variable names used in the parameters.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_taxa_roles(
   use_type = c(1, 2)[1],
@@ -493,32 +539,9 @@ a new network
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$subset_network(node = t1$res_node_type \%>\% .[.$module == "M1", ] \%>\% 
+t1$subset_network(node = t1$res_node_table \%>\% .[.$module == "M1", ] \%>\% 
   rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_edge_table"></a>}}
-\if{latex}{\out{\hypertarget{method-get_edge_table}{}}}
-\subsection{Method \code{get_edge_table()}}{
-Get the table of edges, including connected nodes, labels and weight.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_edge_table()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-data.frame
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$get_edge_table()
 }
 }
 \if{html}{\out{</div>}}
