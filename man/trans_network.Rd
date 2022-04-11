@@ -66,6 +66,15 @@ t1$get_edge_table()
 }
 
 ## ------------------------------------------------
+## Method `trans_network$plot_network`
+## ------------------------------------------------
+
+\donttest{
+t1$plot_network(method = "igraph", layout=layout_with_kk)
+t1$plot_network(method = "networkD3")
+}
+
+## ------------------------------------------------
 ## Method `trans_network$cal_eigen`
 ## ------------------------------------------------
 
@@ -118,6 +127,7 @@ t1$cal_powerlaw_fit()
 \item \href{#method-cal_node_type}{\code{trans_network$cal_node_type()}}
 \item \href{#method-get_node_table}{\code{trans_network$get_node_table()}}
 \item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
+\item \href{#method-plot_network}{\code{trans_network$plot_network()}}
 \item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-subset_network}{\code{trans_network$subset_network()}}
@@ -194,22 +204,22 @@ t1 <- trans_network$new(
 \if{html}{\out{<a id="method-cal_network"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
-Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
+Calculate network either based on the correlation method or based on SpiecEasi or based on julia FlashWeave; 
 See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
 Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
-Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
+Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for FlashWeave based method.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
-  network_method = c("COR", "SpiecEasi", "PGM")[1],
+  network_method = c("COR", "SpiecEasi", "FlashWeave")[1],
   p_thres = 0.01,
   COR_weight = TRUE,
   COR_p_adjust = "fdr",
   COR_cut = 0.6,
   COR_low_threshold = 0.4,
   COR_optimization = FALSE,
-  PGM_tempdir = NULL,
-  PGM_meta_data = FALSE,
-  PGM_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
+  FlashWeave_tempdir = NULL,
+  FlashWeave_meta_data = FALSE,
+  FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
   SpiecEasi_method = "mb",
   add_taxa_name = "Phylum",
   usename_rawtaxa_when_taxalevel_notOTU = FALSE,
@@ -220,7 +230,7 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models of FlashWeave.}
+\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi" or "FlashWeave"; COR: correlation based method.}
 
 \item{\code{p_thres}}{default 0.01; the p value threshold.}
 
@@ -234,14 +244,14 @@ Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
 
 \item{\code{COR_optimization}}{default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113}
 
-\item{\code{PGM_tempdir}}{default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.}
+\item{\code{FlashWeave_tempdir}}{default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.}
 
-\item{\code{PGM_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the env_data in the object and
+\item{\code{FlashWeave_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the env_data in the object and
 generate a file for meta_data_path parameter of FlashWeave.}
 
-\item{\code{PGM_other_para}}{default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
+\item{\code{FlashWeave_other_para}}{default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
 user can change the parameters or add more according to FlashWeave help;
-An exception is meta_data_path parameter, see PGM_meta_data for the description.}
+An exception is meta_data_path parameter, see FlashWeave_meta_data for the description.}
 
 \item{\code{SpiecEasi_method}}{default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.}
 
@@ -353,7 +363,7 @@ t1$cal_network_attr()
 \if{html}{\out{<a id="method-cal_node_type"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_node_type}{}}}
 \subsection{Method \code{cal_node_type()}}{
-Calculate node properties.
+Calculate node properties. This function will be discarded! Please use get_node_table function!
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_node_type()}\if{html}{\out{</div>}}
 }
@@ -412,6 +422,66 @@ res_edge_table in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$get_edge_table()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_network"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_network}{}}}
+\subsection{Method \code{plot_network()}}{
+Plot the network based on a series of methods from other packages, such as igraph and networkD3. 
+The networkD3 package provides dynamic network. It is useful for a glimpse of the network structure
+and checking the interested nodes and edges in it.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_network(
+  method = c("igraph", "networkD3")[1],
+  node_name = "name",
+  node_color = "module",
+  node_legend = TRUE,
+  zoom = TRUE,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{method}}{default "igraph"; The available options:
+\describe{
+  \item{\strong{'igraph'}}{use plot.igraph function in igraph package for the static network; see plot.igraph for the parameters}
+  \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for the dynamic network; see forceNetwork function for the parameters}
+}}
+
+\item{\code{node_name}}{default "name"; node name shown in the plot when method = "networkD3"; 
+Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
+User can select other column names in res_node_table.}
+
+\item{\code{node_color}}{default "module"; node color assignment for method = "networkD3"; Please see the column names of object$res_node_table; 
+User can select other column names or change the content of object$res_node_table for customized requirement; 
+Please also see the Group parameter in networkD3::forceNetwork function.}
+
+\item{\code{node_legend}}{default TRUE; used when method = "networkD3"; logical value to enable node colour legends;
+Please see the legend parameter in networkD3::forceNetwork function.}
+
+\item{\code{zoom}}{default TRUE; used when method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
+Please see the zoom parameter in networkD3::forceNetwork function.}
+
+\item{\code{...}}{parameters passed to plot.igraph function when method = "igraph" or forceNetwork function when method = "networkD3".}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+network plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$plot_network(method = "igraph", layout=layout_with_kk)
+t1$plot_network(method = "networkD3")
 }
 }
 \if{html}{\out{</div>}}

@@ -106,24 +106,24 @@ trans_network <- R6Class(classname = "trans_network",
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Calculate network either based on the correlation method or based on SpiecEasi or based on the Probabilistic Graphical Models (PGM) in julia FlashWeave; 
+		#' Calculate network either based on the correlation method or based on SpiecEasi or based on julia FlashWeave; 
 		#' See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
 		#' Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
-		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for PGM based method.
+		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for FlashWeave based method.
 		#'
-		#' @param network_method default "COR"; "COR", "SpiecEasi" or "PGM"; COR: correlation based method; PGM: Probabilistic Graphical Models of FlashWeave.
+		#' @param network_method default "COR"; "COR", "SpiecEasi" or "FlashWeave"; COR: correlation based method.
 		#' @param p_thres default 0.01; the p value threshold.
 		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges.
 		#' @param COR_p_adjust default "fdr"; p value adjustment method, see method of p.adjust function for available options.
 		#' @param COR_cut default 0.6; correlation coefficient threshold.
 		#' @param COR_low_threshold default 0.4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.
 		#' @param COR_optimization default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113
-		#' @param PGM_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
-		#' @param PGM_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the env_data in the object and
+		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
+		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the env_data in the object and
 		#'   generate a file for meta_data_path parameter of FlashWeave.
-		#' @param PGM_other_para default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
+		#' @param FlashWeave_other_para default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
 		#'   user can change the parameters or add more according to FlashWeave help;
-		#'   An exception is meta_data_path parameter, see PGM_meta_data for the description.
+		#'   An exception is meta_data_path parameter, see FlashWeave_meta_data for the description.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
@@ -134,32 +134,30 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
 		#' }
 		cal_network = function(
-			network_method = c("COR", "SpiecEasi", "PGM")[1],
+			network_method = c("COR", "SpiecEasi", "FlashWeave")[1],
 			p_thres = 0.01,
 			COR_weight = TRUE,
 			COR_p_adjust = "fdr",
 			COR_cut = 0.6,
 			COR_low_threshold = 0.4,
 			COR_optimization = FALSE,
-			PGM_tempdir = NULL,
-			PGM_meta_data = FALSE,
-			PGM_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
+			FlashWeave_tempdir = NULL,
+			FlashWeave_meta_data = FALSE,
+			FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
 			SpiecEasi_method = "mb",
 			add_taxa_name = "Phylum",
 			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
 			...
 			){
 			private$check_igraph()
-			
 			sampleinfo <- self$use_sampleinfo
 			taxa_level <- self$taxa_level
 			taxa_table <- self$use_tax
-			if(!grepl("COR|PGM|SpiecEasi", network_method, ignore.case = TRUE)){
-				stop("Unknown network method in network_method parameter!")
-			}
+			
+			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "FlashWeave"))
 			
 			message("---------------- ", Sys.time()," : Start ----------------")
-			if(grepl("COR", network_method, ignore.case = TRUE)){
+			if(network_method == "COR"){
 				cortable <- self$res_cor_p$cor
 				# p adjustment for the converted vector
 				raw_p <- self$res_cor_p$p
@@ -200,7 +198,7 @@ trans_network <- R6Class(classname = "trans_network",
 					E(network)$weight <- rep.int(1, ecount(network))
 				}
 			}
-			if(grepl("SpiecEasi", network_method, ignore.case = TRUE)){
+			if(network_method == "SpiecEasi"){
 				if(!require("SpiecEasi")){
 					stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
 				}
@@ -211,38 +209,38 @@ trans_network <- R6Class(classname = "trans_network",
 				V(network)$name <- colnames(use_abund)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 			}
-			if(grepl("PGM", network_method, ignore.case = TRUE)){
+			if(grepl("FlashWeave", network_method, ignore.case = TRUE)){
 				use_abund <- self$use_abund
 				oldwd <- getwd()
 				# make sure working directory can not be changed by the function when quit.
 				on.exit(setwd(oldwd))
 
-				if(is.null(PGM_tempdir)){
+				if(is.null(FlashWeave_tempdir)){
 					tem_dir <- tempdir()
 				}else{
 					# check the directory
-					tem_dir <- PGM_tempdir
+					tem_dir <- FlashWeave_tempdir
 					if(!dir.exists(tem_dir)){
 						stop("The input temporary directory: ", tem_dir, " does not exist!")
 					}
 				}
 				setwd(tem_dir)
-				write.table(use_abund, "taxa_table_PGM.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+				write.table(use_abund, "taxa_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 				L1 <- "using FlashWeave\n"
-				L2 <- 'data_path = "taxa_table_PGM.tsv"\n'
-				if(PGM_meta_data == T){
+				L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
+				if(FlashWeave_meta_data == T){
 					meta_data <- self$env_data
-					write.table(meta_data, "meta_table_PGM.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
-					L3 <- 'meta_data_path = "meta_table_PGM.tsv"\n'
+					write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+					L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
 				}else{
 					L3 <- "\n"
 				}
-				if(PGM_meta_data == T){
-					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", PGM_other_para)), ")\n")
+				if(FlashWeave_meta_data == T){
+					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", FlashWeave_other_para)), ")\n")
 				}else{
-					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", PGM_other_para)), ")\n")
+					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", FlashWeave_other_para)), ")\n")
 				}
-				L5 <- 'save_network("network_PGM.gml", netw_results)'
+				L5 <- 'save_network("network_FlashWeave.gml", netw_results)'
 				L <- paste0(L1, L2, L3, L4, L5)
 				openfile <- file("calculate_network.jl", "wb")
 				write(L, file = openfile)
@@ -250,7 +248,7 @@ trans_network <- R6Class(classname = "trans_network",
 				message("The temporary files are in ", tem_dir, " ...")
 				message("Run the FlashWeave ...")
 				system("julia calculate_network.jl")
-				network <- read_graph("network_PGM.gml", format = "gml")
+				network <- read_graph("network_FlashWeave.gml", format = "gml")
 				network <- set_vertex_attr(network, "name", value = V(network)$label)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 				E(network)$weight <- abs(E(network)$weight)
@@ -351,7 +349,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_network_attr ...')
 		},
 		#' @description
-		#' Calculate node properties.
+		#' Calculate node properties. This function will be discarded! Please use get_node_table function!
 		#'
 		#' @return see the Return part in function get_node_table.
 		cal_node_type = function(){
@@ -389,13 +387,15 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				node_table$Abundance <- sum_abund[rownames(node_table)]
 			}
+			if(!is.null(V(network)$module)){
+				node_table$module <- V(network)$module
+				unique_level <- node_table$module %>% unique
+				order_level <- unique_level %>% gsub("M", "", .) %>% as.numeric %>% order
+				node_table$module %<>% factor(levels = unique_level[order_level])
+			}
 			if(node_roles){
-				res_module_roles <- private$module_roles(network) %>% cbind.data.frame(name = rownames(.), .)
+				res_module_roles <- private$module_roles(network) %>% cbind.data.frame(name = rownames(.), .) %>% .[, c("name", "z", "p", "taxa_roles")]
 				node_table %<>% dplyr::left_join(., res_module_roles, by = c("name" = "name")) %>% `rownames<-`(.$name)
-			}else{
-				if(!is.null(V(network)$module)){
-					node_table$module <- V(network)$module
-				}
 			}
 			if(self$taxa_level != "OTU"){
 				node_table %<>% cbind.data.frame(., 
@@ -418,6 +418,8 @@ trans_network <- R6Class(classname = "trans_network",
 		get_edge_table = function(){
 			private$check_igraph()
 			network <- self$res_network
+			# another way:
+			# res_edge_table <- as_data_frame(network, what = "edges")
 			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 			edge_label <- E(network)$label
 			if(!is.null(E(network)$weight)){
@@ -429,6 +431,69 @@ trans_network <- R6Class(classname = "trans_network",
 			colnames(res_edge_table) <- c("node1", "node2", "label", "weight")
 			self$res_edge_table <- res_edge_table
 			message('Result is stored in object$res_edge_table ...')
+		},
+		#' @description
+		#' Plot the network based on a series of methods from other packages, such as igraph and networkD3. 
+		#' The networkD3 package provides dynamic network. It is useful for a glimpse of the network structure
+		#' and checking the interested nodes and edges in it.
+		#'
+		#' @param method default "igraph"; The available options:
+		#'   \describe{
+		#'     \item{\strong{'igraph'}}{use plot.igraph function in igraph package for the static network; see plot.igraph for the parameters}
+		#'     \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for the dynamic network; see forceNetwork function for the parameters}
+		#'   }
+		#' @param node_name default "name"; node name shown in the plot when method = "networkD3"; 
+		#'   Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
+		#'   User can select other column names in res_node_table.
+		#' @param node_color default "module"; node color assignment for method = "networkD3"; Please see the column names of object$res_node_table; 
+		#'   User can select other column names or change the content of object$res_node_table for customized requirement; 
+		#'   Please also see the Group parameter in networkD3::forceNetwork function.
+		#' @param node_legend default TRUE; used when method = "networkD3"; logical value to enable node colour legends;
+		#'   Please see the legend parameter in networkD3::forceNetwork function.
+		#' @param zoom default TRUE; used when method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
+		#'   Please see the zoom parameter in networkD3::forceNetwork function.
+		#' @param ... parameters passed to plot.igraph function when method = "igraph" or forceNetwork function when method = "networkD3".
+		#' @return network plot.
+		#' @examples
+		#' \donttest{
+		#' t1$plot_network(method = "igraph", layout=layout_with_kk)
+		#' t1$plot_network(method = "networkD3")
+		#' }
+		plot_network = function(method = c("igraph", "networkD3")[1], node_name = "name", node_color = "module", node_legend = TRUE, zoom = TRUE, ...){
+			if(is.null(self$res_network)){
+				stop("No res_network found in the object! Please first run cal_network function!")
+			}
+			method <- match.arg(method, c("igraph", "networkD3"))
+			if(method == "igraph"){
+				network <- self$res_network
+				plot.igraph(network, ...)
+			}
+			if(method == "networkD3"){
+				try_find <- try(find.package("networkD3"), silent = TRUE)
+				if(inherits(try_find, "try-error")){
+					stop("Please first install networkD3 package with command: install.packages('networkD3') !")
+				}
+				if(is.null(self$res_node_table)){
+					message("Run get_node_table function to obtain the node property table ...")
+					self$get_node_table()
+				}
+				if(is.null(self$res_edge_table)){
+					message("Run get_edge_table function to obtain the edge property table ...")
+					self$get_edge_table()
+				}
+				node_table <- self$res_node_table
+				edge_table <- self$res_edge_table
+				replace_table <- data.frame(number = 1:nrow(node_table), name = rownames(node_table))
+				rownames(replace_table) <- replace_table$name
+				rownames(node_table) <- replace_table$number
+				edge_table$node1 <- replace_table[edge_table$node1, 1] - 1
+				edge_table$node2 <- replace_table[edge_table$node2, 1] - 1
+				
+				networkD3::forceNetwork(Links = edge_table, Nodes = node_table,
+							Source = "node1", Target = "node2",
+							NodeID = node_name, zoom = zoom,
+							Group = node_color, legend = node_legend, ...)
+			}
 		},
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
