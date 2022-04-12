@@ -2,10 +2,10 @@
 #' Create trans_network object for co-occurrence network analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of network analysis related methods, 
-#' including the correlation based <doi:10.1186/1471-2105-13-113>, SpiecEasi <doi:10.1371/journal.pcbi.1004226>,
-#' and Probabilistic Graphical Models based <doi:10.1016/j.cels.2019.08.002> network construction approaches, network and node attributes analysis
-#' eigengene analysis, network subsetting and other network operations.
+#' This class is a wrapper for a series of network analysis methods, 
+#' including the correlation-based <doi:10.1186/1471-2105-13-113>, SpiecEasi <doi:10.1371/journal.pcbi.1004226>,
+#' and FlashWeave <doi:10.1016/j.cels.2019.08.002> network construction approaches, network attributes analysis,
+#' eigengene analysis, network subsetting, node and edge properties extraction, network plotting, and other network operations.
 #'
 #' @export
 trans_network <- R6Class(classname = "trans_network",
@@ -15,24 +15,26 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   and calculate correlations if cal_cor parameter is selected.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation based network.
-		#' @param cal_cor default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represent do not calculate correlations, used for non-correlation based network. 
-		#' @param taxa_level default "OTU"; taxonomic rank. 
-		#' @param filter_thres default 0; the relative abundance threshold. 
-		#' @param nThreads default 1; the thread number used for "WGCNA" and SparCC. 
-		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap. 
-		#' @param env_cols default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table. 
-		#' @param add_data default NULL; provide environmental table additionally; rownames must be sample names.
-		#' @return res_cor_p list.
+		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation-based network.
+		#' @param cal_cor default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represents no correlation calculation, 
+		#' 	  used for non-correlation based network, such as SpiecEasi and FlashWeave methods.
+		#' @param taxa_level default "OTU"; taxonomic rank; 'OTU' represents using feature table directly; 
+		#' 	  other available options should be one of the colnames of microtable$tax_table.
+		#' @param filter_thres default 0; the relative abundance threshold.
+		#' @param nThreads default 1; the thread number used for "WGCNA" and SparCC.
+		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap.
+		#' @param env_cols default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table;
+		#'   the environmental data can be used in the correlation network (as the nodes) or FlashWeave network.
+		#' @param add_data default NULL; provide environmental table additionally instead of env_cols parameter; rownames must be sample names.
+		#' @return res_cor_p list; include the correlation matrix and p value matrix.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
-		#' # correlation network
-		#' t1 <- trans_network$new(
-		#' 		dataset = dataset, 
-		#' 		cal_cor = "base", 
-		#' 		taxa_level = "OTU", 
-		#' 		filter_thres = 0.001)
+		#' # for correlation network
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		#' 		taxa_level = "OTU", filter_thres = 0.0001)
+		#' # for other network
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
 		#' }
 		initialize = function(
 			dataset = NULL,
@@ -85,6 +87,10 @@ trans_network <- R6Class(classname = "trans_network",
 					cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
 				}
 				if(cal_cor == "SparCC"){
+					try_find <- try(find.package("SpiecEasi"), silent = TRUE)
+					if(inherits(try_find, "try-error")){
+						stop("SpiecEasi package is used for the SparCC calculation, but it is not installed! See https://github.com/zdk123/SpiecEasi for the installation")
+					}
 					bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
 					cor_result <- SpiecEasi::pval.sparccboot(bootres)
 					# reshape the results
@@ -106,45 +112,53 @@ trans_network <- R6Class(classname = "trans_network",
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Calculate network either based on the correlation method or based on SpiecEasi or based on julia FlashWeave; 
+		#' Calculate network based on the correlation method or SpiecEasi or julia FlashWeave; 
 		#' See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
 		#' Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
-		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for FlashWeave based method.
+		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for FlashWeave method.
 		#'
-		#' @param network_method default "COR"; "COR", "SpiecEasi" or "FlashWeave"; COR: correlation based method.
-		#' @param p_thres default 0.01; the p value threshold.
-		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges.
+		#' @param network_method default "COR"; "COR", "SpiecEasi" or "FlashWeave"; The option details: 
+		#'   \describe{
+		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in object$res_cor_p returned from trans_network$new}
+		#'     \item{\strong{'SpiecEasi'}}{SpiecEasi network; see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the package}
+		#'     \item{\strong{'FlashWeave'}}{FlashWeave network; 
+		#'       see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing the package}
+		#'   }
+		#' @param COR_p_thres default 0.01; the p value threshold for the correlation-based network.
 		#' @param COR_p_adjust default "fdr"; p value adjustment method, see method of p.adjust function for available options.
-		#' @param COR_cut default 0.6; correlation coefficient threshold.
-		#' @param COR_low_threshold default 0.4; the lowest correlation coefficient threshold, use with COR_optimization = TRUE.
+		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges; FALSE represents weight = 1 for all edges.
+		#' @param COR_cut default 0.6; correlation coefficient threshold for the correlation network.
 		#' @param COR_optimization default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113
+		#' @param COR_low_threshold default 0.4; the lowest correlation coefficient threshold, only useful when COR_optimization = TRUE.
+		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
-		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the env_data in the object and
+		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
 		#'   generate a file for meta_data_path parameter of FlashWeave.
 		#' @param FlashWeave_other_para default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
-		#'   user can change the parameters or add more according to FlashWeave help;
-		#'   An exception is meta_data_path parameter, see FlashWeave_meta_data for the description.
-		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
-		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network.
+		#'   user can change the parameters or add more according to FlashWeave help document;
+		#'   An exception is meta_data_path parameter as it is generated based on the data inside the object, see FlashWeave_meta_data parameter for the description.
+		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
 		#' @param ... paremeters pass to spiec.easi in package SpiecEasi for network_method = "SpiecEasi".
 		#' @return res_network in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_network(p_thres = 0.01, COR_cut = 0.6)
+		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
+		#' t1$cal_network(network_method = "SpiecEasi")
+		#' t1$cal_network(network_method = "FlashWeave")
 		#' }
 		cal_network = function(
 			network_method = c("COR", "SpiecEasi", "FlashWeave")[1],
-			p_thres = 0.01,
-			COR_weight = TRUE,
+			COR_p_thres = 0.01,
 			COR_p_adjust = "fdr",
+			COR_weight = TRUE,
 			COR_cut = 0.6,
-			COR_low_threshold = 0.4,
 			COR_optimization = FALSE,
+			COR_low_threshold = 0.4,
+			SpiecEasi_method = "mb",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
 			FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
-			SpiecEasi_method = "mb",
 			add_taxa_name = "Phylum",
 			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
 			...
@@ -187,7 +201,7 @@ trans_network <- R6Class(classname = "trans_network",
 				diag(cortable) <- 0
 				cor_matrix <- as.matrix(cortable)
 				cor_matrix[abs(cortable) >= tc1] <- 1
-				cor_matrix[adp >= p_thres] <- 0
+				cor_matrix[adp >= COR_p_thres] <- 0
 				cor_matrix[cor_matrix != 1] <- 0
 				network <- graph.adjacency(cor_matrix, mode = "undirected")
 				edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
@@ -229,6 +243,10 @@ trans_network <- R6Class(classname = "trans_network",
 				L1 <- "using FlashWeave\n"
 				L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
 				if(FlashWeave_meta_data == T){
+					if(is.null(self$env_data)){
+						stop("FlashWeave_meta_data is TRUE, but object$env_data not found! 
+							Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
+					}
 					meta_data <- self$env_data
 					write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 					L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
@@ -290,18 +308,19 @@ trans_network <- R6Class(classname = "trans_network",
 			message('The result network is stored in object$res_network ...')
 		},
 		#' @description
-		#' Add network modules to the network.
+		#' Calculate network modules and add module names to the network node properties.
 		#'
 		#' @param method default "cluster_fast_greedy"; the method used to find the optimal community structure of a graph;
 		#' 	 the following are available functions (options) from igraph package: "cluster_fast_greedy", "cluster_optimal",
 		#' 	 "cluster_edge_betweenness", "cluster_infomap", "cluster_label_prop", "cluster_leading_eigen",
-		#' 	 "cluster_louvain", "cluster_spinglass", "cluster_walktrap".
+		#' 	 "cluster_louvain", "cluster_spinglass", "cluster_walktrap". 
+		#' 	 For the details of these functions, see the help document, such as help(cluster_fast_greedy).
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
-		#' @return a network with modules, stored in object.
+		#' @return res_network with modules, stored in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_module()
+		#' t1$cal_module(method = "cluster_fast_greedy")
 		#' }
 		cal_module = function(method = "cluster_fast_greedy", module_name_prefix = "M"){
 			private$check_igraph()
@@ -326,11 +345,15 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
 		#'
-		#' @param filepath default "network.gexf"; file path.
+		#' @param filepath default "network.gexf"; file path to save the network.
 		#' @return None.
+		#' @examples
+		#' \dontrun{
+		#' t1$save_network(filepath = "network.gexf")
+		#' }
 		save_network = function(filepath = "network.gexf"){
 			if(!require("rgexf")){
-				stop("Please install rgexf package")
+				stop("Please first install rgexf package with command: install.packages('rgexf') !")
 			}
 			private$check_igraph()
 			private$saveAsGEXF(network = self$res_network, filepath = filepath)
@@ -338,7 +361,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate network properties.
 		#'
-		#' @return res_network_attr in object.
+		#' @return res_network_attr stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_network_attr()
@@ -349,7 +372,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_network_attr ...')
 		},
 		#' @description
-		#' Calculate node properties. This function will be discarded! Please use get_node_table function!
+		#' Calculate node properties. This function will be discarded in the future version! Please use get_node_table function!
 		#'
 		#' @return see the Return part in function get_node_table.
 		cal_node_type = function(){
@@ -363,11 +386,11 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Authors: Chi Liu, Umer Zeeshan Ijaz
 		#'
 		#' @param node_roles default TRUE; whether calculate node roles, i.e. Module hubs, Network hubs, Connectors and Peripherals <doi:10.1016/j.geoderma.2022.115866>.
-		#' @return res_node_table in object; Abundance expressed as a percentage; z presents within-module connectivity;
+		#' @return res_node_table in object; Abundance expressed as a percentage; z represents within-module connectivity;
 		#'   p represents among-module connectivity.		
 		#' @examples
 		#' \donttest{
-		#' t1$get_node_table()
+		#' t1$get_node_table(node_roles = TRUE)
 		#' }
 		get_node_table = function(node_roles = TRUE){
 			private$check_igraph()
@@ -408,7 +431,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_node_table ...')
 		},
 		#' @description
-		#' Get the table of edges, including connected nodes, labels and weight.
+		#' Get the edge property table, including connected nodes, label and weight.
 		#'
 		#' @return res_edge_table in object.
 		#' @examples
@@ -435,18 +458,18 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Plot the network based on a series of methods from other packages, such as igraph and networkD3. 
 		#' The networkD3 package provides dynamic network. It is useful for a glimpse of the network structure
-		#' and checking the interested nodes and edges in it.
+		#' and finding the interested nodes and edges in it fast.
 		#'
 		#' @param method default "igraph"; The available options:
 		#'   \describe{
-		#'     \item{\strong{'igraph'}}{use plot.igraph function in igraph package for the static network; see plot.igraph for the parameters}
+		#'     \item{\strong{'igraph'}}{call plot.igraph function in igraph package for the static network; see plot.igraph for the parameters}
 		#'     \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for the dynamic network; see forceNetwork function for the parameters}
 		#'   }
 		#' @param node_name default "name"; node name shown in the plot when method = "networkD3"; 
 		#'   Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
 		#'   User can select other column names in res_node_table.
 		#' @param node_color default "module"; node color assignment for method = "networkD3"; Please see the column names of object$res_node_table; 
-		#'   User can select other column names or change the content of object$res_node_table for customized requirement; 
+		#'   User can select other column names or change the content of object$res_node_table; 
 		#'   Please also see the Group parameter in networkD3::forceNetwork function.
 		#' @param node_legend default TRUE; used when method = "networkD3"; logical value to enable node colour legends;
 		#'   Please see the legend parameter in networkD3::forceNetwork function.
@@ -456,7 +479,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return network plot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_network(method = "igraph", layout=layout_with_kk)
+		#' t1$plot_network(method = "igraph", layout = layout_with_kk)
 		#' t1$plot_network(method = "networkD3")
 		#' }
 		plot_network = function(method = c("igraph", "networkD3")[1], node_name = "name", node_color = "module", node_legend = TRUE, zoom = TRUE, ...){
@@ -496,7 +519,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 		},
 		#' @description
-		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance.
+		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance <doi:10.1186/1471-2105-13-113>.
 		#'
 		#' @return res_eigen and res_eigen_expla in object.
 		#' @examples
@@ -554,7 +577,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_taxa_roles()
+		#' t1$plot_taxa_roles(roles_color_background = FALSE)
 		#' }
 		plot_taxa_roles = function(
 			use_type = c(1, 2)[1],
@@ -665,7 +688,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @param xmin default NULL; See xmin in fit_power_law function; suggest using the result res_powerlaw_min from cal_powerlaw_p function.
 		#' @param ... paremeters pass to fit_power_law function in igraph package.
-		#' @return list stored in object; see fit_power_law function for the details explanation.
+		#' @return res_powerlaw_fit stored in object; see fit_power_law function for the details explanation.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_powerlaw_fit()
@@ -693,19 +716,13 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				cat("res_network_attr object: NULL\n")
 			}
-			if(!is.null(self$res_node_type)){
-				cat("res_node_type object: finished\n")
-				cat(paste0("	colnames: ", paste0(colnames(self$res_node_type), collapse = ", "), "\n"))
-			}else{
-				cat("res_node_type object: NULL\n")
-			}
 			invisible(self)
 		}
 		),
 	private = list(
 		check_igraph = function(){
 			if(!require("igraph")){
-				stop("Please first install igraph package!")
+				stop("Please first install igraph package with the command: install.packages('igraph') !")
 			}
 		},
 		# convert long format to symmetrical matrix
@@ -803,7 +820,6 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		# modified based on microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
 		module_roles = function(comm_graph){
-			
 			td <- igraph::degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)
 			z <- private$zscore(wmd)
@@ -817,13 +833,13 @@ trans_network <- R6Class(classname = "trans_network",
 			nod_roles <- private$assign_module_roles(zp)
 			nod_roles
 		},
-		#compute within-module degree for each of the features
+		#compute within-module degree
 		within_module_degree = function(comm_graph){
 			mods <- get.vertex.attribute(comm_graph, "module")
 			if(is.null(mods)){
-				stop("No modules found! Please first calculate network modules using function cal_module!")
+				stop("No modules found! Please first calculate network modules using function cal_module !")
 			}
-			modvs <- data.frame("taxon"= V(comm_graph)$name, "mod"=mods, stringsAsFactors = FALSE)
+			modvs <- data.frame("taxon" = V(comm_graph)$name, "mod" = mods, stringsAsFactors = FALSE)
 			sg1 <- decompose.graph(comm_graph, mode="strong")
 			res <- data.frame()
 			for(mod in unique(modvs$mod)){
@@ -848,8 +864,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#compute within-module degree z-score which
 		#measures how well-connected a node is to other nodes in the module.
 		zscore = function(mod.degree){
-			ksi_bar <- aggregate(mod_links ~ module, data=mod.degree, FUN = mean)
-			ksi_sigma <- aggregate(mod_links ~ module, data=mod.degree, FUN = sd)
+			ksi_bar <- aggregate(mod_links ~ module, data = mod.degree, FUN = mean)
+			ksi_sigma <- aggregate(mod_links ~ module, data = mod.degree, FUN = sd)
 			z <- NULL
 			for(i in 1:dim(mod.degree)[1]){
 				mod_mean <- ksi_bar$mod_links[which(ksi_bar$module == mod.degree$module[i])]
@@ -859,13 +875,13 @@ trans_network <- R6Class(classname = "trans_network",
 			z <- data.frame(row.names=rownames(mod.degree), z, module=mod.degree$module)
 			z
 		},
-		#calculate the degree (links) of each node to nodes in other modules.
+		#calculate the degree (links) of each node to nodes in other modules
 		among_module_connectivity = function(comm_graph){
-			modvs <- data.frame(taxon= V(comm_graph)$name, mod=get.vertex.attribute(comm_graph, "module"), stringsAsFactors = FALSE)
+			modvs <- data.frame(taxon = V(comm_graph)$name, mod = get.vertex.attribute(comm_graph, "module"), stringsAsFactors = FALSE)
 			edges <- t(sapply(1:ecount(comm_graph), function(x) ends(comm_graph, x)))
 			res <- lapply(modvs$taxon, function(x){
-						sapply(unique(c(edges[edges[,1] == x, 2], edges[edges[,2] == x, 1])), function(y){
-							c(taxa = x, module = modvs[modvs$taxon==y, "mod"])
+						sapply(unique(c(edges[edges[, 1] == x, 2], edges[edges[, 2] == x, 1])), function(y){
+							c(taxa = x, module = modvs[modvs$taxon == y, "mod"])
 						})
 					})
 			res <- do.call(cbind, res) %>% 
