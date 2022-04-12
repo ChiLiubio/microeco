@@ -244,7 +244,7 @@ t1$plot_mantel_corr()
 \if{html}{\out{<a id="method-cal_betampd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betampd}{}}}
 \subsection{Method \code{cal_betampd()}}{
-Calculate betaMPD. Faster than comdist in picante package.
+Calculate betaMPD (mean pairwise distance). Faster than comdist in picante package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betampd(abundance.weighted = FALSE)}\if{html}{\out{</div>}}
 }
@@ -274,7 +274,7 @@ t1$cal_betampd(abundance.weighted=FALSE)
 \if{html}{\out{<a id="method-cal_betamntd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betamntd}{}}}
 \subsection{Method \code{cal_betamntd()}}{
-Calculate betaMNTD. Faster than comdistnt in picante package.
+Calculate betaMNTD (mean nearest taxon distance). Faster than comdistnt in picante package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
   abundance.weighted = FALSE,
@@ -309,7 +309,7 @@ t1$cal_betamntd(abundance.weighted=FALSE)
 \if{html}{\out{<a id="method-cal_ses_betampd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_ses_betampd}{}}}
 \subsection{Method \code{cal_ses_betampd()}}{
-Calculate ses.betaMPD (betaNRI).
+Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (betaNRI).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betampd(
   runs = 1000,
@@ -347,7 +347,7 @@ t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
 \if{html}{\out{<a id="method-cal_ses_betamntd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_ses_betamntd}{}}}
 \subsection{Method \code{cal_ses_betamntd()}}{
-Calculate ses.betaMNTD (betaNTI).
+Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (betaNTI).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betamntd(
   runs = 1000,
@@ -388,7 +388,7 @@ t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics
 \if{html}{\out{<a id="method-cal_rcbray"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_rcbray}{}}}
 \subsection{Method \code{cal_rcbray()}}{
-Calculate rcbray.
+Calculate Bray–Curtis-based Raup–Crick (RCbray).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_rcbray(
   runs = 1000,

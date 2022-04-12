@@ -170,7 +170,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			g
 		},
 		#' @description
-		#' Calculate betaMPD. Faster than comdist in picante package.
+		#' Calculate betaMPD (mean pairwise distance). Faster than comdist in picante package.
 		#'
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
 		#' @return res_betampd in object.
@@ -192,7 +192,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_betampd ...')
 		},
 		#' @description
-		#' Calculate betaMNTD. Faster than comdistnt in picante package.
+		#' Calculate betaMNTD (mean nearest taxon distance). Faster than comdistnt in picante package.
 		#'
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
 		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
@@ -216,7 +216,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_betamntd ...')
 		},
 		#' @description
-		#' Calculate ses.betaMPD (betaNRI).
+		#' Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (betaNRI).
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param abundance.weighted default FALSE; whether use weighted abundance.
@@ -227,7 +227,6 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
 		#' }
 		cal_ses_betampd = function(runs = 1000, abundance.weighted = FALSE, verbose = TRUE) {
-
 			comm <- self$comm
 			dis <- self$dis
 			if(is.null(dis)){
@@ -263,7 +262,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_ses_betampd ...')
 		},
 		#' @description
-		#' Calculate ses.betaMNTD (betaNTI).
+		#' Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (betaNTI).
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param abundance.weighted default FALSE; whether use weighted abundance
@@ -322,7 +321,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_ses_betamntd ...')
 		},
 		#' @description
-		#' Calculate rcbray.
+		#' Calculate Bray–Curtis-based Raup–Crick (RCbray).
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param verbose default TRUE; whether show the calculation process message.
