@@ -35,31 +35,37 @@ trans_func <- R6Class(classname = "trans_func",
 					if(any(grepl("Fungi", all_Kingdom, ignore.case = TRUE))){
 						for_what <- "fungi"
 					}else{
-						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table, please assign for_what object use prok or fungi manually!")
+						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table! 
+							Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi'")
 					}
 				}
 			}else{
-				message("No Kingdom found in the tax_table, please assign for_what object use prok or fungi manually!")
+				message("No Kingdom found in the tax_table! Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi'")
 			}
 			self$for_what <- for_what
 		},
 		#' @description
-		#' Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
-		#' Prokaryotes, based on the FAPROTAX database or NJC19 database, please also cite: 
-		#' FAPROTAX: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>; 
-		#' NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. Scientific Data, 7(1). <10.1038/s41597-020-0516-5>.
-		#' Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
-		#' FUNGuild: Nguyen et al. (2016). 
-		#' FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>; 
-		#' FungalTraits: Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
-		#' Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
+		#' Confirm traits of each feature by matching the taxonomic assignments to the functional database.
 		#'
-		#' @param prok_database default "FAPROTAX"; "FAPROTAX" or "NJC19", selecting a prokaryotic trait database; see the description in this function.
-		#' @param fungi_database default "FUNGuild"; "FUNGuild" or "FungalTraits", a fungi trait database for the identification; see the description in this function.
-		#' @return res_spe_func in object.
+		#' @param prok_database default "FAPROTAX"; "FAPROTAX" or "NJC19"; select a prokaryotic trait database; see the details:
+		#'   \describe{
+		#'     \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4 Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
+		#'     	  Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
+		#'     \item{\strong{'NJC19'}}{NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. 
+		#'     	  Scientific Data, 7(1). <10.1038/s41597-020-0516-5>}
+		#'   }
+		#' @param fungi_database default "FUNGuild"; "FUNGuild" or "FungalTraits"; select a fungal trait database; see the details:
+		#'   \describe{
+		#'     \item{\strong{'FUNGuild'}}{Nguyen et al. (2016) FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild.
+		#'     	  Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>}
+		#'     \item{\strong{'FungalTraits'}}{Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
+		#'     	  Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>}
+		#'   }
+		#' @return res_spe_func stored in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_spe_func()
+		#' t1$cal_spe_func(prok_database = "FAPROTAX")
+		#' t1$cal_spe_func(fungi_database = "FungalTraits")
 		#' }
 		cal_spe_func = function(
 			prok_database = c("FAPROTAX", "NJC19")[1], 
@@ -78,7 +84,7 @@ trans_func <- R6Class(classname = "trans_func",
 					# Copyright (c) 2021, Stilianos Louca. All rights reserved.
 					# developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 					data("prok_func_FAPROTAX", envir=environment())
-					message("Please also cite the original FAPROTAX paper: Louca et al. (2016).")
+					message("FAPROTAX v1.2.4. Please also cite the original FAPROTAX paper: Louca et al. (2016).")
 					message("Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 					# collapse taxonomy
 					tax1 <- apply(tax1, 1, function(x){paste0(x, collapse = ";")}) %>% 
@@ -269,17 +275,19 @@ trans_func <- R6Class(classname = "trans_func",
 			message('The functional binary table is stored in object$res_spe_func ...')
 		},
 		#' @description
-		#' Calculating the percentages of species with specific trait in communities or modules.
-		#' The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+		#' Calculating the percentages of species with specific trait in communities or network modules.
+		#' The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+		#' So this method is a simple calculation of functional redundancy without the consideration of phylogenetic distance among taxa.
 		#'
-		#' @param use_community default TRUE; whether calculate community; if FALSE, use module.
-		#' @param abundance_weighted default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, 
+		#' @param use_community default TRUE; whether calculate percentages for community; if FALSE, for network module.
+		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. If TRUE, 
 		#' 	  calculate the functional individual percentage.
-		#' @param node_type_table default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.
-		#' @return res_spe_func_perc in object.
+		#' @param node_type_table default NULL; used when use_community = FALSE; provide the node_type_table with the module information;
+		#' 	  there must be a colname "module" in the table; generally provide the result of trans_network$get_node_table.
+		#' @return res_spe_func_perc stored in the object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_spe_func_perc(use_community = TRUE)
+		#' t1$cal_spe_func_perc(use_community = TRUE, abundance_weighted = TRUE)
 		#' }
 		cal_spe_func_perc = function(
 			use_community = TRUE, 
@@ -362,13 +370,15 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 		},
 		#' @description
-		#' Plot the percentages of species with specific trait in communities or modules.
+		#' Plot the percentages of species with specific trait in communities or network modules.
 		#'
 		#' @param filter_func default NULL; a vector of function names used to show in the plot.
-		#' @param use_group_list default TRUE; If TRUE, use default group list; If use personalized group list, 
-		#'    first set trans_func$func_group_list object with a list of group names and functions.
+		#' @param use_group_list default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
+		#'    please first set trans_func$func_group_list object with a list of group names and functions.
 		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.
-		#' @param select_samples default NULL; character vector, select partial samples to show
+		#' @param select_samples default NULL; character vector; select partial samples to show.
+		#' @param color_gradient_low default "#00008B"; the color used as the low end in the color gradient.
+		#' @param color_gradient_high default "#9E0142"; the color used as the high end in the color gradient.
 		#' @return ggplot2.
 		#' @examples
 		#' \donttest{
@@ -378,7 +388,9 @@ trans_func <- R6Class(classname = "trans_func",
 			filter_func = NULL, 
 			use_group_list = TRUE, 
 			add_facet = TRUE, 
-			select_samples = NULL
+			select_samples = NULL,
+			color_gradient_low = "#00008B",
+			color_gradient_high = "#9E0142"
 			){
 			if(is.null(self$res_spe_func_perc)){
 				stop("Please first run cal_spe_func and cal_spe_func_perc function !")
@@ -427,9 +439,9 @@ trans_func <- R6Class(classname = "trans_func",
 			g1 <- ggplot(aes(x = sampname, y = variable, fill = value), data = plot_data) + 
 				theme_bw() + 
 				geom_tile() + 
-				scale_fill_gradient2(low = "#00008B", high = "#9E0142") +
+				scale_fill_gradient2(low = color_gradient_low, high = color_gradient_high) +
 				scale_y_discrete(position = "right") + 
-				labs(y=NULL, x=NULL, fill="Percentage (%)") +
+				labs(y = NULL, x = NULL, fill = "Percentage (%)") +
 				theme(axis.text.x = element_text(angle = 35, colour = "black", vjust = 1, hjust = 1, size = 14), axis.text.y = element_text(size = 10)) +
 				theme(panel.grid = element_blank(), panel.border = element_blank()) +
 				theme(panel.spacing = unit(.1, "lines")) + 
@@ -446,7 +458,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
 		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. g__) .
 		#'
-		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the otu table in local place.
+		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the feature table in local place.
 		#' @param folderReferenceData default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.
 		#' @return tax4fun_KO and tax4fun_path in object.
 		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
@@ -489,20 +501,20 @@ trans_func <- R6Class(classname = "trans_func",
 		#'   Tax4Fun2: prediction of habitat-specific functional profiles and functional redundancy based on 16S rRNA gene sequences. Environmental Microbiome 15, 11 (2020).
 		#' 	 <doi:10.1186/s40793-020-00358-7>
 		#'
-		#' @param blast_tool_path default NULL; the folder path, e.g. ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 
-		#'   "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.5.0+-x64-win64.tar.gz  for windows system; 
+		#' @param blast_tool_path default NULL; the folder path, e.g., ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 
+		#'   "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g., ncbi-blast-2.5.0+-x64-win64.tar.gz  for windows system; 
 		#'   if blast_tool_path is NULL, search the tools in the environmental path variable.
 		#' @param path_to_reference_data default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
-		#'   The directory must contain the Ref99NR/Ref100NR folder; 
+		#'   The directory must contain the Ref99NR or Ref100NR folder; 
 		#'   download Ref99NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download}{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download} or 
 		#'   Ref100NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}.
 		#' @param path_to_temp_folder default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, 
-		#' 	 use the default temporary in the computer.
-		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR" .
+		#' 	 use the default temporary in the computer system.
+		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR"; Ref99NR: the 99% clustering reference database; Ref100NR: no clustering.
 		#' @param normalize_by_copy_number default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes. 
 		#' @param min_identity_to_reference default 97; the idenity threshold used for finding the nearest species.
-		#' @param use_uproc default TRUE; UProC was used to functionally anotate the genomes in the reference data.
-		#' @param num_threads default 1; the threads used in the blastn calculation.
+		#' @param use_uproc default TRUE; whether use UProC to functionally anotate the genomes in the reference data.
+		#' @param num_threads default 1; the threads used in the blastn.
 		#' @param normalize_pathways default FALSE; Different to Tax4Fun, when converting from KEGG functions to KEGG pathways, 
 		#' 	 Tax4Fun2 does not equally split KO gene abundances between pathways a functions is affiliated to. The full predicted abundance is affiliated to each pathway. 
 		#'   Use TRUE to split the abundances (default is FALSE).
@@ -760,7 +772,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' }
 		cal_tax4fun2_FRI = function(){
 			if(is.null(self$res_tax4fun2_reference_profile) | is.null(self$res_tax4fun2_database_mode) | is.null(self$res_tax4fun2_path_to_ref_dir)){
-				stop("Please first run cal_tax4fun2()!")
+				stop("Please first run cal_tax4fun2 !")
 			}else{
 				reference_profile <- self$res_tax4fun2_reference_profile
 				database_mode <- self$res_tax4fun2_database_mode
@@ -825,7 +837,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' Print the trans_func object.
 		print = function(){
 			cat("trans_func class:\n")
-			cat(paste("An object for", self$for_what, "analysis.\n"))
+			cat(paste("Functional analysis for", self$for_what, ".\n"))
 			if(!is.null(self$sample_table)){
 				cat("sample_table is available.\n")
 			}

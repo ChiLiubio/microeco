@@ -23,7 +23,8 @@ t1 <- trans_func$new(dataset = dataset)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_spe_func()
+t1$cal_spe_func(prok_database = "FAPROTAX")
+t1$cal_spe_func(fungi_database = "FungalTraits")
 }
 
 ## ------------------------------------------------
@@ -31,7 +32,7 @@ t1$cal_spe_func()
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_spe_func_perc(use_community = TRUE)
+t1$cal_spe_func_perc(use_community = TRUE, abundance_weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -123,15 +124,7 @@ t1 <- trans_func$new(dataset = dataset)
 \if{html}{\out{<a id="method-cal_spe_func"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_spe_func}{}}}
 \subsection{Method \code{cal_spe_func()}}{
-Confirm traits of each OTU by matching the taxonomic assignments to the functional database;
-Prokaryotes, based on the FAPROTAX database or NJC19 database, please also cite: 
-FAPROTAX: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>; 
-NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. Scientific Data, 7(1). <10.1038/s41597-020-0516-5>.
-Fungi, based on the FUNGuild database or FungalTraits database, please also cite:
-FUNGuild: Nguyen et al. (2016). 
-FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>; 
-FungalTraits: Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. 
-Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
+Confirm traits of each feature by matching the taxonomic assignments to the functional database.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(
   prok_database = c("FAPROTAX", "NJC19")[1],
@@ -142,19 +135,32 @@ Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{prok_database}}{default "FAPROTAX"; "FAPROTAX" or "NJC19", selecting a prokaryotic trait database; see the description in this function.}
+\item{\code{prok_database}}{default "FAPROTAX"; "FAPROTAX" or "NJC19"; select a prokaryotic trait database; see the details:
+\describe{
+  \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4 Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
+        Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
+  \item{\strong{'NJC19'}}{NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. 
+        Scientific Data, 7(1). <10.1038/s41597-020-0516-5>}
+}}
 
-\item{\code{fungi_database}}{default "FUNGuild"; "FUNGuild" or "FungalTraits", a fungi trait database for the identification; see the description in this function.}
+\item{\code{fungi_database}}{default "FUNGuild"; "FUNGuild" or "FungalTraits"; select a fungal trait database; see the details:
+\describe{
+  \item{\strong{'FUNGuild'}}{Nguyen et al. (2016) FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild.
+        Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>}
+  \item{\strong{'FungalTraits'}}{Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
+        Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>}
+}}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_spe_func in object.
+res_spe_func stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_spe_func()
+t1$cal_spe_func(prok_database = "FAPROTAX")
+t1$cal_spe_func(fungi_database = "FungalTraits")
 }
 }
 \if{html}{\out{</div>}}
@@ -166,8 +172,9 @@ t1$cal_spe_func()
 \if{html}{\out{<a id="method-cal_spe_func_perc"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_spe_func_perc}{}}}
 \subsection{Method \code{cal_spe_func_perc()}}{
-Calculating the percentages of species with specific trait in communities or modules.
-The percentages of the OTUs with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+Calculating the percentages of species with specific trait in communities or network modules.
+The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+So this method is a simple calculation of functional redundancy without the consideration of phylogenetic distance among taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
   use_community = TRUE,
@@ -179,22 +186,23 @@ The percentages of the OTUs with specific trait can reflect the potential of the
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_community}}{default TRUE; whether calculate community; if FALSE, use module.}
+\item{\code{use_community}}{default TRUE; whether calculate percentages for community; if FALSE, for network module.}
 
-\item{\code{abundance_weighted}}{default FALSE; whether use abundance. If FALSE, calculate the functional population percentage. If TRUE, 
+\item{\code{abundance_weighted}}{default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. If TRUE, 
 calculate the functional individual percentage.}
 
-\item{\code{node_type_table}}{default NULL; If use_community FALSE; provide the node_type_table with the module information, such as the result of cal_node_type.}
+\item{\code{node_type_table}}{default NULL; used when use_community = FALSE; provide the node_type_table with the module information;
+there must be a colname "module" in the table; generally provide the result of trans_network$get_node_table.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_spe_func_perc in object.
+res_spe_func_perc stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_spe_func_perc(use_community = TRUE)
+t1$cal_spe_func_perc(use_community = TRUE, abundance_weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -236,13 +244,15 @@ t1$show_prok_func(use_func = "methanotrophy")
 \if{html}{\out{<a id="method-plot_spe_func_perc"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_spe_func_perc}{}}}
 \subsection{Method \code{plot_spe_func_perc()}}{
-Plot the percentages of species with specific trait in communities or modules.
+Plot the percentages of species with specific trait in communities or network modules.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(
   filter_func = NULL,
   use_group_list = TRUE,
   add_facet = TRUE,
-  select_samples = NULL
+  select_samples = NULL,
+  color_gradient_low = "#00008B",
+  color_gradient_high = "#9E0142"
 )}\if{html}{\out{</div>}}
 }
 
@@ -251,12 +261,16 @@ Plot the percentages of species with specific trait in communities or modules.
 \describe{
 \item{\code{filter_func}}{default NULL; a vector of function names used to show in the plot.}
 
-\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If use personalized group list, 
-first set trans_func$func_group_list object with a list of group names and functions.}
+\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
+please first set trans_func$func_group_list object with a list of group names and functions.}
 
 \item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.}
 
-\item{\code{select_samples}}{default NULL; character vector, select partial samples to show}
+\item{\code{select_samples}}{default NULL; character vector; select partial samples to show.}
+
+\item{\code{color_gradient_low}}{default "#00008B"; the color used as the low end in the color gradient.}
+
+\item{\code{color_gradient_high}}{default "#9E0142"; the color used as the high end in the color gradient.}
 }
 \if{html}{\out{</div>}}
 }
@@ -288,7 +302,7 @@ Note that this function requires a standard prefix in taxonomic table with doubl
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the otu table in local place.}
+\item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the feature table in local place.}
 
 \item{\code{folderReferenceData}}{default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.}
 }
@@ -324,27 +338,27 @@ Predict functional potential of communities with Tax4Fun2 method.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{blast_tool_path}}{default NULL; the folder path, e.g. ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 
-"ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g. ncbi-blast-2.5.0+-x64-win64.tar.gz  for windows system; 
+\item{\code{blast_tool_path}}{default NULL; the folder path, e.g., ncbi-blast-2.5.0+/bin ; blast tools folder downloaded from 
+"ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+"  ; e.g., ncbi-blast-2.5.0+-x64-win64.tar.gz  for windows system; 
 if blast_tool_path is NULL, search the tools in the environmental path variable.}
 
 \item{\code{path_to_reference_data}}{default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
-The directory must contain the Ref99NR/Ref100NR folder; 
+The directory must contain the Ref99NR or Ref100NR folder; 
 download Ref99NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download}{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download} or 
 Ref100NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}.}
 
 \item{\code{path_to_temp_folder}}{default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, 
-use the default temporary in the computer.}
+use the default temporary in the computer system.}
 
-\item{\code{database_mode}}{default 'Ref99NR'; "Ref99NR" or "Ref100NR" .}
+\item{\code{database_mode}}{default 'Ref99NR'; "Ref99NR" or "Ref100NR"; Ref99NR: the 99% clustering reference database; Ref100NR: no clustering.}
 
 \item{\code{normalize_by_copy_number}}{default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes.}
 
 \item{\code{min_identity_to_reference}}{default 97; the idenity threshold used for finding the nearest species.}
 
-\item{\code{use_uproc}}{default TRUE; UProC was used to functionally anotate the genomes in the reference data.}
+\item{\code{use_uproc}}{default TRUE; whether use UProC to functionally anotate the genomes in the reference data.}
 
-\item{\code{num_threads}}{default 1; the threads used in the blastn calculation.}
+\item{\code{num_threads}}{default 1; the threads used in the blastn.}
 
 \item{\code{normalize_pathways}}{default FALSE; Different to Tax4Fun, when converting from KEGG functions to KEGG pathways, 
    Tax4Fun2 does not equally split KO gene abundances between pathways a functions is affiliated to. The full predicted abundance is affiliated to each pathway. 
