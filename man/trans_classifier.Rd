@@ -26,7 +26,7 @@ t1 <- trans_classifier$new(
 ## Method `trans_classifier$cal_preProcess`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 
@@ -193,7 +193,7 @@ converted data_feature in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 }

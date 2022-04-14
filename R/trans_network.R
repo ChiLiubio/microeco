@@ -3,8 +3,7 @@
 #'
 #' @description
 #' This class is a wrapper for a series of network analysis methods, 
-#' including the correlation-based <doi:10.1186/1471-2105-13-113>, SpiecEasi <doi:10.1371/journal.pcbi.1004226>,
-#' and FlashWeave <doi:10.1016/j.cels.2019.08.002> network construction approaches, network attributes analysis,
+#' including the network construction approaches, network attributes analysis,
 #' eigengene analysis, network subsetting, node and edge properties extraction, network plotting, and other network operations.
 #'
 #' @export
@@ -112,17 +111,25 @@ trans_network <- R6Class(classname = "trans_network",
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Calculate network based on the correlation method or SpiecEasi or julia FlashWeave; 
-		#' See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for correlation based method, 
-		#' Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for SpiecEasi method, 
-		#' Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for FlashWeave method.
+		#' Calculate network based on the correlation method or SpiecEasi package or julia FlashWeave package or beemStatic package.
 		#'
-		#' @param network_method default "COR"; "COR", "SpiecEasi" or "FlashWeave"; The option details: 
+		#' @param network_method default "COR"; "COR", "SpiecEasi", "FlashWeave" or "beemStatic"; The option details: 
 		#'   \describe{
-		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in object$res_cor_p returned from trans_network$new}
-		#'     \item{\strong{'SpiecEasi'}}{SpiecEasi network; see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the package}
-		#'     \item{\strong{'FlashWeave'}}{FlashWeave network; 
-		#'       see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing the package}
+		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in object$res_cor_p returned from trans_network$new; 
+		#'     	  See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}
+		#'     \item{\strong{'SpiecEasi'}}{SpiecEasi network; relies on algorithms for sparse neighborhood and inverse covariance selection;
+		#'     	  belong to the category of conditional dependence and graphical models;
+		#'     	  see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the R package; 
+		#'     	  see Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for the algorithm details}
+		#'     \item{\strong{'FlashWeave'}}{FlashWeave network; Local-to-global learning framework; belong to the category of conditional dependence and graphical models;
+		#'        good performance on heterogenous datasets to find direct associations among taxa;
+		#'        see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing julia language and FlashWeave package;
+		#'        julia must be in the computer system env path, otherwise the program can not find julia;
+		#'        see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for the algorithm details}
+		#'     \item{\strong{'beemStatic'}}{beemStatic network;
+		#'        extend generalized Lotka-Volterra model to cases of cross-sectional datasets to infer interaction among taxa based on expectation-maximization algorithm;
+		#'        see \href{https://github.com/CSB5/BEEM-static}{https://github.com/CSB5/BEEM-static} for installing the R package;
+		#'        see Li et al. (2021) <doi:10.1371/journal.pcbi.1009343> for algorithm details}
 		#'   }
 		#' @param COR_p_thres default 0.01; the p value threshold for the correlation-based network.
 		#' @param COR_p_adjust default "fdr"; p value adjustment method, see method of p.adjust function for available options.
@@ -137,18 +144,24 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param FlashWeave_other_para default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
 		#'   user can change the parameters or add more according to FlashWeave help document;
 		#'   An exception is meta_data_path parameter as it is generated based on the data inside the object, see FlashWeave_meta_data parameter for the description.
+		#' @param beemStatic_t_strength default 0.001; for network_method = "beemStatic"; the threshold used to limit the number of interactions (strength);
+		#'   same with the t.strength parameter in showInteraction function of beemStatic package.
+		#' @param beemStatic_t_stab default 0.8; for network_method = "beemStatic"; 
+		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
 		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
-		#' @param ... paremeters pass to spiec.easi in package SpiecEasi for network_method = "SpiecEasi".
-		#' @return res_network in object.
+		#' @param ... paremeters pass to spiec.easi function of SpiecEasi package when network_method = "SpiecEasi" or 
+		#'   func.EM function of beemStatic package when network_method = "beemStatic".
+		#' @return res_network stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 		#' t1$cal_network(network_method = "SpiecEasi")
 		#' t1$cal_network(network_method = "FlashWeave")
+		#' t1$cal_network(network_method = "beemStatic")
 		#' }
 		cal_network = function(
-			network_method = c("COR", "SpiecEasi", "FlashWeave")[1],
+			network_method = c("COR", "SpiecEasi", "FlashWeave", "beemStatic")[1],
 			COR_p_thres = 0.01,
 			COR_p_adjust = "fdr",
 			COR_weight = TRUE,
@@ -159,6 +172,8 @@ trans_network <- R6Class(classname = "trans_network",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
 			FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
+			beemStatic_t_strength = 0.001,
+			beemStatic_t_stab = 0.8,
 			add_taxa_name = "Phylum",
 			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
 			...
@@ -168,7 +183,7 @@ trans_network <- R6Class(classname = "trans_network",
 			taxa_level <- self$taxa_level
 			taxa_table <- self$use_tax
 			
-			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "FlashWeave"))
+			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "FlashWeave", "beemStatic"))
 			
 			message("---------------- ", Sys.time()," : Start ----------------")
 			if(network_method == "COR"){
@@ -222,6 +237,31 @@ trans_network <- R6Class(classname = "trans_network",
 				network <- adj2igraph(getRefit(network))
 				V(network)$name <- colnames(use_abund)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
+			}
+			if(network_method == "beemStatic"){
+				if(!require("beemStatic")){
+					stop("beemStatic package is not installed! See https://github.com/CSB5/BEEM-static ")
+				}
+				use_abund <- self$use_abund %>% t %>% as.data.frame
+				taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
+				message("The feature table have ", nrow(use_abund), " taxa. The taxa with the lowest occurrence frequency was ", names(taxa_low)[1], 
+					", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
+					"please filter more taxa with low abundance using filter_thres parameter when creating the trans_network object ...")
+				beem.out <- func.EM(use_abund, ...)
+				self$res_beemStatic_raw <- beem.out
+				message('beemStatic result is stored in object$res_beemStatic_raw ...')
+				# modified based on the showInteraction function
+				b <- t(beem2param(beem.out)$b.est)
+				diag(b) <- 0
+				if(!is.null(beem.out$resample)){
+					b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
+				}
+				b[abs(b) < beemStatic_t_strength] <- 0
+				network <- graph.adjacency(b, mode='directed', weighted='weight')
+				V(network)$name <- rownames(use_abund)
+				V(network)$RelativeAbundance <- rowMeans(beemStatic:::tss(use_abund))
+				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
+				E(network)$weight <- abs(E(network)$weight)
 			}
 			if(grepl("FlashWeave", network_method, ignore.case = TRUE)){
 				use_abund <- self$use_abund
@@ -314,7 +354,10 @@ trans_network <- R6Class(classname = "trans_network",
 		#' 	 the following are available functions (options) from igraph package: "cluster_fast_greedy", "cluster_optimal",
 		#' 	 "cluster_edge_betweenness", "cluster_infomap", "cluster_label_prop", "cluster_leading_eigen",
 		#' 	 "cluster_louvain", "cluster_spinglass", "cluster_walktrap". 
-		#' 	 For the details of these functions, see the help document, such as help(cluster_fast_greedy).
+		#' 	 For the details of these functions, see the help document, such as help(cluster_fast_greedy);
+		#' 	 Note that the default "cluster_fast_greedy" method can only be used for undirected network. 
+		#' 	 If the user selects network_method = "beemStatic" in cal_network function or provides other directed network, 
+		#' 	 please use cluster_optimal or others for the modules identification.
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
 		#' @return res_network with modules, stored in object.

@@ -103,7 +103,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to preProcess function of caret package.
 		#' @return converted data_feature in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_preProcess(method = c("center", "scale", "nzv"))
 		#' }
 		cal_preProcess = function(...){

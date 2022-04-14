@@ -350,7 +350,7 @@ Ref100NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/d
 \item{\code{path_to_temp_folder}}{default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, 
 use the default temporary in the computer system.}
 
-\item{\code{database_mode}}{default 'Ref99NR'; "Ref99NR" or "Ref100NR"; Ref99NR: the 99% clustering reference database; Ref100NR: no clustering.}
+\item{\code{database_mode}}{default 'Ref99NR'; "Ref99NR" or "Ref100NR"; Ref99NR: 99\% clustering reference database; Ref100NR: no clustering.}
 
 \item{\code{normalize_by_copy_number}}{default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes.}
 
