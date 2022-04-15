@@ -1,27 +1,28 @@
 #' @title
-#' Create trans_nullmodel object.
+#' Create trans_nullmodel object for phylogeny- and taxonomy-based null model analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of null model and phylogeny related approaches, 
-#' including the mantel correlogram analysis of phylogenetic signal, betaNTI, betaNRI and RCbray calculations;
-#' see Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w>. 
+#' This class is a wrapper for a series of null model related approaches, 
+#' including the mantel correlogram analysis of phylogenetic signal, beta nearest taxon index (betaNTI), 
+#' beta net relatedness index (betaNRI), NTI, NRI and RCbray calculations;
+#' See Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w> for the algorithms and applications.
 #'
 #' @export
 trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param filter_thres default 0; the relative abundance threshold. 
-		#' @param taxa_number default NULL; how many taxa you want to use, if set, filter_thres parameter invalid.
+		#' @param taxa_number default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.
 		#' @param group default NULL; which group column name in sample_table is selected.
-		#' @param select_group default NULL; the group name, used following the group to filter samples.
+		#' @param select_group default NULL; the group name, used following the group parameter to filter samples.
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
-		#' @param complete_na default FALSE; whether fill the NA in environmental data.
-		#' @return intermediate files in object.
+		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
+		#' @return comm and dis in object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
-		#' t1 <- trans_nullmodel$new(dataset, taxa_number = 100, add_data = env_data_16S)
+		#' t1 <- trans_nullmodel$new(dataset, filter_thres = 0.0005, add_data = env_data_16S)
 		initialize = function(
 			dataset = NULL,
 			filter_thres = 0,
@@ -77,9 +78,10 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Calculate mantel correlogram.
 		#'
-		#' @param use_env default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, use PCA to reduce dimensionality.
-		#' @param break.pts default seq(0, 1, 0.02); see \code{\link{mantel.correlog}}
-		#' @param cutoff default FALSE; see cutoff in \code{\link{mantel.correlog}}
+		#' @param use_env default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, 
+		#' 	 use PCA (principal component analysis) to reduce dimensionality.
+		#' @param break.pts default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of vegan package.
+		#' @param cutoff default FALSE; see cutoff parameter in \code{\link{mantel.correlog}}.
 		#' @param ... parameters pass to \code{\link{mantel.correlog}}
 		#' @return res_mantel_corr in object.
 		#' @examples
@@ -125,21 +127,22 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				...
 				)
 			message("---------------- ", Sys.time()," : Finish ----------------")
-
 			self$res_mantel_corr <- res_mantel_corr
 			message('The result is stored in object$res_mantel_corr ...')
 		},
 		#' @description
 		#' Plot mantel correlogram.
 		#'
+		#' @param point_shape default 22; the number for selecting point shape type; see ggplot2 manual for the number meaning.
+		#' @param point_size default 3; the point size.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
 		#' t1$plot_mantel_corr()
 		#' }
-		plot_mantel_corr = function(){
+		plot_mantel_corr = function(point_shape = 22, point_size = 3){
 			if(is.null(self$res_mantel_corr)){
-				stop("Please first use cal_mantel_corr function to get plot data!")
+				stop("Please first run cal_mantel_corr function to get data !")
 			}
 			plot_data <- self$res_mantel_corr$mantel.res %>% as.data.frame
 			plot_data <- plot_data[, -4]
@@ -151,32 +154,31 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}else{
 				color_values <- c("white")
 			}
-			g <- ggplot(plot_data, aes(x=index, y=correlation, group = 1, fill=significance)) +
+			g <- ggplot(plot_data, aes(x = index, y = correlation, group = 1, fill = significance)) +
 				theme_bw() +
-				theme(panel.grid=element_blank()) +
-				geom_line(linetype="dashed") +
-				geom_point(shape=22, size=3) +
-				geom_hline(aes(yintercept= 0), linetype="dotted") +
-				scale_fill_manual(values=color_values) +
-				guides(fill=FALSE) +
-				scale_x_continuous(breaks=c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
+				theme(panel.grid = element_blank()) +
+				geom_line(linetype = "dashed") +
+				geom_point(shape = point_shape, size = point_size) +
+				geom_hline(aes(yintercept = 0), linetype = "dotted") +
+				scale_fill_manual(values = color_values) +
+				scale_x_continuous(breaks = c(0.0, 0.2, 0.4, 0.6, 0.8, 1.0)) +
 				ylab("Mantel correlation") +
 				xlab("Phylogenetic distance") +
-				theme(axis.text=element_text(size=13), axis.title=element_text(size=17)) +
-				theme(legend.position="right", legend.text=element_text(size=rel(1))) +
-				theme(legend.background=element_rect(fill="white", colour="grey60")) +
-				guides(fill=guide_legend(title = NULL, reverse=FALSE))
+				theme(axis.text = element_text(size = 13), axis.title = element_text(size = 17)) +
+				theme(legend.position = "right", legend.text = element_text(size = rel(1))) +
+				theme(legend.background = element_rect(fill="white", colour="grey60")) +
+				guides(fill = guide_legend(title = NULL, reverse = FALSE))
 			
 			g
 		},
 		#' @description
-		#' Calculate betaMPD (mean pairwise distance). Faster than comdist in picante package.
+		#' Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
 		#'
-		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @param abundance.weighted default FALSE; whether use abundance-weighted method.
 		#' @return res_betampd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_betampd(abundance.weighted=FALSE)
+		#' t1$cal_betampd(abundance.weighted = TRUE)
 		#' }
 		cal_betampd = function(abundance.weighted=FALSE){
 			dis <- self$dis
@@ -192,19 +194,19 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_betampd ...')
 		},
 		#' @description
-		#' Calculate betaMNTD (mean nearest taxon distance). Faster than comdistnt in picante package.
+		#' Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
 		#'
-		#' @param abundance.weighted default FALSE; whether use weighted abundance
-		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
+		#' @param abundance.weighted default FALSE; whether use abundance-weighted method.
+		#' @param exclude.conspecifics default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.
 		#' @return res_betamntd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_betamntd(abundance.weighted=FALSE)
+		#' t1$cal_betamntd(abundance.weighted = TRUE)
 		#' }
 		cal_betamntd = function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
 			dis <- self$dis
 			if(is.null(dis)){
-				stop("Phylogenetic tree is required!")
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
 			comm <- self$comm
 			self$res_betamntd <- private$betamntd(
@@ -224,28 +226,28 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_ses_betampd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
+		#' t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
 		#' }
 		cal_ses_betampd = function(runs = 1000, abundance.weighted = FALSE, verbose = TRUE) {
 			comm <- self$comm
 			dis <- self$dis
 			if(is.null(dis)){
-				stop("Phylogenetic tree is required!")
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
 			if (abundance.weighted == F) {
 				comm <- decostand(comm, method="pa")
 			}
-			comm <- decostand(comm, method="total", MARGIN=1)
+			comm <- decostand(comm, method = "total", MARGIN = 1)
 			
 			message("---------------- ", Sys.time()," : Start ----------------")
 			if(verbose){
-				cat("Calculate observed betaMPD.\n")
+				cat("Calculate observed betaMPD ...\n")
 			}
 			betaobs <- private$betampd(comm = comm, dis = dis) %>% as.dist
 			all_samples <- rownames(comm)
 			betaobs_vec <- as.vector(betaobs)
 			if(verbose){
-				cat("Simulate betaMPD.\n")
+				cat("Simulate betaMPD ...\n")
 			}
 			beta_rand <- sapply(seq_len(runs), function(x){
 				if(verbose){
@@ -271,7 +273,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_ses_betamntd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+		#' t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 		#' }
 		cal_ses_betamntd = function(
 			runs=1000, 
@@ -282,7 +284,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- self$comm
 			dis <- self$dis
 			if(is.null(dis)){
-				stop("Phylogenetic tree is required!")
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
 			all_samples <- rownames(comm)
 
@@ -298,7 +300,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				) %>% as.dist
 			betaobs_vec <- as.vector(betaobs)
 			if(verbose){
-				cat("Simulate betaMNTD.\n")
+				cat("Simulate betaMNTD ...\n")
 			}
 			beta_rand <- sapply(seq_len(runs), function(x){
 				if(verbose){
@@ -329,9 +331,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_rcbray in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_rcbray(runs=200)
+		#' t1$cal_rcbray(runs = 500)
 		#' }
-		cal_rcbray = function(runs=1000, verbose = TRUE, null.model = "independentswap") {
+		cal_rcbray = function(runs = 1000, verbose = TRUE, null.model = "independentswap") {
 			comm <- self$comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
@@ -348,7 +350,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_rcbray ...')
 		},
 		#' @description
-		#' Infer the processes according to ses.betaMNTD ses.betaMPD and rcbray.
+		#' Infer the ecological processes according to ses.betaMNTD ses.betaMPD and rcbray.
 		#'
 		#' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
 		#' @return res_rcbray in object.
@@ -360,17 +362,17 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			if(use_betamntd == T){
 				ses_phylo_beta <- self$res_ses_betamntd
 				if(is.null(ses_phylo_beta)){
-					stop("ses_betamntd not calculated!")
+					stop("ses_betamntd not calculated! Please first run cal_ses_betamntd function!")
 				}
 			}else{
 				ses_phylo_beta <- self$res_ses_betampd
 				if(is.null(ses_phylo_beta)){
-					stop("ses_betampd not calculated!")
+					stop("ses_betampd not calculated! Please first run cal_ses_betampd function!")
 				}
 			}
 			ses_comm <- self$res_rcbray
 			if(is.null(ses_comm)){
-				stop("RCbray not calculated!")
+				stop("RCbray not calculated! Please first run cal_rcbray function!")
 			}
 			self$res_process <- private$percen_proc(ses_phylo_beta = ses_phylo_beta, ses_comm = ses_comm)
 			message('The result is stored in object$res_process ...')
@@ -391,7 +393,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			samp <- self$comm
 			dis <- self$dis
 			if(is.null(dis)){
-				stop("Phylogenetic distance is required! Please check the phylogenetic tree!")
+				stop("Phylogenetic distance is required! Please check the phylogenetic tree and see the phylo_tree parameter of microtable class!")
 			}
 			res <- picante::ses.mpd(samp, dis, null.model = null.model, abundance.weighted = abundance.weighted, runs = runs, ...)
 			res$NRI <- res$mpd.obs.z * (-1)
@@ -408,7 +410,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_NTI in object, equivalent to -1 times ses.mntd.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_NTI()
+		#' t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
 		#' }
 		cal_NTI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
 			samp <- self$comm

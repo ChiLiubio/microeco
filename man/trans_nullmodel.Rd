@@ -2,11 +2,12 @@
 % Please edit documentation in R/trans_nullmodel.R
 \name{trans_nullmodel}
 \alias{trans_nullmodel}
-\title{Create trans_nullmodel object.}
+\title{Create trans_nullmodel object for phylogeny- and taxonomy-based null model analysis.}
 \description{
-This class is a wrapper for a series of null model and phylogeny related approaches, 
-including the mantel correlogram analysis of phylogenetic signal, betaNTI, betaNRI and RCbray calculations;
-see Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w>.
+This class is a wrapper for a series of null model related approaches, 
+including the mantel correlogram analysis of phylogenetic signal, beta nearest taxon index (betaNTI), 
+beta net relatedness index (betaNRI), NTI, NRI and RCbray calculations;
+See Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w> for the algorithms and applications.
 }
 \examples{
 
@@ -16,7 +17,7 @@ see Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1
 
 data(dataset)
 data(env_data_16S)
-t1 <- trans_nullmodel$new(dataset, taxa_number = 100, add_data = env_data_16S)
+t1 <- trans_nullmodel$new(dataset, filter_thres = 0.0005, add_data = env_data_16S)
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_mantel_corr`
@@ -39,7 +40,7 @@ t1$plot_mantel_corr()
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_betampd(abundance.weighted=FALSE)
+t1$cal_betampd(abundance.weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -47,7 +48,7 @@ t1$cal_betampd(abundance.weighted=FALSE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_betamntd(abundance.weighted=FALSE)
+t1$cal_betamntd(abundance.weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -55,7 +56,7 @@ t1$cal_betamntd(abundance.weighted=FALSE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
+t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -63,7 +64,7 @@ t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
 
 ## ------------------------------------------------
@@ -71,7 +72,7 @@ t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_rcbray(runs=200)
+t1$cal_rcbray(runs = 500)
 }
 
 ## ------------------------------------------------
@@ -95,7 +96,7 @@ t1$cal_NRI()
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_NTI()
+t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -148,28 +149,28 @@ t1$cal_Cscore()
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
 
-\item{\code{taxa_number}}{default NULL; how many taxa you want to use, if set, filter_thres parameter invalid.}
+\item{\code{taxa_number}}{default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.}
 
 \item{\code{group}}{default NULL; which group column name in sample_table is selected.}
 
-\item{\code{select_group}}{default NULL; the group name, used following the group to filter samples.}
+\item{\code{select_group}}{default NULL; the group name, used following the group parameter to filter samples.}
 
 \item{\code{env_cols}}{default NULL; number or name vector to select the environmental data in dataset$sample_table.}
 
 \item{\code{add_data}}{default NULL; provide environmental data table additionally.}
 
-\item{\code{complete_na}}{default FALSE; whether fill the NA in environmental data.}
+\item{\code{complete_na}}{default FALSE; whether fill the NA in environmental data based on the method in mice package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-intermediate files in object.
+comm and dis in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{data(dataset)
 data(env_data_16S)
-t1 <- trans_nullmodel$new(dataset, taxa_number = 100, add_data = env_data_16S)
+t1 <- trans_nullmodel$new(dataset, filter_thres = 0.0005, add_data = env_data_16S)
 }
 \if{html}{\out{</div>}}
 
@@ -193,11 +194,12 @@ Calculate mantel correlogram.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_env}}{default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, use PCA to reduce dimensionality.}
+\item{\code{use_env}}{default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, 
+use PCA (principal component analysis) to reduce dimensionality.}
 
-\item{\code{break.pts}}{default seq(0, 1, 0.02); see \code{\link{mantel.correlog}}}
+\item{\code{break.pts}}{default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of vegan package.}
 
-\item{\code{cutoff}}{default FALSE; see cutoff in \code{\link{mantel.correlog}}}
+\item{\code{cutoff}}{default FALSE; see cutoff parameter in \code{\link{mantel.correlog}}.}
 
 \item{\code{...}}{parameters pass to \code{\link{mantel.correlog}}}
 }
@@ -223,9 +225,18 @@ t1$cal_mantel_corr(use_env = "pH")
 \subsection{Method \code{plot_mantel_corr()}}{
 Plot mantel correlogram.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$plot_mantel_corr()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$plot_mantel_corr(point_shape = 22, point_size = 3)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{point_shape}}{default 22; the number for selecting point shape type; see ggplot2 manual for the number meaning.}
+
+\item{\code{point_size}}{default 3; the point size.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 ggplot.
 }
@@ -244,7 +255,7 @@ t1$plot_mantel_corr()
 \if{html}{\out{<a id="method-cal_betampd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betampd}{}}}
 \subsection{Method \code{cal_betampd()}}{
-Calculate betaMPD (mean pairwise distance). Faster than comdist in picante package.
+Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betampd(abundance.weighted = FALSE)}\if{html}{\out{</div>}}
 }
@@ -252,7 +263,7 @@ Calculate betaMPD (mean pairwise distance). Faster than comdist in picante packa
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
+\item{\code{abundance.weighted}}{default FALSE; whether use abundance-weighted method.}
 }
 \if{html}{\out{</div>}}
 }
@@ -262,7 +273,7 @@ res_betampd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_betampd(abundance.weighted=FALSE)
+t1$cal_betampd(abundance.weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -274,7 +285,7 @@ t1$cal_betampd(abundance.weighted=FALSE)
 \if{html}{\out{<a id="method-cal_betamntd"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_betamntd}{}}}
 \subsection{Method \code{cal_betamntd()}}{
-Calculate betaMNTD (mean nearest taxon distance). Faster than comdistnt in picante package.
+Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
   abundance.weighted = FALSE,
@@ -285,9 +296,9 @@ Calculate betaMNTD (mean nearest taxon distance). Faster than comdistnt in pican
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
+\item{\code{abundance.weighted}}{default FALSE; whether use abundance-weighted method.}
 
-\item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
+\item{\code{exclude.conspecifics}}{default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -297,7 +308,7 @@ res_betamntd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_betamntd(abundance.weighted=FALSE)
+t1$cal_betamntd(abundance.weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -335,7 +346,7 @@ res_ses_betampd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_ses_betampd(runs = 100, abundance.weighted = FALSE)
+t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -376,7 +387,7 @@ res_ses_betamntd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_ses_betamntd(runs = 100, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
 }
 \if{html}{\out{</div>}}
@@ -414,7 +425,7 @@ res_rcbray in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_rcbray(runs=200)
+t1$cal_rcbray(runs = 500)
 }
 }
 \if{html}{\out{</div>}}
@@ -426,7 +437,7 @@ t1$cal_rcbray(runs=200)
 \if{html}{\out{<a id="method-cal_process"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_process}{}}}
 \subsection{Method \code{cal_process()}}{
-Infer the processes according to ses.betaMNTD ses.betaMPD and rcbray.
+Infer the ecological processes according to ses.betaMNTD ses.betaMPD and rcbray.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_process(use_betamntd = TRUE)}\if{html}{\out{</div>}}
 }
@@ -526,7 +537,7 @@ res_NTI in object, equivalent to -1 times ses.mntd.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_NTI()
+t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
