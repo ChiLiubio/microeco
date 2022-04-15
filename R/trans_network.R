@@ -238,31 +238,6 @@ trans_network <- R6Class(classname = "trans_network",
 				V(network)$name <- colnames(use_abund)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 			}
-			if(network_method == "beemStatic"){
-				if(!require("beemStatic")){
-					stop("beemStatic package is not installed! See https://github.com/CSB5/BEEM-static ")
-				}
-				use_abund <- self$use_abund %>% t %>% as.data.frame
-				taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
-				message("The feature table have ", nrow(use_abund), " taxa. The taxa with the lowest occurrence frequency was ", names(taxa_low)[1], 
-					", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
-					"please filter more taxa with low abundance using filter_thres parameter when creating the trans_network object ...")
-				beem.out <- func.EM(use_abund, ...)
-				self$res_beemStatic_raw <- beem.out
-				message('beemStatic result is stored in object$res_beemStatic_raw ...')
-				# modified based on the showInteraction function
-				b <- t(beem2param(beem.out)$b.est)
-				diag(b) <- 0
-				if(!is.null(beem.out$resample)){
-					b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
-				}
-				b[abs(b) < beemStatic_t_strength] <- 0
-				network <- graph.adjacency(b, mode='directed', weighted='weight')
-				V(network)$name <- rownames(use_abund)
-				V(network)$RelativeAbundance <- rowMeans(beemStatic:::tss(use_abund))
-				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
-				E(network)$weight <- abs(E(network)$weight)
-			}
 			if(grepl("FlashWeave", network_method, ignore.case = TRUE)){
 				use_abund <- self$use_abund
 				oldwd <- getwd()
@@ -309,6 +284,31 @@ trans_network <- R6Class(classname = "trans_network",
 				network <- read_graph("network_FlashWeave.gml", format = "gml")
 				network <- set_vertex_attr(network, "name", value = V(network)$label)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
+				E(network)$weight <- abs(E(network)$weight)
+			}
+			if(network_method == "beemStatic"){
+				if(!require("beemStatic")){
+					stop("beemStatic package is not installed! See https://github.com/CSB5/BEEM-static ")
+				}
+				use_abund <- self$use_abund %>% t %>% as.data.frame
+				taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
+				message("The feature table have ", nrow(use_abund), " taxa. The taxa with the lowest occurrence frequency was ", names(taxa_low)[1], 
+					", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
+					"please filter more taxa with low abundance using filter_thres parameter when creating the trans_network object ...")
+				beem.out <- func.EM(use_abund, ...)
+				self$res_beemStatic_raw <- beem.out
+				message('beemStatic result is stored in object$res_beemStatic_raw ...')
+				# modified based on the showInteraction function
+				b <- t(beem2param(beem.out)$b.est)
+				diag(b) <- 0
+				if(!is.null(beem.out$resample)){
+					b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
+				}
+				b[abs(b) < beemStatic_t_strength] <- 0
+				network <- graph.adjacency(b, mode='directed', weighted='weight')
+				V(network)$name <- rownames(use_abund)
+				V(network)$RelativeAbundance <- rowMeans(beemStatic:::tss(use_abund))
+				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
 				E(network)$weight <- abs(E(network)$weight)
 			}
 			message("---------------- ", Sys.time()," : Finish ----------------")
@@ -499,55 +499,102 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_edge_table ...')
 		},
 		#' @description
-		#' Plot the network based on a series of methods from other packages, such as igraph and networkD3. 
-		#' The networkD3 package provides dynamic network. It is useful for a glimpse of the network structure
-		#' and finding the interested nodes and edges in it fast.
+		#' Plot the network based on a series of methods from other packages, such as igraph, ggraph and networkD3. 
+		#' The networkD3 package provides dynamic network. It is especially useful for a glimpse of the whole network structure and finding 
+		#' the interested nodes and edges in a large network. In contrast, the igraph and ggraph methods are suitable for relatively small network.
 		#'
 		#' @param method default "igraph"; The available options:
 		#'   \describe{
-		#'     \item{\strong{'igraph'}}{call plot.igraph function in igraph package for the static network; see plot.igraph for the parameters}
-		#'     \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for the dynamic network; see forceNetwork function for the parameters}
+		#'     \item{\strong{'igraph'}}{call plot.igraph function in igraph package for a static network; see plot.igraph for the parameters}
+		#'     \item{\strong{'ggraph'}}{call ggraph function in ggraph package for a static network}
+		#'     \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for a dynamic network; see forceNetwork function for the parameters}
 		#'   }
-		#' @param node_name default "name"; node name shown in the plot when method = "networkD3"; 
+		#' @param node_label default "name"; node label shown in the plot for method = "ggraph" or method = "networkD3"; 
 		#'   Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
 		#'   User can select other column names in res_node_table.
-		#' @param node_color default "module"; node color assignment for method = "networkD3"; Please see the column names of object$res_node_table; 
-		#'   User can select other column names or change the content of object$res_node_table; 
-		#'   Please also see the Group parameter in networkD3::forceNetwork function.
-		#' @param node_legend default TRUE; used when method = "networkD3"; logical value to enable node colour legends;
+		#' @param node_color default NULL; node color assignment for method = "ggraph" or method = "networkD3"; 
+		#'   Select a column name of object$res_node_table, such as "module".
+		#' @param ggraph_layout default "fr"; for method = "ggraph"; see layout parameter of create_layout function in ggraph package.
+		#' @param ggraph_node_size default 2; for method = "ggraph"; the node size.
+		#' @param ggraph_text_color default NULL; for method = "ggraph"; a column name of object$res_node_table;
+		#'   User can select other column names or change the content of object$res_node_table.
+		#' @param ggraph_text_size default 3; for method = "ggraph"; the node label text size.
+		#' @param networkD3_node_legend default TRUE; used for method = "networkD3"; logical value to enable node colour legends;
 		#'   Please see the legend parameter in networkD3::forceNetwork function.
-		#' @param zoom default TRUE; used when method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
+		#' @param networkD3_zoom default TRUE; used for method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
 		#'   Please see the zoom parameter in networkD3::forceNetwork function.
 		#' @param ... parameters passed to plot.igraph function when method = "igraph" or forceNetwork function when method = "networkD3".
 		#' @return network plot.
 		#' @examples
 		#' \donttest{
 		#' t1$plot_network(method = "igraph", layout = layout_with_kk)
-		#' t1$plot_network(method = "networkD3")
+		#' t1$plot_network(method = "ggraph", node_color = "module")
+		#' t1$plot_network(method = "networkD3", node_color = "module")
 		#' }
-		plot_network = function(method = c("igraph", "networkD3")[1], node_name = "name", node_color = "module", node_legend = TRUE, zoom = TRUE, ...){
+		plot_network = function(method = c("igraph", "ggraph", "networkD3")[1], 
+			node_label = "name", 
+			node_color = NULL, 
+			ggraph_layout = "fr",
+			ggraph_node_size = 2,
+			ggraph_text_color = NULL,
+			ggraph_text_size = 3,
+			networkD3_node_legend = TRUE, 
+			networkD3_zoom = TRUE, 
+			...
+			){
 			if(is.null(self$res_network)){
 				stop("No res_network found in the object! Please first run cal_network function!")
 			}
-			method <- match.arg(method, c("igraph", "networkD3"))
+			method <- match.arg(method, c("igraph", "ggraph", "networkD3"))
 			if(method == "igraph"){
 				network <- self$res_network
-				plot.igraph(network, ...)
+				g <- igraph::plot.igraph(network, ...)
+			}else{
+				message("Run get_node_table function to get or update the node property table ...")
+				self$get_node_table()
+				node_table <- self$res_node_table
+				if(!is.null(node_color)){
+					if(node_color == "module"){
+						if(!any(colnames(node_table) %in% "module")){
+							stop("Please first run cal_module function to get modules !")
+						}
+					}else{
+						if(!any(colnames(node_table) %in% node_color)){
+							stop("The node_color provided is not found in the object$res_node_table !")
+						}
+					}
+				}
+			}
+			if(method == "ggraph"){
+				if(!require("ggraph")){
+					stop("Please first install ggraph package with the command: install.packages('ggraph') !")
+				}
+				network <- self$res_network
+				network_layout <- create_layout(network, layout = ggraph_layout, ...)
+				# add more node properties
+				node_table %<>% {.[, c("name", colnames(.)[!colnames(.) %in% colnames(network_layout)])]}
+				use_network_layout <- dplyr::left_join(network_layout, node_table, by = c("name" = "name"))
+
+				g <- ggraph(use_network_layout)
+				if(is_directed(network)){
+					g <- g + geom_edge_arc(aes(col = label, width = weight), arrow = arrow(length = unit(2, 'mm')), strength = 0.2, alpha = 0.5)
+				}else{
+					g <- g + geom_edge_link(aes(col = label, width = weight), alpha = 0.8)
+				}
+				g <- g + geom_node_point(aes_string(col = node_color), size = ggraph_node_size, alpha = 0.5) +
+					geom_node_text(aes_string(col = ggraph_text_color, label = node_label), size = ggraph_text_size, repel = TRUE) +
+					scale_edge_width(range = c(0.5, 2)) +
+					theme_void()
 			}
 			if(method == "networkD3"){
 				try_find <- try(find.package("networkD3"), silent = TRUE)
 				if(inherits(try_find, "try-error")){
 					stop("Please first install networkD3 package with command: install.packages('networkD3') !")
 				}
-				if(is.null(self$res_node_table)){
-					message("Run get_node_table function to obtain the node property table ...")
-					self$get_node_table()
-				}
 				if(is.null(self$res_edge_table)){
 					message("Run get_edge_table function to obtain the edge property table ...")
 					self$get_edge_table()
 				}
-				node_table <- self$res_node_table
 				edge_table <- self$res_edge_table
 				replace_table <- data.frame(number = 1:nrow(node_table), name = rownames(node_table))
 				rownames(replace_table) <- replace_table$name
@@ -555,11 +602,14 @@ trans_network <- R6Class(classname = "trans_network",
 				edge_table$node1 <- replace_table[edge_table$node1, 1] - 1
 				edge_table$node2 <- replace_table[edge_table$node2, 1] - 1
 				
-				networkD3::forceNetwork(Links = edge_table, Nodes = node_table,
-							Source = "node1", Target = "node2",
-							NodeID = node_name, zoom = zoom,
-							Group = node_color, legend = node_legend, ...)
+				if(is.null(node_color)){
+					stop("networkD3 require the node_color input. Please select one column name of object$res_node_table !")
+				}else{
+					g <- networkD3::forceNetwork(Links = edge_table, Nodes = node_table, Source = "node1", Target = "node2",
+						NodeID = node_label, zoom = networkD3_zoom, Group = node_color, legend = networkD3_node_legend, ...)
+				}
 			}
+			g
 		},
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance <doi:10.1186/1471-2105-13-113>.

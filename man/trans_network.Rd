@@ -80,7 +80,8 @@ t1$get_edge_table()
 
 \donttest{
 t1$plot_network(method = "igraph", layout = layout_with_kk)
-t1$plot_network(method = "networkD3")
+t1$plot_network(method = "ggraph", node_color = "module")
+t1$plot_network(method = "networkD3", node_color = "module")
 }
 
 ## ------------------------------------------------
@@ -484,16 +485,20 @@ t1$get_edge_table()
 \if{html}{\out{<a id="method-plot_network"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_network}{}}}
 \subsection{Method \code{plot_network()}}{
-Plot the network based on a series of methods from other packages, such as igraph and networkD3. 
-The networkD3 package provides dynamic network. It is useful for a glimpse of the network structure
-and finding the interested nodes and edges in it fast.
+Plot the network based on a series of methods from other packages, such as igraph, ggraph and networkD3. 
+The networkD3 package provides dynamic network. It is especially useful for a glimpse of the whole network structure and finding 
+the interested nodes and edges in a large network. In contrast, the igraph and ggraph methods are suitable for relatively small network.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_network(
-  method = c("igraph", "networkD3")[1],
-  node_name = "name",
-  node_color = "module",
-  node_legend = TRUE,
-  zoom = TRUE,
+  method = c("igraph", "ggraph", "networkD3")[1],
+  node_label = "name",
+  node_color = NULL,
+  ggraph_layout = "fr",
+  ggraph_node_size = 2,
+  ggraph_text_color = NULL,
+  ggraph_text_size = 3,
+  networkD3_node_legend = TRUE,
+  networkD3_zoom = TRUE,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -503,22 +508,31 @@ and finding the interested nodes and edges in it fast.
 \describe{
 \item{\code{method}}{default "igraph"; The available options:
 \describe{
-  \item{\strong{'igraph'}}{call plot.igraph function in igraph package for the static network; see plot.igraph for the parameters}
-  \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for the dynamic network; see forceNetwork function for the parameters}
+  \item{\strong{'igraph'}}{call plot.igraph function in igraph package for a static network; see plot.igraph for the parameters}
+  \item{\strong{'ggraph'}}{call ggraph function in ggraph package for a static network}
+  \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for a dynamic network; see forceNetwork function for the parameters}
 }}
 
-\item{\code{node_name}}{default "name"; node name shown in the plot when method = "networkD3"; 
+\item{\code{node_label}}{default "name"; node label shown in the plot for method = "ggraph" or method = "networkD3"; 
 Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
 User can select other column names in res_node_table.}
 
-\item{\code{node_color}}{default "module"; node color assignment for method = "networkD3"; Please see the column names of object$res_node_table; 
-User can select other column names or change the content of object$res_node_table; 
-Please also see the Group parameter in networkD3::forceNetwork function.}
+\item{\code{node_color}}{default NULL; node color assignment for method = "ggraph" or method = "networkD3"; 
+Select a column name of object$res_node_table, such as "module".}
 
-\item{\code{node_legend}}{default TRUE; used when method = "networkD3"; logical value to enable node colour legends;
+\item{\code{ggraph_layout}}{default "fr"; for method = "ggraph"; see layout parameter of create_layout function in ggraph package.}
+
+\item{\code{ggraph_node_size}}{default 2; for method = "ggraph"; the node size.}
+
+\item{\code{ggraph_text_color}}{default NULL; for method = "ggraph"; a column name of object$res_node_table;
+User can select other column names or change the content of object$res_node_table.}
+
+\item{\code{ggraph_text_size}}{default 3; for method = "ggraph"; the node label text size.}
+
+\item{\code{networkD3_node_legend}}{default TRUE; used for method = "networkD3"; logical value to enable node colour legends;
 Please see the legend parameter in networkD3::forceNetwork function.}
 
-\item{\code{zoom}}{default TRUE; used when method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
+\item{\code{networkD3_zoom}}{default TRUE; used for method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
 Please see the zoom parameter in networkD3::forceNetwork function.}
 
 \item{\code{...}}{parameters passed to plot.igraph function when method = "igraph" or forceNetwork function when method = "networkD3".}
@@ -532,7 +546,8 @@ network plot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_network(method = "igraph", layout = layout_with_kk)
-t1$plot_network(method = "networkD3")
+t1$plot_network(method = "ggraph", node_color = "module")
+t1$plot_network(method = "networkD3", node_color = "module")
 }
 }
 \if{html}{\out{</div>}}
