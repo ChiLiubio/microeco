@@ -4,7 +4,8 @@
 \alias{trans_classifier}
 \title{Create trans_classifier object for machine-learning-based model prediction.}
 \description{
-This class is a wrapper for methods of machine-learning-based classification models.
+This class is a wrapper for methods of machine-learning-based classification models, including data pre-processing, feature selection, 
+data split, model training, prediction, confusionMatrix and ROC (Receiver Operator Characteristic) or PR (Precision-Recall) curve.
 
 Author(s): Felipe Mansoldo and Chi Liu
 }
@@ -51,7 +52,7 @@ t1$cal_split(prop.train = 3/4)
 ## ------------------------------------------------
 
 \dontrun{
-t1$set_trainControl()
+t1$set_trainControl(method = 'repeatedcv')
 }
 
 ## ------------------------------------------------
@@ -59,7 +60,10 @@ t1$set_trainControl()
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_train()
+# random forest
+t1$cal_train(method = "rf")
+# Support Vector Machines with Radial Basis Function Kernel
+t1$cal_train(method = "svmRadial", tuneLength = 15)
 }
 
 ## ------------------------------------------------
@@ -139,7 +143,7 @@ Create the trans_classifier object.
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
 \item{\code{x.predictors}}{default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
-data.frame represents other customized data. See the following available options and description:
+data.frame represents other customized data. See the following available options:
 \describe{
   \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
   \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
@@ -207,6 +211,7 @@ t1$cal_preProcess(method = c("center", "scale", "nzv"))
 \if{latex}{\out{\hypertarget{method-cal_feature_sel}{}}}
 \subsection{Method \code{cal_feature_sel()}}{
 Perform feature selection.
+	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_feature_sel(
   boruta.maxRuns = 300,
@@ -260,7 +265,7 @@ Split data for training and testing.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-optimized data_feature in the object.
+data_train and data_test in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -277,7 +282,7 @@ t1$cal_split(prop.train = 3/4)
 \if{html}{\out{<a id="method-set_trainControl"></a>}}
 \if{latex}{\out{\hypertarget{method-set_trainControl}{}}}
 \subsection{Method \code{set_trainControl()}}{
-Control parameters for the following training.
+Control parameters for the following training. See trainControl function of caret package for details.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$set_trainControl(
   method = "repeatedcv",
@@ -290,7 +295,7 @@ Control parameters for the following training.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default 'repeatedcv'; ‘repeatedcv’: Repeated k-Fold cross validation; 
+\item{\code{method}}{default 'repeatedcv'; 'repeatedcv': Repeated k-Fold cross validation; 
 see method parameter in trainControl function of caret package for available options.}
 
 \item{\code{classProbs}}{default TRUE; should class probabilities be computed for classification models?;
@@ -308,7 +313,7 @@ trainControl in the object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$set_trainControl()
+t1$set_trainControl(method = 'repeatedcv')
 }
 }
 \if{html}{\out{</div>}}
@@ -320,7 +325,7 @@ t1$set_trainControl()
 \if{html}{\out{<a id="method-cal_train"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_train}{}}}
 \subsection{Method \code{cal_train()}}{
-Run the training.
+Run the model training.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_train(
   method = "rf",
@@ -334,9 +339,9 @@ Run the training.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "rf"; representing the random forest method; see method in caret::train function.}
+\item{\code{method}}{default "rf"; "rf": random forest; see method in caret::train function for other options.}
 
-\item{\code{metric}}{default "Accuracy"; see metric in train function of caret package.}
+\item{\code{metric}}{default "Accuracy"; see metric in caret::train function for other options.}
 
 \item{\code{max.mtry}}{default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.}
 
@@ -352,7 +357,10 @@ res_train in the object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_train()
+# random forest
+t1$cal_train(method = "rf")
+# Support Vector Machines with Radial Basis Function Kernel
+t1$cal_train(method = "svmRadial", tuneLength = 15)
 }
 }
 \if{html}{\out{</div>}}
@@ -402,7 +410,8 @@ Run the prediction.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{positive_class}}{default NULL; see positive parameter in confusionMatrix function of caret package.}
+\item{\code{positive_class}}{default NULL; see positive parameter in confusionMatrix function of caret package;
+If positive_class is NULL, use the first group in data as the positive class automatically.}
 }
 \if{html}{\out{</div>}}
 }
@@ -442,7 +451,7 @@ Plot the cross-tabulation of observed and predicted classes with associated stat
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot object in the object.
+ggplot object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -459,7 +468,7 @@ t1$plot_confusionMatrix()
 \if{html}{\out{<a id="method-cal_ROC"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_ROC}{}}}
 \subsection{Method \code{cal_ROC()}}{
-Get ROC curve data and the performance data.
+Get ROC (Receiver Operator Characteristic) curve data and the performance data.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_ROC(input = "pred")}\if{html}{\out{</div>}}
 }
@@ -505,7 +514,8 @@ Plot ROC curve.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{plot_type}}{default c("ROC", "PR")[1]; 'ROC' represents ROC curve; 'PR' represents PR curve.}
+\item{\code{plot_type}}{default c("ROC", "PR")[1]; 'ROC' represents ROC (Receiver Operator Characteristic) curve; 
+'PR' represents PR (Precision-Recall) curve.}
 
 \item{\code{plot_group}}{default "all"; 'all' represents all the classes in the model;
 'add' represents all adding micro-average and macro-average results, see 
@@ -514,7 +524,7 @@ other options should be one or more class names, same with the names in Group co
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.}
 
-\item{\code{add_AUC}}{default TRUE; whether add AUC in the legend}
+\item{\code{add_AUC}}{default TRUE; whether add AUC in the legend.}
 
 \item{\code{plot_method}}{default FALSE; If TRUE, show the method in the legend though only one method is found.}
 

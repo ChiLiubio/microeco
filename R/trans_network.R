@@ -868,7 +868,6 @@ trans_network <- R6Class(classname = "trans_network",
 				nnsdpois <- density(private$nnsd(pois))
 				chival1 <- sum((nnsd1$y - nnsdpois$y)^2/nnsdpois$y/512)
 				ps <- rbind(ps, chival1)
-				print(i*100)
 			}
 			ps <- cbind(ps, c(seq(lcor, hcor, 0.01)))
 			tc <- ps[ps[,1] == min(ps[,1]), 2]

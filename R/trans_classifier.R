@@ -2,7 +2,8 @@
 #' Create trans_classifier object for machine-learning-based model prediction.
 #'
 #' @description
-#' This class is a wrapper for methods of machine-learning-based classification models.
+#' This class is a wrapper for methods of machine-learning-based classification models, including data pre-processing, feature selection, 
+#' data split, model training, prediction, confusionMatrix and ROC (Receiver Operator Characteristic) or PR (Precision-Recall) curve.
 #'
 #' Author(s): Felipe Mansoldo and Chi Liu
 #'
@@ -14,7 +15,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param x.predictors default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
-		#'   data.frame represents other customized data. See the following available options and description:
+		#'   data.frame represents other customized data. See the following available options:
 		#'   \describe{
 		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
 		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
@@ -47,7 +48,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if ( nlevels(as.factor(sampleinfo[, y.response])) < 2 ) {
 				stop("Response variable must have at least 2 factors!")
 			}
-			# first judge whether x.predictors is character
+			# x.predictors must be character or data.frame
 			if(is.character(x.predictors)){
 				if (grepl("all", x.predictors, ignore.case = TRUE)) {
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
@@ -78,12 +79,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			ClassNames <- make.names(sampleinfo[, y.response], unique = F)
 			MapNames <- data.frame(OriginalNames = sampleinfo[, y.response], ClassNames = ClassNames)
 			self$MapNames <- MapNames
-			DataX <- abund_table %>% t() %>% as.data.frame()
-			
+			DataX <- abund_table %>% t() %>% as.data.frame()			
 			message("Total feature numbers: ", ncol(DataX))
 			
 			if(all.equal(MapNames$OriginalNames, MapNames$ClassNames) != TRUE){
-				message("Factor names are non-standard. A correction was made and the change map was saved in object$MapNames")
+				message("Factor names are non-standard. A correction was made and the change map was saved in object$MapNames ...")
 			}
 			# message("Start clasification for: ", y.response, " ...")
 			if(n.cores > 1){
@@ -111,10 +111,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			preProcess_res <- caret::preProcess(raw_feature, ...)
 			new_data <- predict(preProcess_res, newdata = raw_feature)
 			self$data_feature <- new_data
-			message("The converted feature table is stored in object$data_feature ...")		
+			message("The converted feature table is stored in object$data_feature ...")
 		},
 		#' @description
 		#' Perform feature selection.
+		#' 	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
 		#' 
 		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the maxRuns parameter in Boruta function of Boruta package.
 		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in Boruta function of Boruta package.
@@ -163,7 +164,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Split data for training and testing.
 		#' 
 		#' @param prop.train default 3/4; the ratio of the dataset used for the training.
-		#' @return optimized data_feature in the object.
+		#' @return data_train and data_test in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_split(prop.train = 3/4)
@@ -192,9 +193,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			message("Training and testing data are stored in object$data_train and object$data_test respectively ...")
 		},
 		#' @description
-		#' Control parameters for the following training.
+		#' Control parameters for the following training. See trainControl function of caret package for details.
 		#' 
-		#' @param method default 'repeatedcv'; ‘repeatedcv’: Repeated k-Fold cross validation; 
+		#' @param method default 'repeatedcv'; 'repeatedcv': Repeated k-Fold cross validation; 
 		#' 	 see method parameter in trainControl function of caret package for available options.
 		#' @param classProbs default TRUE; should class probabilities be computed for classification models?;
 		#' 	 see classProbs parameter in caret::trainControl function.
@@ -203,7 +204,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @return trainControl in the object.
 		#' @examples
 		#' \dontrun{
-		#' t1$set_trainControl()
+		#' t1$set_trainControl(method = 'repeatedcv')
 		#' }
 		set_trainControl = function(
 			method = 'repeatedcv',
@@ -219,17 +220,20 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$trainControl <- trainControl
 		},
 		#' @description
-		#' Run the training.
+		#' Run the model training.
 		#' 
-		#' @param method default "rf"; representing the random forest method; see method in caret::train function.
-		#' @param metric default "Accuracy"; see metric in train function of caret package.
+		#' @param method default "rf"; "rf": random forest; see method in caret::train function for other options.
+		#' @param metric default "Accuracy"; see metric in caret::train function for other options.
 		#' @param max.mtry default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.
 		#' @param max.ntree default 200; for method = "rf"; maximum number of trees used to optimize the model.
 		#' @param ... parameters pass to train function of caret package.
 		#' @return res_train in the object.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_train()
+		#' # random forest
+		#' t1$cal_train(method = "rf")
+		#' # Support Vector Machines with Radial Basis Function Kernel
+		#' t1$cal_train(method = "svmRadial", tuneLength = 15)
 		#' }
 		cal_train = function(
 			method = "rf",
@@ -304,7 +308,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Run the prediction.
 		#' 
-		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package.
+		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package;
+		#' If positive_class is NULL, use the first group in data as the positive class automatically.
 		#' @return res_predict, res_confusion_fit and res_confusion_stats stored in the object.
 		#' @examples
 		#' \dontrun{
@@ -342,7 +347,6 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 
 			self$res_confusion_fit <- confusion.fit.best
 			message('The result of confusionMatrix is stored in object$res_confusion_fit ...')
-			
 			confusion.data.sts <- data.frame(confusion.fit.best$overall)
 			Confusion.Sts <- data.frame("Overall Statistics" = paste0(round(confusion.data.sts[,1],2) * 100,"%")  )
 			rownames(Confusion.Sts) <- rownames(confusion.data.sts)
@@ -355,7 +359,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param plot_confusion default TRUE; whether plot the confusion matrix.
 		#' @param plot_statistics default TRUE; whether plot the statistics.
-		#' @return ggplot object in the object.
+		#' @return ggplot object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_confusionMatrix()
@@ -373,12 +377,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				geom_tile(aes(fill = log(Freq)), colour = "white") +
 				scale_fill_gradient(low = "white", high = "steelblue") +
 				geom_text(aes(x = Reference, y = Prediction, label = Freq)) +
-				theme(legend.position = "none")# +
+				theme(legend.position = "none")
 
 			Confusion.Sts <- self$res_confusion_stats
 
 			p2 <- gridExtra::tableGrob(Confusion.Sts)
-
 			if(plot_confusion == TRUE & plot_statistics == TRUE){
 				p3 <- gridExtra::grid.arrange(p1, p2,nrow = 1, ncol = 2, 
 					top=grid::textGrob("Confusion Matrix and Statistics",gp=grid::gpar(fontsize=15,font=0.5)))
@@ -394,7 +397,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			p3
 		},
 		#' @description
-		#' Get ROC curve data and the performance data.
+		#' Get ROC (Receiver Operator Characteristic) curve data and the performance data.
 		#' 
 		#' @param input default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
 		#'   'train' represents using training results.
@@ -430,8 +433,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			prob_df <- prediction_prob %>% `colnames<-`(paste0(colnames(.), "_pred_", train_method))
 			use_df <- cbind(label_df, prob_df)
 
-			roc_res <- multiROC::multi_roc(use_df, force_diag=T)
-			pr_res <- multiROC::multi_pr(use_df, force_diag=T)
+			roc_res <- multiROC::multi_roc(use_df, force_diag = T)
+			pr_res <- multiROC::multi_pr(use_df, force_diag = T)
 
 			plot_roc_df <- multiROC::plot_roc_data(roc_res)
 			plot_pr_df <- multiROC::plot_pr_data(pr_res)
@@ -447,13 +450,14 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Plot ROC curve.
 		#' 
-		#' @param plot_type default c("ROC", "PR")[1]; 'ROC' represents ROC curve; 'PR' represents PR curve.
+		#' @param plot_type default c("ROC", "PR")[1]; 'ROC' represents ROC (Receiver Operator Characteristic) curve; 
+		#'   'PR' represents PR (Precision-Recall) curve.
 		#' @param plot_group default "all"; 'all' represents all the classes in the model;
 		#' 	 'add' represents all adding micro-average and macro-average results, see 
 		#' 	 \href{http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html}{http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html};
 		#' 	 other options should be one or more class names, same with the names in Group column of res_ROC$res_roc from cal_ROC function.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
-		#' @param add_AUC default TRUE; whether add AUC in the legend
+		#' @param add_AUC default TRUE; whether add AUC in the legend.
 		#' @param plot_method default FALSE; If TRUE, show the method in the legend though only one method is found.
 		#' @param ... parameters pass to geom_path function of ggplot2 package.
 		#' @return ggplot2 object.
