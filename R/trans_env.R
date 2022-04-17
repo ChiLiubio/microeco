@@ -3,18 +3,21 @@
 #'
 #' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
-#' mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+#' mantel test, correlation analysis and linear fitting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 #'
 #' @export
 trans_env <- R6Class(classname = "trans_env",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param env_cols default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. 
-		#'   Either numeric vector or character vector of colnames.
-		#' @param add_data default NULL; data.frame format; provide the environmental data frame individually; rownames should be sample names.
+		#' @param env_cols default NULL; either numeric vector or character vector to select columns in sample_table of your microtable object. 
+		#'    This parameter should be used in the case that all the required environmental data is in sample_table of your microtable object.
+		#'    Otherwise, please use add_data parameter.
+		#' @param add_data default NULL; data.frame format; provide the environmental data in the format data.frame; rownames should be sample names.
+		#'   This parameter should be used when the sample_table in your microtable object has no environmental data. 
+		#'   Under this circumstance, the env_cols parameter can not be used because no data can be selected.
 		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
-		#'   If TRUE, the function can run the interpolation with the mice package; Please first install mice package.
+		#'   If TRUE, the function can run the interpolation with the mice package; to use this parameter, please first install mice package.
 		#' @return env_data in trans_env object.
 		#' @examples
 		#' data(dataset)
@@ -27,16 +30,16 @@ trans_env <- R6Class(classname = "trans_env",
 			character2numeric = TRUE, 
 			complete_na = FALSE
 			){
-			# support all NULL from v0.7.0
-			# first judge dataset input
+			# support all the dataset, env_cols and add_data = NULL from v0.7.0
 			if(is.null(dataset)){
-				cat("The dataset not provided. Remember to provide additional data in the function ...\n")
+				message("The dataset not provided. Remember to provide additional data in the correponding function ...\n")
 			}
 			if(is.null(add_data)){
 				if(!is.null(env_cols)){
 					env_data <- dataset$sample_table[, env_cols, drop = FALSE]
 				}else{
 					env_data <- NULL
+					message("Both env_cols and add_data are NULL. Remember to provide additional data in the correponding function ...\n")
 				}
 			}else{
 				if(is.null(dataset)){
@@ -54,7 +57,7 @@ trans_env <- R6Class(classname = "trans_env",
 						stop("No sample names of sample_table found in env_data! Please check the names of env_data!")
 					}
 					if(inter_sum < nrow(dataset1$sample_table)){
-						message(nrow(dataset1$sample_table)-inter_sum, " samples not found in env_data and removed!")
+						message(nrow(dataset1$sample_table) - inter_sum, " sample(s) not found in env_data and removed!")
 						dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
 						dataset1$tidy_dataset(main_data = FALSE)
 					}
@@ -64,14 +67,14 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				self$dataset <- NULL
 			}
-			if(complete_na == T){
-				env_data[env_data == ""] <- NA
-				env_data %<>% dropallfactors(., unfac2num = TRUE)
-				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
-				env_data %<>% mice::mice(print = FALSE) %>% mice::complete(., 1)
-			}
-			if(character2numeric == T){
-				if(!is.null(env_data)){
+			if(!is.null(env_data)){
+				if(complete_na == T){
+					env_data[env_data == ""] <- NA
+					env_data %<>% dropallfactors(., unfac2num = TRUE)
+					env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
+					env_data %<>% mice::mice(print = FALSE) %>% mice::complete(., 1)
+				}
+				if(character2numeric == T){
 					env_data %<>% dropallfactors(., unfac2num = TRUE, char2num = TRUE)
 				}
 			}
@@ -81,18 +84,21 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 		#'
 		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
-		#' @param feature_sel default FALSE; whether perform the feature selection.
+		#' @param feature_sel default FALSE; whether perform the feature selection based on forward selection method.
 		#' @param taxa_level default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
 		#'   If use otu_table; please input "OTU".
 		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
-		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-		#' @param add_matrix default NULL; additional distance matrix provided, when you do not want to use the beta diversity matrix within the dataset;
+		#' @param use_measure default NULL; a name of beta diversity matrix; only useful when parameter method = "dbRDA";
+		#' 	 If not provided, use the first beta diversity matrix automatically.
+		#' @param add_matrix default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
 		#' @param ... paremeters pass to dbrda or rda or cca function according to the input of method.
 		#' @return res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ordination(method = "RDA", use_measure = "bray")
+		#' t1$cal_ordination(method = "dbRDA", use_measure = "bray")
+		#' t1$cal_ordination(method = "RDA", taxa_level = "Genus")
+		#' t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 		#' }
 		cal_ordination = function(
 			method = c("RDA", "dbRDA", "CCA")[1],
@@ -110,19 +116,19 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("The method should be one of 'RDA', 'dbRDA' and 'CCA' !")
 			}
 			if(is.null(self$env_data)){
-				stop("The env_data is NULL! Please check the env input when creating the object !")
+				stop("The env_data is NULL! Please check the data input when creating the object !")
 			}else{
 				env_data <- self$env_data
 			}
 			
 			if(method == "dbRDA"){
-				# add_matrix is a priority
+				# add_matrix has the priority
 				if(!is.null(add_matrix)){
 					use_matrix <- add_matrix
 					message("Use the additional matrix provided for dbRDA ...")
 				}else{
 					if(is.null(self$dataset)){
-						stop("No distance matrix provided and the dataset in the object is NULL! please check the input!")
+						stop("No dataset is found in the object! please check the input!")
 					}else{
 						if(is.null(self$dataset$beta_diversity)){
 							message("The beta_diversity in dataset is NULL; try to calculate it ...")
@@ -157,7 +163,9 @@ trans_env <- R6Class(classname = "trans_env",
 					use_abund <- self$dataset$otu_table
 					cat("The taxa_level is OTU; Use otu_table as abundance table input ...\n")
 					# add OTU as one column to make the operations concordant
-					self$dataset$add_rownames2taxonomy(use_name = "OTU")
+					if(! taxa_level %in% colnames(self$dataset$tax_table)){
+						self$dataset$add_rownames2taxonomy(use_name = "OTU")
+					}
 				}else{
 					if(! taxa_level %in% colnames(self$dataset$tax_table)){
 						stop("The taxa_level provided is neither OTU nor one of the column names of dataset$tax_table!")
@@ -191,7 +199,7 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("Non variables obtained after selection according to model. Check method and data!")
 				}
 				res_sign <- res_sign[1:(length(res_sign) - 1)]
-				env_data <- env_data[,c(res_sign),drop=FALSE]
+				env_data <- env_data[, c(res_sign), drop=FALSE]
 			}
 			self$ordination_method <- method
 			self$taxa_level <- taxa_level
@@ -235,7 +243,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' transform ordination result for the following plotting.
 		#'
 		#' @param show_taxa default 10; taxa number shown in the plot.
-		#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clear
+		#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clearer.
 		#' @param min_perc_env default 0.1; used for scaling up the minimum of env arrow; multiply by the maximum distance between samples and origin.
 		#' @param max_perc_env default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.
 		#' @param min_perc_tax default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.
@@ -243,7 +251,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @return res_ordination_trans in object.
 		#' @examples
 		#' \donttest{
-		#' t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
+		#' t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env = 1)
 		#' }
 		trans_ordination = function(
 			show_taxa = 10, 
@@ -295,12 +303,11 @@ trans_env <- R6Class(classname = "trans_env",
 				df_arrows_spe <- NULL
 			}
 			if(adjust_arrow_length == T){
-				df_arrows[,1:2] <- private$stand_fun(arr = df_arrows[,1:2], ref = df_sites, min_perc = min_perc_env, max_perc = max_perc_env)
+				df_arrows[, 1:2] <- private$stand_fun(arr = df_arrows[, 1:2], ref = df_sites, min_perc = min_perc_env, max_perc = max_perc_env)
 				if(self$ordination_method != "dbRDA"){
-					df_arrows_spe[,1:2] <- private$stand_fun(arr = df_arrows_spe[,1:2], ref = df_sites, min_perc = min_perc_tax, max_perc = max_perc_tax)
+					df_arrows_spe[, 1:2] <- private$stand_fun(arr = df_arrows_spe[, 1:2], ref = df_sites, min_perc = min_perc_tax, max_perc = max_perc_tax)
 				}
 			}
-			
 			self$res_ordination_trans <- list(
 				df_sites = df_sites, 
 				df_arrows = df_arrows, 
@@ -316,7 +323,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param plot_color default NULL; group used for color.
 		#' @param plot_shape default NULL; group used for shape.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.
-		#' @param shape_values default see the function; vector used in the shape, see ggplot2 tutorial.
+		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); vector used for the shape; see ggplot2 tutorial.
 		#' @param env_text_color default "black"; environmental variable text color.
 		#' @param env_arrow_color default "grey30"; environmental variable arrow color.
 		#' @param taxa_text_color default "firebrick1"; taxa text color.
@@ -325,11 +332,28 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param env_text_size default 3.7; environmental variable text size.
 		#' @param taxa_text_size default 3; taxa text size.
 		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.
+		#' @param env_nudge_x default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of geom_text_repel function of ggrepel package;
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
+		#'   if there are 5 env variables, env_nudge_x should be something like c(0.1, 0, -0.2, 0, 0). 
+		#'   Note that this parameter and env_nudge_y is generally used when the automatic text adjustment is not very well.
+		#' @param env_nudge_y default NULL; numeric vector to adjust the env text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
+		#'   if there are 5 env variables, env_nudge_y should be something like c(0.1, 0, -0.2, 0, 0).
+		#' @param taxa_nudge_x default NULL; numeric vector to adjust the taxa text x axis position; passed to nudge_x parameter of ggrepel::geom_text_repel function;
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
+		#'   if 3 taxa are shown, taxa_nudge_x should be something like c(0.3, -0.2, 0).
+		#' @param taxa_nudge_y default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
+		#'   if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).
 		#' @param ... paremeters pass to geom_point for controlling sample points.
 		#' @return ggplot object.
 		#' @examples
 		#' \donttest{
+		#' t1$cal_ordination(method = "RDA")
+		#' t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 		#' t1$plot_ordination(plot_color = "Group")
+		#' t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
+		#' 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 		#' }
 		plot_ordination = function(
 			plot_color = NULL,
@@ -344,12 +368,15 @@ trans_env <- R6Class(classname = "trans_env",
 			env_text_size = 3.7,
 			taxa_text_size = 3,
 			taxa_text_italic = TRUE,
+			env_nudge_x = NULL,
+			env_nudge_y = NULL,
+			taxa_nudge_x = NULL,
+			taxa_nudge_y = NULL,			
 			...
 			){
 			if(is.null(self$res_ordination_trans)){
 				stop("Please first run trans_ordination function !")
 			}
-			
 			p <- ggplot()
 			p <- p + theme_bw()
 			p <- p + theme(panel.grid=element_blank())
@@ -362,19 +389,47 @@ trans_env <- R6Class(classname = "trans_env",
 				...
 				)
 			# plot arrows
+			env_text_data <- self$res_ordination_trans$df_arrows %>% dplyr::mutate(label = gsub("`", "", rownames(.)))
 			p <- p + geom_segment(
-				data=self$res_ordination_trans$df_arrows, 
+				data = env_text_data, 
 				aes(x = 0, y = 0, xend = x, yend = y), 
 				arrow = arrow(length = unit(0.2, "cm")), 
 				color = env_arrow_color
 				)
-			p <- p + ggrepel::geom_text_repel(
-				data = as.data.frame(self$res_ordination_trans$df_arrows * 1), 
-				aes(x, y, label = gsub("`", "", rownames(self$res_ordination_trans$df_arrows))), 
-				size = env_text_size, 
-				color = env_text_color, 
-				segment.color = "white"
+			if(is.null(env_nudge_x) & is.null(env_nudge_y)){
+				p <- p + ggrepel::geom_text_repel(
+					data = env_text_data, 
+					aes(x, y, label = label), 
+					size = env_text_size, 
+					color = env_text_color, 
+					segment.color = "white"
 				)
+			}else{
+				if(is.null(env_nudge_x)){
+					env_nudge_x <- rep(0, nrow(env_text_data))
+				}else{
+					if(length(env_nudge_x) != nrow(env_text_data)){
+						stop("The length of env_nudge_x not equal to the number of environmental variables !")
+					}
+					if(! inherits(env_nudge_x, "numeric")){
+						stop("The env_nudge_x must be numeric !")
+					}
+				}
+				if(is.null(env_nudge_y)){
+					env_nudge_y <- rep(0, nrow(env_text_data))
+				}else{
+					if(length(env_nudge_y) != nrow(env_text_data)){
+						stop("The length of env_nudge_y not equal to the number of environmental variables !")
+					}
+					if(! inherits(env_nudge_y, "numeric")){
+						stop("The env_nudge_y must be numeric !")
+					}
+				}
+				for(i in seq_len(nrow(env_text_data))){
+					p <- p + ggrepel::geom_text_repel(data = env_text_data[i, ], aes(x, y, label = label), size = env_text_size, 
+						color = env_text_color, segment.color = "white", nudge_x = env_nudge_x[i], nudge_y = env_nudge_y[i])
+				}
+			}
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)
 			}
@@ -396,14 +451,41 @@ trans_env <- R6Class(classname = "trans_env",
 				if(taxa_text_italic == T){
 					df_arrows_spe1[, self$taxa_level] %<>% paste0("italic('", .,"')")
 				}
-				p <- p + ggrepel::geom_text_repel(
-					data = df_arrows_spe1, 
-					aes_string("x", "y", label = self$taxa_level), 
-					size = taxa_text_size, 
-					color = taxa_text_color, 
-					segment.alpha = .01, 
-					parse = TRUE
-				)
+				if(is.null(taxa_nudge_x) & is.null(taxa_nudge_y)){
+					p <- p + ggrepel::geom_text_repel(
+						data = df_arrows_spe1, 
+						aes_string("x", "y", label = self$taxa_level), 
+						size = taxa_text_size, 
+						color = taxa_text_color, 
+						segment.alpha = .01, 
+						parse = TRUE
+					)
+				}else{
+					if(is.null(taxa_nudge_x)){
+						taxa_nudge_x <- rep(0, nrow(df_arrows_spe1))
+					}else{
+						if(length(taxa_nudge_x) != nrow(df_arrows_spe1)){
+							stop("The length of taxa_nudge_x not equal to the number of environmental variables !")
+						}
+						if(! inherits(taxa_nudge_x, "numeric")){
+							stop("The taxa_nudge_x must be numeric !")
+						}
+					}
+					if(is.null(taxa_nudge_y)){
+						taxa_nudge_y <- rep(0, nrow(df_arrows_spe1))
+					}else{
+						if(length(taxa_nudge_y) != nrow(df_arrows_spe1)){
+							stop("The length of taxa_nudge_y not equal to the number of environmental variables !")
+						}
+						if(! inherits(taxa_nudge_y, "numeric")){
+							stop("The taxa_nudge_y must be numeric !")
+						}
+					}
+					for(j in seq_len(nrow(df_arrows_spe1))){
+						p <- p + ggrepel::geom_text_repel(data = df_arrows_spe1[j, ], aes_string("x", "y", label = self$taxa_level), size = taxa_text_size, 
+							color = taxa_text_color, segment.alpha = .01, parse = TRUE, nudge_x = taxa_nudge_x[j], nudge_y = taxa_nudge_y[j])
+					}
+				}
 			}
 			p
 		},
@@ -414,12 +496,14 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.
 		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method.
-		#' @param ... paremeters pass to \code{\link{mantel}}.
+		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in mantel function of vegan package.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
+		#' @param ... paremeters pass to \code{\link{mantel}} of vegan package.
 		#' @return res_mantel in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_mantel(use_measure = "bray")
+		#' t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 		#' }
 		cal_mantel = function(
 			select_env_data = NULL, 
@@ -427,21 +511,32 @@ trans_env <- R6Class(classname = "trans_env",
 			add_matrix = NULL, 
 			use_measure = NULL, 
 			method = "pearson", 
+			p_adjust_method = "fdr",
 			...
 			){
-			if(is.null(self$dataset$beta_diversity) & is.null(add_matrix)){
-				stop("No distance matrix provided; please use set add_matrix parameter or use provide dataset in creating Class !")
+			if(is.null(self$dataset) & is.null(add_matrix)){
+				stop("No beta diversity data found! please see add_matrix parameter or provide dataset when creating the object!")
 			}
 			if(is.null(add_matrix)){
-				if(!is.null(use_measure)){
-					use_matrix <- self$dataset$beta_diversity[[use_measure]]
+				if(is.null(self$dataset$beta_diversity)){
+					message("The beta_diversity in dataset is NULL; try to calculate it ...")
+					self$dataset$cal_betadiv(unifrac = FALSE)
+					message("Calculating done ...")
 				}else{
-					use_matrix <- self$dataset$beta_diversity[[1]]
+					if(!is.null(use_measure)){
+						use_matrix <- self$dataset$beta_diversity[[use_measure]]
+					}else{
+						use_matrix <- self$dataset$beta_diversity[[1]]
+					}
 				}
 			}else{
 				use_matrix <- add_matrix
 			}
-			env_data <- self$env_data
+			if(is.null(self$env_data)){
+				stop("The env_data is NULL! Please check the data input when creating the object !")
+			}else{
+				env_data <- self$env_data
+			}
 			# if no selection, automatically select the numeric columns
 			if(is.null(select_env_data)){
 				env_data <- env_data[, unlist(lapply(env_data, is.numeric))]
@@ -457,41 +552,47 @@ trans_env <- R6Class(classname = "trans_env",
 				env.dist <- vegdist(scale(env_data[, i, drop=FALSE]), "euclid")
 				if(partial_mantel == T){
 					zdis <- vegdist(scale(env_data[, -i, drop=FALSE]), "euclid")
-					man1 <- mantel.partial(veg.dist, env.dist, zdis, ...)
+					man1 <- mantel.partial(veg.dist, env.dist, zdis, method = method, ...)
 				}else{
-					man1 <- mantel(veg.dist, env.dist, ...)
+					man1 <- mantel(veg.dist, env.dist, method = method, ...)
 				}
 				variable_name <- c(variable_name, colnames(env_data)[i])
 				corr_res <- c(corr_res, man1$statistic)
 				p_res <- c(p_res, man1$signif)
 			}
-			cor_method <- rep(method, length(p_res))
-			significance <- cut(p_res, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
-			res_mantel <- data.frame(variable_name, cor_method, corr_res, p_res, significance)
 			if(partial_mantel == T){
-				self$res_mantel_partial <- res_mantel
+				mantel_type <- rep("partial mantel test", length(p_res))
 			}else{
-				self$res_mantel <- res_mantel
+				mantel_type <- rep("mantel test", length(p_res))
 			}
-			message('The result is stored in object$res_mantel or object$res_mantel_partial ...')
+			cor_method <- rep(method, length(p_res))
+			p_adjusted <- p.adjust(p_res, method = p_adjust_method)
+			significance <- cut(p_adjusted, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+			res_mantel <- data.frame(variable_name, mantel_type, cor_method, corr_res, p_res, p_adjusted, significance)
+			colnames(res_mantel) <- c("Variables", "mantel type", "Correlation method", "Correlation coefficient","p.value", "p.adjusted", "Significance")
+
+			self$res_mantel <- res_mantel
+			message('The result is stored in object$res_mantel ...')
 		},
 		#' @description
 		#' Calculating the correlations between taxa abundance and environmental variables.
-		#' Indeed, it can also be used for calculating other correlation between any two variables from two tables.
+		#' Actually, it can also be used for calculating other correlation between any two variables from two tables.
 		#'
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
 		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.
 		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
-		#' @param p_adjust_method default "fdr"; p.adjust method.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
 		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
 		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
-		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g. "Genus".
-		#' @param other_taxa default NULL; provide additional taxa, see use_data parameter.
+		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g., "Genus".
+		#' @param other_taxa default NULL; character vector containing a series of taxa names; used when use_data = "other"; 
+		#' 	  the provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
+		#' 	  please see the example.
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
-		#' @param group_select default NULL; the group name used; will retain samples within the group.
-		#' @param taxa_name_full default TRUE; Whether retain the complete taxonomic name of taxa.
+		#' @param group_select default NULL; the group name used; remain samples within the group.
+		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
 		#' @return res_cor in object.
 		#' @examples
 		#' \donttest{
@@ -513,7 +614,11 @@ trans_env <- R6Class(classname = "trans_env",
 			group_select = NULL,
 			taxa_name_full = TRUE
 			){
-			env_data <- self$env_data
+			if(is.null(self$env_data)){
+				stop("The env_data is NULL! Please check the data input when creating the object !")
+			}else{
+				env_data <- self$env_data
+			}
 			if(is.null(select_env_data)){
 				env_data <- env_data[, unlist(lapply(env_data, is.numeric)), drop = FALSE]
 			}
@@ -535,7 +640,7 @@ trans_env <- R6Class(classname = "trans_env",
 						stop("Unknown use_data parameter provided!")
 					}
 				}
-				abund_table %<>% .[!grepl("__$|__uncultured$", rownames(.)), ]
+				abund_table %<>% .[!grepl("__$", rownames(.)), ]
 				if(use_data %in% names(self$dataset$taxa_abund) & !is.null(use_taxa_num)){
 					if(nrow(abund_table) > use_taxa_num){
 						abund_table %<>% .[1:use_taxa_num, ] 
@@ -559,7 +664,7 @@ trans_env <- R6Class(classname = "trans_env",
 				groups <- rep("All", nrow(env_data))
 			}else{
 				groups <- self$dataset$sample_table[, by_group] %>% as.character
-				message("Calculate the corr by the groups in ", by_group, " of sample_table, respectively ...")
+				message("Perform correlation by the groups in ", by_group, " of sample_table, respectively ...")
 			}
 			comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% 
 				t %>% 
@@ -608,7 +713,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot the top down.
+		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.
 		#' @param text_x_order default NULL; character vector; provide customized text order for x axis.
 		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
 		#' @param cluster_ggplot default "none"; add clustering dendrogram for ggplot2 based heatmap; 
@@ -618,7 +723,6 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when cluster_ggplot != "none".
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".
 		#' @param text_y_position default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.
-		#' @param fontsize default 9; base fontsize for the plot; see fontsize in pheatmap.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
 		#' @param ... paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.
 		#' @return plot.
@@ -641,12 +745,11 @@ trans_env <- R6Class(classname = "trans_env",
 			cluster_height_rows = 0.2,
 			cluster_height_cols = 0.2,
 			text_y_position = "right",
-			fontsize = 9,
 			mylabels_x = NULL,
 			...
 			){
 			if(is.null(self$res_cor)){
-				stop("Please first use cal_cor to get plot data !")
+				stop("Please first run cal_cor function to get plot data !")
 			}
 			if(length(color_vector) != 3){
 				stop("color_vector parameter must have three values !")
@@ -749,12 +852,10 @@ trans_env <- R6Class(classname = "trans_env",
 					clustering_distance_cols= "correlation",
 					border_color = NA, 
 					scale = "none",
-					fontsize = fontsize, 
 					labels_row = mylabels_y, 
 					labels_col = mylabels_x, 
 					display_numbers = sig_data, 
 					number_color = "black", 
-					fontsize_number = fontsize * 1.2,
 					color = color_vector_use,
 					breaks = myBreaks,
 					...
@@ -1012,4 +1113,3 @@ trans_env <- R6Class(classname = "trans_env",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-

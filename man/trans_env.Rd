@@ -5,7 +5,7 @@
 \title{Create trans_env object for the analysis of the effects of environmental factors on communities.}
 \description{
 This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
-mantel test and correlation analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+mantel test, correlation analysis and linear fitting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 }
 \examples{
 
@@ -22,7 +22,9 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_ordination(method = "RDA", use_measure = "bray")
+t1$cal_ordination(method = "dbRDA", use_measure = "bray")
+t1$cal_ordination(method = "RDA", taxa_level = "Genus")
+t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 }
 
 ## ------------------------------------------------
@@ -38,7 +40,7 @@ t1$cal_ordination_envsquare()
 ## ------------------------------------------------
 
 \donttest{
-t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
+t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env = 1)
 }
 
 ## ------------------------------------------------
@@ -46,7 +48,11 @@ t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
 ## ------------------------------------------------
 
 \donttest{
+t1$cal_ordination(method = "RDA")
+t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 t1$plot_ordination(plot_color = "Group")
+t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
+	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 }
 
 ## ------------------------------------------------
@@ -55,6 +61,7 @@ t1$plot_ordination(plot_color = "Group")
 
 \donttest{
 t1$cal_mantel(use_measure = "bray")
+t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 }
 
 ## ------------------------------------------------
@@ -118,15 +125,18 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{env_cols}}{default NULL; a vector to select columns in sample_table, when the environmental data is in sample_table. 
-Either numeric vector or character vector of colnames.}
+\item{\code{env_cols}}{default NULL; either numeric vector or character vector to select columns in sample_table of your microtable object. 
+This parameter should be used in the case that all the required environmental data is in sample_table of your microtable object.
+Otherwise, please use add_data parameter.}
 
-\item{\code{add_data}}{default NULL; data.frame format; provide the environmental data frame individually; rownames should be sample names.}
+\item{\code{add_data}}{default NULL; data.frame format; provide the environmental data in the format data.frame; rownames should be sample names.
+This parameter should be used when the sample_table in your microtable object has no environmental data. 
+Under this circumstance, the env_cols parameter can not be used because no data can be selected.}
 
 \item{\code{character2numeric}}{default TRUE; whether transform the characters or factors to numeric attributes.}
 
 \item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data;
-If TRUE, the function can run the interpolation with the mice package; Please first install mice package.}
+If TRUE, the function can run the interpolation with the mice package; to use this parameter, please first install mice package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -166,16 +176,17 @@ Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan p
 \describe{
 \item{\code{method}}{default c("RDA", "dbRDA", "CCA")[1]; the ordination method.}
 
-\item{\code{feature_sel}}{default FALSE; whether perform the feature selection.}
+\item{\code{feature_sel}}{default FALSE; whether perform the feature selection based on forward selection method.}
 
 \item{\code{taxa_level}}{default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
 If use otu_table; please input "OTU".}
 
 \item{\code{taxa_filter_thres}}{default NULL; If want to filter taxa, provide the relative abundance threshold.}
 
-\item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
+\item{\code{use_measure}}{default NULL; a name of beta diversity matrix; only useful when parameter method = "dbRDA";
+If not provided, use the first beta diversity matrix automatically.}
 
-\item{\code{add_matrix}}{default NULL; additional distance matrix provided, when you do not want to use the beta diversity matrix within the dataset;
+\item{\code{add_matrix}}{default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 only available when method = "dbRDA".}
 
 \item{\code{...}}{paremeters pass to dbrda or rda or cca function according to the input of method.}
@@ -188,7 +199,9 @@ res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis 
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_ordination(method = "RDA", use_measure = "bray")
+t1$cal_ordination(method = "dbRDA", use_measure = "bray")
+t1$cal_ordination(method = "RDA", taxa_level = "Genus")
+t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 }
 }
 \if{html}{\out{</div>}}
@@ -247,7 +260,7 @@ transform ordination result for the following plotting.
 \describe{
 \item{\code{show_taxa}}{default 10; taxa number shown in the plot.}
 
-\item{\code{adjust_arrow_length}}{default FALSE; whether adjust the arrow length to be clear}
+\item{\code{adjust_arrow_length}}{default FALSE; whether adjust the arrow length to be clearer.}
 
 \item{\code{min_perc_env}}{default 0.1; used for scaling up the minimum of env arrow; multiply by the maximum distance between samples and origin.}
 
@@ -265,7 +278,7 @@ res_ordination_trans in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 10)
+t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env = 1)
 }
 }
 \if{html}{\out{</div>}}
@@ -292,6 +305,10 @@ plot ordination result.
   env_text_size = 3.7,
   taxa_text_size = 3,
   taxa_text_italic = TRUE,
+  env_nudge_x = NULL,
+  env_nudge_y = NULL,
+  taxa_nudge_x = NULL,
+  taxa_nudge_y = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -305,7 +322,7 @@ plot ordination result.
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.}
 
-\item{\code{shape_values}}{default see the function; vector used in the shape, see ggplot2 tutorial.}
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); vector used for the shape; see ggplot2 tutorial.}
 
 \item{\code{env_text_color}}{default "black"; environmental variable text color.}
 
@@ -323,6 +340,23 @@ plot ordination result.
 
 \item{\code{taxa_text_italic}}{default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.}
 
+\item{\code{env_nudge_x}}{default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of geom_text_repel function of ggrepel package;
+default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
+if there are 5 env variables, env_nudge_x should be something like c(0.1, 0, -0.2, 0, 0). 
+Note that this parameter and env_nudge_y is generally used when the automatic text adjustment is not very well.}
+
+\item{\code{env_nudge_y}}{default NULL; numeric vector to adjust the env text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
+default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
+if there are 5 env variables, env_nudge_y should be something like c(0.1, 0, -0.2, 0, 0).}
+
+\item{\code{taxa_nudge_x}}{default NULL; numeric vector to adjust the taxa text x axis position; passed to nudge_x parameter of ggrepel::geom_text_repel function;
+default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
+if 3 taxa are shown, taxa_nudge_x should be something like c(0.3, -0.2, 0).}
+
+\item{\code{taxa_nudge_y}}{default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
+default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
+if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).}
+
 \item{\code{...}}{paremeters pass to geom_point for controlling sample points.}
 }
 \if{html}{\out{</div>}}
@@ -333,7 +367,11 @@ ggplot object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
+t1$cal_ordination(method = "RDA")
+t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 t1$plot_ordination(plot_color = "Group")
+t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
+	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 }
 }
 \if{html}{\out{</div>}}
@@ -353,6 +391,7 @@ Mantel test between beta diversity matrix and environmental data.
   add_matrix = NULL,
   use_measure = NULL,
   method = "pearson",
+  p_adjust_method = "fdr",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -368,9 +407,11 @@ Mantel test between beta diversity matrix and environmental data.
 
 \item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
 
-\item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method.}
+\item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in mantel function of vegan package.}
 
-\item{\code{...}}{paremeters pass to \code{\link{mantel}}.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+
+\item{\code{...}}{paremeters pass to \code{\link{mantel}} of vegan package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -381,6 +422,7 @@ res_mantel in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_mantel(use_measure = "bray")
+t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 }
 }
 \if{html}{\out{</div>}}
@@ -393,7 +435,7 @@ t1$cal_mantel(use_measure = "bray")
 \if{latex}{\out{\hypertarget{method-cal_cor}{}}}
 \subsection{Method \code{cal_cor()}}{
 Calculating the correlations between taxa abundance and environmental variables.
-Indeed, it can also be used for calculating other correlation between any two variables from two tables.
+Actually, it can also be used for calculating other correlation between any two variables from two tables.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
@@ -421,7 +463,7 @@ Indeed, it can also be used for calculating other correlation between any two va
 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation method.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
 
 \item{\code{p_adjust_type}}{default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.}
 
@@ -429,15 +471,17 @@ Indeed, it can also be used for calculating other correlation between any two va
 
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate correlations for different groups separately.}
 
-\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g. "Genus".}
+\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g., "Genus".}
 
-\item{\code{other_taxa}}{default NULL; provide additional taxa, see use_data parameter.}
+\item{\code{other_taxa}}{default NULL; character vector containing a series of taxa names; used when use_data = "other"; 
+the provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
+please see the example.}
 
 \item{\code{group_use}}{default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.}
 
-\item{\code{group_select}}{default NULL; the group name used; will retain samples within the group.}
+\item{\code{group_select}}{default NULL; the group name used; remain samples within the group.}
 
-\item{\code{taxa_name_full}}{default TRUE; Whether retain the complete taxonomic name of taxa.}
+\item{\code{taxa_name_full}}{default TRUE; Whether use the complete taxonomic name of taxa.}
 }
 \if{html}{\out{</div>}}
 }
@@ -478,7 +522,6 @@ Plot correlation heatmap.
   cluster_height_rows = 0.2,
   cluster_height_cols = 0.2,
   text_y_position = "right",
-  fontsize = 9,
   mylabels_x = NULL,
   ...
 )}\if{html}{\out{</div>}}
@@ -502,7 +545,7 @@ For example, filter_feature = "" can be used to filter features that only have "
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
-\item{\code{text_y_order}}{default NULL; character vector; provide customized text order for y axis; shown in the plot the top down.}
+\item{\code{text_y_order}}{default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.}
 
 \item{\code{text_x_order}}{default NULL; character vector; provide customized text order for x axis.}
 
@@ -518,8 +561,6 @@ Only available when pheatmap = FALSE.}
 \item{\code{cluster_height_cols}}{default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".}
 
 \item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.}
-
-\item{\code{fontsize}}{default 9; base fontsize for the plot; see fontsize in pheatmap.}
 
 \item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
 
