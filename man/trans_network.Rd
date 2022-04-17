@@ -415,7 +415,7 @@ t1$cal_network_attr()
 \if{html}{\out{<a id="method-cal_node_type"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_node_type}{}}}
 \subsection{Method \code{cal_node_type()}}{
-Calculate node properties. This function will be discarded in the future version! Please use get_node_table function!
+Calculate node properties. This function will be deprecated in the next release! Please use get_node_table function!
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_node_type()}\if{html}{\out{</div>}}
 }

@@ -415,11 +415,11 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_network_attr ...')
 		},
 		#' @description
-		#' Calculate node properties. This function will be discarded in the future version! Please use get_node_table function!
+		#' Calculate node properties. This function will be deprecated in the next release! Please use get_node_table function!
 		#'
 		#' @return see the Return part in function get_node_table.
 		cal_node_type = function(){
-			warning('Please use get_node_table function instead of this! This function will be discarded in the next release version !')
+			warning('Please use get_node_table function instead of this! This function will be deprecated in the next release !')
 			self$get_node_table(node_roles = TRUE)
 		},
 		#' @description

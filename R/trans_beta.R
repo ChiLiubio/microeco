@@ -231,36 +231,42 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis function.
 		#'
-		#' @param cal_manova_all default FALSE; whether manova is used for all data.
+		#' @param cal_manova_all default TRUE; whether manova is only used for all the groups.
 		#' @param cal_manova_paired default FALSE; whether manova is used for all the paired groups.
-		#' @param cal_manova_set default NULL; specified group set for manova, see \code{\link{adonis}}.
-		#' @param permutations default 999; see permutations in \code{\link{adonis}}.
+		#' @param cal_manova_set default NULL; specified group set for manova, such as cal_manova_set = ""Group + Type""; see \code{\link{adonis2}}.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
+		#' @param ... parameters passed to \code{\link{adonis2}} function of vegan package.
 		#' @return res_manova stored in object.
 		#' @examples
 		#' t1$cal_manova(cal_manova_all = TRUE)
 		cal_manova = function(
-			cal_manova_all = FALSE, 
+			cal_manova_all = TRUE, 
 			cal_manova_paired = FALSE, 
 			cal_manova_set = NULL, 
-			permutations = 999
+			p_adjust_method = "fdr",
+			...
 			){
 			if(is.null(self$use_matrix)){
 				stop("Please recreate the object and set the parameter measure !")
 			}
 			use_matrix <- self$use_matrix
+			metadata <- self$sample_table
 			if(!is.null(cal_manova_set)){
-				self$res_manova <- adonis(reformulate(cal_manova_set, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
+				use_formula <- reformulate(cal_manova_set, substitute(as.dist(use_matrix)))
+				self$res_manova <- adonis2(use_formula, data = metadata, ...)
 			}
 			if(cal_manova_all == T){
-				self$res_manova <- adonis(reformulate(self$group, substitute(as.dist(use_matrix))), data = self$sample_table, permutations = permutations)
+				use_formula <- reformulate(self$group, substitute(as.dist(use_matrix)))
+				self$res_manova <- adonis2(use_formula, data = metadata, ...)
 			}
 			if(cal_manova_paired == T){
 				self$res_manova <- private$paired_group_manova(
-					sample_info_use = self$sample_table, 
+					sample_info_use = metadata, 
 					use_matrix = use_matrix, 
 					group = self$group, 
 					measure = self$measure, 
-					permutations = permutations
+					p_adjust_method = p_adjust_method,
+					...
 				)
 			}
 			message('The result is stored in object$res_manova ...')
@@ -519,28 +525,28 @@ trans_beta <- R6Class(classname = "trans_beta",
 			colnames(res)[2] <- type
 			res
 		},
-		paired_group_manova = function(sample_info_use, use_matrix, group, measure, permutations){
+		paired_group_manova = function(sample_info_use, use_matrix, group, measure, p_adjust_method, ...){
 			comnames <- c()
+			F <- c()
 			R2 <- c()
-			p.value <- c()
-			measure_vec <- c()
+			p_value <- c()
 			matrix_total <- use_matrix[rownames(sample_info_use), rownames(sample_info_use)]
 			groupvec <- as.character(sample_info_use[ , group])
 			all_name <- combn(unique(sample_info_use[ , group]), 2)
 			for(i in 1:ncol(all_name)) {
 				matrix_compare <- matrix_total[groupvec %in% as.character(all_name[,i]), groupvec %in% as.character(all_name[,i])]
 				sample_info_compare <- sample_info_use[groupvec %in% as.character(all_name[,i]), ]
-				ad <- adonis(reformulate(group, substitute(as.dist(matrix_compare))), data = sample_info_compare, permutations = permutations)
+				ad <- adonis2(reformulate(group, substitute(as.dist(matrix_compare))), data = sample_info_compare, ...)
 				comnames <- c(comnames, paste0(as.character(all_name[,i]), collapse = " vs "))
-				R2 <- c(R2, ad$aov.tab[1,5])
-				p.value <- c(p.value, ad$aov.tab[1,6])
-				measure_vec <- c(measure_vec, measure)
+				F %<>% c(., ad$F[1])
+				R2 %<>% c(., ad$R2[1])
+				p_value %<>% c(., ad$`Pr(>F)`[1])
 			}
-			significance_label <- cut(p.value, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
-			#p.adjusted = p.adjust(p.value, method='fdr')
-			permutations_res <- rep(permutations, length(comnames))
-			compare_result <- data.frame(comnames, measure_vec, permutations_res, R2, p.value, significance_label)
-			colnames(compare_result) <- c("Groups", "measure", "permutations", "R2","p.value", "Significance")
+			p_adjusted <- p.adjust(p_value, method = p_adjust_method)
+			significance_label <- cut(p_adjusted, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", ""))
+			measure_vec <- rep(measure, length(comnames))
+			compare_result <- data.frame(comnames, measure_vec, F, R2, p_value, p_adjusted, significance_label)
+			colnames(compare_result) <- c("Groups", "measure", "F", "R2","p.value", "p.adjusted", "Significance")
 			compare_result
 		}
 	),

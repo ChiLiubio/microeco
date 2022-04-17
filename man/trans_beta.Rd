@@ -236,23 +236,26 @@ ggplot.
 Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
-  cal_manova_all = FALSE,
+  cal_manova_all = TRUE,
   cal_manova_paired = FALSE,
   cal_manova_set = NULL,
-  permutations = 999
+  p_adjust_method = "fdr",
+  ...
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{cal_manova_all}}{default FALSE; whether manova is used for all data.}
+\item{\code{cal_manova_all}}{default TRUE; whether manova is only used for all the groups.}
 
 \item{\code{cal_manova_paired}}{default FALSE; whether manova is used for all the paired groups.}
 
-\item{\code{cal_manova_set}}{default NULL; specified group set for manova, see \code{\link{adonis}}.}
+\item{\code{cal_manova_set}}{default NULL; specified group set for manova, such as cal_manova_set = ""Group + Type""; see \code{\link{adonis2}}.}
 
-\item{\code{permutations}}{default 999; see permutations in \code{\link{adonis}}.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+
+\item{\code{...}}{parameters passed to \code{\link{adonis2}} function of vegan package.}
 }
 \if{html}{\out{</div>}}
 }
