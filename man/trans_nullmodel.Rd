@@ -49,6 +49,7 @@ t1$cal_betampd(abundance.weighted = TRUE)
 
 \donttest{
 t1$cal_betamntd(abundance.weighted = TRUE)
+t1$cal_betamntd(abundance.weighted = TRUE, use_iCAMP = TRUE)
 }
 
 ## ------------------------------------------------
@@ -164,7 +165,7 @@ t1$cal_Cscore()
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-comm and dis in object.
+comm and phylo_tree in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -257,13 +258,13 @@ t1$plot_mantel_corr()
 \subsection{Method \code{cal_betampd()}}{
 Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betampd(abundance.weighted = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betampd(abundance.weighted = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{abundance.weighted}}{default FALSE; whether use abundance-weighted method.}
+\item{\code{abundance.weighted}}{default TRUE; whether use abundance-weighted method.}
 }
 \if{html}{\out{</div>}}
 }
@@ -288,17 +289,30 @@ t1$cal_betampd(abundance.weighted = TRUE)
 Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
-  abundance.weighted = FALSE,
-  exclude.conspecifics = FALSE
+  abundance.weighted = TRUE,
+  exclude.conspecifics = FALSE,
+  use_iCAMP = FALSE,
+  use_iCAMP_force = TRUE,
+  iCAMP_tempdir = NULL,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{abundance.weighted}}{default FALSE; whether use abundance-weighted method.}
+\item{\code{abundance.weighted}}{default TRUE; whether use abundance-weighted method.}
 
 \item{\code{exclude.conspecifics}}{default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.}
+
+\item{\code{use_iCAMP}}{default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
+This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.}
+
+\item{\code{use_iCAMP_force}}{default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is larger than 3000.}
+
+\item{\code{iCAMP_tempdir}}{default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.}
+
+\item{\code{...}}{paremeters pass to iCAMP::pdist.big function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -309,6 +323,7 @@ res_betamntd in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_betamntd(abundance.weighted = TRUE)
+t1$cal_betamntd(abundance.weighted = TRUE, use_iCAMP = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -324,7 +339,7 @@ Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betampd(
   runs = 1000,
-  abundance.weighted = FALSE,
+  abundance.weighted = TRUE,
   verbose = TRUE
 )}\if{html}{\out{</div>}}
 }
@@ -334,7 +349,7 @@ Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (
 \describe{
 \item{\code{runs}}{default 1000; simulation runs.}
 
-\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance.}
+\item{\code{abundance.weighted}}{default TRUE; whether use weighted abundance.}
 
 \item{\code{verbose}}{default TRUE; whether show the calculation process message.}
 }
@@ -362,22 +377,40 @@ Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (b
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betamntd(
   runs = 1000,
-  abundance.weighted = FALSE,
+  null.model = c("taxa.labels", "richness", "frequency", "sample.pool",
+    "phylogeny.pool", "independentswap", "trialswap")[1],
+  abundance.weighted = TRUE,
   exclude.conspecifics = FALSE,
-  verbose = TRUE
+  use_iCAMP = FALSE,
+  use_iCAMP_force = TRUE,
+  iCAMP_tempdir = NULL,
+  nworker = 2,
+  iterations = 1000
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{runs}}{default 1000; simulation runs.}
+\item{\code{runs}}{default 1000; simulation number of null model.}
 
-\item{\code{abundance.weighted}}{default FALSE; whether use weighted abundance}
+\item{\code{null.model}}{default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
+"independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.}
+
+\item{\code{abundance.weighted}}{default TRUE; whether use abundance-weighted method.}
 
 \item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
 
-\item{\code{verbose}}{default TRUE; whether show the calculation process message.}
+\item{\code{use_iCAMP}}{default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
+This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.}
+
+\item{\code{use_iCAMP_force}}{default FALSE; whether to make use_iCAMP to be TRUE when the feature number is larger than 3000.}
+
+\item{\code{iCAMP_tempdir}}{default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.}
+
+\item{\code{nworker}}{default 2; the CPU thread number.}
+
+\item{\code{iterations}}{default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.}
 }
 \if{html}{\out{</div>}}
 }

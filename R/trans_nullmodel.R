@@ -18,7 +18,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
-		#' @return comm and dis in object.
+		#' @return comm and phylo_tree in object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
@@ -50,13 +50,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- t(use_set$otu_table)
 			if(!is.null(use_set$phylo_tree)){
 				tre <- use_set$phylo_tree
-				dis <- cophenetic(tre)
-				dis <- dis[colnames(comm), colnames(comm)]
 			}else{
-				dis <- NULL
+				tre <- NULL
 			}
 			self$comm <- comm
-			self$dis <- dis
+			self$phylo_tree <- tre
 			self$sample_table <- use_set$sample_table
 			if(!is.null(env_cols) | !is.null(add_data)){
 				if(is.null(add_data)){
@@ -94,8 +92,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			cutoff=FALSE, 
 			...
 			){
-			dis <- self$dis
+			if(is.null(self$phylo_tree)){
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
+			}else{
+				dis <- cophenetic(self$phylo_tree)
+			}
 			comm <- self$comm
+			dis %<>% .[colnames(comm), colnames(comm)]
 			env_data <- self$env_data
 			comm %<>% .[rownames(env_data), ]
 			comm <- apply(comm, 2, function(x) x/sum(x))
@@ -174,18 +177,20 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
 		#'
-		#' @param abundance.weighted default FALSE; whether use abundance-weighted method.
+		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
 		#' @return res_betampd in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_betampd(abundance.weighted = TRUE)
 		#' }
-		cal_betampd = function(abundance.weighted=FALSE){
-			dis <- self$dis
-			if(is.null(dis)){
-				stop("Phylogenetic tree is required!")
+		cal_betampd = function(abundance.weighted=TRUE){
+			if(is.null(self$phylo_tree)){
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
+			}else{
+				dis <- cophenetic(self$phylo_tree)
 			}
 			comm <- self$comm
+			dis %<>% .[colnames(comm), colnames(comm)]
 			if (abundance.weighted == F) {
 				comm <- decostand(comm, method="pa")
 			}
@@ -196,43 +201,76 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
 		#'
-		#' @param abundance.weighted default FALSE; whether use abundance-weighted method.
+		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
 		#' @param exclude.conspecifics default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.
+		#' @param use_iCAMP default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
+		#' 	  This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.
+		#' @param use_iCAMP_force default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is larger than 3000.
+		#' @param iCAMP_tempdir default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.
+		#' @param ... paremeters pass to iCAMP::pdist.big function.
 		#' @return res_betamntd in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_betamntd(abundance.weighted = TRUE)
+		#' t1$cal_betamntd(abundance.weighted = TRUE, use_iCAMP = TRUE)
 		#' }
-		cal_betamntd = function(abundance.weighted = FALSE, exclude.conspecifics = FALSE){
-			dis <- self$dis
-			if(is.null(dis)){
+		cal_betamntd = function(abundance.weighted = TRUE, exclude.conspecifics = FALSE, use_iCAMP = FALSE, 
+			use_iCAMP_force = TRUE, iCAMP_tempdir = NULL, ...){
+			if(is.null(self$phylo_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
 			comm <- self$comm
-			self$res_betamntd <- private$betamntd(
-				comm = comm, 
-				dis = dis, 
-				abundance.weighted = abundance.weighted, 
-				exclude.conspecifics = exclude.conspecifics
+			if(! use_iCAMP){
+				if(ncol(comm) > 3000){
+					if(use_iCAMP_force == T){
+						use_iCAMP <- TRUE
+						message("The feature number is larger than 3000. Automatically change use_iCAMP parameter to be TRUE and ",
+							"use iCAMP package for large matrix and parallel computing. Change use_iCAMP_force = FALSE to skip this method ...")
+					}
+				}
+			}
+			if(use_iCAMP){
+				tree <- self$phylo_tree
+				if(is.null(iCAMP_tempdir)){
+					iCAMP_tempdir <- tempdir()
+				}
+				message("The temporary directory used for big tree is in ", iCAMP_tempdir, " ...")
+				if(!require("iCAMP")){
+					stop("iCAMP package is not installed! Please first install it !")
+				}
+				pd.big <- iCAMP::pdist.big(tree = tree, wd = iCAMP_tempdir, ...)
+				res_betamntd <- iCAMP::bmntd.big(comm = comm, pd.desc = pd.big$pd.file, pd.spname = pd.big$tip.label, pd.wd = pd.big$pd.wd,
+					abundance.weighted = abundance.weighted, exclude.conspecifics = exclude.conspecifics) %>%
+					as.matrix
+			}else{
+				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
+				res_betamntd <- private$betamntd(
+					comm = comm, 
+					dis = dis,
+					abundance.weighted = abundance.weighted, 
+					exclude.conspecifics = exclude.conspecifics
 				)
+			}
+			self$res_betamntd <- res_betamntd
 			message('The result is stored in object$res_betamntd ...')
 		},
 		#' @description
 		#' Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (betaNRI).
 		#'
 		#' @param runs default 1000; simulation runs.
-		#' @param abundance.weighted default FALSE; whether use weighted abundance.
+		#' @param abundance.weighted default TRUE; whether use weighted abundance.
 		#' @param verbose default TRUE; whether show the calculation process message.
 		#' @return res_ses_betampd in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
 		#' }
-		cal_ses_betampd = function(runs = 1000, abundance.weighted = FALSE, verbose = TRUE) {
+		cal_ses_betampd = function(runs = 1000, abundance.weighted = TRUE, verbose = TRUE) {
 			comm <- self$comm
-			dis <- self$dis
-			if(is.null(dis)){
+			if(is.null(self$phylo_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
+			}else{
+				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
 			}
 			if (abundance.weighted == F) {
 				comm <- decostand(comm, method="pa")
@@ -255,7 +293,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				}
 				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis)))
 			}, simplify = "array")
-			message("---------------- ", Sys.time()," : Finish ----------------")
+			message("---------------- ", Sys.time()," : End ----------------")
 			
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
@@ -266,60 +304,102 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (betaNTI).
 		#'
-		#' @param runs default 1000; simulation runs.
-		#' @param abundance.weighted default FALSE; whether use weighted abundance
+		#' @param runs default 1000; simulation number of null model.
+		#' @param null.model default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
+		#' 	  "independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.
+		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
 		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
-		#' @param verbose default TRUE; whether show the calculation process message.
+		#' @param use_iCAMP default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
+		#' 	  This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.
+		#' @param use_iCAMP_force default FALSE; whether to make use_iCAMP to be TRUE when the feature number is larger than 3000.
+		#' @param iCAMP_tempdir default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.
+		#' @param nworker default 2; the CPU thread number.
+		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.
 		#' @return res_ses_betamntd in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 		#' }
 		cal_ses_betamntd = function(
-			runs=1000, 
-			abundance.weighted = FALSE, 
-			exclude.conspecifics = FALSE, 
-			verbose = TRUE
+			runs = 1000, 
+			null.model = c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", "independentswap", "trialswap")[1],
+			abundance.weighted = TRUE, 
+			exclude.conspecifics = FALSE,
+			use_iCAMP = FALSE, 
+			use_iCAMP_force = TRUE, 
+			iCAMP_tempdir = NULL, 
+			nworker = 2,
+			iterations = 1000
 			){
 			comm <- self$comm
-			dis <- self$dis
-			if(is.null(dis)){
+			null.model <- match.arg(null.model, c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", "independentswap", "trialswap"))
+			if(is.null(self$phylo_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
-			all_samples <- rownames(comm)
-
-			message("---------------- ", Sys.time()," : Start ----------------")
-			if(verbose){
-				cat("Calculate observed betaMNTD ...\n")
-			}
-			betaobs <- private$betamntd(
-				comm = comm, 
-				dis = dis, 
-				abundance.weighted = abundance.weighted, 
-				exclude.conspecifics = exclude.conspecifics
-				) %>% as.dist
-			betaobs_vec <- as.vector(betaobs)
-			if(verbose){
-				cat("Simulate betaMNTD ...\n")
-			}
-			beta_rand <- sapply(seq_len(runs), function(x){
-				if(verbose){
-					private$show_run(x = x, runs = runs)
+			if(! use_iCAMP){
+				if(ncol(comm) > 3000){
+					if(use_iCAMP_force == T){
+						use_iCAMP <- TRUE
+						message("The feature number is larger than 3000. Automatically change use_iCAMP parameter to be TRUE and ",
+							"use iCAMP package for large matrix and parallel computing. Change use_iCAMP_force = FALSE to skip this method ...")
+					}
 				}
-				as.dist(private$betamntd(
+			}
+			all_samples <- rownames(comm)
+			
+			message("---------------- ", Sys.time()," : Start ----------------")
+			if(use_iCAMP){
+				tree <- self$phylo_tree
+				if(is.null(iCAMP_tempdir)){
+					iCAMP_tempdir <- tempdir()
+				}
+				message("The temporary directory used for big tree is in ", iCAMP_tempdir, " ...")
+				if(!require("iCAMP")){
+					stop("iCAMP package is not installed! Please first install it !")
+				}
+				pd.big <- iCAMP::pdist.big(tree = tree, wd = iCAMP_tempdir, nworker = nworker)
+				cat("Calculate observed betaMNTD ...\n")
+				betaobs <- iCAMP::bmntd.big(comm=comm, pd.desc = pd.big$pd.file,
+										 pd.spname = pd.big$tip.label, pd.wd = pd.big$pd.wd,
+										 abundance.weighted = abundance.weighted, exclude.consp = exclude.conspecifics)
+				betaobs_vec <- as.vector(betaobs)
+				cat("Simulate betaMNTD ...\n")
+				beta_rand <- sapply(seq_len(runs), function(x){
+					private$show_run(x = x, runs = runs)
+					rand_data <- private$null_model(null.model = null.model, comm = comm, dis = NULL, tip.label = pd.big$tip.label, iterations = iterations)
+					iCAMP::bmntd.big(comm = rand_data$comm, pd.desc = pd.big$pd.file,
+						pd.spname = rand_data$tip.label, pd.wd = pd.big$pd.wd,
+						abundance.weighted = abundance.weighted, exclude.consp = exclude.conspecifics)
+				}, simplify = "array")
+			}else{
+				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
+				cat("Calculate observed betaMNTD ...\n")
+				betaobs <- private$betamntd(
 					comm = comm, 
-					dis = picante::taxaShuffle(dis), 
+					dis = dis, 
 					abundance.weighted = abundance.weighted, 
 					exclude.conspecifics = exclude.conspecifics
+					) %>% as.dist
+				betaobs_vec <- as.vector(betaobs)
+				cat("Simulate betaMNTD ...\n")
+				beta_rand <- sapply(seq_len(runs), function(x){
+					private$show_run(x = x, runs = runs)
+					rand_data <- private$null_model(null.model = null.model, comm = comm, dis = dis, tip.label = NULL, iterations = iterations)
+					as.dist(private$betamntd(
+						comm = rand_data$comm, 
+						dis = rand_data$dis, 
+						abundance.weighted = abundance.weighted, 
+						exclude.conspecifics = exclude.conspecifics
+						)
 					)
-				)
-			}, simplify = "array")
-			message("---------------- ", Sys.time()," : Finish ----------------")
-
+				}, simplify = "array")
+			}
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
 			beta_obs_z <- (betaobs_vec - beta_rand_mean)/beta_rand_sd
-			self$res_ses_betamntd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
+			res_ses_betamntd <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
+			message("---------------- ", Sys.time()," : Finish ----------------")
+			self$res_ses_betamntd <- res_ses_betamntd
 			message('The result is stored in object$res_ses_betamntd ...')
 		},
 		#' @description
@@ -477,7 +557,6 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			matrix_multi <- function(comm_use, dis_use, ag_vector){
 				(comm_use %*% dis_use) %*% ag_vector
 			}
-			
 			res <- data.frame()
 			rm_samples <- c()
 			for(sample_name in all_samples[-length(all_samples)]){
@@ -496,7 +575,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), 
 				data.frame(S1 = all_samples, S2 = all_samples, distance = 0)
 				)
-			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% 
+			res1 <- reshape2::dcast(res1, S1 ~ S2, value.var = "distance") %>% 
 				`row.names<-`(.[,1]) %>% 
 				.[, -1, drop = FALSE]
 			as.matrix(res1[all_samples, all_samples])
@@ -507,62 +586,65 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			abundance.weighted = FALSE, 
 			exclude.conspecifics = FALSE
 			){
-			all_samples <- rownames(comm)
-			comm <- decostand(comm, method="total", MARGIN=1)
-			comm <- rownames_to_column(as.data.frame(comm, stringsAsFactors = FALSE)) %>% 
-				reshape2::melt(id.vars = "rowname")
-			colnames(comm) <- c("Sample", "Taxa", "Abund")
-			comm %<>% .[.$Abund != 0, ]
-			com_group <- combn(all_samples, 2)
-			colnames(com_group) <- unlist(lapply(seq_len(ncol(com_group)), function(x) paste0(sort(com_group[, x]), collapse = "_betamntd_")))
-			res <- data.frame()
-			if(exclude.conspecifics == T){
-				dis[dis == 0] <- NA
+			dis %<>% .[colnames(comm), colnames(comm)]
+			if(!abundance.weighted){
+				comm[comm > 0] <- 1
 			}
-			for(sample_name in all_samples){
-				comm_use <- comm[comm$Sample != sample_name, ]
-				dis_use <- dis[unique(as.character(comm_use$Taxa)), comm[comm$Sample == sample_name, "Taxa"]]
-				each_taxa <- apply(dis_use, 1, min, na.rm=TRUE)
-				comm_use$mindis <- each_taxa[as.character(comm_use$Taxa)]
-				if(abundance.weighted == T){
-					inter_res <- comm_use %>% 
-						dplyr::group_by(Sample) %>% 
-						dplyr::summarise(sum_dis = weighted.mean(mindis, Abund)) %>% 
-						as.data.frame		
-				}else{
-					inter_res <- comm_use %>% 
-						dplyr::group_by(Sample) %>% 
-						dplyr::summarise(sum_dis = sum(mindis), num = dplyr::n()) %>% 
-						as.data.frame		
+			if(! inherits(dis, "matrix")){
+				dis %<>% as.matrix
+			}
+			nd_matrix <- comm
+			if(exclude.conspecifics){
+				diag(dis) <- NA
+				for(i in seq_len(nrow(comm))){
+					id <- comm[i, ] == 0
+					nd_matrix[i, ] <- apply(dis[!id, , drop=FALSE], 2, min, na.rm = TRUE)
 				}
-				inter_res$ag <- sample_name
-				res <- rbind.data.frame(res, inter_res)
-			}
-			res$com_name <- unlist(lapply(seq_len(nrow(res)), function(x) {
-				paste0(sort(unlist(res[x, c("Sample", "ag")])), collapse = "_betamntd_")
-			}))
-			if(abundance.weighted == T){
-				res1 <- res %>% 
-					dplyr::group_by(com_name) %>% 
-					dplyr::summarise(distance = mean(sum_dis)) %>% 
-					as.data.frame
 			}else{
-				res1 <- res %>% 
-					dplyr::group_by(com_name) %>% 
-					dplyr::summarise(distance = sum(sum_dis)/sum(num)) %>% 
-					as.data.frame
+				for(i in seq_len(nrow(comm))){
+					id <- comm[i, ] == 0
+					nd_matrix[i, !id] <- 0
+					nd_matrix[i, id] <- apply(dis[!id, id, drop = FALSE], 2, min)
+				}
 			}
-			res1 <- data.frame(t(com_group[, res1$com_name]), res1$distance)
-			colnames(res1) <- c("S1", "S2", "distance")
-			res1 <- rbind.data.frame(
-				res1, 
-				data.frame(S1 = res1$S2, S2 = res1$S1, distance = res1$distance), 
-				data.frame(S1 = all_samples, S2 = all_samples, distance = 0)
-				)
-			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% 
-				`row.names<-`(.[,1]) %>% 
-				.[, -1, drop = FALSE]
-			as.matrix(res1[all_samples, all_samples])
+			if(abundance.weighted){
+				comm_stand <- comm/rowSums(comm)
+				res <- as.matrix(nd_matrix) %*% (t(comm_stand)) %>% 
+					{(. + t(.))/2}
+			}else{
+				res_inter <- as.matrix(nd_matrix) %*% (t(comm))
+				res <- rowSums(comm) %>%
+					matrix(., nrow = nrow(comm), ncol = nrow(comm)) %>% 
+					{. + t(.)} %>%
+					{(res_inter + t(res_inter))/.}
+			}
+			diag(res) <- 0
+			res
+		},
+		null_model = function(null.model, comm = NULL, dis = NULL, tip.label = NULL, iterations = 1000){
+				if(is.null(comm)){
+					stop("comm should not be NULL!")
+				}
+			if(null.model %in% c("taxa.labels", "phylogeny.pool")){
+				if(is.null(dis)){
+					if(is.null(tip.label)){
+						stop("tip.label should not be NULL when null.model is 'taxa.labels' or 'phylogeny.pool'!")
+					}
+					tip.label <- sample(tip.label)
+				}else{
+					dis <- picante::taxaShuffle(dis)
+				}
+				if(null.model == "phylogeny.pool"){
+					comm <- picante::randomizeMatrix(comm, null.model = "richness")
+				}
+			}else{
+				if(null.model == "sample.pool"){
+					comm <- picante::randomizeMatrix(comm, null.model = "richness", iterations = iterations)
+				}else{
+					comm <- picante::randomizeMatrix(comm, null.model = null.model, iterations = iterations)
+				}
+			}
+			list(comm = comm, dis = dis, tip.label = tip.label)
 		},
 		percen_proc = function(ses_phylo_beta, ses_comm){
 			phylo_vec <- as.vector(as.dist(ses_phylo_beta))
