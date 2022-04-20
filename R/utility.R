@@ -90,13 +90,14 @@ tidy_taxonomy <- function(taxonomy_table,
 
 # inner function
 tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore.case, na_fill){
-	taxonomy_table[, i] %<>% gsub(paste0(pattern, collapse = "|"), replacement, ., ignore.case = ignore.case)
+	taxonomy_table[, i] <- gsub(paste0(pattern, collapse = "|"), replacement, taxonomy_table[, i], ignore.case = ignore.case)
 	# delete the blank space in beginning and end
-	taxonomy_table[, i] %<>% gsub("^\\s+|\\s+$", "", .)
+	taxonomy_table[, i] <- gsub("^\\s+|\\s+$", "", taxonomy_table[, i])
 	# delete any " in the text
-	taxonomy_table[, i] %<>% gsub('"', "", ., fixed = TRUE)
+	taxonomy_table[, i] <- gsub('"', "", taxonomy_table[, i], fixed = TRUE)
 	# some data have single underline, so first double, then single
-	taxonomy_table[, i] %<>% gsub("^.*__", "", .) %>% gsub("^._", "", .)
+	taxonomy_table[, i] <- gsub("^.*__", "", taxonomy_table[, i])
+	taxonomy_table[, i] <- gsub("^._", "", taxonomy_table[, i])
 	# check the missing data
 	taxonomy_table[, i][is.na(taxonomy_table[, i])] <- na_fill
 	# paste the final result with double underlines

@@ -57,7 +57,7 @@ t1$cal_betamntd(abundance.weighted = TRUE, use_iCAMP = TRUE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
+t1$cal_ses_betampd(runs = 500, abundance.weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -65,7 +65,7 @@ t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
+t1$cal_ses_betamntd(runs = 500, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
 
 ## ------------------------------------------------
@@ -308,7 +308,7 @@ Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante
 \item{\code{use_iCAMP}}{default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
 This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.}
 
-\item{\code{use_iCAMP_force}}{default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is larger than 3000.}
+\item{\code{use_iCAMP_force}}{default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is large.}
 
 \item{\code{iCAMP_tempdir}}{default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.}
 
@@ -339,8 +339,10 @@ Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betampd(
   runs = 1000,
+  null.model = c("taxa.labels", "richness", "frequency", "sample.pool",
+    "phylogeny.pool", "independentswap", "trialswap")[1],
   abundance.weighted = TRUE,
-  verbose = TRUE
+  iterations = 1000
 )}\if{html}{\out{</div>}}
 }
 
@@ -349,9 +351,12 @@ Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (
 \describe{
 \item{\code{runs}}{default 1000; simulation runs.}
 
+\item{\code{null.model}}{default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
+"independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.}
+
 \item{\code{abundance.weighted}}{default TRUE; whether use weighted abundance.}
 
-\item{\code{verbose}}{default TRUE; whether show the calculation process message.}
+\item{\code{iterations}}{default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -361,7 +366,7 @@ res_ses_betampd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
+t1$cal_ses_betampd(runs = 500, abundance.weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -404,7 +409,7 @@ Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (b
 \item{\code{use_iCAMP}}{default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
 This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.}
 
-\item{\code{use_iCAMP_force}}{default FALSE; whether to make use_iCAMP to be TRUE when the feature number is larger than 3000.}
+\item{\code{use_iCAMP_force}}{default FALSE; whether to make use_iCAMP to be TRUE when the feature number is large.}
 
 \item{\code{iCAMP_tempdir}}{default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.}
 
@@ -420,7 +425,7 @@ res_ses_betamntd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
+t1$cal_ses_betamntd(runs = 500, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
 }
 \if{html}{\out{</div>}}

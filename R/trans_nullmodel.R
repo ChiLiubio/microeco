@@ -183,19 +183,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' \donttest{
 		#' t1$cal_betampd(abundance.weighted = TRUE)
 		#' }
-		cal_betampd = function(abundance.weighted=TRUE){
+		cal_betampd = function(abundance.weighted = TRUE){
+			comm <- self$comm
 			if(is.null(self$phylo_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}else{
-				dis <- cophenetic(self$phylo_tree)
+				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
 			}
-			comm <- self$comm
-			dis %<>% .[colnames(comm), colnames(comm)]
-			if (abundance.weighted == F) {
-				comm <- decostand(comm, method="pa")
-			}
-			comm <- decostand(comm, method="total", MARGIN=1)
-			self$res_betampd <- private$betampd(comm = comm, dis = dis)
+			self$res_betampd <- private$betampd(comm = comm, dis = dis, abundance.weighted = abundance.weighted)
 			message('The result is stored in object$res_betampd ...')
 		},
 		#' @description
@@ -205,7 +200,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param exclude.conspecifics default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.
 		#' @param use_iCAMP default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
 		#' 	  This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.
-		#' @param use_iCAMP_force default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is larger than 3000.
+		#' @param use_iCAMP_force default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is large.
 		#' @param iCAMP_tempdir default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.
 		#' @param ... paremeters pass to iCAMP::pdist.big function.
 		#' @return res_betamntd in object.
@@ -221,10 +216,10 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 			comm <- self$comm
 			if(! use_iCAMP){
-				if(ncol(comm) > 3000){
+				if(ncol(comm) > 5000){
 					if(use_iCAMP_force == T){
 						use_iCAMP <- TRUE
-						message("The feature number is larger than 3000. Automatically change use_iCAMP parameter to be TRUE and ",
+						message("The feature number is larger than 5000. Automatically change use_iCAMP parameter to be TRUE and ",
 							"use iCAMP package for large matrix and parallel computing. Change use_iCAMP_force = FALSE to skip this method ...")
 					}
 				}
@@ -258,40 +253,38 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (betaNRI).
 		#'
 		#' @param runs default 1000; simulation runs.
+		#' @param null.model default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
+		#' 	  "independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.
 		#' @param abundance.weighted default TRUE; whether use weighted abundance.
-		#' @param verbose default TRUE; whether show the calculation process message.
+		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.
 		#' @return res_ses_betampd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ses_betampd(runs = 100, abundance.weighted = TRUE)
+		#' t1$cal_ses_betampd(runs = 500, abundance.weighted = TRUE)
 		#' }
-		cal_ses_betampd = function(runs = 1000, abundance.weighted = TRUE, verbose = TRUE) {
+		cal_ses_betampd = function(
+			runs = 1000, 
+			null.model = c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", "independentswap", "trialswap")[1],
+			abundance.weighted = TRUE,
+			iterations = 1000
+			){
 			comm <- self$comm
+			null.model <- match.arg(null.model, c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", "independentswap", "trialswap"))
 			if(is.null(self$phylo_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}else{
 				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
 			}
-			if (abundance.weighted == F) {
-				comm <- decostand(comm, method="pa")
-			}
-			comm <- decostand(comm, method = "total", MARGIN = 1)
-			
 			message("---------------- ", Sys.time()," : Start ----------------")
-			if(verbose){
-				cat("Calculate observed betaMPD ...\n")
-			}
-			betaobs <- private$betampd(comm = comm, dis = dis) %>% as.dist
+			cat("Calculate observed betaMPD ...\n")
+			betaobs <- private$betampd(comm = comm, dis = dis, abundance.weighted = abundance.weighted) %>% as.dist
 			all_samples <- rownames(comm)
 			betaobs_vec <- as.vector(betaobs)
-			if(verbose){
-				cat("Simulate betaMPD ...\n")
-			}
+			cat("Simulate betaMPD ...\n")
 			beta_rand <- sapply(seq_len(runs), function(x){
-				if(verbose){
-					private$show_run(x = x, runs = runs)
-				}
-				as.dist(private$betampd(comm = comm, dis = picante::taxaShuffle(dis)))
+				private$show_run(x = x, runs = runs)
+				rand_data <- private$null_model(null.model = null.model, comm = comm, dis = dis, tip.label = NULL, iterations = iterations)
+				as.dist(private$betampd(comm = rand_data$comm, dis = rand_data$dis, abundance.weighted = abundance.weighted))
 			}, simplify = "array")
 			message("---------------- ", Sys.time()," : End ----------------")
 			
@@ -311,14 +304,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
 		#' @param use_iCAMP default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
 		#' 	  This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.
-		#' @param use_iCAMP_force default FALSE; whether to make use_iCAMP to be TRUE when the feature number is larger than 3000.
+		#' @param use_iCAMP_force default FALSE; whether to make use_iCAMP to be TRUE when the feature number is large.
 		#' @param iCAMP_tempdir default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.
 		#' @param nworker default 2; the CPU thread number.
 		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.
 		#' @return res_ses_betamntd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ses_betamntd(runs = 100, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
+		#' t1$cal_ses_betamntd(runs = 500, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 		#' }
 		cal_ses_betamntd = function(
 			runs = 1000, 
@@ -337,10 +330,10 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
 			if(! use_iCAMP){
-				if(ncol(comm) > 3000){
+				if(ncol(comm) > 5000){
 					if(use_iCAMP_force == T){
 						use_iCAMP <- TRUE
-						message("The feature number is larger than 3000. Automatically change use_iCAMP parameter to be TRUE and ",
+						message("The feature number is larger than 5000. Automatically change use_iCAMP parameter to be TRUE and ",
 							"use iCAMP package for large matrix and parallel computing. Change use_iCAMP_force = FALSE to skip this method ...")
 					}
 				}
@@ -550,7 +543,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			
 			res1
 		},
-		betampd = function(comm = NULL, dis = NULL){
+		betampd = function(comm = NULL, dis = NULL, abundance.weighted = FALSE){
+			dis %<>% .[colnames(comm), colnames(comm)]
+			if (abundance.weighted == F) {
+				comm <- decostand(comm, method = "pa")
+			}
+			comm <- decostand(comm, method="total", MARGIN=1)
 			all_samples <- rownames(comm)
 			# use cpp instead of base
 			# matrix_multi <- function(comm_use, dis_use, ag_vector){eigenMapMatMult(eigenMapMatMult(comm_use, dis_use), ag_vector)}

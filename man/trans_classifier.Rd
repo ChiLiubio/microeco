@@ -519,7 +519,7 @@ Plot ROC curve.
 
 \item{\code{plot_group}}{default "all"; 'all' represents all the classes in the model;
 'add' represents all adding micro-average and macro-average results, see 
-\href{http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html}{http://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html};
+\href{https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html}{https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html};
 other options should be one or more class names, same with the names in Group column of res_ROC$res_roc from cal_ROC function.}
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.}
