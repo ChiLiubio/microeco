@@ -107,6 +107,22 @@ t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
 \dontrun{
 t1$cal_Cscore()
 }
+
+## ------------------------------------------------
+## Method `trans_nullmodel$cal_tNST`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
+}
+
+## ------------------------------------------------
+## Method `trans_nullmodel$cal_tNST_test`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_tNST_test()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -123,6 +139,8 @@ t1$cal_Cscore()
 \item \href{#method-cal_NRI}{\code{trans_nullmodel$cal_NRI()}}
 \item \href{#method-cal_NTI}{\code{trans_nullmodel$cal_NTI()}}
 \item \href{#method-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
+\item \href{#method-cal_tNST}{\code{trans_nullmodel$cal_tNST()}}
+\item \href{#method-cal_tNST_test}{\code{trans_nullmodel$cal_tNST_test()}}
 \item \href{#method-clone}{\code{trans_nullmodel$clone()}}
 }
 }
@@ -135,7 +153,6 @@ t1$cal_Cscore()
   dataset = NULL,
   filter_thres = 0,
   taxa_number = NULL,
-  group = NULL,
   select_group = NULL,
   env_cols = NULL,
   add_data = NULL,
@@ -151,10 +168,6 @@ t1$cal_Cscore()
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
 
 \item{\code{taxa_number}}{default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.}
-
-\item{\code{group}}{default NULL; which group column name in sample_table is selected.}
-
-\item{\code{select_group}}{default NULL; the group name, used following the group parameter to filter samples.}
 
 \item{\code{env_cols}}{default NULL; number or name vector to select the environmental data in dataset$sample_table.}
 
@@ -608,6 +621,71 @@ results directly.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$cal_Cscore()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_tNST"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_tNST}{}}}
+\subsection{Method \code{cal_tNST()}}{
+Calculate normalized stochasticity ratio (NST) based on the tNST function of NST package.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_tNST(group, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{group}}{a colname of sample_table; 
+the function can select the data from sample_table to generate a one-column (n x 1) matrix and provide it to the group parameter of tNST function.}
+
+\item{\code{...}}{paremeters pass to tNST function of NST package; see the documents of tNST function for more details.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_tNST_test"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_tNST_test}{}}}
+\subsection{Method \code{cal_tNST_test()}}{
+Test the significance of NST difference between each pair of groups.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_tNST_test(method = "nst.boot", ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{method}}{default "nst.boot"; "nst.boot" or nst.panova; see NST::nst.boot function or NST::nst.panova function for the details.}
+
+\item{\code{...}}{paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_tNST_test()
 }
 }
 \if{html}{\out{</div>}}

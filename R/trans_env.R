@@ -22,7 +22,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
-		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
+		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 		initialize = function(
 			dataset = NULL, 
 			env_cols = NULL, 
@@ -1087,7 +1087,7 @@ trans_env <- R6Class(classname = "trans_env",
 			lm_sec_trim = 2, 
 			lm_squ_trim = 2
 			){
-			if(class(equat) == "lm" & use_cor == T){
+			if(inherits(equat, "lm") & use_cor == T){
 				stop("Input is lm class, but use_cor is TRUE! Please check the use_cor parameter!")
 			}
 			pvalue <- ifelse(use_cor == T, equat$p.value, anova(equat)$`Pr(>F)`[1])

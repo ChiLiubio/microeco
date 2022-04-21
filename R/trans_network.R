@@ -155,10 +155,14 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return res_network stored in object.
 		#' @examples
 		#' \donttest{
+		#' # for correlation network
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		#' 		taxa_level = "OTU", filter_thres = 0.0001)
 		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
 		#' t1$cal_network(network_method = "SpiecEasi")
-		#' t1$cal_network(network_method = "FlashWeave")
 		#' t1$cal_network(network_method = "beemStatic")
+		#' t1$cal_network(network_method = "FlashWeave")
 		#' }
 		cal_network = function(
 			network_method = c("COR", "SpiecEasi", "FlashWeave", "beemStatic")[1],

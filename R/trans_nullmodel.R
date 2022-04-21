@@ -13,8 +13,6 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param filter_thres default 0; the relative abundance threshold. 
 		#' @param taxa_number default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.
-		#' @param group default NULL; which group column name in sample_table is selected.
-		#' @param select_group default NULL; the group name, used following the group parameter to filter samples.
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
@@ -27,17 +25,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			dataset = NULL,
 			filter_thres = 0,
 			taxa_number = NULL,
-			group = NULL,
 			select_group = NULL,
 			env_cols = NULL,
 			add_data = NULL,
 			complete_na = FALSE
 			){
 			use_set <- clone(dataset)
-			if(!is.null(group)){
-				use_set$sample_table <- base::subset(use_set$sample_table, use_set$sample_table[, group] %in% select_group)
-				use_set$tidy_dataset()
-			}
+			use_set$tidy_dataset()
+			
 			if(!is.null(taxa_number)){
 				use_set$otu_table %<>% {.[names(sort(apply(., 1, sum), decreasing = TRUE)[1:taxa_number]), ]}
 			}else{
@@ -518,6 +513,48 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					use_comm %<>% .[, apply(., 2, sum) >0, drop = FALSE]
 					bipartite::C.score(use_comm, ...)
 				})
+			}
+		},
+		#' @description
+		#' Calculate normalized stochasticity ratio (NST) based on the tNST function of NST package.
+		#'
+		#' @param group a colname of sample_table; 
+		#' 	  the function can select the data from sample_table to generate a one-column (n x 1) matrix and provide it to the group parameter of tNST function. 
+		#' @param ... paremeters pass to tNST function of NST package; see the documents of tNST function for more details.
+		#' @return .
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
+		#' }
+		cal_tNST = function(group, ...){
+			comm <- self$comm
+			group <- self$sample_table[, group, drop = FALSE]
+			res <- NST::tNST(comm = comm, group = group, ...)
+			self$res_tNST <- res
+			message('The result is stored in object$res_tNST ...')
+		},
+		#' @description
+		#' Test the significance of NST difference between each pair of groups.
+		#'
+		#' @param method default "nst.boot"; "nst.boot" or nst.panova; see NST::nst.boot function or NST::nst.panova function for the details.
+		#' @param ... paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"
+		#' @return .
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_tNST_test()
+		#' }
+		cal_tNST_test = function(method = "nst.boot", ...){
+			if(is.null(self$res_tNST)){
+				stop("Please first run cal_tNST function!")
+			}else{
+				if(is.null(self$res_tNST$details)){
+					stop("Please first run cal_tNST function with the parameter: output.rand = TRUE ")
+				}
+			}
+			if(method == "nst.boot"){
+				NST::nst.boot(nst.result = self$res_tNST, ...)
+			}else{
+				NST::nst.panova(nst.result = self$res_tNST, ...)
 			}
 		}
 	),

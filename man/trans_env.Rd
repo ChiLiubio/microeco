@@ -15,7 +15,7 @@ mantel test, correlation analysis and linear fitting based on An et al. (2019) <
 
 data(dataset)
 data(env_data_16S)
-t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
+t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 
 ## ------------------------------------------------
 ## Method `trans_env$cal_ordination`
@@ -147,7 +147,7 @@ env_data in trans_env object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{data(dataset)
 data(env_data_16S)
-t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S)
+t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 }
 \if{html}{\out{</div>}}
 
