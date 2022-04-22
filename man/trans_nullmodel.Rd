@@ -153,7 +153,6 @@ t1$cal_tNST_test()
   dataset = NULL,
   filter_thres = 0,
   taxa_number = NULL,
-  select_group = NULL,
   env_cols = NULL,
   add_data = NULL,
   complete_na = FALSE

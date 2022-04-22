@@ -33,7 +33,7 @@ t1$cal_diff(method = "anova")
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_alpha(measure = "Shannon", group = "Group", pair_compare = TRUE)
+t1$plot_alpha(measure = "Shannon", group = "Group")
 }
 }
 \section{Methods}{
@@ -87,8 +87,8 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 Test the difference of alpha diversity across groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
-  method = c("KW", "KW_dunn", "anova")[1],
-  measures = NULL,
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
+  measure = NULL,
   p_adjust_method = "fdr",
   anova_set = NULL,
   ...
@@ -98,11 +98,11 @@ Test the difference of alpha diversity across groups.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "KW"; "KW_dunn" or "anova"; KW: Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum and Signed 
+\item{\code{method}}{default "KW"; "KW", "KW_dunn", "t.test" or "anova"; KW: Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum and Signed 
 Rank Tests (groups = 2); KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
-anova:  Duncan's multiple range test for anova;}
+t.test: t test for paired groups; anova:  Duncan's multiple range test for anova.}
 
-\item{\code{measures}}{default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
+\item{\code{measure}}{default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
@@ -137,21 +137,20 @@ t1$cal_diff(method = "anova")
 Plotting the alpha diveristy.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
+  use_diff = TRUE,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   measure = "Shannon",
   group = NULL,
-  add_letter = FALSE,
+  add_label = "Significance",
   use_boxplot = TRUE,
   boxplot_color = TRUE,
   boxplot_add = "jitter",
-  order_x_mean = TRUE,
-  pair_compare = FALSE,
-  pair_compare_filter = "",
-  pair_compare_method = "wilcox.test",
+  order_x_mean = FALSE,
+  y_start = 1.01,
+  y_increae = 0.05,
   xtext_angle = NULL,
   xtext_size = 10,
   ytitle_size = 17,
-  base_font = "sans",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -159,16 +158,19 @@ Plotting the alpha diveristy.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{colors used for presentation.}
+\item{\code{use_diff}}{default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_alpha_diff;
+This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.}
+
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for groups.}
 
 \item{\code{measure}}{default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
-e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
-\item{\code{add_letter}}{default FALSE; If TRUE, the letters of duncan test will be added in the plot.}
+\item{\code{add_label}}{default "Significance"; select a colname of object$res_alpha_diff for the label text, such as 'P.adj' or 'Significance'.}
 
-\item{\code{use_boxplot}}{default TRUE; TRUE: boxplot, FALSE: mean_se plot.}
+\item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
 
 \item{\code{boxplot_color}}{default TRUE; TRUE: use color_values, FALSE: use "black".}
 
@@ -176,19 +178,16 @@ e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{order_x_mean}}{default FALSE; whether order x axis by the means of groups from large to small.}
 
-\item{\code{pair_compare}}{default FALSE; whether perform paired comparisons.}
+\item{\code{y_start}}{default 1.01; the y axis value from which to add the label; the default 1.01 means 1.01 * max(values).}
 
-\item{\code{pair_compare_filter}}{default ""; groups that need to be removed in the comparisons.}
-
-\item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
+\item{\code{y_increae}}{default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
+this parameter is also used to label the letters of anova result with the fixed (1 + y_increae) * y_start space.}
 
 \item{\code{xtext_angle}}{default NULL; number (e.g. 30) used to make x axis text generate angle.}
 
 \item{\code{xtext_size}}{default 10, x axis text size.}
 
 \item{\code{ytitle_size}}{default 17, y axis title size.}
-
-\item{\code{base_font}}{default "sans", font in the plot.}
 
 \item{\code{...}}{parameters pass to ggpubr::ggboxplot function.}
 }
@@ -200,7 +199,7 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_alpha(measure = "Shannon", group = "Group", pair_compare = TRUE)
+t1$plot_alpha(measure = "Shannon", group = "Group")
 }
 }
 \if{html}{\out{</div>}}
