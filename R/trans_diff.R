@@ -13,18 +13,22 @@
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param method default "lefse"; one of "lefse", "rf", "KW", "KW_dunn", "metastat" or "mseq"; see the following details:
+		#' @param method default "lefse"; see the following available options:
 		#'   \describe{
-		#'     \item{\strong{'lefse'}}{from Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
-		#'     \item{\strong{'rf'}}{random forest, from An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
-		#'     \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum Tests (groups = 2) for a specific taxonomic level or 
-		#'       all levels of microtable$taxa_abund}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package}
-		#'     \item{\strong{'metastat'}}{White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
-		#'     \item{\strong{'mseq'}}{the method based on the zero-inflated log-normal model in metagenomeSeq package.}
+		#'     \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
+		#'     \item{\strong{'rf'}}{random forest and non-parametric test method based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
+		#'     \item{\strong{'metastat'}}{Metastat method for all paired groups based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
+		#'     \item{\strong{'mseq'}}{zero-inflated log-normal model-based differential test method from metagenomeSeq package.}
+		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
+		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
 		#'   }
-		#' @param group default NULL; sample group used for main comparision.
-		#' @param taxa_level default "all"; use abundance data at all taxonomic ranks; For testing at a specific rank, provide taxonomic rank name, such as "Genus".
+		#' @param group default NULL; sample group used for the comparision; a colname of microtable$sample_table.
+		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
+		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "metastat" or "mseq";
+		#' 	  For method = "metastat", please see metastat_taxa_level parameter. 'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.
 		#' @param filter_thres default 0; the relative abundance threshold used for method = "lefse" or "rf". 
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param alpha default .05; significance threshold.
@@ -47,7 +51,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "KW", "KW_dunn", "metastat", "mseq")[1],
+			method = c("lefse", "rf", "metastat", "mseq", "KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -67,19 +71,32 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(is.null(dataset)){
 				stop("No dataset provided!")
 			}
-			
-			method <- match.arg(method, c("lefse", "rf", "KW", "KW_dunn", "metastat", "mseq"))
-
 			sampleinfo <- dataset$sample_table
+			if(is.null(group)){
+				stop("The group parameter need to be provided for differential test among groups!")
+			}else{
+				if(length(group) > 1){
+					stop("Please provide only one colname of sample_table for group parameter!")
+				}else{
+					if(! group %in% colnames(sampleinfo)){
+						stop("Please provide a correct colname of sample_table for group parameter!")
+					}
+				}
+			}
+			method <- match.arg(method, c("lefse", "rf", "metastat", "mseq", "KW", "KW_dunn", "wilcox", "t.test", "anova"))
+
 			sampleinfo[, group] %<>% as.character
 #			self$method <- method
-			if(grepl("lefse|rf|KW|KW_dunn", method, ignore.case = TRUE)){
+			if(!grepl("metastat|mseq", method, ignore.case = TRUE)){
 				if(is.null(dataset$taxa_abund)){
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 				}
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
+					if(! taxa_level %in% names(dataset$taxa_abund)){
+						stop("Please provide a correct taxa_level parameter !")
+					}
 					abund_table <- dataset$taxa_abund[[taxa_level]]
 				}
 				if(filter_thres > 0){
@@ -95,7 +112,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 			}
-			if(method %in% c("KW", "KW_dunn")){
+			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova")){
 				tem_data <- clone(dataset)
 				# use test method in trans_alpha
 				tem_data$alpha_diversity <- as.data.frame(t(abund_table))

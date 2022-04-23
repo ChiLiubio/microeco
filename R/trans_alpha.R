@@ -57,9 +57,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @description
 		#' Test the difference of alpha diversity across groups.
 		#'
-		#' @param method default "KW"; "KW", "KW_dunn", "t.test" or "anova"; KW: Kruskal-Wallis Rank Sum Test (groups > 2) or Wilcoxon Rank Sum and Signed 
-		#'   Rank Tests (groups = 2); KW_dunn: Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package; 
-		#'   t.test: t test for paired groups; anova:  Duncan's multiple range test for anova.
+		#' @param method default "KW"; see the following available options:
+		#'   \describe{
+		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
+		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+		#'   }
 		#' @param measure default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
