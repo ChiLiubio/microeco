@@ -45,7 +45,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 		#'
-		#' @param ordination default "PCoA"; "PCA", "PCoA" or "NMDS".
+		#' @param ordination default "PCoA"; "PCA", "PCoA" or "NMDS". PCA: principal component analysis; 
+		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 		#' @param ncomp default 3; the returned dimensions.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
@@ -130,19 +131,22 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param plot_shape default NULL; the sample group name used for shape in plot.
 		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
 		#' @param plot_point_size default 3; point size in plot.
-		#' @param plot_point_alpha default .9; point transparency in plot.
+		#' @param plot_point_alpha default .8; point transparency in plot.
 		#' @param plot_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
+		#' @param plot_group default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_add;
+		#'    If NULL; use the same set of plot_color.
 		#' @param plot_group_centroid default FALSE; whether show the centroid in each group of plot.
-		#' @param plot_group default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_ellipse.
-		#' @param segment_alpha default .6; segment transparency in plot.
-		#' @param centroid_linetype default 3; the line type related with centroid in plot.
-		#' @param plot_group_ellipse default FALSE; whether show the confidence ellipse in each group of plot.
-		#' @param ellipse_level default .9; confidence level of ellipse.
-		#' @param ellipse_alpha default .1; color transparency in the ellipse.
-		#' @param ellipse_type default t; see type in \code{\link{stat_ellipse}}.
+		#' @param plot_group_centroid_segment_alpha default .6; segment transparency in plot when plot_group_centroid = TRUE.
+		#' @param plot_group_centroid_linetype default 3; the line type related with centroid in plot when plot_group_centroid = TRUE.
+		#' @param plot_group_add default NULL; the available options include "ellipse" and "chull"; 
+		#' 	  ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.
+		#' @param plot_group_add_alpha default 0.1; color transparency in the ellipse or convex hull.
+		#' @param plot_group_add_ellipse_level default .9; confidence level of ellipse for plot_group_add = "ellipse".
+		#' @param plot_group_add_ellipse_type default t; see type in \code{\link{stat_ellipse}}.
 		#' @return ggplot.
 		#' @examples
-		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "ellipse")
+		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "chull")
 		plot_ordination = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
@@ -150,16 +154,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 			plot_shape = NULL,
 			plot_group_order = NULL,
 			plot_point_size = 3,
-			plot_point_alpha = .9,
+			plot_point_alpha = .8,
 			plot_sample_label = NULL,
-			plot_group_centroid = FALSE,
 			plot_group = NULL,
-			segment_alpha = .6,
-			centroid_linetype = 3,
-			plot_group_ellipse = FALSE,
-			ellipse_level = 0.9,
-			ellipse_alpha = 0.1,
-			ellipse_type = "t"
+			plot_group_centroid = FALSE,
+			plot_group_centroid_segment_alpha = .6,
+			plot_group_centroid_linetype = 3,
+			plot_group_add = NULL,
+			plot_group_add_alpha = 0.1,
+			plot_group_add_ellipse_level = 0.9,
+			plot_group_add_ellipse_type = "t"
 			){
 			ordination <- self$ordination
 			if(is.null(ordination)){
@@ -183,7 +187,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					ylab(paste(plot_y, " [", eig[plot_y],"%]", sep = ""))
 			}
 			if(ordination == "NMDS"){
-				p <- p + annotate("text",x= max(combined[,1]),y=max(combined[,2]) + 0.05,label = round(model$stress, 2), parse=TRUE)
+				p <- p + annotate("text", x = max(combined[,1]), y = max(combined[,2]) + 0.05, label = round(model$stress, 2), parse=TRUE)
 			}
 			if (plot_group_centroid == T){
 				if(is.null(plot_group)){
@@ -199,23 +203,33 @@ trans_beta <- R6Class(classname = "trans_beta",
 					aes_string(x = plot_x, xend = "cx", y = plot_y, yend = "cy", color = plot_group),
 					alpha = segment_alpha, 
 					size = 0.5, 
-					linetype = centroid_linetype
+					linetype = plot_group_centroid_linetype
 				)
 			}
-			if (plot_group_ellipse == T) {
+			if (!is.null(plot_group_add)) {
+				plot_group_add <- match.arg(plot_group_add, c("ellipse", "chull"))
 				if(is.null(plot_group)){
 					plot_group <- plot_color
 				}
 				mapping <- aes_string(x = plot_x, y = plot_y, group = plot_group, fill = plot_group)
-				p <- p + ggplot2::stat_ellipse(
-					mapping = mapping, 
-					data = combined, 
-					level = ellipse_level, 
-					type = ellipse_type, 
-					alpha = ellipse_alpha, 
-					geom = "polygon"
-					) + 
-					scale_fill_manual(values = color_values)
+				if(plot_group_add == "ellipse"){
+					p <- p + ggplot2::stat_ellipse(
+						mapping = mapping, 
+						data = combined, 
+						level = plot_group_add_ellipse_level, 
+						type = plot_group_add_ellipse_type, 
+						alpha = plot_group_add_alpha, 
+						geom = "polygon"
+						)
+				}else{
+					p <- p + ggpubr::stat_chull(
+						mapping = mapping, 
+						data = combined, 
+						alpha = plot_group_add_alpha,
+						geom = "polygon"
+						)
+				}
+				p <- p + scale_fill_manual(values = color_values)
 			}
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)

@@ -28,7 +28,8 @@ t1$cal_ordination(ordination = "PCoA")
 ## Method `trans_beta$plot_ordination`
 ## ------------------------------------------------
 
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "ellipse")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "chull")
 
 ## ------------------------------------------------
 ## Method `trans_beta$cal_manova`
@@ -132,7 +133,8 @@ Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ordination}}{default "PCoA"; "PCA", "PCoA" or "NMDS".}
+\item{\code{ordination}}{default "PCoA"; "PCA", "PCoA" or "NMDS". PCA: principal component analysis; 
+PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.}
 
 \item{\code{ncomp}}{default 3; the returned dimensions.}
 
@@ -167,16 +169,16 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
   plot_shape = NULL,
   plot_group_order = NULL,
   plot_point_size = 3,
-  plot_point_alpha = 0.9,
+  plot_point_alpha = 0.8,
   plot_sample_label = NULL,
-  plot_group_centroid = FALSE,
   plot_group = NULL,
-  segment_alpha = 0.6,
-  centroid_linetype = 3,
-  plot_group_ellipse = FALSE,
-  ellipse_level = 0.9,
-  ellipse_alpha = 0.1,
-  ellipse_type = "t"
+  plot_group_centroid = FALSE,
+  plot_group_centroid_segment_alpha = 0.6,
+  plot_group_centroid_linetype = 3,
+  plot_group_add = NULL,
+  plot_group_add_alpha = 0.1,
+  plot_group_add_ellipse_level = 0.9,
+  plot_group_add_ellipse_type = "t"
 )}\if{html}{\out{</div>}}
 }
 
@@ -195,25 +197,27 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 
 \item{\code{plot_point_size}}{default 3; point size in plot.}
 
-\item{\code{plot_point_alpha}}{default .9; point transparency in plot.}
+\item{\code{plot_point_alpha}}{default .8; point transparency in plot.}
 
 \item{\code{plot_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
 
+\item{\code{plot_group}}{default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_add;
+If NULL; use the same set of plot_color.}
+
 \item{\code{plot_group_centroid}}{default FALSE; whether show the centroid in each group of plot.}
 
-\item{\code{plot_group}}{default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_ellipse.}
+\item{\code{plot_group_centroid_segment_alpha}}{default .6; segment transparency in plot when plot_group_centroid = TRUE.}
 
-\item{\code{segment_alpha}}{default .6; segment transparency in plot.}
+\item{\code{plot_group_centroid_linetype}}{default 3; the line type related with centroid in plot when plot_group_centroid = TRUE.}
 
-\item{\code{centroid_linetype}}{default 3; the line type related with centroid in plot.}
+\item{\code{plot_group_add}}{default NULL; the available options include "ellipse" and "chull"; 
+ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.}
 
-\item{\code{plot_group_ellipse}}{default FALSE; whether show the confidence ellipse in each group of plot.}
+\item{\code{plot_group_add_alpha}}{default 0.1; color transparency in the ellipse or convex hull.}
 
-\item{\code{ellipse_level}}{default .9; confidence level of ellipse.}
+\item{\code{plot_group_add_ellipse_level}}{default .9; confidence level of ellipse for plot_group_add = "ellipse".}
 
-\item{\code{ellipse_alpha}}{default .1; color transparency in the ellipse.}
-
-\item{\code{ellipse_type}}{default t; see type in \code{\link{stat_ellipse}}.}
+\item{\code{plot_group_add_ellipse_type}}{default t; see type in \code{\link{stat_ellipse}}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -222,7 +226,8 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_ellipse = TRUE)
+\preformatted{t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "ellipse")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "chull")
 }
 \if{html}{\out{</div>}}
 
