@@ -79,6 +79,14 @@ t1$get_edge_table()
 }
 
 ## ------------------------------------------------
+## Method `trans_network$get_adjacency_matrix`
+## ------------------------------------------------
+
+\donttest{
+t1$get_adjacency_matrix(attr = "weight")
+}
+
+## ------------------------------------------------
 ## Method `trans_network$plot_network`
 ## ------------------------------------------------
 
@@ -141,6 +149,7 @@ t1$cal_powerlaw_fit()
 \item \href{#method-cal_node_type}{\code{trans_network$cal_node_type()}}
 \item \href{#method-get_node_table}{\code{trans_network$get_node_table()}}
 \item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
+\item \href{#method-get_adjacency_matrix}{\code{trans_network$get_adjacency_matrix()}}
 \item \href{#method-plot_network}{\code{trans_network$plot_network()}}
 \item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
@@ -482,6 +491,36 @@ res_edge_table in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$get_edge_table()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-get_adjacency_matrix"></a>}}
+\if{latex}{\out{\hypertarget{method-get_adjacency_matrix}{}}}
+\subsection{Method \code{get_adjacency_matrix()}}{
+Get the adjacency matrix from the network graph.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_adjacency_matrix(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters passed to as_adjacency_matrix function of igraph package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_adjacency_matrix in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$get_adjacency_matrix(attr = "weight")
 }
 }
 \if{html}{\out{</div>}}

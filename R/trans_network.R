@@ -371,6 +371,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_module = function(method = "cluster_fast_greedy", module_name_prefix = "M"){
 			private$check_igraph()
+			private$check_network()
 			# add modules
 			network <- self$res_network
 			if(!is.character(method)){
@@ -403,6 +404,7 @@ trans_network <- R6Class(classname = "trans_network",
 				stop("Please first install rgexf package with command: install.packages('rgexf') !")
 			}
 			private$check_igraph()
+			private$check_network()
 			private$saveAsGEXF(network = self$res_network, filepath = filepath)
 		},
 		#' @description
@@ -415,6 +417,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_network_attr = function(){
 			private$check_igraph()
+			private$check_network()
 			self$res_network_attr <- private$network_attribute(self$res_network)
 			message('Result is stored in object$res_network_attr ...')
 		},
@@ -441,9 +444,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		get_node_table = function(node_roles = TRUE){
 			private$check_igraph()
+			private$check_network()
 			network <- self$res_network
 			use_abund <- self$use_abund
-
 			node_table <- data.frame(name = V(network)$name) %>% `rownames<-`(.[, 1])
 			node_table$degree <- igraph::degree(network)[rownames(node_table)]
 			node_table$betweenness <- betweenness(network)[rownames(node_table)]
@@ -487,6 +490,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		get_edge_table = function(){
 			private$check_igraph()
+			private$check_network()
 			network <- self$res_network
 			# another way:
 			# res_edge_table <- as_data_frame(network, what = "edges")
@@ -501,6 +505,22 @@ trans_network <- R6Class(classname = "trans_network",
 			colnames(res_edge_table) <- c("node1", "node2", "label", "weight")
 			self$res_edge_table <- res_edge_table
 			message('Result is stored in object$res_edge_table ...')
+		},
+		#' @description
+		#' Get the adjacency matrix from the network graph.
+		#'
+		#' @param ... parameters passed to as_adjacency_matrix function of igraph package.
+		#' @return res_adjacency_matrix in object.
+		#' @examples
+		#' \donttest{
+		#' t1$get_adjacency_matrix(attr = "weight")
+		#' }
+		get_adjacency_matrix = function(...){
+			private$check_igraph()
+			private$check_network()
+			network <- self$res_network
+			self$res_adjacency_matrix <- as_adjacency_matrix(network, ...) %>% as.matrix
+			message('Result is stored in object$res_adjacency_matrix ...')
 		},
 		#' @description
 		#' Plot the network based on a series of methods from other packages, such as igraph, ggraph and networkD3. 
@@ -546,9 +566,7 @@ trans_network <- R6Class(classname = "trans_network",
 			networkD3_zoom = TRUE, 
 			...
 			){
-			if(is.null(self$res_network)){
-				stop("No res_network found in the object! Please first run cal_network function!")
-			}
+			private$check_network()
 			method <- match.arg(method, c("igraph", "ggraph", "networkD3"))
 			if(method == "igraph"){
 				network <- self$res_network
@@ -625,7 +643,12 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_eigen = function(){
 			private$check_igraph()
+			private$check_network()
 			use_abund <- self$use_abund
+			if(is.null(self$res_node_table)){
+				message("Run get_node_table function to get the node property table ...")
+				self$get_node_table()
+			}
 			node_table <- self$res_node_table
 			# calculate eigengene for each module
 			res_eigen <- list()
@@ -692,6 +715,10 @@ trans_network <- R6Class(classname = "trans_network",
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
 			...
 			){
+			if(is.null(self$res_node_table)){
+				message("Run get_node_table function to get the node property table ...")
+				self$get_node_table()
+			}
 			if(use_type == 1){
 				res <- private$plot_roles_1(node_roles = self$res_node_table, 
 					roles_color_background = roles_color_background,
@@ -731,6 +758,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE){
 			private$check_igraph()
+			private$check_network()
 			network <- self$res_network
 			if(!is.null(node)){
 				nodes_raw <- V(network)$name
@@ -766,6 +794,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_powerlaw_p()
 		#' }
 		cal_powerlaw_p = function(...){
+			private$check_network()
 			network <- self$res_network
 			degree_dis <- igraph::degree(network)
 			if(!require("poweRlaw")){
@@ -773,12 +802,14 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			resdispl <- poweRlaw::displ$new(degree_dis + 1)
 			est_xmin <- poweRlaw::estimate_xmin(resdispl)
-			resdispl$setXmin(est_xmin)
-			res <- poweRlaw::bootstrap_p(resdispl, ...)
 			self$res_powerlaw_min <- est_xmin
 			message('Estimated lower bound result is stored in object$res_powerlaw_min ...')
+			message('Estimated lower bound: ', est_xmin$xmin)
+			resdispl$setXmin(est_xmin)
+			res <- poweRlaw::bootstrap_p(resdispl, ...)
 			self$res_powerlaw_p <- res
-			message('Bootstrap p value is stored in object$res_powerlaw_p ...')			
+			message('Bootstrap result is stored in object$res_powerlaw_p ...')
+			message('Bootstrap p value: ', res$p)
 		},
 		#' @description
 		#' Fit degrees to a power law distribution.
@@ -792,6 +823,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		cal_powerlaw_fit = function(xmin = NULL, ...){
 			private$check_igraph()
+			private$check_network()
 			network <- self$res_network
 			degree_dis <- igraph::degree(network, mode="in")
 			self$res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = xmin, ...)
@@ -820,6 +852,11 @@ trans_network <- R6Class(classname = "trans_network",
 		check_igraph = function(){
 			if(!require("igraph")){
 				stop("Please first install igraph package with the command: install.packages('igraph') !")
+			}
+		},
+		check_network = function(){
+			if(is.null(self$res_network)){
+				stop("No network found! Please first run cal_network function!")
 			}
 		},
 		# convert long format to symmetrical matrix
