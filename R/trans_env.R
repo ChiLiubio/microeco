@@ -345,6 +345,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_nudge_y default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
 		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
 		#'   if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).
+		#' @param plot_group_add default NULL; the available options include "ellipse" and "chull"; 
+		#' 	  ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.
+		#' @param plot_group_add_alpha default 0.1; color transparency in the ellipse or convex hull.
+		#' @param plot_group_add_ellipse_level default .9; confidence level of ellipse for plot_group_add = "ellipse".
+		#' @param plot_group_add_ellipse_type default "t"; see type in \code{\link{stat_ellipse}}.
 		#' @param ... paremeters pass to geom_point for controlling sample points.
 		#' @return ggplot object.
 		#' @examples
@@ -371,7 +376,11 @@ trans_env <- R6Class(classname = "trans_env",
 			env_nudge_x = NULL,
 			env_nudge_y = NULL,
 			taxa_nudge_x = NULL,
-			taxa_nudge_y = NULL,			
+			taxa_nudge_y = NULL,
+			plot_group_add = NULL,
+			plot_group_add_alpha = 0.1,
+			plot_group_add_ellipse_level = 0.9,
+			plot_group_add_ellipse_type = "t",
 			...
 			){
 			if(is.null(self$res_ordination_trans)){
@@ -383,7 +392,7 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_point(
-				data=self$res_ordination_trans$df_sites, 
+				data = self$res_ordination_trans$df_sites, 
 				aes_string("x", "y", colour = plot_color, shape = plot_shape), 
 				size = sample_point_size,
 				...
@@ -429,6 +438,27 @@ trans_env <- R6Class(classname = "trans_env",
 					p <- p + ggrepel::geom_text_repel(data = env_text_data[i, ], aes(x, y, label = label), size = env_text_size, 
 						color = env_text_color, segment.color = "white", nudge_x = env_nudge_x[i], nudge_y = env_nudge_y[i])
 				}
+			}
+			if (!is.null(plot_group_add)) {
+				plot_group_add <- match.arg(plot_group_add, c("ellipse", "chull"))
+				if(plot_group_add == "ellipse"){
+					p <- p + ggplot2::stat_ellipse(
+						data = self$res_ordination_trans$df_sites, 
+						aes_string("x", "y", colour = plot_color, fill = plot_color),
+						level = plot_group_add_ellipse_level, 
+						type = plot_group_add_ellipse_type, 
+						alpha = plot_group_add_alpha, 
+						geom = "polygon"
+						)
+				}else{
+					p <- p + ggpubr::stat_chull(
+						data = self$res_ordination_trans$df_sites, 
+						aes_string("x", "y", colour = plot_color, fill = plot_color),
+						alpha = plot_group_add_alpha,
+						geom = "polygon"
+						)
+				}
+				p <- p + scale_fill_manual(values = color_values)
 			}
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)

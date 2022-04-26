@@ -142,7 +142,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.
 		#' @param plot_group_add_alpha default 0.1; color transparency in the ellipse or convex hull.
 		#' @param plot_group_add_ellipse_level default .9; confidence level of ellipse for plot_group_add = "ellipse".
-		#' @param plot_group_add_ellipse_type default t; see type in \code{\link{stat_ellipse}}.
+		#' @param plot_group_add_ellipse_type default "t"; see type in \code{\link{stat_ellipse}}.
 		#' @return ggplot.
 		#' @examples
 		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "ellipse")

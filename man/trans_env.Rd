@@ -309,6 +309,10 @@ plot ordination result.
   env_nudge_y = NULL,
   taxa_nudge_x = NULL,
   taxa_nudge_y = NULL,
+  plot_group_add = NULL,
+  plot_group_add_alpha = 0.1,
+  plot_group_add_ellipse_level = 0.9,
+  plot_group_add_ellipse_type = "t",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -356,6 +360,15 @@ if 3 taxa are shown, taxa_nudge_x should be something like c(0.3, -0.2, 0).}
 \item{\code{taxa_nudge_y}}{default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
 default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
 if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).}
+
+\item{\code{plot_group_add}}{default NULL; the available options include "ellipse" and "chull"; 
+ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.}
+
+\item{\code{plot_group_add_alpha}}{default 0.1; color transparency in the ellipse or convex hull.}
+
+\item{\code{plot_group_add_ellipse_level}}{default .9; confidence level of ellipse for plot_group_add = "ellipse".}
+
+\item{\code{plot_group_add_ellipse_type}}{default "t"; see type in \code{\link{stat_ellipse}}.}
 
 \item{\code{...}}{paremeters pass to geom_point for controlling sample points.}
 }

@@ -217,7 +217,7 @@ ellipse: show the confidence ellipse in each group of plot (from plot_group); ch
 
 \item{\code{plot_group_add_ellipse_level}}{default .9; confidence level of ellipse for plot_group_add = "ellipse".}
 
-\item{\code{plot_group_add_ellipse_type}}{default t; see type in \code{\link{stat_ellipse}}.}
+\item{\code{plot_group_add_ellipse_type}}{default "t"; see type in \code{\link{stat_ellipse}}.}
 }
 \if{html}{\out{</div>}}
 }
