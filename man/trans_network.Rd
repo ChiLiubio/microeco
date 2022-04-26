@@ -137,6 +137,14 @@ t1$cal_powerlaw_p()
 \donttest{
 t1$cal_powerlaw_fit()
 }
+
+## ------------------------------------------------
+## Method `trans_network$trans_comm`
+## ------------------------------------------------
+
+\donttest{
+t2 <- t1$trans_comm(use_col = "module")
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -156,6 +164,7 @@ t1$cal_powerlaw_fit()
 \item \href{#method-subset_network}{\code{trans_network$subset_network()}}
 \item \href{#method-cal_powerlaw_p}{\code{trans_network$cal_powerlaw_p()}}
 \item \href{#method-cal_powerlaw_fit}{\code{trans_network$cal_powerlaw_fit()}}
+\item \href{#method-trans_comm}{\code{trans_network$trans_comm()}}
 \item \href{#method-print}{\code{trans_network$print()}}
 \item \href{#method-clone}{\code{trans_network$clone()}}
 }
@@ -788,6 +797,36 @@ res_powerlaw_fit stored in object; see fit_power_law function for the details ex
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_powerlaw_fit()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_comm"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_comm}{}}}
+\subsection{Method \code{trans_comm()}}{
+Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$trans_comm(use_col = "module")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_col}}{default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function get_node_table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a new \code{\link{microtable}} class.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t2 <- t1$trans_comm(use_col = "module")
 }
 }
 \if{html}{\out{</div>}}

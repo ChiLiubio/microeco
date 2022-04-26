@@ -67,7 +67,7 @@ trans_network <- R6Class(classname = "trans_network",
 				dataset1 <- dataset1$merge_taxa(taxa = taxa_level)
 			}
 			# transform each object
-			sampleinfo <- dataset1$sample_table
+			self$use_sampleinfo <- dataset1$sample_table
 			# store taxonomic table for the following analysis
 			self$use_tax <- dataset1$tax_table
 			use_abund <- dataset1$otu_table %>% 
@@ -107,7 +107,6 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			
 			self$use_abund <- use_abund
-			self$use_sampleinfo <- sampleinfo
 			self$taxa_level <- taxa_level
 		},
 		#' @description
@@ -825,9 +824,49 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
-			degree_dis <- igraph::degree(network, mode="in")
+			degree_dis <- igraph::degree(network, mode = "in")
 			self$res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = xmin, ...)
 			message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')
+		},
+		#' @description
+		#' Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
+		#'
+		#' @param use_col default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function get_node_table.
+		#' @return a new \code{\link{microtable}} class.
+		#' @examples
+		#' \donttest{
+		#' t2 <- t1$trans_comm(use_col = "module")
+		#' }
+		trans_comm = function(use_col = "module"){
+			if(use_col == "module"){
+				if(is.null(V(self$res_network)$module)){
+					stop("Please first run cal_module function to get node modules!")
+				}
+			}
+			if(is.null(self$res_node_table)){
+				message("Run get_node_table function to get the node property table ...")
+				self$get_node_table()
+			}
+			if(!use_col %in% colnames(self$res_node_table)){
+				stop("Provided use_col must be one of the colnames of object$res_node_table !")
+			}
+			if(inherits(self$res_node_table[, use_col], "numeric")){
+				stop("The selected column-", use_col, " must not be numeric! Please check it!")
+			}
+			res_node_table <- self$res_node_table
+			if(any(is.na(res_node_table[, use_col]))){
+				message("Filter the taxa with NA in ", use_col, " ...")
+				res_node_table %<>% .[!is.na(.[, use_col]), ]
+			}
+			abund_table <- self$use_abund
+			tax_table <- self$use_tax
+			feature_abund <- apply(abund_table, 2, sum)
+			tm1 <- cbind.data.frame(res_node_table[, c("name", use_col)], abund = feature_abund[res_node_table$name])
+			tm2 <- reshape2::dcast(tm1, reformulate(use_col, "name"), value.var = "abund")
+			tm2[is.na(tm2)] <- 0
+			rownames(tm2) <- tm2[, 1]
+			tm2 %<>% .[, -1]
+			microtable$new(otu_table = tm2, tax_table = tax_table, auto_tidy = TRUE)
 		},
 		#' @description
 		#' Print the trans_network object.
