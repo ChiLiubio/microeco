@@ -783,16 +783,17 @@ trans_network <- R6Class(classname = "trans_network",
 			sub_network
 		},
 		#' @description
-		#' Perform a bootstrapping hypothesis test to determine whether degrees follows a power law distribution;
-		#' a significant p represents the distribution does not follow power law.
+		#' Fit degrees to a power law distribution. First, perform a bootstrapping hypothesis test to determine whether degrees follow a power law distribution.
+		#' If the distribution follows power law, then fit degrees to power law distribution and return the parameters.
 		#'
-		#' @param ... paremeters pass to bootstrap_p in poweRlaw package.
-		#' @return two lists stored in object; see estimate_xmin and bootstrap_p in poweRlaw package for the details.
+		#' @param ... paremeters pass to fit_power_law function in igraph package.
+		#' @return res_powerlaw_p and res_powerlaw_fit; see bootstrap_p function in poweRlaw package for the bootstrapping p value details;
+		#'   see fit_power_law function in igraph package for the power law fit return details.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_powerlaw_p()
+		#' t1$cal_powerlaw()
 		#' }
-		cal_powerlaw_p = function(...){
+		cal_powerlaw = function(...){
 			private$check_network()
 			network <- self$res_network
 			degree_dis <- igraph::degree(network)
@@ -801,32 +802,22 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			resdispl <- poweRlaw::displ$new(degree_dis + 1)
 			est_xmin <- poweRlaw::estimate_xmin(resdispl)
-			self$res_powerlaw_min <- est_xmin
-			message('Estimated lower bound result is stored in object$res_powerlaw_min ...')
-			message('Estimated lower bound: ', est_xmin$xmin)
+			message('Estimated lower bound of degree: ', est_xmin$xmin)
 			resdispl$setXmin(est_xmin)
-			res <- poweRlaw::bootstrap_p(resdispl, ...)
-			self$res_powerlaw_p <- res
+			message('Perform bootstrapping ...')
+			bootstrap_res <- poweRlaw::bootstrap_p(resdispl)
+			self$res_powerlaw_p <- bootstrap_res
 			message('Bootstrap result is stored in object$res_powerlaw_p ...')
-			message('Bootstrap p value: ', res$p)
-		},
-		#' @description
-		#' Fit degrees to a power law distribution.
-		#'
-		#' @param xmin default NULL; See xmin in fit_power_law function; suggest using the result res_powerlaw_min from cal_powerlaw_p function.
-		#' @param ... paremeters pass to fit_power_law function in igraph package.
-		#' @return res_powerlaw_fit stored in object; see fit_power_law function for the details explanation.
-		#' @examples
-		#' \donttest{
-		#' t1$cal_powerlaw_fit()
-		#' }
-		cal_powerlaw_fit = function(xmin = NULL, ...){
-			private$check_igraph()
-			private$check_network()
-			network <- self$res_network
-			degree_dis <- igraph::degree(network, mode = "in")
-			self$res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = xmin, ...)
-			message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')
+			message('Bootstrap p value: ', bootstrap_res$p)
+			if(bootstrap_res$p < 0.05){
+				message("The p value < 0.05; Degrees do not follow power law distribution ...")
+			}else{
+				message("Degrees follow power law distribution ...")
+				res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = est_xmin$xmin, ...)
+				message("The estimated alpha: ", res_powerlaw_fit$alpha)
+				self$res_powerlaw_fit <- res_powerlaw_fit
+				message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')
+			}
 		},
 		#' @description
 		#' Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.

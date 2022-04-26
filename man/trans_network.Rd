@@ -123,19 +123,11 @@ t1$subset_network(node = t1$res_node_table \%>\% .[.$module == "M1", ] \%>\%
 }
 
 ## ------------------------------------------------
-## Method `trans_network$cal_powerlaw_p`
+## Method `trans_network$cal_powerlaw`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_powerlaw_p()
-}
-
-## ------------------------------------------------
-## Method `trans_network$cal_powerlaw_fit`
-## ------------------------------------------------
-
-\donttest{
-t1$cal_powerlaw_fit()
+t1$cal_powerlaw()
 }
 
 ## ------------------------------------------------
@@ -162,8 +154,7 @@ t2 <- t1$trans_comm(use_col = "module")
 \item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-subset_network}{\code{trans_network$subset_network()}}
-\item \href{#method-cal_powerlaw_p}{\code{trans_network$cal_powerlaw_p()}}
-\item \href{#method-cal_powerlaw_fit}{\code{trans_network$cal_powerlaw_fit()}}
+\item \href{#method-cal_powerlaw}{\code{trans_network$cal_powerlaw()}}
 \item \href{#method-trans_comm}{\code{trans_network$trans_comm()}}
 \item \href{#method-print}{\code{trans_network$print()}}
 \item \href{#method-clone}{\code{trans_network$clone()}}
@@ -742,61 +733,30 @@ t1$subset_network(node = t1$res_node_table \%>\% .[.$module == "M1", ] \%>\%
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_powerlaw_p"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_powerlaw_p}{}}}
-\subsection{Method \code{cal_powerlaw_p()}}{
-Perform a bootstrapping hypothesis test to determine whether degrees follows a power law distribution;
-a significant p represents the distribution does not follow power law.
+\if{html}{\out{<a id="method-cal_powerlaw"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_powerlaw}{}}}
+\subsection{Method \code{cal_powerlaw()}}{
+Fit degrees to a power law distribution. First, perform a bootstrapping hypothesis test to determine whether degrees follow a power law distribution.
+If the distribution follows power law, then fit degrees to power law distribution and return the parameters.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_powerlaw_p(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_powerlaw(...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{paremeters pass to bootstrap_p in poweRlaw package.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-two lists stored in object; see estimate_xmin and bootstrap_p in poweRlaw package for the details.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$cal_powerlaw_p()
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_powerlaw_fit"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_powerlaw_fit}{}}}
-\subsection{Method \code{cal_powerlaw_fit()}}{
-Fit degrees to a power law distribution.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_powerlaw_fit(xmin = NULL, ...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{xmin}}{default NULL; See xmin in fit_power_law function; suggest using the result res_powerlaw_min from cal_powerlaw_p function.}
-
 \item{\code{...}}{paremeters pass to fit_power_law function in igraph package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_powerlaw_fit stored in object; see fit_power_law function for the details explanation.
+res_powerlaw_p and res_powerlaw_fit; see bootstrap_p function in poweRlaw package for the bootstrapping p value details;
+  see fit_power_law function in igraph package for the power law fit return details.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_powerlaw_fit()
+t1$cal_powerlaw()
 }
 }
 \if{html}{\out{</div>}}
