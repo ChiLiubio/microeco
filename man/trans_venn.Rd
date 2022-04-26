@@ -28,11 +28,11 @@ t1$plot_venn()
 }
 
 ## ------------------------------------------------
-## Method `trans_venn$trans_venn_com`
+## Method `trans_venn$trans_comm`
 ## ------------------------------------------------
 
 \donttest{
-t2 <- t1$trans_venn_com(use_frequency = TRUE)
+t2 <- t1$trans_comm(use_frequency = TRUE)
 }
 }
 \section{Methods}{
@@ -40,7 +40,7 @@ t2 <- t1$trans_venn_com(use_frequency = TRUE)
 \itemize{
 \item \href{#method-new}{\code{trans_venn$new()}}
 \item \href{#method-plot_venn}{\code{trans_venn$plot_venn()}}
-\item \href{#method-trans_venn_com}{\code{trans_venn$trans_venn_com()}}
+\item \href{#method-trans_comm}{\code{trans_venn$trans_comm()}}
 \item \href{#method-print}{\code{trans_venn$print()}}
 \item \href{#method-clone}{\code{trans_venn$clone()}}
 }
@@ -182,12 +182,12 @@ t1$plot_venn()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_venn_com"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_venn_com}{}}}
-\subsection{Method \code{trans_venn_com()}}{
-Transform venn result for the composition analysis.
+\if{html}{\out{<a id="method-trans_comm"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_comm}{}}}
+\subsection{Method \code{trans_comm()}}{
+Transform venn result to community-like microtable object for further composition analysis.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_venn$trans_venn_com(use_frequency = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_venn$trans_comm(use_frequency = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -203,7 +203,7 @@ a new \code{\link{microtable}} class.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t2 <- t1$trans_venn_com(use_frequency = TRUE)
+t2 <- t1$trans_comm(use_frequency = TRUE)
 }
 }
 \if{html}{\out{</div>}}

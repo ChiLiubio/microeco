@@ -331,15 +331,15 @@ trans_venn <- R6Class(classname = "trans_venn",
 			p
 		},
 		#' @description
-		#' Transform venn result for the composition analysis.
+		#' Transform venn result to community-like microtable object for further composition analysis.
 		#'
 		#' @param use_frequency default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.
 		#' @return a new \code{\link{microtable}} class.
 		#' @examples
 		#' \donttest{
-		#' t2 <- t1$trans_venn_com(use_frequency = TRUE)
+		#' t2 <- t1$trans_comm(use_frequency = TRUE)
 		#' }
-		trans_venn_com = function(use_frequency = TRUE){
+		trans_comm = function(use_frequency = TRUE){
 			otudata <- self$otu_table
 			venn_table <- self$res_content
 			sampledata <- data.frame(SampleID = colnames(venn_table), Group = colnames(venn_table)) %>% 'rownames<-'(colnames(venn_table))
