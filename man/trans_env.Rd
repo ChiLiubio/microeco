@@ -18,6 +18,16 @@ data(env_data_16S)
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 
 ## ------------------------------------------------
+## Method `trans_env$cal_diff`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_diff(group = "Group", method = "KW")
+t1$cal_diff(group = "Group", method = "KW_dunn")
+t1$cal_diff(group = "Group", method = "anova")
+}
+
+## ------------------------------------------------
 ## Method `trans_env$cal_ordination`
 ## ------------------------------------------------
 
@@ -94,6 +104,7 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{trans_env$new()}}
+\item \href{#method-cal_diff}{\code{trans_env$cal_diff()}}
 \item \href{#method-cal_ordination}{\code{trans_env$cal_ordination()}}
 \item \href{#method-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
 \item \href{#method-trans_ordination}{\code{trans_env$trans_ordination()}}
@@ -148,6 +159,63 @@ data_env in trans_env object.
 \preformatted{data(dataset)
 data(env_data_16S)
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_diff"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_diff}{}}}
+\subsection{Method \code{cal_diff()}}{
+Test the difference of environmental variable across groups.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_diff(
+  group = NULL,
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
+  measure = NULL,
+  p_adjust_method = "fdr",
+  anova_set = NULL,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{group}}{default NULL; a colname of sample_table used to compare values across groups.}
+
+\item{\code{method}}{default "KW"; see the following available options:
+\describe{
+  \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
+  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+  \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+  \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
+  \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+}}
+
+\item{\code{measure}}{default NULL; a vector; if null, all variables will be calculated.}
+
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+
+\item{\code{anova_set}}{default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.}
+
+\item{\code{...}}{parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
+agricolae::duncan.test (method = "anova").}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_diff(group = "Group", method = "KW")
+t1$cal_diff(group = "Group", method = "KW_dunn")
+t1$cal_diff(group = "Group", method = "anova")
+}
 }
 \if{html}{\out{</div>}}
 

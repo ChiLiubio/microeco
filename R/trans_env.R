@@ -82,6 +82,53 @@ trans_env <- R6Class(classname = "trans_env",
 			message("Env data is stored in object$data_env ...\n")
 		},
 		#' @description
+		#' Test the difference of environmental variable across groups.
+		#'
+		#' @param group default NULL; a colname of sample_table used to compare values across groups.
+		#' @param method default "KW"; see the following available options:
+		#'   \describe{
+		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
+		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+		#'   }
+		#' @param measure default NULL; a vector; if null, all variables will be calculated.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
+		#' @param anova_set default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.
+		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
+		#'   agricolae::duncan.test (method = "anova").
+		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_diff(group = "Group", method = "KW")
+		#' t1$cal_diff(group = "Group", method = "KW_dunn")
+		#' t1$cal_diff(group = "Group", method = "anova")
+		#' }
+		cal_diff = function(group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
+			if(is.null(group)){
+				stop("Please provide the group parameter!")
+			}else{
+				if(!group %in% colnames(self$dataset$sample_table)){
+					stop("Provided parameter group must be one colname of sample_table! Please check it!")
+				}
+			}
+			if(is.null(self$data_env)){
+				stop("The data_env is NULL! Please check the data input when creating the object !")
+			}else{
+				env_data <- self$data_env
+			}
+			tem_data <- clone(self$dataset)
+			# use test method in trans_alpha
+			tem_data$alpha_diversity <- env_data
+			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
+			suppressMessages(tem_data1$cal_diff(method = method, measure = measure, p_adjust_method = p_adjust_method, anova_set = anova_set, ...))
+			self$res_diff <- tem_data1$res_diff
+			self$cal_diff_method <- method
+			self$group <- group
+			message('The result is stored in object$res_diff ...')
+		},
+		#' @description
 		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 		#'
 		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
