@@ -18,7 +18,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
 		#'   If TRUE, the function can run the interpolation with the mice package; to use this parameter, please first install mice package.
-		#' @return env_data in trans_env object.
+		#' @return data_env in trans_env object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
@@ -78,7 +78,8 @@ trans_env <- R6Class(classname = "trans_env",
 					env_data %<>% dropallfactors(., unfac2num = TRUE, char2num = TRUE)
 				}
 			}
-			self$env_data <- env_data
+			self$data_env <- env_data
+			message("Env data is stored in object$data_env ...\n")
 		},
 		#' @description
 		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
@@ -115,10 +116,10 @@ trans_env <- R6Class(classname = "trans_env",
 			if(! method %in% c("RDA", "dbRDA", "CCA")){
 				stop("The method should be one of 'RDA', 'dbRDA' and 'CCA' !")
 			}
-			if(is.null(self$env_data)){
-				stop("The env_data is NULL! Please check the data input when creating the object !")
+			if(is.null(self$data_env)){
+				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
-				env_data <- self$env_data
+				env_data <- self$data_env
 			}
 			
 			if(method == "dbRDA"){
@@ -235,7 +236,7 @@ trans_env <- R6Class(classname = "trans_env",
 			if(is.null(self$res_ordination)){
 				stop("Please first run cal_ordination function to obtain the ordination result!")
 			}else{
-				self$res_ordination_envsquare <- vegan::envfit(self$res_ordination, self$env_data, ...)
+				self$res_ordination_envsquare <- vegan::envfit(self$res_ordination, self$data_env, ...)
 				message('Result is stored in object$res_ordination_envsquare ...')
 			}
 		},
@@ -522,7 +523,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Mantel test between beta diversity matrix and environmental data.
 		#'
-		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
+		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.
 		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
@@ -562,10 +563,10 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				use_matrix <- add_matrix
 			}
-			if(is.null(self$env_data)){
-				stop("The env_data is NULL! Please check the data input when creating the object !")
+			if(is.null(self$data_env)){
+				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
-				env_data <- self$env_data
+				env_data <- self$data_env
 			}
 			# if no selection, automatically select the numeric columns
 			if(is.null(select_env_data)){
@@ -610,7 +611,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
 		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.
-		#' @param select_env_data default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.
+		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
 		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
@@ -644,10 +645,10 @@ trans_env <- R6Class(classname = "trans_env",
 			group_select = NULL,
 			taxa_name_full = TRUE
 			){
-			if(is.null(self$env_data)){
-				stop("The env_data is NULL! Please check the data input when creating the object !")
+			if(is.null(self$data_env)){
+				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
-				env_data <- self$env_data
+				env_data <- self$data_env
 			}
 			if(is.null(select_env_data)){
 				env_data <- env_data[, unlist(lapply(env_data, is.numeric)), drop = FALSE]
@@ -952,13 +953,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
 		#'  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
 		#'  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
-		#'  assigned according to the column selection of the env_data inside.
+		#'  assigned according to the column selection of the data_env inside.
 		#'
 		#' @param x default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
-		#'     If x is a single value, it will be used to select the column of env_data inside.
+		#'     If x is a single value, it will be used to select the column of data_env inside.
 		#'     If x is a distance matrix, it will be transformed to be a vector.
 		#' @param y default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
-		#'     If y is a single value, it will be used to select the column of env_data inside.
+		#'     If y is a single value, it will be used to select the column of data_env inside.
 		#'     If y is a distance matrix, it will be transformed to be a vector.
 		#' @param use_cor default TRUE; TRUE for correlation; FALSE for regression.
 		#' @param cor_method default "pearson"; one of "pearson", "kendall" and "spearman".
@@ -1004,10 +1005,10 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("The input y is neither a vector nor a matrix !")
 			}
 			if(length(x) == 1){
-				x <- self$env_data[, x]
+				x <- self$data_env[, x]
 			}
 			if(length(y) == 1){
-				y <- self$env_data[, y]
+				y <- self$data_env[, y]
 			}
 			# Matrix is transformed to be a vector
 			if(is.matrix(x) | is.matrix(y)){
@@ -1074,10 +1075,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Print the trans_env object.
 		print = function(){
 			cat("trans_env class:\n")
-			if(!is.null(self$env_data)){
-				cat(paste0("Env table have ", ncol(self$env_data), " variables: ", paste0(colnames(self$env_data), collapse = ","), "\n"))
+			if(!is.null(self$data_env)){
+				cat(paste0("Env table have ", ncol(self$data_env), " variables: ", paste0(colnames(self$data_env), collapse = ","), "\n"))
 			}else{
-				cat("No env table stored in the object.\n")
+				cat("No environmental variable table stored in the object.\n")
 			}
 		}
 	),

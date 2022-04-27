@@ -71,7 +71,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param anova_set default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.
 		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
 		#'   agricolae::duncan.test (method = "anova").
-		#' @return res_alpha_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(method = "KW")
@@ -193,20 +193,20 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					compare_result %<>% `row.names<-`(.[,1]) %>% .[,-1]
 				}
 			}
-			self$res_alpha_diff <- compare_result
+			self$res_diff <- compare_result
 			self$cal_diff_method <- method
-			message('The result is stored in object$res_alpha_diff ...')
+			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
 		#' Plotting the alpha diveristy.
 		#'
-		#' @param use_diff default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_alpha_diff;
+		#' @param use_diff default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
 		#'   This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for groups.
 		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
 		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
-		#' @param add_label default "Significance"; select a colname of object$res_alpha_diff for the label text, such as 'P.adj' or 'Significance'.
+		#' @param add_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_color default TRUE; TRUE: use color_values, FALSE: use "black".
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in ggpubr::ggboxplot.
@@ -249,8 +249,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 			}
 			if(use_diff){
-				if(is.null(self$res_alpha_diff)){
-					message("No object$res_alpha_diff found. Only plot the data. To use difference test result, ",
+				if(is.null(self$res_diff)){
+					message("No object$res_diff found. Only plot the data. To use difference test result, ",
 						"please first run cal_diff function to get the significance result!")
 					use_diff <- FALSE
 				}
@@ -302,9 +302,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(use_diff & group == self$group){
 				x_axis_order <- levels(use_data[, group])
 				if(cal_diff_method == "anova"){
-					if(inherits(self$res_alpha_diff, "data.frame")){
-						use_diff_data <- self$res_alpha_diff %>% .[.$Measure == measure, ]
-						add_letter_text <- self$res_alpha_diff[x_axis_order, measure]
+					if(inherits(self$res_diff, "data.frame")){
+						use_diff_data <- self$res_diff %>% .[.$Measure == measure, ]
+						add_letter_text <- self$res_diff[x_axis_order, measure]
 						group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
 							{. + max(.) * y_increae}
 						textdata <- data.frame(
@@ -317,9 +317,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}else{
 					if(!(cal_diff_method == "KW" & length(unique(use_data[, group])) > 2)){
-						use_diff_data <- self$res_alpha_diff %>% .[.$Measure == measure, ]
+						use_diff_data <- self$res_diff %>% .[.$Measure == measure, ]
 						if(! add_label %in% colnames(use_diff_data)){
-							stop("Please provide a correct add_label parameter! Must be a colname of object$res_alpha_diff !")
+							stop("Please provide a correct add_label parameter! Must be a colname of object$res_diff !")
 						}else{
 							annotations <- use_diff_data[, add_label]
 						}

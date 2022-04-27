@@ -502,6 +502,7 @@ microtable <- R6Class(classname = "microtable",
 		#' class(dataset$alpha_diversity)
 		#' }
 		cal_alphadiv = function(measures = NULL, PD = FALSE){
+			# modified based on the alpha diversity analysis of phyloseq package
 			if (!any(self$otu_table == 1)){
 				warning("The data you have provided does not have\n", 
 					"any singletons. This is highly suspicious. \n", 
@@ -550,7 +551,7 @@ microtable <- R6Class(classname = "microtable",
 				if(is.null(self$phylo_tree)){
 					stop("Please provide phylogenetic tree for PD calculation!")
 				}else{
-					outlist <- c(outlist, list(PD = picante::pd(OTU, self$phylo_tree)[,"PD", drop=TRUE]))
+					outlist <- c(outlist, list(PD = picante::pd(OTU, self$phylo_tree)[, "PD", drop=TRUE]))
 				}
 			}
 			res <- do.call("cbind", outlist)

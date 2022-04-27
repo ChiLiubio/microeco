@@ -143,7 +143,7 @@ Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "
 
 \item{\code{mseq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.}
 
-\item{\code{...}}{parameters passed to kruskal.test function or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").}
+\item{\code{...}}{parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova".}
 }
 \if{html}{\out{</div>}}
 }

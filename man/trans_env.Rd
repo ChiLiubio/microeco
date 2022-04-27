@@ -141,7 +141,7 @@ If TRUE, the function can run the interpolation with the mice package; to use th
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-env_data in trans_env object.
+data_env in trans_env object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -412,7 +412,7 @@ Mantel test between beta diversity matrix and environmental data.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
+\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.}
 
 \item{\code{partial_mantel}}{default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.}
 
@@ -472,7 +472,7 @@ Actually, it can also be used for calculating other correlation between any two 
 \item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
 "all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.}
 
-\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in env_data; if not provided, automatically select the columns with numeric attributes.}
+\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.}
 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation method.}
 
@@ -602,7 +602,7 @@ t1$plot_cor(pheatmap = FALSE)
 Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
- assigned according to the column selection of the env_data inside.
+ assigned according to the column selection of the data_env inside.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_scatterfit(
   x = NULL,
@@ -628,11 +628,11 @@ Scatter plot and add fitted line. The most important thing is to make sure that 
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{x}}{default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
-If x is a single value, it will be used to select the column of env_data inside.
+If x is a single value, it will be used to select the column of data_env inside.
 If x is a distance matrix, it will be transformed to be a vector.}
 
 \item{\code{y}}{default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
-If y is a single value, it will be used to select the column of env_data inside.
+If y is a single value, it will be used to select the column of data_env inside.
 If y is a distance matrix, it will be transformed to be a vector.}
 
 \item{\code{use_cor}}{default TRUE; TRUE for correlation; FALSE for regression.}

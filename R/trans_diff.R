@@ -42,7 +42,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param mseq_adjustMethod default "fdr"; Method to adjust p-values by. Default is "fdr". 
 		#'   Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
 		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
-		#' @param ... parameters passed to kruskal.test function or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn").
+		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova".
 		#' @return res_rf, res_lefse, res_abund, res_diff, res_metastat, or res_mseq in trans_diff object, depending on the method.
 		#' @examples
 		#' \donttest{
@@ -118,7 +118,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
 				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
 				suppressMessages(tem_data1$cal_diff(method = method, ...))
-				self$res_diff <- tem_data1$res_alpha_diff
+				self$res_diff <- tem_data1$res_diff
 				message('The result is stored in object$res_diff ...')
 			}
 			if(grepl("lefse|rf", method, ignore.case = TRUE)){

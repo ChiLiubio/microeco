@@ -120,7 +120,7 @@ agricolae::duncan.test (method = "anova").}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_alpha_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -163,7 +163,7 @@ Plotting the alpha diveristy.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_diff}}{default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_alpha_diff;
+\item{\code{use_diff}}{default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
 This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.}
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for groups.}
@@ -173,7 +173,7 @@ e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
-\item{\code{add_label}}{default "Significance"; select a colname of object$res_alpha_diff for the label text, such as 'P.adj' or 'Significance'.}
+\item{\code{add_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
 
 \item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
 
