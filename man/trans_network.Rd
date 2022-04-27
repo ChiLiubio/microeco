@@ -770,13 +770,16 @@ t1$cal_powerlaw()
 \subsection{Method \code{trans_comm()}}{
 Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$trans_comm(use_col = "module")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$trans_comm(use_col = "module", abundance = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{use_col}}{default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function get_node_table.}
+
+\item{\code{abundance}}{default TRUE; whether sum abundance of taxa. TRUE: sum the abundance for a taxon across all samples; 
+FALSE: sum the frequency for a taxon across all samples.}
 }
 \if{html}{\out{</div>}}
 }

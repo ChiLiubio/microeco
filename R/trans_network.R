@@ -823,12 +823,14 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
 		#'
 		#' @param use_col default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function get_node_table.
+		#' @param abundance default TRUE; whether sum abundance of taxa. TRUE: sum the abundance for a taxon across all samples; 
+		#' 	  FALSE: sum the frequency for a taxon across all samples.
 		#' @return a new \code{\link{microtable}} class.
 		#' @examples
 		#' \donttest{
 		#' t2 <- t1$trans_comm(use_col = "module")
 		#' }
-		trans_comm = function(use_col = "module"){
+		trans_comm = function(use_col = "module", abundance = TRUE){
 			if(use_col == "module"){
 				if(is.null(V(self$res_network)$module)){
 					stop("Please first run cal_module function to get node modules!")
@@ -850,6 +852,9 @@ trans_network <- R6Class(classname = "trans_network",
 				res_node_table %<>% .[!is.na(.[, use_col]), ]
 			}
 			abund_table <- self$use_abund
+			if(abundance == F){
+				abund_table[abund_table > 1] <- 1
+			}
 			tax_table <- self$use_tax
 			feature_abund <- apply(abund_table, 2, sum)
 			tm1 <- cbind.data.frame(res_node_table[, c("name", use_col)], abund = feature_abund[res_node_table$name])
