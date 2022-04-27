@@ -6,7 +6,7 @@
 \description{
 This class is a wrapper for the taxonomic abundance transformations and plotting. 
 The transformed data style is the long-format for ggplot2 plotting.
-The plotting approaches include the bar plot, boxplot, heatmap and pie chart based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+The plotting methods include bar plot, boxplot, heatmap and pie chart.
 }
 \examples{
 
@@ -87,7 +87,7 @@ t1$plot_pie(facet_nrow = 1)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{default NULL; microtable object.}
+\item{\code{dataset}}{default NULL; the object of \code{\link{microtable}} class.}
 
 \item{\code{taxrank}}{default "Phylum"; taxonomic rank.}
 
@@ -96,14 +96,15 @@ t1$plot_pie(facet_nrow = 1)
 \item{\code{ntaxa}}{default 10; how many taxa will be used, ordered by abundance from high to low; 
 this parameter does not conflict with the parameter show; both can be used.}
 
-\item{\code{groupmean}}{default NULL; calculating mean abundance for each group, select a group column name in sample_table.}
+\item{\code{groupmean}}{default NULL; calculating mean abundance for each group; select a group column name in sample_table.}
 
-\item{\code{delete_full_prefix}}{default TRUE; whether delete both the prefix and the character in front of them.}
+\item{\code{delete_full_prefix}}{default TRUE; whether delete both the prefix of taxonomy and the character in front of them.}
 
-\item{\code{delete_part_prefix}}{default FALSE; whether only delete the prefix.}
+\item{\code{delete_part_prefix}}{default FALSE; whether only delete the prefix of taxonomy.}
 
 \item{\code{prefix}}{default NULL; character string; can be used when delete_full_prefix = T or delete_part_prefix = T; 
-default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level.}
+ default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
+Please alter this parameter when the prefix is not standard.}
 
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
 
@@ -112,7 +113,7 @@ default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-abund_data for plotting.
+data_abund stored in the object for plotting.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -130,7 +131,7 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
 \if{html}{\out{<a id="method-plot_bar"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_bar}{}}}
 \subsection{Method \code{plot_bar()}}{
-Bar plot in trans_abund object.
+Bar plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_bar(
   use_colors = RColorBrewer::brewer.pal(12, "Paired"),
@@ -160,7 +161,7 @@ Bar plot in trans_abund object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.}
 
 \item{\code{bar_type}}{default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.}
 
@@ -223,11 +224,10 @@ t1$plot_bar(facet = "Group", xtext_keep = FALSE)
 \if{html}{\out{<a id="method-plot_heatmap"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_heatmap}{}}}
 \subsection{Method \code{plot_heatmap()}}{
-Plot the heatmap in trans_abund object.
+Plot the heatmap.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
-  use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5", "#E6F598",
-    "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"),
+  use_colors = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")),
   facet = NULL,
   order_facet = NULL,
   x_axis_name = NULL,
@@ -256,9 +256,10 @@ Plot the heatmap in trans_abund object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+\item{\code{use_colors}}{default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
+colors palette for the plotting.}
 
-\item{\code{facet}}{default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".}
+\item{\code{facet}}{default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".}
 
 \item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").}
 
@@ -323,7 +324,7 @@ t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 \if{html}{\out{<a id="method-plot_box"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_box}{}}}
 \subsection{Method \code{plot_box()}}{
-Box plot in trans_abund object.
+Box plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_box(
   use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -349,9 +350,9 @@ Box plot in trans_abund object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.}
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
 
-\item{\code{group}}{default NULL; column name of sample table to show abundance across groups.}
+\item{\code{group}}{default NULL; a column name of sample table to show abundance across groups.}
 
 \item{\code{show_point}}{default FALSE; whether show points in plot.}
 
@@ -363,7 +364,7 @@ Box plot in trans_abund object.
 
 \item{\code{plot_flip}}{default FALSE; Whether rotate plot.}
 
-\item{\code{boxfill}}{default TRUE; Whether fill the box.}
+\item{\code{boxfill}}{default TRUE; Whether fill the box with colors.}
 
 \item{\code{middlecolor}}{default "grey95"; The middle line color.}
 
@@ -403,7 +404,7 @@ t1$plot_box(group = "Group")
 \if{html}{\out{<a id="method-plot_pie"></a>}}
 \if{latex}{\out{\hypertarget{method-plot_pie}{}}}
 \subsection{Method \code{plot_pie()}}{
-Plot pie chart in trans_abund class.
+Plot pie chart.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_pie(
   use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -416,7 +417,7 @@ Plot pie chart in trans_abund class.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.}
+\item{\code{use_colors}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
 
 \item{\code{facet_nrow}}{default 1; how many rows in the plot.}
 

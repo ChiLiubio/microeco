@@ -614,6 +614,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				.[, -1, drop = FALSE]
 			as.matrix(res1[all_samples, all_samples])
 		},
+		# from v0.7.5, use the method of iCAMP to calculate betamntd
 		betamntd = function(
 			comm = NULL, 
 			dis = NULL, 

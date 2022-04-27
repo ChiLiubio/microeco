@@ -4,24 +4,25 @@
 #' @description
 #' This class is a wrapper for the taxonomic abundance transformations and plotting. 
 #' The transformed data style is the long-format for ggplot2 plotting.
-#' The plotting approaches include the bar plot, boxplot, heatmap and pie chart based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+#' The plotting methods include bar plot, boxplot, heatmap and pie chart.
 #'
 #' @export
 trans_abund <- R6Class(classname = "trans_abund",
 	public = list(
-		#' @param dataset default NULL; microtable object.
+		#' @param dataset default NULL; the object of \code{\link{microtable}} class.
 		#' @param taxrank default "Phylum"; taxonomic rank.
 		#' @param show default 0; the relative abundance threshold used for filtering.
 		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low; 
 		#'   this parameter does not conflict with the parameter show; both can be used.
-		#' @param groupmean default NULL; calculating mean abundance for each group, select a group column name in sample_table.
-		#' @param delete_full_prefix default TRUE; whether delete both the prefix and the character in front of them.
-		#' @param delete_part_prefix default FALSE; whether only delete the prefix.
+		#' @param groupmean default NULL; calculating mean abundance for each group; select a group column name in sample_table.
+		#' @param delete_full_prefix default TRUE; whether delete both the prefix of taxonomy and the character in front of them.
+		#' @param delete_part_prefix default FALSE; whether only delete the prefix of taxonomy.
 		#' @param prefix default NULL; character string; can be used when delete_full_prefix = T or delete_part_prefix = T; 
-		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level.
+		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
+		#'  Please alter this parameter when the prefix is not standard.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; if some taxa are selected, input taxa names.
-		#' @return abund_data for plotting. 
+		#' @return data_abund stored in the object for plotting. 
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -39,27 +40,32 @@ trans_abund <- R6Class(classname = "trans_abund",
 			use_percentage = TRUE, 
 			input_taxaname = NULL
 			){
-
 			if(is.null(dataset)){
 				stop("No dataset provided!")
 			}
 			if(is.null(dataset$taxa_abund)){
+				message('The taxa_abund in dataset is NULL. Calculate it now ...')
 				dataset$cal_abund()
 			}
-			self$sample_table <- dataset$sample_table
-			self$taxrank <- taxrank
-			self$use_percentage <- use_percentage
-			
-			abund_data <- dataset$taxa_abund[[self$taxrank]] %>% 
-				cbind.data.frame(Taxonomy = rownames(.), ., stringsAsFactors = FALSE)
-			abund_data <- reshape2::melt(abund_data, id.vars = "Taxonomy")
-			colnames(abund_data) <- c("Taxonomy", "Sample", "Abundance")
-			if(any(grepl("__$", abund_data$Taxonomy))){
-				abund_data$Taxonomy[grepl("__$", abund_data$Taxonomy)] <- paste0(abund_data$Taxonomy[grepl("__$", abund_data$Taxonomy)], "unidentified")
+			sample_table <- dataset$sample_table
+			if("Sample" %in% colnames(sample_table)){
+				colnames(sample_table)[colnames(sample_table) == "Sample"] <- "Sample_replace"
+			}
+			if(! taxrank %in% names(dataset$taxa_abund)){
+				stop("The input parameter taxrank: ", taxrank, " is not found! Please check whether it is correct!")
+			}
+			abund_data <- dataset$taxa_abund[[taxrank]] %>% 
+				rownames_to_column(var = "Taxonomy") %>% 
+				reshape2::melt(id.vars = "Taxonomy") %>% 
+				`colnames<-`(c("Taxonomy", "Sample", "Abundance"))
+
+			check_nd <- grepl("__$", abund_data$Taxonomy)
+			if(any(check_nd)){
+				abund_data$Taxonomy[check_nd] %<>% paste0(., "unidentified")
 			}
 			if(delete_full_prefix == T | delete_part_prefix == T){
 				if(is.null(prefix)){
-					prefix <- paste0(tolower(substr(self$taxrank, 1, 1)), "__")
+					prefix <- paste0(tolower(substr(taxrank, 1, 1)), "__")
 				}
 				if(delete_part_prefix == T){
 					delete_full_prefix <- FALSE
@@ -75,15 +81,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 				as.data.frame(stringsAsFactors = FALSE)
 			# calculate mean vlaues for each group
 			if(!is.null(groupmean)){
-				abund_data$Sample %<>% as.character
-				mdf <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
 				message(paste0(groupmean, " column is used to calculate mean abundance ..."))
-				abund_data <- mdf %>% dplyr::group_by(!!! syms(c("Taxonomy", groupmean))) %>% 
+				abund_data$Sample %<>% as.character
+				abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))} %>%
+					dplyr::group_by(!!! syms(c("Taxonomy", groupmean))) %>% 
 					dplyr::summarise(Abundance = mean(Abundance)) %>% 
 					as.data.frame
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
 			}else{
-				abund_data <- suppressWarnings(dplyr::left_join(abund_data, rownames_to_column(self$sample_table), by=c("Sample" = "rowname")))
+				abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))}
 			}
 			abund_data$Taxonomy %<>% as.character
 			# sort according to the abundance
@@ -98,32 +104,37 @@ trans_abund <- R6Class(classname = "trans_abund",
 				ntaxa_use <- sum(mean_abund > show)
 			}
 			# filter useless taxa
-			use_taxanames <- use_taxanames[!grepl("unidentified|unculture|Incertae.sedis", use_taxanames)]
+			use_taxanames %<>% .[!grepl("unidentified|unculture|Incertae.sedis", .)]
 			# identify used taxa
 			if(is.null(input_taxaname)){
-				if(length(use_taxanames) > ntaxa_use) use_taxanames <- use_taxanames[1:ntaxa_use]
+				if(length(use_taxanames) > ntaxa_use){
+					use_taxanames %<>% .[1:ntaxa_use]
+				}
 			} else {
-				use_taxanames <- use_taxanames[use_taxanames %in% input_taxaname]
+				use_taxanames %<>% .[. %in% input_taxaname]
 			}
 			# generate ylab title and store it
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
-				if(self$use_percentage == T){
+				if(use_percentage == T){
 					abund_data$Abundance %<>% {. * 100}
 					ylabname <- "Relative abundance (%)"
 				}else{
 					ylabname <- "Relative abundance"
 				}
 			} else {
-				ylabname <- paste0("Relative abundance (", self$taxrank," > ", show*100, "%)")
+				ylabname <- paste0("Relative abundance (", taxrank, " > ", show*100, "%)")
 			}
+			self$use_percentage <- use_percentage
 			self$ylabname <- ylabname
-			self$abund_data <- abund_data
-			self$use_taxanames <- use_taxanames
+			self$taxrank <- taxrank
+			self$data_abund <- abund_data
+			self$data_taxanames <- use_taxanames
+			message('The transformed abundance data is stored in object$data_abund ...')
 		},
 		#' @description
-		#' Bar plot in trans_abund object.
+		#' Bar plot.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
+		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
 		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
@@ -173,7 +184,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			base_font = NULL,
 			ylab_title = NULL
 			){
-			plot_data <- self$abund_data
+			plot_data <- self$data_abund
+			use_taxanames <- self$data_taxanames
 			
 			# order x axis samples and facet
 			plot_data <- private$adjust_axis_facet(
@@ -188,15 +200,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			if(bar_type == "full"){
 				# make sure whether taxonomy info are all in selected use_taxanames in case of special data
-				if(!all(plot_data$Taxonomy %in% self$use_taxanames)){
-					plot_data$Taxonomy[!plot_data$Taxonomy %in% self$use_taxanames] <- "Others"
-					plot_data$Taxonomy %<>% factor(., levels = rev(c(self$use_taxanames, "Others")))
+				if(!all(plot_data$Taxonomy %in% use_taxanames)){
+					plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
+					plot_data$Taxonomy %<>% factor(., levels = rev(c(use_taxanames, "Others")))
 				}else{
-					plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
+					plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 				}
 			}else{
-				plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
-				plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
+				plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
+				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 			}
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
@@ -271,10 +283,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p
 		},
 		#' @description
-		#' Plot the heatmap in trans_abund object.
+		#' Plot the heatmap.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-		#' @param facet default NULL; a character string; if using facet, providing a group column name of sample_table, such as, "Group".
+		#' @param use_colors default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
+		#' 	  colors palette for the plotting.
+		#' @param facet default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
@@ -303,7 +316,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 		#' }
 		plot_heatmap = function(
-			use_colors = c("#00008B", "#102D9B", "#215AAC", "#3288BD", "#66C2A5",  "#E6F598", "#FFFFBF", "#FED690", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"), 
+			use_colors = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")), 
 			facet = NULL,
 			order_facet = NULL,
 			x_axis_name = NULL,
@@ -327,7 +340,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 			pheatmap = FALSE,
 			...
 			){
-			plot_data <- self$abund_data
+			plot_data <- self$data_abund
+			use_taxanames <- self$data_taxanames
+			
 			if(pheatmap == FALSE){
 				# order x axis samples and facet
 				plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
@@ -337,8 +352,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if (is.null(max_abundance)){
 					max_abundance <- max(plot_data$Abundance)
 				}
-				plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
-				plot_data$Taxonomy %<>% factor(., levels = rev(self$use_taxanames))
+				plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
+				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 
 				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
 				
@@ -400,16 +415,16 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 		},
 		#' @description
-		#' Box plot in trans_abund object.
+		#' Box plot.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); providing the plotting colors.
-		#' @param group default NULL; column name of sample table to show abundance across groups.
+		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param group default NULL; a column name of sample table to show abundance across groups.
 		#' @param show_point default FALSE; whether show points in plot.
 		#' @param point_color default "black"; If show_point TRUE; use the color
 		#' @param point_size default 3; If show_point TRUE; use the size
 		#' @param point_alpha default .3; If show_point TRUE; use the transparency.
 		#' @param plot_flip default FALSE; Whether rotate plot.
-		#' @param boxfill default TRUE; Whether fill the box.
+		#' @param boxfill default TRUE; Whether fill the box with colors.
 		#' @param middlecolor default "grey95"; The middle line color.
 		#' @param middlesize default 1; The middle line size.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
@@ -443,10 +458,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 			base_font =NULL,
 			...
 			){
-			plot_data <- self$abund_data
-			plot_data %<>% {.[.$Taxonomy %in% self$use_taxanames, ]}
+			plot_data <- self$data_abund
+			use_taxanames <- self$data_taxanames
 
-			plot_data$Taxonomy %<>% factor(., levels = self$use_taxanames)
+			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
+			plot_data$Taxonomy %<>% factor(., levels = use_taxanames)
 
 			p <- ggplot(plot_data, aes_string(x = "Taxonomy", y = "Abundance")) 
 			p <- p + ylab(self$ylabname) + guides(col = guide_legend(reverse = TRUE)) + xlab("")
@@ -489,9 +505,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p
 		},
 		#' @description
-		#' Plot pie chart in trans_abund class.
+		#' Plot pie chart.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); providing the plotting colors.
+		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
 		#' @param facet_nrow default 1; how many rows in the plot.
 		#' @param strip_text default 11; sample title size.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
@@ -507,9 +523,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 			strip_text = 11, 
 			legend_text_italic = FALSE
 			){
-			plot_data <- self$abund_data
-			plot_data$Taxonomy[!plot_data$Taxonomy %in% self$use_taxanames] <- "Others"
-			plot_data$Taxonomy %<>% factor(., levels = rev(c(self$use_taxanames, "Others")))
+			plot_data <- self$data_abund
+			use_taxanames <- self$data_taxanames
+
+			plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
+			plot_data$Taxonomy %<>% factor(., levels = rev(c(use_taxanames, "Others")))
 
 			p <- ggplot(plot_data, aes(x='', y=Abundance, fill = Taxonomy, label = percent(Abundance))) + 
 				geom_bar(width = 1, stat = "identity") +
@@ -527,15 +545,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 		},
 		#' @description
 		#' Print the trans_abund object.
-		print = function() {
+		print = function(){
 			cat("trans_abund class:\n")
-			cat(paste("abund_data have", ncol(self$abund_data), "columns: ", paste0(colnames(self$abund_data), collapse = ", "), "\n"))
-			cat(paste("abund_data have", nrow(self$abund_data), "rows\n"))
-			if(!is.null(self$use_taxanames)){
-				if(length(self$use_taxanames) > 20){
-					cat(paste("Filtered taxa: ", length(self$use_taxanames), "\n"))
+			cat(paste("data_abund have", ncol(self$data_abund), "columns: ", paste0(colnames(self$data_abund), collapse = ", "), "\n"))
+			cat(paste("data_abund have", nrow(self$data_abund), "rows\n"))
+			if(!is.null(self$data_taxanames)){
+				if(length(self$data_taxanames) > 20){
+					cat(paste("Filtered taxa: ", length(self$data_taxanames), "\n"))
 				}else{
-					cat(paste("Filtered taxa names: ", paste0(self$use_taxanames, collapse = ", "), "\n"))
+					cat(paste("Filtered taxa names: ", paste0(self$data_taxanames, collapse = ", "), "\n"))
 				}
 			}
 			invisible(self)
