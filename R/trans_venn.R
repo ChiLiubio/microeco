@@ -14,7 +14,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' 	 NULL: no additional percentage.
 		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
 		#' Features must be rows.
-		#' @return res_content and res_summary_table stored in trans_venn object.
+		#' @return data_details and data_summary stored in trans_venn object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -81,15 +81,14 @@ trans_venn <- R6Class(classname = "trans_venn",
 				c(x, rep("", fill_length))
 			})
 			venn_table <- as.data.frame(t(do.call(rbind, venn_table)))
-			self$res_summary_table <- venn_count_abund
-			self$res_content <- venn_table
+			self$data_summary <- venn_count_abund
+			self$data_details <- venn_table
 			self$colnumber <- colnumber
 			self$res_names <- res_names
 			self$ratio <- ratio
 			self$otu_table <- abund
-			message('The names is stored in object$res_names ...')
-			message('The details of each venn part is stored in object$res_content ...')
-			message('The summary table used for plot is stored in object$res_summary_table ...')
+			message('The details of each venn part is stored in object$data_details ...')
+			message('The venn summary table used for plot is stored in object$data_summary ...')
 		},
 		#' @description
 		#' Plot venn diagram.
@@ -147,7 +146,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			ratio <- self$ratio
 			res_names <- self$res_names
 			switch_num <- colnumber-1
-			summary_table <- self$res_summary_table
+			summary_table <- self$data_summary
 			
 			# text position in venn
 			if(is.null(text_name_position)){
@@ -341,7 +340,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' }
 		trans_comm = function(use_frequency = TRUE){
 			otudata <- self$otu_table
-			venn_table <- self$res_content
+			venn_table <- self$data_details
 			sampledata <- data.frame(SampleID = colnames(venn_table), Group = colnames(venn_table)) %>% 'rownames<-'(colnames(venn_table))
 			taxdata <- self$tax_table
 			sum_table <- data.frame(apply(otudata, 1, sum))
@@ -364,7 +363,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @description
 		#' Print the trans_venn object.
 		print = function() {
-			print(self$res_summary_table)
+			print(self$data_summary)
 		}
 		),
 	private = list(

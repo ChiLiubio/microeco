@@ -74,7 +74,7 @@ Features must be rows.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_content and res_summary_table stored in trans_venn object.
+data_details and data_summary stored in trans_venn object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
