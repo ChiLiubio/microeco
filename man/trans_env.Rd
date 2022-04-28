@@ -28,6 +28,14 @@ t1$cal_diff(group = "Group", method = "anova")
 }
 
 ## ------------------------------------------------
+## Method `trans_env$cal_autocor`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_autocor(method = "GGally")
+}
+
+## ------------------------------------------------
 ## Method `trans_env$cal_ordination`
 ## ------------------------------------------------
 
@@ -105,6 +113,7 @@ t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
 \itemize{
 \item \href{#method-new}{\code{trans_env$new()}}
 \item \href{#method-cal_diff}{\code{trans_env$cal_diff()}}
+\item \href{#method-cal_autocor}{\code{trans_env$cal_autocor()}}
 \item \href{#method-cal_ordination}{\code{trans_env$cal_ordination()}}
 \item \href{#method-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
 \item \href{#method-trans_ordination}{\code{trans_env$trans_ordination()}}
@@ -215,6 +224,36 @@ res_diff in object. A data.frame generally. A list for anova when anova_set is a
 t1$cal_diff(group = "Group", method = "KW")
 t1$cal_diff(group = "Group", method = "KW_dunn")
 t1$cal_diff(group = "Group", method = "anova")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_autocor"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_autocor}{}}}
+\subsection{Method \code{cal_autocor()}}{
+Calculate the autocorrelations among environmental variables and plot the result.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_autocor(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{default parameters passed to GGally::ggpairs.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggmatrix.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_autocor(method = "GGally")
 }
 }
 \if{html}{\out{</div>}}

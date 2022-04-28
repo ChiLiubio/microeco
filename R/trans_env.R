@@ -129,6 +129,22 @@ trans_env <- R6Class(classname = "trans_env",
 			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
+		#' Calculate the autocorrelations among environmental variables and plot the result.
+		#'
+		#' @param ... default parameters passed to GGally::ggpairs.
+		#' @return ggmatrix.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_autocor(method = "GGally")
+		#' }
+		cal_autocor = function(...){
+			if(!requireNamespace("GGally", quietly = TRUE)){
+				stop("Please first install GGally with the command: install.packages('GGally') !")
+			}
+			g <- GGally::ggpairs(self$data_env, ...)
+			g
+		},
+		#' @description
 		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 		#'
 		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
