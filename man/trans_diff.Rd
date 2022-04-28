@@ -195,7 +195,7 @@ Plotting the abundance of differential taxa.
 
 \item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
 
-\item{\code{color_values}}{colors for presentation.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.}
 
 \item{\code{plot1_bar_color}}{default "grey30"; the color for the plot 1.}
 

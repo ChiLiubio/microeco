@@ -448,7 +448,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param method default NULL; "rf" or "lefse"; automatically check the method in the result.
 		#' @param only_abund_plot default TRUE; if true, return only abundance plot; if false, return both indicator plot and abundance plot
 		#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
-		#' @param color_values colors for presentation.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.
 		#' @param plot1_bar_color default "grey30"; the color for the plot 1.
 		#' @param plot2_sig_color default "red"; the color for the significance in plot 2.
 		#' @param plot2_sig_size default 1.5; the size for the significance in plot 2.

@@ -50,20 +50,20 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			if(!is.null(dataset)){
-				dataset1 <- clone(dataset)
+				use_dataset <- clone(dataset)
 				if(!is.null(env_data)){
-					inter_sum <- sum(rownames(dataset1$sample_table) %in% rownames(env_data))
+					inter_sum <- sum(rownames(use_dataset$sample_table) %in% rownames(env_data))
 					if(inter_sum == 0){
 						stop("No sample names of sample_table found in env_data! Please check the names of env_data!")
 					}
-					if(inter_sum < nrow(dataset1$sample_table)){
-						message(nrow(dataset1$sample_table) - inter_sum, " sample(s) not found in env_data and removed!")
-						dataset1$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
-						dataset1$tidy_dataset(main_data = FALSE)
+					if(inter_sum < nrow(use_dataset$sample_table)){
+						message(nrow(use_dataset$sample_table) - inter_sum, " sample(s) not found in env_data and removed!")
+						use_dataset$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
+						use_dataset$tidy_dataset(main_data = FALSE)
 					}
-					env_data %<>% .[rownames(dataset1$sample_table), , drop = FALSE]
+					env_data %<>% .[rownames(use_dataset$sample_table), , drop = FALSE]
 				}
-				self$dataset <- dataset1
+				self$dataset <- use_dataset
 			}else{
 				self$dataset <- NULL
 			}
@@ -131,17 +131,42 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Calculate the autocorrelations among environmental variables and plot the result.
 		#'
+		#' @param group default NULL; a colname of sample_table; used to perform calculations for different groups.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.
+		#' @param alpha default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.
 		#' @param ... default parameters passed to GGally::ggpairs.
 		#' @return ggmatrix.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_autocor(method = "GGally")
 		#' }
-		cal_autocor = function(...){
+		cal_autocor = function(group = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.8, ...){
 			if(!requireNamespace("GGally", quietly = TRUE)){
 				stop("Please first install GGally with the command: install.packages('GGally') !")
 			}
-			g <- GGally::ggpairs(self$data_env, ...)
+			if(is.null(self$data_env)){
+				stop("The data_env is NULL! Please check the data input when creating the object !")
+			}else{
+				env_data <- self$data_env
+			}
+			if(is.null(group)){
+				g <- GGally::ggpairs(env_data, ...)
+			}else{
+				sample_table <- self$dataset$sample_table
+				if(! group %in% colnames(sample_table)){
+					stop("Please provide a correct group name!")
+				}
+				merge_data <- cbind.data.frame(sample_table[, group, drop = FALSE], env_data[rownames(sample_table), ])
+				g <- GGally::ggpairs(merge_data, aes_string(color = group, alpha = alpha),  ...)
+				# Loop through each plot changing relevant scales 
+				for(i in 1:g$nrow){
+					for(j in 1:g$ncol){
+						g[i, j] <- g[i, j] + 
+							scale_fill_manual(values = color_values) +
+							scale_color_manual(values = color_values)
+					}
+				}
+			}
 			g
 		},
 		#' @description

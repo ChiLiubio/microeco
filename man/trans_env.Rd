@@ -237,12 +237,23 @@ t1$cal_diff(group = "Group", method = "anova")
 \subsection{Method \code{cal_autocor()}}{
 Calculate the autocorrelations among environmental variables and plot the result.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_autocor(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_autocor(
+  group = NULL,
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  alpha = 0.8,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{group}}{default NULL; a colname of sample_table; used to perform calculations for different groups.}
+
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.}
+
+\item{\code{alpha}}{default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.}
+
 \item{\code{...}}{default parameters passed to GGally::ggpairs.}
 }
 \if{html}{\out{</div>}}
