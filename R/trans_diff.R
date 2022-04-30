@@ -464,6 +464,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				message('The group information is stored in object$res_mseq_group_matrix ...')
 			}
 			self$method <- method
+			self$taxa_level <- taxa_level
 		},
 		#' @description
 		#' Plotting the abundance of differential taxa.
@@ -668,37 +669,38 @@ trans_diff <- R6Class(classname = "trans_diff",
 			p
 		},
 		#' @description
-		#' Plot the cladogram for LEfSe result similar with the python version. Codes are modified from microbiomeMarker 
+		#' Plot the cladogram using taxa with significant difference.
 		#'
-		#' @param color default RColorBrewer::brewer.pal(8, "Dark2"); color used in the plot.
-		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance 
-		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance
-		#' @param use_feature_num default NULL; integer; The feature number used in the plot; select the features according to the LDA score
+		#' @param color default RColorBrewer::brewer.pal(8, "Dark2"); color palette used in the plot.
+		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .
+		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance.
+		#' @param use_feature_num default NULL; integer; The feature number used in the plot; 
+		#'	  select the features according to the LDA score (method = "lefse") or MeanDecreaseGini (method = "rf") from high to low.
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
 		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
-		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest
-		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters
-		#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels
-		#' @param sep default "|"; the seperate character in the taxonomic information
-		#' @param branch_size default 0.2; numberic, size of branch
-		#' @param alpha default 0.2; shading of the color
+		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest.
+		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters.
+		#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels.
+		#' @param sep default "|"; the seperate character in the taxonomic information.
+		#' @param branch_size default 0.2; numberic, size of branch.
+		#' @param alpha default 0.2; shading of the color.
 		#' @param clade_label_size default 2; basic size for the clade label; please also see clade_label_size_add and clade_label_size_log
 		#' @param clade_label_size_add default 5; added basic size for the clade label; see the formula in clade_label_size_log parameter.
 		#' @param clade_label_size_log default exp(1); the base of log function for added size of the clade label; the size formula: 
 		#'   clade_label_size + log(clade_label_level + clade_label_size_add, base = clade_label_size_log); 
 		#'   so use clade_label_size_log, clade_label_size_add and clade_label_size
 		#'   can totally control the label size for different taxonomic levels.
-		#' @param node_size_scale default 1; scale for the node size
-		#' @param node_size_offset default 1; offset for the node size
-		#' @param annotation_shape default 22; shape used in the annotation legend
-		#' @param annotation_shape_size default 5; size used in the annotation legend
+		#' @param node_size_scale default 1; scale for the node size.
+		#' @param node_size_offset default 1; offset for the node size.
+		#' @param annotation_shape default 22; shape used in the annotation legend.
+		#' @param annotation_shape_size default 5; size used in the annotation legend.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_lefse_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
+		#' t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 		#' }
-		plot_lefse_cladogram = function(
+		plot_diff_cladogram = function(
 			color = RColorBrewer::brewer.pal(8, "Dark2"),
 			use_taxa_num = 200,
 			filter_taxa = NULL,
@@ -718,9 +720,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 			annotation_shape = 22,
 			annotation_shape_size = 5
 			){
+			# developed based on microbiomeMarker 
 			abund_table <- self$abund_table
 			marker_table <- self$res_diff %>% dropallfactors
-
+			method <- self$method
+			
+			if(! method %in% c("lefse", "rf")){
+				stop("This function currently can only be used for method = 'lefse' or 'rf' !")
+			}
+			if(self$taxa_level != "all"){
+				stop("This function is only useful when taxa_level = 'all' !")
+			}
 			if(!is.null(use_feature_num)){
 				marker_table %<>% .[1:use_feature_num, ]
 			}

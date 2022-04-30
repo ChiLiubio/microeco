@@ -40,11 +40,11 @@ t1$plot_diff_bar(use_number = 1:20)
 }
 
 ## ------------------------------------------------
-## Method `trans_diff$plot_lefse_cladogram`
+## Method `trans_diff$plot_diff_cladogram`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_lefse_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
+t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
 
 ## ------------------------------------------------
@@ -62,7 +62,7 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \item \href{#method-new}{\code{trans_diff$new()}}
 \item \href{#method-plot_diff_abund}{\code{trans_diff$plot_diff_abund()}}
 \item \href{#method-plot_diff_bar}{\code{trans_diff$plot_diff_bar()}}
-\item \href{#method-plot_lefse_cladogram}{\code{trans_diff$plot_lefse_cladogram()}}
+\item \href{#method-plot_diff_cladogram}{\code{trans_diff$plot_diff_cladogram()}}
 \item \href{#method-plot_metastat}{\code{trans_diff$plot_metastat()}}
 \item \href{#method-clone}{\code{trans_diff$clone()}}
 }
@@ -276,12 +276,12 @@ t1$plot_diff_bar(use_number = 1:20)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_lefse_cladogram"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_lefse_cladogram}{}}}
-\subsection{Method \code{plot_lefse_cladogram()}}{
-Plot the cladogram for LEfSe result similar with the python version. Codes are modified from microbiomeMarker
+\if{html}{\out{<a id="method-plot_diff_cladogram"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_diff_cladogram}{}}}
+\subsection{Method \code{plot_diff_cladogram()}}{
+Plot the cladogram using taxa with significant difference.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_lefse_cladogram(
+\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_cladogram(
   color = RColorBrewer::brewer.pal(8, "Dark2"),
   use_taxa_num = 200,
   filter_taxa = NULL,
@@ -306,29 +306,30 @@ Plot the cladogram for LEfSe result similar with the python version. Codes are m
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color}}{default RColorBrewer::brewer.pal(8, "Dark2"); color used in the plot.}
+\item{\code{color}}{default RColorBrewer::brewer.pal(8, "Dark2"); color palette used in the plot.}
 
-\item{\code{use_taxa_num}}{default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance}
+\item{\code{use_taxa_num}}{default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .}
 
-\item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance}
+\item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance.}
 
-\item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; select the features according to the LDA score}
+\item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; 
+select the features according to the LDA score or MeanDecreaseGini from high to low.}
 
 \item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
 If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 If provided, this parameter can overwrite the levels in the group of sample_table.}
 
-\item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest}
+\item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest.}
 
-\item{\code{select_show_labels}}{default NULL; character vector; The features to show in the plot with full label names, not the letters}
+\item{\code{select_show_labels}}{default NULL; character vector; The features to show in the plot with full label names, not the letters.}
 
-\item{\code{only_select_show}}{default FALSE; whether only use the the select features in the parameter select_show_labels}
+\item{\code{only_select_show}}{default FALSE; whether only use the the select features in the parameter select_show_labels.}
 
-\item{\code{sep}}{default "|"; the seperate character in the taxonomic information}
+\item{\code{sep}}{default "|"; the seperate character in the taxonomic information.}
 
-\item{\code{branch_size}}{default 0.2; numberic, size of branch}
+\item{\code{branch_size}}{default 0.2; numberic, size of branch.}
 
-\item{\code{alpha}}{default 0.2; shading of the color}
+\item{\code{alpha}}{default 0.2; shading of the color.}
 
 \item{\code{clade_label_size}}{default 2; basic size for the clade label; please also see clade_label_size_add and clade_label_size_log}
 
@@ -339,13 +340,13 @@ clade_label_size + log(clade_label_level + clade_label_size_add, base = clade_la
 so use clade_label_size_log, clade_label_size_add and clade_label_size
 can totally control the label size for different taxonomic levels.}
 
-\item{\code{node_size_scale}}{default 1; scale for the node size}
+\item{\code{node_size_scale}}{default 1; scale for the node size.}
 
-\item{\code{node_size_offset}}{default 1; offset for the node size}
+\item{\code{node_size_offset}}{default 1; offset for the node size.}
 
-\item{\code{annotation_shape}}{default 22; shape used in the annotation legend}
+\item{\code{annotation_shape}}{default 22; shape used in the annotation legend.}
 
-\item{\code{annotation_shape_size}}{default 5; size used in the annotation legend}
+\item{\code{annotation_shape_size}}{default 5; size used in the annotation legend.}
 }
 \if{html}{\out{</div>}}
 }
@@ -355,7 +356,7 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_lefse_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
+t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
 }
 \if{html}{\out{</div>}}
