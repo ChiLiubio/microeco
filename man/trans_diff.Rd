@@ -4,10 +4,11 @@
 \alias{trans_diff}
 \title{Create trans_diff object for the differential analysis on the taxonomic abundance.}
 \description{
-This class is a wrapper for a series of differential abundance test and indicator analysis methods, including non-parametric Kruskal-Wallis Rank Sum Test,
-Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
- random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352> and
-the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>.
+This class is a wrapper for a series of differential abundance test and indicator analysis methods, including 
+ LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
+ random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
+ the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, non-parametric Kruskal-Wallis Rank Sum Test,
+ Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test and anova.
 
 Authors: Chi Liu, Yang Cao, Chenhao Li
 }
@@ -31,11 +32,11 @@ t1$plot_diff_abund(use_number = 1:10)
 }
 
 ## ------------------------------------------------
-## Method `trans_diff$plot_lefse_bar`
+## Method `trans_diff$plot_diff_bar`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_lefse_bar(LDA_score = 4)
+t1$plot_diff_bar(use_number = 1:20)
 }
 
 ## ------------------------------------------------
@@ -60,10 +61,9 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \itemize{
 \item \href{#method-new}{\code{trans_diff$new()}}
 \item \href{#method-plot_diff_abund}{\code{trans_diff$plot_diff_abund()}}
-\item \href{#method-plot_lefse_bar}{\code{trans_diff$plot_lefse_bar()}}
+\item \href{#method-plot_diff_bar}{\code{trans_diff$plot_diff_bar()}}
 \item \href{#method-plot_lefse_cladogram}{\code{trans_diff$plot_lefse_cladogram()}}
 \item \href{#method-plot_metastat}{\code{trans_diff$plot_metastat()}}
-\item \href{#method-print}{\code{trans_diff$print()}}
 \item \href{#method-clone}{\code{trans_diff$clone()}}
 }
 }
@@ -79,8 +79,9 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
-  lefse_subgroup = NULL,
   alpha = 0.05,
+  p_adjust_method = "fdr",
+  lefse_subgroup = NULL,
   lefse_min_subsam = 10,
   lefse_norm = 1e+06,
   nresam = 0.6667,
@@ -88,7 +89,6 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
   rf_ntree = 1000,
   metastat_taxa_level = "Genus",
   group_choose_paired = NULL,
-  mseq_adjustMethod = "fdr",
   mseq_count = 1,
   ...
 )}\if{html}{\out{</div>}}
@@ -118,28 +118,27 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "metastat" or "mseq";
 For method = "metastat", please see metastat_taxa_level parameter. 'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.}
 
-\item{\code{filter_thres}}{default 0; the relative abundance threshold used for method = "lefse" or "rf".}
+\item{\code{filter_thres}}{default 0; the relative abundance threshold used for method != "metastat" or "mseq".}
+
+\item{\code{alpha}}{default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.}
+
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options.}
 
 \item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
-
-\item{\code{alpha}}{default .05; significance threshold.}
 
 \item{\code{lefse_min_subsam}}{default 10; sample numbers required in the subgroup test.}
 
 \item{\code{lefse_norm}}{default 1000000; scale value in lefse.}
 
-\item{\code{nresam}}{default .6667; sample number ratio used in each bootstrap or LEfSe or random forest.}
+\item{\code{nresam}}{default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".}
 
-\item{\code{boots}}{default 30; bootstrap test number for lefse or rf.}
+\item{\code{boots}}{default 30; bootstrap test number for method = "lefse" or "rf".}
 
-\item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package.}
+\item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package when method = "rf".}
 
 \item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.}
 
-\item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing, only used for metastat or mseq.}
-
-\item{\code{mseq_adjustMethod}}{default "fdr"; Method to adjust p-values by. Default is "fdr". 
-Options include "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".}
+\item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "mseq".}
 
 \item{\code{mseq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.}
 
@@ -169,19 +168,13 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 Plotting the abundance of differential taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_abund(
-  method = NULL,
-  only_abund_plot = TRUE,
   use_number = 1:10,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  plot1_bar_color = "grey50",
-  plot2_sig_color = "red",
-  plot2_sig_size = 1.2,
-  axis_text_y = 10,
+  text_y_size = 10,
   simplify_names = TRUE,
   keep_prefix = TRUE,
   group_order = NULL,
-  plot2_barwidth = 0.9,
-  add_significance = TRUE,
+  barwidth = 0.9,
   use_se = TRUE
 )}\if{html}{\out{</div>}}
 }
@@ -189,21 +182,11 @@ Plotting the abundance of differential taxa.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default NULL; "rf" or "lefse"; automatically check the method in the result.}
-
-\item{\code{only_abund_plot}}{default TRUE; if true, return only abundance plot; if false, return both indicator plot and abundance plot}
-
-\item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
+\item{\code{use_number}}{default 1:10; numeric vector; the taxa numbers (1:n) used in the plot.}
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.}
 
-\item{\code{plot1_bar_color}}{default "grey30"; the color for the plot 1.}
-
-\item{\code{plot2_sig_color}}{default "red"; the color for the significance in plot 2.}
-
-\item{\code{plot2_sig_size}}{default 1.5; the size for the significance in plot 2.}
-
-\item{\code{axis_text_y}}{default 12; the size for the y axis text.}
+\item{\code{text_y_size}}{default 10; the size for the y axis text.}
 
 \item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
 
@@ -211,11 +194,9 @@ Plotting the abundance of differential taxa.
 
 \item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
 
-\item{\code{plot2_barwidth}}{default .9; the bar width in plot 2.}
+\item{\code{barwidth}}{default .9; the bar width in plot.}
 
-\item{\code{add_significance}}{default TRUE; whether add the significance asterisk; only available when only_abund_plot FALSE.}
-
-\item{\code{use_se}}{default TRUE; whether use SE in plot 2, if FALSE, use SD.}
+\item{\code{use_se}}{default TRUE; whether use SE in plot, if FALSE, use SD.}
 }
 \if{html}{\out{</div>}}
 }
@@ -234,15 +215,15 @@ t1$plot_diff_abund(use_number = 1:10)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_lefse_bar"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_lefse_bar}{}}}
-\subsection{Method \code{plot_lefse_bar()}}{
+\if{html}{\out{<a id="method-plot_diff_bar"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_diff_bar}{}}}
+\subsection{Method \code{plot_diff_bar()}}{
 Bar plot for LDA score.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_lefse_bar(
-  use_number = 1:10,
+\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_bar(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  LDA_score = NULL,
+  use_number = 1:10,
+  threshold = NULL,
   simplify_names = TRUE,
   keep_prefix = TRUE,
   group_order = NULL,
@@ -255,11 +236,11 @@ Bar plot for LDA score.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.}
 
-\item{\code{color_values}}{colors for presentation.}
+\item{\code{use_number}}{default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.}
 
-\item{\code{LDA_score}}{default NULL; numeric value as the threshold, such as 2, limited with use_number.}
+\item{\code{threshold}}{default NULL; threshold value for selecting taxa, such as 3 for LDA score of LEfSe.}
 
 \item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
 
@@ -281,7 +262,7 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_lefse_bar(LDA_score = 4)
+t1$plot_diff_bar(use_number = 1:20)
 }
 }
 \if{html}{\out{</div>}}
@@ -414,16 +395,6 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 }
 \if{html}{\out{</div>}}
 
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
-\subsection{Method \code{print()}}{
-Print the trans_diff object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_diff$print()}\if{html}{\out{</div>}}
 }
 
 }
