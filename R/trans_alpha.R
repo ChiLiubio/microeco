@@ -72,6 +72,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
 		#'   agricolae::duncan.test (method = "anova").
 		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+		#'   In the data frame, Group column means that the group is the most enriched in this comparison;
+		#'   For non-parametric methods, this group has the highest median value; 
+		#'   For t.test, this group has the highest mean value.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(method = "KW")
@@ -100,6 +103,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				p_value <- c()
 				measure_use <- c()
 				test_method <- c()
+				max_group <- c()
 				for(k in measure){
 					div_table <- alpha_data[alpha_data$Measure == k, c(group, "Value")]
 					groupvec <- as.character(div_table[, group])
@@ -114,12 +118,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							if(i == 2){
 								if(method == "t.test"){
 									res1 <- t.test(formu, data = table_compare, ...)
+									max_group_select <- tapply(table_compare$Value, table_compare[, group], mean) %>% {.[which.max(.)]} %>% names
 								}else{
 									if(method == "wilcox"){
 										res1 <- wilcox.test(formu, data = table_compare, ...)
+										max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
 									}else{
 										if(method == "KW" & length(use_comp_group_num) == 1){
 											res1 <- kruskal.test(formu, data = table_compare, ...)
+											max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
 										}else{
 											next
 										}
@@ -128,6 +135,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							}else{
 								if(method == "KW"){
 									res1 <- kruskal.test(formu, data = table_compare, ...)
+									max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
 								}else{
 									next
 								}
@@ -137,12 +145,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							p_value %<>% c(., res2)
 							measure_use %<>% c(., k)
 							test_method %<>% c(., use_method)
+							max_group %<>% c(., max_group_select)
 						}
 					}
 				}
 				p_value_adjust <- p.adjust(p_value, method = p_adjust_method)
-				compare_result <- data.frame(comnames, measure_use, test_method, p_value, p_value_adjust)
-				colnames(compare_result) <- c("Comparison", "Measure", "Test_method", "P.unadj", "P.adj")
+				compare_result <- data.frame(comnames, measure_use, test_method, max_group, p_value, p_value_adjust)
+				colnames(compare_result) <- c("Comparison", "Measure", "Test_method", "Group", "P.unadj", "P.adj")
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 			}
 			if(method == "KW_dunn"){
@@ -157,7 +166,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
 					formu <- reformulate(group, "Value")
 					dunnTest_raw <- FSA::dunnTest(formu, data = table_compare, ...)
-					dunnTest_res <- data.frame(Measure = k, Test_method = use_method, dunnTest_raw$res)
+					max_group <- lapply(dunnTest_raw$res$Comparison, function(x){
+						group_select <- unlist(strsplit(x, split = " - "))
+						table_compare_select <- table_compare[as.character(table_compare[, group]) %in% group_select, ]
+						tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
+					}) %>% unlist
+					dunnTest_res <- data.frame(Measure = k, Test_method = use_method, Group = max_group, dunnTest_raw$res)
 					compare_result %<>% rbind(., dunnTest_res)
 				}
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))

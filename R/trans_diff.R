@@ -405,6 +405,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
 				colnames(output)[1:2] <- c("Comparison", "Taxa")
+				max_group <- lapply(seq_len(nrow(output)), function(x){
+					group_select <- unlist(strsplit(output[x, "Comparison"], split = " - "))
+					ifelse(output[x, "mean(group1)"] > output[x, "mean(group2)"], group_select[1], group_select[2])
+				}) %>% unlist
+				output <- data.frame(output, Group = max_group)
 				self$res_diff <- output
 				message('The metastat result is stored in object$res_diff ...')
 			}
@@ -456,10 +461,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output <- rbind.data.frame(output, res)
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
-				self$res_mseq <- output
-				message('The result is stored in object$res_mseq ...')
-				self$res_mseq_group_matrix <- all_name
-				message('The group information is stored in object$res_mseq_group_matrix ...')
+				colnames(output)[1:2] <- c("Comparison", "Taxa")
+				self$res_diff <- output
+				message('The differential test result is stored in object$res_diff ...')
 			}
 			self$method <- method
 			self$taxa_level <- taxa_level
@@ -502,17 +506,22 @@ trans_diff <- R6Class(classname = "trans_diff",
 			diff_data <- self$res_diff
 
 			if(method == "anova"){
-				stop("This function can not be applied to 'anova' method !")
+				stop("This function can not be applied to 'anova' method currently!")
 			}else{
-				if(method == "metastat"){
-					message('Reorder taxa according to qvalue in res_diff from low to high ...')
-					diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
-					diff_data %<>% .[.$qvalue < 0.05, ]
+				if(method == "mseq"){
+					stop("This function can not be applied to 'mseq' method currently!")
 				}else{
-					if(! method %in% c("lefse", "rf", "mseq")){
-						message('Reorder taxa according to P.adj in res_diff from low to high ...')
-						diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
-						diff_data %<>% .[.$P.adj < 0.05, ]
+					if(method == "metastat"){
+						message('Reorder taxa according to qvalue in res_diff from low to high ...')
+						diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
+						diff_data %<>% .[.$qvalue < 0.05, ]
+					}else{
+						# lefse and rf are ordered
+						if(! method %in% c("lefse", "rf")){
+							message('Reorder taxa according to P.adj in res_diff from low to high ...')
+							diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
+							diff_data %<>% .[.$P.adj < 0.05, ]
+						}
 					}
 				}
 			}
@@ -588,6 +597,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.
 		#' @param use_number default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.
 		#' @param threshold default NULL; threshold value for selecting taxa, such as 3 for LDA score of LEfSe.
+		#' @param select_group default NULL; this is used to select the paired group when multiple comparisions are generated;
+		#'   The input select_group must be one of object$res_diff$Comparison.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
@@ -605,6 +616,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			use_number = 1:10,
 			threshold = NULL,
+			select_group = NULL,
 			simplify_names = TRUE,
 			keep_prefix = TRUE,
 			group_order = NULL,
@@ -622,10 +634,41 @@ trans_diff <- R6Class(classname = "trans_diff",
 					colnames(use_data)[colnames(use_data) == "MeanDecreaseGini"] <- "Value"
 					ylab_title <- "MeanDecreaseGini"
 				}else{
-					stop("This function can only be used to 'lefse' or 'rf' currently!")
+					if(method == "metastat"){
+						use_data %<>% .[.$qvalue < 0.05, ]
+						use_data$Value <- 1 - use_data$qvalue
+						ylab_title <- "1 - qvalue"
+					}else{
+						if(method %in% c("KW", "KW_dunn", "wilcox", "t.test")){
+							use_data %<>% .[.$P.adj < 0.05, ]
+							use_data$Value <- 1 - use_data$P.adj
+							ylab_title <- "1 - P.adjust"
+						}else{
+							stop("This function can not be used to ", method," currently!")
+						}
+					}
 				}
 			}
-			
+			if(!method %in% c("lefse", "rf")){
+				if(length(unique(use_data$Comparison)) > 1){
+					# make sure the Group not replicated for multiple comparisions
+					if(is.null(select_group)){
+						message('Multiple comparisions found. But select_group parameter not provided. Select the first group pair to show ...')
+						select_group <- unique(use_data$Comparison)[1]
+					}else{
+						if(length(select_group) > 1){
+							stop("The select_group parameter should only have one element! Please check the input!")
+						}
+						if(! select_group %in% use_data$Comparison){
+							stop("The select_group parameter must be one of elements of object$res_diff$Comparison!")
+						}
+					}
+					use_data %<>% .[.$Comparison %in% select_group, ]
+				}
+			}
+			if(nrow(use_data) == 0){
+				stop("No significant taxa can be used to show!")
+			}
 			if(simplify_names == T){
 				use_data$Taxa %<>% gsub(".*\\|", "", .)
 			}
@@ -646,7 +689,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			use_data %<>% .[sel_num, ]
 			if(is.null(group_order)){
-				if(! is.null(self$group_order)){
+				if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
 					use_data$Group %<>% factor(., levels = self$group_order)
 				}else{
 					use_data$Group %<>% as.character %>% as.factor

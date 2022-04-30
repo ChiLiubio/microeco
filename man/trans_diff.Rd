@@ -219,6 +219,7 @@ Bar plot for LDA score.
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   use_number = 1:10,
   threshold = NULL,
+  select_group = NULL,
   simplify_names = TRUE,
   keep_prefix = TRUE,
   group_order = NULL,
@@ -236,6 +237,9 @@ Bar plot for LDA score.
 \item{\code{use_number}}{default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.}
 
 \item{\code{threshold}}{default NULL; threshold value for selecting taxa, such as 3 for LDA score of LEfSe.}
+
+\item{\code{select_group}}{default NULL; this is used to select the paired group when multiple comparisions are generated;
+The input select_group must be one of object$res_diff$Comparison.}
 
 \item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
 
