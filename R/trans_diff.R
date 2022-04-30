@@ -28,8 +28,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of microtable$sample_table.
 		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
-		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "metastat" or "mseq";
-		#' 	  For method = "metastat", please see metastat_taxa_level parameter. 'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.
+		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "mseq";
+		#' 	  'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.
 		#' @param filter_thres default 0; the relative abundance threshold used for method != "metastat" or "mseq". 
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options.
@@ -39,7 +39,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param nresam default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".
 		#' @param boots default 30; bootstrap test number for method = "lefse" or "rf".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package when method = "rf".
-		#' @param metastat_taxa_level default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "mseq".
 		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
 		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova".
@@ -63,7 +62,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 			nresam = 0.6667,
 			boots = 30,
 			rf_ntree = 1000,
-			metastat_taxa_level = "Genus",
 			group_choose_paired = NULL,
 			mseq_count = 1,
 			...
@@ -90,7 +88,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				sampleinfo[, group] %<>% as.character
 			}
 			
-			if(!grepl("metastat|mseq", method, ignore.case = TRUE)){
+			if(!grepl("mseq", method, ignore.case = TRUE)){
 				if(is.null(dataset$taxa_abund)){
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 				}
@@ -346,7 +344,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- res1
 				message('The lefse result is stored in object$res_diff ...')
 			}
-			if(! grepl("metastat|mseq", method, ignore.case = TRUE)){
+			if(! grepl("mseq", method, ignore.case = TRUE)){
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
 				}else{
@@ -372,9 +370,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				output <- data.frame()			
 			}
 			if(grepl("metastat", method, ignore.case = TRUE)){
-				self$metastat_taxa_level <- metastat_taxa_level
+				if(!taxa_level %in% colnames(dataset$tax_table)){
+					stop("For metastat, taxa_level parameter must be one of column names of dataset$tax_table!")
+				}
 				# transform data
-				ranknumber <- which(colnames(dataset$tax_table) %in% metastat_taxa_level)
+				ranknumber <- which(colnames(dataset$tax_table) %in% taxa_level)
 				abund <- dataset$otu_table
 				tax <- dataset$tax_table[, 1:ranknumber, drop=FALSE]
 				merged_taxonomy <- apply(tax, 1, paste, collapse="|")
@@ -392,23 +392,21 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 				message("Total ", ncol(all_name), " paired group for calculation ...")
 				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
 					use_data <- new_abund[ , unlist(lapply(as.character(all_name[,i]), function(x) which(as.character(sampleinfo[, group]) %in% x)))]
 					use_data %<>% .[!grepl("__$", rownames(.)), ]
 					use_data <- use_data[apply(use_data, 1, sum) != 0, ]
-
 					g <- sum(as.character(sampleinfo[, group]) == as.character(all_name[1, i])) + 1
 					# calculate metastat
 					res <- private$calculate_metastat(inputdata = use_data, g = g)
-					add_name <- paste0(as.character(all_name[, i]), collapse = " vs ") %>% rep(., nrow(res))
+					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
 					res <- cbind.data.frame(compare = add_name, res)
 					output <- rbind.data.frame(output, res)
 				}
 				output %<>% dropallfactors(unfac2num = TRUE)
-				self$res_metastat <- output
-				message('The metastat result is stored in object$res_metastat ...')
-				self$res_metastat_group_matrix <- all_name
-				message('The metastat group information is stored in object$res_metastat_group_matrix ...')
+				colnames(output)[1:2] <- c("Comparison", "Taxa")
+				self$res_diff <- output
+				message('The metastat result is stored in object$res_diff ...')
 			}
 			if(grepl("mseq", method, ignore.case = TRUE)){
 				if(!require("metagenomeSeq")){
@@ -416,7 +414,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				message("Total ", ncol(all_name), " paired group for calculation ...")
 				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " vs "), " ...\n"))
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
 					use_dataset <- clone(dataset)
 					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
 					use_dataset$tidy_dataset()
@@ -453,7 +451,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					colnames(res) <- c(colnames(tb)[1:2], "pvalues", "adjPvalues")
 					res <- cbind.data.frame(feature = rownames(res), res)
 					rownames(res) <- NULL
-					add_name <- paste0(as.character(all_name[, i]), collapse = " vs ") %>% rep(., nrow(res))
+					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
 					res <- cbind.data.frame(compare = add_name, res)
 					output <- rbind.data.frame(output, res)
 				}
@@ -472,14 +470,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param use_number default 1:20; numeric vector; the taxa numbers (1:n) used in the plot; 
 		#'   If the n is larger than the number of total significant taxa, automatically use all the taxa.		
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.
-		#' @param text_y_size default 10; the size for the y axis text.
+		#' @param select_group default NULL; this is used to select the paired groups. 
+		#'   This parameter is especially useful when the comparision methods is applied to paired groups;
+		#'   The input select_group must be one of object$res_diff$Comparison.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
 		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
-		#' @param barwidth default .9; the bar width in plot.
+		#' @param barwidth default 0.9; the bar width in plot.
 		#' @param use_se default TRUE; whether use SE in plot, if FALSE, use SD.
+		#' @param text_y_size default 10; the size for the y axis text.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -488,12 +489,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 		plot_diff_abund = function(
 			use_number = 1:20,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-			text_y_size = 10,
+			select_group = NULL,
 			simplify_names = TRUE,
 			keep_prefix = TRUE,
 			group_order = NULL,
-			barwidth = .9,
-			use_se = TRUE
+			barwidth = 0.9,
+			use_se = TRUE,
+			text_y_size = 10
 			){
 			abund_data <- self$res_abund
 			method <- self$method
@@ -502,11 +504,32 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(method == "anova"){
 				stop("This function can not be applied to 'anova' method !")
 			}else{
-				if(! method %in% c("lefse", "rf")){
-					diff_data <- diff_data[order(diff_data$P.adj, decreasing = FALSE), ]
+				if(method == "metastat"){
+					message('Reorder taxa according to qvalue in res_diff from low to high ...')
+					diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
+					diff_data %<>% .[.$qvalue < 0.05, ]
+				}else{
+					if(! method %in% c("lefse", "rf", "mseq")){
+						message('Reorder taxa according to P.adj in res_diff from low to high ...')
+						diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
+						diff_data %<>% .[.$P.adj < 0.05, ]
+					}
 				}
 			}
-
+			if(!is.null(select_group)){
+				if(length(select_group) > 1){
+					stop("The select_group parameter should only have one element! Please check the input!")
+				}
+				if(! select_group %in% diff_data$Comparison){
+					stop("The select_group parameter must be one of elements of object$res_diff$Comparison!")
+				}
+				diff_data %<>% .[.$Comparison %in% select_group, ]
+				select_group_split <- strsplit(select_group, split = " - ") %>% unlist
+				abund_data %<>% .[.$Group %in% select_group_split, ]
+			}
+			if(nrow(diff_data) == 0){
+				stop("No significant taxa can be used to plot the abudance!")
+			}
 			if(simplify_names == T){
 				diff_data$Taxa %<>% gsub(".*\\|", "", .)
 				abund_data$Taxa %<>% gsub(".*\\|", "", .)
@@ -523,16 +546,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_data %<>% .[.$Taxa %in% levels(diff_data$Taxa), ]
 			abund_data$Taxa %<>% factor(., levels = levels(diff_data$Taxa))
 			if(is.null(group_order)){
-				if(! is.null(self$group_order)){
-					abund_data$Group %<>% factor(., levels = self$group_order)
+				if((!is.null(self$group_order)) & (length(unique(abund_data$Group)) == length(self$group_order))){
+					abund_data$Group %<>% factor(., levels = rev(self$group_order))
 				}else{
 					abund_data$Group %<>% as.character %>% as.factor
 				}
 			}else{
-				abund_data$Group %<>% factor(., levels = group_order)
+				abund_data$Group %<>% factor(., levels = rev(group_order))
 			}
 			if(length(color_values) < length(levels(abund_data$Group))){
 				stop("Please provide color_values parameter with more colors!")
+			}else{
+				color_values %<>% .[1:length(levels(abund_data$Group))] %>% rev
 			}
 			
 			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group, group = Group)) +
@@ -549,11 +574,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 				scale_fill_manual(values = color_values) +
 				ylab("Relative abundance") +
 				theme(legend.position = "right") +
-				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.border = element_blank(), 
-					panel.background=element_rect(fill="white")) +
+				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), 
+					panel.border = element_blank(), panel.background=element_rect(fill="white")) +
 				theme(axis.title = element_text(size = 17)) +
-				# fill=guide_legend(reverse=TRUE, ncol=1),
-				guides(color = "none") + 
+				guides(fill=guide_legend(reverse = TRUE, ncol=1), color = "none") + 
 				theme(axis.title.y=element_blank(), axis.text.y = element_text(size = text_y_size, color = "black")) + 
 				theme(plot.margin = unit(c(.1, 0, .1, 0), "cm"))
 			p
@@ -914,53 +938,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 			tree <- tree + theme(legend.position = "right", legend.title = element_blank())
 			tree
 
-		},
-		#' @description
-		#' Bar plot for metastat.
-		#'
-		#' @param use_number default 1:10; vector, the taxa numbers used in the plot, 1:n.
-		#' @param color_values colors for presentation.
-		#' @param qvalue default .05; numeric value as the threshold of q value.
-		#' @param choose_group default 1; which column in res_metastat_group_matrix will be used.
-		#' @return ggplot.
-		#' @examples
-		#' \donttest{
-		#' t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
-		#' t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
-		#' }
-		plot_metastat = function(use_number = 1:10, color_values = RColorBrewer::brewer.pal(8, "Dark2"), qvalue = 0.05, choose_group = 1
-			){
-			use_data <- self$res_metastat
-			group_char <- self$res_metastat_group_matrix[, choose_group]
-			# updated, collapsed use_group
-			use_group <- paste0(as.character(group_char), collapse = " vs ")
-			use_data %<>% .[.$qvalue < qvalue & .[,1] == use_group, ]
-			use_data[,2] %<>% gsub(paste0(".*", tolower(substr(self$metastat_taxa_level, 1, 1)), "__(.*)$"), "\\1", .)
-			use_data %<>% .[.[,2] != "", ]
-			
-			if(nrow(use_data) > length(use_number)){
-				use_data %<>% .[use_number, ]
-			}
-			plot_data <- data.frame(
-				taxa = rep(use_data[,2], 2), 
-				Mean = c(use_data[,3], use_data[,6]), 
-				SE = c(use_data[,5], use_data[,8]), 
-				Group = rep(group_char, times = 1, each = nrow(use_data))
-				)
-			plot_data$taxa %<>% factor(., levels = unique(.))
-			
-			p <- ggplot(plot_data, aes(x=taxa, y=Mean, color = Group, fill = Group, group = Group)) +
-				geom_bar(stat="identity", position = position_dodge()) +
-				geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(.9), color = "black") +
-				theme_classic() +
-				scale_color_manual(values=color_values) +
-				scale_fill_manual(values=color_values) +
-				ylab("Relative abundance") +
-				theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 9), legend.position = "top") +
-				theme(axis.title = element_text(size = 15)) +
-				xlab(self$metastat_taxa_level)
-			
-			p
 		}
 		),
 	private = list(

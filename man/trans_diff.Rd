@@ -46,15 +46,6 @@ t1$plot_diff_bar(use_number = 1:20)
 \donttest{
 t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
-
-## ------------------------------------------------
-## Method `trans_diff$plot_metastat`
-## ------------------------------------------------
-
-\donttest{
-t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
-t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
-}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -63,7 +54,6 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \item \href{#method-plot_diff_abund}{\code{trans_diff$plot_diff_abund()}}
 \item \href{#method-plot_diff_bar}{\code{trans_diff$plot_diff_bar()}}
 \item \href{#method-plot_diff_cladogram}{\code{trans_diff$plot_diff_cladogram()}}
-\item \href{#method-plot_metastat}{\code{trans_diff$plot_metastat()}}
 \item \href{#method-clone}{\code{trans_diff$clone()}}
 }
 }
@@ -87,7 +77,6 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
   nresam = 0.6667,
   boots = 30,
   rf_ntree = 1000,
-  metastat_taxa_level = "Genus",
   group_choose_paired = NULL,
   mseq_count = 1,
   ...
@@ -115,8 +104,8 @@ t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of microtable$sample_table.}
 
 \item{\code{taxa_level}}{default "all"; 'all' represents using abundance data at all taxonomic ranks; 
-For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "metastat" or "mseq";
-For method = "metastat", please see metastat_taxa_level parameter. 'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.}
+For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "mseq";
+'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.}
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold used for method != "metastat" or "mseq".}
 
@@ -135,8 +124,6 @@ For method = "metastat", please see metastat_taxa_level parameter. 'mseq' method
 \item{\code{boots}}{default 30; bootstrap test number for method = "lefse" or "rf".}
 
 \item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package when method = "rf".}
-
-\item{\code{metastat_taxa_level}}{default "Genus"; taxonomic rank level used in metastat test; White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.}
 
 \item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "mseq".}
 
@@ -170,12 +157,13 @@ Plotting the abundance of differential taxa.
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_abund(
   use_number = 1:20,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  text_y_size = 10,
+  select_group = NULL,
   simplify_names = TRUE,
   keep_prefix = TRUE,
   group_order = NULL,
   barwidth = 0.9,
-  use_se = TRUE
+  use_se = TRUE,
+  text_y_size = 10
 )}\if{html}{\out{</div>}}
 }
 
@@ -187,7 +175,9 @@ If the n is larger than the number of total significant taxa, automatically use 
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.}
 
-\item{\code{text_y_size}}{default 10; the size for the y axis text.}
+\item{\code{select_group}}{default NULL; this is used to select the paired groups. 
+This parameter is especially useful when the comparision methods is applied to paired groups;
+The input select_group must be one of object$res_diff$Comparison.}
 
 \item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
 
@@ -197,9 +187,11 @@ If the n is larger than the number of total significant taxa, automatically use 
 If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 If provided, this parameter can overwrite the levels in the group of sample_table.}
 
-\item{\code{barwidth}}{default .9; the bar width in plot.}
+\item{\code{barwidth}}{default 0.9; the bar width in plot.}
 
 \item{\code{use_se}}{default TRUE; whether use SE in plot, if FALSE, use SD.}
+
+\item{\code{text_y_size}}{default 10; the size for the y axis text.}
 }
 \if{html}{\out{</div>}}
 }
@@ -313,7 +305,7 @@ Plot the cladogram using taxa with significant difference.
 \item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance.}
 
 \item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; 
-select the features according to the LDA score or MeanDecreaseGini from high to low.}
+select the features according to the LDA score (method = "lefse") or MeanDecreaseGini (method = "rf") from high to low.}
 
 \item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
 If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
@@ -357,48 +349,6 @@ ggplot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_metastat"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_metastat}{}}}
-\subsection{Method \code{plot_metastat()}}{
-Bar plot for metastat.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_metastat(
-  use_number = 1:10,
-  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  qvalue = 0.05,
-  choose_group = 1
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{use_number}}{default 1:10; vector, the taxa numbers used in the plot, 1:n.}
-
-\item{\code{color_values}}{colors for presentation.}
-
-\item{\code{qvalue}}{default .05; numeric value as the threshold of q value.}
-
-\item{\code{choose_group}}{default 1; which column in res_metastat_group_matrix will be used.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-ggplot.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
-t1$plot_metastat(use_number = 1:10, qvalue = 0.05, choose_group = 1)
 }
 }
 \if{html}{\out{</div>}}
