@@ -193,7 +193,9 @@ If the n is larger than the number of total significant taxa, automatically use 
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
-\item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
+\item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
+If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+If provided, this parameter can overwrite the levels in the group of sample_table.}
 
 \item{\code{barwidth}}{default .9; the bar width in plot.}
 
@@ -247,7 +249,9 @@ Bar plot for LDA score.
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
-\item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
+\item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
+If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+If provided, this parameter can overwrite the levels in the group of sample_table.}
 
 \item{\code{axis_text_y}}{default 12; the size for the y axis text.}
 
@@ -310,7 +314,9 @@ Plot the cladogram for LEfSe result similar with the python version. Codes are m
 
 \item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; select the features according to the LDA score}
 
-\item{\code{group_order}}{default NULL; a vector to order the legend in plot.}
+\item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
+If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+If provided, this parameter can overwrite the levels in the group of sample_table.}
 
 \item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest}
 

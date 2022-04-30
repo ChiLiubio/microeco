@@ -84,8 +84,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			method <- match.arg(method, c("lefse", "rf", "metastat", "mseq", "KW", "KW_dunn", "wilcox", "t.test", "anova"))
-
-			sampleinfo[, group] %<>% as.character
+			
+			if(is.factor(sampleinfo[, group])){
+				self$group_order <- levels(sampleinfo[, group])
+				sampleinfo[, group] %<>% as.character
+			}
+			
 			if(!grepl("metastat|mseq", method, ignore.case = TRUE)){
 				if(is.null(dataset$taxa_abund)){
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
@@ -202,7 +206,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					message("Start lefse subgroup biomarkers check for ", lefse_subgroup, " ...")
 					all_sub_number <- as.data.table(sampleinfo)[, .N, by = c(group, lefse_subgroup)] %>% as.data.frame %>% .$N
 					if(all(all_sub_number < lefse_min_subsam)){
-						stop("All sample numbers for subgroups < ", lefse_min_subsam, "! Please consider use small lefse_min_subsam parameter!")
+						stop("All sample numbers for subgroups < ", lefse_min_subsam, "! Please consider using small lefse_min_subsam parameter!")
 					}
 					remove_list_total <- list()
 					# for each group paires
@@ -470,7 +474,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param text_y_size default 10; the size for the y axis text.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param group_order default NULL; a vector to order the legend in plot.
+		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
+		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
 		#' @param barwidth default .9; the bar width in plot.
 		#' @param use_se default TRUE; whether use SE in plot, if FALSE, use SD.
 		#' @return ggplot.
@@ -516,11 +522,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_data %<>% .[.$Taxa %in% levels(diff_data$Taxa), ]
 			abund_data$Taxa %<>% factor(., levels = levels(diff_data$Taxa))
 			if(is.null(group_order)){
-				abund_data$Group %<>% as.character %>% as.factor
+				if(! is.null(self$group_order)){
+					abund_data$Group %<>% factor(., levels = self$group_order)
+				}else{
+					abund_data$Group %<>% as.character %>% as.factor
+				}
 			}else{
-				abund_data$Group %<>% factor(., levels = rev(group_order))
+				abund_data$Group %<>% factor(., levels = group_order)
 			}
-
+			if(length(color_values) < length(levels(abund_data$Group))){
+				stop("Please provide color_values parameter with more colors!")
+			}
+			
 			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group, group = Group)) +
 				geom_bar(stat="identity", position = position_dodge(), width = barwidth)
 			if(use_se == T){
@@ -528,16 +541,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}else{
 				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
 			}
+			
 			p <- p + theme_bw() +
 				coord_flip() +
-				scale_color_manual(values=color_values) +
-				scale_fill_manual(values=color_values) +
+				scale_color_manual(values = color_values) +
+				scale_fill_manual(values = color_values) +
 				ylab("Relative abundance") +
 				theme(legend.position = "right") +
 				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.border = element_blank(), 
 					panel.background=element_rect(fill="white")) +
 				theme(axis.title = element_text(size = 17)) +
-				guides(fill=guide_legend(reverse=TRUE, ncol=1), color = "none") + 
+				# fill=guide_legend(reverse=TRUE, ncol=1),
+				guides(color = "none") + 
 				theme(axis.title.y=element_blank(), axis.text.y = element_text(size = text_y_size, color = "black")) + 
 				theme(plot.margin = unit(c(.1, 0, .1, 0), "cm"))
 			p
@@ -550,7 +565,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param threshold default NULL; threshold value for selecting taxa, such as 3 for LDA score of LEfSe.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param group_order default NULL; a vector to order the legend in plot.
+		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
+		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
 		#' @param axis_text_y default 12; the size for the y axis text.
 		#' @param plot_vertical default TRUE; whether use vertical bar plot or horizontal.
 		#' @param ... parameters pass to \code{\link{geom_bar}}
@@ -604,10 +621,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			use_data %<>% .[sel_num, ]
 			if(is.null(group_order)){
-				use_data$Group %<>% as.character %>% as.factor
+				if(! is.null(self$group_order)){
+					use_data$Group %<>% factor(., levels = self$group_order)
+				}else{
+					use_data$Group %<>% as.character %>% as.factor
+				}
 			}else{
 				use_data$Group %<>% factor(., levels = group_order)
 			}
+			if(length(color_values) < length(levels(use_data$Group))){
+				stop("Please provide color_values parameter with more colors!")
+			}
+			
 			# rearrange orders
 			if(length(levels(use_data$Group)) == 2){
 				use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
@@ -627,8 +652,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
 				geom_bar(stat="identity", position = position_dodge(), ...) +
 				theme_bw() +
-				scale_color_manual(values=color_values) +
-				scale_fill_manual(values=color_values) +
+				scale_color_manual(values = color_values) +
+				scale_fill_manual(values = color_values) +
 				ylab(ylab_title) +
 				xlab("") +
 				theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
@@ -649,7 +674,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance 
 		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance
 		#' @param use_feature_num default NULL; integer; The feature number used in the plot; select the features according to the LDA score
-		#' @param group_order default NULL; a vector to order the legend in plot.
+		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
+		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
 		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest
 		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters
 		#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels
@@ -769,7 +796,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 			
 			# color legend order settings
 			if(is.null(group_order)){
-				color_groups <- marker_table$Group %>% as.character %>% as.factor %>% levels
+				if(! is.null(self$group_order)){
+					color_groups <- self$group_order
+				}else{
+					color_groups <- marker_table$Group %>% as.character %>% as.factor %>% levels
+				}
 			}else{
 				color_groups <- group_order
 			}
