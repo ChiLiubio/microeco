@@ -243,20 +243,21 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis function.
+		#' Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis2 function.
 		#'
-		#' @param cal_manova_all default TRUE; whether manova is only used for all the groups.
-		#' @param cal_manova_paired default FALSE; whether manova is used for all the paired groups.
-		#' @param cal_manova_set default NULL; specified group set for manova, such as cal_manova_set = ""Group + Type""; see \code{\link{adonis2}}.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
+		#' @param manova_type default "all"; see the following available options and details:
+		#'   \describe{
+		#'     \item{\strong{'all'}}{test for all the groups, i.e. the overall test}
+		#'     \item{\strong{'paired'}}{test for all the paired groups}
+		#'     \item{\strong{other}}{other specified group set for manova, such as "Group + Type" and "Group*Type"; see also \code{\link{adonis2}}}
+		#'   }
+		#' @param p_adjust_method default "fdr"; p.adjust method when manova_type = "paired"; see method parameter of p.adjust function for available options.
 		#' @param ... parameters passed to \code{\link{adonis2}} function of vegan package.
 		#' @return res_manova stored in object.
 		#' @examples
 		#' t1$cal_manova(cal_manova_all = TRUE)
 		cal_manova = function(
-			cal_manova_all = TRUE, 
-			cal_manova_paired = FALSE, 
-			cal_manova_set = NULL, 
+			manova_type = "all", 
 			p_adjust_method = "fdr",
 			...
 			){
@@ -265,23 +266,23 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			use_matrix <- self$use_matrix
 			metadata <- self$sample_table
-			if(!is.null(cal_manova_set)){
-				use_formula <- reformulate(cal_manova_set, substitute(as.dist(use_matrix)))
-				self$res_manova <- adonis2(use_formula, data = metadata, ...)
-			}
-			if(cal_manova_all == T){
+			if(manova_type == "all"){
 				use_formula <- reformulate(self$group, substitute(as.dist(use_matrix)))
 				self$res_manova <- adonis2(use_formula, data = metadata, ...)
-			}
-			if(cal_manova_paired == T){
-				self$res_manova <- private$paired_group_manova(
-					sample_info_use = metadata, 
-					use_matrix = use_matrix, 
-					group = self$group, 
-					measure = self$measure, 
-					p_adjust_method = p_adjust_method,
-					...
-				)
+			}else{
+				if(manova_type == "paired"){
+					self$res_manova <- private$paired_group_manova(
+						sample_info_use = metadata, 
+						use_matrix = use_matrix, 
+						group = self$group, 
+						measure = self$measure, 
+						p_adjust_method = p_adjust_method,
+						...
+					)
+				}else{
+					use_formula <- reformulate(manova_type, substitute(as.dist(use_matrix)))
+					self$res_manova <- adonis2(use_formula, data = metadata, ...)
+				}
 			}
 			message('The result is stored in object$res_manova ...')
 		},

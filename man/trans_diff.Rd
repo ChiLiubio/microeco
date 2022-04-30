@@ -28,7 +28,7 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_diff_abund(use_number = 1:10)
+t1$plot_diff_abund(use_number = 1:20)
 }
 
 ## ------------------------------------------------
@@ -168,7 +168,7 @@ t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 Plotting the abundance of differential taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_abund(
-  use_number = 1:10,
+  use_number = 1:20,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   text_y_size = 10,
   simplify_names = TRUE,
@@ -182,7 +182,8 @@ Plotting the abundance of differential taxa.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_number}}{default 1:10; numeric vector; the taxa numbers (1:n) used in the plot.}
+\item{\code{use_number}}{default 1:20; numeric vector; the taxa numbers (1:n) used in the plot; 
+If the n is larger than the number of total significant taxa, automatically use all the taxa.}
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.}
 
@@ -206,7 +207,7 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_diff_abund(use_number = 1:10)
+t1$plot_diff_abund(use_number = 1:20)
 }
 }
 \if{html}{\out{</div>}}

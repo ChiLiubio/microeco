@@ -238,27 +238,22 @@ t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = 
 \if{html}{\out{<a id="method-cal_manova"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
-Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis function.
+Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis2 function.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
-  cal_manova_all = TRUE,
-  cal_manova_paired = FALSE,
-  cal_manova_set = NULL,
-  p_adjust_method = "fdr",
-  ...
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(manova_type = "all", p_adjust_method = "fdr", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{cal_manova_all}}{default TRUE; whether manova is only used for all the groups.}
+\item{\code{manova_type}}{default "all"; see the following available options and details:
+\describe{
+  \item{\strong{'all'}}{test for all the groups, i.e. the overall test}
+  \item{\strong{'paired'}}{test for all the paired groups}
+  \item{\strong{other}}{other specified group set for manova, such as "Group + Type" and "Group*Type"; see also \code{\link{adonis2}}}
+}}
 
-\item{\code{cal_manova_paired}}{default FALSE; whether manova is used for all the paired groups.}
-
-\item{\code{cal_manova_set}}{default NULL; specified group set for manova, such as cal_manova_set = ""Group + Type""; see \code{\link{adonis2}}.}
-
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method when manova_type = "paired"; see method parameter of p.adjust function for available options.}
 
 \item{\code{...}}{parameters passed to \code{\link{adonis2}} function of vegan package.}
 }
