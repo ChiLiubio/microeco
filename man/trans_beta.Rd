@@ -28,8 +28,8 @@ t1$cal_ordination(ordination = "PCoA")
 ## Method `trans_beta$plot_ordination`
 ## ------------------------------------------------
 
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "ellipse")
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "chull")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
 
 ## ------------------------------------------------
 ## Method `trans_beta$cal_manova`
@@ -79,7 +79,6 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \item \href{#method-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
 \item \href{#method-plot_group_distance}{\code{trans_beta$plot_group_distance()}}
 \item \href{#method-plot_clustering}{\code{trans_beta$plot_clustering()}}
-\item \href{#method-print}{\code{trans_beta$print()}}
 \item \href{#method-clone}{\code{trans_beta$clone()}}
 }
 }
@@ -163,31 +162,39 @@ res_ordination stored in the object.
 Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_ordination(
+  plot_type = "point",
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
   plot_color = NULL,
   plot_shape = NULL,
   plot_group_order = NULL,
-  plot_point_size = 3,
-  plot_point_alpha = 0.8,
-  plot_sample_label = NULL,
-  plot_group = NULL,
-  plot_group_centroid = FALSE,
-  plot_group_centroid_segment_alpha = 0.6,
-  plot_group_centroid_linetype = 3,
-  plot_group_add = NULL,
-  plot_group_add_alpha = 0.1,
-  plot_group_add_ellipse_level = 0.9,
-  plot_group_add_ellipse_type = "t"
+  add_sample_label = NULL,
+  point_size = 3,
+  point_alpha = 0.8,
+  centroid_segment_alpha = 0.6,
+  centroid_segment_size = 1,
+  centroid_segment_linetype = 3,
+  ellipse_chull_fill = TRUE,
+  ellipse_chull_fill_alpha = 0.1,
+  ellipse_level = 0.9,
+  ellipse_type = "t"
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors for presentation.}
+\item{\code{plot_type}}{default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
+\describe{
+  \item{\strong{'point'}}{add point}
+  \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
+  \item{\strong{'chull'}}{add convex hull for points of each group}
+  \item{\strong{'centroid'}}{add centroid line of each group}
+}}
 
-\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector used in the shape type, see ggplot2 tutorial.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.}
+
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.}
 
 \item{\code{plot_color}}{default NULL; the sample group name used for color in plot.}
 
@@ -195,29 +202,25 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 
 \item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the legend of plot.}
 
-\item{\code{plot_point_size}}{default 3; point size in plot.}
+\item{\code{add_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
 
-\item{\code{plot_point_alpha}}{default .8; point transparency in plot.}
+\item{\code{point_size}}{default 3; point size in plot when "point" is in plot_type.}
 
-\item{\code{plot_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
+\item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in plot_type.}
 
-\item{\code{plot_group}}{default NULL; the column name in sample table, generally used with plot_group_centroid and plot_group_add;
-If NULL; use the same set of plot_color.}
+\item{\code{centroid_segment_alpha}}{default 0.6; segment transparency in plot when "centroid" is in plot_type.}
 
-\item{\code{plot_group_centroid}}{default FALSE; whether show the centroid in each group of plot.}
+\item{\code{centroid_segment_size}}{default 1; segment size in plot when "centroid" is in plot_type.}
 
-\item{\code{plot_group_centroid_segment_alpha}}{default .6; segment transparency in plot when plot_group_centroid = TRUE.}
+\item{\code{centroid_segment_linetype}}{default 3; the line type related with centroid in plot when "centroid" is in plot_type.}
 
-\item{\code{plot_group_centroid_linetype}}{default 3; the line type related with centroid in plot when plot_group_centroid = TRUE.}
+\item{\code{ellipse_chull_fill}}{default TRUE; whether fill colors to the area of ellipse or chull.}
 
-\item{\code{plot_group_add}}{default NULL; the available options include "ellipse" and "chull"; 
-ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.}
+\item{\code{ellipse_chull_fill_alpha}}{default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.}
 
-\item{\code{plot_group_add_alpha}}{default 0.1; color transparency in the ellipse or convex hull.}
+\item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in plot_type.}
 
-\item{\code{plot_group_add_ellipse_level}}{default .9; confidence level of ellipse for plot_group_add = "ellipse".}
-
-\item{\code{plot_group_add_ellipse_type}}{default "t"; see type in \code{\link{stat_ellipse}}.}
+\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -226,8 +229,8 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "ellipse")
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_group_add = "chull")
+\preformatted{t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
 }
 \if{html}{\out{</div>}}
 
@@ -433,16 +436,6 @@ ggplot.
 }
 \if{html}{\out{</div>}}
 
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
-\subsection{Method \code{print()}}{
-Print the trans_beta object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$print()}\if{html}{\out{</div>}}
 }
 
 }
