@@ -21,7 +21,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'metastat'}}{Metastat method for all paired groups based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
 		#'     \item{\strong{'mseq'}}{zero-inflated log-normal model-based differential test method from metagenomeSeq package.}
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in FSA package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
@@ -42,11 +42,25 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "mseq".
 		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
 		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova".
-		#' @return res_rf, res_lefse, res_abund, res_diff, res_metastat, or res_mseq in trans_diff object, depending on the method.
+		#' @return res_diff and res_abund.\cr
+		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
+		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
+		#'     \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups used;\cr
+		#'     \strong{"Group"}: Which group has the maximum median or mean value across all the test groups; 
+		#'        For non-parametric methods, median value; For t.test, mean value;\cr
+		#'     \strong{"Taxa"}: which taxa is used in this comparision;\cr
+		#'     \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
+		#'     \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
+		#'     \strong{"P.unadj" and "P.adj"}: raw p value; P.adj: adjusted p value;\cr
+		#'     \strong{"qvalue"}: qvalue for metastat analysis.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
 		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+		#' t1 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group")
+		#' t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
+		#' t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+		#' t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group")
 		#' }
 		initialize = function(
 			dataset = NULL,
@@ -88,7 +102,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				sampleinfo[, group] %<>% as.character
 			}
 			
-			if(!grepl("mseq", method, ignore.case = TRUE)){
+			if(method != "mseq"){
 				if(is.null(dataset$taxa_abund)){
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 				}
@@ -126,7 +140,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- res
 				message('The result is stored in object$res_diff ...')
 			}
-			if(grepl("lefse|rf", method, ignore.case = TRUE)){
+			if(method %in% c("lefse", "rf")){
 				# differential test
 				group_vec <- sampleinfo[, group] %>% as.factor
 				message("Start differential test for ", group, " ...")
@@ -149,7 +163,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				pvalue_sub <- pvalue[sel_taxa]
 				class_taxa_median_sub <- lapply(res_class, function(x) x$med) %>% do.call(cbind, .) %>% .[, sel_taxa]
 			}
-			if(grepl("rf", method, ignore.case = TRUE)){
+			if(method == "rf"){
 				# change the name in case of additional problem from the taxonomic names
 				nametable <- cbind.data.frame(name = rownames(abund_table_sub), repl = paste0("t", 1:nrow(abund_table_sub)), stringsAsFactors = FALSE)
 				rownames(nametable) <- nametable$repl
@@ -197,7 +211,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- imp_sort
 				message('The rf result is stored in object$res_diff ...')
 			}
-			if(grepl("lefse", method, ignore.case = TRUE)){
+			if(method == "lefse"){
 				all_class_pairs <- combn(unique(as.character(group_vec)), 2)
 				# check the difference among subgroups
 				if(!is.null(lefse_subgroup)){
@@ -344,7 +358,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- res1
 				message('The lefse result is stored in object$res_diff ...')
 			}
-			if(! grepl("mseq", method, ignore.case = TRUE)){
+			if(method != "mseq"){
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
 				}else{
@@ -361,7 +375,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_abund <- res_abund
 				message('Taxa abundance data is stored in object$res_abund ...')
 			}
-			if(grepl("metastat|mseq", method, ignore.case = TRUE)){
+			if(method %in% c("metastat", "mseq")){
 				if(is.null(group_choose_paired)){
 					all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
 				}else{
@@ -369,7 +383,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				output <- data.frame()			
 			}
-			if(grepl("metastat", method, ignore.case = TRUE)){
+			if(method == "metastat"){
 				if(!taxa_level %in% colnames(dataset$tax_table)){
 					stop("For metastat, taxa_level parameter must be one of column names of dataset$tax_table!")
 				}
@@ -413,7 +427,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- output
 				message('The metastat result is stored in object$res_diff ...')
 			}
-			if(grepl("mseq", method, ignore.case = TRUE)){
+			if(method == "mseq"){
 				if(!require("metagenomeSeq")){
 					stop("metagenomeSeq package not installed")
 				}
@@ -477,6 +491,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param select_group default NULL; this is used to select the paired groups. 
 		#'   This parameter is especially useful when the comparision methods is applied to paired groups;
 		#'   The input select_group must be one of object$res_diff$Comparison.
+		#' @param select_taxa default NULL; character vector to provide taxa names. 
+		#' 	 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in object$res_diff$Taxa.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
@@ -494,6 +510,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			use_number = 1:20,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			select_group = NULL,
+			select_taxa = NULL,
 			simplify_names = TRUE,
 			keep_prefix = TRUE,
 			group_order = NULL,
@@ -547,11 +564,19 @@ trans_diff <- R6Class(classname = "trans_diff",
 				diff_data$Taxa %<>% gsub(".__", "", .)
 				abund_data$Taxa %<>% gsub(".__", "", .)
 			}
-			if(length(use_number) > nrow(diff_data)){
-				use_number <- 1:nrow(diff_data)
+			if(is.null(select_taxa)){
+				if(length(use_number) > nrow(diff_data)){
+					use_number <- 1:nrow(diff_data)
+				}
+				diff_data %<>% .[use_number, ]
+				diff_data$Taxa %<>% factor(., levels = rev(unique(as.character(.))))
+			}else{
+				diff_data %<>% .[.$Taxa %in% select_taxa, ]
+				if(nrow(diff_data) == 0){
+					stop("No significant taxa can be used to plot the abudance!")
+				}
+				diff_data$Taxa %<>% factor(., levels = rev(select_taxa))
 			}
-			diff_data %<>% .[use_number, ]
-			diff_data$Taxa %<>% factor(., levels = rev(unique(as.character(.))))
 			abund_data %<>% .[.$Taxa %in% levels(diff_data$Taxa), ]
 			abund_data$Taxa %<>% factor(., levels = levels(diff_data$Taxa))
 			if(is.null(group_order)){
@@ -576,7 +601,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}else{
 				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
 			}
-			
 			p <- p + theme_bw() +
 				coord_flip() +
 				scale_color_manual(values = color_values) +
@@ -587,8 +611,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 					panel.border = element_blank(), panel.background=element_rect(fill="white")) +
 				theme(axis.title = element_text(size = 17)) +
 				guides(fill=guide_legend(reverse = TRUE, ncol=1), color = "none") + 
-				theme(axis.title.y=element_blank(), axis.text.y = element_text(size = text_y_size, color = "black")) + 
-				theme(plot.margin = unit(c(.1, 0, .1, 0), "cm"))
+				theme(axis.title.y=element_blank(), axis.text.y = element_text(size = text_y_size, color = "black"))
+				#theme(plot.margin = unit(c(.1, 0, .1, 0), "cm"))
 			p
 		},
 		#' @description
@@ -716,6 +740,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
 				})))))
 			}
+			self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
 			
 			p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
 				geom_bar(stat="identity", position = position_dodge(), ...) +
@@ -725,7 +750,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				ylab(ylab_title) +
 				xlab("") +
 				theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
-				theme(axis.text.x = element_text(size = 12)) +
+				theme(axis.text.x = element_text(size = 10)) +
 				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.grid.minor.x = element_blank()) +
 				theme(panel.border = element_blank()) +
 				theme(axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"))

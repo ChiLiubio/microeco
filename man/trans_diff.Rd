@@ -21,6 +21,10 @@ Authors: Chi Liu, Yang Cao, Chenhao Li
 \donttest{
 data(dataset)
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group")
 }
 
 ## ------------------------------------------------
@@ -95,7 +99,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'metastat'}}{Metastat method for all paired groups based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
   \item{\strong{'mseq'}}{zero-inflated log-normal model-based differential test method from metagenomeSeq package.}
   \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in FSA package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
   \item{\strong{'anova'}}{Duncan's multiple range test for anova}
@@ -134,13 +138,27 @@ For testing at a specific rank, provide taxonomic rank name, such as "Genus"; th
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rf, res_lefse, res_abund, res_diff, res_metastat, or res_mseq in trans_diff object, depending on the method.
+res_diff and res_abund.\cr
+  \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
+  \strong{res_diff} is the detailed differential test result, containing:\cr
+    \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups used;\cr
+    \strong{"Group"}: Which group has the maximum median or mean value across all the test groups; 
+       For non-parametric methods, median value; For t.test, mean value;\cr
+    \strong{"Taxa"}: which taxa is used in this comparision;\cr
+    \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
+    \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
+    \strong{"P.unadj" and "P.adj"}: raw p value; P.adj: adjusted p value;\cr
+    \strong{"qvalue"}: qvalue for metastat analysis.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 data(dataset)
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group")
 }
 }
 \if{html}{\out{</div>}}
@@ -158,6 +176,7 @@ Plotting the abundance of differential taxa.
   use_number = 1:20,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   select_group = NULL,
+  select_taxa = NULL,
   simplify_names = TRUE,
   keep_prefix = TRUE,
   group_order = NULL,
@@ -178,6 +197,9 @@ If the n is larger than the number of total significant taxa, automatically use 
 \item{\code{select_group}}{default NULL; this is used to select the paired groups. 
 This parameter is especially useful when the comparision methods is applied to paired groups;
 The input select_group must be one of object$res_diff$Comparison.}
+
+\item{\code{select_taxa}}{default NULL; character vector to provide taxa names. 
+The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in object$res_diff$Taxa.}
 
 \item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
 
