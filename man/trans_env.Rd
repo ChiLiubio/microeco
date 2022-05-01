@@ -69,6 +69,9 @@ t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env
 t1$cal_ordination(method = "RDA")
 t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 t1$plot_ordination(plot_color = "Group")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = c("point", "ellipse"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
 t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 }
@@ -419,18 +422,24 @@ plot ordination result.
   env_arrow_color = "grey30",
   taxa_text_color = "firebrick1",
   taxa_arrow_color = "firebrick1",
-  sample_point_size = 3.5,
   env_text_size = 3.7,
   taxa_text_size = 3,
   taxa_text_italic = TRUE,
+  plot_type = "point",
+  point_size = 3,
+  point_alpha = 0.8,
+  centroid_segment_alpha = 0.6,
+  centroid_segment_size = 1,
+  centroid_segment_linetype = 3,
+  ellipse_chull_fill = TRUE,
+  ellipse_chull_alpha = 0.1,
+  ellipse_level = 0.9,
+  ellipse_type = "t",
+  add_sample_label = NULL,
   env_nudge_x = NULL,
   env_nudge_y = NULL,
   taxa_nudge_x = NULL,
   taxa_nudge_y = NULL,
-  plot_group_add = NULL,
-  plot_group_add_alpha = 0.1,
-  plot_group_add_ellipse_level = 0.9,
-  plot_group_add_ellipse_type = "t",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -438,13 +447,13 @@ plot ordination result.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{plot_color}}{default NULL; group used for color.}
+\item{\code{plot_color}}{default NULL; a colname of sample_table to assign colors to different groups in plot.}
 
-\item{\code{plot_shape}}{default NULL; group used for shape.}
+\item{\code{plot_shape}}{default NULL; a colname of sample_table to assign shapes to different groups in plot.}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.}
 
-\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); vector used for the shape; see ggplot2 tutorial.}
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.}
 
 \item{\code{env_text_color}}{default "black"; environmental variable text color.}
 
@@ -454,13 +463,39 @@ plot ordination result.
 
 \item{\code{taxa_arrow_color}}{default "firebrick1"; taxa arrow color.}
 
-\item{\code{sample_point_size}}{default 3.5; sample point size.}
-
 \item{\code{env_text_size}}{default 3.7; environmental variable text size.}
 
 \item{\code{taxa_text_size}}{default 3; taxa text size.}
 
 \item{\code{taxa_text_italic}}{default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.}
+
+\item{\code{plot_type}}{default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
+\describe{
+  \item{\strong{'point'}}{add point}
+  \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
+  \item{\strong{'chull'}}{add convex hull for points of each group}
+  \item{\strong{'centroid'}}{add centroid line of each group}
+}}
+
+\item{\code{point_size}}{default 3; point size in plot when "point" is in plot_type.}
+
+\item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in plot_type.}
+
+\item{\code{centroid_segment_alpha}}{default 0.6; segment transparency in plot when "centroid" is in plot_type.}
+
+\item{\code{centroid_segment_size}}{default 1; segment size in plot when "centroid" is in plot_type.}
+
+\item{\code{centroid_segment_linetype}}{default 3; the line type related with centroid in plot when "centroid" is in plot_type.}
+
+\item{\code{ellipse_chull_fill}}{default TRUE; whether fill colors to the area of ellipse or chull.}
+
+\item{\code{ellipse_chull_alpha}}{default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.}
+
+\item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in plot_type.}
+
+\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.}
+
+\item{\code{add_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
 
 \item{\code{env_nudge_x}}{default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of geom_text_repel function of ggrepel package;
 default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
@@ -479,15 +514,6 @@ if 3 taxa are shown, taxa_nudge_x should be something like c(0.3, -0.2, 0).}
 default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
 if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).}
 
-\item{\code{plot_group_add}}{default NULL; the available options include "ellipse" and "chull"; 
-ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.}
-
-\item{\code{plot_group_add_alpha}}{default 0.1; color transparency in the ellipse or convex hull.}
-
-\item{\code{plot_group_add_ellipse_level}}{default .9; confidence level of ellipse for plot_group_add = "ellipse".}
-
-\item{\code{plot_group_add_ellipse_type}}{default "t"; see type in \code{\link{stat_ellipse}}.}
-
 \item{\code{...}}{paremeters pass to geom_point for controlling sample points.}
 }
 \if{html}{\out{</div>}}
@@ -501,6 +527,9 @@ ggplot object.
 t1$cal_ordination(method = "RDA")
 t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 t1$plot_ordination(plot_color = "Group")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = c("point", "ellipse"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
 t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 }

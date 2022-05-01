@@ -409,18 +409,34 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' plot ordination result.
 		#'
-		#' @param plot_color default NULL; group used for color.
-		#' @param plot_shape default NULL; group used for shape.
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete.
-		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); vector used for the shape; see ggplot2 tutorial.
+		#' @param plot_color default NULL; a colname of sample_table to assign colors to different groups in plot.
+		#' @param plot_shape default NULL; a colname of sample_table to assign shapes to different groups in plot.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.
+		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.
 		#' @param env_text_color default "black"; environmental variable text color.
 		#' @param env_arrow_color default "grey30"; environmental variable arrow color.
 		#' @param taxa_text_color default "firebrick1"; taxa text color.
 		#' @param taxa_arrow_color default "firebrick1"; taxa arrow color.
-		#' @param sample_point_size default 3.5; sample point size.
 		#' @param env_text_size default 3.7; environmental variable text size.
 		#' @param taxa_text_size default 3; taxa text size.
 		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.
+		#' @param plot_type default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
+		#'   \describe{
+		#'     \item{\strong{'point'}}{add point}
+		#'     \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
+		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
+		#'     \item{\strong{'centroid'}}{add centroid line of each group}
+		#'   }
+		#' @param point_size default 3; point size in plot when "point" is in plot_type.
+		#' @param point_alpha default .8; point transparency in plot when "point" is in plot_type.
+		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in plot_type.
+		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in plot_type.
+		#' @param centroid_segment_linetype default 3; the line type related with centroid in plot when "centroid" is in plot_type.
+		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
+		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
+		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.
+		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.
+		#' @param add_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
 		#' @param env_nudge_x default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of geom_text_repel function of ggrepel package;
 		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
 		#'   if there are 5 env variables, env_nudge_x should be something like c(0.1, 0, -0.2, 0, 0). 
@@ -434,11 +450,6 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_nudge_y default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
 		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
 		#'   if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).
-		#' @param plot_group_add default NULL; the available options include "ellipse" and "chull"; 
-		#' 	  ellipse: show the confidence ellipse in each group of plot (from plot_group); chull: plot convex hull of points from each group.
-		#' @param plot_group_add_alpha default 0.1; color transparency in the ellipse or convex hull.
-		#' @param plot_group_add_ellipse_level default .9; confidence level of ellipse for plot_group_add = "ellipse".
-		#' @param plot_group_add_ellipse_type default "t"; see type in \code{\link{stat_ellipse}}.
 		#' @param ... paremeters pass to geom_point for controlling sample points.
 		#' @return ggplot object.
 		#' @examples
@@ -446,6 +457,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$cal_ordination(method = "RDA")
 		#' t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 		#' t1$plot_ordination(plot_color = "Group")
+		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = c("point", "ellipse"))
+		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
+		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
 		#' t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 		#' 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 		#' }
@@ -458,34 +472,53 @@ trans_env <- R6Class(classname = "trans_env",
 			env_arrow_color = "grey30",
 			taxa_text_color = "firebrick1",
 			taxa_arrow_color = "firebrick1",
-			sample_point_size = 3.5,
 			env_text_size = 3.7,
 			taxa_text_size = 3,
 			taxa_text_italic = TRUE,
+			plot_type = "point",
+			point_size = 3,
+			point_alpha = 0.8,
+			centroid_segment_alpha = 0.6,
+			centroid_segment_size = 1,
+			centroid_segment_linetype = 3,
+			ellipse_chull_fill = TRUE,
+			ellipse_chull_alpha = 0.1,
+			ellipse_level = 0.9,
+			ellipse_type = "t",
+			add_sample_label = NULL,
 			env_nudge_x = NULL,
 			env_nudge_y = NULL,
 			taxa_nudge_x = NULL,
 			taxa_nudge_y = NULL,
-			plot_group_add = NULL,
-			plot_group_add_alpha = 0.1,
-			plot_group_add_ellipse_level = 0.9,
-			plot_group_add_ellipse_type = "t",
 			...
 			){
 			if(is.null(self$res_ordination_trans)){
 				stop("Please first run trans_ordination function !")
 			}
+			if(is.null(plot_color)){
+				if(any(c("ellipse", "chull", "centroid") %in% plot_type)){
+					stop("Plot ellipse or chull or centroid need groups! Please provide plot_color parameter!")
+				}
+			}
+			if(! all(plot_type %in% c("point", "ellipse", "chull", "centroid"))){
+				message("There maybe a typo in your plot_type input! plot_type should be one or more from 'point', 'ellipse', 'chull' and 'centroid'!")
+			}
+			df_sites <- self$res_ordination_trans$df_sites
+			
 			p <- ggplot()
 			p <- p + theme_bw()
 			p <- p + theme(panel.grid=element_blank())
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
-			p <- p + geom_point(
-				data = self$res_ordination_trans$df_sites, 
-				aes_string("x", "y", colour = plot_color, shape = plot_shape), 
-				size = sample_point_size,
-				...
-				)
+			if("point" %in% plot_type){
+				p <- p + geom_point(
+					data = df_sites, 
+					aes_string("x", "y", colour = plot_color, shape = plot_shape), 
+					size = point_size,
+					alpha = point_alpha,
+					...
+					)
+			}
 			# plot arrows
 			env_text_data <- self$res_ordination_trans$df_arrows %>% dplyr::mutate(label = gsub("`", "", rownames(.)))
 			p <- p + geom_segment(
@@ -528,26 +561,49 @@ trans_env <- R6Class(classname = "trans_env",
 						color = env_text_color, segment.color = "white", nudge_x = env_nudge_x[i], nudge_y = env_nudge_y[i])
 				}
 			}
-			if (!is.null(plot_group_add)) {
-				plot_group_add <- match.arg(plot_group_add, c("ellipse", "chull"))
-				if(plot_group_add == "ellipse"){
-					p <- p + ggplot2::stat_ellipse(
-						data = self$res_ordination_trans$df_sites, 
-						aes_string("x", "y", colour = plot_color, fill = plot_color),
-						level = plot_group_add_ellipse_level, 
-						type = plot_group_add_ellipse_type, 
-						alpha = plot_group_add_alpha, 
-						geom = "polygon"
-						)
+			if("centroid" %in% plot_type){
+				centroid_xy <- data.frame(group = df_sites[, plot_color], x = df_sites[, "x"], y = df_sites[, "y"]) %>%
+					dplyr::group_by(group) %>%
+					dplyr::summarise(cx = mean(x), cy = mean(y)) %>%
+					as.data.frame()
+				combined_centroid_xy <- merge(df_sites, centroid_xy, by.x = plot_color, by.y = "group")
+				p <- p + geom_segment(
+					data = combined_centroid_xy, 
+					aes_string(x = "x", xend = "cx", y = "y", yend = "cy", color = plot_color),
+					alpha = centroid_segment_alpha, 
+					size = centroid_segment_size, 
+					linetype = centroid_segment_linetype
+				)
+			}
+			if(any(c("ellipse", "chull") %in% plot_type)){
+				if(ellipse_chull_fill){
+					ellipse_chull_fill_color <- plot_color
 				}else{
-					p <- p + ggpubr::stat_chull(
-						data = self$res_ordination_trans$df_sites, 
-						aes_string("x", "y", colour = plot_color, fill = plot_color),
-						alpha = plot_group_add_alpha,
+					ellipse_chull_fill_color <- NULL
+					ellipse_chull_alpha <- 0
+				}
+				mapping <- aes_string(x = "x", y = "y", group = plot_color, color = plot_color, fill = ellipse_chull_fill_color)
+				if("ellipse" %in% plot_type){
+					p <- p + ggplot2::stat_ellipse(
+						mapping = mapping, 
+						data = df_sites, 
+						level = ellipse_level, 
+						type = ellipse_type, 
+						alpha = ellipse_chull_alpha, 
 						geom = "polygon"
 						)
 				}
-				p <- p + scale_fill_manual(values = color_values)
+				if("chull" %in% plot_type){
+					p <- p + ggpubr::stat_chull(
+						mapping = mapping, 
+						data = df_sites, 
+						alpha = ellipse_chull_alpha,
+						geom = "polygon"
+						)
+				}
+				if(ellipse_chull_fill){
+					p <- p + scale_fill_manual(values = color_values)
+				}
 			}
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)
@@ -605,6 +661,12 @@ trans_env <- R6Class(classname = "trans_env",
 							color = taxa_text_color, segment.alpha = .01, parse = TRUE, nudge_x = taxa_nudge_x[j], nudge_y = taxa_nudge_y[j])
 					}
 				}
+			}
+			if(!is.null(add_sample_label)){
+				p <- p + ggrepel::geom_text_repel(
+					data = df_sites,
+					mapping = aes_string(x = "x", y = "y", label = add_sample_label)
+					)
 			}
 			p
 		},

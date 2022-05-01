@@ -28,8 +28,11 @@ t1$cal_ordination(ordination = "PCoA")
 ## Method `trans_beta$plot_ordination`
 ## ------------------------------------------------
 
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
+t1$plot_ordination(plot_type = "point")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "ellipse"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
 
 ## ------------------------------------------------
 ## Method `trans_beta$cal_manova`
@@ -175,7 +178,7 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
   centroid_segment_size = 1,
   centroid_segment_linetype = 3,
   ellipse_chull_fill = TRUE,
-  ellipse_chull_fill_alpha = 0.1,
+  ellipse_chull_alpha = 0.1,
   ellipse_level = 0.9,
   ellipse_type = "t"
 )}\if{html}{\out{</div>}}
@@ -196,9 +199,9 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 
 \item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.}
 
-\item{\code{plot_color}}{default NULL; the sample group name used for color in plot.}
+\item{\code{plot_color}}{default NULL; a colname of sample_table to assign colors to different groups in plot.}
 
-\item{\code{plot_shape}}{default NULL; the sample group name used for shape in plot.}
+\item{\code{plot_shape}}{default NULL; a colname of sample_table to assign shapes to different groups in plot.}
 
 \item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the legend of plot.}
 
@@ -216,7 +219,7 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 
 \item{\code{ellipse_chull_fill}}{default TRUE; whether fill colors to the area of ellipse or chull.}
 
-\item{\code{ellipse_chull_fill_alpha}}{default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.}
+\item{\code{ellipse_chull_alpha}}{default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.}
 
 \item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in plot_type.}
 
@@ -229,8 +232,11 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
-t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
+\preformatted{t1$plot_ordination(plot_type = "point")
+t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "ellipse"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
 }
 \if{html}{\out{</div>}}
 

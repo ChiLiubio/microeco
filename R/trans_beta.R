@@ -134,8 +134,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   }
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.
-		#' @param plot_color default NULL; the sample group name used for color in plot.
-		#' @param plot_shape default NULL; the sample group name used for shape in plot.
+		#' @param plot_color default NULL; a colname of sample_table to assign colors to different groups in plot.
+		#' @param plot_shape default NULL; a colname of sample_table to assign shapes to different groups in plot.
 		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
 		#' @param add_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
 		#' @param point_size default 3; point size in plot when "point" is in plot_type.
@@ -144,13 +144,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in plot_type.
 		#' @param centroid_segment_linetype default 3; the line type related with centroid in plot when "centroid" is in plot_type.
 		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
-		#' @param ellipse_chull_fill_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
+		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.
 		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.
 		#' @return ggplot.
 		#' @examples
-		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
-		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group")
+		#' t1$plot_ordination(plot_type = "point")
+		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
+		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "ellipse"))
+		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
+		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
 		plot_ordination = function(
 			plot_type = "point",
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
@@ -165,7 +168,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			centroid_segment_size = 1,
 			centroid_segment_linetype = 3,
 			ellipse_chull_fill = TRUE,
-			ellipse_chull_fill_alpha = 0.1,
+			ellipse_chull_alpha = 0.1,
 			ellipse_level = 0.9,
 			ellipse_type = "t"
 			){
@@ -217,15 +220,20 @@ trans_beta <- R6Class(classname = "trans_beta",
 				)
 			}
 			if(any(c("ellipse", "chull") %in% plot_type)){
-				ellipse_chull_fill <- ifelse(ellipse_chull_fill, plot_color, NULL)
-				mapping <- aes_string(x = plot_x, y = plot_y, group = plot_color, fill = ellipse_chull_fill)
+				if(ellipse_chull_fill){
+					ellipse_chull_fill_color <- plot_color
+				}else{
+					ellipse_chull_fill_color <- NULL
+					ellipse_chull_alpha <- 0
+				}
+				mapping <- aes_string(x = plot_x, y = plot_y, group = plot_color, color = plot_color, fill = ellipse_chull_fill_color)
 				if("ellipse" %in% plot_type){
 					p <- p + ggplot2::stat_ellipse(
 						mapping = mapping, 
 						data = combined, 
 						level = ellipse_level, 
 						type = ellipse_type, 
-						alpha = ellipse_chull_fill_alpha, 
+						alpha = ellipse_chull_alpha, 
 						geom = "polygon"
 						)
 				}
@@ -233,11 +241,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 					p <- p + ggpubr::stat_chull(
 						mapping = mapping, 
 						data = combined, 
-						alpha = ellipse_chull_fill_alpha,
+						alpha = ellipse_chull_alpha,
 						geom = "polygon"
 						)
 				}
-				p <- p + scale_fill_manual(values = color_values)
+				if(ellipse_chull_fill){
+					p <- p + scale_fill_manual(values = color_values)
+				}
 			}
 			if(!is.null(add_sample_label)){
 				p <- p + ggrepel::geom_text_repel(aes_string(label = add_sample_label))
