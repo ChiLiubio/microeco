@@ -127,7 +127,89 @@ color_palette_20 <- c("#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#9
 	"#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5")
 
 
+# inner function
+# Add correlation or regression statictics to a scatter plot
+# developed based on the stat_cor of ggpubr package
+stat_corlm <- function(mapping = NULL, data = NULL, 
+	type = c("cor", "lm")[1], cor_method = "pearson", label_sep = ";",
+	pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2,
+	label.x.npc = "left", label.y.npc = "top", label.x = NULL, label.y = NULL,
+	geom = "text", position = "identity", na.rm = FALSE, show.legend = NA,
+	inherit.aes = TRUE, ...
+	){
+	layer(
+		stat = StatCorLm, data = data, mapping = mapping, geom = geom,
+		position = position, show.legend = show.legend, inherit.aes = inherit.aes,
+		params = list(label.x.npc  = label.x.npc , label.y.npc  = label.y.npc, label.x = label.x, label.y = label.y,
+			type = type, cor_method = cor_method, label_sep = label_sep,
+			pvalue_trim = pvalue_trim, cor_coef_trim = cor_coef_trim, lm_fir_trim = lm_fir_trim, lm_sec_trim = lm_sec_trim, lm_squ_trim = lm_squ_trim,
+			parse = TRUE, na.rm = na.rm, ...)
+	)
+}
 
+StatCorLm <- ggproto("StatCorLm", Stat,
+	required_aes = c("x", "y"),
+	default_aes = aes(hjust = ..hjust.., vjust = ..vjust..),
+	compute_group = function(data, scales, type, cor_method, label_sep,
+		pvalue_trim, cor_coef_trim, lm_fir_trim, lm_sec_trim, lm_squ_trim,
+		label.x.npc, label.y.npc, label.x, label.y
+		){
+		if(length(unique(data$x)) < 2){
+			return(data.frame())
+		}
+		# Returns a data frame with estimate, p.value, label, method
+		.test <- .corlm_test(
+			data$x, data$y, type = type, cor_method = cor_method, label_sep = label_sep,
+			pvalue_trim = pvalue_trim,
+			cor_coef_trim = cor_coef_trim, 
+			lm_fir_trim = lm_fir_trim, 
+			lm_sec_trim = lm_sec_trim, 
+			lm_squ_trim = lm_squ_trim
+		)
+		# Returns a data frame with label: x, y, hjust, vjust
+		.label.pms <- ggpubr:::.label_params(data = data, scales = scales,
+			label.x.npc = label.x.npc, label.y.npc = label.y.npc,
+			label.x = label.x, label.y = label.y ) %>%
+			dplyr::mutate(hjust = 0)
+		cbind(.test, .label.pms)
+	}
+)
+
+.corlm_test <- function(
+	x, y, 
+	type, cor_method = "pearson", label_sep = ";",
+	pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2
+	){
+	label_sep_use <- paste0("*`", label_sep, "`~")
+	if(type == "cor"){
+		fit <- suppressWarnings(stats::cor.test(x, y, method = cor_method, alternative = "two.sided"))
+		pvalue <- fit$p.value
+		estimate <- fit$estimate
+		cor_var <- list(
+			cor_coef = unname(round(estimate, digits = cor_coef_trim)), 
+			cor_p = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
+		)
+		cor_coef_exp <- substitute(italic(R)~"="~cor_coef, cor_var)
+		cor_p_exp <- substitute(~italic(P)*cor_p, cor_var)
+		res <- paste0(c(cor_coef_exp, label_sep_use, cor_p_exp), collapse = "")
+	}else{
+		fit <- lm(y ~ x)
+		pvalue <- anova(fit)$`Pr(>F)`[1]
+		inte <- round(unname(coef(fit))[1], digits = lm_sec_trim)
+		lm_var <- list(
+			lm_a = ifelse(inte < 0, paste0(" - ", abs(inte)), paste0(" + ", as.character(inte))),
+			lm_b = round(unname(coef(fit))[2], digits = lm_fir_trim),
+			lm_r2 = round(summary(fit)$r.squared, digits = lm_squ_trim),
+			lm_p = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
+			)
+		lm_ab_exp <- substitute(italic(y) == lm_b %.% italic(x)*lm_a, lm_var)
+		lm_r2_exp <- substitute(~italic(R)^2~"="~lm_r2, lm_var)
+		lm_p_exp <- substitute(~italic(P)*lm_p, lm_var)
+		
+		res <- paste0(c(lm_ab_exp, label_sep_use, lm_r2_exp, label_sep_use, lm_p_exp), collapse = "")
+	}
+	data.frame(label = as.character(as.expression(res)))
+}
 
 
 

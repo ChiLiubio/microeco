@@ -99,6 +99,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
 		#'   agricolae::duncan.test (method = "anova").
 		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
+		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(group = "Group", method = "KW")
@@ -1111,36 +1113,71 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param y default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
 		#'     If y is a single value, it will be used to select the column of data_env inside.
 		#'     If y is a distance matrix, it will be transformed to be a vector.
-		#' @param use_cor default TRUE; TRUE for correlation; FALSE for regression.
-		#' @param cor_method default "pearson"; one of "pearson", "kendall" and "spearman".
-		#' @param add_line default TRUE; whether add the fitted line in the plot.
-		#' @param use_se default TRUE; Whether show the confidence interval for the fitting.
-		#' @param text_x_pos default NULL; the central x axis position of the fitting text.
-		#' @param text_y_pos default NULL; the central y axis position of the fitting text.
+		#' @param group default NULL; a character vector; if length is 1, must be a colname of dataset$sample_table;
+		#'    Otherwise, group should be a vector with same length of x/y (for vector) or ncol of x/y (for matrix).
+		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot when group is not NULL; 
+		#' 	  If group_order is NULL and group is provided, the function can first check whether the group column of dataset$sample_table is factor. 
+		#' 	  If provided, overlook the levels in the group of dataset$sample_table.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.
+		#' @param shape_values default NULL; a numeric vector for point shape types of groups when group is not NULL, see ggplot2 tutorial.
+		#' @param type default c("cor", "lm")[1]; "cor": correlation; "lm" for regression.
+		#' @param cor_method default "pearson"; one of "pearson", "kendall" and "spearman"; correlation method.
+		#' @param label_sep default ";"; the separator string between different label parts.
+		#' @param label.x.npc default "left"; can be numeric or character vector of the same length as the number of groups and/or panels. If too short they will be recycled.
+		#' \describe{
+		#'   \item{numeric}{value should be between 0 and 1. Coordinates to be used for positioning the label, expressed in "normalized parent coordinates"}
+		#'   \item{character}{allowed values include: i) one of c('right', 'left', 'center', 'centre', 'middle') for x-axis; ii) and one of 
+		#'      c( 'bottom', 'top', 'center', 'centre', 'middle') for y-axis.}
+		#' }
+		#' @param label.y.npc default "top"; same usage with label.x.npc; see also label.y.npc parameter of stat_cor of ggpubr package.
+		#' @param label.x default NULL; x axis absolute position for adding the statictic label.
+		#' @param label.y default NULL; x axis absolute position for adding the statictic label.
 		#' @param x_axis_title default ""; the title of x axis.
 		#' @param y_axis_title default ""; the title of y axis.
+		#' @param point_size default 5; point size value.
+		#' @param point_alpha default 0.6; alpha value for the point color transparency.
+		#' @param line_size default 0.8; line size value.
+		#' @param line_se default TRUE; Whether show the confidence interval for the fitting.
+		#' @param line_se_color default "grey70"; the color to fill the confidence interval when line_se = TRUE.
+		#' @param line_alpha default 1; alpha value for the line color transparency.
+		#' @param line_color default "black"; fitted line color only useful when group = NULL.
 		#' @param pvalue_trim default 4; trim the decimal places of p value.
 		#' @param cor_coef_trim default 3; trim the decimal places of correlation coefficient.
 		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
 		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
 		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
-		#' @param ... the parameters passing to ggplot2::geom_point function.
+		#' @param ... other arguments to pass to geom_text or geom_label.
 		#' @return plot.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
+		#' t1$plot_scatterfit(x = 1, y = 2, type = "cor")
+		#' t1$plot_scatterfit(x = 1, y = 2, type = "lm", point_alpha = .3)
+		#' t1$plot_scatterfit(x = "pH", y = "TOC", type = "lm", group = "Group", line_se = FALSE)
+		#' t1$plot_scatterfit(x = dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
 		#' }
 		plot_scatterfit = function(
 			x = NULL, 
 			y = NULL, 
-			use_cor = TRUE,
+			group = NULL,
+			group_order = NULL,
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			shape_values = NULL,
+			type = c("cor", "lm")[1],
 			cor_method = "pearson",
-			add_line = TRUE,
-			use_se = TRUE,
-			text_x_pos = NULL, 
-			text_y_pos = NULL, 
+			label_sep = ";",
+			label.x.npc = "left", 
+			label.y.npc = "top",
+			label.x = NULL, 
+			label.y = NULL, 
 			x_axis_title = "", 
 			y_axis_title = "",
+			point_size = 5,
+			point_alpha = 0.6,
+			line_size = 0.8,
+			line_alpha = 1,
+			line_color = "black",
+			line_se = TRUE,
+			line_se_color = "grey70",
 			pvalue_trim = 4, 
 			cor_coef_trim = 3,
 			lm_fir_trim = 2,
@@ -1154,71 +1191,127 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!(is.vector(y) | is.matrix(y))){
 				stop("The input y is neither a vector nor a matrix !")
 			}
+			type <- match.arg(type, c("cor", "lm"))
+
 			if(length(x) == 1){
 				x <- self$data_env[, x]
 			}
 			if(length(y) == 1){
 				y <- self$data_env[, y]
 			}
-			# Matrix is transformed to be a vector
-			if(is.matrix(x) | is.matrix(y)){
-				if(is.matrix(x) & is.matrix(y)){
-					x <- as.vector(as.dist(x))
-					y <- as.vector(as.dist(y))
-				}else{
-					if(is.matrix(x)){
-						x <- as.vector(as.dist(x))
-						y1 <- as.data.frame(as.numeric(as.character(y)))
-						y <- as.vector(vegdist(y1, "euclidean"))
+			# first get the raw data length according to x
+			x_raw_length <- ifelse(is.vector(x), length(x), ncol(x))
+			if(is.null(group)){
+				group_vector <- rep("all", x_raw_length)
+			}else{
+				if(length(group) == 1){
+					if(is.null(self$dataset)){
+						stop("No dataset$sample_table found! Please check the dataset input when creading the object!")
 					}else{
-						y <- as.vector(as.dist(y))
-						x1 <- as.data.frame(as.numeric(as.character(x)))
-						x <- as.vector(vegdist(x1, "euclidean"))
+						if(! group %in% colnames(self$dataset$sample_table)){
+							stop("The group must be one of colnames of dataset$sample_table!")
+						}
+						# the sample_table names have been same with data_env when creading the object
+						group_vector <- self$dataset$sample_table[, group] %>% as.character
 					}
 				}
 			}
-			if(length(x) != length(y)){
-				stop("The length of x axis vector is not equal to the length of y axis vector!")
+			if(length(group_vector) != x_raw_length){
+				stop("The group length is not same with x data length! Please check the input!")
 			}
-			use_data <- data.frame(x, y)
-			if(use_cor == T){
-				fit <- cor.test(x, y, method = cor_method)
+			if(is.vector(x) & is.vector(y)){
+				if(length(x) != length(y)){
+					stop("x length is not equal to y length!")
+				}
+				use_data <- data.frame(x = x, y = y, Group = group_vector)
+			}
+			# Matrix is transformed to be a vector
+			if(is.matrix(x) | is.matrix(y)){
+				if(is.vector(x)){
+					x1 <- as.data.frame(as.numeric(as.character(x)))
+					x <- as.matrix(vegdist(x1, "euclidean"))
+				}
+				# has make sure x is a matrix
+				x <- lapply(unique(group_vector), function(i){
+						data.frame("x" = as.vector(as.dist(x[group_vector == i, group_vector == i])), "Group" = i)
+					}) %>% 
+					do.call(rbind, .)
+				if(is.vector(y)){
+					y1 <- as.data.frame(as.numeric(as.character(y)))
+					y <- as.matrix(vegdist(y1, "euclidean"))
+				}
+				y <- lapply(unique(group_vector), function(i){
+						data.frame("y" = as.vector(as.dist(y[group_vector == i, group_vector == i])), "Group" = i)
+					}) %>% 
+					do.call(rbind, .)
+				if(nrow(x) != nrow(y)){
+					stop("Converted x length is not equal to y length! Please check the input vector or matrix !")
+				}else{
+					use_data <- data.frame(x = x[, "x"], y = y[, "y"], Group = x[, "Group"])
+				}
+			}
+			if(!is.null(group_order)){
+				if(!all(unique(as.character(use_data$Group)) %in% group_order)){
+					stop("Please check the group_order input! Part of group(s) not found in group_order!")
+				}
+			}
+			if(!is.null(group)){
+				if(length(group) == 1){
+					if(is.null(group_order)){
+						if(is.factor(self$dataset$sample_table[, group])){
+							use_data$Group %<>% factor(., levels = levels(self$dataset$sample_table[, group]))
+						}else{
+							use_data$Group %<>% as.character %>% as.factor
+						}
+					}else{
+						use_data$Group %<>% factor(., levels = group_order)
+					}
+				}else{
+					if(is.null(group_order)){
+						use_data$Group %<>% as.character %>% as.factor
+					}else{
+						use_data$Group %<>% factor(., levels = group_order)
+					}
+				}
+			}
+			if(!is.null(shape_values)){
+				plot_shape <- "Group"
 			}else{
-				fit <- lm(y ~ x)
+				plot_shape <- NULL
 			}
-			# default position max * .8
-			if(is.null(text_x_pos)){
-				text_x_pos <- max(use_data$x) * 0.8
+			if(is.null(group)){
+				p <- ggplot(use_data, aes_string(x = "x", y = "y"))
+			}else{
+				p <- ggplot(use_data, aes_string(x = "x", y = "y", color = "Group", shape = plot_shape))
 			}
-			if(is.null(text_y_pos)){
-				text_y_pos <- max(use_data$y) * 0.8
+			p <- p + geom_point(size = point_size, alpha = point_alpha)
+			if(is.null(group)){
+				p <- p + geom_smooth(method = "lm", size = line_size, color = line_color, alpha = line_alpha, se = line_se, fill = line_se_color)
+			}else{
+				p <- p + geom_smooth(method = "lm", size = line_size, alpha = line_alpha, se = line_se, fill = line_se_color)
 			}
-
-			p <- ggplot(use_data, aes(x = x, y = y)) + 
-				theme_bw() + 
-				geom_point(shape = 20, ...) +
-				theme(panel.grid = element_blank())
-			if(add_line == T){
-				p <- p + geom_smooth(method = "lm", size = .8, colour = "black", se = use_se)
+			p <- p + stat_corlm(
+				type = type, 
+				cor_method = cor_method, 
+				label_sep = label_sep, 
+				pvalue_trim = pvalue_trim,
+				cor_coef_trim = cor_coef_trim,
+				lm_fir_trim = lm_fir_trim, 
+				lm_sec_trim = lm_sec_trim,
+				lm_squ_trim = lm_squ_trim,
+				label.x.npc = label.x.npc, 
+				label.y.npc = label.y.npc, 
+				label.x = label.x, 
+				label.y = label.y,
+				...
+				)
+			p <- p + xlab(x_axis_title) + ylab(y_axis_title)
+			if(!is.null(group)){
+				p <- p + scale_color_manual(values = color_values)
+				if(!is.null(shape_values)){
+					p <- p + scale_shape_manual(values = shape_values)
+				}
 			}
-			p <- p + annotate("text", 
-					x = text_x_pos, 
-					y = text_y_pos, 
-					label = private$fit_equat(
-						fit, 
-						use_cor = use_cor, 
-						pvalue_trim = pvalue_trim, 
-						cor_coef_trim = cor_coef_trim, 
-						lm_fir_trim = lm_fir_trim, 
-						lm_sec_trim = lm_sec_trim, 
-						lm_squ_trim = lm_squ_trim
-						), 
-					parse = TRUE) +
-#				scale_x_continuous(limits = c(min(x2) - 0.2 * (range(x2)[2] - range(x2)[1]), NA)) +
-				xlab(x_axis_title) + 
-				ylab(y_axis_title) +
-				theme(axis.text=element_text(size=13), axis.title=element_text(size=15))
-			
 			p
 		},
 		#' @description
@@ -1257,38 +1350,6 @@ trans_env <- R6Class(classname = "trans_env",
 			res <- data.frame(newx, newy)
 			colnames(res) <- colnames(arr)
 			res
-		},
-		# parse the equation and add the statistics
-		fit_equat = function(
-			equat, 
-			use_cor = TRUE, 
-			pvalue_trim = 4, 
-			cor_coef_trim = 3, 
-			lm_fir_trim = 2, 
-			lm_sec_trim = 2, 
-			lm_squ_trim = 2
-			){
-			if(inherits(equat, "lm") & use_cor == T){
-				stop("Input is lm class, but use_cor is TRUE! Please check the use_cor parameter!")
-			}
-			pvalue <- ifelse(use_cor == T, equat$p.value, anova(equat)$`Pr(>F)`[1])
-			if(use_cor == T){
-				estimate = equat$estimate
-				all_coef <- list(
-					R1 = unname(round(estimate, digits = cor_coef_trim)), 
-					P1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
-					)
-				res <- substitute(italic(R)~"="~R1*";"~~italic(P)*P1, all_coef)
-			}else{
-				inte <- round(unname(coef(equat))[1], digits = lm_sec_trim)
-				lm_coef <- list(a = ifelse(inte < 0, paste0(" - ", abs(inte)), paste0(" + ", as.character(inte))),
-							  b = round(unname(coef(equat))[2], digits = lm_fir_trim),
-							  r2 = round(summary(equat)$r.squared, digits = lm_squ_trim),
-							  p1 = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
-							  )
-				res <- substitute(italic(y) == b %.% italic(x)*a*","~~italic(R)^2~"="~r2*","~~italic(P)*p1, lm_coef)
-			}
-			as.character(as.expression(res))
 		}
 	),
 	lock_class = FALSE,

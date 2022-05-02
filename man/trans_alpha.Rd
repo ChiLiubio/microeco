@@ -121,9 +121,8 @@ agricolae::duncan.test (method = "anova").}
 }
 \subsection{Returns}{
 res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
-  In the data frame, Group column means that the group is the most enriched in this comparison;
-  For non-parametric methods, this group has the highest median value; 
-  For t.test, this group has the highest mean value.
+  In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
+  For non-parametric methods, maximum median value; For t.test, maximum mean value.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

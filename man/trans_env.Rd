@@ -108,7 +108,10 @@ t1$plot_cor(pheatmap = FALSE)
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
+t1$plot_scatterfit(x = 1, y = 2, type = "cor")
+t1$plot_scatterfit(x = 1, y = 2, type = "lm", point_alpha = .3)
+t1$plot_scatterfit(x = "pH", y = "TOC", type = "lm", group = "Group", line_se = FALSE)
+t1$plot_scatterfit(x = dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
 }
 }
 \section{Methods}{
@@ -220,6 +223,8 @@ agricolae::duncan.test (method = "anova").}
 }
 \subsection{Returns}{
 res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+  In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
+  For non-parametric methods, maximum median value; For t.test, maximum mean value.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -754,14 +759,26 @@ Scatter plot and add fitted line. The most important thing is to make sure that 
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_scatterfit(
   x = NULL,
   y = NULL,
-  use_cor = TRUE,
+  group = NULL,
+  group_order = NULL,
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  shape_values = NULL,
+  type = c("cor", "lm")[1],
   cor_method = "pearson",
-  add_line = TRUE,
-  use_se = TRUE,
-  text_x_pos = NULL,
-  text_y_pos = NULL,
+  label_sep = ";",
+  label.x.npc = "left",
+  label.y.npc = "top",
+  label.x = NULL,
+  label.y = NULL,
   x_axis_title = "",
   y_axis_title = "",
+  point_size = 5,
+  point_alpha = 0.6,
+  line_size = 0.8,
+  line_alpha = 1,
+  line_color = "black",
+  line_se = TRUE,
+  line_se_color = "grey70",
   pvalue_trim = 4,
   cor_coef_trim = 3,
   lm_fir_trim = 2,
@@ -782,21 +799,53 @@ If x is a distance matrix, it will be transformed to be a vector.}
 If y is a single value, it will be used to select the column of data_env inside.
 If y is a distance matrix, it will be transformed to be a vector.}
 
-\item{\code{use_cor}}{default TRUE; TRUE for correlation; FALSE for regression.}
+\item{\code{group}}{default NULL; a character vector; if length is 1, must be a colname of dataset$sample_table;
+Otherwise, group should be a vector with same length of x/y (for vector) or ncol of x/y (for matrix).}
 
-\item{\code{cor_method}}{default "pearson"; one of "pearson", "kendall" and "spearman".}
+\item{\code{group_order}}{default NULL; a vector to order groups, i.e. reorder the legend and colors in plot when group is not NULL; 
+If group_order is NULL and group is provided, the function can first check whether the group column of dataset$sample_table is factor. 
+If provided, overlook the levels in the group of dataset$sample_table.}
 
-\item{\code{add_line}}{default TRUE; whether add the fitted line in the plot.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.}
 
-\item{\code{use_se}}{default TRUE; Whether show the confidence interval for the fitting.}
+\item{\code{shape_values}}{default NULL; a numeric vector for point shape types of groups when group is not NULL, see ggplot2 tutorial.}
 
-\item{\code{text_x_pos}}{default NULL; the central x axis position of the fitting text.}
+\item{\code{type}}{default c("cor", "lm")[1]; "cor": correlation; "lm" for regression.}
 
-\item{\code{text_y_pos}}{default NULL; the central y axis position of the fitting text.}
+\item{\code{cor_method}}{default "pearson"; one of "pearson", "kendall" and "spearman"; correlation method.}
+
+\item{\code{label_sep}}{default ";"; the separator string between different label parts.}
+
+\item{\code{label.x.npc}}{default "left"; can be numeric or character vector of the same length as the number of groups and/or panels. If too short they will be recycled.
+\describe{
+  \item{numeric}{value should be between 0 and 1. Coordinates to be used for positioning the label, expressed in "normalized parent coordinates"}
+  \item{character}{allowed values include: i) one of c('right', 'left', 'center', 'centre', 'middle') for x-axis; ii) and one of 
+     c( 'bottom', 'top', 'center', 'centre', 'middle') for y-axis.}
+}}
+
+\item{\code{label.y.npc}}{default "top"; same usage with label.x.npc; see also label.y.npc parameter of stat_cor of ggpubr package.}
+
+\item{\code{label.x}}{default NULL; x axis absolute position for adding the statictic label.}
+
+\item{\code{label.y}}{default NULL; x axis absolute position for adding the statictic label.}
 
 \item{\code{x_axis_title}}{default ""; the title of x axis.}
 
 \item{\code{y_axis_title}}{default ""; the title of y axis.}
+
+\item{\code{point_size}}{default 5; point size value.}
+
+\item{\code{point_alpha}}{default 0.6; alpha value for the point color transparency.}
+
+\item{\code{line_size}}{default 0.8; line size value.}
+
+\item{\code{line_alpha}}{default 1; alpha value for the line color transparency.}
+
+\item{\code{line_color}}{default "black"; fitted line color only useful when group = NULL.}
+
+\item{\code{line_se}}{default TRUE; Whether show the confidence interval for the fitting.}
+
+\item{\code{line_se_color}}{default "grey70"; the color to fill the confidence interval when line_se = TRUE.}
 
 \item{\code{pvalue_trim}}{default 4; trim the decimal places of p value.}
 
@@ -808,7 +857,7 @@ If y is a distance matrix, it will be transformed to be a vector.}
 
 \item{\code{lm_squ_trim}}{default 2; trim the decimal places of regression R square.}
 
-\item{\code{...}}{the parameters passing to ggplot2::geom_point function.}
+\item{\code{...}}{other arguments to pass to geom_text or geom_label.}
 }
 \if{html}{\out{</div>}}
 }
@@ -818,7 +867,10 @@ plot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_scatterfit(x = 1, y = 2, alpha = .5)
+t1$plot_scatterfit(x = 1, y = 2, type = "cor")
+t1$plot_scatterfit(x = 1, y = 2, type = "lm", point_alpha = .3)
+t1$plot_scatterfit(x = "pH", y = "TOC", type = "lm", group = "Group", line_se = FALSE)
+t1$plot_scatterfit(x = dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
 }
 }
 \if{html}{\out{</div>}}

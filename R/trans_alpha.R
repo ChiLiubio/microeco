@@ -72,9 +72,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
 		#'   agricolae::duncan.test (method = "anova").
 		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
-		#'   In the data frame, Group column means that the group is the most enriched in this comparison;
-		#'   For non-parametric methods, this group has the highest median value; 
-		#'   For t.test, this group has the highest mean value.
+		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
+		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(method = "KW")

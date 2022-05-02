@@ -46,7 +46,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
 		#'     \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups used;\cr
-		#'     \strong{"Group"}: Which group has the maximum median or mean value across all the test groups; 
+		#'     \strong{"Group"}: Which group has the maximum median or mean value across the test groups; 
 		#'        For non-parametric methods, median value; For t.test, mean value;\cr
 		#'     \strong{"Taxa"}: which taxa is used in this comparision;\cr
 		#'     \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
@@ -495,9 +495,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in object$res_diff$Taxa.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
+		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
 		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
-		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
+		#' 	  If provided, overlook the levels in the group of sample_table.
 		#' @param barwidth default 0.9; the bar width in plot.
 		#' @param use_se default TRUE; whether use SE in plot, if FALSE, use SD.
 		#' @param text_y_size default 10; the size for the y axis text.
