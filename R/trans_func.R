@@ -275,77 +275,43 @@ trans_func <- R6Class(classname = "trans_func",
 			message('The functional binary table is stored in object$res_spe_func ...')
 		},
 		#' @description
-		#' Calculating the percentages of species with specific trait in communities or network modules.
-		#' The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+		#' Calculating the percentages of species with specific trait in communities.
+		#' The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community.
 		#' So this method is a simple calculation of functional redundancy without the consideration of phylogenetic distance among taxa.
 		#'
-		#' @param use_community default TRUE; whether calculate percentages for community; if FALSE, for network module.
-		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. If TRUE, 
-		#' 	  calculate the functional individual percentage.
-		#' @param node_type_table default NULL; used when use_community = FALSE; provide the node_type_table with the module information;
-		#' 	  there must be a colname "module" in the table; generally provide the result of trans_network$get_node_table.
+		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
+		#' 	  If TRUE, calculate the functional individual percentage.
 		#' @return res_spe_func_perc stored in the object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_spe_func_perc(use_community = TRUE, abundance_weighted = TRUE)
+		#' t1$cal_spe_func_perc(abundance_weighted = TRUE)
 		#' }
 		cal_spe_func_perc = function(
-			use_community = TRUE, 
-			abundance_weighted = FALSE, 
-			node_type_table = NULL
+			abundance_weighted = FALSE
 			){
 			if(is.null(self$res_spe_func)){
 				stop("Please first run cal_spe_func function !")
 			}
 			res_spe_func <- self$res_spe_func
 			otu_table <- self$otu_table
-			if(use_community){
-				res_spe_func_perc <- sapply(colnames(otu_table), function(input_samplecolumn){
-					sample_otu <- otu_table[, input_samplecolumn]
-					names(sample_otu) <- rownames(otu_table)
-					# remove species whose abundance is 0
-					sample_otu <- sample_otu[sample_otu != 0]
-					res_table <- unlist(lapply(colnames(res_spe_func), function(x){
-						if(abundance_weighted){
-							(res_spe_func[names(sample_otu), x, drop = TRUE] * sample_otu) %>% 
-								{sum(.) * 100/sum(sample_otu)} %>% 
-								{round(., 2)}
-						}else{
-							res_spe_func[names(sample_otu), x, drop = TRUE] %>% 
-								{sum(. != 0) * 100/length(.)} %>% 
-								{round(., 2)}
-						}
-					}))
-					res_table
-				})
-			}else{
-				if(is.null(node_type_table)){
-					stop("No node_type_table provided! see parameter: node_type_table !")
-				}else{
-					# if(!colnames(node_type_table) %in% c("module")){
-						# stop("No column name is 'module'! Please check the input node_type_table")
-					# }
+			res_spe_func_perc <- sapply(colnames(otu_table), function(input_samplecolumn){
+				sample_otu <- otu_table[, input_samplecolumn]
+				names(sample_otu) <- rownames(otu_table)
+				# remove species whose abundance is 0
+				sample_otu <- sample_otu[sample_otu != 0]
+				res_table <- unlist(lapply(colnames(res_spe_func), function(x){
 					if(abundance_weighted){
-						otu_total_abund <- apply(otu_table, 1, sum)
+						(res_spe_func[names(sample_otu), x, drop = TRUE] * sample_otu) %>% 
+							{sum(.) * 100/sum(sample_otu)} %>% 
+							{round(., 2)}
+					}else{
+						res_spe_func[names(sample_otu), x, drop = TRUE] %>% 
+							{sum(. != 0) * 100/length(.)} %>% 
+							{round(., 2)}
 					}
-					# calculate for each module
-					res_spe_func_perc <- sapply(sort(unique(as.character(node_type_table$module))), function(input_module){
-							otu_names <- rownames(node_type_table[node_type_table$module == input_module, ])
-							res_table <- unlist(lapply(colnames(res_spe_func), function(x){
-								if(abundance_weighted){
-									(res_spe_func[otu_names, x, drop = TRUE] * otu_total_abund[otu_names]) %>% 
-										{sum(.) * 100/sum(otu_total_abund[otu_names])} %>% 
-										{round(., 2)}
-								}else{
-									res_spe_func[otu_names, x, drop = TRUE] %>% 
-										{sum(. != 0) * 100/length(.)} %>% 
-										{round(., 2)}
-								}
-							}))
-						res_table
-					})
-				}
-			}
+				}))
+				res_table
+			})
 			res_spe_func_perc %<>% t %>% 
 				as.data.frame %>% 
 				`colnames<-`(colnames(res_spe_func)) %>% 

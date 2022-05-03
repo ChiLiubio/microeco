@@ -71,7 +71,8 @@ t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 t1$plot_ordination(plot_color = "Group")
 t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = c("point", "ellipse"))
 t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
-t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
+	  centroid_segment_linetype = 1)
 t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 }
@@ -92,7 +93,7 @@ t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 \donttest{
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
-t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
 }
 
 ## ------------------------------------------------
@@ -111,7 +112,8 @@ t1$plot_cor(pheatmap = FALSE)
 t1$plot_scatterfit(x = 1, y = 2, type = "cor")
 t1$plot_scatterfit(x = 1, y = 2, type = "lm", point_alpha = .3)
 t1$plot_scatterfit(x = "pH", y = "TOC", type = "lm", group = "Group", line_se = FALSE)
-t1$plot_scatterfit(x = dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
+t1$plot_scatterfit(x = 
+	 dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
 }
 }
 \section{Methods}{
@@ -534,7 +536,8 @@ t1$trans_ordination(adjust_arrow_length = TRUE, max_perc_env = 1.5)
 t1$plot_ordination(plot_color = "Group")
 t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = c("point", "ellipse"))
 t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
-t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
+t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
+	  centroid_segment_linetype = 1)
 t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 }
@@ -658,7 +661,7 @@ res_cor in object.
 \preformatted{\donttest{
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
-t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
 }
 }
 \if{html}{\out{</div>}}
@@ -870,7 +873,8 @@ plot.
 t1$plot_scatterfit(x = 1, y = 2, type = "cor")
 t1$plot_scatterfit(x = 1, y = 2, type = "lm", point_alpha = .3)
 t1$plot_scatterfit(x = "pH", y = "TOC", type = "lm", group = "Group", line_se = FALSE)
-t1$plot_scatterfit(x = dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
+t1$plot_scatterfit(x = 
+	 dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
 }
 }
 \if{html}{\out{</div>}}

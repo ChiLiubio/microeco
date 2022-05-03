@@ -8,9 +8,9 @@
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param group default NULL; the sample column used for the statistics; If provided, can return alpha_stat.
+		#' @param group default NULL; the sample column used for the statistics; If provided, can return data_stat.
 		#' @param order_x default NULL; sample_table column name or a vector containg sample names; if provided, order samples by using factor.
-		#' @return alpha_data and alpha_stat stored in the object.
+		#' @return data_alpha and data_stat stored in the object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -20,13 +20,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			self$group <- group
 			if(is.null(dataset)){
 				message("Parameter dataset not provided. Please run the functions with your other customized data!")
-				self$alpha_data <- NULL
+				self$data_alpha <- NULL
 			}else{
 				if(is.null(dataset$alpha_diversity)){
 					message("Alpha diversity not found. Calculate it automatically ...")
 					dataset$cal_alphadiv()
 				}
-				alpha_data <- dataset$alpha_diversity %>% 
+				data_alpha <- dataset$alpha_diversity %>% 
 					cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE) %>%
 					.[, !grepl("^se", colnames(.))] %>%
 					# to long format
@@ -35,23 +35,23 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					dplyr::left_join(., rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
 				if(!is.null(order_x)){
 					if(length(order_x == 1)){
-						alpha_data$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
+						data_alpha$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
 					} else {
-						alpha_data$Sample %<>% factor(., levels = order_x)
+						data_alpha$Sample %<>% factor(., levels = order_x)
 					}
 				}
-				self$alpha_data <- alpha_data
-				message('The transformed diversity data is stored in object$alpha_data ...')
+				self$data_alpha <- data_alpha
+				message('The transformed diversity data is stored in object$data_alpha ...')
 			}
 
 			if(!is.null(group)){
 				if(is.null(dataset)){
 					stop("Parameter dataset not provided, but group is provided!")
 				}
-				self$alpha_stat <- microeco:::summarySE_inter(alpha_data, measurevar = "Value", groupvars = c(self$group, "Measure"))
-				message('The group statistics are stored in object$alpha_stat ...')
+				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(self$group, "Measure"))
+				message('The group statistics are stored in object$data_stat ...')
 			}else{
-				self$alpha_stat <- NULL
+				self$data_stat <- NULL
 			}
 		},
 		#' @description
@@ -82,16 +82,16 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' }
 		cal_diff = function(method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
 			group <- self$group
-			alpha_data <- self$alpha_data
+			data_alpha <- self$data_alpha
 			if(is.null(measure)){
-				measure <- unique(as.character(alpha_data$Measure))
+				measure <- unique(as.character(data_alpha$Measure))
 			}else{
-				if(! all(measure %in% as.character(alpha_data$Measure))){
-					stop("One or more measures input not in the alpha_data! Please check the input!")
+				if(! all(measure %in% as.character(data_alpha$Measure))){
+					stop("One or more measures input not in the data_alpha! Please check the input!")
 				}
 			}
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova"))
-			if(method %in% c("wilcox", "t.test") & length(unique(as.character(alpha_data[, group]))) > 5){
+			if(method %in% c("wilcox", "t.test") & length(unique(as.character(data_alpha[, group]))) > 5){
 				stop("There are too many groups to do paired comparisons! please use method = 'KW' or 'KW_dunn' or 'anova' !")
 			}
 			if(!is.null(anova_set)){
@@ -104,7 +104,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				test_method <- c()
 				max_group <- c()
 				for(k in measure){
-					div_table <- alpha_data[alpha_data$Measure == k, c(group, "Value")]
+					div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
 					groupvec <- as.character(div_table[, group])
 					use_comp_group_num <- unique(c(2, length(unique(groupvec))))
 					for(i in use_comp_group_num){
@@ -120,7 +120,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 									max_group_select <- tapply(table_compare$Value, table_compare[, group], mean) %>% {.[which.max(.)]} %>% names
 								}else{
 									if(method == "wilcox"){
-										res1 <- wilcox.test(formu, data = table_compare, ...)
+										res1 <- suppressWarnings(wilcox.test(formu, data = table_compare, ...))
 										max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
 									}else{
 										if(method == "KW" & length(use_comp_group_num) == 1){
@@ -154,13 +154,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 			}
 			if(method == "KW_dunn"){
-				if(length(unique(alpha_data[, group])) == 2){
+				if(length(unique(data_alpha[, group])) == 2){
 					stop("There are only 2 groups. Please select other method instead of KW_dunn !")
 				}
 				use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
 				compare_result <- data.frame()
 				for(k in measure){
-					div_table <- alpha_data[alpha_data$Measure == k, c(group, "Value")]
+					div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
 					table_compare <- div_table
 					table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
 					formu <- reformulate(group, "Value")
@@ -184,7 +184,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				
 				for(i in measure){
-					use_data <- alpha_data[alpha_data$Measure == i, ]
+					use_data <- data_alpha[data_alpha$Measure == i, ]
 					if(is.null(anova_set)){
 						model <- aov(reformulate(group, "Value"), use_data)
 						out <- agricolae::duncan.test(model, group, main = i, ...)
@@ -228,8 +228,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param y_increae default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
 		#' 	  this parameter is also used to label the letters of anova result with the fixed (1 + y_increae) * y_start space.
 		#' @param xtext_angle default NULL; number (e.g. 30) used to make x axis text generate angle.
-		#' @param xtext_size default 10, x axis text size.
-		#' @param ytitle_size default 17, y axis title size.
+		#' @param xtext_size default 15; x axis text size.
+		#' @param ytitle_size default 17; y axis title size.
 		#' @param ... parameters pass to ggpubr::ggboxplot function.
 		#' @return ggplot.
 		#' @examples
@@ -249,7 +249,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			y_start = 1.01,
 			y_increae = 0.05,
 			xtext_angle = NULL,
-			xtext_size = 10,
+			xtext_size = 15,
 			ytitle_size = 17,
 			...
 			){
@@ -268,10 +268,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					use_diff <- FALSE
 				}
 			}
-			if(! measure %in% self$alpha_data$Measure){
+			if(! measure %in% self$data_alpha$Measure){
 				stop("Please provide a correct measure parameter !")
 			}else{
-				use_data <- self$alpha_data[self$alpha_data$Measure == measure, ]
+				use_data <- self$data_alpha[self$data_alpha$Measure == measure, ]
 			}
 			if(order_x_mean){
 				mean_orders <- names(sort(tapply(use_data$Value, use_data[, group], mean), decreasing = TRUE))
@@ -373,8 +373,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' Print the trans_alpha object.
 		print = function() {
 			cat("trans_alpha class:\n")
-			cat(paste("alpha_data have", ncol(self$alpha_data), "columns: ", paste0(colnames(self$alpha_data), collapse = ", "), "\n"))
-			if(!is.null(self$alpha_stat)) cat(paste("alpha_stat have", ncol(self$alpha_stat), "columns: ", paste0(colnames(self$alpha_stat), collapse = ", "), "\n"))
+			cat(paste("data_alpha have", ncol(self$data_alpha), "columns: ", paste0(colnames(self$data_alpha), collapse = ", "), "\n"))
+			if(!is.null(self$data_stat)) cat(paste("data_stat have", ncol(self$data_stat), "columns: ", paste0(colnames(self$data_stat), collapse = ", "), "\n"))
 			invisible(self)
 		}
 		),

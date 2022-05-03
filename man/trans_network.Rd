@@ -32,9 +32,9 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		taxa_level = "OTU", filter_thres = 0.0001)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 t1$cal_network(network_method = "SpiecEasi")
-t1$cal_network(network_method = "beemStatic")
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 t1$cal_network(network_method = "FlashWeave")
 }
 
@@ -43,6 +43,9 @@ t1$cal_network(network_method = "FlashWeave")
 ## ------------------------------------------------
 
 \donttest{
+t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		taxa_level = "OTU", filter_thres = 0.0001)
+t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
 }
 
@@ -321,9 +324,9 @@ res_network stored in object.
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		taxa_level = "OTU", filter_thres = 0.0001)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 t1$cal_network(network_method = "SpiecEasi")
-t1$cal_network(network_method = "beemStatic")
+t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 t1$cal_network(network_method = "FlashWeave")
 }
 }
@@ -367,6 +370,9 @@ res_network with modules, stored in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
+t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		taxa_level = "OTU", filter_thres = 0.0001)
+t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
 }
 }

@@ -158,9 +158,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		#' 		taxa_level = "OTU", filter_thres = 0.0001)
 		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 		#' t1$cal_network(network_method = "SpiecEasi")
-		#' t1$cal_network(network_method = "beemStatic")
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 		#' t1$cal_network(network_method = "FlashWeave")
 		#' }
 		cal_network = function(
@@ -197,6 +197,7 @@ trans_network <- R6Class(classname = "trans_network",
 					stop("Correlation table and p value table have different column numbers !")
 				}
 				raw_vector_p <- raw_p %>% as.dist %>% as.numeric
+				message("Perform p value adjustment with ", COR_p_adjust, " method ...")
 				adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
 				# to matrix
 				use_names <- colnames(raw_p)
@@ -209,6 +210,7 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 				if(COR_optimization == T) {
 					#find out threshold of correlation 
+					message("Start COR optimizing ...")
 					tc1 <- private$rmt(cortable)
 					tc1 <- ifelse(tc1 > COR_low_threshold, tc1, COR_low_threshold)
 					message("The optimized COR threshold: ", tc1, "...\n")
@@ -366,6 +368,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return res_network with modules, stored in object.
 		#' @examples
 		#' \donttest{
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		#' 		taxa_level = "OTU", filter_thres = 0.0001)
+		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 		#' t1$cal_module(method = "cluster_fast_greedy")
 		#' }
 		cal_module = function(method = "cluster_fast_greedy", module_name_prefix = "M"){
@@ -944,6 +949,9 @@ trans_network <- R6Class(classname = "trans_network",
 				nnsdpois <- density(private$nnsd(pois))
 				chival1 <- sum((nnsd1$y - nnsdpois$y)^2/nnsdpois$y/512)
 				ps <- rbind(ps, chival1)
+				if((i*100) %% 5 == 0){
+					print(i)
+				}
 			}
 			ps <- cbind(ps, c(seq(lcor, hcor, 0.01)))
 			tc <- ps[ps[,1] == min(ps[,1]), 2]

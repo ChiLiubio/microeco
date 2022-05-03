@@ -134,7 +134,7 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
 Bar plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_bar(
-  use_colors = RColorBrewer::brewer.pal(12, "Paired"),
+  color_values = RColorBrewer::brewer.pal(12, "Paired"),
   bar_type = "full",
   others_color = "grey90",
   facet = NULL,
@@ -161,7 +161,7 @@ Bar plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.}
 
 \item{\code{bar_type}}{default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.}
 
@@ -227,7 +227,7 @@ t1$plot_bar(facet = "Group", xtext_keep = FALSE)
 Plot the heatmap.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
-  use_colors = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")),
+  color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")),
   facet = NULL,
   order_facet = NULL,
   x_axis_name = NULL,
@@ -256,7 +256,7 @@ Plot the heatmap.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
+\item{\code{color_values}}{default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
 colors palette for the plotting.}
 
 \item{\code{facet}}{default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".}
@@ -327,7 +327,7 @@ t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 Box plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_box(
-  use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   group = NULL,
   show_point = FALSE,
   point_color = "black",
@@ -350,7 +350,7 @@ Box plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
 
 \item{\code{group}}{default NULL; a column name of sample table to show abundance across groups.}
 
@@ -407,7 +407,7 @@ t1$plot_box(group = "Group")
 Plot pie chart.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_pie(
-  use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   facet_nrow = 1,
   strip_text = 11,
   legend_text_italic = FALSE
@@ -417,7 +417,7 @@ Plot pie chart.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
 
 \item{\code{facet_nrow}}{default 1; how many rows in the plot.}
 

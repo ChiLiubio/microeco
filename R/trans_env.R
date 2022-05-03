@@ -461,7 +461,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$plot_ordination(plot_color = "Group")
 		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = c("point", "ellipse"))
 		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
-		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), centroid_segment_linetype = 1)
+		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
+		#' 	  centroid_segment_linetype = 1)
 		#' t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 		#' 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
 		#' }
@@ -781,7 +782,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' \donttest{
 		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
-		#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_rf$Taxa[1:40])
+		#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
 		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
@@ -1153,7 +1154,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$plot_scatterfit(x = 1, y = 2, type = "cor")
 		#' t1$plot_scatterfit(x = 1, y = 2, type = "lm", point_alpha = .3)
 		#' t1$plot_scatterfit(x = "pH", y = "TOC", type = "lm", group = "Group", line_se = FALSE)
-		#' t1$plot_scatterfit(x = dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
+		#' t1$plot_scatterfit(x = 
+		#' 	 dataset$beta_diversity$bray[rownames(t1$data_env), rownames(t1$data_env)], y = "pH")
 		#' }
 		plot_scatterfit = function(
 			x = NULL, 

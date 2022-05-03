@@ -58,9 +58,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' data(dataset)
 		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 		#' t1 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group")
-		#' t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group")
+		#' t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group", taxa_level = "Genus")
 		#' t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
-		#' t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group")
+		#' t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group", taxa_level = "Phylum")
 		#' }
 		initialize = function(
 			dataset = NULL,
@@ -504,6 +504,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
+		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 		#' t1$plot_diff_abund(use_number = 1:20)
 		#' }
 		plot_diff_abund = function(

@@ -13,10 +13,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param filter_thres default 0; the relative abundance threshold. 
 		#' @param taxa_number default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.
+		#' @param group default NULL; which group column name in sample_table is selected.
+		#' @param select_group default NULL; the group name, used following the group to filter samples.
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
-		#' @return comm and phylo_tree in object.
+		#' @return data_comm and data_tree in object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
@@ -25,13 +27,18 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			dataset = NULL,
 			filter_thres = 0,
 			taxa_number = NULL,
+			group = NULL,
+			select_group = NULL,
 			env_cols = NULL,
 			add_data = NULL,
 			complete_na = FALSE
 			){
 			use_set <- clone(dataset)
+			if(!is.null(group)){
+				use_set$sample_table <- base::subset(use_set$sample_table, use_set$sample_table[, group] %in% select_group)
+			}
 			use_set$tidy_dataset()
-			
+
 			if(!is.null(taxa_number)){
 				use_set$otu_table %<>% {.[names(sort(apply(., 1, sum), decreasing = TRUE)[1:taxa_number]), ]}
 			}else{
@@ -47,8 +54,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}else{
 				tre <- NULL
 			}
-			self$comm <- comm
-			self$phylo_tree <- tre
+			self$data_comm <- comm
+			self$data_tree <- tre
 			self$sample_table <- use_set$sample_table
 			if(!is.null(env_cols) | !is.null(add_data)){
 				if(is.null(add_data)){
@@ -86,12 +93,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			cutoff=FALSE, 
 			...
 			){
-			if(is.null(self$phylo_tree)){
+			if(is.null(self$data_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}else{
-				dis <- cophenetic(self$phylo_tree)
+				dis <- cophenetic(self$data_tree)
 			}
-			comm <- self$comm
+			comm <- self$data_comm
 			dis %<>% .[colnames(comm), colnames(comm)]
 			env_data <- self$env_data
 			comm %<>% .[rownames(env_data), ]
@@ -178,11 +185,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' t1$cal_betampd(abundance.weighted = TRUE)
 		#' }
 		cal_betampd = function(abundance.weighted = TRUE){
-			comm <- self$comm
-			if(is.null(self$phylo_tree)){
+			comm <- self$data_comm
+			if(is.null(self$data_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}else{
-				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
+				dis <- cophenetic(self$data_tree) %>% .[colnames(comm), colnames(comm)]
 			}
 			self$res_betampd <- private$betampd(comm = comm, dis = dis, abundance.weighted = abundance.weighted)
 			message('The result is stored in object$res_betampd ...')
@@ -201,14 +208,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @examples
 		#' \donttest{
 		#' t1$cal_betamntd(abundance.weighted = TRUE)
-		#' t1$cal_betamntd(abundance.weighted = TRUE, use_iCAMP = TRUE)
 		#' }
 		cal_betamntd = function(abundance.weighted = TRUE, exclude.conspecifics = FALSE, use_iCAMP = FALSE, 
 			use_iCAMP_force = TRUE, iCAMP_tempdir = NULL, ...){
-			if(is.null(self$phylo_tree)){
+			if(is.null(self$data_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
-			comm <- self$comm
+			comm <- self$data_comm
 			if(! use_iCAMP){
 				if(ncol(comm) > 5000){
 					if(use_iCAMP_force == T){
@@ -219,7 +225,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				}
 			}
 			if(use_iCAMP){
-				tree <- self$phylo_tree
+				tree <- self$data_tree
 				if(is.null(iCAMP_tempdir)){
 					iCAMP_tempdir <- tempdir()
 				}
@@ -232,7 +238,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					abundance.weighted = abundance.weighted, exclude.conspecifics = exclude.conspecifics) %>%
 					as.matrix
 			}else{
-				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
+				dis <- cophenetic(self$data_tree) %>% .[colnames(comm), colnames(comm)]
 				res_betamntd <- private$betamntd(
 					comm = comm, 
 					dis = dis,
@@ -254,7 +260,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_ses_betampd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ses_betampd(runs = 500, abundance.weighted = TRUE)
+		#' # run 50 times for the example; default 1000
+		#' t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 		#' }
 		cal_ses_betampd = function(
 			runs = 1000, 
@@ -262,12 +269,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			abundance.weighted = TRUE,
 			iterations = 1000
 			){
-			comm <- self$comm
+			comm <- self$data_comm
 			null.model <- match.arg(null.model, c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", "independentswap", "trialswap"))
-			if(is.null(self$phylo_tree)){
+			if(is.null(self$data_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}else{
-				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
+				dis <- cophenetic(self$data_tree) %>% .[colnames(comm), colnames(comm)]
 			}
 			message("---------------- ", Sys.time()," : Start ----------------")
 			cat("Calculate observed betaMPD ...\n")
@@ -305,7 +312,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_ses_betamntd in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ses_betamntd(runs = 500, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
+		#' # run 50 times for the example; default 1000
+		#' t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 		#' }
 		cal_ses_betamntd = function(
 			runs = 1000, 
@@ -318,9 +326,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			nworker = 2,
 			iterations = 1000
 			){
-			comm <- self$comm
+			comm <- self$data_comm
 			null.model <- match.arg(null.model, c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", "independentswap", "trialswap"))
-			if(is.null(self$phylo_tree)){
+			if(is.null(self$data_tree)){
 				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
 			if(! use_iCAMP){
@@ -336,7 +344,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			
 			message("---------------- ", Sys.time()," : Start ----------------")
 			if(use_iCAMP){
-				tree <- self$phylo_tree
+				tree <- self$data_tree
 				if(is.null(iCAMP_tempdir)){
 					iCAMP_tempdir <- tempdir()
 				}
@@ -359,7 +367,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 						abundance.weighted = abundance.weighted, exclude.consp = exclude.conspecifics)
 				}, simplify = "array")
 			}else{
-				dis <- cophenetic(self$phylo_tree) %>% .[colnames(comm), colnames(comm)]
+				dis <- cophenetic(self$data_tree) %>% .[colnames(comm), colnames(comm)]
 				cat("Calculate observed betaMNTD ...\n")
 				betaobs <- private$betamntd(
 					comm = comm, 
@@ -398,10 +406,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_rcbray in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_rcbray(runs = 500)
+		#' # run 50 times for the example; default 1000
+		#' t1$cal_rcbray(runs = 50)
 		#' }
 		cal_rcbray = function(runs = 1000, verbose = TRUE, null.model = "independentswap") {
-			comm <- self$comm
+			comm <- self$data_comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
 			beta_rand <- sapply(seq_len(runs), function(x){
@@ -453,15 +462,15 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to ses.mpd function in picante package.
 		#' @return res_NRI in object, equivalent to -1 times ses.mpd.
 		#' @examples
-		#' \dontrun{
+		#' \donttest{
 		#' t1$cal_NRI()
 		#' }
 		cal_NRI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
-			samp <- self$comm
-			dis <- self$dis
-			if(is.null(dis)){
-				stop("Phylogenetic distance is required! Please check the phylogenetic tree and see the phylo_tree parameter of microtable class!")
+			samp <- self$data_comm
+			if(is.null(self$data_tree)){
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
+			dis <- cophenetic(self$data_tree) %>% .[colnames(samp), colnames(samp)]
 			res <- picante::ses.mpd(samp, dis, null.model = null.model, abundance.weighted = abundance.weighted, runs = runs, ...)
 			res$NRI <- res$mpd.obs.z * (-1)
 			self$res_NRI <- res
@@ -476,15 +485,15 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to ses.mntd function in picante package.
 		#' @return res_NTI in object, equivalent to -1 times ses.mntd.
 		#' @examples
-		#' \dontrun{
+		#' \donttest{
 		#' t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
 		#' }
 		cal_NTI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
-			samp <- self$comm
-			dis <- self$dis
-			if(is.null(dis)){
-				stop("Phylogenetic distance is required! Please check the phylogenetic tree!")
+			samp <- self$data_comm
+			if(is.null(self$data_tree)){
+				stop("Phylogenetic tree is required! Please see the phylo_tree parameter of microtable class!")
 			}
+			dis <- cophenetic(self$data_tree) %>% .[colnames(samp), colnames(samp)]
 			res <- picante::ses.mntd(samp, dis, null.model = null.model, abundance.weighted = abundance.weighted, runs = runs, ...)
 			res$NTI <- res$mntd.obs.z * (-1)
 			self$res_NTI <- res
@@ -497,12 +506,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to C.score function in bipartite package.
 		#' @return results directly.
 		#' @examples
-		#' \dontrun{
+		#' \donttest{
 		#' t1$cal_Cscore()
 		#' }
 		cal_Cscore = function(by_group = NULL, ...){
-			comm <- self$comm
-			
+			comm <- self$data_comm
 			if(is.null(by_group)){
 				bipartite::C.score(comm, ...)
 			}else{
@@ -522,11 +530,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to tNST function of NST package; see the documents of tNST function for more details.
 		#' @return .
 		#' @examples
-		#' \dontrun{
+		#' \donttest{
 		#' t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 		#' }
 		cal_tNST = function(group, ...){
-			comm <- self$comm
+			comm <- self$data_comm
 			group <- self$sample_table[, group, drop = FALSE]
 			res <- NST::tNST(comm = comm, group = group, ...)
 			self$res_tNST <- res
@@ -535,11 +543,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Test the significance of NST difference between each pair of groups.
 		#'
-		#' @param method default "nst.boot"; "nst.boot" or nst.panova; see NST::nst.boot function or NST::nst.panova function for the details.
+		#' @param method default "nst.boot"; "nst.boot" or "nst.panova"; see NST::nst.boot function or NST::nst.panova function for the details.
 		#' @param ... paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"
 		#' @return .
 		#' @examples
-		#' \dontrun{
+		#' \donttest{
 		#' t1$cal_tNST_test()
 		#' }
 		cal_tNST_test = function(method = "nst.boot", ...){

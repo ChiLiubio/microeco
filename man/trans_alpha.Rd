@@ -59,14 +59,14 @@ t1$plot_alpha(measure = "Shannon", group = "Group")
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{group}}{default NULL; the sample column used for the statistics; If provided, can return alpha_stat.}
+\item{\code{group}}{default NULL; the sample column used for the statistics; If provided, can return data_stat.}
 
 \item{\code{order_x}}{default NULL; sample_table column name or a vector containg sample names; if provided, order samples by using factor.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-alpha_data and alpha_stat stored in the object.
+data_alpha and data_stat stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -156,7 +156,7 @@ Plotting the alpha diveristy.
   y_start = 1.01,
   y_increae = 0.05,
   xtext_angle = NULL,
-  xtext_size = 10,
+  xtext_size = 15,
   ytitle_size = 17,
   ...
 )}\if{html}{\out{</div>}}
@@ -192,9 +192,9 @@ this parameter is also used to label the letters of anova result with the fixed 
 
 \item{\code{xtext_angle}}{default NULL; number (e.g. 30) used to make x axis text generate angle.}
 
-\item{\code{xtext_size}}{default 10, x axis text size.}
+\item{\code{xtext_size}}{default 15; x axis text size.}
 
-\item{\code{ytitle_size}}{default 17, y axis title size.}
+\item{\code{ytitle_size}}{default 17; y axis title size.}
 
 \item{\code{...}}{parameters pass to ggpubr::ggboxplot function.}
 }

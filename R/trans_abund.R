@@ -134,7 +134,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Bar plot.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.
+		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
 		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
@@ -162,7 +162,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1$plot_bar(facet = "Group", xtext_keep = FALSE)
 		#' }
 		plot_bar = function(
-			use_colors = RColorBrewer::brewer.pal(12, "Paired"),
+			color_values = RColorBrewer::brewer.pal(12, "Paired"),
 			bar_type = "full",
 			others_color = "grey90",
 			facet = NULL,
@@ -212,7 +212,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
-			bar_colors_use <- use_colors[1:length(unique(plot_data$Taxonomy))]
+			bar_colors_use <- color_values[1:length(unique(plot_data$Taxonomy))]
 			if(any(grepl("Others", as.character(plot_data$Taxonomy)))){
 				bar_colors_use[length(bar_colors_use)] <- others_color
 			}
@@ -285,7 +285,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Plot the heatmap.
 		#'
-		#' @param use_colors default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
+		#' @param color_values default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
 		#' 	  colors palette for the plotting.
 		#' @param facet default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
@@ -316,7 +316,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 		#' }
 		plot_heatmap = function(
-			use_colors = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")), 
+			color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")), 
 			facet = NULL,
 			order_facet = NULL,
 			x_axis_name = NULL,
@@ -370,9 +370,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + geom_text(data = abund, size = plot_text_size, colour = "grey10")  
 				}
 				if (is.null(plot_breaks)){
-					p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
+					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
 				}else{
-					p <- p + scale_fill_gradientn(colours = use_colors, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
+					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
 						limits = c(min_abundance, max_abundance))
 				}
 				if(!is.null(order_facet)) {
@@ -417,7 +417,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Box plot.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
 		#' @param group default NULL; a column name of sample table to show abundance across groups.
 		#' @param show_point default FALSE; whether show points in plot.
 		#' @param point_color default "black"; If show_point TRUE; use the color
@@ -440,7 +440,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1$plot_box(group = "Group")
 		#' }
 		plot_box = function(
-			use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			group = NULL,
 			show_point = FALSE,
 			point_color = "black",
@@ -470,17 +470,17 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + coord_flip()
 			}
 			if(is.null(group)) {
-				p <- p + geom_boxplot(color = use_colors[1], ...)
+				p <- p + geom_boxplot(color = color_values[1], ...)
 			} else {
 				if(boxfill == T){
 					p <- p + geom_boxplot(aes_string(color = group, fill = group), ...)
-					p <- p + scale_fill_manual(values = use_colors)
-					p <- p + scale_color_manual(values = use_colors) + guides(color = "none")
+					p <- p + scale_fill_manual(values = color_values)
+					p <- p + scale_color_manual(values = color_values) + guides(color = "none")
 					## Change the default middle line
 					dat <- ggplot_build(p)$data[[1]]
 					p <- p + geom_segment(data=dat, aes(x=xmin, xend=xmax, y=middle, yend=middle), colour = middlecolor, size=middlesize)
 				} else {	 
-					p <- p + geom_boxplot(aes_string(color = group), ...) + scale_color_manual(values = use_colors)
+					p <- p + geom_boxplot(aes_string(color = group), ...) + scale_color_manual(values = color_values)
 				}
 			}
 			if(show_point == T){
@@ -507,7 +507,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Plot pie chart.
 		#'
-		#' @param use_colors default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
 		#' @param facet_nrow default 1; how many rows in the plot.
 		#' @param strip_text default 11; sample title size.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
@@ -518,7 +518,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1$plot_pie(facet_nrow = 1)
 		#' }
 		plot_pie = function(
-			use_colors = RColorBrewer::brewer.pal(8, "Dark2"), 
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
 			facet_nrow = 1, 
 			strip_text = 11, 
 			legend_text_italic = FALSE
@@ -533,7 +533,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				geom_bar(width = 1, stat = "identity") +
 				coord_polar("y", start=0) +
 				private$blank_theme +
-				scale_fill_manual(values = use_colors) +
+				scale_fill_manual(values = color_values) +
 				theme(axis.text.x=element_blank()) +
 				facet_wrap(~Sample, nrow = facet_nrow) +
 				theme(strip.text = element_text(size=strip_text)) +

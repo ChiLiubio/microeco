@@ -32,7 +32,7 @@ t1$cal_spe_func(fungi_database = "FungalTraits")
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_spe_func_perc(use_community = TRUE, abundance_weighted = TRUE)
+t1$cal_spe_func_perc(abundance_weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -172,27 +172,18 @@ t1$cal_spe_func(fungi_database = "FungalTraits")
 \if{html}{\out{<a id="method-cal_spe_func_perc"></a>}}
 \if{latex}{\out{\hypertarget{method-cal_spe_func_perc}{}}}
 \subsection{Method \code{cal_spe_func_perc()}}{
-Calculating the percentages of species with specific trait in communities or network modules.
-The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community or the module in the network.
+Calculating the percentages of species with specific trait in communities.
+The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community.
 So this method is a simple calculation of functional redundancy without the consideration of phylogenetic distance among taxa.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
-  use_community = TRUE,
-  abundance_weighted = FALSE,
-  node_type_table = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(abundance_weighted = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_community}}{default TRUE; whether calculate percentages for community; if FALSE, for network module.}
-
-\item{\code{abundance_weighted}}{default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. If TRUE, 
-calculate the functional individual percentage.}
-
-\item{\code{node_type_table}}{default NULL; used when use_community = FALSE; provide the node_type_table with the module information;
-there must be a colname "module" in the table; generally provide the result of trans_network$get_node_table.}
+\item{\code{abundance_weighted}}{default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
+If TRUE, calculate the functional individual percentage.}
 }
 \if{html}{\out{</div>}}
 }
@@ -202,7 +193,7 @@ res_spe_func_perc stored in the object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_spe_func_perc(use_community = TRUE, abundance_weighted = TRUE)
+t1$cal_spe_func_perc(abundance_weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}

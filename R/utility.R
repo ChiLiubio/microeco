@@ -193,12 +193,12 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 		cor_p_exp <- substitute(~italic(P)*cor_p, cor_var)
 		res <- paste0(c(cor_coef_exp, label_sep_use, cor_p_exp), collapse = "")
 	}else{
-		fit <- lm(y ~ x)
-		pvalue <- anova(fit)$`Pr(>F)`[1]
-		inte <- round(unname(coef(fit))[1], digits = lm_sec_trim)
+		fit <- stats::lm(y ~ x)
+		pvalue <- stats::anova(fit)$`Pr(>F)`[1]
+		inte <- round(unname(stats::coef(fit))[1], digits = lm_sec_trim)
 		lm_var <- list(
 			lm_a = ifelse(inte < 0, paste0(" - ", abs(inte)), paste0(" + ", as.character(inte))),
-			lm_b = round(unname(coef(fit))[2], digits = lm_fir_trim),
+			lm_b = round(unname(stats::coef(fit))[2], digits = lm_fir_trim),
 			lm_r2 = round(summary(fit)$r.squared, digits = lm_squ_trim),
 			lm_p = ifelse(pvalue < 0.0001, " < 0.0001", paste0(" = ", round(pvalue, digits = pvalue_trim)))
 			)
