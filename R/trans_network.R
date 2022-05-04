@@ -61,15 +61,15 @@ trans_network <- R6Class(classname = "trans_network",
 					dropallfactors(unfac2num = TRUE)
 				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 				env_data[] <- lapply(env_data, as.numeric)
-				self$env_data <- env_data
+				self$data_env <- env_data
 			}
 			if(taxa_level != "OTU"){
 				dataset1 <- dataset1$merge_taxa(taxa = taxa_level)
 			}
 			# transform each object
-			self$use_sampleinfo <- dataset1$sample_table
+			self$sample_table <- dataset1$sample_table
 			# store taxonomic table for the following analysis
-			self$use_tax <- dataset1$tax_table
+			self$tax_table <- dataset1$tax_table
 			use_abund <- dataset1$otu_table %>% 
 				{.[apply(., 1, sum)/sum(.) > filter_thres, ]} %>%
 				t %>%
@@ -106,7 +106,7 @@ trans_network <- R6Class(classname = "trans_network",
 				self$res_cor_p <- NULL
 			}
 			
-			self$use_abund <- use_abund
+			self$data_abund <- use_abund
 			self$taxa_level <- taxa_level
 		},
 		#' @description
@@ -147,7 +147,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   same with the t.strength parameter in showInteraction function of beemStatic package.
 		#' @param beemStatic_t_stab default 0.8; for network_method = "beemStatic"; 
 		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
-		#' @param add_taxa_name default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network node properties.
+		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
 		#' @param ... paremeters pass to spiec.easi function of SpiecEasi package when network_method = "SpiecEasi" or 
 		#'   func.EM function of beemStatic package when network_method = "beemStatic".
@@ -182,9 +182,9 @@ trans_network <- R6Class(classname = "trans_network",
 			...
 			){
 			private$check_igraph()
-			sampleinfo <- self$use_sampleinfo
+			sampleinfo <- self$sample_table
 			taxa_level <- self$taxa_level
-			taxa_table <- self$use_tax
+			taxa_table <- self$tax_table
 			
 			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "FlashWeave", "beemStatic"))
 			
@@ -236,7 +236,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(!require("SpiecEasi")){
 					stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
 				}
-				use_abund <- self$use_abund %>% as.matrix
+				use_abund <- self$data_abund %>% as.matrix
 				# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
 				network <- spiec.easi(use_abund, method = SpiecEasi_method, ...)
 				network <- adj2igraph(getRefit(network))
@@ -244,7 +244,7 @@ trans_network <- R6Class(classname = "trans_network",
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 			}
 			if(grepl("FlashWeave", network_method, ignore.case = TRUE)){
-				use_abund <- self$use_abund
+				use_abund <- self$data_abund
 				oldwd <- getwd()
 				# make sure working directory can not be changed by the function when quit.
 				on.exit(setwd(oldwd))
@@ -263,11 +263,11 @@ trans_network <- R6Class(classname = "trans_network",
 				L1 <- "using FlashWeave\n"
 				L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
 				if(FlashWeave_meta_data == T){
-					if(is.null(self$env_data)){
+					if(is.null(self$data_env)){
 						stop("FlashWeave_meta_data is TRUE, but object$env_data not found! 
 							Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
 					}
-					meta_data <- self$env_data
+					meta_data <- self$data_env
 					write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 					L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
 				}else{
@@ -295,7 +295,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(!require("beemStatic")){
 					stop("beemStatic package is not installed! See https://github.com/CSB5/BEEM-static ")
 				}
-				use_abund <- self$use_abund %>% t %>% as.data.frame
+				use_abund <- self$data_abund %>% t %>% as.data.frame
 				taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
 				message("The feature table have ", nrow(use_abund), " taxa. The taxa with the lowest occurrence frequency was ", names(taxa_low)[1], 
 					", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
@@ -334,9 +334,19 @@ trans_network <- R6Class(classname = "trans_network",
 			network %<>% delete_vertices(delete_nodes)
 			V(network)$taxa <- V(network)$name
 			if(!is.null(add_taxa_name)){
-				network <- set_vertex_attr(network, add_taxa_name, value = V(network)$name %>% 
-					taxa_table[., add_taxa_name] %>% 
-					gsub("^.__", "", .))
+				if(!is.null(taxa_table)){
+					for(i in add_taxa_name){
+						if(i %in% colnames(taxa_table)){
+							network <- set_vertex_attr(network, i, value = V(network)$name %>% 
+								taxa_table[., i] %>% 
+								gsub("^.__", "", .))
+						}else{
+							message("Skip adding taxonomy: ", i, " to node as it is not in colnames of tax_table ...")
+						}
+					}
+				}else{
+					message('Skip adding taxonomy to node as tax_table is not found ...')
+				}
 			}
 			if(taxa_level != "OTU"){
 				if(usename_rawtaxa_when_taxalevel_notOTU == T){
@@ -450,7 +460,7 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
-			use_abund <- self$use_abund
+			use_abund <- self$data_abund
 			node_table <- data.frame(name = V(network)$name) %>% `rownames<-`(.[, 1])
 			node_table$degree <- igraph::degree(network)[rownames(node_table)]
 			node_table$betweenness <- betweenness(network)[rownames(node_table)]
@@ -476,9 +486,9 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			if(self$taxa_level != "OTU"){
 				node_table %<>% cbind.data.frame(., 
-					self$use_tax[replace_table[rownames(.), 2], 1:which(colnames(self$use_tax) %in% self$taxa_level), drop = FALSE])
+					self$tax_table[replace_table[rownames(.), 2], 1:which(colnames(self$tax_table) %in% self$taxa_level), drop = FALSE])
 			}else{
-				node_table %<>% cbind.data.frame(., self$use_tax[rownames(.), ])
+				node_table %<>% cbind.data.frame(., self$tax_table[rownames(.), ])
 			}
 			
 			self$res_node_table <- node_table
@@ -648,7 +658,7 @@ trans_network <- R6Class(classname = "trans_network",
 		cal_eigen = function(){
 			private$check_igraph()
 			private$check_network()
-			use_abund <- self$use_abund
+			use_abund <- self$data_abund
 			if(is.null(self$res_node_table)){
 				message("Run get_node_table function to get the node property table ...")
 				self$get_node_table()
@@ -856,11 +866,11 @@ trans_network <- R6Class(classname = "trans_network",
 				message("Filter the taxa with NA in ", use_col, " ...")
 				res_node_table %<>% .[!is.na(.[, use_col]), ]
 			}
-			abund_table <- self$use_abund
+			abund_table <- self$data_abund
 			if(abundance == F){
 				abund_table[abund_table > 1] <- 1
 			}
-			tax_table <- self$use_tax
+			tax_table <- self$tax_table
 			feature_abund <- apply(abund_table, 2, sum)
 			tm1 <- cbind.data.frame(res_node_table[, c("name", use_col)], abund = feature_abund[res_node_table$name])
 			tm2 <- reshape2::dcast(tm1, reformulate(use_col, "name"), value.var = "abund")

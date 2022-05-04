@@ -305,7 +305,7 @@ same with the t.strength parameter in showInteraction function of beemStatic pac
 \item{\code{beemStatic_t_stab}}{default 0.8; for network_method = "beemStatic"; 
 the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.}
 
-\item{\code{add_taxa_name}}{default "Phylum"; NULL or a taxonomic rank name; used to add taxonomic rank name to network node properties.}
+\item{\code{add_taxa_name}}{default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.}
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
 
