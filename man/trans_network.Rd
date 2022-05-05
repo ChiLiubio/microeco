@@ -241,7 +241,7 @@ Calculate network based on the correlation method or SpiecEasi package or julia 
   COR_weight = TRUE,
   COR_cut = 0.6,
   COR_optimization = FALSE,
-  COR_low_threshold = 0.4,
+  COR_optimization_low_high = c(0.4, 0.8),
   SpiecEasi_method = "mb",
   FlashWeave_tempdir = NULL,
   FlashWeave_meta_data = FALSE,
@@ -284,9 +284,10 @@ Calculate network based on the correlation method or SpiecEasi package or julia 
 
 \item{\code{COR_cut}}{default 0.6; correlation coefficient threshold for the correlation network.}
 
-\item{\code{COR_optimization}}{default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113}
+\item{\code{COR_optimization}}{default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
+see https://doi.org/10.1186/1471-2105-13-113}
 
-\item{\code{COR_low_threshold}}{default 0.4; the lowest correlation coefficient threshold, only useful when COR_optimization = TRUE.}
+\item{\code{COR_optimization_low_high}}{default c(0.4, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.}
 
 \item{\code{SpiecEasi_method}}{default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.}
 

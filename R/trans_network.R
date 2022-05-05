@@ -134,8 +134,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param COR_p_adjust default "fdr"; p value adjustment method, see method of p.adjust function for available options.
 		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges; FALSE represents weight = 1 for all edges.
 		#' @param COR_cut default 0.6; correlation coefficient threshold for the correlation network.
-		#' @param COR_optimization default FALSE; whether use random matrix theory to optimize the choice of correlation coefficient, see https://doi.org/10.1186/1471-2105-13-113
-		#' @param COR_low_threshold default 0.4; the lowest correlation coefficient threshold, only useful when COR_optimization = TRUE.
+		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
+		#' 	  see https://doi.org/10.1186/1471-2105-13-113
+		#' @param COR_optimization_low_high default c(0.4, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
 		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
@@ -170,7 +171,7 @@ trans_network <- R6Class(classname = "trans_network",
 			COR_weight = TRUE,
 			COR_cut = 0.6,
 			COR_optimization = FALSE,
-			COR_low_threshold = 0.4,
+			COR_optimization_low_high = c(0.4, 0.8),
 			SpiecEasi_method = "mb",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
@@ -211,8 +212,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(COR_optimization == T) {
 					#find out threshold of correlation 
 					message("Start COR optimizing ...")
-					tc1 <- private$rmt(cortable)
-					tc1 <- ifelse(tc1 > COR_low_threshold, tc1, COR_low_threshold)
+					tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2])
 					message("The optimized COR threshold: ", tc1, "...\n")
 				}
 				else {
@@ -586,8 +586,10 @@ trans_network <- R6Class(classname = "trans_network",
 				network <- self$res_network
 				g <- igraph::plot.igraph(network, ...)
 			}else{
-				message("Run get_node_table function to get or update the node property table ...")
-				self$get_node_table()
+				if(is.null(self$res_node_table)){
+					message("Run get_node_table function to obtain the node property table ...")
+					self$get_node_table()
+				}
 				node_table <- self$res_node_table
 				if(!is.null(node_color)){
 					if(node_color == "module"){
@@ -946,25 +948,30 @@ trans_network <- R6Class(classname = "trans_network",
 			res
 		},
 		# RMT optimization
-		rmt = function(cormat, lcor = 0.4, hcor = 0.8){
+		rmt = function(cormat, low_thres = 0.4, high_thres = 0.8){
 			s <- seq(0, 3, 0.1)
 			pois <- exp(-s)
-			ps <- NULL  
-			for(i in seq(lcor, hcor, 0.01)){
+			ps <- c()
+			seq_value <- c()
+			for(i in seq(low_thres, high_thres, 0.01)){
 				cormat1 <- abs(cormat)
 				cormat1[cormat1 < i] <- 0  
 				eigen_res <- sort(eigen(cormat1)$value)
-				ssp <- smooth.spline(eigen_res, control.spar = list(low = 0, high = 3)) 
+				check_res <- tryCatch(ssp <- smooth.spline(eigen_res, control.spar = list(low = 0, high = 3)), error = function(e) { skip_to_next <- TRUE})
+				if(rlang::is_true(check_res)) {
+					next
+				}
 				nnsd1 <- density(private$nnsd(ssp$y))
 				nnsdpois <- density(private$nnsd(pois))
 				chival1 <- sum((nnsd1$y - nnsdpois$y)^2/nnsdpois$y/512)
-				ps <- rbind(ps, chival1)
+				ps <- c(ps, chival1)
+				seq_value <- c(seq_value, i)
 				if((i*100) %% 5 == 0){
 					print(i)
 				}
 			}
-			ps <- cbind(ps, c(seq(lcor, hcor, 0.01)))
-			tc <- ps[ps[,1] == min(ps[,1]), 2]
+			res <- data.frame(ps, seq_value)
+			tc <- res[which.min(res[, 1]), 2]
 			tc
 		},
 		nnsd = function(x){
