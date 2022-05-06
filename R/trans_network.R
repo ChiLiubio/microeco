@@ -243,7 +243,7 @@ trans_network <- R6Class(classname = "trans_network",
 				V(network)$name <- colnames(use_abund)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 			}
-			if(grepl("FlashWeave", network_method, ignore.case = TRUE)){
+			if(network_method == "FlashWeave"){
 				use_abund <- self$data_abund
 				oldwd <- getwd()
 				# make sure working directory can not be changed by the function when quit.
@@ -284,6 +284,11 @@ trans_network <- R6Class(classname = "trans_network",
 				write(L, file = openfile)
 				close(openfile)
 				message("The temporary files are in ", tem_dir, " ...")
+				message("Check Julia ...")
+				check_out <- system(command = "julia -help", intern = TRUE)
+				if(length(check_out) == 0){
+					stop("Julia language not found in the system path! Install it from https://julialang.org/downloads/ and add bin directory to the path!")
+				}
 				message("Run the FlashWeave ...")
 				system("julia calculate_network.jl")
 				network <- read_graph("network_FlashWeave.gml", format = "gml")
