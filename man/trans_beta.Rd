@@ -39,7 +39,7 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 ## Method `trans_beta$cal_manova`
 ## ------------------------------------------------
 
-t1$cal_manova(cal_manova_all = TRUE)
+t1$cal_manova(manova_all = TRUE)
 
 ## ------------------------------------------------
 ## Method `trans_beta$cal_betadisper`
@@ -281,7 +281,7 @@ res_manova stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_manova(cal_manova_all = TRUE)
+\preformatted{t1$cal_manova(manova_all = TRUE)
 }
 \if{html}{\out{</div>}}
 

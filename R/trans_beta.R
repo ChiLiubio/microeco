@@ -272,7 +272,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ... parameters passed to \code{\link{adonis2}} function of vegan package.
 		#' @return res_manova stored in object.
 		#' @examples
-		#' t1$cal_manova(cal_manova_all = TRUE)
+		#' t1$cal_manova(manova_all = TRUE)
 		cal_manova = function(
 			manova_all = TRUE,
 			manova_set = NULL,
