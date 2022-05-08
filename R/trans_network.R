@@ -773,7 +773,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return a new network
 		#' @examples
 		#' \donttest{
-		#' t1$subset_network(node = t1$res_node_table %>% .[.$module == "M1", ] %>% 
+		#' t1$subset_network(node = t1$res_node_table %>% base::subset(module == "M1") %>% 
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }

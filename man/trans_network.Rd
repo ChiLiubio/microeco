@@ -120,7 +120,7 @@ t1$plot_taxa_roles(roles_color_background = FALSE)
 ## ------------------------------------------------
 
 \donttest{
-t1$subset_network(node = t1$res_node_table \%>\% .[.$module == "M1", ] \%>\% 
+t1$subset_network(node = t1$res_node_table \%>\% base::subset(module == "M1") \%>\% 
   rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
 }
@@ -729,7 +729,7 @@ a new network
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$subset_network(node = t1$res_node_table \%>\% .[.$module == "M1", ] \%>\% 
+t1$subset_network(node = t1$res_node_table \%>\% base::subset(module == "M1") \%>\% 
   rownames, rm_single = TRUE)
 # return a sub network that contains all nodes of module M1
 }

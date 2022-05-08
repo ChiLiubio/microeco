@@ -625,10 +625,11 @@ trans_func <- R6Class(classname = "trans_func",
 
 			# Reading and filtering the otu table
 			otu_table <- self$otu_table %>% tibble::rownames_to_column()
-			otu_table_reduced <- merge(x = ref_blast_result_reduced, y = otu_table, by.x = "V1", by.y = "rowname")[,-1]
+			# for the taxa mapping
+			raw_otu_table_reduced <- merge(x = ref_blast_result_reduced, y = otu_table, by.x = "V1", by.y = "rowname")
+			otu_table_reduced <- raw_otu_table_reduced[, -1]
+			# for the calculation
 			otu_table_reduced_aggregated <- aggregate(x = otu_table_reduced[, -1, drop = FALSE], by = list(otu_table_reduced[,1]), sum)
-			message('otu_table_reduced_aggregated is stored in object$res_tax4fun2_otu_table_reduced_aggregated!')
-			self$res_tax4fun2_otu_table_reduced_aggregated <- otu_table_reduced_aggregated
 
 			# Write unknown fraction to log file
 			if((ncol(otu_table) - 1) == 1){
@@ -661,15 +662,18 @@ trans_func <- R6Class(classname = "trans_func",
 				reference_profile <- rbind(reference_profile, as.numeric(reference_file[, n]))
 			}
 			
-			self$res_tax4fun2_reference_profile <- reference_profile
-			message('Reference profile file is stored in object$res_tax4fun2_reference_profile!')
-			
 			# all the required KEGG files are stored in Tax4Fun2_KEGG Rdata
 			data("Tax4Fun2_KEGG", envir=environment())
 			ko_list <- Tax4Fun2_KEGG$ko_list
+
+			map_reference_profile <- data.frame(id = otu_table_reduced_aggregated$Group.1, reference_profile)
+			res_tax4fun2_reference_profile <- dplyr::left_join(raw_otu_table_reduced[, 1:2], map_reference_profile, by = c("V2" = "id"))
+			colnames(res_tax4fun2_reference_profile) <- c("Taxa", "id", ko_list$ko)
+			write.table(res_tax4fun2_reference_profile, file.path(path_to_temp_folder, 'res_tax4fun2_reference_profile.tsv'), sep = "\t")
+			message("Reference profile file is saved in ", file.path(path_to_temp_folder, "res_tax4fun2_reference_profile.tsv"), " ...")
 			
 			# Calculate functional profiles sample-wise
-			message('Generating functional profile for samples')
+			message('Generating functional profile for samples ...')
 			functional_prediction = NULL
 			for(sample_num in 2:ncol(otu_table_reduced_aggregated)){
 				functional_prediction_sample <- reference_profile * as.numeric(otu_table_reduced_aggregated[, sample_num])
