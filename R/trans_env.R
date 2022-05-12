@@ -433,7 +433,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param point_alpha default .8; point transparency in plot when "point" is in plot_type.
 		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in plot_type.
 		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in plot_type.
-		#' @param centroid_segment_linetype default 3; the line type related with centroid in plot when "centroid" is in plot_type.
+		#' @param centroid_segment_linetype default 3; an integer; the line type related with centroid in plot when "centroid" is in plot_type.
 		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
 		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.

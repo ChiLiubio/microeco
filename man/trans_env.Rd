@@ -492,7 +492,7 @@ plot ordination result.
 
 \item{\code{centroid_segment_size}}{default 1; segment size in plot when "centroid" is in plot_type.}
 
-\item{\code{centroid_segment_linetype}}{default 3; the line type related with centroid in plot when "centroid" is in plot_type.}
+\item{\code{centroid_segment_linetype}}{default 3; an integer; the line type related with centroid in plot when "centroid" is in plot_type.}
 
 \item{\code{ellipse_chull_fill}}{default TRUE; whether fill colors to the area of ellipse or chull.}
 

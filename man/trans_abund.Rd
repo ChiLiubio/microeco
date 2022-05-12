@@ -45,6 +45,15 @@ t1$plot_box(group = "Group")
 }
 
 ## ------------------------------------------------
+## Method `trans_abund$plot_line`
+## ------------------------------------------------
+
+\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
+t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
+}
+
+## ------------------------------------------------
 ## Method `trans_abund$plot_pie`
 ## ------------------------------------------------
 
@@ -60,6 +69,7 @@ t1$plot_pie(facet_nrow = 1)
 \item \href{#method-plot_bar}{\code{trans_abund$plot_bar()}}
 \item \href{#method-plot_heatmap}{\code{trans_abund$plot_heatmap()}}
 \item \href{#method-plot_box}{\code{trans_abund$plot_box()}}
+\item \href{#method-plot_line}{\code{trans_abund$plot_line()}}
 \item \href{#method-plot_pie}{\code{trans_abund$plot_pie()}}
 \item \href{#method-print}{\code{trans_abund$print()}}
 \item \href{#method-clone}{\code{trans_abund$clone()}}
@@ -153,7 +163,6 @@ Bar plot.
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
   ytitle_size = 17,
-  base_font = NULL,
   ylab_title = NULL
 )}\if{html}{\out{</div>}}
 }
@@ -200,8 +209,6 @@ use this parameter, please first install package ggh4x using install.packages("g
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
-\item{\code{base_font}}{default NULL; ggplot font family in the plot.}
-
 \item{\code{ylab_title}}{default NULL; y axis title.}
 }
 \if{html}{\out{</div>}}
@@ -247,7 +254,6 @@ Plot the heatmap.
   xtitle_keep = TRUE,
   grid_clean = TRUE,
   xtext_type_hor = TRUE,
-  base_font = NULL,
   pheatmap = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -297,8 +303,6 @@ colors palette for the plotting.}
 
 \item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
 
-\item{\code{base_font}}{default NULL; font in the plot.}
-
 \item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 
 \item{\code{...}}{paremeters pass to pheatmap when pheatmap = TRUE.}
@@ -342,7 +346,6 @@ Box plot.
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
   ytitle_size = 17,
-  base_font = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -380,8 +383,6 @@ Box plot.
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
-\item{\code{base_font}}{default NULL; font in the plot.}
-
 \item{\code{...}}{parameters pass to \code{\link{geom_boxplot}}.}
 }
 \if{html}{\out{</div>}}
@@ -393,6 +394,72 @@ ggplot2 plot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_box(group = "Group")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_line"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_line}{}}}
+\subsection{Method \code{plot_line()}}{
+Plot the line chart.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_line(
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  plot_SE = TRUE,
+  position = position_dodge(0.1),
+  errorbar_size = 1,
+  point_size = 3,
+  point_alpha = 0.8,
+  line_size = 0.8,
+  line_alpha = 0.8,
+  line_type = 1,
+  xtext_type_hor = FALSE,
+  xtext_size = 10,
+  ytitle_size = 17
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
+
+\item{\code{plot_SE}}{default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.}
+
+\item{\code{position}}{default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.}
+
+\item{\code{errorbar_size}}{default 1; errorbar size.}
+
+\item{\code{point_size}}{default 3; point size for taxa.}
+
+\item{\code{point_alpha}}{default 0.8; point transparency.}
+
+\item{\code{line_size}}{default 0.8; line size.}
+
+\item{\code{line_alpha}}{default 0.8; line transparency.}
+
+\item{\code{line_type}}{default 1; an integer; line type.}
+
+\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+
+\item{\code{xtext_size}}{default 10; x axis text size.}
+
+\item{\code{ytitle_size}}{default 17; y axis title size.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
+t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
 }
 }
 \if{html}{\out{</div>}}

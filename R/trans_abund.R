@@ -79,20 +79,22 @@ trans_abund <- R6Class(classname = "trans_abund",
 			abund_data %<>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
 				dplyr::summarise(Abundance = sum(Abundance)) %>%
 				as.data.frame(stringsAsFactors = FALSE)
+			
+			# add sample table
+			abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))}
 			# calculate mean vlaues for each group
 			if(!is.null(groupmean)){
 				message(paste0(groupmean, " column is used to calculate mean abundance ..."))
-				abund_data$Sample %<>% as.character
-				abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))} %>%
-					dplyr::group_by(!!! syms(c("Taxonomy", groupmean))) %>% 
-					dplyr::summarise(Abundance = mean(Abundance)) %>% 
-					as.data.frame
+				# abund_data[, groupmean] %<>% as.character
+				abund_data <- microeco:::summarySE_inter(abund_data, measurevar = "Abundance", groupvars = c("Taxonomy", groupmean))
+				colnames(abund_data)[colnames(abund_data) == "Mean"] <- "Abundance"
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
-			}else{
-				abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))}
+				if(is.factor(sample_table[, groupmean])){
+					abund_data$Sample %<>% factor(., levels = levels(sample_table[, groupmean]))
+				}
 			}
-			abund_data$Taxonomy %<>% as.character
 			# sort according to the abundance
+			abund_data$Taxonomy %<>% as.character
 			mean_abund <- tapply(abund_data$Abundance, abund_data$Taxonomy, FUN = mean)
 			use_taxanames <- as.character(rev(names(sort(mean_abund))))
 			if(!is.null(ntaxa)){
@@ -117,6 +119,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
 				if(use_percentage == T){
 					abund_data$Abundance %<>% {. * 100}
+					if("SE" %in% colnames(abund_data)) abund_data$SE %<>% {. * 100}
+					if("SD" %in% colnames(abund_data)) abund_data$SD %<>% {. * 100}
 					ylabname <- "Relative abundance (%)"
 				}else{
 					ylabname <- "Relative abundance"
@@ -154,7 +158,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
-		#' @param base_font default NULL; ggplot font family in the plot.
 		#' @param ylab_title default NULL; y axis title.
 		#' @return ggplot2 plot. 
 		#' @examples
@@ -181,7 +184,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
 			ytitle_size = 17,
-			base_font = NULL,
 			ylab_title = NULL
 			){
 			plot_data <- self$data_abund
@@ -273,9 +275,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(xtitle_keep == F) {
 				p <- p + theme(axis.title.x = element_blank())
 			}
-			if(!is.null(base_font)){
-				p <- p + theme(text=element_text(family=base_font))
-			}
 			p <- p + guides(fill=guide_legend(title=self$taxrank))
 			if(use_alluvium){
 			p <- p + guides(color = guide_legend(title=self$taxrank))
@@ -306,7 +305,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param grid_clean default TRUE; whether remove grid lines.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-		#' @param base_font default NULL; font in the plot.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param ... paremeters pass to pheatmap when pheatmap = TRUE.
 		#' @return ggplot2 plot or grid plot based on pheatmap.
@@ -336,7 +334,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtitle_keep = TRUE,
 			grid_clean = TRUE,
 			xtext_type_hor = TRUE,
-			base_font =NULL,
 			pheatmap = FALSE,
 			...
 			){
@@ -392,9 +389,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 				if(grid_clean){
 					p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
-				}			
-				if(!is.null(base_font)){
-					p <- p + theme(text=element_text(family=base_font))
 				}
 				p
 			} else {
@@ -432,7 +426,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
-		#' @param base_font default NULL; font in the plot.
 		#' @param ... parameters pass to \code{\link{geom_boxplot}}.
 		#' @return ggplot2 plot. 
 		#' @examples
@@ -455,7 +448,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
 			ytitle_size = 17,
-			base_font =NULL,
 			...
 			){
 			plot_data <- self$data_abund
@@ -496,12 +488,67 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(xtitle_keep == F) {
 				p <- p + theme(axis.title.x = element_blank())
 			}
-			if(!is.null(base_font)){
-				p <- p + theme(text=element_text(family=base_font))
-			}
 			if(!is.null(group)) {
 				p <- p + guides(fill=guide_legend(title=group))
 			}
+			p
+		},
+		#' @description
+		#' Plot the line chart.
+		#'
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param plot_SE default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.
+		#' @param position default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.
+		#' @param errorbar_size default 1; errorbar size.
+		#' @param point_size default 3; point size for taxa.
+		#' @param point_alpha default 0.8; point transparency.
+		#' @param line_size default 0.8; line size.
+		#' @param line_alpha default 0.8; line transparency.
+		#' @param line_type default 1; an integer; line type.
+		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_size default 10; x axis text size.
+		#' @param ytitle_size default 17; y axis title size.
+		#' @return ggplot2 plot. 
+		#' @examples
+		#' \donttest{
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
+		#' t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
+		#' }
+		plot_line = function(
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			plot_SE = TRUE,
+			position = position_dodge(0.1),
+			errorbar_size = 1,
+			point_size = 3,
+			point_alpha = 0.8,
+			line_size = 0.8, 
+			line_alpha = 0.8, 
+			line_type = 1,
+			xtext_type_hor = FALSE,
+			xtext_size = 10,
+			ytitle_size = 17
+			){
+			plot_data <- self$data_abund
+			use_taxanames <- self$data_taxanames
+
+			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
+			plot_data$Taxonomy %<>% factor(., levels = use_taxanames)
+						
+			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", color = "Taxonomy", group = "Taxonomy"))
+			if(("SE" %in% colnames(plot_data)) & plot_SE){
+				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), width = .1, position = position, size = errorbar_size)
+			}else{
+				if(("SD" %in% colnames(plot_data)) & plot_SE){
+					p <- p + geom_errorbar(aes(ymin = Abundance - SD, ymax = Abundance + SD), width = .1, position = position, size = errorbar_size)
+				}
+			}
+			p <- p + geom_point(size = point_size, alpha = point_alpha, position = position)
+			p <- p + geom_line(size = line_size, alpha = line_alpha, linetype = line_type, position = position)
+			p <- p + ylab(self$ylabname) + guides(col = guide_legend(title=self$taxrank, reverse = TRUE)) + xlab("")
+			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
+			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
+			p <- p + scale_color_manual(values = color_values)
+			
 			p
 		},
 		#' @description
