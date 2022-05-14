@@ -447,7 +447,7 @@ trans_func <- R6Class(classname = "trans_func",
 			output <- file(pathfilename, open = "wb")
 			# must write this line, otherwise sample line will disappear
 			cat("# Constructed from biom file\n", file = output)
-			write.table(otu_file, file = output, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE)
+			suppressWarnings(write.table(otu_file, file = output, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE))
 			close(output)
 
 			x1 <- importQIIMEData(pathfilename)
