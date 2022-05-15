@@ -183,7 +183,14 @@ Plotting the abundance of differential taxa.
   group_order = NULL,
   barwidth = 0.9,
   use_se = TRUE,
-  text_y_size = 10
+  add_sig = FALSE,
+  add_sig_label = "Significance",
+  add_sig_label_color = "black",
+  add_sig_tip_length = 0.01,
+  y_start = 1.01,
+  y_increase = 0.05,
+  text_y_size = 10,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -214,7 +221,22 @@ If provided, overlook the levels in the group of sample_table.}
 
 \item{\code{use_se}}{default TRUE; whether use SE in plot, if FALSE, use SD.}
 
+\item{\code{add_sig}}{default FALSE; whether add the significance label to the plot.}
+
+\item{\code{add_sig_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
+
+\item{\code{add_sig_label_color}}{default "black"; the color for the label text when add_sig = TRUE.}
+
+\item{\code{add_sig_tip_length}}{default 0.01; the tip length for the added line when add_sig = TRUE.}
+
+\item{\code{y_start}}{default 1.01; the y axis value from which to add the label; the default 1.01 means 1.01 * max(values).}
+
+\item{\code{y_increase}}{default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
+this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start space.}
+
 \item{\code{text_y_size}}{default 10; the size for the y axis text.}
+
+\item{\code{...}}{parameters passed to ggsignif::stat_signif when add_sig = TRUE.}
 }
 \if{html}{\out{</div>}}
 }

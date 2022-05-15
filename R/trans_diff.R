@@ -423,6 +423,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					group_select <- unlist(strsplit(output[x, "Comparison"], split = " - "))
 					ifelse(output[x, "mean(group1)"] > output[x, "mean(group2)"], group_select[1], group_select[2])
 				}) %>% unlist
+				output$Significance <- cut(output$qvalue, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 				output <- data.frame(output, Group = max_group)
 				self$res_diff <- output
 				message('The metastat result is stored in object$res_diff ...')
@@ -500,7 +501,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  If provided, overlook the levels in the group of sample_table.
 		#' @param barwidth default 0.9; the bar width in plot.
 		#' @param use_se default TRUE; whether use SE in plot, if FALSE, use SD.
+		#' @param add_sig default FALSE; whether add the significance label to the plot.
+		#' @param add_sig_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
+		#' @param add_sig_label_color default "black"; the color for the label text when add_sig = TRUE.
+		#' @param add_sig_tip_length default 0.01; the tip length for the added line when add_sig = TRUE.
+		#' @param y_start default 1.01; the y axis value from which to add the label; the default 1.01 means 1.01 * max(values).
+		#' @param y_increase default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
+		#' 	  this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start space.
 		#' @param text_y_size default 10; the size for the y axis text.
+		#' @param ... parameters passed to ggsignif::stat_signif when add_sig = TRUE.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -517,7 +526,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 			group_order = NULL,
 			barwidth = 0.9,
 			use_se = TRUE,
-			text_y_size = 10
+			add_sig = FALSE,
+			add_sig_label = "Significance",
+			add_sig_label_color = "black",
+			add_sig_tip_length = 0.01,
+			y_start = 1.01,
+			y_increase = 0.05,
+			text_y_size = 10,
+			...
 			){
 			abund_data <- self$res_abund
 			method <- self$method
@@ -532,13 +548,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(method == "metastat"){
 						message('Reorder taxa according to qvalue in res_diff from low to high ...')
 						diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
-						diff_data %<>% .[.$qvalue < 0.05, ]
+						# diff_data %<>% .[.$qvalue < 0.05, ]
 					}else{
 						# lefse and rf are ordered
 						if(! method %in% c("lefse", "rf")){
 							message('Reorder taxa according to P.adj in res_diff from low to high ...')
 							diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
-							diff_data %<>% .[.$P.adj < 0.05, ]
+							# diff_data %<>% .[.$P.adj < 0.05, ]
 						}
 					}
 				}
@@ -566,10 +582,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				abund_data$Taxa %<>% gsub(".__", "", .)
 			}
 			if(is.null(select_taxa)){
-				if(length(use_number) > nrow(diff_data)){
-					use_number <- 1:nrow(diff_data)
+				if(length(use_number) > length(unique(as.character(diff_data$Taxa)))){
+					message("The length of use_number is larger than taxa number in object$diff_data. Use all taxa ...")
+					use_number <- 1:length(unique(as.character(diff_data$Taxa)))
 				}
-				diff_data %<>% .[use_number, ]
+				diff_data %<>% .[.$Taxa %in% unique(as.character(diff_data$Taxa))[use_number], ]
 				diff_data$Taxa %<>% factor(., levels = rev(unique(as.character(.))))
 			}else{
 				diff_data %<>% .[.$Taxa %in% select_taxa, ]
@@ -595,12 +612,60 @@ trans_diff <- R6Class(classname = "trans_diff",
 				color_values %<>% .[1:length(levels(abund_data$Group))] %>% rev
 			}
 			
-			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group, group = Group)) +
+			# get labels info
+			if(add_sig){
+				if(use_se){
+					y_start <- max((abund_data$Mean + abund_data$SE)) * y_start
+				}else{
+					y_start <- max((abund_data$Mean + abund_data$SD)) * y_start
+				}
+				annotations <- c()
+				x_min <- c()
+				x_max <- c()
+				y_position <- c()
+				# assign labels by factor orders
+				x_axis_order <- levels(abund_data$Group)
+				start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
+				increase_bar_mid <- barwidth/length(x_axis_order)
+				all_taxa <- levels(abund_data$Taxa)
+				if(! add_sig_label %in% colnames(diff_data)){
+					stop("add_sig_label parameter must be one of colnames of object$res_diff!")
+				}
+				if(is.factor(diff_data[, add_sig_label])){
+					diff_data[, add_sig_label] %<>% as.character
+				}
+				for(j in all_taxa){
+					select_use_diff_data <- diff_data %>% dropallfactors %>% .[.$Taxa == j, ]
+					for(i in seq_len(nrow(select_use_diff_data))){
+						# first determine the bar range
+						mid_num <- match(j, all_taxa) - 1
+						annotations %<>% c(., select_use_diff_data[i, add_sig_label])
+						x_min %<>% c(., mid_num + 
+							(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\1", select_use_diff_data[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
+						x_max %<>% c(., mid_num + 
+							(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\2", select_use_diff_data[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
+						y_position %<>% c(., y_start * (1 + i * y_increase))
+					}
+				}
+			}
+			
+			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group)) +
 				geom_bar(stat="identity", position = position_dodge(), width = barwidth)
 			if(use_se == T){
 				p <- p + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(barwidth), color = "black")
 			}else{
 				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
+			}
+			if(add_sig){
+				p <- p + ggsignif::geom_signif(
+					annotations = annotations,
+					y_position = y_position, 
+					xmin = x_min, 
+					xmax = x_max,
+					color = add_sig_label_color,
+					tip_length = add_sig_tip_length,
+					...
+					)
 			}
 			p <- p + theme_bw() +
 				coord_flip() +
