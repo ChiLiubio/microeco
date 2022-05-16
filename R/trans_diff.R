@@ -144,7 +144,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				# differential test
 				group_vec <- sampleinfo[, group] %>% as.factor
 				message("Start differential test for ", group, " ...")
-				res_class <- lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec))
+				res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec)))
+				
 				pvalue_raw <- unlist(lapply(res_class, function(x) x$p_value))
 				names(pvalue_raw) <- rownames(abund_table)
 				pvalue_raw[is.nan(pvalue_raw)] <- 1
@@ -1075,47 +1076,27 @@ trans_diff <- R6Class(classname = "trans_diff",
 		}
 		),
 	private = list(
-		# group test in lefse or rf
-		test_mark = function(dataframe, group, nonpara = TRUE, para = "anova", min_num_nonpara = 1){
+		# group test for lefse or rf
+		test_mark = function(dataframe, group, min_num_nonpara = 1){
 			d1 <- as.data.frame(t(dataframe))
-			# check normality for parametric test
-			if(nonpara == F){
-				num_vals <- as.numeric(d1[,1])
-				#shapiro test function
-				if(length(unique((num_vals[!is.na(num_vals)]))) > 3 & length(unique((num_vals[!is.na(num_vals)]))) < 5000 ){
-					d1.shapiro <- shapiro.test(num_vals)$p.value
-					if(d1.shapiro > 0.05){
-						nonpara = F
-					}
-				}else{
-					message("It was impossible to verify the normality of the taxa ", colnames(d1)[1], " !")
-				}
-			}
-			if(nonpara == T){
-				if(any(table(as.character(group))) < min_num_nonpara){
-					list(p_value = NA, med = NA)
-				}else{
-					if(length(unique(as.character(group))) == 2){
-						res1 <- wilcox.test(d1[,1], g = group)
-					}else{
-						res1 <- kruskal.test(d1[,1], g = group)
-					}
-					if(is.nan(res1$p.value)){
-						res1$p.value <- 1
-					}
-					med <- tapply(d1[,1], group, median) %>% as.data.frame
-					colnames(med) <- colnames(d1)
-					list(p_value = res1$p.value, med = med)
-				}
+			taxaname <- colnames(d1)[1]
+			d1$Group <- group
+			colnames(d1)[1] <- "Value"
+			formu <- reformulate("Group", "Value")
+			if(any(table(as.character(group))) < min_num_nonpara){
+				list(p_value = NA, med = NA)
 			}else{
-				# Currently, anova is not used in the whole class
-				if(para == "anova"){
-					colnames(d1)[1] <- "Abundance"
-					d2 <- cbind.data.frame(d1, Group = group)
-					res1 <- aov(Abundance ~ Group, d2)
-					pvalue <- as.numeric(unlist(summary(res1))[9])
-					list(p_value = pvalue)
+				if(length(unique(as.character(group))) == 2){
+					res1 <- wilcox.test(formula = formu, data = d1)
+				}else{
+					res1 <- kruskal.test(formula = formu, data = d1)
 				}
+				if(is.nan(res1$p.value)){
+					res1$p.value <- 1
+				}
+				med <- tapply(d1[,1], group, median) %>% as.data.frame
+				colnames(med) <- taxaname
+				list(p_value = res1$p.value, med = med)
 			}
 		},
 		# generate the cladogram annotation table
