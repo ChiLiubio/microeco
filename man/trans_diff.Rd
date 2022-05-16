@@ -34,6 +34,13 @@ t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group", tax
 \donttest{
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "anova", group = "Group", taxa_level = "Genus")
+t1$plot_diff_abund(use_number = 1:10)
+t1$plot_diff_abund(use_number = 1:10, add_sig = TRUE)
 }
 
 ## ------------------------------------------------
@@ -248,6 +255,13 @@ ggplot.
 \preformatted{\donttest{
 t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
 t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "anova", group = "Group", taxa_level = "Genus")
+t1$plot_diff_abund(use_number = 1:10)
+t1$plot_diff_abund(use_number = 1:10, add_sig = TRUE)
 }
 }
 \if{html}{\out{</div>}}
