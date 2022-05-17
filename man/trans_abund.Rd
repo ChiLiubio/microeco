@@ -49,6 +49,8 @@ t1$plot_box(group = "Group")
 ## ------------------------------------------------
 
 \donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5)
+t1$plot_line(point_size = 3)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
 t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
 }
@@ -458,6 +460,8 @@ ggplot2 plot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5)
+t1$plot_line(point_size = 3)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
 t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
 }

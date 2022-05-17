@@ -32,15 +32,15 @@ t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group", tax
 ## ------------------------------------------------
 
 \donttest{
-t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
-t1$plot_diff_abund(use_number = 1:20)
-t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
-t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
-t1$plot_diff_abund(use_number = 1:20)
-t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 t1 <- trans_diff$new(dataset = dataset, method = "anova", group = "Group", taxa_level = "Genus")
 t1$plot_diff_abund(use_number = 1:10)
 t1$plot_diff_abund(use_number = 1:10, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 }
 
 ## ------------------------------------------------
@@ -198,6 +198,7 @@ Plotting the abundance of differential taxa.
   y_start = 1.01,
   y_increase = 0.05,
   text_y_size = 10,
+  coord_flip = TRUE,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -237,12 +238,16 @@ If provided, overlook the levels in the group of sample_table.}
 
 \item{\code{add_sig_tip_length}}{default 0.01; the tip length for the added line when add_sig = TRUE.}
 
-\item{\code{y_start}}{default 1.01; the y axis value from which to add the label; the default 1.01 means 1.01 * max(values).}
+\item{\code{y_start}}{default 1.01; the y axis position from which to add the label; the default 1.01 means 1.01 * Value;
+For method != "anova", all the start positions are same, i.e. Value = max(Mean+SD or Mean+SE); 
+For method = "anova"; the stat position is calculated for each point, i.e. Value = Mean+SD or Mean+SE.}
 
-\item{\code{y_increase}}{default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
-this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start space.}
+\item{\code{y_increase}}{default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
+In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.}
 
 \item{\code{text_y_size}}{default 10; the size for the y axis text.}
+
+\item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.}
 
 \item{\code{...}}{parameters passed to ggsignif::stat_signif when add_sig = TRUE.}
 }
@@ -254,15 +259,15 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
-t1$plot_diff_abund(use_number = 1:20)
-t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
-t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
-t1$plot_diff_abund(use_number = 1:20)
-t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 t1 <- trans_diff$new(dataset = dataset, method = "anova", group = "Group", taxa_level = "Genus")
 t1$plot_diff_abund(use_number = 1:10)
 t1$plot_diff_abund(use_number = 1:10, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+t1$plot_diff_abund(use_number = 1:20)
+t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 }
 }
 \if{html}{\out{</div>}}

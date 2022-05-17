@@ -511,6 +511,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @return ggplot2 plot. 
 		#' @examples
 		#' \donttest{
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5)
+		#' t1$plot_line(point_size = 3)
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
 		#' t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
 		#' }

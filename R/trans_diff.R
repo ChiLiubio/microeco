@@ -524,23 +524,26 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param add_sig_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
 		#' @param add_sig_label_color default "black"; the color for the label text when add_sig = TRUE.
 		#' @param add_sig_tip_length default 0.01; the tip length for the added line when add_sig = TRUE.
-		#' @param y_start default 1.01; the y axis value from which to add the label; the default 1.01 means 1.01 * max(values).
-		#' @param y_increase default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
-		#' 	  this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start space.
+		#' @param y_start default 1.01; the y axis position from which to add the label; the default 1.01 means 1.01 * Value;
+		#'   For method != "anova", all the start positions are same, i.e. Value = max(Mean+SD or Mean+SE); 
+		#'   For method = "anova"; the stat position is calculated for each point, i.e. Value = Mean+SD or Mean+SE.
+		#' @param y_increase default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
+		#' 	  In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.
 		#' @param text_y_size default 10; the size for the y axis text.
+		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.
 		#' @param ... parameters passed to ggsignif::stat_signif when add_sig = TRUE.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
-		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
-		#' t1$plot_diff_abund(use_number = 1:20)
-		#' t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
-		#' t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
-		#' t1$plot_diff_abund(use_number = 1:20)
-		#' t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 		#' t1 <- trans_diff$new(dataset = dataset, method = "anova", group = "Group", taxa_level = "Genus")
 		#' t1$plot_diff_abund(use_number = 1:10)
 		#' t1$plot_diff_abund(use_number = 1:10, add_sig = TRUE)
+		#' t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
+		#' t1$plot_diff_abund(use_number = 1:20)
+		#' t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
+		#' t1 <- trans_diff$new(dataset = dataset, method = "lefse", group = "Group")
+		#' t1$plot_diff_abund(use_number = 1:20)
+		#' t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 		#' }
 		plot_diff_abund = function(
 			use_number = 1:20,
@@ -559,6 +562,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			y_start = 1.01,
 			y_increase = 0.05,
 			text_y_size = 10,
+			coord_flip = TRUE,
 			...
 			){
 			abund_data <- self$res_abund
@@ -633,6 +637,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				stop("Please provide color_values parameter with more colors!")
 			}else{
 				color_values %<>% .[1:length(levels(abund_data$Group))] %>% rev
+			}
+			if(!coord_flip){
+				abund_data$Group %<>% factor(., levels = rev(levels(.)))
+				abund_data$Taxa %<>% factor(., levels = rev(levels(.)))
+				diff_data$Taxa %<>% factor(., levels = rev(levels(.)))
+				color_values %<>% rev
 			}
 			
 			# get labels info
@@ -721,6 +731,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			
 			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group)) +
+				theme_bw() +
 				geom_bar(stat="identity", position = position_dodge(), width = barwidth)
 			if(use_se == T){
 				p <- p + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(barwidth), color = "black")
@@ -746,18 +757,24 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 			}
-			p <- p + theme_bw() +
-				coord_flip() +
+			p <- p +
 				scale_color_manual(values = color_values) +
 				scale_fill_manual(values = color_values) +
 				ylab("Relative abundance") +
 				theme(legend.position = "right") +
-				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), 
-					panel.border = element_blank(), panel.background=element_rect(fill="white")) +
-				theme(axis.title = element_text(size = 17)) +
-				guides(fill=guide_legend(reverse = TRUE, ncol=1), color = "none") + 
-				theme(axis.title.y=element_blank(), axis.text.y = element_text(size = text_y_size, color = "black"))
-				#theme(plot.margin = unit(c(.1, 0, .1, 0), "cm"))
+				theme(panel.border = element_blank(), panel.background=element_rect(fill="white")) +
+				theme(axis.title = element_text(size = 17))
+				
+			if(coord_flip){
+				p <- p + coord_flip() + guides(fill = guide_legend(reverse = TRUE, ncol = 1), color = "none") +
+					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) +
+					theme(axis.title.y = element_blank(), axis.text.y = element_text(size = text_y_size, color = "black"))
+			}else{
+				p <- p + guides(fill = guide_legend(reverse = FALSE, ncol=1), color = "none") +
+					theme(axis.text.x = element_text(angle = 45, colour = "black", vjust = 1, hjust = 1, size = text_y_size)) +
+					theme(axis.title.x = element_blank(), axis.text.x = element_text(size = text_y_size, color = "black")) +
+					theme(plot.margin = unit(c(.1, .1, .1, 1), "cm"))
+			}
 			p
 		},
 		#' @description
