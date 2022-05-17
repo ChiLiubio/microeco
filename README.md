@@ -57,7 +57,7 @@ devtools::install_github("ChiLiubio/microeco")
 
 ## Tutorial
 See the detailed package **tutorial** (https://chiliubio.github.io/microeco_tutorial/).
-The backup tutorial website in gitee is also available (http://chiliubio.gitee.io/microeco_tutorial/).
+The tutorial can also be downloaded to the computer to open (https://github.com/ChiLiubio/microeco_tutorial/releases).
 Please use the class name to search the help documents (e.g. ?microtable).
 Constructing the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2, HUMAnN, Kraken2 and phyloseq) 
 can be easily achieved with the package file2meco (https://github.com/ChiLiubio/file2meco).
