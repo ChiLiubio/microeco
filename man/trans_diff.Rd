@@ -123,7 +123,8 @@ For testing at a specific rank, provide taxonomic rank name, such as "Genus"; th
 
 \item{\code{alpha}}{default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options; 
+NULL can disuse the p value adjustment.}
 
 \item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
 

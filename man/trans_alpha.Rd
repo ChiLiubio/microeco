@@ -110,7 +110,8 @@ Test the difference of alpha diversity across groups.
 \item{\code{measure}}{default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options; 
+NULL can disuse the p value adjustment.}
 
 \item{\code{anova_set}}{default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.}
 

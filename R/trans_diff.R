@@ -32,7 +32,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.
 		#' @param filter_thres default 0; the relative abundance threshold used for method != "metastat" or "mseq". 
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options; 
+		#'    NULL can disuse the p value adjustment.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
@@ -149,13 +150,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 				comparisions <- paste0(levels(group_vec), collapse = " - ")
 
 				message("Start differential test for ", group, " ...")
-				res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec)))
+				res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec, method = "kruskal.test")))
 				
 				pvalue_raw <- unlist(lapply(res_class, function(x) x$p_value))
 				names(pvalue_raw) <- rownames(abund_table)
 				pvalue_raw[is.nan(pvalue_raw)] <- 1
 				message(sum(pvalue_raw < alpha), " taxa found significant ...")
-				pvalue <- p.adjust(pvalue_raw, method = p_adjust_method)
+				if(is.null(p_adjust_method)){
+					pvalue <- pvalue_raw
+				}else{
+					pvalue <- p.adjust(pvalue_raw, method = p_adjust_method)
+				}
 				# select significant taxa
 				sel_taxa <- pvalue < alpha
 				message("After P value adjustment, ", sum(sel_taxa), " taxa found significant ...")
@@ -463,10 +468,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# extract the result
 					tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
 					p <- objres1@pvalues
-					if (p_adjust_method == "ihw-ubiquity" | p_adjust_method == "ihw-abundance") {
-						padj <- MRihw(objres1, p, p_adjust_method, 0.1)
-					} else {
-						padj <- p.adjust(p, method = p_adjust_method)
+					if(is.null(p_adjust_method)){
+						padj <- p
+					}else{
+						if (p_adjust_method == "ihw-ubiquity" | p_adjust_method == "ihw-abundance") {
+							padj <- MRihw(objres1, p, p_adjust_method, 0.1)
+						} else {
+							padj <- p.adjust(p, method = p_adjust_method)
+						}
 					}
 					srt <- order(p, decreasing = FALSE)
 					valid <- 1:length(padj)
@@ -1146,7 +1155,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		),
 	private = list(
 		# group test for lefse or rf
-		test_mark = function(dataframe, group, min_num_nonpara = 1){
+		test_mark = function(dataframe, group, min_num_nonpara = 1, method = NULL){
 			d1 <- as.data.frame(t(dataframe))
 			taxaname <- colnames(d1)[1]
 			d1$Group <- group
@@ -1155,10 +1164,19 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(any(table(as.character(group))) < min_num_nonpara){
 				list(p_value = NA, med = NA)
 			}else{
-				if(length(unique(as.character(group))) == 2){
-					res1 <- wilcox.test(formula = formu, data = d1)
+				if(! is.null(method)){
+					method <- match.arg(method, c("wilcox.test", "kruskal.test"))
+					if(method == "wilcox.test"){
+						res1 <- wilcox.test(formula = formu, data = d1)
+					}else{
+						res1 <- kruskal.test(formula = formu, data = d1)
+					}
 				}else{
-					res1 <- kruskal.test(formula = formu, data = d1)
+					if(length(unique(as.character(group))) == 2){
+						res1 <- wilcox.test(formula = formu, data = d1)
+					}else{
+						res1 <- kruskal.test(formula = formu, data = d1)
+					}
 				}
 				if(is.nan(res1$p.value)){
 					res1$p.value <- 1
