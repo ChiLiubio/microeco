@@ -33,7 +33,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "base",
 		taxa_level = "OTU", filter_thres = 0.0001)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
-t1$cal_network(network_method = "SpiecEasi")
+t1$cal_network(network_method = "SpiecEasi", method = "glasso")
 t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 t1$cal_network(network_method = "FlashWeave")
 }
@@ -242,7 +242,6 @@ Calculate network based on the correlation method or SpiecEasi package or julia 
   COR_cut = 0.6,
   COR_optimization = FALSE,
   COR_optimization_low_high = c(0.4, 0.8),
-  SpiecEasi_method = "mb",
   FlashWeave_tempdir = NULL,
   FlashWeave_meta_data = FALSE,
   FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
@@ -289,8 +288,6 @@ see https://doi.org/10.1186/1471-2105-13-113}
 
 \item{\code{COR_optimization_low_high}}{default c(0.4, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.}
 
-\item{\code{SpiecEasi_method}}{default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.}
-
 \item{\code{FlashWeave_tempdir}}{default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.}
 
 \item{\code{FlashWeave_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
@@ -326,7 +323,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = "base",
 		taxa_level = "OTU", filter_thres = 0.0001)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
-t1$cal_network(network_method = "SpiecEasi")
+t1$cal_network(network_method = "SpiecEasi", method = "glasso")
 t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
 t1$cal_network(network_method = "FlashWeave")
 }
