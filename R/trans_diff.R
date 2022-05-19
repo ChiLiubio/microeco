@@ -33,7 +33,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param filter_thres default 0; the relative abundance threshold used for method != "metastat" or "mseq". 
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options; 
-		#'    NULL can disuse the p value adjustment.
+		#'    NULL mean disuse the p value adjustment; So when p_adjust_method = NULL, P.adj is same with P.unadj.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
@@ -149,7 +149,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				group_vec <- sampleinfo[, group] %>% as.factor
 				comparisions <- paste0(levels(group_vec), collapse = " - ")
 
-				message("Start differential test for ", group, " ...")
+				message("Start Kruskal-Wallis rank sum test for ", group, " ...")
 				res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec, method = "kruskal.test")))
 				
 				pvalue_raw <- unlist(lapply(res_class, function(x) x$p_value))
@@ -676,6 +676,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 						)
 				}else{
 					if(method != "anova"){
+						if(any(grepl("\\s-\\s", x_axis_order))){
+							stop("The group names have ' - ' characters, which can impede the group recognition and mapping in the plot! Please rename groups and rerun!")
+						}
 						annotations <- c()
 						x_min <- c()
 						x_max <- c()
