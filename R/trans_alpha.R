@@ -225,6 +225,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
 		#' @param add_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
+		#' @param label_text_size default 3.88; the size of text in added label.
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_color default TRUE; TRUE: use color_values, FALSE: use "black".
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in ggpubr::ggboxplot.
@@ -247,6 +248,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			measure = "Shannon",
 			group = NULL,
 			add_label = "Significance",
+			label_text_size = 3.88,
 			use_boxplot = TRUE,
 			boxplot_color = TRUE,
 			boxplot_add = "jitter",
@@ -331,7 +333,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							add = add_letter_text, 
 							stringsAsFactors = FALSE
 							)
-						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = 7)
+						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = label_text_size)
 					}
 				}else{
 					if(!(cal_diff_method == "KW" & length(unique(use_data[, group])) > 2)){
@@ -357,7 +359,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							annotations = annotations,
 							y_position = y_position, 
 							xmin = x_min, 
-							xmax = x_max
+							xmax = x_max,
+							textsize = label_text_size
 						)
 					}
 				}

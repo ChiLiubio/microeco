@@ -150,6 +150,7 @@ Plotting the alpha diveristy.
   measure = "Shannon",
   group = NULL,
   add_label = "Significance",
+  label_text_size = 3.88,
   use_boxplot = TRUE,
   boxplot_color = TRUE,
   boxplot_add = "jitter",
@@ -177,6 +178,8 @@ e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 \item{\code{group}}{default NULL; group name used for the plot.}
 
 \item{\code{add_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
+
+\item{\code{label_text_size}}{default 3.88; the size of text in added label.}
 
 \item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
 
