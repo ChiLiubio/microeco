@@ -208,7 +208,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}
 				if(is.null(anova_set)){
-					compare_result %<>% `row.names<-`(.[,1]) %>% .[,-1]
+					compare_result %<>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
 				}
 			}
 			self$res_diff <- compare_result
