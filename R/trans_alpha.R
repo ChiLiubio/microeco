@@ -218,14 +218,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @description
 		#' Plotting the alpha diveristy.
 		#'
-		#' @param use_diff default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
-		#'   This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for groups.
 		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
 		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
-		#' @param add_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
-		#' @param label_text_size default 3.88; the size of text in added label.
+		#' @param add_sig default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
+		#'   This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.
+		#' @param add_sig_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
+		#' @param add_sig_text_size default 3.88; the size of text in added label.
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_color default TRUE; TRUE: use color_values, FALSE: use "black".
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in ggpubr::ggboxplot.
@@ -243,12 +243,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$plot_alpha(measure = "Shannon", group = "Group")
 		#' }
 		plot_alpha = function(
-			use_diff = TRUE,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			measure = "Shannon",
 			group = NULL,
-			add_label = "Significance",
-			label_text_size = 3.88,
+			add_sig = TRUE,
+			add_sig_label = "Significance",
+			add_sig_text_size = 3.88,
 			use_boxplot = TRUE,
 			boxplot_color = TRUE,
 			boxplot_add = "jitter",
@@ -268,11 +268,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					group <- self$group
 				}
 			}
-			if(use_diff){
+			if(add_sig){
 				if(is.null(self$res_diff)){
 					message("No object$res_diff found. Only plot the data. To use difference test result, ",
 						"please first run cal_diff function to get the significance result!")
-					use_diff <- FALSE
+					add_sig <- FALSE
 				}
 			}
 			if(! measure %in% self$data_alpha$Measure){
@@ -319,11 +319,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						plot.margin=unit(c(10,5,5,5),"mm")
 						)
 			}
-			if(use_diff & group == self$group){
+			if(add_sig & group == self$group){
 				x_axis_order <- levels(use_data[, group])
 				if(cal_diff_method == "anova"){
 					if(inherits(self$res_diff, "data.frame")){
-						use_diff_data <- self$res_diff %>% .[.$Measure == measure, ]
 						add_letter_text <- self$res_diff[x_axis_order, measure]
 						group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
 							{. + max(.) * y_increase}
@@ -333,15 +332,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							add = add_letter_text, 
 							stringsAsFactors = FALSE
 							)
-						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = label_text_size)
+						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
 					}
 				}else{
 					if(!(cal_diff_method == "KW" & length(unique(use_data[, group])) > 2)){
 						use_diff_data <- self$res_diff %>% .[.$Measure == measure, ]
-						if(! add_label %in% colnames(use_diff_data)){
-							stop("Please provide a correct add_label parameter! Must be a colname of object$res_diff !")
+						if(! add_sig_label %in% colnames(use_diff_data)){
+							stop("Please provide a correct add_sig_label parameter! Must be a colname of object$res_diff !")
 						}else{
-							annotations <- use_diff_data[, add_label]
+							annotations <- use_diff_data[, add_sig_label]
 						}
 						if(is.numeric(annotations)){
 							annotations %<>% round(., 4)
@@ -360,7 +359,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							y_position = y_position, 
 							xmin = x_min, 
 							xmax = x_max,
-							textsize = label_text_size
+							textsize = add_sig_text_size
 						)
 					}
 				}

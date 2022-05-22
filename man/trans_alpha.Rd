@@ -145,12 +145,12 @@ t1$cal_diff(method = "anova")
 Plotting the alpha diveristy.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
-  use_diff = TRUE,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   measure = "Shannon",
   group = NULL,
-  add_label = "Significance",
-  label_text_size = 3.88,
+  add_sig = TRUE,
+  add_sig_label = "Significance",
+  add_sig_text_size = 3.88,
   use_boxplot = TRUE,
   boxplot_color = TRUE,
   boxplot_add = "jitter",
@@ -167,9 +167,6 @@ Plotting the alpha diveristy.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_diff}}{default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
-This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.}
-
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for groups.}
 
 \item{\code{measure}}{default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
@@ -177,9 +174,12 @@ e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
-\item{\code{add_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
+\item{\code{add_sig}}{default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
+This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.}
 
-\item{\code{label_text_size}}{default 3.88; the size of text in added label.}
+\item{\code{add_sig_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
+
+\item{\code{add_sig_text_size}}{default 3.88; the size of text in added label.}
 
 \item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
 
