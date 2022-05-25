@@ -1319,7 +1319,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Print the trans_env object.
 		print = function(){
-			cat("trans_env class:\n")
+			cat("trans_env object:\n")
 			if(!is.null(self$data_env)){
 				cat(paste0("Env table have ", ncol(self$data_env), " variables: ", paste0(colnames(self$data_env), collapse = ","), "\n"))
 			}else{

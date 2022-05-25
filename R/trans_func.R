@@ -806,7 +806,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @description
 		#' Print the trans_func object.
 		print = function(){
-			cat("trans_func class:\n")
+			cat("trans_func object:\n")
 			cat(paste("Functional analysis for", self$for_what, ".\n"))
 			if(!is.null(self$sample_table)){
 				cat("sample_table is available.\n")

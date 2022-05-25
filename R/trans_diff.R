@@ -1171,6 +1171,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 			tree <- tree + theme(legend.position = "right", legend.title = element_blank())
 			tree
 
+		},
+		#' @description
+		#' Print the trans_alpha object.
+		print = function() {
+			cat("trans_diff object:\n")
+			cat(paste("res_diff have", ncol(self$res_diff), "columns: ", paste0(colnames(self$res_diff), collapse = ", "), "\n"))
+			if(!is.null(self$res_abund)) cat(paste("res_abund have", ncol(self$res_abund), "columns: ", paste0(colnames(self$res_abund), collapse = ", "), "\n"))
+			invisible(self)
 		}
 		),
 	private = list(

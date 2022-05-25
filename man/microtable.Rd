@@ -151,7 +151,6 @@ class(dataset$beta_diversity)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-new}{\code{microtable$new()}}
-\item \href{#method-print}{\code{microtable$print()}}
 \item \href{#method-filter_pollution}{\code{microtable$filter_pollution()}}
 \item \href{#method-rarefy_samples}{\code{microtable$rarefy_samples()}}
 \item \href{#method-tidy_dataset}{\code{microtable$tidy_dataset()}}
@@ -169,6 +168,7 @@ class(dataset$beta_diversity)
 \item \href{#method-save_alphadiv}{\code{microtable$save_alphadiv()}}
 \item \href{#method-cal_betadiv}{\code{microtable$cal_betadiv()}}
 \item \href{#method-save_betadiv}{\code{microtable$save_betadiv()}}
+\item \href{#method-print}{\code{microtable$print()}}
 \item \href{#method-clone}{\code{microtable$clone()}}
 }
 }
@@ -234,16 +234,6 @@ dataset$tidy_dataset()
 }
 \if{html}{\out{</div>}}
 
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
-\subsection{Method \code{print()}}{
-Print the microtable object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$print()}\if{html}{\out{</div>}}
 }
 
 }
@@ -733,6 +723,16 @@ Save beta diversity matrix to the computer.
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
+\subsection{Method \code{print()}}{
+Print the microtable object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$print()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

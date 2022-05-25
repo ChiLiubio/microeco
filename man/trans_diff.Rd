@@ -66,6 +66,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \item \href{#method-plot_diff_abund}{\code{trans_diff$plot_diff_abund()}}
 \item \href{#method-plot_diff_bar}{\code{trans_diff$plot_diff_bar()}}
 \item \href{#method-plot_diff_cladogram}{\code{trans_diff$plot_diff_cladogram()}}
+\item \href{#method-print}{\code{trans_diff$print()}}
 \item \href{#method-clone}{\code{trans_diff$clone()}}
 }
 }
@@ -423,6 +424,16 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 }
 \if{html}{\out{</div>}}
 
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
+\subsection{Method \code{print()}}{
+Print the trans_alpha object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_diff$print()}\if{html}{\out{</div>}}
 }
 
 }

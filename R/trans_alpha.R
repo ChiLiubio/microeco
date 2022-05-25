@@ -379,8 +379,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @description
 		#' Print the trans_alpha object.
 		print = function() {
-			cat("trans_alpha class:\n")
+			cat("trans_alpha object:\n")
 			cat(paste("data_alpha have", ncol(self$data_alpha), "columns: ", paste0(colnames(self$data_alpha), collapse = ", "), "\n"))
+			cat(paste("data_alpha$Measure: ", paste0(unique(as.character(self$data_alpha$Measure)), collapse = ", "), "\n"))
 			if(!is.null(self$data_stat)) cat(paste("data_stat have", ncol(self$data_stat), "columns: ", paste0(colnames(self$data_stat), collapse = ", "), "\n"))
 			invisible(self)
 		}

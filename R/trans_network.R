@@ -887,18 +887,13 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Print the trans_network object.
 		print = function() {
-			cat("trans_network class:\n")
+			cat("trans_network object:\n")
 			if(!is.null(self$res_network)){
-				cat("network object: \n")
-				print.igraph(self$res_network)
+				cat("res_network: \n")
+				igraph::print.igraph(self$res_network)
 				cat("\n")
 			}else{
-				cat("network object: NULL\n")
-			}
-			if(!is.null(self$res_network_attr)){
-				cat("res_network_attr object: finished\n")
-			}else{
-				cat("res_network_attr object: NULL\n")
+				cat("res_network: NULL\n")
 			}
 			invisible(self)
 		}

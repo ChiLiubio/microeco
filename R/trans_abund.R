@@ -595,14 +595,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Print the trans_abund object.
 		print = function(){
-			cat("trans_abund class:\n")
+			cat("trans_abund object:\n")
 			cat(paste("data_abund have", ncol(self$data_abund), "columns: ", paste0(colnames(self$data_abund), collapse = ", "), "\n"))
-			cat(paste("data_abund have", nrow(self$data_abund), "rows\n"))
+			cat(paste("data_abund have total", length(unique(as.character(self$data_abund$Taxonomy))), "taxa\n"))
+			cat(paste("taxrank: ", self$taxrank, "\n"))
 			if(!is.null(self$data_taxanames)){
-				if(length(self$data_taxanames) > 20){
-					cat(paste("Filtered taxa: ", length(self$data_taxanames), "\n"))
+				if(length(self$data_taxanames) > 50){
+					cat(paste("data_taxanames: ", length(self$data_taxanames), "taxa\n"))
 				}else{
-					cat(paste("Filtered taxa names: ", paste0(self$data_taxanames, collapse = ", "), "\n"))
+					cat(paste("data_taxanames: ", paste0(self$data_taxanames, collapse = ", "), "\n"))
 				}
 			}
 			invisible(self)
