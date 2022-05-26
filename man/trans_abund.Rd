@@ -414,6 +414,7 @@ Plot the line chart.
   plot_SE = TRUE,
   position = position_dodge(0.1),
   errorbar_size = 1,
+  errorbar_width = 0.1,
   point_size = 3,
   point_alpha = 0.8,
   line_size = 0.8,
@@ -435,6 +436,8 @@ Plot the line chart.
 \item{\code{position}}{default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.}
 
 \item{\code{errorbar_size}}{default 1; errorbar size.}
+
+\item{\code{errorbar_width}}{default 0.1; errorbar width.}
 
 \item{\code{point_size}}{default 3; point size for taxa.}
 

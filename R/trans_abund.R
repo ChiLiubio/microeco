@@ -500,6 +500,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param plot_SE default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.
 		#' @param position default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.
 		#' @param errorbar_size default 1; errorbar size.
+		#' @param errorbar_width default 0.1; errorbar width.
 		#' @param point_size default 3; point size for taxa.
 		#' @param point_alpha default 0.8; point transparency.
 		#' @param line_size default 0.8; line size.
@@ -521,6 +522,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_SE = TRUE,
 			position = position_dodge(0.1),
 			errorbar_size = 1,
+			errorbar_width = 0.1,
 			point_size = 3,
 			point_alpha = 0.8,
 			line_size = 0.8, 
@@ -538,10 +540,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 						
 			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", color = "Taxonomy", group = "Taxonomy"))
 			if(("SE" %in% colnames(plot_data)) & plot_SE){
-				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), width = .1, position = position, size = errorbar_size)
+				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), width = errorbar_width, position = position, size = errorbar_size)
 			}else{
 				if(("SD" %in% colnames(plot_data)) & plot_SE){
-					p <- p + geom_errorbar(aes(ymin = Abundance - SD, ymax = Abundance + SD), width = .1, position = position, size = errorbar_size)
+					p <- p + geom_errorbar(aes(ymin = Abundance - SD, ymax = Abundance + SD), width = errorbar_width, position = position, size = errorbar_size)
 				}
 			}
 			p <- p + geom_point(size = point_size, alpha = point_alpha, position = position)
