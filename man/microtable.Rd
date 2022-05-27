@@ -630,7 +630,8 @@ Calculate alpha diversity in microtable object.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{measures}}{default NULL; one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; 
-If null, use all those measures.}
+If null, use all those measures. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on vegan::diversity function;
+'Chao1' and 'ACE' depend on the function vegan::estimateR; 'PD' depends on the function picante::pd.}
 
 \item{\code{PD}}{TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.}
 }

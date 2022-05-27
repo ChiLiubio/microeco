@@ -137,6 +137,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
 		#' 	  see https://doi.org/10.1186/1471-2105-13-113
 		#' @param COR_optimization_low_high default c(0.4, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
+		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
 		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
 		#'   generate a file for meta_data_path parameter of FlashWeave.
@@ -171,6 +172,7 @@ trans_network <- R6Class(classname = "trans_network",
 			COR_cut = 0.6,
 			COR_optimization = FALSE,
 			COR_optimization_low_high = c(0.4, 0.8),
+			SpiecEasi_method = "mb",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
 			FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
@@ -234,10 +236,18 @@ trans_network <- R6Class(classname = "trans_network",
 				if(!require("SpiecEasi")){
 					stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
 				}
+				SpiecEasi_method <- match.arg(SpiecEasi_method, c("glasso", "mb"))
 				use_abund <- self$data_abund %>% as.matrix
 				# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
-				network <- spiec.easi(use_abund, ...)
-				network <- adj2igraph(getRefit(network))
+				spieceasi_fit <- SpiecEasi::spiec.easi(use_abund, method = SpiecEasi_method, ...)
+				# use the way from NetCoMi package
+				if(SpiecEasi_method == "glasso"){
+					assoMat <- stats::cov2cor(as.matrix(getOptCov(spieceasi_fit))) * SpiecEasi::getRefit(spieceasi_fit)
+				}else{
+					assoMat <- SpiecEasi::symBeta(SpiecEasi::getOptBeta(spieceasi_fit), mode = "ave")
+				}
+				assoMat %<>% as.matrix
+				network <- adj2igraph(assoMat)
 				V(network)$name <- colnames(use_abund)
 				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 			}
