@@ -20,7 +20,7 @@ data(dataset)
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		taxa_level = "OTU", filter_thres = 0.0001)
 # for other network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 }
 
 ## ------------------------------------------------
@@ -30,11 +30,13 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
 \donttest{
 # for correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		taxa_level = "OTU", filter_thres = 0.0001)
-t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
-t1$cal_network(network_method = "SpiecEasi", method = "glasso")
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
+		taxa_level = "OTU", filter_thres = 0.001)
+t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
+t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, taxa_level = "OTU", filter_thres = 0.005)
+t1$cal_network(network_method = "beemStatic")
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.001)
 t1$cal_network(network_method = "FlashWeave")
 }
 
@@ -44,7 +46,7 @@ t1$cal_network(network_method = "FlashWeave")
 
 \donttest{
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		taxa_level = "OTU", filter_thres = 0.0001)
+		taxa_level = "OTU", filter_thres = 0.0002)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
 }
@@ -173,7 +175,7 @@ This function is used to create the trans_network object, store the important in
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
   dataset = NULL,
   cor_method = c("pearson", "spearman", "kendall")[1],
-  cal_cor = c("base", "WGCNA", "SparCC", NA)[1],
+  cal_cor = c("base", "WGCNA", "SparCC", NULL)[1],
   taxa_level = "OTU",
   filter_thres = 0,
   nThreads = 1,
@@ -190,10 +192,10 @@ This function is used to create the trans_network object, store the important in
 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation-based network.}
 
-\item{\code{cal_cor}}{default "base"; "base", "WGCNA", "SparCC" or NA; correlation method; NA represents no correlation calculation, 
+\item{\code{cal_cor}}{default "base"; "base", "WGCNA", "SparCC" or NULL; correlation method; NULL denote no correlation calculation, 
 used for non-correlation based network, such as SpiecEasi and FlashWeave methods.}
 
-\item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' represents using feature table directly; 
+\item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 other available options should be one of the colnames of microtable$tax_table.}
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
@@ -220,7 +222,7 @@ data(dataset)
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		taxa_level = "OTU", filter_thres = 0.0001)
 # for other network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 }
 }
 \if{html}{\out{</div>}}
@@ -323,11 +325,13 @@ res_network stored in object.
 \preformatted{\donttest{
 # for correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		taxa_level = "OTU", filter_thres = 0.0001)
-t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
-t1$cal_network(network_method = "SpiecEasi", method = "glasso")
-t1 <- trans_network$new(dataset = dataset, cal_cor = NA, filter_thres = 0.0001)
+		taxa_level = "OTU", filter_thres = 0.001)
+t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
+t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, taxa_level = "OTU", filter_thres = 0.005)
+t1$cal_network(network_method = "beemStatic")
+t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.001)
 t1$cal_network(network_method = "FlashWeave")
 }
 }
@@ -372,7 +376,7 @@ res_network with modules, stored in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		taxa_level = "OTU", filter_thres = 0.0001)
+		taxa_level = "OTU", filter_thres = 0.0002)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
 }
@@ -468,8 +472,8 @@ Authors: Chi Liu, Umer Zeeshan Ijaz
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_node_table in object; Abundance expressed as a percentage; z represents within-module connectivity;
-  p represents among-module connectivity.
+res_node_table in object; Abundance expressed as a percentage; z denotes within-module connectivity;
+  p denotes among-module connectivity.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
