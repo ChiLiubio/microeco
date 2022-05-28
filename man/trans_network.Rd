@@ -237,7 +237,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 Calculate network based on the correlation method or SpiecEasi package or julia FlashWeave package or beemStatic package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
-  network_method = c("COR", "SpiecEasi", "FlashWeave", "beemStatic")[1],
+  network_method = c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic")[1],
   COR_p_thres = 0.01,
   COR_p_adjust = "fdr",
   COR_weight = TRUE,
@@ -259,7 +259,7 @@ Calculate network based on the correlation method or SpiecEasi package or julia 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi", "FlashWeave" or "beemStatic"; The option details: 
+\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; The option details: 
 \describe{
   \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in object$res_cor_p returned from trans_network$new; 
         See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}
@@ -267,6 +267,12 @@ Calculate network based on the correlation method or SpiecEasi package or julia 
         belong to the category of conditional dependence and graphical models;
         see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the R package; 
         see Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for the algorithm details}
+  \item{\strong{'gcoda'}}{hypothesize the logistic normal distribution of microbiome data; use penalized maximum likelihood method to estimate
+        the sparse structure of inverse covariance for latent normal variables to address the high
+        dimensionality of the microbiome data;
+        belong to the category of conditional dependence and graphical models;
+        depend on the R NetCoMi package \href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi}; 
+        see FANG et al. (2017) <doi:10.1089/cmb.2017.0054> for the algorithm details}
   \item{\strong{'FlashWeave'}}{FlashWeave network; Local-to-global learning framework; belong to the category of conditional dependence and graphical models;
      good performance on heterogenous datasets to find direct associations among taxa;
      see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing julia language and FlashWeave package;

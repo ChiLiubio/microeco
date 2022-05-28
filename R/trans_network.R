@@ -113,7 +113,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate network based on the correlation method or SpiecEasi package or julia FlashWeave package or beemStatic package.
 		#'
-		#' @param network_method default "COR"; "COR", "SpiecEasi", "FlashWeave" or "beemStatic"; The option details: 
+		#' @param network_method default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; The option details: 
 		#'   \describe{
 		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in object$res_cor_p returned from trans_network$new; 
 		#'     	  See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}
@@ -121,6 +121,12 @@ trans_network <- R6Class(classname = "trans_network",
 		#'     	  belong to the category of conditional dependence and graphical models;
 		#'     	  see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the R package; 
 		#'     	  see Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for the algorithm details}
+		#'     \item{\strong{'gcoda'}}{hypothesize the logistic normal distribution of microbiome data; use penalized maximum likelihood method to estimate
+		#'     	  the sparse structure of inverse covariance for latent normal variables to address the high
+		#'     	  dimensionality of the microbiome data;
+		#'     	  belong to the category of conditional dependence and graphical models;
+		#'     	  depend on the R NetCoMi package \href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi}; 
+		#'     	  see FANG et al. (2017) <doi:10.1089/cmb.2017.0054> for the algorithm details}
 		#'     \item{\strong{'FlashWeave'}}{FlashWeave network; Local-to-global learning framework; belong to the category of conditional dependence and graphical models;
 		#'        good performance on heterogenous datasets to find direct associations among taxa;
 		#'        see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing julia language and FlashWeave package;
@@ -151,8 +157,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
 		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
-		#' @param ... paremeters pass to spiec.easi function of SpiecEasi package when network_method = "SpiecEasi" or 
-		#'   func.EM function of beemStatic package when network_method = "beemStatic".
+		#' @param ... paremeters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
+		#'   pass to NetCoMi::netConstruct when network_method = "gcoda"; 
+		#'   pass to beemStatic::func.EM when network_method = "beemStatic".
 		#' @return res_network stored in object.
 		#' @examples
 		#' \donttest{
@@ -168,7 +175,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_network(network_method = "FlashWeave")
 		#' }
 		cal_network = function(
-			network_method = c("COR", "SpiecEasi", "FlashWeave", "beemStatic")[1],
+			network_method = c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic")[1],
 			COR_p_thres = 0.01,
 			COR_p_adjust = "fdr",
 			COR_weight = TRUE,
@@ -190,7 +197,7 @@ trans_network <- R6Class(classname = "trans_network",
 			taxa_level <- self$taxa_level
 			taxa_table <- self$tax_table
 			
-			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "FlashWeave", "beemStatic"))
+			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic"))
 			
 			message("---------------- ", Sys.time()," : Start ----------------")
 			if(network_method == "COR"){
@@ -252,7 +259,17 @@ trans_network <- R6Class(classname = "trans_network",
 				assoMat %<>% as.matrix
 				network <- adj2igraph(assoMat)
 				V(network)$name <- colnames(use_abund)
-				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
+			}
+			if(network_method == "gcoda"){
+				if(!require("NetCoMi")){
+					stop("NetCoMi package is not installed! Please see https://github.com/stefpeschel/NetCoMi ")
+				}
+				netConstruct_raw <- netConstruct(self$data_abund, measure = network_method, ...)
+				self$res_gcoda_raw <- netConstruct_raw
+				message("The raw file is stored in object$res_gcoda_raw ...")
+				asso_matrix <- netConstruct_raw$assoMat1
+				network <- SpiecEasi::adj2igraph(asso_matrix)
+				V(network)$name <- colnames(asso_matrix)
 			}
 			if(network_method == "FlashWeave"){
 				use_abund <- self$data_abund
@@ -304,7 +321,6 @@ trans_network <- R6Class(classname = "trans_network",
 				system("julia calculate_network.jl")
 				network <- read_graph("network_FlashWeave.gml", format = "gml")
 				network <- set_vertex_attr(network, "name", value = V(network)$label)
-				E(network)$label <- unlist(lapply(E(network)$weight, function(x) ifelse(x > 0, "+", "-")))
 			}
 			if(network_method == "beemStatic"){
 				if(!require("beemStatic")){
@@ -328,9 +344,12 @@ trans_network <- R6Class(classname = "trans_network",
 				network <- graph.adjacency(b, mode='directed', weighted='weight')
 				V(network)$name <- rownames(use_abund)
 				V(network)$RelativeAbundance <- rowMeans(beemStatic:::tss(use_abund))
+			}
+			if(network_method != "COR"){
 				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
 			}
 			E(network)$weight <- abs(E(network)$weight)
+			
 			message("---------------- ", Sys.time()," : Finish ----------------")
 			
 			nodes_raw <- data.frame(cbind(V(network), V(network)$name))
