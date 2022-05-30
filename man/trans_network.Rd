@@ -27,7 +27,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 ## Method `trans_network$cal_network`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 # for correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		taxa_level = "OTU", filter_thres = 0.001)
@@ -151,7 +151,6 @@ t2 <- t1$trans_comm(use_col = "module")
 \item \href{#method-cal_module}{\code{trans_network$cal_module()}}
 \item \href{#method-save_network}{\code{trans_network$save_network()}}
 \item \href{#method-cal_network_attr}{\code{trans_network$cal_network_attr()}}
-\item \href{#method-cal_node_type}{\code{trans_network$cal_node_type()}}
 \item \href{#method-get_node_table}{\code{trans_network$get_node_table()}}
 \item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
 \item \href{#method-get_adjacency_matrix}{\code{trans_network$get_adjacency_matrix()}}
@@ -318,8 +317,9 @@ the threshold used to limit the number of interactions (stability); same with th
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
 
-\item{\code{...}}{paremeters pass to spiec.easi function of SpiecEasi package when network_method = "SpiecEasi" or 
-func.EM function of beemStatic package when network_method = "beemStatic".}
+\item{\code{...}}{paremeters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
+pass to NetCoMi::netConstruct when network_method = "gcoda"; 
+pass to beemStatic::func.EM when network_method = "beemStatic".}
 }
 \if{html}{\out{</div>}}
 }
@@ -328,7 +328,7 @@ res_network stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 # for correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		taxa_level = "OTU", filter_thres = 0.001)
@@ -444,19 +444,6 @@ t1$cal_network_attr()
 
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_node_type"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_node_type}{}}}
-\subsection{Method \code{cal_node_type()}}{
-Calculate node properties. This function will be deprecated in the next release! Please use get_node_table function!
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_node_type()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-see the Return part in function get_node_table.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_node_table"></a>}}

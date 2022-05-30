@@ -61,7 +61,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' t1 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group")
 		#' t1 <- trans_diff$new(dataset = dataset, method = "metastat", group = "Group", taxa_level = "Genus")
 		#' t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
-		#' t1 <- trans_diff$new(dataset = dataset, method = "KW_dunn", group = "Group", taxa_level = "Phylum")
 		#' }
 		initialize = function(
 			dataset = NULL,

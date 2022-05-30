@@ -260,7 +260,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_ses_betampd in object.
 		#' @examples
 		#' \donttest{
-		#' # run 50 times for the example; default 1000
+		#' # only run 50 times for the example; default 1000
 		#' t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 		#' }
 		cal_ses_betampd = function(
@@ -312,7 +312,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_ses_betamntd in object.
 		#' @examples
 		#' \donttest{
-		#' # run 50 times for the example; default 1000
+		#' # only run 50 times for the example; default 1000
 		#' t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 		#' }
 		cal_ses_betamntd = function(
@@ -406,7 +406,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_rcbray in object.
 		#' @examples
 		#' \donttest{
-		#' # run 50 times for the example; default 1000
+		#' # only run 50 times for the example; default 1000
 		#' t1$cal_rcbray(runs = 50)
 		#' }
 		cal_rcbray = function(runs = 1000, verbose = TRUE, null.model = "independentswap") {
@@ -463,7 +463,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_NRI in object, equivalent to -1 times ses.mpd.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_NRI()
+		#' # only run 50 times for the example; default 999
+		#' t1$cal_NRI(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 50)
 		#' }
 		cal_NRI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
 			samp <- self$data_comm
@@ -486,7 +487,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return res_NTI in object, equivalent to -1 times ses.mntd.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
+		#' # only run 50 times for the example; default 999
+		#' t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE, runs = 50)
 		#' }
 		cal_NTI = function(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 999, ...){
 			samp <- self$data_comm
@@ -506,7 +508,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to C.score function in bipartite package.
 		#' @return results directly.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_Cscore()
 		#' }
 		cal_Cscore = function(by_group = NULL, ...){
@@ -530,7 +532,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to tNST function of NST package; see the documents of tNST function for more details.
 		#' @return .
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 		#' }
 		cal_tNST = function(group, ...){
@@ -547,7 +549,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"
 		#' @return .
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_tNST_test()
 		#' }
 		cal_tNST_test = function(method = "nst.boot", ...){

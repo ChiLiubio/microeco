@@ -56,7 +56,7 @@ t1$cal_betamntd(abundance.weighted = TRUE)
 ## ------------------------------------------------
 
 \donttest{
-# run 50 times for the example; default 1000
+# only run 50 times for the example; default 1000
 t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 }
 
@@ -65,7 +65,7 @@ t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 ## ------------------------------------------------
 
 \donttest{
-# run 50 times for the example; default 1000
+# only run 50 times for the example; default 1000
 t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
 
@@ -74,7 +74,7 @@ t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics =
 ## ------------------------------------------------
 
 \donttest{
-# run 50 times for the example; default 1000
+# only run 50 times for the example; default 1000
 t1$cal_rcbray(runs = 50)
 }
 
@@ -91,7 +91,8 @@ t1$cal_process(use_betamntd = TRUE)
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_NRI()
+# only run 50 times for the example; default 999
+t1$cal_NRI(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 50)
 }
 
 ## ------------------------------------------------
@@ -99,14 +100,15 @@ t1$cal_NRI()
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
+# only run 50 times for the example; default 999
+t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE, runs = 50)
 }
 
 ## ------------------------------------------------
 ## Method `trans_nullmodel$cal_Cscore`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_Cscore()
 }
 
@@ -114,7 +116,7 @@ t1$cal_Cscore()
 ## Method `trans_nullmodel$cal_tNST`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 }
 
@@ -122,7 +124,7 @@ t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRU
 ## Method `trans_nullmodel$cal_tNST_test`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_tNST_test()
 }
 }
@@ -385,7 +387,7 @@ res_ses_betampd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-# run 50 times for the example; default 1000
+# only run 50 times for the example; default 1000
 t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 }
 }
@@ -445,7 +447,7 @@ res_ses_betamntd in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-# run 50 times for the example; default 1000
+# only run 50 times for the example; default 1000
 t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
 }
@@ -484,7 +486,7 @@ res_rcbray in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-# run 50 times for the example; default 1000
+# only run 50 times for the example; default 1000
 t1$cal_rcbray(runs = 50)
 }
 }
@@ -556,7 +558,8 @@ res_NRI in object, equivalent to -1 times ses.mpd.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_NRI()
+# only run 50 times for the example; default 999
+t1$cal_NRI(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 50)
 }
 }
 \if{html}{\out{</div>}}
@@ -597,7 +600,8 @@ res_NTI in object, equivalent to -1 times ses.mntd.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE)
+# only run 50 times for the example; default 999
+t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE, runs = 50)
 }
 }
 \if{html}{\out{</div>}}
@@ -628,7 +632,7 @@ results directly.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_Cscore()
 }
 }
@@ -661,7 +665,7 @@ the function can select the data from sample_table to generate a one-column (n x
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 }
 }
@@ -693,7 +697,7 @@ Test the significance of NST difference between each pair of groups.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_tNST_test()
 }
 }

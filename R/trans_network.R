@@ -162,7 +162,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   pass to beemStatic::func.EM when network_method = "beemStatic".
 		#' @return res_network stored in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' # for correlation network
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
 		#' 		taxa_level = "OTU", filter_thres = 0.001)
@@ -328,7 +328,7 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 				use_abund <- self$data_abund %>% t %>% as.data.frame
 				taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
-				message("The feature table have ", nrow(use_abund), " taxa. The taxa with the lowest occurrence frequency was ", names(taxa_low)[1], 
+				message("The feature table has ", nrow(use_abund), " taxa. The taxon with the lowest occurrence frequency was ", names(taxa_low)[1], 
 					", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
 					"please filter more taxa with low abundance using filter_thres parameter when creating the trans_network object ...")
 				beem.out <- func.EM(use_abund, ...)
@@ -468,14 +468,6 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_network()
 			self$res_network_attr <- private$network_attribute(self$res_network)
 			message('Result is stored in object$res_network_attr ...')
-		},
-		#' @description
-		#' Calculate node properties. This function will be deprecated in the next release! Please use get_node_table function!
-		#'
-		#' @return see the Return part in function get_node_table.
-		cal_node_type = function(){
-			warning('Please use get_node_table function instead of this! This function will be deprecated in the next release !')
-			self$get_node_table(node_roles = TRUE)
 		},
 		#' @description
 		#' Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
