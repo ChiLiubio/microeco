@@ -17,8 +17,8 @@ eigengene analysis, network subsetting, node and edge properties extraction, net
 \donttest{
 data(dataset)
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+		taxa_level = "OTU", filter_thres = 0.0002)
 # for other network
 t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 }
@@ -169,18 +169,21 @@ t2 <- t1$trans_comm(use_col = "module")
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 This function is used to create the trans_network object, store the important intermediate data 
-  and calculate correlations if cal_cor parameter is selected.
+  and calculate correlations if cal_cor parameter is not NULL.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
   dataset = NULL,
-  cor_method = c("pearson", "spearman", "kendall")[1],
-  cal_cor = c("base", "WGCNA", "SparCC", NULL)[1],
+  cal_cor = c(NULL, "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe")[1],
+  use_WGCNA_pearson_spearman = FALSE,
+  use_NetCoMi_pearson_spearman = FALSE,
+  use_sparcc_method = c("NetCoMi", "SpiecEasi")[1],
   taxa_level = "OTU",
   filter_thres = 0,
   nThreads = 1,
   SparCC_simu_num = 100,
   env_cols = NULL,
-  add_data = NULL
+  add_data = NULL,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -189,37 +192,49 @@ This function is used to create the trans_network object, store the important in
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation-based network.}
+\item{\code{cal_cor}}{default NULL; must be one of c(NULL, "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"); 
+correlation method used; NULL denote using non-correlation based network, such as SpiecEasi and FlashWeave methods in cal_network function.
+For "pearson" or "spearman", If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function in R base cor.test;
+For "bicor", "cclasso", "ccrepe" and "sparcc" (when use_sparcc_method == "NetCoMi"), use NetCoMi package to calculate associations.
+For the details of those methods, please see NetCoMi package reference article <doi: 10.1093/bib/bbaa290>.}
 
-\item{\code{cal_cor}}{default "base"; "base", "WGCNA", "SparCC" or NULL; correlation method; NULL denote no correlation calculation, 
-used for non-correlation based network, such as SpiecEasi and FlashWeave methods.}
+\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when cal_cor == "pearson" or "spearman".}
+
+\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cal_cor == "pearson" or "spearman".
+The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.}
+
+\item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cal_cor == "sparcc".}
 
 \item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 other available options should be one of the colnames of microtable$tax_table.}
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
 
-\item{\code{nThreads}}{default 1; the thread number used for "WGCNA" and SparCC.}
+\item{\code{nThreads}}{default 1; the CPU thread number; available when use_WGCNA_pearson_spearman = TRUE or use_sparcc_method = "SpiecEasi".}
 
-\item{\code{SparCC_simu_num}}{default 100; SparCC simulation number for bootstrap.}
+\item{\code{SparCC_simu_num}}{default 100; SparCC simulation number for bootstrap when use_sparcc_method = "SpiecEasi".}
 
 \item{\code{env_cols}}{default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table;
 the environmental data can be used in the correlation network (as the nodes) or FlashWeave network.}
 
 \item{\code{add_data}}{default NULL; provide environmental table additionally instead of env_cols parameter; rownames must be sample names.}
+
+\item{\code{...}}{parameters pass to NetCoMi::netConstruct for other operations, such as zero handling and/or data normalization 
+when cal_cor and other parameters refer to NetCoMi package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_cor_p list; include the correlation matrix and p value matrix.
+res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cal_cor and other parameters refer to NetCoMi package,
+  the p value table are all zero as the significant associations have been selected.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 data(dataset)
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		taxa_level = "OTU", filter_thres = 0.0001)
+t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+		taxa_level = "OTU", filter_thres = 0.0002)
 # for other network
 t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 }
@@ -317,7 +332,7 @@ the threshold used to limit the number of interactions (stability); same with th
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
 
-\item{\code{...}}{paremeters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
+\item{\code{...}}{parameters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
 pass to NetCoMi::netConstruct when network_method = "gcoda"; 
 pass to beemStatic::func.EM when network_method = "beemStatic".}
 }
@@ -682,7 +697,7 @@ Plot the classification and importance of nodes, see object$res_node_table for t
 
 \item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type=2; shape vector, see ggplot2 tutorial for the shape meaning.}
 
-\item{\code{...}}{paremeters pass to geom_point.}
+\item{\code{...}}{parameters pass to geom_point.}
 }
 \if{html}{\out{</div>}}
 }
@@ -749,7 +764,7 @@ If the distribution follows power law, then fit degrees to power law distributio
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{paremeters pass to fit_power_law function in igraph package.}
+\item{\code{...}}{parameters pass to fit_power_law function in igraph package.}
 }
 \if{html}{\out{</div>}}
 }

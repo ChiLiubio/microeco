@@ -11,40 +11,52 @@ trans_network <- R6Class(classname = "trans_network",
 	public = list(
 		#' @description
 		#' This function is used to create the trans_network object, store the important intermediate data 
-		#'   and calculate correlations if cal_cor parameter is selected.
+		#'   and calculate correlations if cal_cor parameter is not NULL.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation algorithm, only use for correlation-based network.
-		#' @param cal_cor default "base"; "base", "WGCNA", "SparCC" or NULL; correlation method; NULL denote no correlation calculation, 
-		#' 	  used for non-correlation based network, such as SpiecEasi and FlashWeave methods.
+		#' @param cal_cor default NULL; must be one of c(NULL, "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"); 
+		#' 	  correlation method used; NULL denote using non-correlation based network, such as SpiecEasi and FlashWeave methods in cal_network function.
+		#' 	  For "pearson" or "spearman", If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function in R base cor.test;
+		#' 	  For "bicor", "cclasso", "ccrepe" and "sparcc" (when use_sparcc_method == "NetCoMi"), use NetCoMi package to calculate associations.
+		#' 	  For the details of those methods, please see NetCoMi package reference article <doi: 10.1093/bib/bbaa290>.
+		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when cal_cor == "pearson" or "spearman".
+		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when cal_cor == "pearson" or "spearman".
+		#'   The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.
+		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cal_cor == "sparcc".
 		#' @param taxa_level default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 		#' 	  other available options should be one of the colnames of microtable$tax_table.
 		#' @param filter_thres default 0; the relative abundance threshold.
-		#' @param nThreads default 1; the thread number used for "WGCNA" and SparCC.
-		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap.
+		#' @param nThreads default 1; the CPU thread number; available when use_WGCNA_pearson_spearman = TRUE or use_sparcc_method = "SpiecEasi".
+		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap when use_sparcc_method = "SpiecEasi".
 		#' @param env_cols default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table;
 		#'   the environmental data can be used in the correlation network (as the nodes) or FlashWeave network.
 		#' @param add_data default NULL; provide environmental table additionally instead of env_cols parameter; rownames must be sample names.
-		#' @return res_cor_p list; include the correlation matrix and p value matrix.
+		#' @param ... parameters pass to NetCoMi::netConstruct for other operations, such as zero handling and/or data normalization 
+		#' 	 when cal_cor and other parameters refer to NetCoMi package. 
+		#' @return res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cal_cor and other parameters refer to NetCoMi package,
+		#'   the p value table are all zero as the significant associations have been selected.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
 		#' # for correlation network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
-		#' 		taxa_level = "OTU", filter_thres = 0.0001)
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+		#' 		taxa_level = "OTU", filter_thres = 0.0002)
 		#' # for other network
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 		#' }
 		initialize = function(
 			dataset = NULL,
-			cor_method = c("pearson", "spearman", "kendall")[1],
-			cal_cor = c("base", "WGCNA", "SparCC", NULL)[1],
+			cal_cor = c(NULL, "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe")[1],
+			use_WGCNA_pearson_spearman = FALSE,
+			use_NetCoMi_pearson_spearman = FALSE,
+			use_sparcc_method = c("NetCoMi", "SpiecEasi")[1],
 			taxa_level = "OTU",
 			filter_thres = 0,
 			nThreads = 1,
 			SparCC_simu_num = 100,
 			env_cols = NULL,
-			add_data = NULL
+			add_data = NULL,
+			...
 			){
 			#cor_method <- match.arg(cor_method)
 			dataset1 <- clone(dataset)
@@ -78,28 +90,49 @@ trans_network <- R6Class(classname = "trans_network",
 			if( (!is.null(cal_cor)) & (!is.null(env_cols) | !is.null(add_data))){
 				use_abund <- cbind.data.frame(use_abund, env_data)
 			}
+
 			if(!is.null(cal_cor)){
-				cal_cor <- match.arg(cal_cor, c("base", "WGCNA", "SparCC"))
-				if(cal_cor == "base"){
-					cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
-				}
-				if(cal_cor == "WGCNA"){
-					cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
-				}
-				if(cal_cor == "SparCC"){
-					try_find <- try(find.package("SpiecEasi"), silent = TRUE)
-					if(inherits(try_find, "try-error")){
-						stop("SpiecEasi package is used for the SparCC calculation, but it is not installed! See https://github.com/zdk123/SpiecEasi for the installation")
+				cal_cor <- match.arg(cal_cor, c("pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"))
+				
+				if(cal_cor %in% c("pearson", "spearman")){
+					if(use_NetCoMi_pearson_spearman){
+						private$check_NetCoMi()
+						netConstruct_raw <- netConstruct(data = use_abund, measure = cal_cor, ...)
+						cor_result <- private$get_cor_p_list_NetCoMi(netConstruct_raw)
+					}else{
+						if(use_WGCNA_pearson_spearman){
+							cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cal_cor, nThreads = nThreads)
+						}else{
+							cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cal_cor)
+						}
 					}
-					bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
-					cor_result <- SpiecEasi::pval.sparccboot(bootres)
-					# reshape the results
-					use_names <- colnames(bootres$data)
-					com_res <- t(combn(use_names, 2))
-					res <- cbind.data.frame(com_res, cor = cor_result$cors, p = cor_result$pvals, stringsAsFactors = FALSE)
-					res_cor <- private$vec2mat(datatable = res, use_names = use_names, value_var = "cor", rep_value = 1)
-					res_p <- private$vec2mat(datatable = res, use_names = use_names, value_var = "p", rep_value = 0)
-					cor_result <- list(cor = res_cor, p = res_p)
+				}
+				if(cal_cor == "sparcc"){
+					use_sparcc_method <- match.arg(use_sparcc_method, c("NetCoMi", "SpiecEasi"))
+					if(use_sparcc_method == "NetCoMi"){
+						private$check_NetCoMi()
+						netConstruct_raw <- netConstruct(data = use_abund, measure = cal_cor, ...)
+						cor_result <- private$get_cor_p_list_NetCoMi(netConstruct_raw)
+					}else{
+						try_find <- try(find.package("SpiecEasi"), silent = TRUE)
+						if(inherits(try_find, "try-error")){
+							stop("SpiecEasi package is used for the SparCC calculation, but it is not installed! See https://github.com/zdk123/SpiecEasi for the installation")
+						}
+						bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
+						cor_result <- SpiecEasi::pval.sparccboot(bootres)
+						# reshape the results
+						use_names <- colnames(bootres$data)
+						com_res <- t(combn(use_names, 2))
+						res <- cbind.data.frame(com_res, cor = cor_result$cors, p = cor_result$pvals, stringsAsFactors = FALSE)
+						res_cor <- private$vec2mat(datatable = res, use_names = use_names, value_var = "cor", rep_value = 1)
+						res_p <- private$vec2mat(datatable = res, use_names = use_names, value_var = "p", rep_value = 0)
+						cor_result <- list(cor = res_cor, p = res_p)
+					}
+				}
+				if(cal_cor %in% c("bicor", "cclasso", "ccrepe")){
+					private$check_NetCoMi()
+					netConstruct_raw <- netConstruct(data = use_abund, measure = cal_cor, ...)
+					cor_result <- private$get_cor_p_list_NetCoMi(netConstruct_raw)
 				}
 				self$res_cor_p <- cor_result
 				message('The correlation result list is stored in object$res_cor_p ...')
@@ -157,7 +190,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
 		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
-		#' @param ... paremeters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
+		#' @param ... parameters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
 		#'   pass to NetCoMi::netConstruct when network_method = "gcoda"; 
 		#'   pass to beemStatic::func.EM when network_method = "beemStatic".
 		#' @return res_network stored in object.
@@ -735,7 +768,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param plot_size default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also available.
 		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type=2; shape vector, see ggplot2 tutorial for the shape meaning.
-		#' @param ... paremeters pass to geom_point.
+		#' @param ... parameters pass to geom_point.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -829,7 +862,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Fit degrees to a power law distribution. First, perform a bootstrapping hypothesis test to determine whether degrees follow a power law distribution.
 		#' If the distribution follows power law, then fit degrees to power law distribution and return the parameters.
 		#'
-		#' @param ... paremeters pass to fit_power_law function in igraph package.
+		#' @param ... parameters pass to fit_power_law function in igraph package.
 		#' @return res_powerlaw_p and res_powerlaw_fit; see bootstrap_p function in poweRlaw package for the bootstrapping p value details;
 		#'   see fit_power_law function in igraph package for the power law fit return details.
 		#' @examples
@@ -922,6 +955,11 @@ trans_network <- R6Class(classname = "trans_network",
 		}
 		),
 	private = list(
+		check_NetCoMi = function(){
+			if(!require("NetCoMi")){
+				stop("NetCoMi package is not installed! Please see https://github.com/stefpeschel/NetCoMi ")
+			}
+		},
 		check_igraph = function(){
 			if(!require("igraph")){
 				stop("Please first install igraph package with the command: install.packages('igraph') !")
@@ -931,6 +969,13 @@ trans_network <- R6Class(classname = "trans_network",
 			if(is.null(self$res_network)){
 				stop("No network found! Please first run cal_network function!")
 			}
+		},
+		# x must be microNet class from netConstruct function
+		get_cor_p_list_NetCoMi = function(x){
+			res_cor <- x$assoMat1
+			res_p <- res_cor
+			res_p[res_p != 0] <- 0
+			list(cor = res_cor, p = res_p)
 		},
 		# convert long format to symmetrical matrix
 		# The first and second columns must be names
