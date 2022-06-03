@@ -19,7 +19,7 @@ data(dataset)
 # for correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
-# for other network
+# for non-correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 }
 
@@ -173,7 +173,8 @@ This function is used to create the trans_network object, store the important in
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
   dataset = NULL,
-  cal_cor = c(NULL, "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe")[1],
+  cal_cor = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso",
+    "ccrepe")[1],
   use_WGCNA_pearson_spearman = FALSE,
   use_NetCoMi_pearson_spearman = FALSE,
   use_sparcc_method = c("NetCoMi", "SpiecEasi")[1],
@@ -192,15 +193,30 @@ This function is used to create the trans_network object, store the important in
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{cal_cor}}{default NULL; must be one of c(NULL, "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"); 
-correlation method used; NULL denote using non-correlation based network, such as SpiecEasi and FlashWeave methods in cal_network function.
-For "pearson" or "spearman", If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function in R base cor.test;
-For "bicor", "cclasso", "ccrepe" and "sparcc" (when use_sparcc_method == "NetCoMi"), use NetCoMi package to calculate associations.
-For the details of those methods, please see NetCoMi package reference article <doi: 10.1093/bib/bbaa290>.}
+\item{\code{cal_cor}}{default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
+All the methods refered to NetCoMi package are performed based on netConstruct function of NetCoMi package and require
+NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
+For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
+\describe{
+  \item{\strong{NULL}}{denote using non-correlation based network, such as SpiecEasi network construction approaches in cal_network function.}
+  \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on vegan::vegdist function}
+  \item{\strong{'pearson'}}{Pearson correlation; If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function cor.test in R base;
+    use_WGCNA_pearson_spearman = TRUE invoke corAndPvalue function of WGCNA package; 
+    use_NetCoMi_pearson_spearman = TRUE invoke netConstruct function of NetCoMi package}
+  \item{\strong{'spearman'}}{Spearman correlation; other details are same with the 'pearson' option}
+  \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on WGCNA::bicor function; require NetCoMi package installed}
+  \item{\strong{'sparcc'}}{SparCC algorithm (Friedman & Alm, PLoS Comp Biol, 2012, <doi:10.1371/journal.pcbi.1002687>);
+       use NetCoMi package when use_sparcc_method = "NetCoMi"; use SpiecEasi package when use_sparcc_method = "SpiecEasi" and require SpiecEasi installed from Github
+       (\href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi})}
+  \item{\strong{'cclasso'}}{Correlation inference of Composition data through Lasso method based on netConstruct function of NetCoMi package; 
+       for details, see NetCoMi::cclasso function}
+  \item{\strong{'ccrepe'}}{Calculates compositionality-corrected p-values and q-values for compositional data 
+       using an arbitrary distance metric based on netConstruct function of NetCoMi package; also see NetCoMi::ccrepe function}
+}}
 
-\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when cal_cor == "pearson" or "spearman".}
+\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when cal_cor = "pearson" or "spearman".}
 
-\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cal_cor == "pearson" or "spearman".
+\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cal_cor = "pearson" or "spearman".
 The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.}
 
 \item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cal_cor == "sparcc".}
@@ -235,7 +251,7 @@ data(dataset)
 # for correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
-# for other network
+# for non-correlation network
 t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 }
 }
