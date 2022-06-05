@@ -567,9 +567,10 @@ trans_network <- R6Class(classname = "trans_network",
 				node_table %<>% cbind.data.frame(., 
 					self$tax_table[replace_table[rownames(.), 2], 1:which(colnames(self$tax_table) %in% self$taxa_level), drop = FALSE])
 			}else{
-				node_table %<>% cbind.data.frame(., self$tax_table[rownames(.), ])
+				if(!is.null(self$tax_table)){
+					node_table %<>% cbind.data.frame(., self$tax_table[rownames(.), , drop = FALSE])
+				}
 			}
-			
 			self$res_node_table <- node_table
 			message('Result is stored in object$res_node_table ...')
 		},
