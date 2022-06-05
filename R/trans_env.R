@@ -126,9 +126,20 @@ trans_env <- R6Class(classname = "trans_env",
 			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
 			suppressMessages(tem_data1$cal_diff(method = method, measure = measure, p_adjust_method = p_adjust_method, anova_set = anova_set, ...))
 			self$res_diff <- tem_data1$res_diff
-			self$cal_diff_method <- method
+			self$res_diff_tmp <- tem_data1
 			self$group <- group
 			message('The result is stored in object$res_diff ...')
+		},
+		#' @description
+		#' Plotting values of environmental variables across groups and add the significance label.
+		#'
+		#' @param ... parameters passed to plot_alpha of trans_alpha. Please see plot_alpha function of trans_alpha class for all the available parameters.
+		plot_diff = function(...){
+			if(is.null(self$res_diff_tmp)){
+				stop("Please first run cal_diff function!")
+			}
+			res_diff_tmp <- self$res_diff_tmp
+			res_diff_tmp$plot_alpha(...)
 		},
 		#' @description
 		#' Calculate the autocorrelations among environmental variables and plot the result.

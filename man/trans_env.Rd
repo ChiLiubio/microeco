@@ -121,6 +121,7 @@ t1$plot_scatterfit(x =
 \itemize{
 \item \href{#method-new}{\code{trans_env$new()}}
 \item \href{#method-cal_diff}{\code{trans_env$cal_diff()}}
+\item \href{#method-plot_diff}{\code{trans_env$plot_diff()}}
 \item \href{#method-cal_autocor}{\code{trans_env$cal_autocor()}}
 \item \href{#method-cal_ordination}{\code{trans_env$cal_ordination()}}
 \item \href{#method-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
@@ -240,6 +241,23 @@ t1$cal_diff(group = "Group", method = "anova")
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_diff"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_diff}{}}}
+\subsection{Method \code{plot_diff()}}{
+Plotting values of environmental variables across groups and add the significance label.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_diff(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters passed to plot_alpha of trans_alpha. Please see plot_alpha function of trans_alpha class for all the available parameters.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-cal_autocor"></a>}}
