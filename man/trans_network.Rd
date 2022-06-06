@@ -136,6 +136,22 @@ t1$cal_powerlaw()
 }
 
 ## ------------------------------------------------
+## Method `trans_network$cal_sum_links`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_sum_links(taxa_level = "Phylum")
+}
+
+## ------------------------------------------------
+## Method `trans_network$plot_sum_links`
+## ------------------------------------------------
+
+\dontrun{
+test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+}
+
+## ------------------------------------------------
 ## Method `trans_network$trans_comm`
 ## ------------------------------------------------
 
@@ -159,6 +175,8 @@ t2 <- t1$trans_comm(use_col = "module")
 \item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
 \item \href{#method-subset_network}{\code{trans_network$subset_network()}}
 \item \href{#method-cal_powerlaw}{\code{trans_network$cal_powerlaw()}}
+\item \href{#method-cal_sum_links}{\code{trans_network$cal_sum_links()}}
+\item \href{#method-plot_sum_links}{\code{trans_network$plot_sum_links()}}
 \item \href{#method-trans_comm}{\code{trans_network$trans_comm()}}
 \item \href{#method-print}{\code{trans_network$print()}}
 \item \href{#method-clone}{\code{trans_network$clone()}}
@@ -792,6 +810,78 @@ res_powerlaw_p and res_powerlaw_fit; see bootstrap_p function in poweRlaw packag
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_powerlaw()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-cal_sum_links"></a>}}
+\if{latex}{\out{\hypertarget{method-cal_sum_links}{}}}
+\subsection{Method \code{cal_sum_links()}}{
+This function is used to sum the links number from one taxa to another or in the same taxa, for example, at Phylum level.
+This is very useful to fast see how many nodes are connected between different taxa or within the taxa.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_sum_links(taxa_level = "Phylum")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{taxa_level}}{default "Phylum"; taxonomic rank.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_sum_links_pos and res_sum_links_neg in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_sum_links(taxa_level = "Phylum")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_sum_links"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_sum_links}{}}}
+\subsection{Method \code{plot_sum_links()}}{
+Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_sum_links(
+  plot_pos = TRUE,
+  plot_num = NULL,
+  color_values = NULL,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot_pos}}{default TRUE; If TRUE, plot the summed positive linkages; If FALSE, plot the summed negative linkages.}
+
+\item{\code{plot_num}}{default NULL; number of taxa presented in the plot.}
+
+\item{\code{color_values}}{default NULL; If not provided, use microeco::color_palette_20 or randomcoloR package to generate random colors (for taxa > 20).}
+
+\item{\code{...}}{parameters pass to chorddiag::chorddiag function.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+chorddiag plot
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
 }
 }
 \if{html}{\out{</div>}}
