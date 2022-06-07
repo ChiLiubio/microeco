@@ -12,7 +12,7 @@ tidy_taxonomy(
   column = "all",
   pattern = c(".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*",
     ".*No blast hit.*", ".*sp\\\\.$", ".*metagenome.*", ".*cultivar.*", ".*archaeon$",
-    "__synthetic.*", ".*\\\\sbacterium$", ".*bacterium\\\\s.*"),
+    "__synthetic.*", ".*\\\\sbacterium$", ".*bacterium\\\\s.*", ".*Incertae.sedis.*"),
   replacement = "",
   ignore.case = TRUE,
   na_fill = ""

@@ -999,7 +999,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]} %>%
 				{.[!grepl("\\s", rownames(.)), ]} %>%
 				# also filter uncleared classification to make it in line with the lefse above
-				{.[!grepl("Incertae_sedis|unculture", rownames(.)), ]}
+				{.[!grepl("Incertae_sedis|unculture", rownames(.), ignore.case = TRUE), ]}
 
 			if(!is.null(use_taxa_num)){
 				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
@@ -1031,8 +1031,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% .[!duplicated(.)]))
 
 			# root must be a parent node
-			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1]) %>%
-				c("root", .)
+			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1]) %>% c("root", .)
 
 			## add index for nodes
 			is_tip <- !nodes %in% nodes_parent

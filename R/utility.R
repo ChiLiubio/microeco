@@ -70,7 +70,7 @@ trycharnum <- function(x){
 tidy_taxonomy <- function(taxonomy_table, 
 	column = "all",
 	pattern = c(".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*", ".*No blast hit.*", ".*sp\\.$",
-		".*metagenome.*", ".*cultivar.*", ".*archaeon$", "__synthetic.*", ".*\\sbacterium$", ".*bacterium\\s.*"),
+		".*metagenome.*", ".*cultivar.*", ".*archaeon$", "__synthetic.*", ".*\\sbacterium$", ".*bacterium\\s.*", ".*Incertae.sedis.*"),
 	replacement = "",
 	ignore.case = TRUE,
 	na_fill = ""
