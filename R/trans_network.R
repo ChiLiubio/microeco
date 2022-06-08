@@ -197,6 +197,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
 		#' 	  see https://doi.org/10.1186/1471-2105-13-113
 		#' @param COR_optimization_low_high default c(0.4, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
+		#' @param COR_optimization_seq default 0.01; the interval of correlation coefficient used for RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
 		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
@@ -217,7 +218,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @examples
 		#' \dontrun{
 		#' # for correlation network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		#' 		taxa_level = "OTU", filter_thres = 0.001)
 		#' t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
 		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
@@ -235,6 +236,7 @@ trans_network <- R6Class(classname = "trans_network",
 			COR_cut = 0.6,
 			COR_optimization = FALSE,
 			COR_optimization_low_high = c(0.4, 0.8),
+			COR_optimization_seq = 0.01,
 			SpiecEasi_method = "mb",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
@@ -272,10 +274,10 @@ trans_network <- R6Class(classname = "trans_network",
 				if(! identical(colnames(cortable), colnames(adp))){
 					adp <- adp[colnames(cortable), colnames(cortable)]
 				}
-				if(COR_optimization == T) {
+				if(COR_optimization == T){
 					#find out threshold of correlation 
 					message("Start COR optimizing ...")
-					tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2])
+					tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2], seq_by = COR_optimization_seq)
 					message("The optimized COR threshold: ", tc1, "...\n")
 				}
 				else {
@@ -286,6 +288,7 @@ trans_network <- R6Class(classname = "trans_network",
 				cor_matrix[abs(cortable) >= tc1] <- 1
 				cor_matrix[adp > COR_p_thres] <- 0
 				cor_matrix[cor_matrix != 1] <- 0
+				diag(cor_matrix) <- 0
 				network <- graph.adjacency(cor_matrix, mode = "undirected")
 				edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 				E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
@@ -465,7 +468,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return res_network with modules, stored in object.
 		#' @examples
 		#' \donttest{
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		#' 		taxa_level = "OTU", filter_thres = 0.0002)
 		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 		#' t1$cal_module(method = "cluster_fast_greedy")
@@ -1124,12 +1127,12 @@ trans_network <- R6Class(classname = "trans_network",
 			res
 		},
 		# RMT optimization
-		rmt = function(cormat, low_thres = 0.4, high_thres = 0.8){
+		rmt = function(cormat, low_thres = 0.4, high_thres = 0.8, seq_by = 0.01){
 			s <- seq(0, 3, 0.1)
 			pois <- exp(-s)
 			ps <- c()
 			seq_value <- c()
-			for(i in seq(low_thres, high_thres, 0.01)){
+			for(i in seq(low_thres, high_thres, seq_by)){
 				cormat1 <- abs(cormat)
 				cormat1[cormat1 < i] <- 0  
 				eigen_res <- sort(eigen(cormat1)$value)
