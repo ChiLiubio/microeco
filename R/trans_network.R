@@ -11,10 +11,10 @@ trans_network <- R6Class(classname = "trans_network",
 	public = list(
 		#' @description
 		#' This function is used to create the trans_network object, store the important intermediate data 
-		#'   and calculate correlations if cal_cor parameter is not NULL.
+		#'   and calculate correlations if cor_method parameter is not NULL.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param cal_cor default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
+		#' @param cor_method default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
 		#'   All the methods refered to NetCoMi package are performed based on netConstruct function of NetCoMi package and require
 		#'   NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 		#'   For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
@@ -34,10 +34,10 @@ trans_network <- R6Class(classname = "trans_network",
 		#'     \item{\strong{'ccrepe'}}{Calculates compositionality-corrected p-values and q-values for compositional data 
 		#'     	 using an arbitrary distance metric based on netConstruct function of NetCoMi package; also see NetCoMi::ccrepe function}
 		#'   }
-		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when cal_cor = "pearson" or "spearman".
-		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when cal_cor = "pearson" or "spearman".
+		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when cor_method = "pearson" or "spearman".
+		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
 		#'   The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.
-		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cal_cor == "sparcc".
+		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method == "sparcc".
 		#' @param taxa_level default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 		#' 	  other available options should be one of the colnames of microtable$tax_table.
 		#' @param filter_thres default 0; the relative abundance threshold.
@@ -47,21 +47,21 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   the environmental data can be used in the correlation network (as the nodes) or FlashWeave network.
 		#' @param add_data default NULL; provide environmental table additionally instead of env_cols parameter; rownames must be sample names.
 		#' @param ... parameters pass to NetCoMi::netConstruct for other operations, such as zero handling and/or data normalization 
-		#' 	 when cal_cor and other parameters refer to NetCoMi package. 
-		#' @return res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cal_cor and other parameters refer to NetCoMi package,
+		#' 	 when cor_method and other parameters refer to NetCoMi package. 
+		#' @return res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cor_method and other parameters refer to NetCoMi package,
 		#'   the p value table are all zero as the significant associations have been selected.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
 		#' # for correlation network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		#' 		taxa_level = "OTU", filter_thres = 0.0002)
 		#' # for non-correlation network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 		#' }
 		initialize = function(
 			dataset = NULL,
-			cal_cor = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe")[1],
+			cor_method = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe")[1],
 			use_WGCNA_pearson_spearman = FALSE,
 			use_NetCoMi_pearson_spearman = FALSE,
 			use_sparcc_method = c("NetCoMi", "SpiecEasi")[1],
@@ -102,36 +102,36 @@ trans_network <- R6Class(classname = "trans_network",
 				t %>%
 				as.data.frame
 			
-			if( (!is.null(cal_cor)) & (!is.null(env_cols) | !is.null(add_data))){
+			if( (!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
 				use_abund <- cbind.data.frame(use_abund, env_data)
 			}
 
-			if(!is.null(cal_cor)){
-				cal_cor <- match.arg(cal_cor, c("bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"))
+			if(!is.null(cor_method)){
+				cor_method <- match.arg(cor_method, c("bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"))
 				
-				if(cal_cor == "bray"){
+				if(cor_method == "bray"){
 					tmp <- vegan::vegdist(t(use_abund), method = "bray") %>% as.matrix
 					tmp <- 1 - tmp
 					cor_result <- private$get_cor_p_list(tmp)
 				}
-				if(cal_cor %in% c("pearson", "spearman")){
+				if(cor_method %in% c("pearson", "spearman")){
 					if(use_NetCoMi_pearson_spearman){
 						private$check_NetCoMi()
-						netConstruct_raw <- netConstruct(data = use_abund, measure = cal_cor, ...)
+						netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
 						cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 					}else{
 						if(use_WGCNA_pearson_spearman){
-							cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cal_cor, nThreads = nThreads)
+							cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
 						}else{
-							cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cal_cor)
+							cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
 						}
 					}
 				}
-				if(cal_cor == "sparcc"){
+				if(cor_method == "sparcc"){
 					use_sparcc_method <- match.arg(use_sparcc_method, c("NetCoMi", "SpiecEasi"))
 					if(use_sparcc_method == "NetCoMi"){
 						private$check_NetCoMi()
-						netConstruct_raw <- netConstruct(data = use_abund, measure = cal_cor, ...)
+						netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
 						cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 					}else{
 						try_find <- try(find.package("SpiecEasi"), silent = TRUE)
@@ -149,9 +149,9 @@ trans_network <- R6Class(classname = "trans_network",
 						cor_result <- list(cor = res_cor, p = res_p)
 					}
 				}
-				if(cal_cor %in% c("bicor", "cclasso", "ccrepe")){
+				if(cor_method %in% c("bicor", "cclasso", "ccrepe")){
 					private$check_NetCoMi()
-					netConstruct_raw <- netConstruct(data = use_abund, measure = cal_cor, ...)
+					netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
 					cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 				}
 				self$res_cor_p <- cor_result

@@ -17,10 +17,10 @@ eigengene analysis, network subsetting, node and edge properties extraction, net
 \donttest{
 data(dataset)
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
 # for non-correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 }
 
 ## ------------------------------------------------
@@ -29,7 +29,7 @@ t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
 
 \dontrun{
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.001)
 t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
 t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
@@ -45,7 +45,7 @@ t1$cal_network(network_method = "FlashWeave")
 ## ------------------------------------------------
 
 \donttest{
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
@@ -187,11 +187,11 @@ t2 <- t1$trans_comm(use_col = "module")
 \if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 This function is used to create the trans_network object, store the important intermediate data 
-  and calculate correlations if cal_cor parameter is not NULL.
+  and calculate correlations if cor_method parameter is not NULL.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
   dataset = NULL,
-  cal_cor = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso",
+  cor_method = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso",
     "ccrepe")[1],
   use_WGCNA_pearson_spearman = FALSE,
   use_NetCoMi_pearson_spearman = FALSE,
@@ -211,7 +211,7 @@ This function is used to create the trans_network object, store the important in
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{cal_cor}}{default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
+\item{\code{cor_method}}{default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
 All the methods refered to NetCoMi package are performed based on netConstruct function of NetCoMi package and require
 NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
@@ -232,12 +232,12 @@ For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi:
        using an arbitrary distance metric based on netConstruct function of NetCoMi package; also see NetCoMi::ccrepe function}
 }}
 
-\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when cal_cor = "pearson" or "spearman".}
+\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when cor_method = "pearson" or "spearman".}
 
-\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cal_cor = "pearson" or "spearman".
+\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
 The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.}
 
-\item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cal_cor == "sparcc".}
+\item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method == "sparcc".}
 
 \item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 other available options should be one of the colnames of microtable$tax_table.}
@@ -254,12 +254,12 @@ the environmental data can be used in the correlation network (as the nodes) or 
 \item{\code{add_data}}{default NULL; provide environmental table additionally instead of env_cols parameter; rownames must be sample names.}
 
 \item{\code{...}}{parameters pass to NetCoMi::netConstruct for other operations, such as zero handling and/or data normalization 
-when cal_cor and other parameters refer to NetCoMi package.}
+when cor_method and other parameters refer to NetCoMi package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cal_cor and other parameters refer to NetCoMi package,
+res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cor_method and other parameters refer to NetCoMi package,
   the p value table are all zero as the significant associations have been selected.
 }
 \subsection{Examples}{
@@ -267,10 +267,10 @@ res_cor_p list; include the correlation (association) matrix and p value matrix.
 \preformatted{\donttest{
 data(dataset)
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
 # for non-correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 }
 }
 \if{html}{\out{</div>}}
@@ -382,7 +382,7 @@ res_network stored in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.001)
 t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
 t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
@@ -433,7 +433,7 @@ res_network with modules, stored in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1 <- trans_network$new(dataset = dataset, cal_cor = "base", 
+t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
