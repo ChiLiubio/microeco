@@ -14,7 +14,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   and calculate correlations if cor_method parameter is not NULL.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param cor_method default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
+		#' @param cor_method default NULL; NULL or one of "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso" and "ccrepe";
 		#'   All the methods refered to NetCoMi package are performed based on netConstruct function of NetCoMi package and require
 		#'   NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 		#'   For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
@@ -61,7 +61,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			cor_method = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe")[1],
+			cor_method = NULL,
 			use_WGCNA_pearson_spearman = FALSE,
 			use_NetCoMi_pearson_spearman = FALSE,
 			use_sparcc_method = c("NetCoMi", "SpiecEasi")[1],
@@ -782,6 +782,12 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot; 2 represents the layered plot with taxa as x axis.
 		#' @param roles_color_background default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.
 		#' @param roles_color_values default NULL; for use_type=1; color palette for background or points.
+		#' @param add_label default FALSE; for use_type = 1; whether add labels for the points.
+		#' @param add_label_group default "Network hubs"; If add_label = TRUE; which part of tax_roles is used to show labels; character vectors.
+		#' @param add_label_text default "name"; If add_label = TRUE; which column of object$res_node_table is used to label the text.
+		#' @param label_text_size default 4; The text size of the label.
+		#' @param label_text_color default "grey50"; The text color of the label.
+		#' @param label_text_italic default FALSE; whether use italic style for the label text.
 		#' @param plot_module default FALSE; for use_type=1; whether plot the modules information.
 		#' @param x_lim default c(0, 1); for use_type=1; x axis range when roles_color_background = FALSE.
 		#' @param use_level default "Phylum"; for use_type=2; used taxonomic level in x axis.
@@ -802,6 +808,12 @@ trans_network <- R6Class(classname = "trans_network",
 			use_type = c(1, 2)[1],
 			roles_color_background = FALSE,
 			roles_color_values = NULL,
+			add_label = FALSE, 
+			add_label_group = "Network hubs", 
+			add_label_text = "name", 
+			label_text_size = 4, 
+			label_text_color = "grey50", 
+			label_text_italic = FALSE,
 			plot_module = FALSE,
 			x_lim = c(0, 1),
 			use_level = "Phylum",
@@ -822,6 +834,12 @@ trans_network <- R6Class(classname = "trans_network",
 				res <- private$plot_roles_1(node_roles = self$res_node_table, 
 					roles_color_background = roles_color_background,
 					roles_color_values = roles_color_values, 
+					add_label = add_label, 
+					add_label_group = add_label_group, 
+					add_label_text = add_label_text, 
+					label_text_size = label_text_size, 
+					label_text_color = label_text_color, 
+					label_text_italic = label_text_italic,				
 					module = plot_module,
 					x_lim = x_lim,
 					...
@@ -1305,7 +1323,10 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			outdf
 		},
-		plot_roles_1 = function(node_roles, roles_color_background, roles_color_values = NULL, module = FALSE, x_lim = c(0, 1), ...){
+		plot_roles_1 = function(node_roles, roles_color_background, add_label = FALSE, add_label_group = "Network hubs", add_label_text = "name", 
+			label_text_size = 4, label_text_color = "grey50", label_text_italic = FALSE,
+			roles_color_values = NULL, module = FALSE, x_lim = c(0, 1), ...
+			){
 			if(module == T){
 				all_modules <- unique(as.character(node_roles$module))
 				node_roles$module <- factor(as.character(node_roles$module), levels = stringr::str_sort(all_modules, numeric = TRUE))
@@ -1314,10 +1335,10 @@ trans_network <- R6Class(classname = "trans_network",
 			x2 <- c(0.62, 1, 0.62, 1)
 			y1 <- c(-Inf,-Inf, 2.5, 2.5)
 			y2 <- c(2.5,2.5, Inf, Inf)
-			lab <- c("Peripheral nodes","Connectors" ,"Module hubs","Network hubs")
+			lab <- c("Peripheral nodes", "Connectors", "Module hubs", "Network hubs")
 			lab <- factor(lab, levels = rev(lab))
 			if(is.null(roles_color_values)){roles_color_values <- rev(c("grey80", RColorBrewer::brewer.pal(3, "Dark2")))}
-
+			
 			p <- ggplot() + theme_bw()
 			if(roles_color_background){
 				p <- p + geom_rect(data=NULL, mapping = aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = lab, alpha = .4))
@@ -1343,6 +1364,28 @@ trans_network <- R6Class(classname = "trans_network",
 					geom_vline(xintercept = 0.62, linetype = "dashed") +
 					scale_color_manual(values = roles_color_values)
 				p <- p + guides(color = guide_legend(title = "Roles"), alpha = "none")
+			}
+			if(add_label){
+				if(!add_label_text %in% colnames(node_roles)){
+					stop("The provided add_label_text parameter must be one of colnames of object$res_node_table!")
+				}else{
+					label_data <- node_roles[node_roles$taxa_roles %in% add_label_group, ]
+					if(nrow(label_data) == 0){
+						message("No label need to be added!")
+					}else{
+						if(label_text_italic == T){
+							label_data[, add_label_text] %<>% paste0("italic('", .,"')")
+						}
+						p <- p + ggrepel::geom_text_repel(
+							data = label_data, 
+							aes_string("p", "z", label = add_label_text), 
+							size = label_text_size, 
+							color = label_text_color, 
+							segment.alpha = .01, 
+							parse = TRUE
+						)
+					}
+				}
 			}
 			p <- p + xlab("Among-module connectivity") + 
 				ylab("Within-module connectivity") +

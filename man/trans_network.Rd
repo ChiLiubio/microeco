@@ -191,8 +191,7 @@ This function is used to create the trans_network object, store the important in
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$new(
   dataset = NULL,
-  cor_method = c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso",
-    "ccrepe")[1],
+  cor_method = NULL,
   use_WGCNA_pearson_spearman = FALSE,
   use_NetCoMi_pearson_spearman = FALSE,
   use_sparcc_method = c("NetCoMi", "SpiecEasi")[1],
@@ -211,7 +210,7 @@ This function is used to create the trans_network object, store the important in
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{cor_method}}{default NULL; must be one of c(NULL, "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe");
+\item{\code{cor_method}}{default NULL; NULL or one of "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso" and "ccrepe";
 All the methods refered to NetCoMi package are performed based on netConstruct function of NetCoMi package and require
 NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
@@ -691,6 +690,12 @@ Plot the classification and importance of nodes, see object$res_node_table for t
   use_type = c(1, 2)[1],
   roles_color_background = FALSE,
   roles_color_values = NULL,
+  add_label = FALSE,
+  add_label_group = "Network hubs",
+  add_label_text = "name",
+  label_text_size = 5,
+  label_text_color = "grey50",
+  label_text_italic = FALSE,
   plot_module = FALSE,
   x_lim = c(0, 1),
   use_level = "Phylum",
@@ -713,6 +718,18 @@ Plot the classification and importance of nodes, see object$res_node_table for t
 \item{\code{roles_color_background}}{default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.}
 
 \item{\code{roles_color_values}}{default NULL; for use_type=1; color palette for background or points.}
+
+\item{\code{add_label}}{default FALSE; for use_type = 1; whether add labels for the points.}
+
+\item{\code{add_label_group}}{default "Network hubs"; If add_label = TRUE; which part of tax_roles is used to show labels; character vectors.}
+
+\item{\code{add_label_text}}{default "name"; If add_label = TRUE; which column of object$res_node_table is used to label the text.}
+
+\item{\code{label_text_size}}{default 5; The text size of the label.}
+
+\item{\code{label_text_color}}{default "grey50"; The text color of the label.}
+
+\item{\code{label_text_italic}}{default FALSE; whether use italic style for the label text.}
 
 \item{\code{plot_module}}{default FALSE; for use_type=1; whether plot the modules information.}
 
