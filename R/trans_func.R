@@ -342,7 +342,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param use_group_list default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
 		#'    please first set trans_func$func_group_list object with a list of group names and functions.
 		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.
-		#' @param select_samples default NULL; character vector; select partial samples to show.
+		#' @param order_x default NULL; character vector; to sort the x axis text; can be also used to select partial samples to show.
 		#' @param color_gradient_low default "#00008B"; the color used as the low end in the color gradient.
 		#' @param color_gradient_high default "#9E0142"; the color used as the high end in the color gradient.
 		#' @return ggplot2.
@@ -354,7 +354,7 @@ trans_func <- R6Class(classname = "trans_func",
 			filter_func = NULL, 
 			use_group_list = TRUE, 
 			add_facet = TRUE, 
-			select_samples = NULL,
+			order_x = NULL,
 			color_gradient_low = "#00008B",
 			color_gradient_high = "#9E0142"
 			){
@@ -393,9 +393,9 @@ trans_func <- R6Class(classname = "trans_func",
 			if(!is.null(filter_func)){
 				plot_data$variable %<>% gsub("_", " ", .) %>% factor(., levels = gsub("_", " ", filter_func))			
 			}
-			if(!is.null(select_samples)){
-				plot_data %<>% .[.$sampname %in% select_samples, , drop = FALSE]
-				plot_data$sampname %<>% factor(., levels = select_samples)
+			if(!is.null(order_x)){
+				plot_data %<>% .[.$sampname %in% order_x, , drop = FALSE]
+				plot_data$sampname %<>% factor(., levels = order_x)
 			}
 			if(self$for_what == "fungi"){
 				if(grepl("FungalTraits", self$fungi_database, ignore.case = TRUE)){

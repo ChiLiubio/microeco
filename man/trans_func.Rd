@@ -241,7 +241,7 @@ Plot the percentages of species with specific trait in communities or network mo
   filter_func = NULL,
   use_group_list = TRUE,
   add_facet = TRUE,
-  select_samples = NULL,
+  order_x = NULL,
   color_gradient_low = "#00008B",
   color_gradient_high = "#9E0142"
 )}\if{html}{\out{</div>}}
@@ -257,7 +257,7 @@ please first set trans_func$func_group_list object with a list of group names an
 
 \item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.}
 
-\item{\code{select_samples}}{default NULL; character vector; select partial samples to show.}
+\item{\code{order_x}}{default NULL; character vector; to sort the x axis text; can be also used to select partial samples to show.}
 
 \item{\code{color_gradient_low}}{default "#00008B"; the color used as the low end in the color gradient.}
 

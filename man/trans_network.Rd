@@ -693,7 +693,7 @@ Plot the classification and importance of nodes, see object$res_node_table for t
   add_label = FALSE,
   add_label_group = "Network hubs",
   add_label_text = "name",
-  label_text_size = 5,
+  label_text_size = 4,
   label_text_color = "grey50",
   label_text_italic = FALSE,
   plot_module = FALSE,
@@ -725,7 +725,7 @@ Plot the classification and importance of nodes, see object$res_node_table for t
 
 \item{\code{add_label_text}}{default "name"; If add_label = TRUE; which column of object$res_node_table is used to label the text.}
 
-\item{\code{label_text_size}}{default 5; The text size of the label.}
+\item{\code{label_text_size}}{default 4; The text size of the label.}
 
 \item{\code{label_text_color}}{default "grey50"; The text color of the label.}
 
