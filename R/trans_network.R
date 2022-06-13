@@ -218,14 +218,14 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @examples
 		#' \dontrun{
 		#' # for correlation network
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		#' 		taxa_level = "OTU", filter_thres = 0.001)
 		#' t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.003)
 		#' t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, taxa_level = "OTU", filter_thres = 0.005)
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, taxa_level = "OTU", filter_thres = 0.005)
 		#' t1$cal_network(network_method = "beemStatic")
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.001)
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.001)
 		#' t1$cal_network(network_method = "FlashWeave")
 		#' }
 		cal_network = function(
@@ -468,7 +468,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @return res_network with modules, stored in object.
 		#' @examples
 		#' \donttest{
-		#' t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		#' 		taxa_level = "OTU", filter_thres = 0.0002)
 		#' t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 		#' t1$cal_module(method = "cluster_fast_greedy")
@@ -1451,7 +1451,7 @@ trans_network <- R6Class(classname = "trans_network",
 			all_names <- taxa_table[rownames(taxa_table) %in% unique(c(link_table[,1], link_table[,2])), ] %>%
 				{table(.[, taxa_level])} %>%
 				sort(., decreasing = TRUE) %>% 
-				rownames
+				names
 			com_group <- expand.grid(all_names, all_names)
 			colnames(com_group) <- c("C1", "C2")
 			# assign rownames irrespective of the order
@@ -1475,7 +1475,7 @@ trans_network <- R6Class(classname = "trans_network",
 			res <- reshape2::dcast(res, C1~C2, value.var = "sum_count") %>%
 				`row.names<-`(.[,1]) %>%
 				.[, -1, drop = FALSE] %>%
-				.[all_names, all_names] %>%
+				.[all_names, all_names, drop = FALSE] %>%
 				as.matrix
 			res[is.na(res)] <- 0			
 			res

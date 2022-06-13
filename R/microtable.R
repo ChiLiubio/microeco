@@ -489,38 +489,33 @@ microtable <- R6Class(classname = "microtable",
 		#' }
 		cal_alphadiv = function(measures = NULL, PD = FALSE){
 			# modified based on the alpha diversity analysis of phyloseq package
-			if (!any(self$otu_table == 1)){
-				warning("The data you have provided does not have\n", 
-					"any singletons. This is highly suspicious. \n", 
-					"Results of richness estimates are probably unreliable, or wrong.")
-			}
 			OTU <- as.data.frame(t(self$otu_table), check.names = FALSE)
 			renamevec    <-     c("Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")
 			names(renamevec) <- c("S.obs", "coverage", "S.chao1", "S.ACE", "shannon", "simpson", "invsimpson", "fisher")
-			if (is.null(measures)){
+			if(is.null(measures)){
 				measures <- as.character(renamevec)
 			}
-			if (any(measures %in% names(renamevec))){
+			if(any(measures %in% names(renamevec))){
 				measures[measures %in% names(renamevec)] <- renamevec[names(renamevec) %in% measures]
 			}
-			if (!any(measures %in% renamevec)){
+			if(!any(measures %in% renamevec)){
 				stop("None of the `measures` you provided are supported. Try default `NULL` instead.")
 			}
 			outlist <- vector("list")
 			estimRmeas <- c("Chao1", "Observed", "ACE")
-			if (any(estimRmeas %in% measures)){
+			if(any(estimRmeas %in% measures)){
 				outlist <- c(outlist, list(t(data.frame(vegan::estimateR(OTU), check.names = FALSE))))
 			}
-			if ("Shannon" %in% measures){
+			if("Shannon" %in% measures){
 				outlist <- c(outlist, list(shannon = vegan::diversity(OTU, index = "shannon")))
 			}
-			if ("Simpson" %in% measures){
+			if("Simpson" %in% measures){
 				outlist <- c(outlist, list(simpson = vegan::diversity(OTU, index = "simpson")))
 			}
-			if ("InvSimpson" %in% measures){
+			if("InvSimpson" %in% measures){
 				outlist <- c(outlist, list(invsimpson = vegan::diversity(OTU, index = "invsimpson")))
 			}
-			if ("Fisher" %in% measures) {
+			if("Fisher" %in% measures) {
 				fisher = tryCatch(vegan::fisher.alpha(OTU, se = TRUE), warning = function(w) {
 					suppressWarnings(vegan::fisher.alpha(OTU, se = TRUE)[, c("alpha", "se")])
 				})
@@ -532,8 +527,10 @@ microtable <- R6Class(classname = "microtable",
 					outlist <- c(outlist, Fisher = list(fisher))
 				}
 			}
-			outlist <- c(outlist, list(coverage = private$goods(OTU)))
-			if(PD == T){
+			if(is.null(measures)){
+				outlist <- c(outlist, list(coverage = private$goods(OTU)))
+			}
+			if(PD){
 				if(is.null(self$phylo_tree)){
 					stop("Please provide phylogenetic tree for PD calculation!")
 				}else{
