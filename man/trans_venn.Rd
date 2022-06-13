@@ -28,6 +28,14 @@ t1$plot_venn()
 }
 
 ## ------------------------------------------------
+## Method `trans_venn$plot_bar`
+## ------------------------------------------------
+
+\donttest{
+t2 <- t1$plot_freq()
+}
+
+## ------------------------------------------------
 ## Method `trans_venn$trans_comm`
 ## ------------------------------------------------
 
@@ -40,6 +48,7 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
 \itemize{
 \item \href{#method-new}{\code{trans_venn$new()}}
 \item \href{#method-plot_venn}{\code{trans_venn$plot_venn()}}
+\item \href{#method-plot_bar}{\code{trans_venn$plot_bar()}}
 \item \href{#method-trans_comm}{\code{trans_venn$trans_comm()}}
 \item \href{#method-print}{\code{trans_venn$print()}}
 \item \href{#method-clone}{\code{trans_venn$clone()}}
@@ -54,7 +63,8 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
   dataset = NULL,
   sample_names = NULL,
   ratio = NULL,
-  add_abund_table = NULL
+  add_abund_table = NULL,
+  name_joint = "&"
 )}\if{html}{\out{</div>}}
 }
 
@@ -70,6 +80,8 @@ NULL: no additional percentage.}
 
 \item{\code{add_abund_table}}{default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
 Features must be rows.}
+
+\item{\code{name_joint}}{default "&"; the joint mark for generating multi-sample names.}
 }
 \if{html}{\out{</div>}}
 }
@@ -174,6 +186,59 @@ ggplot.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_venn()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-plot_bar"></a>}}
+\if{latex}{\out{\hypertarget{method-plot_bar}{}}}
+\subsection{Method \code{plot_bar()}}{
+Plot the intersections using histogram. Especially useful when samples > 5.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_venn$plot_bar(
+  bottom_y_text_size = 12,
+  up_y_text_size = 8,
+  up_y_title_size = 12,
+  bar_color = "grey70",
+  bar_fill = "grey70",
+  point_size = 3,
+  point_color = "black",
+  bottom_height = 0.5
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{bottom_y_text_size}}{default 12; y axis text size, i.e. sample name size, of bottom plot.}
+
+\item{\code{up_y_text_size}}{default 4; y axis text size of upper plot.}
+
+\item{\code{up_y_title_size}}{default 12; y axis title size of upper plot.}
+
+\item{\code{bar_color}}{default "grey70"; bar border color of upper plot.}
+
+\item{\code{bar_fill}}{default "grey70"; bar fill color of upper plot.}
+
+\item{\code{point_size}}{default 3; point size of bottom plot.}
+
+\item{\code{point_color}}{default "black"; point color of bottom plot.}
+
+\item{\code{bottom_height}}{default 0.5; bottom plot height.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a ggplot2 object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t2 <- t1$plot_freq()
 }
 }
 \if{html}{\out{</div>}}

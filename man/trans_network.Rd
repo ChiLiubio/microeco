@@ -29,14 +29,14 @@ t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 
 \dontrun{
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.001)
 t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.003)
 t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, taxa_level = "OTU", filter_thres = 0.005)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, taxa_level = "OTU", filter_thres = 0.005)
 t1$cal_network(network_method = "beemStatic")
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.001)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.001)
 t1$cal_network(network_method = "FlashWeave")
 }
 
@@ -45,7 +45,7 @@ t1$cal_network(network_method = "FlashWeave")
 ## ------------------------------------------------
 
 \donttest{
-t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")
@@ -381,14 +381,14 @@ res_network stored in object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 # for correlation network
-t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.001)
 t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.003)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.003)
 t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, taxa_level = "OTU", filter_thres = 0.005)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, taxa_level = "OTU", filter_thres = 0.005)
 t1$cal_network(network_method = "beemStatic")
-t1 <- trans_network$new(dataset = dataset, cal_cor = NULL, filter_thres = 0.001)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.001)
 t1$cal_network(network_method = "FlashWeave")
 }
 }
@@ -432,7 +432,7 @@ res_network with modules, stored in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1 <- trans_network$new(dataset = dataset, cal_cor = "pearson", 
+t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
 		taxa_level = "OTU", filter_thres = 0.0002)
 t1$cal_network(COR_p_thres = 0.01, COR_cut = 0.6)
 t1$cal_module(method = "cluster_fast_greedy")

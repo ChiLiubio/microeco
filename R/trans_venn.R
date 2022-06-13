@@ -13,7 +13,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
 		#' 	 NULL: no additional percentage.
 		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
-		#' Features must be rows.
+		#'   Features must be rows.
+		#' @param name_joint default "&"; the joint mark for generating multi-sample names.
 		#' @return data_details and data_summary stored in trans_venn object.
 		#' @examples
 		#' \donttest{
@@ -21,7 +22,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' t1 <- dataset$merge_samples(use_group = "Group")
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		#' }
-		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_abund_table = NULL
+		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_abund_table = NULL, name_joint = "&"
 			){
 			if(!is.null(dataset)){
 				# first clone the dataset
@@ -56,7 +57,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			# modified from the code of systemPipeR package 
 			allcombl <- lapply(1:colnumber, function(x) combn(colnames(setmatrix), m = x, simplify = FALSE)) %>% unlist(recursive=FALSE)
 			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix = setmatrix, allcombl = allcombl, index = x, setunion = setunion))
-			names(venn_list) <- sapply(allcombl, paste, collapse= "-")
+			names(venn_list) <- sapply(allcombl, paste, collapse = name_joint)
 			venn_abund <- sapply(venn_list, function(x){
 				subset(abund2, OTU %in% x) %>% 
 				dplyr::summarise(Sum = sum(Abundance)) %>% 
@@ -87,6 +88,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			self$res_names <- res_names
 			self$ratio <- ratio
 			self$otu_table <- abund
+			self$name_joint <- name_joint
 			message('The details of each venn part is stored in object$data_details ...')
 			message('The venn summary table used for plot is stored in object$data_summary ...')
 		},
@@ -257,16 +259,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- p + annotate("text", x = text_name_position$x, y = text_name_position$y, label = res_names, size = text_name_size)
 				if(!is.null(ratio)){
 					p <- p + annotate("text", 
-							x = plot_data[,3], 
-							y = plot_data[,4], 
-							label = c(paste(plot_data[,1], "\n(", plot_data[,2],")", sep = "")), 
+							x = plot_data[, 3], 
+							y = plot_data[, 4], 
+							label = c(paste(plot_data[, 1], "\n(", plot_data[, 2],")", sep = "")), 
 							size = text_size
 							)
 				}else{
 					p <- p + annotate("text", 
-							x = plot_data[,3], 
-							y = plot_data[,4], 
-							label = plot_data[,1], 
+							x = plot_data[, 3], 
+							y = plot_data[, 4], 
+							label = plot_data[, 1], 
 							size = text_size
 							)
 				}
@@ -276,7 +278,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				plot_data <- summary_table[c(1:nPetals, nrow(summary_table)), ]
 				petal_color_use <- rep(petal_color, nPetals)
 				
-				p <- ggplot(data.frame(), aes(x=c(0, 0), y=0)) +
+				p <- ggplot(data.frame(), aes(x=c(0, 0), y = 0)) +
 					  xlim(petal_use_lim[1], petal_use_lim[2]) +
 					  ylim(petal_use_lim[1], petal_use_lim[2]) +
 					  private$main_theme
@@ -328,6 +330,82 @@ trans_venn <- R6Class(classname = "trans_venn",
 				stop("This colnumber > 5! Please use petal_plot = TRUE !")
 			}
 			p
+		},
+		#' @description
+		#' Plot the intersections using histogram. Especially useful when samples > 5.
+		#'
+		#' @param bottom_y_text_size default 12; y axis text size, i.e. sample name size, of bottom plot.
+		#' @param up_y_text_size default 4; y axis text size of upper plot.
+		#' @param up_y_title_size default 12; y axis title size of upper plot.
+		#' @param bar_color default "grey70"; bar border color of upper plot.
+		#' @param bar_fill default "grey70"; bar fill color of upper plot.
+		#' @param point_size default 3; point size of bottom plot.
+		#' @param point_color default "black"; point color of bottom plot.
+		#' @param bottom_height default 0.5; bottom plot height.
+		#' @return a ggplot2 object.
+		#' @examples
+		#' \donttest{
+		#' t2 <- t1$plot_freq()
+		#' }
+		plot_bar = function(
+			bottom_y_text_size = 12,
+			up_y_text_size = 8,
+			up_y_title_size = 12,
+			bar_color = "grey70",
+			bar_fill = "grey70",
+			point_size = 3,
+			point_color = "black",
+			bottom_height = 0.5
+			){
+			colnumber <- self$colnumber
+			ratio <- self$ratio
+			res_names <- self$res_names
+			switch_num <- colnumber-1
+			summary_table <- self$data_summary
+			name_joint <- self$name_joint
+			
+			if(any(grepl(name_joint, res_names, fixed = TRUE))){
+				stop("Please change name_joint parameter when creating trans_venn object!")
+			}
+			
+			plot_data <- summary_table %>% 
+				rownames_to_column %>% 
+				.[order(.$Counts, decreasing = TRUE), ]
+			plot_data[, 1] %<>% factor(., levels = .)
+			
+			g1 <- ggplot(plot_data, aes_string(x = "rowname", y = "Counts")) +
+				theme_classic() +
+				geom_col(color = bar_color, fill = bar_fill) +
+				theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
+				theme(axis.text = element_text(size = up_y_text_size), axis.title = element_text(size = up_y_title_size))
+			
+			data2 <- matrix(nrow = colnumber, ncol = nrow(plot_data)) %>% as.data.frame
+			rownames(data2) <- res_names
+			colnames(data2) <- plot_data[, 1]
+			for(i in colnames(data2)){
+				tmp <- strsplit(i, name_joint) %>% unlist
+				for(j in rownames(data2)){
+					if(j %in% tmp){
+						data2[j, i] <- 1
+					}
+				}
+			}
+			data2 %<>% rownames_to_column %>% reshape2::melt(., id.vars = "rowname")
+			data2$variable %<>% factor(., levels = levels(plot_data[, 1]))
+			data3 <- data2[!is.na(data2$value), ]
+			#data2$value[is.na(data2$value)] <- 0
+			g2 <- ggplot(data2, aes_string(x = "variable", y = "rowname")) +
+				theme_bw() +
+				geom_point(aes_string(x = "variable", y = "rowname"), data = data3, size = point_size, color = point_color, inherit.aes = FALSE) +
+				theme(legend.position = "none") +
+				theme(axis.title = element_blank(), axis.text.x = element_blank(), axis.ticks = element_blank()) +
+				theme(axis.text = element_text(size = bottom_y_text_size)) +
+				theme(panel.border = element_blank()) +
+				theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+				#theme(plot.background = element_rect(fill = "white", colour = "white", size = 0.1))
+
+			g3 <- aplot::insert_bottom(g1, g2, height = bottom_height)
+			g3
 		},
 		#' @description
 		#' Transform venn result to community-like microtable object for further composition analysis.
