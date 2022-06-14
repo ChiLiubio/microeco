@@ -201,8 +201,9 @@ Plot the intersections using histogram. Especially useful when samples > 5.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$plot_bar(
   bottom_y_text_size = 12,
+  up_y_title = "Intersection set",
+  up_y_title_size = 15,
   up_y_text_size = 8,
-  up_y_title_size = 12,
   bar_color = "grey70",
   bar_fill = "grey70",
   point_size = 3,
@@ -216,9 +217,11 @@ Plot the intersections using histogram. Especially useful when samples > 5.
 \describe{
 \item{\code{bottom_y_text_size}}{default 12; y axis text size, i.e. sample name size, of bottom plot.}
 
-\item{\code{up_y_text_size}}{default 4; y axis text size of upper plot.}
+\item{\code{up_y_title}}{default "Intersection set"; y axis title of upper plot.}
 
-\item{\code{up_y_title_size}}{default 12; y axis title size of upper plot.}
+\item{\code{up_y_title_size}}{default 15; y axis title size of upper plot.}
+
+\item{\code{up_y_text_size}}{default 4; y axis text size of upper plot.}
 
 \item{\code{bar_color}}{default "grey70"; bar border color of upper plot.}
 

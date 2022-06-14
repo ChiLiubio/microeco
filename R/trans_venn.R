@@ -335,8 +335,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' Plot the intersections using histogram. Especially useful when samples > 5.
 		#'
 		#' @param bottom_y_text_size default 12; y axis text size, i.e. sample name size, of bottom plot.
+		#' @param up_y_title default "Intersection set"; y axis title of upper plot.
+		#' @param up_y_title_size default 15; y axis title size of upper plot.
 		#' @param up_y_text_size default 4; y axis text size of upper plot.
-		#' @param up_y_title_size default 12; y axis title size of upper plot.
 		#' @param bar_color default "grey70"; bar border color of upper plot.
 		#' @param bar_fill default "grey70"; bar fill color of upper plot.
 		#' @param point_size default 3; point size of bottom plot.
@@ -349,8 +350,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' }
 		plot_bar = function(
 			bottom_y_text_size = 12,
+			up_y_title = "Intersection set",
+			up_y_title_size = 15,
 			up_y_text_size = 8,
-			up_y_title_size = 12,
 			bar_color = "grey70",
 			bar_fill = "grey70",
 			point_size = 3,
@@ -376,6 +378,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			g1 <- ggplot(plot_data, aes_string(x = "rowname", y = "Counts")) +
 				theme_classic() +
 				geom_col(color = bar_color, fill = bar_fill) +
+				ylab(up_y_title) +
 				theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
 				theme(axis.text = element_text(size = up_y_text_size), axis.title = element_text(size = up_y_title_size))
 			
@@ -383,7 +386,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			rownames(data2) <- res_names
 			colnames(data2) <- plot_data[, 1]
 			for(i in colnames(data2)){
-				tmp <- strsplit(i, name_joint) %>% unlist
+				tmp <- strsplit(i, name_joint, fixed = TRUE) %>% unlist
 				for(j in rownames(data2)){
 					if(j %in% tmp){
 						data2[j, i] <- 1
