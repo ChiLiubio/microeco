@@ -196,7 +196,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param COR_cut default 0.6; correlation coefficient threshold for the correlation network.
 		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
 		#' 	  see https://doi.org/10.1186/1471-2105-13-113
-		#' @param COR_optimization_low_high default c(0.4, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
+		#' @param COR_optimization_low_high default c(0.01, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param COR_optimization_seq default 0.01; the interval of correlation coefficient used for RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
@@ -235,7 +235,7 @@ trans_network <- R6Class(classname = "trans_network",
 			COR_weight = TRUE,
 			COR_cut = 0.6,
 			COR_optimization = FALSE,
-			COR_optimization_low_high = c(0.4, 0.8),
+			COR_optimization_low_high = c(0.01, 0.8),
 			COR_optimization_seq = 0.01,
 			SpiecEasi_method = "mb",
 			FlashWeave_tempdir = NULL,
