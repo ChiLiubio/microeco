@@ -1039,6 +1039,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t2 <- t1$trans_comm(use_col = "module")
 		#' }
 		trans_comm = function(use_col = "module", abundance = TRUE){
+			private$check_igraph()
 			if(use_col == "module"){
 				if(is.null(V(self$res_network)$module)){
 					stop("Please first run cal_module function to get node modules!")

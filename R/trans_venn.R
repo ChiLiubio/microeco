@@ -346,7 +346,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @return a ggplot2 object.
 		#' @examples
 		#' \donttest{
-		#' t2 <- t1$plot_freq()
+		#' t2 <- t1$plot_bar()
 		#' }
 		plot_bar = function(
 			bottom_y_text_size = 12,

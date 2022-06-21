@@ -32,7 +32,7 @@ t1$plot_venn()
 ## ------------------------------------------------
 
 \donttest{
-t2 <- t1$plot_freq()
+t2 <- t1$plot_bar()
 }
 
 ## ------------------------------------------------
@@ -241,7 +241,7 @@ a ggplot2 object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t2 <- t1$plot_freq()
+t2 <- t1$plot_bar()
 }
 }
 \if{html}{\out{</div>}}
