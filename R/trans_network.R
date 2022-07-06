@@ -103,8 +103,12 @@ trans_network <- R6Class(classname = "trans_network",
 			if(nrow(use_abund) == 0){
 				stop("Aftering filtering, no feature is remained! Please try to lower filter_thres!")
 			}else{
-				message("Aftering filtering, ", nrow(use_abund), " features are remained ...")
-				use_abund %<>% t %>% as.data.frame
+				if(nrow(use_abund) == 1){
+					stop("Aftering filtering, only one feature is remained! Please try to lower filter_thres!")
+				}else{
+					message("Aftering filtering, ", nrow(use_abund), " features are remained ...")
+					use_abund %<>% t %>% as.data.frame
+				}
 			}
 			
 			if( (!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
