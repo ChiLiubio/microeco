@@ -478,7 +478,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' 	 use the default temporary in the computer system.
 		#' @param database_mode default 'Ref99NR'; "Ref99NR" or "Ref100NR"; Ref99NR: 99\% clustering reference database; Ref100NR: no clustering.
 		#' @param normalize_by_copy_number default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes. 
-		#' @param min_identity_to_reference default 97; the idenity threshold used for finding the nearest species.
+		#' @param min_identity_to_reference default 97; the sequences identity threshold used for finding the nearest species.
 		#' @param use_uproc default TRUE; whether use UProC to functionally anotate the genomes in the reference data.
 		#' @param num_threads default 1; the threads used in the blastn.
 		#' @param normalize_pathways default FALSE; Different to Tax4Fun, when converting from KEGG functions to KEGG pathways, 

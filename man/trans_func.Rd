@@ -345,7 +345,7 @@ use the default temporary in the computer system.}
 
 \item{\code{normalize_by_copy_number}}{default TRUE; whether normalize the result by the 16S rRNA copy number in the genomes.}
 
-\item{\code{min_identity_to_reference}}{default 97; the idenity threshold used for finding the nearest species.}
+\item{\code{min_identity_to_reference}}{default 97; the sequences identity threshold used for finding the nearest species.}
 
 \item{\code{use_uproc}}{default TRUE; whether use UProC to functionally anotate the genomes in the reference data.}
 

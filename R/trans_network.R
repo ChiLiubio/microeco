@@ -37,7 +37,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when cor_method = "pearson" or "spearman".
 		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
 		#'   The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.
-		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method == "sparcc".
+		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method = "sparcc".
 		#' @param taxa_level default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 		#' 	  other available options should be one of the colnames of microtable$tax_table.
 		#' @param filter_thres default 0; the relative abundance threshold.
@@ -98,9 +98,14 @@ trans_network <- R6Class(classname = "trans_network",
 			# store taxonomic table for the following analysis
 			self$tax_table <- dataset1$tax_table
 			use_abund <- dataset1$otu_table %>% 
-				{.[apply(., 1, sum)/sum(.) > filter_thres, ]} %>%
-				t %>%
-				as.data.frame
+				{.[apply(., 1, sum)/sum(.) > filter_thres, ]}
+			# check filtered data
+			if(nrow(use_abund) == 0){
+				stop("Aftering filtering, no feature is remained! Please try to lower filter_thres!")
+			}else{
+				message("Aftering filtering, ", nrow(use_abund), " features are remained ...")
+				use_abund %<>% t %>% as.data.frame
+			}
 			
 			if( (!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
 				use_abund <- cbind.data.frame(use_abund, env_data)
@@ -223,7 +228,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
 		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.003)
 		#' t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, taxa_level = "OTU", filter_thres = 0.005)
+		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.005)
 		#' t1$cal_network(network_method = "beemStatic")
 		#' t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.001)
 		#' t1$cal_network(network_method = "FlashWeave")

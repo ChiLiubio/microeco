@@ -34,7 +34,7 @@ t1 <- trans_network$new(dataset = dataset, cor_method = "pearson",
 t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
 t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.003)
 t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-t1 <- trans_network$new(dataset = dataset, cor_method = NULL, taxa_level = "OTU", filter_thres = 0.005)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.005)
 t1$cal_network(network_method = "beemStatic")
 t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.001)
 t1$cal_network(network_method = "FlashWeave")
@@ -236,7 +236,7 @@ For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi:
 \item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
 The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.}
 
-\item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method == "sparcc".}
+\item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method = "sparcc".}
 
 \item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 other available options should be one of the colnames of microtable$tax_table.}
@@ -386,7 +386,7 @@ t1 <- trans_network$new(dataset = dataset, cor_method = "pearson",
 t1$cal_network(COR_p_thres = 0.05, COR_cut = 0.6)
 t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.003)
 t1$cal_network(network_method = "SpiecEasi", SpiecEasi_method = "mb")
-t1 <- trans_network$new(dataset = dataset, cor_method = NULL, taxa_level = "OTU", filter_thres = 0.005)
+t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.005)
 t1$cal_network(network_method = "beemStatic")
 t1 <- trans_network$new(dataset = dataset, cor_method = NULL, filter_thres = 0.001)
 t1$cal_network(network_method = "FlashWeave")
