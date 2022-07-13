@@ -1077,27 +1077,22 @@ trans_env <- R6Class(classname = "trans_env",
 					}else{
 						p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
 						if(cluster_ggplot %in% c("row", "both")){
-							row_plot <- factoextra::fviz_dend(
-								row_cluster, 
-								show_labels = FALSE, 
-								labels_track_height = 0, 
-								horiz = TRUE, 
-								main = "",
-								xlab = "",
-								ylab = "",
-								ggtheme = theme_classic()) + theme(axis.text.x = element_blank(), axis.ticks = element_blank())
+							dendro_data_plot <- ggdendro::dendro_data(as.dendrogram(row_cluster))
+							row_plot <- ggplot(data = ggdendro::segment(dendro_data_plot)) + 
+								geom_segment(aes(x = x, y = y, xend = xend, yend = yend), color = "grey30") +
+								coord_flip() +
+								scale_y_reverse(expand = c(0, 0)) +
+								theme_void()
+
 							p %<>% aplot::insert_left(row_plot, width = cluster_height_rows)
 						}
 						if(cluster_ggplot %in% c("col", "both")){
-							col_plot <- factoextra::fviz_dend(
-								col_cluster, 
-								show_labels = FALSE, 
-								labels_track_height = 0, 
-								horiz = FALSE, 
-								main = "",
-								xlab = "",
-								ylab = "",
-								ggtheme = theme_classic()) + theme(axis.text.y = element_blank(), axis.ticks = element_blank())
+							dendro_data_plot <- ggdendro::dendro_data(as.dendrogram(col_cluster))
+							col_plot <- ggplot(data = ggdendro::segment(dendro_data_plot)) + 
+								geom_segment(aes(x = x, y = y, xend = xend, yend = yend), color = "grey30") +
+								scale_y_continuous(expand = c(0, 0)) +
+								theme_void()
+							
 							p %<>% aplot::insert_top(col_plot, height = cluster_height_cols)
 						}
 					}
