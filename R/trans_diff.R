@@ -1089,9 +1089,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			hilights_df$y <- 1
 			# resort the table used for the legend color and text
 			hilights_df %<>% `row.names<-`(.$enrich_group) %>%
-				.[color_groups, ]
+				.[color_groups[color_groups %in% rownames(.)], ]
 			# make sure the right order in legend
-			hilights_df$enrich_group %<>% factor(., levels = color_groups)
+			hilights_df$enrich_group %<>% factor(., levels = color_groups[color_groups %in% .])
 
 			# add legend
 			tree <- tree + 
