@@ -9,9 +9,10 @@
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add; 
-		#' 	 beta diversity index used for ordination, manova or group distance.
+		#' @param dataset the object of \code{\link{microtable}} class.
+		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in microtable$beta_diversity; 
+		#' 	 used for ordination, manova or group distance. The measure must be one of names of microtable$beta_diversity list. 
+		#' 	 Please see microtable$cal_betadiv function for more details.
 		#' @param group default NULL; sample group used for manova, betadisper or group distance.
 		#' @return parameters stored in the object.
 		#' @examples
@@ -27,7 +28,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			if(!is.null(measure)){
 				if(!measure %in% c(names(dataset$beta_diversity), 1:length(dataset$beta_diversity))){
-					stop("Input measure should be one of beta_diversity distance in dataset !")
+					stop("Input measure should be one of beta_diversity distance in dataset! Please see microtable$cal_betadiv!")
 				}else{
 					self$use_matrix <- dataset$beta_diversity[[measure]]
 				}
