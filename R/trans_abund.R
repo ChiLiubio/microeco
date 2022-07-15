@@ -305,6 +305,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param grid_clean default TRUE; whether remove grid lines.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param legend_title default "% Relative\nAbundance"; legend title text.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param ... paremeters pass to pheatmap when pheatmap = TRUE.
 		#' @return ggplot2 plot or grid plot based on pheatmap.
@@ -334,6 +335,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtitle_keep = TRUE,
 			grid_clean = TRUE,
 			xtext_type_hor = TRUE,
+			legend_title = "% Relative\nAbundance",
 			pheatmap = FALSE,
 			...
 			){
@@ -379,7 +381,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
 				}
-				p <- p + labs(x = "", y = "", fill = "% Relative\nAbundance")
+				p <- p + labs(x = "", y = "", fill = legend_title)
 				if (!is.null(ytext_size)){
 					p <- p + theme(axis.text.y = element_text(size = ytext_size))
 				}

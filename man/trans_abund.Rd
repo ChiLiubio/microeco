@@ -256,6 +256,7 @@ Plot the heatmap.
   xtitle_keep = TRUE,
   grid_clean = TRUE,
   xtext_type_hor = TRUE,
+  legend_title = "\% Relative\\nAbundance",
   pheatmap = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -304,6 +305,8 @@ colors palette for the plotting.}
 \item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
 
 \item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+
+\item{\code{legend_title}}{default "% Relative\nAbundance"; legend title text.}
 
 \item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 
