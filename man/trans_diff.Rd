@@ -344,10 +344,10 @@ Plot the cladogram using taxa with significant difference.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_cladogram(
   color = RColorBrewer::brewer.pal(8, "Dark2"),
+  group_order = NULL,
   use_taxa_num = 200,
   filter_taxa = NULL,
   use_feature_num = NULL,
-  group_order = NULL,
   clade_label_level = 4,
   select_show_labels = NULL,
   only_select_show = FALSE,
@@ -369,16 +369,17 @@ Plot the cladogram using taxa with significant difference.
 \describe{
 \item{\code{color}}{default RColorBrewer::brewer.pal(8, "Dark2"); color palette used in the plot.}
 
+\item{\code{group_order}}{default NULL; a vector to order the legend in plot; 
+If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+If provided, this parameter can overwrite the levels in the group of sample_table. 
+If the number of provided group_order is less than the number of groups in res_diff$Group, the function will select the groups of group_order automatically.}
+
 \item{\code{use_taxa_num}}{default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .}
 
 \item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance.}
 
 \item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; 
 select the features according to the LDA score (method = "lefse") or MeanDecreaseGini (method = "rf") from high to low.}
-
-\item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
-If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
-If provided, this parameter can overwrite the levels in the group of sample_table.}
 
 \item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest.}
 
