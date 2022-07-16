@@ -33,6 +33,8 @@ t1$cal_diff(group = "Group", method = "anova")
 
 \donttest{
 t1$cal_autocor(method = "GGally")
+# Spearman correlation
+t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
 }
 
 ## ------------------------------------------------
@@ -293,6 +295,8 @@ ggmatrix.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_autocor(method = "GGally")
+# Spearman correlation
+t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
 }
 }
 \if{html}{\out{</div>}}

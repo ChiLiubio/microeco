@@ -152,6 +152,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @examples
 		#' \donttest{
 		#' t1$cal_autocor(method = "GGally")
+		#' # Spearman correlation
+		#' t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
 		#' }
 		cal_autocor = function(group = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.8, ...){
 			if(!requireNamespace("GGally", quietly = TRUE)){
