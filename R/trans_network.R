@@ -3,8 +3,8 @@
 #'
 #' @description
 #' This class is a wrapper for a series of network analysis methods, 
-#' including the network construction approaches, network attributes analysis,
-#' eigengene analysis, network subsetting, node and edge properties extraction, network plotting, and other network operations.
+#' including the network construction, network attributes analysis,
+#' eigengene analysis, network subsetting, node and edge properties, network visualization and other network operations.
 #'
 #' @export
 trans_network <- R6Class(classname = "trans_network",
@@ -19,7 +19,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 		#'   For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
 		#'   \describe{
-		#'     \item{\strong{NULL}}{denote using non-correlation based network, such as SpiecEasi network construction approaches in cal_network function.}
+		#'     \item{\strong{NULL}}{denote non-correlation network. Do not use correlation-based network. 
+		#'       So the return res_cor_p list will be NULL, and COR option in network_method parameter of cal_network function can not be used.}
 		#'     \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on vegan::vegdist function}
 		#'     \item{\strong{'pearson'}}{Pearson correlation; If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function cor.test in R base;
 		#'       use_WGCNA_pearson_spearman = TRUE invoke corAndPvalue function of WGCNA package; 
@@ -219,6 +220,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param beemStatic_t_stab default 0.8; for network_method = "beemStatic"; 
 		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
 		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
+		#' @param delete_unlinked_nodes default TRUE; whether delete the nodes without any link.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
 		#' @param ... parameters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
 		#'   pass to NetCoMi::netConstruct when network_method = "gcoda"; 
@@ -253,6 +255,7 @@ trans_network <- R6Class(classname = "trans_network",
 			beemStatic_t_strength = 0.001,
 			beemStatic_t_stab = 0.8,
 			add_taxa_name = "Phylum",
+			delete_unlinked_nodes = TRUE,
 			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
 			...
 			){
@@ -427,10 +430,12 @@ trans_network <- R6Class(classname = "trans_network",
 				network %<>% delete_vertices(delete_nodes)
 				nodes_raw <- data.frame(cbind(V(network), V(network)$name))
 			}
-			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-			delete_nodes <- rownames(nodes_raw) %>% 
-				.[! . %in% as.character(c(edges[,1], edges[,2]))]
-			network %<>% delete_vertices(delete_nodes)
+			if(delete_unlinked_nodes){
+				edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
+				delete_nodes <- rownames(nodes_raw) %>% 
+					.[! . %in% as.character(c(edges[,1], edges[,2]))]
+				network %<>% delete_vertices(delete_nodes)	
+			}
 			V(network)$taxa <- V(network)$name
 			if(!is.null(add_taxa_name)){
 				if(!is.null(taxa_table)){

@@ -5,8 +5,8 @@
 \title{Create trans_network object for co-occurrence network analysis.}
 \description{
 This class is a wrapper for a series of network analysis methods, 
-including the network construction approaches, network attributes analysis,
-eigengene analysis, network subsetting, node and edge properties extraction, network plotting, and other network operations.
+including the network construction, network attributes analysis,
+eigengene analysis, network subsetting, node and edge properties, network visualization and other network operations.
 }
 \examples{
 
@@ -215,7 +215,8 @@ All the methods refered to NetCoMi package are performed based on netConstruct f
 NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
 \describe{
-  \item{\strong{NULL}}{denote using non-correlation based network, such as SpiecEasi network construction approaches in cal_network function.}
+  \item{\strong{NULL}}{denote non-correlation network. Do not use correlation-based network. 
+    So the return res_cor_p list will be NULL, and COR option in network_method parameter of cal_network function can not be used.}
   \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on vegan::vegdist function}
   \item{\strong{'pearson'}}{Pearson correlation; If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function cor.test in R base;
     use_WGCNA_pearson_spearman = TRUE invoke corAndPvalue function of WGCNA package; 
@@ -299,6 +300,7 @@ Calculate network based on the correlation method or SpiecEasi package or julia 
   beemStatic_t_strength = 0.001,
   beemStatic_t_stab = 0.8,
   add_taxa_name = "Phylum",
+  delete_unlinked_nodes = TRUE,
   usename_rawtaxa_when_taxalevel_notOTU = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -365,6 +367,8 @@ same with the t.strength parameter in showInteraction function of beemStatic pac
 the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.}
 
 \item{\code{add_taxa_name}}{default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.}
+
+\item{\code{delete_unlinked_nodes}}{default TRUE; whether delete the nodes without any link.}
 
 \item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
 
