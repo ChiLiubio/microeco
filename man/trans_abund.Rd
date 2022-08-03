@@ -151,6 +151,8 @@ Bar plot.
   others_color = "grey90",
   facet = NULL,
   facet2 = NULL,
+  facet3 = NULL,
+  facet4 = NULL,
   order_facet = NULL,
   x_axis_name = NULL,
   order_x = NULL,
@@ -183,7 +185,12 @@ Bar plot.
 \item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
 use this parameter, please first install package ggh4x using install.packages("ggh4x")}
 
-\item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").}
+\item{\code{facet3}}{default NULL; the third facet, used with facet and facet2 parameter together.}
+
+\item{\code{facet4}}{default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.}
+
+\item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
+If multiple facets are used, please manually assign factors in sample_table of microtable object.}
 
 \item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
 

@@ -144,7 +144,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
 		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
 		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x")
-		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
+		#' @param facet3 default NULL; the third facet, used with facet and facet2 parameter together.
+		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
+		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
+		#'   If multiple facets are used, please manually assign factors in sample_table of microtable object.
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
 		#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
@@ -170,6 +173,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			others_color = "grey90",
 			facet = NULL,
 			facet2 = NULL,
+			facet3 = NULL,
+			facet4 = NULL,
 			order_facet = NULL,
 			x_axis_name = NULL,
 			order_x = NULL,
@@ -256,7 +261,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(is.null(facet2)){
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 				}else{
-					p <- p + ggh4x::facet_nested(reformulate(c(facet, facet2)), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+					p <- p + ggh4x::facet_nested(reformulate(c(facet, facet2, facet3, facet4)), nest_line = element_line(linetype = 2), scales = "free", space = "free")
 				}
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
