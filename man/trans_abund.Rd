@@ -183,7 +183,7 @@ Bar plot.
 \item{\code{facet}}{default NULL; if using facet, providing a group column name of sample_table, such as, "Group".}
 
 \item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-use this parameter, please first install package ggh4x using install.packages("ggh4x")}
+use this parameter, please first install package ggh4x using install.packages("ggh4x").}
 
 \item{\code{facet3}}{default NULL; the third facet, used with facet and facet2 parameter together.}
 
@@ -245,6 +245,9 @@ Plot the heatmap.
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
   color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")),
   facet = NULL,
+  facet2 = NULL,
+  facet3 = NULL,
+  facet4 = NULL,
   order_facet = NULL,
   x_axis_name = NULL,
   order_x = NULL,
@@ -276,6 +279,13 @@ Plot the heatmap.
 colors palette for the plotting.}
 
 \item{\code{facet}}{default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".}
+
+\item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
+use this parameter, please first install package ggh4x using install.packages("ggh4x").}
+
+\item{\code{facet3}}{default NULL; the third facet, used with facet and facet2 parameter together.}
+
+\item{\code{facet4}}{default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.}
 
 \item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").}
 
@@ -313,7 +323,7 @@ colors palette for the plotting.}
 
 \item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
 
-\item{\code{legend_title}}{default "% Relative\nAbundance"; legend title text.}
+\item{\code{legend_title}}{default "\% Relative\nAbundance"; legend title text.}
 
 \item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 

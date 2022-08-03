@@ -143,7 +143,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param others_color default "grey90"; the color for "others" taxa.
 		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
 		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x")
+		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x").
 		#' @param facet3 default NULL; the third facet, used with facet and facet2 parameter together.
 		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
@@ -292,6 +292,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param color_values default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
 		#' 	  colors palette for the plotting.
 		#' @param facet default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".
+		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
+		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x").
+		#' @param facet3 default NULL; the third facet, used with facet and facet2 parameter together.
+		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
@@ -310,7 +314,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param grid_clean default TRUE; whether remove grid lines.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-		#' @param legend_title default "% Relative\nAbundance"; legend title text.
+		#' @param legend_title default "\% Relative\nAbundance"; legend title text.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param ... paremeters pass to pheatmap when pheatmap = TRUE.
 		#' @return ggplot2 plot or grid plot based on pheatmap.
@@ -322,6 +326,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		plot_heatmap = function(
 			color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")), 
 			facet = NULL,
+			facet2 = NULL,
+			facet3 = NULL,
+			facet4 = NULL,
 			order_facet = NULL,
 			x_axis_name = NULL,
 			order_x = NULL,
@@ -383,7 +390,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 					plot_data[, facet] <- factor(plot_data[, facet], levels = unique(order_facet))
 				}
 				if(!is.null(facet)){
-					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+					if(is.null(facet2)){
+						p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+					}else{
+						p <- p + ggh4x::facet_nested(reformulate(c(facet, facet2, facet3, facet4)), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+					}
 					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
 				}
 				p <- p + labs(x = "", y = "", fill = legend_title)
