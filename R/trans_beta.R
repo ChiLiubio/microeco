@@ -27,9 +27,26 @@ trans_beta <- R6Class(classname = "trans_beta",
 				stop("dataset is necessary !")
 			}
 			if(!is.null(measure)){
-				if(!measure %in% c(names(dataset$beta_diversity), 1:length(dataset$beta_diversity))){
-					stop("Input measure should be one of beta_diversity distance in dataset! Please see microtable$cal_betadiv!")
+				if(is.null(dataset$beta_diversity)){
+					stop("No dataset$beta_diversity found! Please first use microtable$cal_betadiv to calculate ", measure, " !")
 				}else{
+					if(length(measure) > 1){
+						stop("The input measure should only have one element! Please check it!")
+					}
+					if(is.character(measure)){
+						if(!measure %in% names(dataset$beta_diversity)){
+							stop("Input measure: ", measure, " should be one of beta_diversity distance matrix names in dataset! ",
+								"Please use names(dataset$beta_diversity) to check it!")
+						}
+					}else{
+						if(is.numeric(measure)){
+							if(measure > length(dataset$beta_diversity)){
+								stop("Input measure: ", measure, " is larger than total beta_diversity distance matrixes number! Please check it")
+							}
+						}else{
+							stop("Unknown format of input measure parameter!")
+						}
+					}
 					self$use_matrix <- dataset$beta_diversity[[measure]]
 				}
 			}

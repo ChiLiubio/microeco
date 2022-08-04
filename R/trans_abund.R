@@ -314,7 +314,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param grid_clean default TRUE; whether remove grid lines.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
-		#' @param legend_title default "\% Relative\nAbundance"; legend title text.
+		#' @param legend_title default "\% Relative\\nAbundance"; legend title text.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param ... paremeters pass to pheatmap when pheatmap = TRUE.
 		#' @return ggplot2 plot or grid plot based on pheatmap.

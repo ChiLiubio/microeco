@@ -274,7 +274,7 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				if(!is.numeric(select_cols)){
 					if(any(! select_cols %in% colnames(self$tax_table))){
-						stop("Part of the input names are not in the tax_table!")
+						stop("Part of input names of select_cols are not in the tax_table!")
 					}else{
 						select_cols <- match(select_cols, colnames(self$tax_table))
 					}
@@ -287,7 +287,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			for(i in seq_along(select_cols)) {
 				taxrank <- colnames(self$tax_table)[select_cols[i]]
-				# assign the columns used for the splitting.
+				# assign the columns used for the splitting
 				if(!is.null(split_column)){
 					if(is.list(split_column)){
 						use_split_column <- split_column[[i]]

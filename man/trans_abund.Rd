@@ -323,7 +323,7 @@ use this parameter, please first install package ggh4x using install.packages("g
 
 \item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
 
-\item{\code{legend_title}}{default "\% Relative\nAbundance"; legend title text.}
+\item{\code{legend_title}}{default "\% Relative\\nAbundance"; legend title text.}
 
 \item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 
