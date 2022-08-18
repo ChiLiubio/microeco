@@ -8,10 +8,10 @@ An R package for data mining in microbial community ecology
 
 ## Background
 In microbial community ecology, with the development of high-throughput sequencing techniques,
-the increasing data amount and complexity make the community data analysis and management a challenge.
+the increasing data amount and complexity make the microbiome data analysis and management a challenge.
 There has been a lot of R packages created for the microbiome profiling analysis.
 However, it is still difficult to perform data mining fast and efficiently.
-Therefore, we created R microeco package.
+Therefore, we created R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
 
 ## Main Features
   + R6 Class to store and analyze data; fast, flexible and modularized
