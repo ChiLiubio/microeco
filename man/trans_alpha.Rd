@@ -39,16 +39,16 @@ t1$plot_alpha(measure = "Shannon", group = "Group")
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_alpha$new()}}
-\item \href{#method-cal_diff}{\code{trans_alpha$cal_diff()}}
-\item \href{#method-plot_alpha}{\code{trans_alpha$plot_alpha()}}
-\item \href{#method-print}{\code{trans_alpha$print()}}
-\item \href{#method-clone}{\code{trans_alpha$clone()}}
+\item \href{#method-trans_alpha-new}{\code{trans_alpha$new()}}
+\item \href{#method-trans_alpha-cal_diff}{\code{trans_alpha$cal_diff()}}
+\item \href{#method-trans_alpha-plot_alpha}{\code{trans_alpha$plot_alpha()}}
+\item \href{#method-trans_alpha-print}{\code{trans_alpha$print()}}
+\item \href{#method-trans_alpha-clone}{\code{trans_alpha$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_alpha-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_alpha-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$new(dataset = NULL, group = NULL, order_x = NULL)}\if{html}{\out{</div>}}
@@ -81,8 +81,8 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_diff"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_diff}{}}}
+\if{html}{\out{<a id="method-trans_alpha-cal_diff"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_alpha-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
 Test the difference of alpha diversity across groups.
 \subsection{Usage}{
@@ -139,8 +139,8 @@ t1$cal_diff(method = "anova")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_alpha"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_alpha}{}}}
+\if{html}{\out{<a id="method-trans_alpha-plot_alpha"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_alpha-plot_alpha}{}}}
 \subsection{Method \code{plot_alpha()}}{
 Plotting the alpha diveristy.
 \subsection{Usage}{
@@ -219,8 +219,8 @@ t1$plot_alpha(measure = "Shannon", group = "Group")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-trans_alpha-print"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_alpha-print}{}}}
 \subsection{Method \code{print()}}{
 Print the trans_alpha object.
 \subsection{Usage}{
@@ -229,8 +229,8 @@ Print the trans_alpha object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_alpha-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_alpha-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

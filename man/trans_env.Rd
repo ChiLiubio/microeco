@@ -121,25 +121,25 @@ t1$plot_scatterfit(x =
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_env$new()}}
-\item \href{#method-cal_diff}{\code{trans_env$cal_diff()}}
-\item \href{#method-plot_diff}{\code{trans_env$plot_diff()}}
-\item \href{#method-cal_autocor}{\code{trans_env$cal_autocor()}}
-\item \href{#method-cal_ordination}{\code{trans_env$cal_ordination()}}
-\item \href{#method-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
-\item \href{#method-trans_ordination}{\code{trans_env$trans_ordination()}}
-\item \href{#method-plot_ordination}{\code{trans_env$plot_ordination()}}
-\item \href{#method-cal_mantel}{\code{trans_env$cal_mantel()}}
-\item \href{#method-cal_cor}{\code{trans_env$cal_cor()}}
-\item \href{#method-plot_cor}{\code{trans_env$plot_cor()}}
-\item \href{#method-plot_scatterfit}{\code{trans_env$plot_scatterfit()}}
-\item \href{#method-print}{\code{trans_env$print()}}
-\item \href{#method-clone}{\code{trans_env$clone()}}
+\item \href{#method-trans_env-new}{\code{trans_env$new()}}
+\item \href{#method-trans_env-cal_diff}{\code{trans_env$cal_diff()}}
+\item \href{#method-trans_env-plot_diff}{\code{trans_env$plot_diff()}}
+\item \href{#method-trans_env-cal_autocor}{\code{trans_env$cal_autocor()}}
+\item \href{#method-trans_env-cal_ordination}{\code{trans_env$cal_ordination()}}
+\item \href{#method-trans_env-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
+\item \href{#method-trans_env-trans_ordination}{\code{trans_env$trans_ordination()}}
+\item \href{#method-trans_env-plot_ordination}{\code{trans_env$plot_ordination()}}
+\item \href{#method-trans_env-cal_mantel}{\code{trans_env$cal_mantel()}}
+\item \href{#method-trans_env-cal_cor}{\code{trans_env$cal_cor()}}
+\item \href{#method-trans_env-plot_cor}{\code{trans_env$plot_cor()}}
+\item \href{#method-trans_env-plot_scatterfit}{\code{trans_env$plot_scatterfit()}}
+\item \href{#method-trans_env-print}{\code{trans_env$print()}}
+\item \href{#method-trans_env-clone}{\code{trans_env$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_env-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$new(
@@ -186,8 +186,8 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_diff"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_diff}{}}}
+\if{html}{\out{<a id="method-trans_env-cal_diff"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
 Test the difference of environmental variable across groups.
 \subsection{Usage}{
@@ -245,8 +245,8 @@ t1$cal_diff(group = "Group", method = "anova")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_diff"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_diff}{}}}
+\if{html}{\out{<a id="method-trans_env-plot_diff"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-plot_diff}{}}}
 \subsection{Method \code{plot_diff()}}{
 Plotting values of environmental variables across groups and add the significance label.
 \subsection{Usage}{
@@ -262,8 +262,8 @@ Plotting values of environmental variables across groups and add the significanc
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_autocor"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_autocor}{}}}
+\if{html}{\out{<a id="method-trans_env-cal_autocor"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_autocor}{}}}
 \subsection{Method \code{cal_autocor()}}{
 Calculate the autocorrelations among environmental variables and plot the result.
 \subsection{Usage}{
@@ -305,8 +305,8 @@ t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_ordination"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_ordination}{}}}
+\if{html}{\out{<a id="method-trans_env-cal_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_ordination}{}}}
 \subsection{Method \code{cal_ordination()}}{
 Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
 \subsection{Usage}{
@@ -360,8 +360,8 @@ t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_ordination_envsquare"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_ordination_envsquare}{}}}
+\if{html}{\out{<a id="method-trans_env-cal_ordination_envsquare"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_ordination_envsquare}{}}}
 \subsection{Method \code{cal_ordination_envsquare()}}{
 Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 \subsection{Usage}{
@@ -390,8 +390,8 @@ t1$cal_ordination_envsquare()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_ordination"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_ordination}{}}}
+\if{html}{\out{<a id="method-trans_env-trans_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-trans_ordination}{}}}
 \subsection{Method \code{trans_ordination()}}{
 transform ordination result for the following plotting.
 \subsection{Usage}{
@@ -437,8 +437,8 @@ t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_ordination"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_ordination}{}}}
+\if{html}{\out{<a id="method-trans_env-plot_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-plot_ordination}{}}}
 \subsection{Method \code{plot_ordination()}}{
 plot ordination result.
 \subsection{Usage}{
@@ -570,8 +570,8 @@ t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_mantel"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_mantel}{}}}
+\if{html}{\out{<a id="method-trans_env-cal_mantel"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_mantel}{}}}
 \subsection{Method \code{cal_mantel()}}{
 Mantel test between beta diversity matrix and environmental data.
 \subsection{Usage}{
@@ -621,8 +621,8 @@ t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_cor"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_cor}{}}}
+\if{html}{\out{<a id="method-trans_env-cal_cor"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_cor}{}}}
 \subsection{Method \code{cal_cor()}}{
 Calculating the correlations between taxa abundance and environmental variables.
 Actually, it can also be used for calculating other correlation between any two variables from two tables.
@@ -692,8 +692,8 @@ t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_cor"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_cor}{}}}
+\if{html}{\out{<a id="method-trans_env-plot_cor"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-plot_cor}{}}}
 \subsection{Method \code{plot_cor()}}{
 Plot correlation heatmap.
 \subsection{Usage}{
@@ -773,8 +773,8 @@ t1$plot_cor(pheatmap = FALSE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_scatterfit"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_scatterfit}{}}}
+\if{html}{\out{<a id="method-trans_env-plot_scatterfit"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-plot_scatterfit}{}}}
 \subsection{Method \code{plot_scatterfit()}}{
 Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
@@ -905,8 +905,8 @@ t1$plot_scatterfit(x =
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-trans_env-print"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-print}{}}}
 \subsection{Method \code{print()}}{
 Print the trans_env object.
 \subsection{Usage}{
@@ -915,8 +915,8 @@ Print the trans_env object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_env-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

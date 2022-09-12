@@ -78,21 +78,21 @@ t1$cal_tax4fun2_FRI()
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_func$new()}}
-\item \href{#method-cal_spe_func}{\code{trans_func$cal_spe_func()}}
-\item \href{#method-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
-\item \href{#method-show_prok_func}{\code{trans_func$show_prok_func()}}
-\item \href{#method-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
-\item \href{#method-cal_tax4fun}{\code{trans_func$cal_tax4fun()}}
-\item \href{#method-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
-\item \href{#method-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
-\item \href{#method-print}{\code{trans_func$print()}}
-\item \href{#method-clone}{\code{trans_func$clone()}}
+\item \href{#method-trans_func-new}{\code{trans_func$new()}}
+\item \href{#method-trans_func-cal_spe_func}{\code{trans_func$cal_spe_func()}}
+\item \href{#method-trans_func-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
+\item \href{#method-trans_func-show_prok_func}{\code{trans_func$show_prok_func()}}
+\item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
+\item \href{#method-trans_func-cal_tax4fun}{\code{trans_func$cal_tax4fun()}}
+\item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
+\item \href{#method-trans_func-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
+\item \href{#method-trans_func-print}{\code{trans_func$print()}}
+\item \href{#method-trans_func-clone}{\code{trans_func$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_func-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-new}{}}}
 \subsection{Method \code{new()}}{
 Create the trans_func object. This function can identify the data type for Prokaryotes or Fungi automatically.
 \subsection{Usage}{
@@ -121,8 +121,8 @@ t1 <- trans_func$new(dataset = dataset)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_spe_func"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_spe_func}{}}}
+\if{html}{\out{<a id="method-trans_func-cal_spe_func"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func}{}}}
 \subsection{Method \code{cal_spe_func()}}{
 Confirm traits of each feature by matching the taxonomic assignments to the functional database.
 \subsection{Usage}{
@@ -169,8 +169,8 @@ t1$cal_spe_func(fungi_database = "FungalTraits")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_spe_func_perc}{}}}
+\if{html}{\out{<a id="method-trans_func-cal_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func_perc}{}}}
 \subsection{Method \code{cal_spe_func_perc()}}{
 Calculating the percentages of species with specific trait in communities.
 The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community.
@@ -202,8 +202,8 @@ t1$cal_spe_func_perc(abundance_weighted = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-show_prok_func"></a>}}
-\if{latex}{\out{\hypertarget{method-show_prok_func}{}}}
+\if{html}{\out{<a id="method-trans_func-show_prok_func"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-show_prok_func}{}}}
 \subsection{Method \code{show_prok_func()}}{
 Show the annotation information for a function of prokaryotes from FAPROTAX database.
 \subsection{Usage}{
@@ -232,8 +232,8 @@ t1$show_prok_func(use_func = "methanotrophy")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_spe_func_perc}{}}}
+\if{html}{\out{<a id="method-trans_func-plot_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-plot_spe_func_perc}{}}}
 \subsection{Method \code{plot_spe_func_perc()}}{
 Plot the percentages of species with specific trait in communities or network modules.
 \subsection{Usage}{
@@ -280,8 +280,8 @@ t1$plot_spe_func_perc(use_group_list = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_tax4fun"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_tax4fun}{}}}
+\if{html}{\out{<a id="method-trans_func-cal_tax4fun"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_tax4fun}{}}}
 \subsection{Method \code{cal_tax4fun()}}{
 Predict functional potential of communities using tax4fun.
 please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
@@ -304,8 +304,8 @@ tax4fun_KO and tax4fun_path in object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_tax4fun2"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_tax4fun2}{}}}
+\if{html}{\out{<a id="method-trans_func-cal_tax4fun2"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_tax4fun2}{}}}
 \subsection{Method \code{cal_tax4fun2()}}{
 Predict functional potential of communities with Tax4Fun2 method. 
   The function was adapted from the raw Tax4Fun2 package to make it compatible with the microtable object.
@@ -373,8 +373,8 @@ t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.5.0+/bin",
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_tax4fun2_FRI"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_tax4fun2_FRI}{}}}
+\if{html}{\out{<a id="method-trans_func-cal_tax4fun2_FRI"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_tax4fun2_FRI}{}}}
 \subsection{Method \code{cal_tax4fun2_FRI()}}{
 Calculate (multi-) functional redundancy index (FRI) of prokaryotic community with Tax4Fun2 method.
 This function is used to calculating aFRI and rFRI use the intermediate files generated by the function cal_tax4fun2().
@@ -400,8 +400,8 @@ t1$cal_tax4fun2_FRI()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-trans_func-print"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-print}{}}}
 \subsection{Method \code{print()}}{
 Print the trans_func object.
 \subsection{Usage}{
@@ -410,8 +410,8 @@ Print the trans_func object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_func-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

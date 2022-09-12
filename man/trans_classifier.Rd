@@ -109,23 +109,23 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_classifier$new()}}
-\item \href{#method-cal_preProcess}{\code{trans_classifier$cal_preProcess()}}
-\item \href{#method-cal_feature_sel}{\code{trans_classifier$cal_feature_sel()}}
-\item \href{#method-cal_split}{\code{trans_classifier$cal_split()}}
-\item \href{#method-set_trainControl}{\code{trans_classifier$set_trainControl()}}
-\item \href{#method-cal_train}{\code{trans_classifier$cal_train()}}
-\item \href{#method-cal_feature_imp}{\code{trans_classifier$cal_feature_imp()}}
-\item \href{#method-cal_predict}{\code{trans_classifier$cal_predict()}}
-\item \href{#method-plot_confusionMatrix}{\code{trans_classifier$plot_confusionMatrix()}}
-\item \href{#method-cal_ROC}{\code{trans_classifier$cal_ROC()}}
-\item \href{#method-plot_ROC}{\code{trans_classifier$plot_ROC()}}
-\item \href{#method-clone}{\code{trans_classifier$clone()}}
+\item \href{#method-trans_classifier-new}{\code{trans_classifier$new()}}
+\item \href{#method-trans_classifier-cal_preProcess}{\code{trans_classifier$cal_preProcess()}}
+\item \href{#method-trans_classifier-cal_feature_sel}{\code{trans_classifier$cal_feature_sel()}}
+\item \href{#method-trans_classifier-cal_split}{\code{trans_classifier$cal_split()}}
+\item \href{#method-trans_classifier-set_trainControl}{\code{trans_classifier$set_trainControl()}}
+\item \href{#method-trans_classifier-cal_train}{\code{trans_classifier$cal_train()}}
+\item \href{#method-trans_classifier-cal_feature_imp}{\code{trans_classifier$cal_feature_imp()}}
+\item \href{#method-trans_classifier-cal_predict}{\code{trans_classifier$cal_predict()}}
+\item \href{#method-trans_classifier-plot_confusionMatrix}{\code{trans_classifier$plot_confusionMatrix()}}
+\item \href{#method-trans_classifier-cal_ROC}{\code{trans_classifier$cal_ROC()}}
+\item \href{#method-trans_classifier-plot_ROC}{\code{trans_classifier$plot_ROC()}}
+\item \href{#method-trans_classifier-clone}{\code{trans_classifier$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_classifier-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-new}{}}}
 \subsection{Method \code{new()}}{
 Create the trans_classifier object.
 \subsection{Usage}{
@@ -176,8 +176,8 @@ t1 <- trans_classifier$new(
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_preProcess"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_preProcess}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_preProcess"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_preProcess}{}}}
 \subsection{Method \code{cal_preProcess()}}{
 Pre-process (centering, scaling etc.) of the feature data based on the caret::preProcess function. 
 	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
@@ -207,8 +207,8 @@ t1$cal_preProcess(method = c("center", "scale", "nzv"))
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_feature_sel"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_feature_sel}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_feature_sel"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_feature_sel}{}}}
 \subsection{Method \code{cal_feature_sel()}}{
 Perform feature selection.
 	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
@@ -249,8 +249,8 @@ t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_split"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_split}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_split"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_split}{}}}
 \subsection{Method \code{cal_split()}}{
 Split data for training and testing.
 \subsection{Usage}{
@@ -279,8 +279,8 @@ t1$cal_split(prop.train = 3/4)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_trainControl"></a>}}
-\if{latex}{\out{\hypertarget{method-set_trainControl}{}}}
+\if{html}{\out{<a id="method-trans_classifier-set_trainControl"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-set_trainControl}{}}}
 \subsection{Method \code{set_trainControl()}}{
 Control parameters for the following training. See trainControl function of caret package for details.
 \subsection{Usage}{
@@ -322,8 +322,8 @@ t1$set_trainControl(method = 'repeatedcv')
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_train"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_train}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_train"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_train}{}}}
 \subsection{Method \code{cal_train()}}{
 Run the model training.
 \subsection{Usage}{
@@ -369,8 +369,8 @@ t1$cal_train(method = "svmRadial", tuneLength = 15)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_feature_imp"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_feature_imp}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_feature_imp"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_feature_imp}{}}}
 \subsection{Method \code{cal_feature_imp()}}{
 Get feature importance from the training model.
 \subsection{Usage}{
@@ -399,8 +399,8 @@ t1$cal_feature_imp()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_predict"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_predict}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_predict"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_predict}{}}}
 \subsection{Method \code{cal_predict()}}{
 Run the prediction.
 \subsection{Usage}{
@@ -430,8 +430,8 @@ t1$cal_predict()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_confusionMatrix"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_confusionMatrix}{}}}
+\if{html}{\out{<a id="method-trans_classifier-plot_confusionMatrix"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-plot_confusionMatrix}{}}}
 \subsection{Method \code{plot_confusionMatrix()}}{
 Plot the cross-tabulation of observed and predicted classes with associated statistics.
 \subsection{Usage}{
@@ -465,8 +465,8 @@ t1$plot_confusionMatrix()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_ROC"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_ROC}{}}}
+\if{html}{\out{<a id="method-trans_classifier-cal_ROC"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_ROC}{}}}
 \subsection{Method \code{cal_ROC()}}{
 Get ROC (Receiver Operator Characteristic) curve data and the performance data.
 \subsection{Usage}{
@@ -496,8 +496,8 @@ t1$cal_ROC()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_ROC"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_ROC}{}}}
+\if{html}{\out{<a id="method-trans_classifier-plot_ROC"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-plot_ROC}{}}}
 \subsection{Method \code{plot_ROC()}}{
 Plot ROC curve.
 \subsection{Usage}{
@@ -547,8 +547,8 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_classifier-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

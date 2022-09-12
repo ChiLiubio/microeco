@@ -19,18 +19,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
 		#'     \item{\strong{'rf'}}{random forest and non-parametric test method based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
 		#'     \item{\strong{'metastat'}}{Metastat method for all paired groups based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
-		#'     \item{\strong{'mseq'}}{zero-inflated log-normal model-based differential test method from metagenomeSeq package.}
+		#'     \item{\strong{'metagenomeSeq'}}{zero-inflated log-normal model-based differential test method from metagenomeSeq package.}
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in FSA package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) <doi:10.1038/s41467-020-17041-7>}
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of microtable$sample_table.
 		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
-		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus"; this parameter can be applied when method != "mseq";
-		#' 	  'mseq' method is performed on the feature abudance, i.e. microtable$otu_table.
-		#' @param filter_thres default 0; the relative abundance threshold used for method != "metastat" or "mseq". 
+		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
+		#' @param filter_thres default 0; the relative abundance threshold used for method != "metastat" or "metagenomeSeq". 
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options; 
 		#'    NULL mean disuse the p value adjustment; So when p_adjust_method = NULL, P.adj is same with P.unadj.
@@ -40,9 +40,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param nresam default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".
 		#' @param boots default 30; bootstrap test number for method = "lefse" or "rf".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package when method = "rf".
-		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "mseq".
-		#' @param mseq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
-		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova".
+		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".
+		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
+		#' @param ANCOMBC_formula default NULL; same with the formula parameter in ANCOMBC::ancombc function; If NULL; assign the group parameter to it automatically.
+		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
+		#' 	 passed to ANCOMBC::ancombc function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter).
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
@@ -64,7 +66,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "metastat", "mseq", "KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
+			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -77,7 +79,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			boots = 30,
 			rf_ntree = 1000,
 			group_choose_paired = NULL,
-			mseq_count = 1,
+			metagenomeSeq_count = 1,
+			ANCOMBC_formula = NULL,
 			...
 			){
 			if(is.null(dataset)){
@@ -95,14 +98,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 			}
-			method <- match.arg(method, c("lefse", "rf", "metastat", "mseq", "KW", "KW_dunn", "wilcox", "t.test", "anova"))
+			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC"))
 			
 			if(is.factor(sampleinfo[, group])){
 				self$group_order <- levels(sampleinfo[, group])
 				sampleinfo[, group] %<>% as.character
 			}
 			
-			if(method != "mseq"){
+			if(method != "metagenomeSeq"){
 				if(is.null(dataset$taxa_abund)){
 					stop("Please first calculate taxa_abund! see cal_abund function in microtable class!")
 				}
@@ -372,7 +375,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- res1
 				message('The lefse result is stored in object$res_diff ...')
 			}
-			if(method != "mseq"){
+			if(! method %in% c("metagenomeSeq", "ANCOMBC")){
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
 				}else{
@@ -389,7 +392,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_abund <- res_abund
 				message('Taxa abundance data is stored in object$res_abund ...')
 			}
-			if(method %in% c("metastat", "mseq")){
+			if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC")){
 				if(is.null(group_choose_paired)){
 					all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
 				}else{
@@ -442,9 +445,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$res_diff <- output
 				message('The metastat result is stored in object$res_diff ...')
 			}
-			if(method == "mseq"){
+			if(method == "metagenomeSeq"){
 				if(!require("metagenomeSeq")){
-					stop("metagenomeSeq package not installed")
+					stop("metagenomeSeq package not installed !")
+				}
+				if(taxa_level == "all"){
+					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+				}
+				if(! (taxa_level %in% colnames(dataset$tax_table))){
+					dataset$add_rownames2taxonomy(use_name = taxa_level)
 				}
 				message("Total ", ncol(all_name), " paired group for calculation ...")
 				for(i in 1:ncol(all_name)) {
@@ -452,10 +461,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 					use_dataset <- clone(dataset)
 					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
 					use_dataset$tidy_dataset()
+					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], 
+						sample_table = use_dataset$sample_table)
+					newdata$tidy_dataset()
 					obj <- newMRexperiment(
-						use_dataset$otu_table, 
-						phenoData= AnnotatedDataFrame(use_dataset$sample_table), 
-						featureData = AnnotatedDataFrame(use_dataset$tax_table)
+						newdata$otu_table, 
+						phenoData= AnnotatedDataFrame(newdata$sample_table)
+#						featureData = AnnotatedDataFrame(use_dataset$tax_table)
 						)
 					## Normalization and Statistical testing
 					obj_1 <- cumNorm(obj)
@@ -478,9 +491,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					srt <- order(p, decreasing = FALSE)
 					valid <- 1:length(padj)
-					if (mseq_count > 0) {
+					if (metagenomeSeq_count > 0) {
 						np <- rowSums(objres1@counts)
-						valid <- intersect(valid, which(np >= mseq_count))
+						valid <- intersect(valid, which(np >= metagenomeSeq_count))
 					}
 					srt <- srt[which(srt %in% valid)]
 					res <- cbind(tb[, 1:2], p)
@@ -497,6 +510,62 @@ trans_diff <- R6Class(classname = "trans_diff",
 				colnames(output)[1:2] <- c("Comparison", "Taxa")
 				self$res_diff <- output
 				message('The differential test result is stored in object$res_diff ...')
+			}
+			if(method == "ANCOMBC"){
+				if(!require("ANCOMBC")){
+					stop("ANCOMBC package is not installed !")
+				}
+				if(!require("file2meco")){
+					stop("Please install file2meco package! The function meco2phyloseq is required!")
+				}
+				if(taxa_level == "all"){
+					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+				}
+				if(is.null(ANCOMBC_formula)){
+					ANCOMBC_formula <- group
+				}
+				if(! (taxa_level %in% colnames(dataset$tax_table))){
+					dataset$add_rownames2taxonomy(use_name = taxa_level)
+				}
+				if(ncol(all_name) > 1){
+					message("First run the global test ...")
+					use_dataset <- clone(dataset)
+					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
+					newdata$tidy_dataset()
+					newdata <- file2meco::meco2phyloseq(newdata)
+					res_raw <- ancombc(phyloseq = newdata, group = group, formula = ANCOMBC_formula, global = TRUE, ...)
+					res <- res_raw$res_global
+					colnames(res) <- c("W", "pvalues", "adjPvalues", "diff_abn")
+					res <- cbind.data.frame(feature = rownames(res), res)
+					group_vec <- use_dataset$sample_table[, group] %>% as.character %>% unique
+					comparisions <- paste0(group_vec, collapse = " - ")
+					res <- cbind.data.frame(compare = comparisions, res)
+					output <- rbind.data.frame(output, res)
+				}
+				message("Total ", ncol(all_name), " paired group for test ...")
+				for(i in 1:ncol(all_name)) {
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
+					use_dataset <- clone(dataset)
+					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+					use_dataset$tidy_dataset()
+					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
+					newdata$tidy_dataset()
+					newdata <- file2meco::meco2phyloseq(newdata)
+					res_raw <- ancombc(phyloseq = newdata, group = group, formula = ANCOMBC_formula, ...)
+					res_raw2 <- res_raw$res
+					res <- data.frame(feature = rownames(res_raw2$W), W = res_raw2$W[, 1], pvalues = res_raw2$p_val[, 1], 
+						adjPvalues = res_raw2$q_val[, 1], diff_abn = res_raw2$diff_abn[, 1])
+					rownames(res) <- NULL
+					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+					res <- cbind.data.frame(compare = add_name, res)
+					output <- rbind.data.frame(output, res)
+				}
+				output %<>% dropallfactors(unfac2num = TRUE)
+				colnames(output)[1:2] <- c("Comparison", "Taxa")
+				self$res_diff <- output
+				message('The ANCOMBC differential test result is stored in object$res_diff ...')
 			}
 			self$method <- method
 			self$taxa_level <- taxa_level
@@ -568,8 +637,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			method <- self$method
 			diff_data <- self$res_diff
 
-			if(method == "mseq"){
-				stop("This function can not be applied to 'mseq' method currently!")
+			if(method == "metagenomeSeq"){
+				stop("This function can not be applied to 'metagenomeSeq' method currently!")
 			}else{
 				if(method == "metastat"){
 					message('Reorder taxa according to qvalue in res_diff from low to high ...')

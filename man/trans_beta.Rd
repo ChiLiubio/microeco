@@ -75,20 +75,20 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_beta$new()}}
-\item \href{#method-cal_ordination}{\code{trans_beta$cal_ordination()}}
-\item \href{#method-plot_ordination}{\code{trans_beta$plot_ordination()}}
-\item \href{#method-cal_manova}{\code{trans_beta$cal_manova()}}
-\item \href{#method-cal_betadisper}{\code{trans_beta$cal_betadisper()}}
-\item \href{#method-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
-\item \href{#method-plot_group_distance}{\code{trans_beta$plot_group_distance()}}
-\item \href{#method-plot_clustering}{\code{trans_beta$plot_clustering()}}
-\item \href{#method-clone}{\code{trans_beta$clone()}}
+\item \href{#method-trans_beta-new}{\code{trans_beta$new()}}
+\item \href{#method-trans_beta-cal_ordination}{\code{trans_beta$cal_ordination()}}
+\item \href{#method-trans_beta-plot_ordination}{\code{trans_beta$plot_ordination()}}
+\item \href{#method-trans_beta-cal_manova}{\code{trans_beta$cal_manova()}}
+\item \href{#method-trans_beta-cal_betadisper}{\code{trans_beta$cal_betadisper()}}
+\item \href{#method-trans_beta-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
+\item \href{#method-trans_beta-plot_group_distance}{\code{trans_beta$plot_group_distance()}}
+\item \href{#method-trans_beta-plot_clustering}{\code{trans_beta$plot_clustering()}}
+\item \href{#method-trans_beta-clone}{\code{trans_beta$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_beta-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$new(dataset = NULL, measure = NULL, group = NULL)}\if{html}{\out{</div>}}
@@ -121,8 +121,8 @@ t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_ordination"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_ordination}{}}}
+\if{html}{\out{<a id="method-trans_beta-cal_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-cal_ordination}{}}}
 \subsection{Method \code{cal_ordination()}}{
 Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 \subsection{Usage}{
@@ -161,8 +161,8 @@ res_ordination stored in the object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_ordination"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_ordination}{}}}
+\if{html}{\out{<a id="method-trans_beta-plot_ordination"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-plot_ordination}{}}}
 \subsection{Method \code{plot_ordination()}}{
 Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 \subsection{Usage}{
@@ -247,8 +247,8 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_manova"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_manova}{}}}
+\if{html}{\out{<a id="method-trans_beta-cal_manova"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
 Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis2 function.
 \subsection{Usage}{
@@ -290,8 +290,8 @@ res_manova stored in object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_betadisper"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_betadisper}{}}}
+\if{html}{\out{<a id="method-trans_beta-cal_betadisper"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-cal_betadisper}{}}}
 \subsection{Method \code{cal_betadisper()}}{
 A wrapper for betadisper function in vegan package for multivariate homogeneity test of groups dispersions.
 \subsection{Usage}{
@@ -318,8 +318,8 @@ res_betadisper stored in object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_group_distance"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_group_distance}{}}}
+\if{html}{\out{<a id="method-trans_beta-cal_group_distance"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-cal_group_distance}{}}}
 \subsection{Method \code{cal_group_distance()}}{
 Transform sample distances within groups or between groups.
 \subsection{Usage}{
@@ -348,8 +348,8 @@ t1$cal_group_distance(within_group = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_group_distance"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_group_distance}{}}}
+\if{html}{\out{<a id="method-trans_beta-plot_group_distance"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-plot_group_distance}{}}}
 \subsection{Method \code{plot_group_distance()}}{
 Plotting the distance between samples within or between groups.
 \subsection{Usage}{
@@ -410,8 +410,8 @@ t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_clustering"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_clustering}{}}}
+\if{html}{\out{<a id="method-trans_beta-plot_clustering"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-plot_clustering}{}}}
 \subsection{Method \code{plot_clustering()}}{
 Plotting clustering result. Require ggdendro package.
 \subsection{Usage}{
@@ -449,8 +449,8 @@ ggplot.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_beta-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -131,26 +131,26 @@ t1$cal_tNST_test()
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_nullmodel$new()}}
-\item \href{#method-cal_mantel_corr}{\code{trans_nullmodel$cal_mantel_corr()}}
-\item \href{#method-plot_mantel_corr}{\code{trans_nullmodel$plot_mantel_corr()}}
-\item \href{#method-cal_betampd}{\code{trans_nullmodel$cal_betampd()}}
-\item \href{#method-cal_betamntd}{\code{trans_nullmodel$cal_betamntd()}}
-\item \href{#method-cal_ses_betampd}{\code{trans_nullmodel$cal_ses_betampd()}}
-\item \href{#method-cal_ses_betamntd}{\code{trans_nullmodel$cal_ses_betamntd()}}
-\item \href{#method-cal_rcbray}{\code{trans_nullmodel$cal_rcbray()}}
-\item \href{#method-cal_process}{\code{trans_nullmodel$cal_process()}}
-\item \href{#method-cal_NRI}{\code{trans_nullmodel$cal_NRI()}}
-\item \href{#method-cal_NTI}{\code{trans_nullmodel$cal_NTI()}}
-\item \href{#method-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
-\item \href{#method-cal_tNST}{\code{trans_nullmodel$cal_tNST()}}
-\item \href{#method-cal_tNST_test}{\code{trans_nullmodel$cal_tNST_test()}}
-\item \href{#method-clone}{\code{trans_nullmodel$clone()}}
+\item \href{#method-trans_nullmodel-new}{\code{trans_nullmodel$new()}}
+\item \href{#method-trans_nullmodel-cal_mantel_corr}{\code{trans_nullmodel$cal_mantel_corr()}}
+\item \href{#method-trans_nullmodel-plot_mantel_corr}{\code{trans_nullmodel$plot_mantel_corr()}}
+\item \href{#method-trans_nullmodel-cal_betampd}{\code{trans_nullmodel$cal_betampd()}}
+\item \href{#method-trans_nullmodel-cal_betamntd}{\code{trans_nullmodel$cal_betamntd()}}
+\item \href{#method-trans_nullmodel-cal_ses_betampd}{\code{trans_nullmodel$cal_ses_betampd()}}
+\item \href{#method-trans_nullmodel-cal_ses_betamntd}{\code{trans_nullmodel$cal_ses_betamntd()}}
+\item \href{#method-trans_nullmodel-cal_rcbray}{\code{trans_nullmodel$cal_rcbray()}}
+\item \href{#method-trans_nullmodel-cal_process}{\code{trans_nullmodel$cal_process()}}
+\item \href{#method-trans_nullmodel-cal_NRI}{\code{trans_nullmodel$cal_NRI()}}
+\item \href{#method-trans_nullmodel-cal_NTI}{\code{trans_nullmodel$cal_NTI()}}
+\item \href{#method-trans_nullmodel-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
+\item \href{#method-trans_nullmodel-cal_tNST}{\code{trans_nullmodel$cal_tNST()}}
+\item \href{#method-trans_nullmodel-cal_tNST_test}{\code{trans_nullmodel$cal_tNST_test()}}
+\item \href{#method-trans_nullmodel-clone}{\code{trans_nullmodel$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$new(
@@ -201,8 +201,8 @@ t1 <- trans_nullmodel$new(dataset, filter_thres = 0.0005, add_data = env_data_16
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_mantel_corr"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_mantel_corr}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_mantel_corr"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_mantel_corr}{}}}
 \subsection{Method \code{cal_mantel_corr()}}{
 Calculate mantel correlogram.
 \subsection{Usage}{
@@ -243,8 +243,8 @@ t1$cal_mantel_corr(use_env = "pH")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_mantel_corr"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_mantel_corr}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-plot_mantel_corr"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-plot_mantel_corr}{}}}
 \subsection{Method \code{plot_mantel_corr()}}{
 Plot mantel correlogram.
 \subsection{Usage}{
@@ -275,8 +275,8 @@ t1$plot_mantel_corr()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_betampd"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_betampd}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_betampd"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_betampd}{}}}
 \subsection{Method \code{cal_betampd()}}{
 Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
 \subsection{Usage}{
@@ -305,8 +305,8 @@ t1$cal_betampd(abundance.weighted = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_betamntd"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_betamntd}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_betamntd"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_betamntd}{}}}
 \subsection{Method \code{cal_betamntd()}}{
 Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
 \subsection{Usage}{
@@ -353,15 +353,15 @@ t1$cal_betamntd(abundance.weighted = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_ses_betampd"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_ses_betampd}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_ses_betampd"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_ses_betampd}{}}}
 \subsection{Method \code{cal_ses_betampd()}}{
 Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (betaNRI).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betampd(
   runs = 1000,
-  null.model = c("taxa.labels", "richness", "frequency", "sample.pool",
-    "phylogeny.pool", "independentswap", "trialswap")[1],
+  null.model = c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool",
+    "independentswap", "trialswap")[1],
   abundance.weighted = TRUE,
   iterations = 1000
 )}\if{html}{\out{</div>}}
@@ -397,15 +397,15 @@ t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_ses_betamntd"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_ses_betamntd}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_ses_betamntd"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_ses_betamntd}{}}}
 \subsection{Method \code{cal_ses_betamntd()}}{
 Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (betaNTI).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_ses_betamntd(
   runs = 1000,
-  null.model = c("taxa.labels", "richness", "frequency", "sample.pool",
-    "phylogeny.pool", "independentswap", "trialswap")[1],
+  null.model = c("taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool",
+    "independentswap", "trialswap")[1],
   abundance.weighted = TRUE,
   exclude.conspecifics = FALSE,
   use_iCAMP = FALSE,
@@ -457,8 +457,8 @@ t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics =
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_rcbray"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_rcbray}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_rcbray"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_rcbray}{}}}
 \subsection{Method \code{cal_rcbray()}}{
 Calculate Bray–Curtis-based Raup–Crick (RCbray).
 \subsection{Usage}{
@@ -496,8 +496,8 @@ t1$cal_rcbray(runs = 50)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_process"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_process}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_process"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_process}{}}}
 \subsection{Method \code{cal_process()}}{
 Infer the ecological processes according to ses.betaMNTD ses.betaMPD and rcbray.
 \subsection{Usage}{
@@ -526,8 +526,8 @@ t1$cal_process(use_betamntd = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_NRI"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_NRI}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_NRI"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_NRI}{}}}
 \subsection{Method \code{cal_NRI()}}{
 Calculates Nearest Relative Index (NRI), equivalent to -1 times the standardized effect size of MPD.
 \subsection{Usage}{
@@ -568,8 +568,8 @@ t1$cal_NRI(null.model = "taxa.labels", abundance.weighted = FALSE, runs = 50)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_NTI"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_NTI}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_NTI"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_NTI}{}}}
 \subsection{Method \code{cal_NTI()}}{
 Calculates Nearest Taxon Index (NTI), equivalent to -1 times the standardized effect size of MNTD.
 \subsection{Usage}{
@@ -610,8 +610,8 @@ t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE, runs = 50)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_Cscore"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_Cscore}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_Cscore"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_Cscore}{}}}
 \subsection{Method \code{cal_Cscore()}}{
 Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
 \subsection{Usage}{
@@ -642,8 +642,8 @@ t1$cal_Cscore()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_tNST"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_tNST}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_tNST"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_tNST}{}}}
 \subsection{Method \code{cal_tNST()}}{
 Calculate normalized stochasticity ratio (NST) based on the tNST function of NST package.
 \subsection{Usage}{
@@ -675,8 +675,8 @@ t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRU
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_tNST_test"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_tNST_test}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_tNST_test"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_tNST_test}{}}}
 \subsection{Method \code{cal_tNST_test()}}{
 Test the significance of NST difference between each pair of groups.
 \subsection{Usage}{
@@ -707,8 +707,8 @@ t1$cal_tNST_test()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_nullmodel-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

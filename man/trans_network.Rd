@@ -162,29 +162,29 @@ t2 <- t1$trans_comm(use_col = "module")
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_network$new()}}
-\item \href{#method-cal_network}{\code{trans_network$cal_network()}}
-\item \href{#method-cal_module}{\code{trans_network$cal_module()}}
-\item \href{#method-save_network}{\code{trans_network$save_network()}}
-\item \href{#method-cal_network_attr}{\code{trans_network$cal_network_attr()}}
-\item \href{#method-get_node_table}{\code{trans_network$get_node_table()}}
-\item \href{#method-get_edge_table}{\code{trans_network$get_edge_table()}}
-\item \href{#method-get_adjacency_matrix}{\code{trans_network$get_adjacency_matrix()}}
-\item \href{#method-plot_network}{\code{trans_network$plot_network()}}
-\item \href{#method-cal_eigen}{\code{trans_network$cal_eigen()}}
-\item \href{#method-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
-\item \href{#method-subset_network}{\code{trans_network$subset_network()}}
-\item \href{#method-cal_powerlaw}{\code{trans_network$cal_powerlaw()}}
-\item \href{#method-cal_sum_links}{\code{trans_network$cal_sum_links()}}
-\item \href{#method-plot_sum_links}{\code{trans_network$plot_sum_links()}}
-\item \href{#method-trans_comm}{\code{trans_network$trans_comm()}}
-\item \href{#method-print}{\code{trans_network$print()}}
-\item \href{#method-clone}{\code{trans_network$clone()}}
+\item \href{#method-trans_network-new}{\code{trans_network$new()}}
+\item \href{#method-trans_network-cal_network}{\code{trans_network$cal_network()}}
+\item \href{#method-trans_network-cal_module}{\code{trans_network$cal_module()}}
+\item \href{#method-trans_network-save_network}{\code{trans_network$save_network()}}
+\item \href{#method-trans_network-cal_network_attr}{\code{trans_network$cal_network_attr()}}
+\item \href{#method-trans_network-get_node_table}{\code{trans_network$get_node_table()}}
+\item \href{#method-trans_network-get_edge_table}{\code{trans_network$get_edge_table()}}
+\item \href{#method-trans_network-get_adjacency_matrix}{\code{trans_network$get_adjacency_matrix()}}
+\item \href{#method-trans_network-plot_network}{\code{trans_network$plot_network()}}
+\item \href{#method-trans_network-cal_eigen}{\code{trans_network$cal_eigen()}}
+\item \href{#method-trans_network-plot_taxa_roles}{\code{trans_network$plot_taxa_roles()}}
+\item \href{#method-trans_network-subset_network}{\code{trans_network$subset_network()}}
+\item \href{#method-trans_network-cal_powerlaw}{\code{trans_network$cal_powerlaw()}}
+\item \href{#method-trans_network-cal_sum_links}{\code{trans_network$cal_sum_links()}}
+\item \href{#method-trans_network-plot_sum_links}{\code{trans_network$plot_sum_links()}}
+\item \href{#method-trans_network-trans_comm}{\code{trans_network$trans_comm()}}
+\item \href{#method-trans_network-print}{\code{trans_network$print()}}
+\item \href{#method-trans_network-clone}{\code{trans_network$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_network-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-new}{}}}
 \subsection{Method \code{new()}}{
 This function is used to create the trans_network object, store the important intermediate data 
   and calculate correlations if cor_method parameter is not NULL.
@@ -279,8 +279,8 @@ t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_network"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_network}{}}}
+\if{html}{\out{<a id="method-trans_network-cal_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
 Calculate network based on the correlation method or SpiecEasi package or julia FlashWeave package or beemStatic package.
 \subsection{Usage}{
@@ -402,8 +402,8 @@ t1$cal_network(network_method = "FlashWeave")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_module"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_module}{}}}
+\if{html}{\out{<a id="method-trans_network-cal_module"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-cal_module}{}}}
 \subsection{Method \code{cal_module()}}{
 Calculate network modules and add module names to the network node properties.
 \subsection{Usage}{
@@ -448,8 +448,8 @@ t1$cal_module(method = "cluster_fast_greedy")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-save_network"></a>}}
-\if{latex}{\out{\hypertarget{method-save_network}{}}}
+\if{html}{\out{<a id="method-trans_network-save_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-save_network}{}}}
 \subsection{Method \code{save_network()}}{
 Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
 \subsection{Usage}{
@@ -478,8 +478,8 @@ t1$save_network(filepath = "network.gexf")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_network_attr"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_network_attr}{}}}
+\if{html}{\out{<a id="method-trans_network-cal_network_attr"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-cal_network_attr}{}}}
 \subsection{Method \code{cal_network_attr()}}{
 Calculate network properties.
 \subsection{Usage}{
@@ -501,8 +501,8 @@ t1$cal_network_attr()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_node_table"></a>}}
-\if{latex}{\out{\hypertarget{method-get_node_table}{}}}
+\if{html}{\out{<a id="method-trans_network-get_node_table"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-get_node_table}{}}}
 \subsection{Method \code{get_node_table()}}{
 Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
   taxonomy, within-module connectivity and among-module connectivity <doi:10.1016/j.geoderma.2022.115866>.
@@ -535,8 +535,8 @@ t1$get_node_table(node_roles = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_edge_table"></a>}}
-\if{latex}{\out{\hypertarget{method-get_edge_table}{}}}
+\if{html}{\out{<a id="method-trans_network-get_edge_table"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-get_edge_table}{}}}
 \subsection{Method \code{get_edge_table()}}{
 Get the edge property table, including connected nodes, label and weight.
 \subsection{Usage}{
@@ -558,8 +558,8 @@ t1$get_edge_table()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_adjacency_matrix"></a>}}
-\if{latex}{\out{\hypertarget{method-get_adjacency_matrix}{}}}
+\if{html}{\out{<a id="method-trans_network-get_adjacency_matrix"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-get_adjacency_matrix}{}}}
 \subsection{Method \code{get_adjacency_matrix()}}{
 Get the adjacency matrix from the network graph.
 \subsection{Usage}{
@@ -588,8 +588,8 @@ t1$get_adjacency_matrix(attr = "weight")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_network"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_network}{}}}
+\if{html}{\out{<a id="method-trans_network-plot_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-plot_network}{}}}
 \subsection{Method \code{plot_network()}}{
 Plot the network based on a series of methods from other packages, such as igraph, ggraph and networkD3. 
 The networkD3 package provides dynamic network. It is especially useful for a glimpse of the whole network structure and finding 
@@ -662,8 +662,8 @@ t1$plot_network(method = "networkD3", node_color = "module")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_eigen"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_eigen}{}}}
+\if{html}{\out{<a id="method-trans_network-cal_eigen"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-cal_eigen}{}}}
 \subsection{Method \code{cal_eigen()}}{
 Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance <doi:10.1186/1471-2105-13-113>.
 \subsection{Usage}{
@@ -685,8 +685,8 @@ t1$cal_eigen()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_taxa_roles"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_taxa_roles}{}}}
+\if{html}{\out{<a id="method-trans_network-plot_taxa_roles"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-plot_taxa_roles}{}}}
 \subsection{Method \code{plot_taxa_roles()}}{
 Plot the classification and importance of nodes, see object$res_node_table for the variable names used in the parameters.
 \subsection{Usage}{
@@ -774,8 +774,8 @@ t1$plot_taxa_roles(roles_color_background = FALSE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-subset_network"></a>}}
-\if{latex}{\out{\hypertarget{method-subset_network}{}}}
+\if{html}{\out{<a id="method-trans_network-subset_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-subset_network}{}}}
 \subsection{Method \code{subset_network()}}{
 Subset of the network.
 \subsection{Usage}{
@@ -810,8 +810,8 @@ t1$subset_network(node = t1$res_node_table \%>\% base::subset(module == "M1") \%
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_powerlaw"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_powerlaw}{}}}
+\if{html}{\out{<a id="method-trans_network-cal_powerlaw"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-cal_powerlaw}{}}}
 \subsection{Method \code{cal_powerlaw()}}{
 Fit degrees to a power law distribution. First, perform a bootstrapping hypothesis test to determine whether degrees follow a power law distribution.
 If the distribution follows power law, then fit degrees to power law distribution and return the parameters.
@@ -842,8 +842,8 @@ t1$cal_powerlaw()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_sum_links"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_sum_links}{}}}
+\if{html}{\out{<a id="method-trans_network-cal_sum_links"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-cal_sum_links}{}}}
 \subsection{Method \code{cal_sum_links()}}{
 This function is used to sum the links number from one taxa to another or in the same taxa, for example, at Phylum level.
 This is very useful to fast see how many nodes are connected between different taxa or within the taxa.
@@ -873,8 +873,8 @@ t1$cal_sum_links(taxa_level = "Phylum")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_sum_links"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_sum_links}{}}}
+\if{html}{\out{<a id="method-trans_network-plot_sum_links"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-plot_sum_links}{}}}
 \subsection{Method \code{plot_sum_links()}}{
 Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
 \subsection{Usage}{
@@ -914,8 +914,8 @@ test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_comm"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_comm}{}}}
+\if{html}{\out{<a id="method-trans_network-trans_comm"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-trans_comm}{}}}
 \subsection{Method \code{trans_comm()}}{
 Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
 \subsection{Usage}{
@@ -947,8 +947,8 @@ t2 <- t1$trans_comm(use_col = "module")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-trans_network-print"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-print}{}}}
 \subsection{Method \code{print()}}{
 Print the trans_network object.
 \subsection{Usage}{
@@ -957,8 +957,8 @@ Print the trans_network object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_network-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

@@ -150,31 +150,31 @@ class(dataset$beta_diversity)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{microtable$new()}}
-\item \href{#method-filter_pollution}{\code{microtable$filter_pollution()}}
-\item \href{#method-rarefy_samples}{\code{microtable$rarefy_samples()}}
-\item \href{#method-tidy_dataset}{\code{microtable$tidy_dataset()}}
-\item \href{#method-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
-\item \href{#method-cal_abund}{\code{microtable$cal_abund()}}
-\item \href{#method-save_abund}{\code{microtable$save_abund()}}
-\item \href{#method-sample_sums}{\code{microtable$sample_sums()}}
-\item \href{#method-taxa_sums}{\code{microtable$taxa_sums()}}
-\item \href{#method-sample_names}{\code{microtable$sample_names()}}
-\item \href{#method-taxa_names}{\code{microtable$taxa_names()}}
-\item \href{#method-rename_taxa}{\code{microtable$rename_taxa()}}
-\item \href{#method-merge_samples}{\code{microtable$merge_samples()}}
-\item \href{#method-merge_taxa}{\code{microtable$merge_taxa()}}
-\item \href{#method-cal_alphadiv}{\code{microtable$cal_alphadiv()}}
-\item \href{#method-save_alphadiv}{\code{microtable$save_alphadiv()}}
-\item \href{#method-cal_betadiv}{\code{microtable$cal_betadiv()}}
-\item \href{#method-save_betadiv}{\code{microtable$save_betadiv()}}
-\item \href{#method-print}{\code{microtable$print()}}
-\item \href{#method-clone}{\code{microtable$clone()}}
+\item \href{#method-microtable-new}{\code{microtable$new()}}
+\item \href{#method-microtable-filter_pollution}{\code{microtable$filter_pollution()}}
+\item \href{#method-microtable-rarefy_samples}{\code{microtable$rarefy_samples()}}
+\item \href{#method-microtable-tidy_dataset}{\code{microtable$tidy_dataset()}}
+\item \href{#method-microtable-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
+\item \href{#method-microtable-cal_abund}{\code{microtable$cal_abund()}}
+\item \href{#method-microtable-save_abund}{\code{microtable$save_abund()}}
+\item \href{#method-microtable-sample_sums}{\code{microtable$sample_sums()}}
+\item \href{#method-microtable-taxa_sums}{\code{microtable$taxa_sums()}}
+\item \href{#method-microtable-sample_names}{\code{microtable$sample_names()}}
+\item \href{#method-microtable-taxa_names}{\code{microtable$taxa_names()}}
+\item \href{#method-microtable-rename_taxa}{\code{microtable$rename_taxa()}}
+\item \href{#method-microtable-merge_samples}{\code{microtable$merge_samples()}}
+\item \href{#method-microtable-merge_taxa}{\code{microtable$merge_taxa()}}
+\item \href{#method-microtable-cal_alphadiv}{\code{microtable$cal_alphadiv()}}
+\item \href{#method-microtable-save_alphadiv}{\code{microtable$save_alphadiv()}}
+\item \href{#method-microtable-cal_betadiv}{\code{microtable$cal_betadiv()}}
+\item \href{#method-microtable-save_betadiv}{\code{microtable$save_betadiv()}}
+\item \href{#method-microtable-print}{\code{microtable$print()}}
+\item \href{#method-microtable-clone}{\code{microtable$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-microtable-new"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$new(
@@ -238,8 +238,8 @@ dataset$tidy_dataset()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-filter_pollution"></a>}}
-\if{latex}{\out{\hypertarget{method-filter_pollution}{}}}
+\if{html}{\out{<a id="method-microtable-filter_pollution"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-filter_pollution}{}}}
 \subsection{Method \code{filter_pollution()}}{
 Filter the taxa considered as pollution from tax_table.
 This operation will remove any line of the tax_table containing any the word in taxa parameter regardless of word case.
@@ -267,8 +267,8 @@ None
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rarefy_samples"></a>}}
-\if{latex}{\out{\hypertarget{method-rarefy_samples}{}}}
+\if{html}{\out{<a id="method-microtable-rarefy_samples"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
 Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} for the alternative method.
 \subsection{Usage}{
@@ -301,8 +301,8 @@ dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-tidy_dataset"></a>}}
-\if{latex}{\out{\hypertarget{method-tidy_dataset}{}}}
+\if{html}{\out{<a id="method-microtable-tidy_dataset"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-tidy_dataset}{}}}
 \subsection{Method \code{tidy_dataset()}}{
 Tidy the object of microtable Class.
 Trim files in the object to make taxa and samples consistent across all files in the object. So the results are intersections.
@@ -331,8 +331,8 @@ None, Object of microtable itself cleaned up.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add_rownames2taxonomy"></a>}}
-\if{latex}{\out{\hypertarget{method-add_rownames2taxonomy}{}}}
+\if{html}{\out{<a id="method-microtable-add_rownames2taxonomy"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-add_rownames2taxonomy}{}}}
 \subsection{Method \code{add_rownames2taxonomy()}}{
 Add the rownames of tax_table as the last column of tax_table. 
 This is especially useful when the rownames of tax_table are required as a taxonomic level for the following taxa_abund calculation and biomarker idenfification.
@@ -362,8 +362,8 @@ dataset$add_rownames2taxonomy()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_abund"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_abund}{}}}
+\if{html}{\out{<a id="method-microtable-cal_abund"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-cal_abund}{}}}
 \subsection{Method \code{cal_abund()}}{
 Calculate the taxonomic abundance at each taxonomic rank.
 \subsection{Usage}{
@@ -409,8 +409,8 @@ dataset$cal_abund()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-save_abund"></a>}}
-\if{latex}{\out{\hypertarget{method-save_abund}{}}}
+\if{html}{\out{<a id="method-microtable-save_abund"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-save_abund}{}}}
 \subsection{Method \code{save_abund()}}{
 Save taxonomic abundance to the computer local place.
 \subsection{Usage}{
@@ -436,8 +436,8 @@ dataset$save_abund(dirpath = "taxa_abund")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sample_sums"></a>}}
-\if{latex}{\out{\hypertarget{method-sample_sums}{}}}
+\if{html}{\out{<a id="method-microtable-sample_sums"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-sample_sums}{}}}
 \subsection{Method \code{sample_sums()}}{
 Sum the species number for each sample.
 \subsection{Usage}{
@@ -459,8 +459,8 @@ dataset$sample_sums()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-taxa_sums"></a>}}
-\if{latex}{\out{\hypertarget{method-taxa_sums}{}}}
+\if{html}{\out{<a id="method-microtable-taxa_sums"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-taxa_sums}{}}}
 \subsection{Method \code{taxa_sums()}}{
 Sum the species number for each taxa.
 \subsection{Usage}{
@@ -482,8 +482,8 @@ dataset$taxa_sums()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-sample_names"></a>}}
-\if{latex}{\out{\hypertarget{method-sample_names}{}}}
+\if{html}{\out{<a id="method-microtable-sample_names"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-sample_names}{}}}
 \subsection{Method \code{sample_names()}}{
 Show sample names.
 \subsection{Usage}{
@@ -505,8 +505,8 @@ dataset$sample_names()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-taxa_names"></a>}}
-\if{latex}{\out{\hypertarget{method-taxa_names}{}}}
+\if{html}{\out{<a id="method-microtable-taxa_names"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-taxa_names}{}}}
 \subsection{Method \code{taxa_names()}}{
 Show taxa names of tax_table.
 \subsection{Usage}{
@@ -528,8 +528,8 @@ dataset$taxa_names()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rename_taxa"></a>}}
-\if{latex}{\out{\hypertarget{method-rename_taxa}{}}}
+\if{html}{\out{<a id="method-microtable-rename_taxa"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-rename_taxa}{}}}
 \subsection{Method \code{rename_taxa()}}{
 Rename the taxa, including the rownames of otu_table, rownames of tax_table, tip labels of phylogenetic tree and representative sequences.
 \subsection{Usage}{
@@ -558,8 +558,8 @@ dataset$rename_taxa()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-merge_samples"></a>}}
-\if{latex}{\out{\hypertarget{method-merge_samples}{}}}
+\if{html}{\out{<a id="method-microtable-merge_samples"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-merge_samples}{}}}
 \subsection{Method \code{merge_samples()}}{
 Merge samples according to specific group to generate a new microtable.
 \subsection{Usage}{
@@ -588,8 +588,8 @@ dataset$merge_samples(use_group = "Group")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-merge_taxa"></a>}}
-\if{latex}{\out{\hypertarget{method-merge_taxa}{}}}
+\if{html}{\out{<a id="method-microtable-merge_taxa"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-merge_taxa}{}}}
 \subsection{Method \code{merge_taxa()}}{
 Merge taxa according to specific taxonomic rank to generate a new microtable.
 \subsection{Usage}{
@@ -618,8 +618,8 @@ dataset$merge_taxa(taxa = "Genus")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_alphadiv"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_alphadiv}{}}}
+\if{html}{\out{<a id="method-microtable-cal_alphadiv"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-cal_alphadiv}{}}}
 \subsection{Method \code{cal_alphadiv()}}{
 Calculate alpha diversity in microtable object.
 \subsection{Usage}{
@@ -653,8 +653,8 @@ class(dataset$alpha_diversity)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-save_alphadiv"></a>}}
-\if{latex}{\out{\hypertarget{method-save_alphadiv}{}}}
+\if{html}{\out{<a id="method-microtable-save_alphadiv"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-save_alphadiv}{}}}
 \subsection{Method \code{save_alphadiv()}}{
 Save alpha diversity table to the computer.
 \subsection{Usage}{
@@ -670,8 +670,8 @@ Save alpha diversity table to the computer.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cal_betadiv"></a>}}
-\if{latex}{\out{\hypertarget{method-cal_betadiv}{}}}
+\if{html}{\out{<a id="method-microtable-cal_betadiv"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
 Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac.
 See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
@@ -709,8 +709,8 @@ class(dataset$beta_diversity)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-save_betadiv"></a>}}
-\if{latex}{\out{\hypertarget{method-save_betadiv}{}}}
+\if{html}{\out{<a id="method-microtable-save_betadiv"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-save_betadiv}{}}}
 \subsection{Method \code{save_betadiv()}}{
 Save beta diversity matrix to the computer.
 \subsection{Usage}{
@@ -726,8 +726,8 @@ Save beta diversity matrix to the computer.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-microtable-print"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-print}{}}}
 \subsection{Method \code{print()}}{
 Print the microtable object.
 \subsection{Usage}{
@@ -736,8 +736,8 @@ Print the microtable object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-microtable-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

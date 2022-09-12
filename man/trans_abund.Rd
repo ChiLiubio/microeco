@@ -67,19 +67,19 @@ t1$plot_pie(facet_nrow = 1)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{trans_abund$new()}}
-\item \href{#method-plot_bar}{\code{trans_abund$plot_bar()}}
-\item \href{#method-plot_heatmap}{\code{trans_abund$plot_heatmap()}}
-\item \href{#method-plot_box}{\code{trans_abund$plot_box()}}
-\item \href{#method-plot_line}{\code{trans_abund$plot_line()}}
-\item \href{#method-plot_pie}{\code{trans_abund$plot_pie()}}
-\item \href{#method-print}{\code{trans_abund$print()}}
-\item \href{#method-clone}{\code{trans_abund$clone()}}
+\item \href{#method-trans_abund-new}{\code{trans_abund$new()}}
+\item \href{#method-trans_abund-plot_bar}{\code{trans_abund$plot_bar()}}
+\item \href{#method-trans_abund-plot_heatmap}{\code{trans_abund$plot_heatmap()}}
+\item \href{#method-trans_abund-plot_box}{\code{trans_abund$plot_box()}}
+\item \href{#method-trans_abund-plot_line}{\code{trans_abund$plot_line()}}
+\item \href{#method-trans_abund-plot_pie}{\code{trans_abund$plot_pie()}}
+\item \href{#method-trans_abund-print}{\code{trans_abund$print()}}
+\item \href{#method-trans_abund-clone}{\code{trans_abund$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-trans_abund-new"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$new(
@@ -140,8 +140,8 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_bar"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_bar}{}}}
+\if{html}{\out{<a id="method-trans_abund-plot_bar"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-plot_bar}{}}}
 \subsection{Method \code{plot_bar()}}{
 Bar plot.
 \subsection{Usage}{
@@ -237,8 +237,8 @@ t1$plot_bar(facet = "Group", xtext_keep = FALSE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_heatmap"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_heatmap}{}}}
+\if{html}{\out{<a id="method-trans_abund-plot_heatmap"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-plot_heatmap}{}}}
 \subsection{Method \code{plot_heatmap()}}{
 Plot the heatmap.
 \subsection{Usage}{
@@ -347,8 +347,8 @@ t1$plot_heatmap(facet = "Group", xtext_keep = FALSE, withmargin = FALSE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_box"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_box}{}}}
+\if{html}{\out{<a id="method-trans_abund-plot_box"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-plot_box}{}}}
 \subsection{Method \code{plot_box()}}{
 Box plot.
 \subsection{Usage}{
@@ -424,8 +424,8 @@ t1$plot_box(group = "Group")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_line"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_line}{}}}
+\if{html}{\out{<a id="method-trans_abund-plot_line"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-plot_line}{}}}
 \subsection{Method \code{plot_line()}}{
 Plot the line chart.
 \subsection{Usage}{
@@ -495,8 +495,8 @@ t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot_pie"></a>}}
-\if{latex}{\out{\hypertarget{method-plot_pie}{}}}
+\if{html}{\out{<a id="method-trans_abund-plot_pie"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-plot_pie}{}}}
 \subsection{Method \code{plot_pie()}}{
 Plot pie chart.
 \subsection{Usage}{
@@ -537,8 +537,8 @@ t1$plot_pie(facet_nrow = 1)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-trans_abund-print"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-print}{}}}
 \subsection{Method \code{print()}}{
 Print the trans_abund object.
 \subsection{Usage}{
@@ -547,8 +547,8 @@ Print the trans_abund object.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-trans_abund-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
