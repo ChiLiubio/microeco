@@ -49,7 +49,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param prok_database default "FAPROTAX"; "FAPROTAX" or "NJC19"; select a prokaryotic trait database; see the details:
 		#'   \describe{
-		#'     \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4 Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
+		#'     \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4; Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
 		#'     	  Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
 		#'     \item{\strong{'NJC19'}}{NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. 
 		#'     	  Scientific Data, 7(1). <10.1038/s41597-020-0516-5>}
@@ -58,7 +58,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#'   \describe{
 		#'     \item{\strong{'FUNGuild'}}{Nguyen et al. (2016) FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild.
 		#'     	  Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>}
-		#'     \item{\strong{'FungalTraits'}}{Polme et al. FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
+		#'     \item{\strong{'FungalTraits'}}{version: FungalTraits_1.2_ver_16Dec_2020V.1.2; Polme et al. 
+		#'     	  FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
 		#'     	  Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>}
 		#'   }
 		#' @return res_spe_func stored in object.
