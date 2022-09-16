@@ -118,9 +118,10 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of microtable$sample_table.}
 
 \item{\code{taxa_level}}{default "all"; 'all' represents using abundance data at all taxonomic ranks; 
-For testing at a specific rank, provide taxonomic rank name, such as "Genus".}
+For testing at a specific rank, provide taxonomic rank name, such as "Genus".
+If the provided taxonomic name is neither 'all' nor a colname in tax_table of dataset, the function will use the features in otu_table automatically.}
 
-\item{\code{filter_thres}}{default 0; the relative abundance threshold used for method != "metastat" or "metagenomeSeq".}
+\item{\code{filter_thres}}{default 0; the relative abundance threshold, such as 0.0005; only useful when method != "metastat", "metagenomeSeq" or "ANCOMBC".}
 
 \item{\code{alpha}}{default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.}
 
@@ -282,7 +283,7 @@ t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 \if{html}{\out{<a id="method-trans_diff-plot_diff_bar"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_diff-plot_diff_bar}{}}}
 \subsection{Method \code{plot_diff_bar()}}{
-Bar plot for LDA score.
+Bar plot for indicator index, such as LDA score and P value.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_bar(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -305,7 +306,7 @@ Bar plot for LDA score.
 
 \item{\code{use_number}}{default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.}
 
-\item{\code{threshold}}{default NULL; threshold value for selecting taxa, such as 3 for LDA score of LEfSe.}
+\item{\code{threshold}}{default NULL; threshold value of indicators for selecting taxa, such as 3 for LDA score of LEfSe.}
 
 \item{\code{select_group}}{default NULL; this is used to select the paired group when multiple comparisions are generated;
 The input select_group must be one of object$res_diff$Comparison.}
