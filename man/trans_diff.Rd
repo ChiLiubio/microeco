@@ -9,8 +9,6 @@ This class is a wrapper for a series of differential abundance test and indicato
  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
  the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, non-parametric Kruskal-Wallis Rank Sum Test,
  Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test and anova.
-
-Authors: Chi Liu, Yang Cao, Chenhao Li
 }
 \examples{
 

@@ -8,8 +8,6 @@
 #'  the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, non-parametric Kruskal-Wallis Rank Sum Test,
 #'  Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test and anova.
 #' 
-#' Authors: Chi Liu, Yang Cao, Chenhao Li
-#' 
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
@@ -142,6 +140,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 			################################
 			
 			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova")){
+				if(method == "KW_dunn"){
+					# filter taxa with equal abudance across all samples
+					abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
+				}
 				tem_data <- clone(tmp_dataset)
 				# use test method in trans_alpha
 				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
