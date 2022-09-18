@@ -194,9 +194,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
 
-			# if(use_alluvium){
-				# bar_type <- "notfull"
-			# }
 			if(bar_type == "full"){
 				# make sure whether taxonomy info are all in selected use_taxanames in case of special data
 				if(!all(plot_data$Taxonomy %in% use_taxanames)){
