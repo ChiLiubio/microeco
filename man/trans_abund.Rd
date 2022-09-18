@@ -154,8 +154,8 @@ Bar plot.
   facet3 = NULL,
   facet4 = NULL,
   order_facet = NULL,
-  x_axis_name = NULL,
   order_x = NULL,
+  x_axis_name = NULL,
   barwidth = NULL,
   use_alluvium = FALSE,
   clustering = FALSE,
@@ -192,9 +192,9 @@ use this parameter, please first install package ggh4x using install.packages("g
 \item{\code{order_facet}}{NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
 If multiple facets are used, please manually assign factors in sample_table of microtable object.}
 
-\item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
-
 \item{\code{order_x}}{default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").}
+
+\item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.}
 
 \item{\code{barwidth}}{default NULL; bar width, see width in \code{\link{geom_bar}}.}
 

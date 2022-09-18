@@ -148,8 +148,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
 		#'   If multiple facets are used, please manually assign factors in sample_table of microtable object.
-		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
+		#' @param x_axis_name NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.
 		#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
 		#' @param use_alluvium default FALSE; whether add alluvium plot
 		#' @param clustering default FALSE; whether order samples by the clustering
@@ -176,8 +176,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			facet3 = NULL,
 			facet4 = NULL,
 			order_facet = NULL,
-			x_axis_name = NULL,
 			order_x = NULL,
+			x_axis_name = NULL,
 			barwidth = NULL,
 			use_alluvium = FALSE,
 			clustering = FALSE,
@@ -193,22 +193,19 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
-			
-			# order x axis samples and facet
-			plot_data <- private$adjust_axis_facet(
-				plot_data = plot_data, 
-				x_axis_name = x_axis_name, 
-				order_x = order_x, 
-				facet = facet, 
-				order_facet = order_facet)
 
-			if(use_alluvium){
-				bar_type <- "notfull"
-			}
+			# if(use_alluvium){
+				# bar_type <- "notfull"
+			# }
 			if(bar_type == "full"){
 				# make sure whether taxonomy info are all in selected use_taxanames in case of special data
 				if(!all(plot_data$Taxonomy %in% use_taxanames)){
 					plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
+					new_data <- plot_data %>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
+						dplyr::summarise(Abundance = sum(Abundance)) %>%
+						as.data.frame(stringsAsFactors = FALSE)
+					plot_data_merge <- plot_data[, ! colnames(plot_data) %in% c("Taxonomy", "Abundance", "N", "SD", "SE"), drop = FALSE] %>% unique
+					plot_data <- dplyr::left_join(new_data, plot_data_merge, by = c("Sample" = "Sample"))
 					plot_data$Taxonomy %<>% factor(., levels = rev(c(use_taxanames, "Others")))
 				}else{
 					plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
@@ -217,6 +214,14 @@ trans_abund <- R6Class(classname = "trans_abund",
 				plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 			}
+			# order x axis samples and facet
+			plot_data <- private$adjust_axis_facet(
+				plot_data = plot_data, 
+				x_axis_name = x_axis_name, 
+				order_x = order_x, 
+				facet = facet, 
+				order_facet = order_facet)
+
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
 			bar_colors_use <- color_values[1:length(unique(plot_data$Taxonomy))]
@@ -224,7 +229,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				bar_colors_use[length(bar_colors_use)] <- others_color
 			}
 			if(clustering){
-				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance") %>% 
+				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance", fun.aggregate = sum) %>% 
 					`row.names<-`(.[,1]) %>% .[, -1]
 				order_x_clustering <- hclust(dist(data_clustering)) %>% {.$labels[.$order]} %>% as.character
 				plot_data$Sample %<>% factor(., levels = order_x_clustering)
