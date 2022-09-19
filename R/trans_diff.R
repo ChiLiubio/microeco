@@ -5,8 +5,10 @@
 #' This class is a wrapper for a series of differential abundance test and indicator analysis methods, including 
 #'  LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
 #'  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
-#'  the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, non-parametric Kruskal-Wallis Rank Sum Test,
-#'  Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test and anova.
+#'  non-parametric Kruskal-Wallis Rank Sum Test,
+#'  Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test, anova, 
+#'  R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
+#'  R package ANCOMBC <doi:10.1038/s41467-020-17041-7> and R package ALDEx2 <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>.
 #' 
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
@@ -23,7 +25,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
-		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) <doi:10.1038/s41467-020-17041-7>}
+		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
+		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require ANCOMBC package to be installed 
+		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
+		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with ALDEx2 package; see also the test parameter in ALDEx2::aldex function;
+		#'     	  ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
+		#'     	  drawn from the Dirichlet distribution; Reference: <doi:10.1371/journal.pone.0067019> and <doi:10.1186/2049-2618-2-15>; 
+		#'     	  require ALDEx2 package to be installed 
+		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
+		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with ALDEx2 package;
+		#'     	  require ALDEx2 package to be installed 
+		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of microtable$sample_table.
 		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
@@ -42,8 +54,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".
 		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
 		#' @param ANCOMBC_formula default NULL; same with the formula parameter in ANCOMBC::ancombc function; If NULL; assign the group parameter to it automatically.
+		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
+		#'   applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
+		#'   for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
+		#'   and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
+		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
 		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-		#' 	 passed to ANCOMBC::ancombc function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter).
+		#' 	 passed to ANCOMBC::ancombc function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter);
+		#' 	 passed to ALDEx2::aldex function when method = "ALDEx2_t" or "ALDEx2_kw".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
@@ -65,7 +83,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC")[1],
+			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -80,6 +98,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			group_choose_paired = NULL,
 			metagenomeSeq_count = 1,
 			ANCOMBC_formula = NULL,
+			ALDEx2_sig = c("wi.eBH", "kw.eBH"),
 			...
 			){
 			if(is.null(dataset)){
@@ -99,7 +118,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 			}
-			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC"))
+			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw"))
 			
 			if(is.factor(sampleinfo[, group])){
 				self$group_order <- levels(sampleinfo[, group])
@@ -396,7 +415,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
 			colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 			#######################################
-			if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC")){
+			if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC", "ALDEx2_t")){
 				if(taxa_level == "all"){
 					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
 				}
@@ -405,7 +424,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}else{
 					all_name <- combn(unique(group_choose_paired), 2)
 				}
-				output <- data.frame()			
+				output <- data.frame()
 			}
 			if(method == "metastat"){
 				# transform data
@@ -549,7 +568,51 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output <- rbind.data.frame(output, res)
 				}
 			}
-			if(method %in% c("metagenomeSeq", "ANCOMBC")){
+			if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
+				if(!require("ALDEx2")){
+					stop("ALDEx2 package is not installed !")
+				}
+			}
+			if(method == "ALDEx2_t"){
+				message("Total ", ncol(all_name), " paired group for test ...")				
+				for(i in 1:ncol(all_name)) {
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
+					use_dataset <- clone(tmp_dataset)
+					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+					use_dataset$tidy_dataset()
+					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
+					newdata$tidy_dataset()
+					
+					res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
+					res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
+					rownames(res) <- NULL
+					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+					res <- cbind.data.frame(compare = add_name, res) %>%
+						.[, !grepl("^rab\\.", colnames(.))]
+					output <- rbind.data.frame(output, res)
+				}
+			}
+			if(method == "ALDEx2_kw"){
+				if(taxa_level == "all"){
+					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+				}
+				use_dataset <- clone(tmp_dataset)
+				use_dataset$tidy_dataset()
+				suppressMessages(use_dataset$cal_abund(rel = FALSE))
+				res_raw <- ALDEx2::aldex(use_dataset$taxa_abund[[taxa_level]], use_dataset$sample_table[, group], test = "kw", ...)
+				res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
+				comparisions <- paste0(unique(as.character(use_dataset$sample_table[, group])), collapse = " - ")
+				output <- cbind.data.frame(compare = comparisions, res)
+			}
+			if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
+				if(! any(colnames(output) %in% ALDEx2_sig)){
+					stop("ALDEx2_sig is not found in the result! Please check the input!")
+				}else{
+					output$P.adj <- output[, ALDEx2_sig %>% .[. %in% colnames(output)] %>% .[1]]
+				}
+			}
+			if(method %in% c("metagenomeSeq", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")){
 				output %<>% dropallfactors(unfac2num = TRUE)
 				colnames(output)[1:2] <- c("Comparison", "Taxa")
 				output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))

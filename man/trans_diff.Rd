@@ -7,8 +7,10 @@
 This class is a wrapper for a series of differential abundance test and indicator analysis methods, including 
  LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
- the method in R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, non-parametric Kruskal-Wallis Rank Sum Test,
- Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test and anova.
+ non-parametric Kruskal-Wallis Rank Sum Test,
+ Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test, anova, 
+ R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
+ R package ANCOMBC <doi:10.1038/s41467-020-17041-7> and R package ALDEx2 <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>.
 }
 \examples{
 
@@ -75,7 +77,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
-    "t.test", "anova", "ANCOMBC")[1],
+    "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -90,6 +92,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   group_choose_paired = NULL,
   metagenomeSeq_count = 1,
   ANCOMBC_formula = NULL,
+  ALDEx2_sig = c("wi.eBH", "kw.eBH"),
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -110,7 +113,17 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
   \item{\strong{'anova'}}{Duncan's multiple range test for anova}
-  \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) <doi:10.1038/s41467-020-17041-7>}
+  \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
+     Reference: <doi:10.1038/s41467-020-17041-7>; Require ANCOMBC package to be installed 
+     (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
+  \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with ALDEx2 package; see also the test parameter in ALDEx2::aldex function;
+        ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
+        drawn from the Dirichlet distribution; Reference: <doi:10.1371/journal.pone.0067019> and <doi:10.1186/2049-2618-2-15>; 
+        require ALDEx2 package to be installed 
+        (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
+  \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with ALDEx2 package;
+        require ALDEx2 package to be installed 
+        (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
 }}
 
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of microtable$sample_table.}
@@ -144,8 +157,15 @@ NULL mean disuse the p value adjustment; So when p_adjust_method = NULL, P.adj i
 
 \item{\code{ANCOMBC_formula}}{default NULL; same with the formula parameter in ANCOMBC::ancombc function; If NULL; assign the group parameter to it automatically.}
 
+\item{\code{ALDEx2_sig}}{default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
+applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
+for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
+and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
+the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).}
+
 \item{\code{...}}{parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-passed to ANCOMBC::ancombc function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter).}
+passed to ANCOMBC::ancombc function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter);
+passed to ALDEx2::aldex function when method = "ALDEx2_t" or "ALDEx2_kw".}
 }
 \if{html}{\out{</div>}}
 }
