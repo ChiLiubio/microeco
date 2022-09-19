@@ -109,7 +109,8 @@ t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE, runs = 50)
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_Cscore()
+t1$cal_Cscore(normalise = FALSE)
+t1$cal_Cscore(by_group = "Group", normalise = FALSE)
 }
 
 ## ------------------------------------------------
@@ -633,7 +634,8 @@ vector.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_Cscore()
+t1$cal_Cscore(normalise = FALSE)
+t1$cal_Cscore(by_group = "Group", normalise = FALSE)
 }
 }
 \if{html}{\out{</div>}}

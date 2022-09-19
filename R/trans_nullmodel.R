@@ -509,7 +509,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @return vector.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_Cscore()
+		#' t1$cal_Cscore(normalise = FALSE)
+		#' t1$cal_Cscore(by_group = "Group", normalise = FALSE)
 		#' }
 		cal_Cscore = function(by_group = NULL, ...){
 			comm <- self$data_comm
@@ -517,11 +518,14 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				bipartite::C.score(comm, ...)
 			}else{
 				sample_table <- self$sample_table
-				lapply(unique(sample_table[, by_group]), function(x){
-					use_comm <- comm[sample_table[, by_group] %in% x, ]
-					use_comm %<>% .[, apply(., 2, sum) >0, drop = FALSE]
+				all_groups <- unique(as.character(sample_table[, by_group]))
+				res <- lapply(all_groups, function(x){
+					use_comm <- comm[as.character(sample_table[, by_group]) %in% x, ]
+					use_comm %<>% .[, apply(., 2, sum) > 0, drop = FALSE]
 					bipartite::C.score(use_comm, ...)
-				})
+				}) %>% unlist
+				names(res) <- all_groups
+				res
 			}
 		},
 		#' @description
