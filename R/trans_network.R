@@ -1,5 +1,5 @@
 #' @title
-#' Create trans_network object for co-occurrence network analysis.
+#' Create \code{trans_network} object for co-occurrence network analysis.
 #'
 #' @description
 #' This class is a wrapper for a series of network analysis methods, 
@@ -10,46 +10,48 @@
 trans_network <- R6Class(classname = "trans_network",
 	public = list(
 		#' @description
-		#' This function is used to create the trans_network object, store the important intermediate data 
-		#'   and calculate correlations if cor_method parameter is not NULL.
+		#' Create the \code{trans_network} object, store the important intermediate data 
+		#'   and calculate correlations if \code{cor_method} parameter is not NULL.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param cor_method default NULL; NULL or one of "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso" and "ccrepe";
-		#'   All the methods refered to NetCoMi package are performed based on netConstruct function of NetCoMi package and require
-		#'   NetCoMi installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
+		#'   All the methods refered to \code{NetCoMi} package are performed based on \code{netConstruct} function of \code{NetCoMi} package and require
+		#'   \code{NetCoMi} installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 		#'   For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
 		#'   \describe{
-		#'     \item{\strong{NULL}}{denote non-correlation network. Do not use correlation-based network. 
-		#'       So the return res_cor_p list will be NULL, and COR option in network_method parameter of cal_network function can not be used.}
-		#'     \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on vegan::vegdist function}
-		#'     \item{\strong{'pearson'}}{Pearson correlation; If use_WGCNA_pearson_spearman and use_NetCoMi_pearson_spearman are both FALSE, use the function cor.test in R base;
-		#'       use_WGCNA_pearson_spearman = TRUE invoke corAndPvalue function of WGCNA package; 
-		#'       use_NetCoMi_pearson_spearman = TRUE invoke netConstruct function of NetCoMi package}
+		#'     \item{\strong{NULL}}{NULL denotes non-correlation network, i.e. do not use correlation-based network. 
+		#'       If so, the return res_cor_p list will be NULL, and COR option in \code{network_method} parameter of \code{cal_network} function can not be used.}
+		#'     \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on \code{vegan::vegdist} function}
+		#'     \item{\strong{'pearson'}}{Pearson correlation; If \code{use_WGCNA_pearson_spearman} and \code{use_NetCoMi_pearson_spearman} are both FALSE, 
+		#'       use the function \code{cor.test} in R; \code{use_WGCNA_pearson_spearman = TRUE} invoke \code{corAndPvalue} function of \code{WGCNA} package; 
+		#'       \code{use_NetCoMi_pearson_spearman = TRUE} invoke \code{netConstruct} function of \code{NetCoMi} package}
 		#'     \item{\strong{'spearman'}}{Spearman correlation; other details are same with the 'pearson' option}
-		#'     \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on WGCNA::bicor function; require NetCoMi package installed}
+		#'     \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on \code{WGCNA::bicor} function; 
+		#'       require \code{WGCNA} and \code{NetCoMi} packages installed}
 		#'     \item{\strong{'sparcc'}}{SparCC algorithm (Friedman & Alm, PLoS Comp Biol, 2012, <doi:10.1371/journal.pcbi.1002687>);
-		#'     	 use NetCoMi package when use_sparcc_method = "NetCoMi"; use SpiecEasi package when use_sparcc_method = "SpiecEasi" and require SpiecEasi installed from Github
+		#'     	 use NetCoMi package when \code{use_sparcc_method = "NetCoMi"}; use \code{SpiecEasi} package when \code{use_sparcc_method = "SpiecEasi"} 
+		#'     	 and require \code{SpiecEasi} to be installed from Github
 		#'     	 (\href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi})}
-		#'     \item{\strong{'cclasso'}}{Correlation inference of Composition data through Lasso method based on netConstruct function of NetCoMi package; 
-		#'     	 for details, see NetCoMi::cclasso function}
+		#'     \item{\strong{'cclasso'}}{Correlation inference of Composition data through Lasso method based on \code{netConstruct} function of \code{NetCoMi} package; 
+		#'     	 for details, see \code{NetCoMi::cclasso} function}
 		#'     \item{\strong{'ccrepe'}}{Calculates compositionality-corrected p-values and q-values for compositional data 
-		#'     	 using an arbitrary distance metric based on netConstruct function of NetCoMi package; also see NetCoMi::ccrepe function}
+		#'     	 using an arbitrary distance metric based on \code{NetCoMi::netConstruct} function; also see \code{NetCoMi::ccrepe} function}
 		#'   }
 		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when cor_method = "pearson" or "spearman".
 		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
 		#'   The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.
-		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when cor_method = "sparcc".
+		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when \code{cor_method = "sparcc"}.
 		#' @param taxa_level default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
 		#' 	  other available options should be one of the colnames of microtable$tax_table.
 		#' @param filter_thres default 0; the relative abundance threshold.
-		#' @param nThreads default 1; the CPU thread number; available when use_WGCNA_pearson_spearman = TRUE or use_sparcc_method = "SpiecEasi".
-		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap when use_sparcc_method = "SpiecEasi".
+		#' @param nThreads default 1; the CPU thread number; available when \code{use_WGCNA_pearson_spearman = TRUE} or \code{use_sparcc_method = "SpiecEasi"}.
+		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap when \code{use_sparcc_method = "SpiecEasi"}.
 		#' @param env_cols default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table;
-		#'   the environmental data can be used in the correlation network (as the nodes) or FlashWeave network.
-		#' @param add_data default NULL; provide environmental table additionally instead of env_cols parameter; rownames must be sample names.
-		#' @param ... parameters pass to NetCoMi::netConstruct for other operations, such as zero handling and/or data normalization 
-		#' 	 when cor_method and other parameters refer to NetCoMi package. 
-		#' @return res_cor_p list; include the correlation (association) matrix and p value matrix. Note that when cor_method and other parameters refer to NetCoMi package,
+		#'   the environmental data can be used in the correlation network (as the nodes) or \code{FlashWeave} network.
+		#' @param add_data default NULL; provide environmental table additionally instead of \code{env_cols} parameter; rownames must be sample names.
+		#' @param ... parameters pass to \code{NetCoMi::netConstruct} for other operations, such as zero handling and/or data normalization 
+		#' 	 when cor_method and other parameters refer to \code{NetCoMi} package. 
+		#' @return \code{res_cor_p} list; include the correlation (association) matrix and p value matrix. Note that when cor_method and other parameters refer to \code{NetCoMi} package,
 		#'   the p value table are all zero as the significant associations have been selected.
 		#' @examples
 		#' \donttest{
@@ -174,13 +176,13 @@ trans_network <- R6Class(classname = "trans_network",
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Calculate network based on the correlation method or SpiecEasi package or julia FlashWeave package or beemStatic package.
+		#' Calculate network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
 		#'
 		#' @param network_method default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; The option details: 
 		#'   \describe{
-		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in object$res_cor_p returned from trans_network$new; 
+		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in \code{object$res_cor_p} returned from \code{trans_network$new}; 
 		#'     	  See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}
-		#'     \item{\strong{'SpiecEasi'}}{SpiecEasi network; relies on algorithms for sparse neighborhood and inverse covariance selection;
+		#'     \item{\strong{'SpiecEasi'}}{\code{SpiecEasi} network; relies on algorithms for sparse neighborhood and inverse covariance selection;
 		#'     	  belong to the category of conditional dependence and graphical models;
 		#'     	  see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the R package; 
 		#'     	  see Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for the algorithm details}
@@ -188,14 +190,14 @@ trans_network <- R6Class(classname = "trans_network",
 		#'     	  the sparse structure of inverse covariance for latent normal variables to address the high
 		#'     	  dimensionality of the microbiome data;
 		#'     	  belong to the category of conditional dependence and graphical models;
-		#'     	  depend on the R NetCoMi package \href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi}; 
+		#'     	  depend on the R \code{NetCoMi} package \href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi}; 
 		#'     	  see FANG et al. (2017) <doi:10.1089/cmb.2017.0054> for the algorithm details}
-		#'     \item{\strong{'FlashWeave'}}{FlashWeave network; Local-to-global learning framework; belong to the category of conditional dependence and graphical models;
+		#'     \item{\strong{'FlashWeave'}}{\code{FlashWeave} network; Local-to-global learning framework; belong to the category of conditional dependence and graphical models;
 		#'        good performance on heterogenous datasets to find direct associations among taxa;
-		#'        see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing julia language and FlashWeave package;
-		#'        julia must be in the computer system env path, otherwise the program can not find julia;
+		#'        see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing \code{julia} language and 
+		#'        \code{FlashWeave} package; julia must be in the computer system env path, otherwise the program can not find julia;
 		#'        see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for the algorithm details}
-		#'     \item{\strong{'beemStatic'}}{beemStatic network;
+		#'     \item{\strong{'beemStatic'}}{\code{beemStatic} network;
 		#'        extend generalized Lotka-Volterra model to cases of cross-sectional datasets to infer interaction among taxa based on expectation-maximization algorithm;
 		#'        see \href{https://github.com/CSB5/BEEM-static}{https://github.com/CSB5/BEEM-static} for installing the R package;
 		#'        see Li et al. (2021) <doi:10.1371/journal.pcbi.1009343> for algorithm details}
@@ -206,13 +208,13 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param COR_cut default 0.6; correlation coefficient threshold for the correlation network.
 		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
 		#' 	  see https://doi.org/10.1186/1471-2105-13-113
-		#' @param COR_optimization_low_high default c(0.01, 0.8); the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
+		#' @param COR_optimization_low_high default \code{c(0.01, 0.8)}; the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param COR_optimization_seq default 0.01; the interval of correlation coefficient used for RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
 		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
 		#'   generate a file for meta_data_path parameter of FlashWeave.
-		#' @param FlashWeave_other_para default "alpha=0.01,sensitive=true,heterogeneous=true"; the parameters used for FlashWeave;
+		#' @param FlashWeave_other_para default \code{"alpha=0.01,sensitive=true,heterogeneous=true"}; the parameters used for FlashWeave;
 		#'   user can change the parameters or add more according to FlashWeave help document;
 		#'   An exception is meta_data_path parameter as it is generated based on the data inside the object, see FlashWeave_meta_data parameter for the description.
 		#' @param beemStatic_t_strength default 0.001; for network_method = "beemStatic"; the threshold used to limit the number of interactions (strength);
@@ -222,10 +224,10 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param delete_unlinked_nodes default TRUE; whether delete the nodes without any link.
 		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
-		#' @param ... parameters pass to SpiecEasi::spiec.easi when network_method = "SpiecEasi";
-		#'   pass to NetCoMi::netConstruct when network_method = "gcoda"; 
-		#'   pass to beemStatic::func.EM when network_method = "beemStatic".
-		#' @return res_network stored in object.
+		#' @param ... parameters pass to \code{SpiecEasi::spiec.easi} when \code{network_method = "SpiecEasi"};
+		#'   pass to \code{NetCoMi::netConstruct} when \code{network_method = "gcoda"}; 
+		#'   pass to \code{beemStatic::func.EM} when \code{network_method = "beemStatic"}.
+		#' @return \code{res_network} stored in object.
 		#' @examples
 		#' \dontrun{
 		#' # for correlation network
@@ -473,13 +475,13 @@ trans_network <- R6Class(classname = "trans_network",
 		#' 	 the following are available functions (options) from igraph package: "cluster_fast_greedy", "cluster_optimal",
 		#' 	 "cluster_edge_betweenness", "cluster_infomap", "cluster_label_prop", "cluster_leading_eigen",
 		#' 	 "cluster_louvain", "cluster_spinglass", "cluster_walktrap". 
-		#' 	 For the details of these functions, see the help document, such as help(cluster_fast_greedy);
+		#' 	 For the details of these functions, see the help document, such as \code{help(cluster_fast_greedy)};
 		#' 	 Note that the default "cluster_fast_greedy" method can only be used for undirected network. 
-		#' 	 If the user selects network_method = "beemStatic" in cal_network function or provides other directed network, 
+		#' 	 If the user selects \code{network_method = "beemStatic"} in cal_network function or provides other directed network, 
 		#' 	 please use cluster_optimal or others for the modules identification.
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
-		#' @return res_network with modules, stored in object.
+		#' @return \code{res_network} with modules, stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1 <- trans_network$new(dataset = dataset, cor_method = "pearson", 
@@ -594,7 +596,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Get the edge property table, including connected nodes, label and weight.
 		#'
-		#' @return res_edge_table in object.
+		#' @return \code{res_edge_table} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$get_edge_table()
@@ -620,8 +622,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Get the adjacency matrix from the network graph.
 		#'
-		#' @param ... parameters passed to as_adjacency_matrix function of igraph package.
-		#' @return res_adjacency_matrix in object.
+		#' @param ... parameters passed to as_adjacency_matrix function of \code{igraph} package.
+		#' @return \code{res_adjacency_matrix} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$get_adjacency_matrix(attr = "weight")
@@ -634,15 +636,15 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_adjacency_matrix ...')
 		},
 		#' @description
-		#' Plot the network based on a series of methods from other packages, such as igraph, ggraph and networkD3. 
+		#' Plot the network based on a series of methods from other packages, such as \code{igraph}, \code{ggraph} and \code{networkD3}. 
 		#' The networkD3 package provides dynamic network. It is especially useful for a glimpse of the whole network structure and finding 
 		#' the interested nodes and edges in a large network. In contrast, the igraph and ggraph methods are suitable for relatively small network.
 		#'
 		#' @param method default "igraph"; The available options:
 		#'   \describe{
-		#'     \item{\strong{'igraph'}}{call plot.igraph function in igraph package for a static network; see plot.igraph for the parameters}
-		#'     \item{\strong{'ggraph'}}{call ggraph function in ggraph package for a static network}
-		#'     \item{\strong{'networkD3'}}{use forceNetwork function in networkD3 package for a dynamic network; see forceNetwork function for the parameters}
+		#'     \item{\strong{'igraph'}}{call \code{plot.igraph} function in \code{igraph} package for a static network; see plot.igraph for the parameters}
+		#'     \item{\strong{'ggraph'}}{call \code{ggraph} function in \code{ggraph} package for a static network}
+		#'     \item{\strong{'networkD3'}}{use forceNetwork function in \code{networkD3} package for a dynamic network; see forceNetwork function for the parameters}
 		#'   }
 		#' @param node_label default "name"; node label shown in the plot for method = "ggraph" or method = "networkD3"; 
 		#'   Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
@@ -749,7 +751,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate eigengenes of modules, i.e. the first principal component based on PCA analysis, and the percentage of variance <doi:10.1186/1471-2105-13-113>.
 		#'
-		#' @return res_eigen and res_eigen_expla in object.
+		#' @return \code{res_eigen} and \code{res_eigen_expla} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_eigen()
@@ -995,7 +997,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @param plot_pos default TRUE; If TRUE, plot the summed positive linkages; If FALSE, plot the summed negative linkages.
 		#' @param plot_num default NULL; number of taxa presented in the plot.
-		#' @param color_values default NULL; If not provided, use microeco::color_palette_20 or randomcoloR package to generate random colors (for taxa > 20).
+		#' @param color_values default NULL; If not provided, use \code{microeco::color_palette_20} or \code{randomcoloR} package to generate random colors (for taxa > 20).
 		#' @param ... parameters pass to chorddiag::chorddiag function.
 		#' @return chorddiag plot
 		#' @examples
@@ -1044,7 +1046,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
 		#'
-		#' @param use_col default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function get_node_table.
+		#' @param use_col default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function \code{get_node_table}.
 		#' @param abundance default TRUE; whether sum abundance of taxa. TRUE: sum the abundance for a taxon across all samples; 
 		#' 	  FALSE: sum the frequency for a taxon across all samples.
 		#' @return a new \code{\link{microtable}} class.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_env.R
 \name{trans_env}
 \alias{trans_env}
-\title{Create trans_env object for the analysis of the effects of environmental factors on communities.}
+\title{Create \code{trans_env} object for the analysis of the effects of environmental factors on communities.}
 \description{
 This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
 mantel test, correlation analysis and linear fitting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
@@ -156,23 +156,23 @@ t1$plot_scatterfit(x =
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{env_cols}}{default NULL; either numeric vector or character vector to select columns in sample_table of your microtable object. 
-This parameter should be used in the case that all the required environmental data is in sample_table of your microtable object.
-Otherwise, please use add_data parameter.}
+\item{\code{env_cols}}{default NULL; either numeric vector or character vector to select columns in \code{microtable$sample_table}, i.e. dataset$sample_table. 
+This parameter should be used in the case that all the required environmental data is in \code{sample_table} of your \code{microtable} object.
+Otherwise, please use \code{add_data} parameter.}
 
-\item{\code{add_data}}{default NULL; data.frame format; provide the environmental data in the format data.frame; rownames should be sample names.
-This parameter should be used when the sample_table in your microtable object has no environmental data. 
-Under this circumstance, the env_cols parameter can not be used because no data can be selected.}
+\item{\code{add_data}}{default NULL; \code{data.frame} format; provide the environmental data in the format \code{data.frame}; rownames should be sample names.
+This parameter should be used when the your \code{microtable$sample_table} object has no environmental data. 
+Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.}
 
 \item{\code{character2numeric}}{default TRUE; whether transform the characters or factors to numeric attributes.}
 
 \item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data;
-If TRUE, the function can run the interpolation with the mice package; to use this parameter, please first install mice package.}
+If TRUE, the function can run the interpolation with the \code{mice} package; to use this parameter, please first install mice package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_env in trans_env object.
+\code{data_env} stored in the \code{trans_env} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -209,7 +209,7 @@ Test the difference of environmental variable across groups.
 \item{\code{method}}{default "KW"; see the following available options:
 \describe{
   \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
   \item{\strong{'anova'}}{Duncan's multiple range test for anova}
@@ -217,17 +217,17 @@ Test the difference of environmental variable across groups.
 
 \item{\code{measure}}{default NULL; a vector; if null, all variables will be calculated.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; \code{p.adjust} method; see method parameter of \code{p.adjust} function for available options.}
 
-\item{\code{anova_set}}{default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.}
+\item{\code{anova_set}}{default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.}
 
-\item{\code{...}}{parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
-agricolae::duncan.test (method = "anova").}
+\item{\code{...}}{parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{FSA::dunnTest} function (\code{method = "KW_dunn"}) or
+\code{agricolae::duncan.test} (\code{method = "anova"}).}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+\code{res_diff} in object. A \code{data.frame} generally. A list for anova when \code{anova_set} is assigned.
   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 }
@@ -256,7 +256,7 @@ Plotting values of environmental variables across groups and add the significanc
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters passed to plot_alpha of trans_alpha. Please see plot_alpha function of trans_alpha class for all the available parameters.}
+\item{\code{...}}{parameters passed to \code{plot_alpha} of \code{trans_alpha} class. Please see \code{trans_alpha$plot_alpha} function for all the available parameters.}
 }
 \if{html}{\out{</div>}}
 }
@@ -280,16 +280,16 @@ Calculate the autocorrelations among environmental variables and plot the result
 \describe{
 \item{\code{group}}{default NULL; a colname of sample_table; used to perform calculations for different groups.}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.}
 
 \item{\code{alpha}}{default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.}
 
-\item{\code{...}}{default parameters passed to GGally::ggpairs.}
+\item{\code{...}}{default parameters passed to \code{GGally::ggpairs}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggmatrix.
+\code{ggmatrix}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -308,7 +308,7 @@ t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
 \if{html}{\out{<a id="method-trans_env-cal_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-cal_ordination}{}}}
 \subsection{Method \code{cal_ordination()}}{
-Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
+Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{vegan} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination(
   method = c("RDA", "dbRDA", "CCA")[1],
@@ -333,7 +333,7 @@ If use otu_table; please input "OTU".}
 
 \item{\code{taxa_filter_thres}}{default NULL; If want to filter taxa, provide the relative abundance threshold.}
 
-\item{\code{use_measure}}{default NULL; a name of beta diversity matrix; only useful when parameter method = "dbRDA";
+\item{\code{use_measure}}{default NULL; a name of beta diversity matrix; only useful when parameter \code{method = "dbRDA"};
 If not provided, use the first beta diversity matrix automatically.}
 
 \item{\code{add_matrix}}{default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
@@ -344,7 +344,7 @@ only available when method = "dbRDA".}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis in object.
+\code{res_ordination}, \code{res_ordination_R2}, \code{res_ordination_terms} and \code{res_ordination_axis} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -371,12 +371,12 @@ Fits each environmental vector onto the ordination to obtain the contribution of
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{the parameters passing to vegan::envfit function.}
+\item{\code{...}}{the parameters passing to \code{vegan::envfit} function.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_ordination_envsquare in object.
+\code{res_ordination_envsquare} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -423,7 +423,7 @@ transform ordination result for the following plotting.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_ordination_trans in object.
+\code{res_ordination_trans} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -480,7 +480,7 @@ plot ordination result.
 
 \item{\code{plot_shape}}{default NULL; a colname of sample_table to assign shapes to different groups in plot.}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.}
 
 \item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.}
 
@@ -526,24 +526,24 @@ plot ordination result.
 
 \item{\code{add_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
 
-\item{\code{env_nudge_x}}{default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of geom_text_repel function of ggrepel package;
-default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
-if there are 5 env variables, env_nudge_x should be something like c(0.1, 0, -0.2, 0, 0). 
+\item{\code{env_nudge_x}}{default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of \code{ggrepel::geom_text_repel} function;
+default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows}. For example, 
+if there are 5 env variables, env_nudge_x should be something like \code{c(0.1, 0, -0.2, 0, 0)}. 
 Note that this parameter and env_nudge_y is generally used when the automatic text adjustment is not very well.}
 
 \item{\code{env_nudge_y}}{default NULL; numeric vector to adjust the env text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
-default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
-if there are 5 env variables, env_nudge_y should be something like c(0.1, 0, -0.2, 0, 0).}
+default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows}. For example, 
+if there are 5 env variables, env_nudge_y should be something like \code{c(0.1, 0, -0.2, 0, 0)}.}
 
 \item{\code{taxa_nudge_x}}{default NULL; numeric vector to adjust the taxa text x axis position; passed to nudge_x parameter of ggrepel::geom_text_repel function;
-default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
-if 3 taxa are shown, taxa_nudge_x should be something like c(0.3, -0.2, 0).}
+default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows_spe}. For example, 
+if 3 taxa are shown, taxa_nudge_x should be something like \code{c(0.3, -0.2, 0)}.}
 
 \item{\code{taxa_nudge_y}}{default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
-default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
-if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).}
+default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows_spe}. For example, 
+if 3 taxa are shown, taxa_nudge_y should be something like \code{c(-0.2, 0, 0.4)}.}
 
-\item{\code{...}}{paremeters pass to geom_point for controlling sample points.}
+\item{\code{...}}{paremeters pass to \code{geom_point} for controlling sample points.}
 }
 \if{html}{\out{</div>}}
 }
@@ -597,16 +597,16 @@ Mantel test between beta diversity matrix and environmental data.
 
 \item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
 
-\item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in mantel function of vegan package.}
+\item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.}
 
 \item{\code{...}}{paremeters pass to \code{\link{mantel}} of vegan package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_mantel in object.
+\code{res_mantel} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -646,14 +646,14 @@ Actually, it can also be used for calculating other correlation between any two 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
-"all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.}
+\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
+"all": use all merged taxa abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.}
 
 \item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.}
 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation method.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.}
 
 \item{\code{p_adjust_type}}{default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.}
 
@@ -661,7 +661,7 @@ Actually, it can also be used for calculating other correlation between any two 
 
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate correlations for different groups separately.}
 
-\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g., "Genus".}
+\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".}
 
 \item{\code{other_taxa}}{default NULL; character vector containing a series of taxa names; used when use_data = "other"; 
 the provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
@@ -676,7 +676,7 @@ please see the example.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_cor in object.
+\code{res_cor} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -720,7 +720,7 @@ Plot correlation heatmap.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_vector}}{default c("#053061", "white", "#A50026"); colors with only three values representing low, middle and high value.}
+\item{\code{color_vector}}{default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high value.}
 
 \item{\code{color_palette}}{default NULL; a customized palette with more color values; if provided, use it instead of color_vector.}
 
@@ -739,9 +739,9 @@ For example, filter_feature = "" can be used to filter features that only have "
 
 \item{\code{text_x_order}}{default NULL; character vector; provide customized text order for x axis.}
 
-\item{\code{font_family}}{default NULL; font family used in ggplot2; only available when pheatmap = FALSE.}
+\item{\code{font_family}}{default NULL; font family used in \code{ggplot2}; only available when pheatmap = FALSE.}
 
-\item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for ggplot2 based heatmap; 
+\item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for \code{ggplot2} based heatmap; 
 available options: "none", "row", "col" or "both". "none": no any clustering used;
 "row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
 Only available when pheatmap = FALSE.}
@@ -754,7 +754,7 @@ Only available when pheatmap = FALSE.}
 
 \item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
 
-\item{\code{...}}{paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.}
+\item{\code{...}}{paremeters pass to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.}
 }
 \if{html}{\out{</div>}}
 }
@@ -779,7 +779,7 @@ t1$plot_cor(pheatmap = FALSE)
 Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
- assigned according to the column selection of the data_env inside.
+ assigned according to the column selection of the \code{data_env} inside.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_scatterfit(
   x = NULL,
@@ -817,11 +817,11 @@ Scatter plot and add fitted line. The most important thing is to make sure that 
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{x}}{default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
-If x is a single value, it will be used to select the column of data_env inside.
+If x is a single value, it will be used to select the column of \code{data_env} inside.
 If x is a distance matrix, it will be transformed to be a vector.}
 
 \item{\code{y}}{default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
-If y is a single value, it will be used to select the column of data_env inside.
+If y is a single value, it will be used to select the column of \code{data_env} inside.
 If y is a distance matrix, it will be transformed to be a vector.}
 
 \item{\code{group}}{default NULL; a character vector; if length is 1, must be a colname of dataset$sample_table;
@@ -831,7 +831,7 @@ Otherwise, group should be a vector with same length of x/y (for vector) or ncol
 If group_order is NULL and group is provided, the function can first check whether the group column of dataset$sample_table is factor. 
 If provided, overlook the levels in the group of dataset$sample_table.}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.}
 
 \item{\code{shape_values}}{default NULL; a numeric vector for point shape types of groups when group is not NULL, see ggplot2 tutorial.}
 
@@ -848,7 +848,7 @@ If provided, overlook the levels in the group of dataset$sample_table.}
      c( 'bottom', 'top', 'center', 'centre', 'middle') for y-axis.}
 }}
 
-\item{\code{label.y.npc}}{default "top"; same usage with label.x.npc; see also label.y.npc parameter of stat_cor of ggpubr package.}
+\item{\code{label.y.npc}}{default "top"; same usage with label.x.npc; see also label.y.npc parameter of \code{ggpubr::stat_cor} package.}
 
 \item{\code{label.x}}{default NULL; x axis absolute position for adding the statictic label.}
 
@@ -870,7 +870,7 @@ If provided, overlook the levels in the group of dataset$sample_table.}
 
 \item{\code{line_se}}{default TRUE; Whether show the confidence interval for the fitting.}
 
-\item{\code{line_se_color}}{default "grey70"; the color to fill the confidence interval when line_se = TRUE.}
+\item{\code{line_se_color}}{default "grey70"; the color to fill the confidence interval when \code{line_se = TRUE}.}
 
 \item{\code{pvalue_trim}}{default 4; trim the decimal places of p value.}
 
@@ -882,12 +882,12 @@ If provided, overlook the levels in the group of dataset$sample_table.}
 
 \item{\code{lm_squ_trim}}{default 2; trim the decimal places of regression R square.}
 
-\item{\code{...}}{other arguments to pass to geom_text or geom_label.}
+\item{\code{...}}{other arguments to pass to \code{geom_text} or \code{geom_label}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-plot.
+ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

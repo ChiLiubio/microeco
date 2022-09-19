@@ -1,5 +1,5 @@
 #' @title
-#' Create trans_venn object.
+#' Create \code{trans_venn} object.
 #'
 #' @description
 #' This class is a wrapper for a series of venn analysis related methods, including venn result, 2- to 5-way venn diagram, 
@@ -15,7 +15,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
 		#'   Features must be rows.
 		#' @param name_joint default "&"; the joint mark for generating multi-sample names.
-		#' @return data_details and data_summary stored in trans_venn object.
+		#' @return \code{data_details} and \code{data_summary} stored in trans_venn object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -95,7 +95,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @description
 		#' Plot venn diagram.
 		#'
-		#' @param color_circle default RColorBrewer::brewer.pal(8, "Dark2"); color pallete
+		#' @param color_circle default \code{RColorBrewer::brewer.pal(8, "Dark2")}; color pallete
 		#' @param fill_color default TRUE; whether fill the area color
 		#' @param text_size default 4.5; text size in plot
 		#' @param text_name_size default 6; name size in plot
@@ -114,8 +114,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param petal_move_k_count default 1.3; the distance of data text to circle
 		#' @param petal_text_move default 40; the distance between two data text
 		#' @param other_text_show default NULL; other characters used to show in the plot
-		#' @param other_text_position default c(1, 1); the text position for text in other_text_show
-		#' @param other_text_size default 5; the text size for text in other_text_show
+		#' @param other_text_position default c(1, 1); the text position for text in \code{other_text_show}
+		#' @param other_text_size default 5; the text size for text in \code{other_text_show}
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{

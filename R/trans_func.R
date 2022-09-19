@@ -1,5 +1,5 @@
 #' @title
-#' Create trans_func object for functional analysis.
+#' Create \code{trans_func} object for functional analysis.
 #'
 #' @description
 #' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on 
@@ -11,11 +11,11 @@
 trans_func <- R6Class(classname = "trans_func",
 	public = list(
 		#' @description
-		#' Create the trans_func object. This function can identify the data type for Prokaryotes or Fungi automatically.
+		#' Create the \code{trans_func} object. This function can identify the data type for Prokaryotes or Fungi automatically.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @return for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
-		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
+		#' @return \code{for_what}: "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
+		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. \code{dataset$for_what <- "prok"}.
 		#' @examples
 		#' data(dataset)
 		#' t1 <- trans_func$new(dataset = dataset)
@@ -62,7 +62,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'     	  FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
 		#'     	  Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>}
 		#'   }
-		#' @return res_spe_func stored in object.
+		#' @return \code{res_spe_func} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func(prok_database = "FAPROTAX")
@@ -282,7 +282,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
 		#' 	  If TRUE, calculate the functional individual percentage.
-		#' @return res_spe_func_perc stored in the object.
+		#' @return \code{res_spe_func_perc} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func_perc(abundance_weighted = TRUE)
@@ -341,8 +341,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param filter_func default NULL; a vector of function names used to show in the plot.
 		#' @param use_group_list default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
-		#'    please first set trans_func$func_group_list object with a list of group names and functions.
-		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.
+		#'    please first set \code{trans_func$func_group_list} object with a list of group names and functions.
+		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see \code{trans_func$func_group_list} object.
 		#' @param order_x default NULL; character vector; to sort the x axis text; can be also used to select partial samples to show.
 		#' @param color_gradient_low default "#00008B"; the color used as the low end in the color gradient.
 		#' @param color_gradient_high default "#9E0142"; the color used as the high end in the color gradient.
@@ -427,7 +427,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the feature table in local place.
 		#' @param folderReferenceData default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.
-		#' @return tax4fun_KO and tax4fun_path in object.
+		#' @return \code{tax4fun_KO} and \code{tax4fun_path} in object.
 		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
 			if(is.null(folderReferenceData)){
 				stop("No folderReferenceData provided! Please see the help document!")
@@ -485,7 +485,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param normalize_pathways default FALSE; Different to Tax4Fun, when converting from KEGG functions to KEGG pathways, 
 		#' 	 Tax4Fun2 does not equally split KO gene abundances between pathways a functions is affiliated to. The full predicted abundance is affiliated to each pathway. 
 		#'   Use TRUE to split the abundances (default is FALSE).
-		#' @return res_tax4fun2_KO and res_tax4fun2_pathway in object.
+		#' @return \code{res_tax4fun2_KO} and \code{res_tax4fun2_pathway} in object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_tax4fun2(blast_tool_path = "ncbi-blast-2.5.0+/bin", 

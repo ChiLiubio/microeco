@@ -2,12 +2,11 @@
 % Please edit documentation in R/trans_beta.R
 \name{trans_beta}
 \alias{trans_beta}
-\title{Create trans_beta object for the analysis of distance matrix of beta-diversity.}
+\title{Create \code{trans_beta} object for beta-diversity analysis based on the distance matrix}
 \description{
 This class is a wrapper for a series of beta-diversity related analysis, 
 including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and PERMDISP.
-Please also cite the original paper: An et al. (2019). Soil bacterial community structure in Chinese wetlands. Geoderma, 337, 290-299.
 }
 \examples{
 
@@ -99,9 +98,9 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} class.}
 
-\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in microtable$beta_diversity; 
+\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in \code{microtable$beta_diversity}; 
 used for ordination, manova or group distance. The measure must be one of names of microtable$beta_diversity list. 
-Please see microtable$cal_betadiv function for more details.}
+Please see \code{microtable$cal_betadiv} function for more details.}
 
 \item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance.}
 }
@@ -149,7 +148,7 @@ PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_ordination stored in the object.
+\code{res_ordination} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -197,9 +196,9 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
   \item{\strong{'centroid'}}{add centroid line of each group}
 }}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.}
 
-\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.}
+\item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see \code{ggplot2} tutorial.}
 
 \item{\code{plot_color}}{default NULL; a colname of sample_table to assign colors to different groups in plot.}
 
@@ -230,7 +229,7 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot.
+\code{ggplot}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -250,7 +249,7 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 \if{html}{\out{<a id="method-trans_beta-cal_manova"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
-Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis2 function.
+Calculate perMANOVA based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
   manova_all = TRUE,
@@ -267,18 +266,18 @@ Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.0
 \item{\code{manova_all}}{default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 FALSE represents test for all the paired groups.}
 
-\item{\code{manova_set}}{default NULL; other specified group set for manova, such as "Group + Type" and "Group*Type"; see also \code{\link{adonis2}}.}
+\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.}
 
 \item{\code{group}}{default NULL; a column name of sample_table used for manova. If NULL, search group stored in the object.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method when manova_all = FALSE; see method parameter of p.adjust function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.}
 
-\item{\code{...}}{parameters passed to \code{\link{adonis2}} function of vegan package.}
+\item{\code{...}}{parameters passed to \code{\link{adonis2}} function of \code{vegan} package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_manova stored in object.
+\code{res_manova} stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -293,7 +292,7 @@ res_manova stored in object.
 \if{html}{\out{<a id="method-trans_beta-cal_betadisper"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_betadisper}{}}}
 \subsection{Method \code{cal_betadisper()}}{
-A wrapper for betadisper function in vegan package for multivariate homogeneity test of groups dispersions.
+A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_betadisper(...)}\if{html}{\out{</div>}}
 }
@@ -306,7 +305,7 @@ A wrapper for betadisper function in vegan package for multivariate homogeneity 
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_betadisper stored in object.
+\code{res_betadisper} stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -334,7 +333,7 @@ Transform sample distances within groups or between groups.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_group_distance stored in object.
+\code{res_group_distance} stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -377,23 +376,25 @@ Plotting the distance between samples within or between groups.
 
 \item{\code{hide_ns}}{default FALSE; whether hide the "ns" pairs, i.e. non significant comparisions.}
 
-\item{\code{hide_ns_more}}{default NULL; character vector; available when hide_ns = TRUE; if provided, used for the specific significance filtering, such as c("ns", "*").}
+\item{\code{hide_ns_more}}{default NULL; character vector; available when \code{hide_ns = TRUE}; 
+if provided, used for the specific significance filtering, such as \code{c("ns", "*")}.}
 
-\item{\code{pair_compare_filter_match}}{default NULL; only available when hide_ns = FALSE; if provided, remove the matched groups; use the regular express to match the paired groups.}
+\item{\code{pair_compare_filter_match}}{default NULL; only available when \code{hide_ns = FALSE}; 
+if provided, remove the matched groups; use the regular express to match the paired groups.}
 
-\item{\code{pair_compare_filter_select}}{default NULL; numeric vector;only available when hide_ns = FALSE; if provided, only select those input groups.
-This parameter must be a numeric vector used to select the paired combination of groups. For example, pair_compare_filter_select = c(1, 3) 
+\item{\code{pair_compare_filter_select}}{default NULL; numeric vector;only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
+This parameter must be a numeric vector used to select the paired combination of groups. For example, \code{pair_compare_filter_select = c(1, 3)} 
 can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
-The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together.}
+The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_match} can not be both used together.}
 
-\item{\code{pair_compare_method}}{default wilcox.test; wilcox.test, kruskal.test, t.test or anova.}
+\item{\code{pair_compare_method}}{default \code{wilcox.test}; \code{wilcox.test}, \code{kruskal.test}, \code{t.test} or \code{anova}.}
 
 \item{\code{plot_distance_xtype}}{default NULL; number used to make x axis text generate angle.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot.
+\code{ggplot}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -413,7 +414,7 @@ t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3
 \if{html}{\out{<a id="method-trans_beta-plot_clustering"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-plot_clustering}{}}}
 \subsection{Method \code{plot_clustering()}}{
-Plotting clustering result. Require ggdendro package.
+Plotting clustering result based on the \code{ggdendro} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_clustering(
   use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -437,7 +438,7 @@ Plotting clustering result. Require ggdendro package.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot.
+\code{ggplot}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

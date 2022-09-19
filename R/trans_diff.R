@@ -1,14 +1,14 @@
 #' @title 
-#' Create trans_diff object for the differential analysis on the taxonomic abundance.
+#' Create \code{trans_diff} object for the differential analysis on the taxonomic abundance
 #'
 #' @description
 #' This class is a wrapper for a series of differential abundance test and indicator analysis methods, including 
 #'  LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
 #'  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
 #'  non-parametric Kruskal-Wallis Rank Sum Test,
-#'  Dunn's Kruskal-Wallis Multiple Comparisons based on the FSA package, Wilcoxon Rank Sum and Signed Rank Tests, t test, anova, 
-#'  R package metagenomeSeq Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
-#'  R package ANCOMBC <doi:10.1038/s41467-020-17041-7> and R package ALDEx2 <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>.
+#'  Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t test, anova, 
+#'  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
+#'  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7> and R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>.
 #' 
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
@@ -19,32 +19,32 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
 		#'     \item{\strong{'rf'}}{random forest and non-parametric test method based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
 		#'     \item{\strong{'metastat'}}{Metastat method for all paired groups based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
-		#'     \item{\strong{'metagenomeSeq'}}{zero-inflated log-normal model-based differential test method from metagenomeSeq package.}
+		#'     \item{\strong{'metagenomeSeq'}}{zero-inflated log-normal model-based differential test method from \code{metagenomeSeq} package.}
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in FSA package}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
 		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
-		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require ANCOMBC package to be installed 
+		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
 		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
-		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with ALDEx2 package; see also the test parameter in ALDEx2::aldex function;
+		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
 		#'     	  ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
 		#'     	  drawn from the Dirichlet distribution; Reference: <doi:10.1371/journal.pone.0067019> and <doi:10.1186/2049-2618-2-15>; 
-		#'     	  require ALDEx2 package to be installed 
+		#'     	  require \code{ALDEx2} package to be installed 
 		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
-		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with ALDEx2 package;
-		#'     	  require ALDEx2 package to be installed 
-		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
+		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
+		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
 		#'   }
-		#' @param group default NULL; sample group used for the comparision; a colname of microtable$sample_table.
+		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table}.
 		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
-		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of dataset, the function will use the features in otu_table automatically.
-		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only useful when method != "metastat", "metagenomeSeq" or "ANCOMBC". 
+		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
+		#' 	  the function will use the features in input \code{microtable$otu_table} automatically.
+		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only useful when method != "metastat".
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for other available options; 
-		#'    NULL mean disuse the p value adjustment; So when p_adjust_method = NULL, P.adj is same with P.unadj.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
+		#'    NULL mean disuse the p value adjustment; So when \code{p_adjust_method = NULL}, P.adj is same with P.unadj.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
@@ -52,16 +52,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param boots default 30; bootstrap test number for method = "lefse" or "rf".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package when method = "rf".
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".
-		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of metagenomeSeq package.
-		#' @param ANCOMBC_formula default NULL; same with the formula parameter in ANCOMBC::ancombc function; If NULL; assign the group parameter to it automatically.
+		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.
+		#' @param ANCOMBC_formula default NULL; same with the formula parameter in \code{ANCOMBC::ancombc} function; If NULL; assign the group parameter to it automatically.
 		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
 		#'   applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
 		#'   for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
 		#'   and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
 		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
-		#' @param ... parameters passed to cal_diff function of trans_alpha class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-		#' 	 passed to ANCOMBC::ancombc function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter);
-		#' 	 passed to ALDEx2::aldex function when method = "ALDEx2_t" or "ALDEx2_kw".
+		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
+		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter);
+		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
@@ -635,16 +635,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Plotting the abundance of differential taxa.
+		#' Plot the abundance of differential taxa
 		#'
-		#' @param use_number default 1:20; numeric vector; the taxa numbers (1:n) used in the plot; 
+		#' @param use_number default 1:20; numeric vector; the taxa numbers (1:n) selected in the plot; 
 		#'   If the n is larger than the number of total significant taxa, automatically use all the taxa.		
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.
 		#' @param select_group default NULL; this is used to select the paired groups. 
 		#'   This parameter is especially useful when the comparision methods is applied to paired groups;
-		#'   The input select_group must be one of object$res_diff$Comparison.
+		#'   The input select_group must be one of \code{object$res_diff$Comparison}.
 		#' @param select_taxa default NULL; character vector to provide taxa names. 
-		#' 	 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in object$res_diff$Taxa.
+		#' 	 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in \code{object$res_diff$Taxa}.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
@@ -663,7 +663,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.
 		#' @param text_y_size default 10; the size for the y axis text.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.
-		#' @param ... parameters passed to ggsignif::stat_signif when add_sig = TRUE.
+		#' @param ... parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -912,16 +912,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @description
 		#' Bar plot for indicator index, such as LDA score and P value.
 		#'
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.
 		#' @param use_number default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.
 		#' @param threshold default NULL; threshold value of indicators for selecting taxa, such as 3 for LDA score of LEfSe.
 		#' @param select_group default NULL; this is used to select the paired group when multiple comparisions are generated;
-		#'   The input select_group must be one of object$res_diff$Comparison.
+		#'   The input select_group must be one of \code{object$res_diff$Comparison}.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
-		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
-		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table.
+		#' 	  If NULL, the function can first check whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
+		#' 	  If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.
 		#' @param axis_text_y default 12; the size for the y axis text.
 		#' @param plot_vertical default TRUE; whether use vertical bar plot or horizontal.
 		#' @param ... parameters pass to \code{\link{geom_bar}}
@@ -1062,26 +1062,26 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @description
 		#' Plot the cladogram using taxa with significant difference.
 		#'
-		#' @param color default RColorBrewer::brewer.pal(8, "Dark2"); color palette used in the plot.
+		#' @param color default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color palette used in the plot.
 		#' @param group_order default NULL; a vector to order the legend in plot; 
 		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table. 
-		#' 	  If the number of provided group_order is less than the number of groups in res_diff$Group, the function will select the groups of group_order automatically.
+		#' 	  If the number of provided group_order is less than the number of groups in \code{res_diff$Group}, the function will select the groups of group_order automatically.
 		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .
 		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance.
 		#' @param use_feature_num default NULL; integer; The feature number used in the plot; 
 		#'	  select the features according to the LDA score (method = "lefse") or MeanDecreaseGini (method = "rf") from high to low.
 		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest.
 		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters.
-		#' @param only_select_show default FALSE; whether only use the the select features in the parameter select_show_labels.
+		#' @param only_select_show default FALSE; whether only use the the select features in the parameter \code{select_show_labels}.
 		#' @param sep default "|"; the seperate character in the taxonomic information.
 		#' @param branch_size default 0.2; numberic, size of branch.
 		#' @param alpha default 0.2; shading of the color.
-		#' @param clade_label_size default 2; basic size for the clade label; please also see clade_label_size_add and clade_label_size_log
-		#' @param clade_label_size_add default 5; added basic size for the clade label; see the formula in clade_label_size_log parameter.
-		#' @param clade_label_size_log default exp(1); the base of log function for added size of the clade label; the size formula: 
-		#'   clade_label_size + log(clade_label_level + clade_label_size_add, base = clade_label_size_log); 
-		#'   so use clade_label_size_log, clade_label_size_add and clade_label_size
+		#' @param clade_label_size default 2; basic size for the clade label; please also see \code{clade_label_size_add} and \code{clade_label_size_log}.
+		#' @param clade_label_size_add default 5; added basic size for the clade label; see the formula in \code{clade_label_size_log} parameter.
+		#' @param clade_label_size_log default \code{exp(1)}; the base of \code{log} function for added size of the clade label; the size formula: 
+		#'   \code{clade_label_size + log(clade_label_level + clade_label_size_add, base = clade_label_size_log)}; 
+		#'   so use \code{clade_label_size_log}, \code{clade_label_size_add} and \code{clade_label_size}
 		#'   can totally control the label size for different taxonomic levels.
 		#' @param node_size_scale default 1; scale for the node size.
 		#' @param node_size_offset default 1; offset for the node size.

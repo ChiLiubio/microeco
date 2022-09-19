@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_nullmodel.R
 \name{trans_nullmodel}
 \alias{trans_nullmodel}
-\title{Create trans_nullmodel object for phylogeny- and taxonomy-based null model analysis.}
+\title{Create \code{trans_nullmodel} object for phylogeny- and taxonomy-based null model analysis.}
 \description{
 This class is a wrapper for a series of null model related approaches, 
 including the mantel correlogram analysis of phylogenetic signal, beta nearest taxon index (betaNTI), 
@@ -187,7 +187,7 @@ t1$cal_tNST_test()
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_comm and data_tree in object.
+\code{data_comm} and \code{data_tree} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -220,7 +220,7 @@ Calculate mantel correlogram.
 \item{\code{use_env}}{default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, 
 use PCA (principal component analysis) to reduce dimensionality.}
 
-\item{\code{break.pts}}{default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of vegan package.}
+\item{\code{break.pts}}{default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of \code{vegan} package.}
 
 \item{\code{cutoff}}{default FALSE; see cutoff parameter in \code{\link{mantel.correlog}}.}
 
@@ -254,7 +254,7 @@ Plot mantel correlogram.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{point_shape}}{default 22; the number for selecting point shape type; see ggplot2 manual for the number meaning.}
+\item{\code{point_shape}}{default 22; the number for selecting point shape type; see \code{ggplot2} manual for the number meaning.}
 
 \item{\code{point_size}}{default 3; the point size.}
 }
@@ -278,7 +278,7 @@ t1$plot_mantel_corr()
 \if{html}{\out{<a id="method-trans_nullmodel-cal_betampd"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_betampd}{}}}
 \subsection{Method \code{cal_betampd()}}{
-Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
+Calculate betaMPD (mean pairwise distance). Same with \code{picante::comdist} function, but faster.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betampd(abundance.weighted = TRUE)}\if{html}{\out{</div>}}
 }
@@ -308,7 +308,7 @@ t1$cal_betampd(abundance.weighted = TRUE)
 \if{html}{\out{<a id="method-trans_nullmodel-cal_betamntd"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_betamntd}{}}}
 \subsection{Method \code{cal_betamntd()}}{
-Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
+Calculate betaMNTD (mean nearest taxon distance). Same with \code{picante::comdistnt} package, but faster.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
   abundance.weighted = TRUE,
@@ -325,16 +325,16 @@ Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante
 \describe{
 \item{\code{abundance.weighted}}{default TRUE; whether use abundance-weighted method.}
 
-\item{\code{exclude.conspecifics}}{default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.}
+\item{\code{exclude.conspecifics}}{default FALSE; see \code{exclude.conspecifics} parameter in \code{comdistnt} function of \code{picante} package.}
 
-\item{\code{use_iCAMP}}{default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
+\item{\code{use_iCAMP}}{default FALSE; whether use \code{bmntd.big} function of \code{iCAMP} package to calculate betaMNTD. 
 This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.}
 
-\item{\code{use_iCAMP_force}}{default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is large.}
+\item{\code{use_iCAMP_force}}{default FALSE; whether use \code{bmntd.big} function of \code{iCAMP} package automatically when the feature number is large.}
 
 \item{\code{iCAMP_tempdir}}{default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.}
 
-\item{\code{...}}{paremeters pass to iCAMP::pdist.big function.}
+\item{\code{...}}{paremeters pass to \code{iCAMP::pdist.big} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -373,11 +373,11 @@ Calculate standardized effect size of betaMPD, i.e. beta net relatedness index (
 \item{\code{runs}}{default 1000; simulation runs.}
 
 \item{\code{null.model}}{default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
-"independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.}
+"independentswap"and "trialswap"; see \code{null.model} parameter of \code{ses.mntd} function in \code{picante} package for the algorithm details.}
 
 \item{\code{abundance.weighted}}{default TRUE; whether use weighted abundance.}
 
-\item{\code{iterations}}{default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.}
+\item{\code{iterations}}{default 1000; iteration number for part null models to perform; see iterations parameter of \code{picante::randomizeMatrix} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -422,11 +422,11 @@ Calculate standardized effect size of betaMNTD, i.e. beta nearest taxon index (b
 \item{\code{runs}}{default 1000; simulation number of null model.}
 
 \item{\code{null.model}}{default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
-"independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.}
+"independentswap"and "trialswap"; see \code{null.model} parameter of \code{ses.mntd} function in \code{picante} package for the algorithm details.}
 
 \item{\code{abundance.weighted}}{default TRUE; whether use abundance-weighted method.}
 
-\item{\code{exclude.conspecifics}}{default FALSE; see comdistnt in picante package.}
+\item{\code{exclude.conspecifics}}{default FALSE; see \code{comdistnt} in picante package.}
 
 \item{\code{use_iCAMP}}{default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
 This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.}
@@ -437,7 +437,7 @@ This method can store the phylogenetic distance matrix on the disk to lower the 
 
 \item{\code{nworker}}{default 2; the CPU thread number.}
 
-\item{\code{iterations}}{default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.}
+\item{\code{iterations}}{default 1000; iteration number for part null models to perform; see iterations parameter of \code{picante::randomizeMatrix} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -476,7 +476,7 @@ Calculate Bray–Curtis-based Raup–Crick (RCbray).
 
 \item{\code{verbose}}{default TRUE; whether show the calculation process message.}
 
-\item{\code{null.model}}{default "independentswap"; see more available options in randomizeMatrix function of picante package.}
+\item{\code{null.model}}{default "independentswap"; see more available options in \code{randomizeMatrix} function of \code{picante} package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -542,7 +542,7 @@ Calculates Nearest Relative Index (NRI), equivalent to -1 times the standardized
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{null.model}}{default "taxa.labels"; Null model to use; see null.model parameter in ses.mpd function of picante package for available options.}
+\item{\code{null.model}}{default "taxa.labels"; Null model to use; see \code{null.model} parameter in \code{ses.mpd} function of \code{picante} package for available options.}
 
 \item{\code{abundance.weighted}}{default FALSE; Should mean nearest relative distances for each species be weighted by species abundance?}
 
@@ -584,13 +584,13 @@ Calculates Nearest Taxon Index (NTI), equivalent to -1 times the standardized ef
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{null.model}}{default "taxa.labels"; Null model to use; see null.model parameter in ses.mntd function of picante package for available options.}
+\item{\code{null.model}}{default "taxa.labels"; Null model to use; see \code{null.model} parameter in \code{ses.mntd} function of \code{picante} package for available options.}
 
 \item{\code{abundance.weighted}}{default FALSE; Should mean nearest taxon distances for each species be weighted by species abundance?}
 
 \item{\code{runs}}{default 999; Number of randomizations.}
 
-\item{\code{...}}{paremeters pass to ses.mntd function in picante package.}
+\item{\code{...}}{paremeters pass to \code{ses.mntd} function in \code{picante} package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -613,7 +613,7 @@ t1$cal_NTI(null.model = "taxa.labels", abundance.weighted = TRUE, runs = 50)
 \if{html}{\out{<a id="method-trans_nullmodel-cal_Cscore"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_Cscore}{}}}
 \subsection{Method \code{cal_Cscore()}}{
-Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
+Calculates the (normalised) mean number of checkerboard combinations (C-score) using \code{C.score} function in \code{bipartite} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_Cscore(by_group = NULL, ...)}\if{html}{\out{</div>}}
 }
@@ -623,12 +623,12 @@ Calculates the (normalised) mean number of checkerboard combinations (C-score) u
 \describe{
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate C-score for different groups separately.}
 
-\item{\code{...}}{paremeters pass to C.score function in bipartite package.}
+\item{\code{...}}{paremeters pass to \code{bipartite::C.score} function.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-results directly.
+vector.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -645,7 +645,7 @@ t1$cal_Cscore()
 \if{html}{\out{<a id="method-trans_nullmodel-cal_tNST"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_tNST}{}}}
 \subsection{Method \code{cal_tNST()}}{
-Calculate normalized stochasticity ratio (NST) based on the tNST function of NST package.
+Calculate normalized stochasticity ratio (NST) based on the \code{tNST} function of \code{NST} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_tNST(group, ...)}\if{html}{\out{</div>}}
 }
@@ -656,7 +656,7 @@ Calculate normalized stochasticity ratio (NST) based on the tNST function of NST
 \item{\code{group}}{a colname of sample_table; 
 the function can select the data from sample_table to generate a one-column (n x 1) matrix and provide it to the group parameter of tNST function.}
 
-\item{\code{...}}{paremeters pass to tNST function of NST package; see the documents of tNST function for more details.}
+\item{\code{...}}{paremeters pass to \code{NST::tNST} function; see the documents of \code{tNST} function for more details.}
 }
 \if{html}{\out{</div>}}
 }
@@ -686,7 +686,7 @@ Test the significance of NST difference between each pair of groups.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "nst.boot"; "nst.boot" or "nst.panova"; see NST::nst.boot function or NST::nst.panova function for the details.}
+\item{\code{method}}{default "nst.boot"; "nst.boot" or "nst.panova"; see \code{NST::nst.boot} function or \code{NST::nst.panova} function for the details.}
 
 \item{\code{...}}{paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"}
 }

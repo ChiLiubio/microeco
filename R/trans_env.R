@@ -1,5 +1,5 @@
 #' @title 
-#' Create trans_env object for the analysis of the effects of environmental factors on communities.
+#' Create \code{trans_env} object for the analysis of the effects of environmental factors on communities.
 #'
 #' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
@@ -9,16 +9,16 @@
 trans_env <- R6Class(classname = "trans_env",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param env_cols default NULL; either numeric vector or character vector to select columns in sample_table of your microtable object. 
-		#'    This parameter should be used in the case that all the required environmental data is in sample_table of your microtable object.
-		#'    Otherwise, please use add_data parameter.
-		#' @param add_data default NULL; data.frame format; provide the environmental data in the format data.frame; rownames should be sample names.
-		#'   This parameter should be used when the sample_table in your microtable object has no environmental data. 
-		#'   Under this circumstance, the env_cols parameter can not be used because no data can be selected.
+		#' @param env_cols default NULL; either numeric vector or character vector to select columns in \code{microtable$sample_table}, i.e. dataset$sample_table. 
+		#'    This parameter should be used in the case that all the required environmental data is in \code{sample_table} of your \code{microtable} object.
+		#'    Otherwise, please use \code{add_data} parameter.
+		#' @param add_data default NULL; \code{data.frame} format; provide the environmental data in the format \code{data.frame}; rownames should be sample names.
+		#'   This parameter should be used when the your \code{microtable$sample_table} object has no environmental data. 
+		#'   Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.
 		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
-		#'   If TRUE, the function can run the interpolation with the mice package; to use this parameter, please first install mice package.
-		#' @return data_env in trans_env object.
+		#'   If TRUE, the function can run the interpolation with the \code{mice} package; to use this parameter, please first install mice package.
+		#' @return \code{data_env} stored in the \code{trans_env} object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
@@ -88,17 +88,17 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
 		#'   }
 		#' @param measure default NULL; a vector; if null, all variables will be calculated.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
-		#' @param anova_set default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.
-		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
-		#'   agricolae::duncan.test (method = "anova").
-		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+		#' @param p_adjust_method default "fdr"; \code{p.adjust} method; see method parameter of \code{p.adjust} function for available options.
+		#' @param anova_set default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.
+		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{FSA::dunnTest} function (\code{method = "KW_dunn"}) or
+		#'   \code{agricolae::duncan.test} (\code{method = "anova"}).
+		#' @return \code{res_diff} in object. A \code{data.frame} generally. A list for anova when \code{anova_set} is assigned.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
 		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
@@ -133,7 +133,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Plotting values of environmental variables across groups and add the significance label.
 		#'
-		#' @param ... parameters passed to plot_alpha of trans_alpha. Please see plot_alpha function of trans_alpha class for all the available parameters.
+		#' @param ... parameters passed to \code{plot_alpha} of \code{trans_alpha} class. Please see \code{trans_alpha$plot_alpha} function for all the available parameters.
 		plot_diff = function(...){
 			if(is.null(self$res_diff_tmp)){
 				stop("Please first run cal_diff function!")
@@ -145,10 +145,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Calculate the autocorrelations among environmental variables and plot the result.
 		#'
 		#' @param group default NULL; a colname of sample_table; used to perform calculations for different groups.
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.
 		#' @param alpha default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.
-		#' @param ... default parameters passed to GGally::ggpairs.
-		#' @return ggmatrix.
+		#' @param ... default parameters passed to \code{GGally::ggpairs}.
+		#' @return \code{ggmatrix}.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_autocor(method = "GGally")
@@ -185,19 +185,19 @@ trans_env <- R6Class(classname = "trans_env",
 			g
 		},
 		#' @description
-		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the vegan package.
+		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{vegan} package.
 		#'
 		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
 		#' @param feature_sel default FALSE; whether perform the feature selection based on forward selection method.
 		#' @param taxa_level default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
 		#'   If use otu_table; please input "OTU".
 		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
-		#' @param use_measure default NULL; a name of beta diversity matrix; only useful when parameter method = "dbRDA";
+		#' @param use_measure default NULL; a name of beta diversity matrix; only useful when parameter \code{method = "dbRDA"};
 		#' 	 If not provided, use the first beta diversity matrix automatically.
 		#' @param add_matrix default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
 		#' @param ... paremeters pass to dbrda or rda or cca function according to the input of method.
-		#' @return res_ordination, res_ordination_R2, res_ordination_terms and res_ordination_axis in object.
+		#' @return \code{res_ordination}, \code{res_ordination_R2}, \code{res_ordination_terms} and \code{res_ordination_axis} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ordination(method = "dbRDA", use_measure = "bray")
@@ -329,8 +329,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 		#'
-		#' @param ... the parameters passing to vegan::envfit function.
-		#' @return res_ordination_envsquare in object.
+		#' @param ... the parameters passing to \code{vegan::envfit} function.
+		#' @return \code{res_ordination_envsquare} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ordination_envsquare()
@@ -352,7 +352,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param max_perc_env default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.
 		#' @param min_perc_tax default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.
 		#' @param max_perc_tax default 0.8; used for scaling up the maximum of tax arrow; multiply by the maximum distance between samples and origin.
-		#' @return res_ordination_trans in object.
+		#' @return \code{res_ordination_trans} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env = 1)
@@ -426,7 +426,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param plot_color default NULL; a colname of sample_table to assign colors to different groups in plot.
 		#' @param plot_shape default NULL; a colname of sample_table to assign shapes to different groups in plot.
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.
 		#' @param env_text_color default "black"; environmental variable text color.
 		#' @param env_arrow_color default "grey30"; environmental variable arrow color.
@@ -452,20 +452,20 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.
 		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.
 		#' @param add_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
-		#' @param env_nudge_x default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of geom_text_repel function of ggrepel package;
-		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
-		#'   if there are 5 env variables, env_nudge_x should be something like c(0.1, 0, -0.2, 0, 0). 
+		#' @param env_nudge_x default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of \code{ggrepel::geom_text_repel} function;
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows}. For example, 
+		#'   if there are 5 env variables, env_nudge_x should be something like \code{c(0.1, 0, -0.2, 0, 0)}. 
 		#'   Note that this parameter and env_nudge_y is generally used when the automatic text adjustment is not very well.
 		#' @param env_nudge_y default NULL; numeric vector to adjust the env text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
-		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows. For example, 
-		#'   if there are 5 env variables, env_nudge_y should be something like c(0.1, 0, -0.2, 0, 0).
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows}. For example, 
+		#'   if there are 5 env variables, env_nudge_y should be something like \code{c(0.1, 0, -0.2, 0, 0)}.
 		#' @param taxa_nudge_x default NULL; numeric vector to adjust the taxa text x axis position; passed to nudge_x parameter of ggrepel::geom_text_repel function;
-		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
-		#'   if 3 taxa are shown, taxa_nudge_x should be something like c(0.3, -0.2, 0).
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows_spe}. For example, 
+		#'   if 3 taxa are shown, taxa_nudge_x should be something like \code{c(0.3, -0.2, 0)}.
 		#' @param taxa_nudge_y default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
-		#'   default NULL represents automatic adjustment; the length must be same with the row number of object$res_ordination_trans$df_arrows_spe. For example, 
-		#'   if 3 taxa are shown, taxa_nudge_y should be something like c(-0.2, 0, 0.4).
-		#' @param ... paremeters pass to geom_point for controlling sample points.
+		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows_spe}. For example, 
+		#'   if 3 taxa are shown, taxa_nudge_y should be something like \code{c(-0.2, 0, 0.4)}.
+		#' @param ... paremeters pass to \code{geom_point} for controlling sample points.
 		#' @return ggplot object.
 		#' @examples
 		#' \donttest{
@@ -693,10 +693,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.
 		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
-		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in mantel function of vegan package.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
+		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' @param ... paremeters pass to \code{\link{mantel}} of vegan package.
-		#' @return res_mantel in object.
+		#' @return \code{res_mantel} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_mantel(use_measure = "bray")
@@ -775,22 +775,22 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Calculating the correlations between taxa abundance and environmental variables.
 		#' Actually, it can also be used for calculating other correlation between any two variables from two tables.
 		#'
-		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in taxa_abund; 
-		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with other_taxa parameter which is necessary.
+		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
+		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
 		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options.
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
 		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
-		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when use_data parameter is a taxonomic level, e.g., "Genus".
+		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
 		#' @param other_taxa default NULL; character vector containing a series of taxa names; used when use_data = "other"; 
 		#' 	  the provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
 		#' 	  please see the example.
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
-		#' @return res_cor in object.
+		#' @return \code{res_cor} in object.
 		#' @examples
 		#' \donttest{
 		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
@@ -906,7 +906,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Plot correlation heatmap.
 		#'
-		#' @param color_vector default c("#053061", "white", "#A50026"); colors with only three values representing low, middle and high value.
+		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high value.
 		#' @param color_palette default NULL; a customized palette with more color values; if provided, use it instead of color_vector.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
@@ -916,8 +916,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.
 		#' @param text_x_order default NULL; character vector; provide customized text order for x axis.
-		#' @param font_family default NULL; font family used in ggplot2; only available when pheatmap = FALSE.
-		#' @param cluster_ggplot default "none"; add clustering dendrogram for ggplot2 based heatmap; 
+		#' @param font_family default NULL; font family used in \code{ggplot2}; only available when pheatmap = FALSE.
+		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap; 
 		#'   available options: "none", "row", "col" or "both". "none": no any clustering used;
 		#'   "row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
 		#'   Only available when pheatmap = FALSE.
@@ -925,7 +925,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".
 		#' @param text_y_position default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
-		#' @param ... paremeters pass to ggplot2::geom_tile or pheatmap, depending on the pheatmap = FALSE or TRUE.
+		#' @param ... paremeters pass to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.
 		#' @return plot.
 		#' @examples
 		#' \donttest{
@@ -1118,20 +1118,20 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
 		#'  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
 		#'  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
-		#'  assigned according to the column selection of the data_env inside.
+		#'  assigned according to the column selection of the \code{data_env} inside.
 		#'
 		#' @param x default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
-		#'     If x is a single value, it will be used to select the column of data_env inside.
+		#'     If x is a single value, it will be used to select the column of \code{data_env} inside.
 		#'     If x is a distance matrix, it will be transformed to be a vector.
 		#' @param y default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
-		#'     If y is a single value, it will be used to select the column of data_env inside.
+		#'     If y is a single value, it will be used to select the column of \code{data_env} inside.
 		#'     If y is a distance matrix, it will be transformed to be a vector.
 		#' @param group default NULL; a character vector; if length is 1, must be a colname of dataset$sample_table;
 		#'    Otherwise, group should be a vector with same length of x/y (for vector) or ncol of x/y (for matrix).
 		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot when group is not NULL; 
 		#' 	  If group_order is NULL and group is provided, the function can first check whether the group column of dataset$sample_table is factor. 
 		#' 	  If provided, overlook the levels in the group of dataset$sample_table.
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for different groups.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.
 		#' @param shape_values default NULL; a numeric vector for point shape types of groups when group is not NULL, see ggplot2 tutorial.
 		#' @param type default c("cor", "lm")[1]; "cor": correlation; "lm" for regression.
 		#' @param cor_method default "pearson"; one of "pearson", "kendall" and "spearman"; correlation method.
@@ -1142,7 +1142,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'   \item{character}{allowed values include: i) one of c('right', 'left', 'center', 'centre', 'middle') for x-axis; ii) and one of 
 		#'      c( 'bottom', 'top', 'center', 'centre', 'middle') for y-axis.}
 		#' }
-		#' @param label.y.npc default "top"; same usage with label.x.npc; see also label.y.npc parameter of stat_cor of ggpubr package.
+		#' @param label.y.npc default "top"; same usage with label.x.npc; see also label.y.npc parameter of \code{ggpubr::stat_cor} package.
 		#' @param label.x default NULL; x axis absolute position for adding the statictic label.
 		#' @param label.y default NULL; x axis absolute position for adding the statictic label.
 		#' @param x_axis_title default ""; the title of x axis.
@@ -1151,7 +1151,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param point_alpha default 0.6; alpha value for the point color transparency.
 		#' @param line_size default 0.8; line size value.
 		#' @param line_se default TRUE; Whether show the confidence interval for the fitting.
-		#' @param line_se_color default "grey70"; the color to fill the confidence interval when line_se = TRUE.
+		#' @param line_se_color default "grey70"; the color to fill the confidence interval when \code{line_se = TRUE}.
 		#' @param line_alpha default 1; alpha value for the line color transparency.
 		#' @param line_color default "black"; fitted line color only useful when group = NULL.
 		#' @param pvalue_trim default 4; trim the decimal places of p value.
@@ -1159,8 +1159,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
 		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
 		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
-		#' @param ... other arguments to pass to geom_text or geom_label.
-		#' @return plot.
+		#' @param ... other arguments to pass to \code{geom_text} or \code{geom_label}.
+		#' @return ggplot.
 		#' @examples
 		#' \donttest{
 		#' t1$plot_scatterfit(x = 1, y = 2, type = "cor")

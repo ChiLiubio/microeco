@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_func.R
 \name{trans_func}
 \alias{trans_func}
-\title{Create trans_func object for functional analysis.}
+\title{Create \code{trans_func} object for functional analysis.}
 \description{
 This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on 
 Louca et al. (2016) <doi:10.1126/science.aaf4507> and Lim et al. (2020) <10.1038/s41597-020-0516-5>, 
@@ -94,7 +94,7 @@ t1$cal_tax4fun2_FRI()
 \if{html}{\out{<a id="method-trans_func-new"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_func-new}{}}}
 \subsection{Method \code{new()}}{
-Create the trans_func object. This function can identify the data type for Prokaryotes or Fungi automatically.
+Create the \code{trans_func} object. This function can identify the data type for Prokaryotes or Fungi automatically.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$new(dataset = NULL)}\if{html}{\out{</div>}}
 }
@@ -107,8 +107,8 @@ Create the trans_func object. This function can identify the data type for Proka
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-for_what : "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
-at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. dataset$for_what <- "prok".
+\code{for_what}: "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
+at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. \code{dataset$for_what <- "prok"}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -155,7 +155,7 @@ Confirm traits of each feature by matching the taxonomic assignments to the func
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_spe_func stored in object.
+\code{res_spe_func} stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -189,7 +189,7 @@ If TRUE, calculate the functional individual percentage.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_spe_func_perc stored in the object.
+\code{res_spe_func_perc} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -254,9 +254,9 @@ Plot the percentages of species with specific trait in communities or network mo
 \item{\code{filter_func}}{default NULL; a vector of function names used to show in the plot.}
 
 \item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
-please first set trans_func$func_group_list object with a list of group names and functions.}
+please first set \code{trans_func$func_group_list} object with a list of group names and functions.}
 
-\item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see trans_func$func_group_list object.}
+\item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see \code{trans_func$func_group_list} object.}
 
 \item{\code{order_x}}{default NULL; character vector; to sort the x axis text; can be also used to select partial samples to show.}
 
@@ -301,7 +301,7 @@ Note that this function requires a standard prefix in taxonomic table with doubl
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-tax4fun_KO and tax4fun_path in object.
+\code{tax4fun_KO} and \code{tax4fun_path} in object.
 }
 }
 \if{html}{\out{<hr>}}
@@ -359,7 +359,7 @@ Use TRUE to split the abundances (default is FALSE).}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_tax4fun2_KO and res_tax4fun2_pathway in object.
+\code{res_tax4fun2_KO} and \code{res_tax4fun2_pathway} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

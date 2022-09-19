@@ -1,9 +1,9 @@
 #' @title
-#' Create trans_abund object to transform taxonomic abundance for plotting.
+#' Create \code{trans_abund} object for plotting taxonomic abundance.
 #'
 #' @description
 #' This class is a wrapper for the taxonomic abundance transformations and plotting. 
-#' The transformed data style is the long-format for ggplot2 plotting.
+#' The transformed data style is the long-format for \code{ggplot2} plotting.
 #' The plotting methods include bar plot, boxplot, heatmap and pie chart.
 #'
 #' @export
@@ -14,15 +14,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param show default 0; the relative abundance threshold used for filtering.
 		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low; 
 		#'   this parameter does not conflict with the parameter show; both can be used.
-		#' @param groupmean default NULL; calculating mean abundance for each group; select a group column name in sample_table.
+		#' @param groupmean default NULL; calculating mean abundance for each group; select a group column name in \code{microtable$sample_table}.
 		#' @param delete_full_prefix default TRUE; whether delete both the prefix of taxonomy and the character in front of them.
 		#' @param delete_part_prefix default FALSE; whether only delete the prefix of taxonomy.
-		#' @param prefix default NULL; character string; can be used when delete_full_prefix = T or delete_part_prefix = T; 
+		#' @param prefix default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
 		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
 		#'  Please alter this parameter when the prefix is not standard.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; if some taxa are selected, input taxa names.
-		#' @return data_abund stored in the object for plotting. 
+		#' @return \code{data_abund} stored in the object for plotting. 
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -138,13 +138,13 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Bar plot.
 		#'
-		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plotting.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
 		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
 		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x").
-		#' @param facet3 default NULL; the third facet, used with facet and facet2 parameter together.
+		#'   use this parameter, please first install package \code{ggh4x} using \code{install.packages("ggh4x")}.
+		#' @param facet3 default NULL; the third facet, used with \code{facet} and \code{facet2} parameter together.
 		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
 		#'   If multiple facets are used, please manually assign factors in sample_table of microtable object.
@@ -294,9 +294,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param color_values default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
 		#' 	  colors palette for the plotting.
 		#' @param facet default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".
-		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-		#'   use this parameter, please first install package ggh4x using install.packages("ggh4x").
-		#' @param facet3 default NULL; the third facet, used with facet and facet2 parameter together.
+		#' @param facet2 default NULL; the second facet, used with facet parameter together; \code{facet2} should have a finer scale;
+		#'   use this parameter, please first install package \code{ggh4x}.
+		#' @param facet3 default NULL; the third facet, used with \code{facet} and \code{facet2} parameter together.
 		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
 		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
@@ -431,7 +431,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Box plot.
 		#'
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
 		#' @param group default NULL; a column name of sample table to show abundance across groups.
 		#' @param show_point default FALSE; whether show points in plot.
 		#' @param point_color default "black"; If show_point TRUE; use the color
@@ -516,7 +516,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Plot the line chart.
 		#'
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
 		#' @param plot_SE default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.
 		#' @param position default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.
 		#' @param errorbar_size default 1; errorbar size.
@@ -578,7 +578,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Plot pie chart.
 		#'
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
 		#' @param facet_nrow default 1; how many rows in the plot.
 		#' @param strip_text default 11; sample title size.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.

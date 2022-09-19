@@ -2,10 +2,10 @@
 % Please edit documentation in R/trans_abund.R
 \name{trans_abund}
 \alias{trans_abund}
-\title{Create trans_abund object to transform taxonomic abundance for plotting.}
+\title{Create \code{trans_abund} object for plotting taxonomic abundance.}
 \description{
 This class is a wrapper for the taxonomic abundance transformations and plotting. 
-The transformed data style is the long-format for ggplot2 plotting.
+The transformed data style is the long-format for \code{ggplot2} plotting.
 The plotting methods include bar plot, boxplot, heatmap and pie chart.
 }
 \examples{
@@ -108,13 +108,13 @@ t1$plot_pie(facet_nrow = 1)
 \item{\code{ntaxa}}{default 10; how many taxa will be used, ordered by abundance from high to low; 
 this parameter does not conflict with the parameter show; both can be used.}
 
-\item{\code{groupmean}}{default NULL; calculating mean abundance for each group; select a group column name in sample_table.}
+\item{\code{groupmean}}{default NULL; calculating mean abundance for each group; select a group column name in \code{microtable$sample_table}.}
 
 \item{\code{delete_full_prefix}}{default TRUE; whether delete both the prefix of taxonomy and the character in front of them.}
 
 \item{\code{delete_part_prefix}}{default FALSE; whether only delete the prefix of taxonomy.}
 
-\item{\code{prefix}}{default NULL; character string; can be used when delete_full_prefix = T or delete_part_prefix = T; 
+\item{\code{prefix}}{default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
  default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
 Please alter this parameter when the prefix is not standard.}
 
@@ -125,7 +125,7 @@ Please alter this parameter when the prefix is not standard.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_abund stored in the object for plotting.
+\code{data_abund} stored in the object for plotting.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -174,7 +174,7 @@ Bar plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plotting.}
 
 \item{\code{bar_type}}{default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.}
 
@@ -183,9 +183,9 @@ Bar plot.
 \item{\code{facet}}{default NULL; if using facet, providing a group column name of sample_table, such as, "Group".}
 
 \item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-use this parameter, please first install package ggh4x using install.packages("ggh4x").}
+use this parameter, please first install package \code{ggh4x} using \code{install.packages("ggh4x")}.}
 
-\item{\code{facet3}}{default NULL; the third facet, used with facet and facet2 parameter together.}
+\item{\code{facet3}}{default NULL; the third facet, used with \code{facet} and \code{facet2} parameter together.}
 
 \item{\code{facet4}}{default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.}
 
@@ -280,10 +280,10 @@ colors palette for the plotting.}
 
 \item{\code{facet}}{default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".}
 
-\item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-use this parameter, please first install package ggh4x using install.packages("ggh4x").}
+\item{\code{facet2}}{default NULL; the second facet, used with facet parameter together; \code{facet2} should have a finer scale;
+use this parameter, please first install package \code{ggh4x}.}
 
-\item{\code{facet3}}{default NULL; the third facet, used with facet and facet2 parameter together.}
+\item{\code{facet3}}{default NULL; the third facet, used with \code{facet} and \code{facet2} parameter together.}
 
 \item{\code{facet4}}{default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.}
 
@@ -375,7 +375,7 @@ Box plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
 
 \item{\code{group}}{default NULL; a column name of sample table to show abundance across groups.}
 
@@ -449,7 +449,7 @@ Plot the line chart.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
 
 \item{\code{plot_SE}}{default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.}
 
@@ -511,7 +511,7 @@ Plot pie chart.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
 
 \item{\code{facet_nrow}}{default 1; how many rows in the plot.}
 

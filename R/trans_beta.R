@@ -1,18 +1,17 @@
-#' @title Create trans_beta object for the analysis of distance matrix of beta-diversity.
+#' @title Create \code{trans_beta} object for beta-diversity analysis based on the distance matrix
 #'
 #' @description
 #' This class is a wrapper for a series of beta-diversity related analysis, 
 #' including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 #' clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and PERMDISP.
-#' Please also cite the original paper: An et al. (2019). Soil bacterial community structure in Chinese wetlands. Geoderma, 337, 290-299.
 #'
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} class.
-		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in microtable$beta_diversity; 
+		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in \code{microtable$beta_diversity}; 
 		#' 	 used for ordination, manova or group distance. The measure must be one of names of microtable$beta_diversity list. 
-		#' 	 Please see microtable$cal_betadiv function for more details.
+		#' 	 Please see \code{microtable$cal_betadiv} function for more details.
 		#' @param group default NULL; sample group used for manova, betadisper or group distance.
 		#' @return parameters stored in the object.
 		#' @examples
@@ -68,7 +67,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ncomp default 3; the returned dimensions.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
-		#' @return res_ordination stored in the object.
+		#' @return \code{res_ordination} stored in the object.
 		#' @examples
 		#' t1$cal_ordination(ordination = "PCoA")		
 		cal_ordination = function(
@@ -150,8 +149,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
 		#'     \item{\strong{'centroid'}}{add centroid line of each group}
 		#'   }
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for different groups.
-		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.
+		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see \code{ggplot2} tutorial.
 		#' @param plot_color default NULL; a colname of sample_table to assign colors to different groups in plot.
 		#' @param plot_shape default NULL; a colname of sample_table to assign shapes to different groups in plot.
 		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
@@ -165,7 +164,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.
 		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.
-		#' @return ggplot.
+		#' @return \code{ggplot}.
 		#' @examples
 		#' t1$plot_ordination(plot_type = "point")
 		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
@@ -280,15 +279,15 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Calculate perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan adonis2 function.
+		#' Calculate perMANOVA based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
 		#'
 		#' @param manova_all default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 		#'    FALSE represents test for all the paired groups.
-		#' @param manova_set default NULL; other specified group set for manova, such as "Group + Type" and "Group*Type"; see also \code{\link{adonis2}}.
+		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
 		#' @param group default NULL; a column name of sample_table used for manova. If NULL, search group stored in the object.
-		#' @param p_adjust_method default "fdr"; p.adjust method when manova_all = FALSE; see method parameter of p.adjust function for available options.
-		#' @param ... parameters passed to \code{\link{adonis2}} function of vegan package.
-		#' @return res_manova stored in object.
+		#' @param p_adjust_method default "fdr"; p.adjust method when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
+		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
+		#' @return \code{res_manova} stored in object.
 		#' @examples
 		#' t1$cal_manova(manova_all = TRUE)
 		cal_manova = function(
@@ -331,10 +330,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The result is stored in object$res_manova ...')
 		},
 		#' @description
-		#' A wrapper for betadisper function in vegan package for multivariate homogeneity test of groups dispersions.
+		#' A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions.
 		#'
 		#' @param ... parameters passed to \code{\link{betadisper}} function.
-		#' @return res_betadisper stored in object.
+		#' @return \code{res_betadisper} stored in object.
 		#' @examples
 		#' t1$cal_betadisper()
 		cal_betadisper = function(...){
@@ -351,7 +350,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' Transform sample distances within groups or between groups.
 		#'
 		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
-		#' @return res_group_distance stored in object.
+		#' @return \code{res_group_distance} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance(within_group = TRUE)
@@ -371,15 +370,17 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param color_values colors for presentation.
 		#' @param distance_pair_stat default FALSE; whether do the paired comparisions.
 		#' @param hide_ns default FALSE; whether hide the "ns" pairs, i.e. non significant comparisions.
-		#' @param hide_ns_more default NULL; character vector; available when hide_ns = TRUE; if provided, used for the specific significance filtering, such as c("ns", "*").
-		#' @param pair_compare_filter_match default NULL; only available when hide_ns = FALSE; if provided, remove the matched groups; use the regular express to match the paired groups.
-		#' @param pair_compare_filter_select default NULL; numeric vector;only available when hide_ns = FALSE; if provided, only select those input groups.
-		#'   This parameter must be a numeric vector used to select the paired combination of groups. For example, pair_compare_filter_select = c(1, 3) 
+		#' @param hide_ns_more default NULL; character vector; available when \code{hide_ns = TRUE}; 
+		#' 	 if provided, used for the specific significance filtering, such as \code{c("ns", "*")}.
+		#' @param pair_compare_filter_match default NULL; only available when \code{hide_ns = FALSE}; 
+		#' 	 if provided, remove the matched groups; use the regular express to match the paired groups.
+		#' @param pair_compare_filter_select default NULL; numeric vector;only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
+		#'   This parameter must be a numeric vector used to select the paired combination of groups. For example, \code{pair_compare_filter_select = c(1, 3)} 
 		#'   can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
-		#'   The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together.
-		#' @param pair_compare_method default wilcox.test; wilcox.test, kruskal.test, t.test or anova.
+		#'   The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_match} can not be both used together.
+		#' @param pair_compare_method default \code{wilcox.test}; \code{wilcox.test}, \code{kruskal.test}, \code{t.test} or \code{anova}.
 		#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
-		#' @return ggplot.
+		#' @return \code{ggplot}.
 		#' @examples
 		#' \donttest{
 		#' t1$plot_group_distance(distance_pair_stat = TRUE)
@@ -473,13 +474,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Plotting clustering result. Require ggdendro package.
+		#' Plotting clustering result based on the \code{ggdendro} package.
 		#'
 		#' @param use_colors colors for presentation.
 		#' @param measure default NULL; beta diversity index; If NULL, using the measure when creating object
 		#' @param group default NULL; if provided, use this group to assign color.
 		#' @param replace_name default NULL; if provided, use this as label.
-		#' @return ggplot.
+		#' @return \code{ggplot}.
 		#' @examples
 		#' t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 		plot_clustering = function(

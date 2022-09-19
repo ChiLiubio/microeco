@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_venn.R
 \name{trans_venn}
 \alias{trans_venn}
-\title{Create trans_venn object.}
+\title{Create \code{trans_venn} object.}
 \description{
 This class is a wrapper for a series of venn analysis related methods, including venn result, 2- to 5-way venn diagram, 
 more than 5-way petal plot and venn result transformations based on David et al. (2012) <doi:10.1128/AEM.01459-12>.
@@ -86,7 +86,7 @@ Features must be rows.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_details and data_summary stored in trans_venn object.
+\code{data_details} and \code{data_summary} stored in trans_venn object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -135,7 +135,7 @@ Plot venn diagram.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_circle}}{default RColorBrewer::brewer.pal(8, "Dark2"); color pallete}
+\item{\code{color_circle}}{default \code{RColorBrewer::brewer.pal(8, "Dark2")}; color pallete}
 
 \item{\code{fill_color}}{default TRUE; whether fill the area color}
 
@@ -173,9 +173,9 @@ Plot venn diagram.
 
 \item{\code{other_text_show}}{default NULL; other characters used to show in the plot}
 
-\item{\code{other_text_position}}{default c(1, 1); the text position for text in other_text_show}
+\item{\code{other_text_position}}{default c(1, 1); the text position for text in \code{other_text_show}}
 
-\item{\code{other_text_size}}{default 5; the text size for text in other_text_show}
+\item{\code{other_text_size}}{default 5; the text size for text in \code{other_text_show}}
 }
 \if{html}{\out{</div>}}
 }

@@ -1,16 +1,16 @@
-#' @title Create trans_alpha object for alpha diveristy statistics and plotting.
+#' @title Create \code{trans_alpha} object for alpha diversity statistics and plotting.
 #'
 #' @description
-#' This class is a wrapper for a series of alpha diveristy related analysis, including the statistics and plotting based on 
+#' This class is a wrapper for a series of alpha diversity related analysis, including the statistics and plotting based on 
 #' An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 #'
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param group default NULL; the sample column used for the statistics; If provided, can return data_stat.
-		#' @param order_x default NULL; sample_table column name or a vector containg sample names; if provided, order samples by using factor.
-		#' @return data_alpha and data_stat stored in the object.
+		#' @param group default NULL; the sample column used for the statistics; If provided, can return \code{data_stat}.
+		#' @param order_x default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.
+		#' @return \code{data_alpha} and \code{data_stat} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -60,19 +60,19 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see dunnTest function in FSA package}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
 		#'   }
-		#' @param measure default NULL; a vector; if null, all indexes will be calculated; see names of microtable$alpha_diversity, 
+		#' @param measure default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of p.adjust function for available options; 
+		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 		#'    NULL can disuse the p value adjustment.
-		#' @param anova_set default NULL; specified group set for anova, such as 'block + N*P*K', see \code{\link{aov}}.
-		#' @param ... parameters passed to kruskal.test or wilcox.test function (method = "KW") or dunnTest function of FSA package (method = "KW_dunn") or
-		#'   agricolae::duncan.test (method = "anova").
-		#' @return res_diff in object. A data.frame generally. A list for anova when anova_set is assigned.
+		#' @param anova_set default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.
+		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
+		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}).
+		#' @return \code{res_diff} in object. A \code{data.frame} generally. A list for anova when anova_set is assigned.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
 		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
@@ -216,27 +216,27 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
-		#' Plotting the alpha diveristy.
+		#' Plotting the alpha diversity.
 		#'
-		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color pallete for groups.
-		#' @param measure default Shannon; alpha diveristy measurement; see names of alpha_diversity of dataset, 
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
+		#' @param measure default Shannon; alpha diversity measurement; see names of alpha_diversity of dataset, 
 		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
-		#' @param add_sig default TRUE; wheter add significance label using the result of cal_diff function, i.e. object$res_diff;
+		#' @param add_sig default TRUE; wheter add significance label using the result of cal_diff function, i.e. \code{object$res_diff};
 		#'   This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.
-		#' @param add_sig_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
+		#' @param add_sig_label default "Significance"; select a colname of \code{object$res_diff} for the label text, such as 'P.adj' or 'Significance'.
 		#' @param add_sig_text_size default 3.88; the size of text in added label.
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_color default TRUE; TRUE: use color_values, FALSE: use "black".
-		#' @param boxplot_add default "jitter"; points type, see the add parameter in ggpubr::ggboxplot.
+		#' @param boxplot_add default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.
 		#' @param order_x_mean default FALSE; whether order x axis by the means of groups from large to small.
-		#' @param y_start default 1.01; the y axis value from which to add the label; the default 1.01 means 1.01 * max(values).
-		#' @param y_increase default 0.05; the increasing y axia space to add label; the default 0.05 means 0.05 * y_start; 
-		#' 	  this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start space.
+		#' @param y_start default 1.01; the y axis value from which to add the label; the default 1.01 means \code{1.01 * max(values)}.
+		#' @param y_increase default 0.05; the increasing y axia space to add label; the default 0.05 means \code{0.05 * y_start}; 
+		#' 	  this parameter is also used to label the letters of anova result with the fixed \code{(1 + y_increase) * y_start space}.
 		#' @param xtext_angle default NULL; number (e.g. 30) used to make x axis text generate angle.
 		#' @param xtext_size default 15; x axis text size.
 		#' @param ytitle_size default 17; y axis title size.
-		#' @param ... parameters pass to ggpubr::ggboxplot function.
+		#' @param ... parameters pass to \code{ggpubr::ggboxplot} function.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{

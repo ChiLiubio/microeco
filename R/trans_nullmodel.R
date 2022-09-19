@@ -1,5 +1,5 @@
 #' @title
-#' Create trans_nullmodel object for phylogeny- and taxonomy-based null model analysis.
+#' Create \code{trans_nullmodel} object for phylogeny- and taxonomy-based null model analysis.
 #'
 #' @description
 #' This class is a wrapper for a series of null model related approaches, 
@@ -18,7 +18,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
-		#' @return data_comm and data_tree in object.
+		#' @return \code{data_comm} and \code{data_tree} in object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
@@ -79,7 +79,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param use_env default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, 
 		#' 	 use PCA (principal component analysis) to reduce dimensionality.
-		#' @param break.pts default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of vegan package.
+		#' @param break.pts default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of \code{vegan} package.
 		#' @param cutoff default FALSE; see cutoff parameter in \code{\link{mantel.correlog}}.
 		#' @param ... parameters pass to \code{\link{mantel.correlog}}
 		#' @return res_mantel_corr in object.
@@ -137,7 +137,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Plot mantel correlogram.
 		#'
-		#' @param point_shape default 22; the number for selecting point shape type; see ggplot2 manual for the number meaning.
+		#' @param point_shape default 22; the number for selecting point shape type; see \code{ggplot2} manual for the number meaning.
 		#' @param point_size default 3; the point size.
 		#' @return ggplot.
 		#' @examples
@@ -176,7 +176,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			g
 		},
 		#' @description
-		#' Calculate betaMPD (mean pairwise distance). Same with comdist in picante package, but faster.
+		#' Calculate betaMPD (mean pairwise distance). Same with \code{picante::comdist} function, but faster.
 		#'
 		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
 		#' @return res_betampd in object.
@@ -195,15 +195,15 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_betampd ...')
 		},
 		#' @description
-		#' Calculate betaMNTD (mean nearest taxon distance). Same with comdistnt in picante package, but faster.
+		#' Calculate betaMNTD (mean nearest taxon distance). Same with \code{picante::comdistnt} package, but faster.
 		#'
 		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
-		#' @param exclude.conspecifics default FALSE; see exclude.conspecifics parameter in comdistnt function of picante package.
-		#' @param use_iCAMP default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
+		#' @param exclude.conspecifics default FALSE; see \code{exclude.conspecifics} parameter in \code{comdistnt} function of \code{picante} package.
+		#' @param use_iCAMP default FALSE; whether use \code{bmntd.big} function of \code{iCAMP} package to calculate betaMNTD. 
 		#' 	  This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.
-		#' @param use_iCAMP_force default FALSE; whether use bmntd.big function of iCAMP package automatically when the feature number is large.
+		#' @param use_iCAMP_force default FALSE; whether use \code{bmntd.big} function of \code{iCAMP} package automatically when the feature number is large.
 		#' @param iCAMP_tempdir default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.
-		#' @param ... paremeters pass to iCAMP::pdist.big function.
+		#' @param ... paremeters pass to \code{iCAMP::pdist.big} function.
 		#' @return res_betamntd in object.
 		#' @examples
 		#' \donttest{
@@ -254,9 +254,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param null.model default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
-		#' 	  "independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.
+		#' 	  "independentswap"and "trialswap"; see \code{null.model} parameter of \code{ses.mntd} function in \code{picante} package for the algorithm details.
 		#' @param abundance.weighted default TRUE; whether use weighted abundance.
-		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.
+		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of \code{picante::randomizeMatrix} function.
 		#' @return res_ses_betampd in object.
 		#' @examples
 		#' \donttest{
@@ -300,15 +300,15 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param runs default 1000; simulation number of null model.
 		#' @param null.model default "taxa.labels"; The available options include "taxa.labels", "richness", "frequency", "sample.pool", "phylogeny.pool", 
-		#' 	  "independentswap"and "trialswap"; see null.model parameter of ses.mntd function in picante package for the algorithm details.
+		#' 	  "independentswap"and "trialswap"; see \code{null.model} parameter of \code{ses.mntd} function in \code{picante} package for the algorithm details.
 		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
-		#' @param exclude.conspecifics default FALSE; see comdistnt in picante package.
+		#' @param exclude.conspecifics default FALSE; see \code{comdistnt} in picante package.
 		#' @param use_iCAMP default FALSE; whether use bmntd.big function of iCAMP package to calculate betaMNTD. 
 		#' 	  This method can store the phylogenetic distance matrix on the disk to lower the memory spending and perform the calculation parallelly.
 		#' @param use_iCAMP_force default FALSE; whether to make use_iCAMP to be TRUE when the feature number is large.
 		#' @param iCAMP_tempdir default NULL; the temporary directory used to place the large tree file; If NULL; use the system user tempdir.
 		#' @param nworker default 2; the CPU thread number.
-		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of picante::randomizeMatrix function.
+		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of \code{picante::randomizeMatrix} function.
 		#' @return res_ses_betamntd in object.
 		#' @examples
 		#' \donttest{
@@ -402,7 +402,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param verbose default TRUE; whether show the calculation process message.
-		#' @param null.model default "independentswap"; see more available options in randomizeMatrix function of picante package.
+		#' @param null.model default "independentswap"; see more available options in \code{randomizeMatrix} function of \code{picante} package.
 		#' @return res_rcbray in object.
 		#' @examples
 		#' \donttest{
@@ -456,7 +456,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Calculates Nearest Relative Index (NRI), equivalent to -1 times the standardized effect size of MPD.
 		#'
-		#' @param null.model default "taxa.labels"; Null model to use; see null.model parameter in ses.mpd function of picante package for available options.
+		#' @param null.model default "taxa.labels"; Null model to use; see \code{null.model} parameter in \code{ses.mpd} function of \code{picante} package for available options.
 		#' @param abundance.weighted default FALSE; Should mean nearest relative distances for each species be weighted by species abundance?
 		#' @param runs default 999; Number of randomizations.
 		#' @param ... paremeters pass to ses.mpd function in picante package.
@@ -480,10 +480,10 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Calculates Nearest Taxon Index (NTI), equivalent to -1 times the standardized effect size of MNTD.
 		#'
-		#' @param null.model default "taxa.labels"; Null model to use; see null.model parameter in ses.mntd function of picante package for available options.
+		#' @param null.model default "taxa.labels"; Null model to use; see \code{null.model} parameter in \code{ses.mntd} function of \code{picante} package for available options.
 		#' @param abundance.weighted default FALSE; Should mean nearest taxon distances for each species be weighted by species abundance?
 		#' @param runs default 999; Number of randomizations.
-		#' @param ... paremeters pass to ses.mntd function in picante package.
+		#' @param ... paremeters pass to \code{ses.mntd} function in \code{picante} package.
 		#' @return res_NTI in object, equivalent to -1 times ses.mntd.
 		#' @examples
 		#' \donttest{
@@ -502,11 +502,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_NTI ...')
 		},
 		#' @description
-		#' Calculates the (normalised) mean number of checkerboard combinations (C-score) using C.score function in bipartite package.
+		#' Calculates the (normalised) mean number of checkerboard combinations (C-score) using \code{C.score} function in \code{bipartite} package.
 		#'
 		#' @param by_group default NULL; one column name or number in sample_table; calculate C-score for different groups separately.
-		#' @param ... paremeters pass to C.score function in bipartite package.
-		#' @return results directly.
+		#' @param ... paremeters pass to \code{bipartite::C.score} function.
+		#' @return vector.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_Cscore()
@@ -525,11 +525,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 		},
 		#' @description
-		#' Calculate normalized stochasticity ratio (NST) based on the tNST function of NST package.
+		#' Calculate normalized stochasticity ratio (NST) based on the \code{tNST} function of \code{NST} package.
 		#'
 		#' @param group a colname of sample_table; 
 		#' 	  the function can select the data from sample_table to generate a one-column (n x 1) matrix and provide it to the group parameter of tNST function. 
-		#' @param ... paremeters pass to tNST function of NST package; see the documents of tNST function for more details.
+		#' @param ... paremeters pass to \code{NST::tNST} function; see the documents of \code{tNST} function for more details.
 		#' @return .
 		#' @examples
 		#' \dontrun{
@@ -545,7 +545,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @description
 		#' Test the significance of NST difference between each pair of groups.
 		#'
-		#' @param method default "nst.boot"; "nst.boot" or "nst.panova"; see NST::nst.boot function or NST::nst.panova function for the details.
+		#' @param method default "nst.boot"; "nst.boot" or "nst.panova"; see \code{NST::nst.boot} function or \code{NST::nst.panova} function for the details.
 		#' @param ... paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"
 		#' @return .
 		#' @examples
