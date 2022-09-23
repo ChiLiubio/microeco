@@ -714,8 +714,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# diff_data %<>% .[.$P.adj < 0.05, ]
 				}
 			}
-
-			if(!is.null(select_group)){
+			if(is.null(select_group)){
+				if(method == "ANCOMBC"){
+					if(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1){
+						if(any(sapply(gregexpr(" - ", t1$res_diff$Comparison), length) == 1)){
+							message("For ANCOMBC, both global and paired test are found. No select_group provided, use the global test result ...")
+							diff_data %<>% .[.$Comparison == diff_data$Comparison[1], ]
+						}
+					}
+				}
+			}else{
 				if(length(select_group) > 1){
 					stop("The select_group parameter should only have one element! Please check the input!")
 				}
@@ -794,8 +802,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					y_start_use <- max((abund_data$Mean + abund_data$SD)) * y_start
 				}
 				all_taxa <- levels(abund_data$Taxa)
-
-				if(length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW")){
+				
+				# for groups > 3, show the global comparision
+				if((length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW", "ALDEx2_kw")) | 
+					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ANCOMBC")){
 					add_letter_text <- diff_data[match(all_taxa, diff_data$Taxa), add_sig_label]
 					textdf <- data.frame(
 						x = all_taxa, 
@@ -804,9 +814,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stringsAsFactors = FALSE
 						)
 				}else{
+					# show all the comparisions
 					if(method != "anova"){
 						if(any(grepl("\\s-\\s", x_axis_order))){
-							stop("The group names have ' - ' characters, which can impede the group recognition and mapping in the plot! Please rename groups and rerun!")
+							stop("The group names have ' - ' characters, which can hinder the group recognition and mapping in the plot! Please rename groups and rerun!")
 						}
 						annotations <- c()
 						x_min <- c()
@@ -871,7 +882,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
 			}
 			if(add_sig){
-				if(length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW")){
+				if((length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW", "ALDEx2_kw")) | 
+					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ANCOMBC")){
 					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, inherit.aes = FALSE)
 				}else{
 					if(method != "anova"){
