@@ -16,7 +16,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param cor_method default NULL; NULL or one of "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso" and "ccrepe";
 		#'   All the methods refered to \code{NetCoMi} package are performed based on \code{netConstruct} function of \code{NetCoMi} package and require
-		#'   \code{NetCoMi} installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
+		#'   \code{NetCoMi} to be installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 		#'   For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
 		#'   \describe{
 		#'     \item{\strong{NULL}}{NULL denotes non-correlation network, i.e. do not use correlation-based network. 
@@ -27,7 +27,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'       \code{use_NetCoMi_pearson_spearman = TRUE} invoke \code{netConstruct} function of \code{NetCoMi} package}
 		#'     \item{\strong{'spearman'}}{Spearman correlation; other details are same with the 'pearson' option}
 		#'     \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on \code{WGCNA::bicor} function; 
-		#'       require \code{WGCNA} and \code{NetCoMi} packages installed}
+		#'       require \code{WGCNA} and \code{NetCoMi} packages to be installed}
 		#'     \item{\strong{'sparcc'}}{SparCC algorithm (Friedman & Alm, PLoS Comp Biol, 2012, <doi:10.1371/journal.pcbi.1002687>);
 		#'     	 use NetCoMi package when \code{use_sparcc_method = "NetCoMi"}; use \code{SpiecEasi} package when \code{use_sparcc_method = "SpiecEasi"} 
 		#'     	 and require \code{SpiecEasi} to be installed from Github
@@ -37,12 +37,13 @@ trans_network <- R6Class(classname = "trans_network",
 		#'     \item{\strong{'ccrepe'}}{Calculates compositionality-corrected p-values and q-values for compositional data 
 		#'     	 using an arbitrary distance metric based on \code{NetCoMi::netConstruct} function; also see \code{NetCoMi::ccrepe} function}
 		#'   }
-		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when cor_method = "pearson" or "spearman".
-		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
+		#' @param use_WGCNA_pearson_spearman default FALSE; whether use WGCNA package to calculate correlation when \code{cor_method} = "pearson" or "spearman".
+		#' @param use_NetCoMi_pearson_spearman default FALSE; whether use NetCoMi package to calculate correlation when \code{cor_method} = "pearson" or "spearman".
 		#'   The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.
-		#' @param use_sparcc_method default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when \code{cor_method = "sparcc"}.
+		#' @param use_sparcc_method default \code{c("NetCoMi", "SpiecEasi")[1]}; 
+		#'   use \code{NetCoMi} package or \code{SpiecEasi} package to perform SparCC when \code{cor_method = "sparcc"}.
 		#' @param taxa_level default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
-		#' 	  other available options should be one of the colnames of microtable$tax_table.
+		#' 	  other available options should be one of the colnames of \code{tax_table} of input dataset.
 		#' @param filter_thres default 0; the relative abundance threshold.
 		#' @param nThreads default 1; the CPU thread number; available when \code{use_WGCNA_pearson_spearman = TRUE} or \code{use_sparcc_method = "SpiecEasi"}.
 		#' @param SparCC_simu_num default 100; SparCC simulation number for bootstrap when \code{use_sparcc_method = "SpiecEasi"}.
@@ -51,8 +52,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param add_data default NULL; provide environmental table additionally instead of \code{env_cols} parameter; rownames must be sample names.
 		#' @param ... parameters pass to \code{NetCoMi::netConstruct} for other operations, such as zero handling and/or data normalization 
 		#' 	 when cor_method and other parameters refer to \code{NetCoMi} package. 
-		#' @return \code{res_cor_p} list; include the correlation (association) matrix and p value matrix. Note that when cor_method and other parameters refer to \code{NetCoMi} package,
-		#'   the p value table are all zero as the significant associations have been selected.
+		#' @return \code{res_cor_p} list with the correlation (association) matrix and p value matrix. Note that when \code{cor_method} and other parameters
+		#'    refer to \code{NetCoMi} package, the p value table are all zero as the significant associations have been selected.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -76,31 +77,26 @@ trans_network <- R6Class(classname = "trans_network",
 			add_data = NULL,
 			...
 			){
-			#cor_method <- match.arg(cor_method)
-			dataset1 <- clone(dataset)
+			use_dataset <- clone(dataset)
 			if(!is.null(env_cols)){
-				env_data <- dataset1$sample_table[, env_cols, drop = FALSE]
+				env_data <- use_dataset$sample_table[, env_cols, drop = FALSE]
 			}
 			if(!is.null(add_data)){
-				env_data <- add_data[rownames(add_data) %in% rownames(dataset1$sample_table), ]
+				env_data <- add_data[rownames(add_data) %in% rownames(use_dataset$sample_table), ]
 			}
 			if(!is.null(env_cols) | !is.null(add_data)){
-				dataset1$sample_table %<>% .[rownames(.) %in% rownames(env_data), ]
-				dataset1$tidy_dataset(main_data = TRUE)
-				env_data %<>% .[rownames(dataset1$sample_table), ] %>%
+				use_dataset$sample_table %<>% .[rownames(.) %in% rownames(env_data), ]
+				use_dataset$tidy_dataset(main_data = TRUE)
+				env_data %<>% .[rownames(use_dataset$sample_table), ] %>%
 					dropallfactors(unfac2num = TRUE)
 				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 				env_data[] <- lapply(env_data, as.numeric)
 				self$data_env <- env_data
 			}
 			if(taxa_level != "OTU"){
-				dataset1 <- dataset1$merge_taxa(taxa = taxa_level)
+				use_dataset <- use_dataset$merge_taxa(taxa = taxa_level)
 			}
-			# transform each object
-			self$sample_table <- dataset1$sample_table
-			# store taxonomic table for the following analysis
-			self$tax_table <- dataset1$tax_table
-			use_abund <- dataset1$otu_table %>% 
+			use_abund <- use_dataset$otu_table %>% 
 				{.[apply(., 1, sum)/sum(.) > filter_thres, ]}
 			# check filtered data
 			if(nrow(use_abund) == 0){
@@ -113,14 +109,12 @@ trans_network <- R6Class(classname = "trans_network",
 					use_abund %<>% t %>% as.data.frame
 				}
 			}
-			
-			if( (!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
+			if((!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
 				use_abund <- cbind.data.frame(use_abund, env_data)
 			}
 
 			if(!is.null(cor_method)){
 				cor_method <- match.arg(cor_method, c("bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"))
-				
 				if(cor_method == "bray"){
 					tmp <- vegan::vegdist(t(use_abund), method = "bray") %>% as.matrix
 					tmp <- 1 - tmp
@@ -171,12 +165,14 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				self$res_cor_p <- NULL
 			}
-			
+			self$sample_table <- use_dataset$sample_table
+			# store taxonomic table for the following analysis
+			self$tax_table <- use_dataset$tax_table
 			self$data_abund <- use_abund
 			self$taxa_level <- taxa_level
 		},
 		#' @description
-		#' Calculate network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
+		#' Construct network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
 		#'
 		#' @param network_method default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; The option details: 
 		#'   \describe{
@@ -514,7 +510,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
 		#'
 		#' @param filepath default "network.gexf"; file path to save the network.
-		#' @return None.
+		#' @return None
 		#' @examples
 		#' \dontrun{
 		#' t1$save_network(filepath = "network.gexf")
@@ -530,7 +526,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Calculate network properties.
 		#'
-		#' @return res_network_attr stored in object.
+		#' @return \code{res_network_attr} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_network_attr()
@@ -548,7 +544,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Authors: Chi Liu, Umer Zeeshan Ijaz
 		#'
 		#' @param node_roles default TRUE; whether calculate node roles, i.e. Module hubs, Network hubs, Connectors and Peripherals <doi:10.1016/j.geoderma.2022.115866>.
-		#' @return res_node_table in object; Abundance expressed as a percentage; z denotes within-module connectivity;
+		#' @return \code{res_node_table} in object; Abundance expressed as a percentage; z denotes within-module connectivity;
 		#'   p denotes among-module connectivity.
 		#' @examples
 		#' \donttest{
@@ -646,21 +642,21 @@ trans_network <- R6Class(classname = "trans_network",
 		#'     \item{\strong{'ggraph'}}{call \code{ggraph} function in \code{ggraph} package for a static network}
 		#'     \item{\strong{'networkD3'}}{use forceNetwork function in \code{networkD3} package for a dynamic network; see forceNetwork function for the parameters}
 		#'   }
-		#' @param node_label default "name"; node label shown in the plot for method = "ggraph" or method = "networkD3"; 
+		#' @param node_label default "name"; node label shown in the plot for \code{method = "ggraph"} or \code{method = "networkD3"}; 
 		#'   Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
 		#'   User can select other column names in res_node_table.
-		#' @param node_color default NULL; node color assignment for method = "ggraph" or method = "networkD3"; 
-		#'   Select a column name of object$res_node_table, such as "module".
-		#' @param ggraph_layout default "fr"; for method = "ggraph"; see layout parameter of create_layout function in ggraph package.
-		#' @param ggraph_node_size default 2; for method = "ggraph"; the node size.
-		#' @param ggraph_text_color default NULL; for method = "ggraph"; a column name of object$res_node_table;
+		#' @param node_color default NULL; node color assignment for \code{method = "ggraph"} or \code{method = "networkD3"}; 
+		#'   Select a column name of \code{object$res_node_table}, such as "module".
+		#' @param ggraph_layout default "fr"; for \code{method = "ggraph"}; see \code{layout} parameter of \code{create_layout} function in \code{ggraph} package.
+		#' @param ggraph_node_size default 2; for \code{method = "ggraph"}; the node size.
+		#' @param ggraph_text_color default NULL; for \code{method = "ggraph"}; a column name of object$res_node_table;
 		#'   User can select other column names or change the content of object$res_node_table.
-		#' @param ggraph_text_size default 3; for method = "ggraph"; the node label text size.
-		#' @param networkD3_node_legend default TRUE; used for method = "networkD3"; logical value to enable node colour legends;
+		#' @param ggraph_text_size default 3; for \code{method = "ggraph"}; the node label text size.
+		#' @param networkD3_node_legend default TRUE; used for \code{method = "networkD3"}; logical value to enable node colour legends;
 		#'   Please see the legend parameter in networkD3::forceNetwork function.
-		#' @param networkD3_zoom default TRUE; used for method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
+		#' @param networkD3_zoom default TRUE; used for \code{method = "networkD3"}; logical value to enable (TRUE) or disable (FALSE) zooming;
 		#'   Please see the zoom parameter in networkD3::forceNetwork function.
-		#' @param ... parameters passed to plot.igraph function when method = "igraph" or forceNetwork function when method = "networkD3".
+		#' @param ... parameters passed to \code{plot.igraph} function when \code{method = "igraph"} or forceNetwork function when \code{method = "networkD3"}.
 		#' @return network plot.
 		#' @examples
 		#' \donttest{
@@ -921,8 +917,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' If the distribution follows power law, then fit degrees to power law distribution and return the parameters.
 		#'
 		#' @param ... parameters pass to fit_power_law function in igraph package.
-		#' @return res_powerlaw_p and res_powerlaw_fit; see bootstrap_p function in poweRlaw package for the bootstrapping p value details;
-		#'   see fit_power_law function in igraph package for the power law fit return details.
+		#' @return \code{res_powerlaw_p} and \code{res_powerlaw_fit}; see \code{poweRlaw::bootstrap_p} function for the bootstrapping p value details;
+		#'   see \code{igraph::fit_power_law} function for the power law fit return details.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_powerlaw()
@@ -958,7 +954,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' This is very useful to fast see how many nodes are connected between different taxa or within the taxa.
 		#'
 		#' @param taxa_level default "Phylum"; taxonomic rank.
-		#' @return res_sum_links_pos and res_sum_links_neg in object.
+		#' @return \code{res_sum_links_pos} and \code{res_sum_links_neg} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_sum_links(taxa_level = "Phylum")
@@ -998,7 +994,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param plot_pos default TRUE; If TRUE, plot the summed positive linkages; If FALSE, plot the summed negative linkages.
 		#' @param plot_num default NULL; number of taxa presented in the plot.
 		#' @param color_values default NULL; If not provided, use \code{microeco::color_palette_20} or \code{randomcoloR} package to generate random colors (for taxa > 20).
-		#' @param ... parameters pass to chorddiag::chorddiag function.
+		#' @param ... parameters pass to \code{chorddiag::chorddiag} function.
 		#' @return chorddiag plot
 		#' @examples
 		#' \dontrun{

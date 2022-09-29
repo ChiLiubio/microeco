@@ -212,7 +212,7 @@ Create the \code{trans_network} object, store the important intermediate data
 
 \item{\code{cor_method}}{default NULL; NULL or one of "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso" and "ccrepe";
 All the methods refered to \code{NetCoMi} package are performed based on \code{netConstruct} function of \code{NetCoMi} package and require
-\code{NetCoMi} installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
+\code{NetCoMi} to be installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
 \describe{
   \item{\strong{NULL}}{NULL denotes non-correlation network, i.e. do not use correlation-based network. 
@@ -223,7 +223,7 @@ For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi:
     \code{use_NetCoMi_pearson_spearman = TRUE} invoke \code{netConstruct} function of \code{NetCoMi} package}
   \item{\strong{'spearman'}}{Spearman correlation; other details are same with the 'pearson' option}
   \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on \code{WGCNA::bicor} function; 
-    require \code{WGCNA} and \code{NetCoMi} packages installed}
+    require \code{WGCNA} and \code{NetCoMi} packages to be installed}
   \item{\strong{'sparcc'}}{SparCC algorithm (Friedman & Alm, PLoS Comp Biol, 2012, <doi:10.1371/journal.pcbi.1002687>);
        use NetCoMi package when \code{use_sparcc_method = "NetCoMi"}; use \code{SpiecEasi} package when \code{use_sparcc_method = "SpiecEasi"} 
        and require \code{SpiecEasi} to be installed from Github
@@ -234,15 +234,16 @@ For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi:
        using an arbitrary distance metric based on \code{NetCoMi::netConstruct} function; also see \code{NetCoMi::ccrepe} function}
 }}
 
-\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when cor_method = "pearson" or "spearman".}
+\item{\code{use_WGCNA_pearson_spearman}}{default FALSE; whether use WGCNA package to calculate correlation when \code{cor_method} = "pearson" or "spearman".}
 
-\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when cor_method = "pearson" or "spearman".
+\item{\code{use_NetCoMi_pearson_spearman}}{default FALSE; whether use NetCoMi package to calculate correlation when \code{cor_method} = "pearson" or "spearman".
 The important difference between NetCoMi and others is the features of zero handling and data normalization; See <doi: 10.1093/bib/bbaa290>.}
 
-\item{\code{use_sparcc_method}}{default c("NetCoMi", "SpiecEasi")[1]; use NetCoMi package or SpiecEasi package to perform SparCC when \code{cor_method = "sparcc"}.}
+\item{\code{use_sparcc_method}}{default \code{c("NetCoMi", "SpiecEasi")[1]}; 
+use \code{NetCoMi} package or \code{SpiecEasi} package to perform SparCC when \code{cor_method = "sparcc"}.}
 
 \item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
-other available options should be one of the colnames of microtable$tax_table.}
+other available options should be one of the colnames of \code{tax_table} of input dataset.}
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
 
@@ -261,8 +262,8 @@ when cor_method and other parameters refer to \code{NetCoMi} package.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_cor_p} list; include the correlation (association) matrix and p value matrix. Note that when cor_method and other parameters refer to \code{NetCoMi} package,
-  the p value table are all zero as the significant associations have been selected.
+\code{res_cor_p} list with the correlation (association) matrix and p value matrix. Note that when \code{cor_method} and other parameters
+   refer to \code{NetCoMi} package, the p value table are all zero as the significant associations have been selected.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -284,7 +285,7 @@ t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 \if{html}{\out{<a id="method-trans_network-cal_network"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
-Calculate network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
+Construct network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
   network_method = c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic")[1],
@@ -466,7 +467,7 @@ Save network as gexf style, which can be opened by Gephi (\href{https://gephi.or
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-None.
+None
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -489,7 +490,7 @@ Calculate network properties.
 }
 
 \subsection{Returns}{
-res_network_attr stored in object.
+\code{res_network_attr} stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -522,7 +523,7 @@ Authors: Chi Liu, Umer Zeeshan Ijaz
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_node_table in object; Abundance expressed as a percentage; z denotes within-module connectivity;
+\code{res_node_table} in object; Abundance expressed as a percentage; z denotes within-module connectivity;
   p denotes among-module connectivity.
 }
 \subsection{Examples}{
@@ -621,29 +622,29 @@ the interested nodes and edges in a large network. In contrast, the igraph and g
   \item{\strong{'networkD3'}}{use forceNetwork function in \code{networkD3} package for a dynamic network; see forceNetwork function for the parameters}
 }}
 
-\item{\code{node_label}}{default "name"; node label shown in the plot for method = "ggraph" or method = "networkD3"; 
+\item{\code{node_label}}{default "name"; node label shown in the plot for \code{method = "ggraph"} or \code{method = "networkD3"}; 
 Please see the column names of object$res_node_table, which is the returned table of function object$get_node_table;
 User can select other column names in res_node_table.}
 
-\item{\code{node_color}}{default NULL; node color assignment for method = "ggraph" or method = "networkD3"; 
-Select a column name of object$res_node_table, such as "module".}
+\item{\code{node_color}}{default NULL; node color assignment for \code{method = "ggraph"} or \code{method = "networkD3"}; 
+Select a column name of \code{object$res_node_table}, such as "module".}
 
-\item{\code{ggraph_layout}}{default "fr"; for method = "ggraph"; see layout parameter of create_layout function in ggraph package.}
+\item{\code{ggraph_layout}}{default "fr"; for \code{method = "ggraph"}; see \code{layout} parameter of \code{create_layout} function in \code{ggraph} package.}
 
-\item{\code{ggraph_node_size}}{default 2; for method = "ggraph"; the node size.}
+\item{\code{ggraph_node_size}}{default 2; for \code{method = "ggraph"}; the node size.}
 
-\item{\code{ggraph_text_color}}{default NULL; for method = "ggraph"; a column name of object$res_node_table;
+\item{\code{ggraph_text_color}}{default NULL; for \code{method = "ggraph"}; a column name of object$res_node_table;
 User can select other column names or change the content of object$res_node_table.}
 
-\item{\code{ggraph_text_size}}{default 3; for method = "ggraph"; the node label text size.}
+\item{\code{ggraph_text_size}}{default 3; for \code{method = "ggraph"}; the node label text size.}
 
-\item{\code{networkD3_node_legend}}{default TRUE; used for method = "networkD3"; logical value to enable node colour legends;
+\item{\code{networkD3_node_legend}}{default TRUE; used for \code{method = "networkD3"}; logical value to enable node colour legends;
 Please see the legend parameter in networkD3::forceNetwork function.}
 
-\item{\code{networkD3_zoom}}{default TRUE; used for method = "networkD3"; logical value to enable (TRUE) or disable (FALSE) zooming;
+\item{\code{networkD3_zoom}}{default TRUE; used for \code{method = "networkD3"}; logical value to enable (TRUE) or disable (FALSE) zooming;
 Please see the zoom parameter in networkD3::forceNetwork function.}
 
-\item{\code{...}}{parameters passed to plot.igraph function when method = "igraph" or forceNetwork function when method = "networkD3".}
+\item{\code{...}}{parameters passed to \code{plot.igraph} function when \code{method = "igraph"} or forceNetwork function when \code{method = "networkD3"}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -829,8 +830,8 @@ If the distribution follows power law, then fit degrees to power law distributio
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_powerlaw_p and res_powerlaw_fit; see bootstrap_p function in poweRlaw package for the bootstrapping p value details;
-  see fit_power_law function in igraph package for the power law fit return details.
+\code{res_powerlaw_p} and \code{res_powerlaw_fit}; see \code{poweRlaw::bootstrap_p} function for the bootstrapping p value details;
+  see \code{igraph::fit_power_law} function for the power law fit return details.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -861,7 +862,7 @@ This is very useful to fast see how many nodes are connected between different t
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_sum_links_pos and res_sum_links_neg in object.
+\code{res_sum_links_pos} and \code{res_sum_links_neg} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -897,7 +898,7 @@ Plot the summed linkages among taxa using chorddiag package <https://github.com/
 
 \item{\code{color_values}}{default NULL; If not provided, use \code{microeco::color_palette_20} or \code{randomcoloR} package to generate random colors (for taxa > 20).}
 
-\item{\code{...}}{parameters pass to chorddiag::chorddiag function.}
+\item{\code{...}}{parameters pass to \code{chorddiag::chorddiag} function.}
 }
 \if{html}{\out{</div>}}
 }
