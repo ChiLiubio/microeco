@@ -51,7 +51,7 @@ t1$plot_alpha(measure = "Shannon", group = "Group")
 \if{latex}{\out{\hypertarget{method-trans_alpha-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_alpha$new(dataset = NULL, group = NULL, order_x = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_alpha$new(dataset = NULL, group = NULL, by_group = NULL, order_x = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -60,6 +60,8 @@ t1$plot_alpha(measure = "Shannon", group = "Group")
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
 \item{\code{group}}{default NULL; the sample column used for the statistics; If provided, can return \code{data_stat}.}
+
+\item{\code{by_group}}{default NULL; perform the differential test among groups within each by_group.}
 
 \item{\code{order_x}}{default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.}
 }

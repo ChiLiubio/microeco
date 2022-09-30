@@ -9,6 +9,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param group default NULL; the sample column used for the statistics; If provided, can return \code{data_stat}.
+		#' @param by_group default NULL; perform the differential test among groups within each by_group.
 		#' @param order_x default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.
 		#' @return \code{data_alpha} and \code{data_stat} stored in the object.
 		#' @examples
@@ -16,14 +17,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' data(dataset)
 		#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 		#' }
-		initialize = function(dataset = NULL, group = NULL, order_x = NULL) {
-			self$group <- group
+		initialize = function(dataset = NULL, group = NULL, by_group = NULL, order_x = NULL) {
 			if(is.null(dataset)){
 				message("Parameter dataset not provided. Please run the functions with your other customized data!")
 				self$data_alpha <- NULL
 			}else{
 				if(is.null(dataset$alpha_diversity)){
-					message("Alpha diversity not found. Calculate it automatically ...")
+					message("The alpha_diversity in dataset not found! Calculate it automatically ...")
 					dataset$cal_alphadiv()
 				}
 				data_alpha <- dataset$alpha_diversity %>% 
@@ -43,16 +43,25 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				self$data_alpha <- data_alpha
 				message('The transformed diversity data is stored in object$data_alpha ...')
 			}
-
-			if(!is.null(group)){
+			if(! is.null(by_group)){
+				if(! by_group %in% colnames(data_alpha)){
+					stop("Provided by_group: ", by_group, " is not found in dataset$sample_table!")
+				}
+			}
+			if(! is.null(group)){
 				if(is.null(dataset)){
 					stop("Parameter dataset not provided, but group is provided!")
 				}
-				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(self$group, "Measure"))
+				if(! group %in% colnames(data_alpha)){
+					stop("Provided group: ", group, " is not found in dataset$sample_table!")
+				}
+				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(group, "Measure"))
 				message('The group statistics are stored in object$data_stat ...')
 			}else{
 				self$data_stat <- NULL
 			}
+			self$group <- group
+			self$by_group <- by_group
 		},
 		#' @description
 		#' Test the difference of alpha diversity across groups.
@@ -83,132 +92,130 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' }
 		cal_diff = function(method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
 			group <- self$group
+			# 'by_group' for test inside each by_group instead of all groups in 'group'
+			by_group <- self$by_group
 			data_alpha <- self$data_alpha
 			if(is.null(measure)){
 				measure <- unique(as.character(data_alpha$Measure))
 			}else{
 				if(! all(measure %in% as.character(data_alpha$Measure))){
-					stop("One or more measures input not in the data_alpha! Please check the input!")
+					stop("One or more measures input not in the object$data_alpha! Please check the input!")
 				}
 			}
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova"))
-			if(method %in% c("wilcox", "t.test") & length(unique(as.character(data_alpha[, group]))) > 5){
-				stop("There are too many groups to do paired comparisons! please use method = 'KW' or 'KW_dunn' or 'anova' !")
+			if(is.null(by_group)){
+				if(method %in% c("wilcox", "t.test") & length(unique(as.character(data_alpha[, group]))) > 10){
+					stop("There are too many groups to do paired comparisons! please use method = 'KW' or 'KW_dunn' or 'anova' !")
+				}
 			}
 			if(!is.null(anova_set)){
 				method <- "anova"
 			}
+			if(!is.null(by_group)){
+				all_bygroups <- as.character(data_alpha[, by_group])
+				unique_bygroups <- unique(all_bygroups)
+			}
 			if(method %in% c("KW", "wilcox", "t.test")){
-				comnames <- c()
-				p_value <- c()
-				measure_use <- c()
-				test_method <- c()
-				max_group <- c()
+				res_list <- list()
+				res_list$comnames <- c()
+				res_list$p_value <- c()
+				res_list$measure_use <- c()
+				res_list$test_method <- c()
+				res_list$max_group <- c()
+				res_list$group_by <- c()
 				for(k in measure){
-					div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
-					groupvec <- as.character(div_table[, group])
-					use_comp_group_num <- unique(c(2, length(unique(groupvec))))
-					for(i in use_comp_group_num){
-						all_name <- combn(unique(groupvec), i)
-						use_method <- switch(method, KW = "Kruskal-Wallis Rank Sum Test", wilcox = "Wilcoxon Rank Sum Test", t.test= "t.test")
-						for(j in 1:ncol(all_name)){
-							table_compare <- div_table[groupvec %in% as.character(all_name[, j]), ]
-							table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
-							formu <- reformulate(group, "Value")
-							if(i == 2){
-								if(method == "t.test"){
-									res1 <- t.test(formu, data = table_compare, ...)
-									max_group_select <- tapply(table_compare$Value, table_compare[, group], mean) %>% {.[which.max(.)]} %>% names
-								}else{
-									if(method == "wilcox"){
-										res1 <- suppressWarnings(wilcox.test(formu, data = table_compare, ...))
-										max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
-									}else{
-										if(method == "KW" & length(use_comp_group_num) == 1){
-											res1 <- kruskal.test(formu, data = table_compare, ...)
-											max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
-										}else{
-											next
-										}
-									}
-								}
-							}else{
-								if(method == "KW"){
-									res1 <- kruskal.test(formu, data = table_compare, ...)
-									max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
-								}else{
-									next
-								}
+					if(is.null(by_group)){
+						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
+						res_list <- private$kwwitt_test(method = method, input_table = div_table, group = group, res_list = res_list, measure = k, ...)
+					}else{
+						for(each_group in unique_bygroups){
+							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
+							if(length(unique(as.character(div_table[, group]))) < 2){
+								next
 							}
-							res2 <- res1$p.value
-							comnames %<>% c(., paste0(as.character(all_name[,j]), collapse = " - "))
-							p_value %<>% c(., res2)
-							measure_use %<>% c(., k)
-							test_method %<>% c(., use_method)
-							max_group %<>% c(., max_group_select)
+							res_list <- private$kwwitt_test(method = method, input_table = div_table, group = group, res_list = res_list, 
+								group_by = each_group, measure = k, ...)
 						}
 					}
 				}
 				if(is.null(p_adjust_method)){
-					p_value_adjust <- p_value
+					p_value_adjust <- res_list$p_value
 				}else{
-					p_value_adjust <- p.adjust(p_value, method = p_adjust_method)
+					p_value_adjust <- p.adjust(res_list$p_value, method = p_adjust_method)
 				}
-				compare_result <- data.frame(comnames, measure_use, test_method, max_group, p_value, p_value_adjust)
-				colnames(compare_result) <- c("Comparison", "Measure", "Test_method", "Group", "P.unadj", "P.adj")
+				if(is.null(by_group)){
+					compare_result <- data.frame(res_list$comnames, res_list$measure_use, res_list$test_method, res_list$max_group, res_list$p_value, p_value_adjust)
+					colnames(compare_result) <- c("Comparison", "Measure", "Test_method", "Group", "P.unadj", "P.adj")
+				}else{
+					compare_result <- data.frame(res_list$comnames, res_list$group_by, res_list$measure_use, res_list$test_method, 
+						res_list$max_group, res_list$p_value, p_value_adjust)
+					colnames(compare_result) <- c("Comparison", "by_group", "Measure", "Test_method", "Group", "P.unadj", "P.adj")
+				}
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 			}
 			if(method == "KW_dunn"){
-				if(length(unique(data_alpha[, group])) == 2){
-					stop("There are only 2 groups. Please select other method instead of KW_dunn !")
+				if(is.null(by_group)){
+					if(length(unique(data_alpha[, group])) == 2){
+						stop("There are only 2 groups. Please select other method instead of KW_dunn !")
+					}
 				}
-				use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
 				compare_result <- data.frame()
 				for(k in measure){
-					div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
-					table_compare <- div_table
-					table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
-					formu <- reformulate(group, "Value")
-					dunnTest_raw <- FSA::dunnTest(formu, data = table_compare, ...)
-					max_group <- lapply(dunnTest_raw$res$Comparison, function(x){
-						group_select <- unlist(strsplit(x, split = " - "))
-						table_compare_select <- table_compare[as.character(table_compare[, group]) %in% group_select, ]
-						tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
-					}) %>% unlist
-					dunnTest_res <- data.frame(Measure = k, Test_method = use_method, Group = max_group, dunnTest_raw$res)
-					compare_result %<>% rbind(., dunnTest_res)
+					if(is.null(by_group)){
+						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
+						res_table <- private$kdunn_test(input_table = div_table, group = group, measure = k, ...)
+						compare_result %<>% rbind(., res_table)
+					}else{
+						for(each_group in unique_bygroups){
+							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
+							if(length(unique(as.character(div_table[, group]))) < 3){
+								next
+							}
+							res_table <- private$kdunn_test(input_table = div_table, group = group, group_by = each_group, measure = k, ...)
+							compare_result %<>% rbind(., res_table)
+						}
+					}
 				}
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 			}
 			if(method == "anova"){
-				# library(agricolae)
 				if(is.null(anova_set)){
 					compare_result <- NULL
 				}else{
 					compare_result <- list()
 				}
-				
-				for(i in measure){
-					use_data <- data_alpha[data_alpha$Measure == i, ]
-					if(is.null(anova_set)){
-						model <- aov(reformulate(group, "Value"), use_data)
-						out <- agricolae::duncan.test(model, group, main = i, ...)
-						res2 <- out$groups[, "groups", drop = FALSE]
-						res2$groups <- as.character(res2$groups)
-						res2 <- data.frame(rownames(res2), res2, stringsAsFactors = FALSE, check.names = FALSE)
-						colnames(res2) <- c("name", i)
-						if(is.null(compare_result)){
-							compare_result <- res2
-						} else {
-							compare_result <- dplyr::full_join(compare_result, res2, by = c("name" = "name"))
-						}
-					}else{
-						model <- aov(reformulate(anova_set, "Value"), use_data)
-						compare_result[[i]] <- summary(model)
-					}
-				}
 				if(is.null(anova_set)){
-					compare_result %<>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
+					if(is.null(by_group)){
+						for(k in measure){
+							div_table <- data_alpha[data_alpha$Measure == k, ]
+							compare_result <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = compare_result, ...)
+						}
+						colnames(compare_result)[1] <- "Group"
+					}else{
+						for(each_group in unique_bygroups){
+							test <- data_alpha[all_bygroups == each_group, ]
+							if(length(unique(as.character(test[, group]))) < 2){
+								message("Skip the by_group: ", each_group, " as groups number < 2!")
+								next
+							}
+							tmp_measure <- NULL
+							for(k in measure){
+								# regenerate table for test
+								div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
+								tmp_measure <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = tmp_measure, ...)
+							}
+							if(!is.null(tmp_measure)){
+								tmp_measure <- cbind.data.frame(by_group = each_group, tmp_measure)
+								compare_result %<>% rbind.data.frame(., tmp_measure)
+							}
+						}
+						colnames(compare_result)[2] <- "Group"
+					}
+				}else{
+					for(k in measure){
+						model <- aov(reformulate(anova_set, "Value"), div_table)
+						compare_result[[k]] <- summary(model)
+					}
 				}
 			}
 			self$res_diff <- compare_result
@@ -386,6 +393,89 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			invisible(self)
 		}
 		),
+	private = list(
+		kwwitt_test = function(method = NULL, input_table = NULL, group = NULL, res_list = NULL, group_by = NULL, measure = NULL, ...){
+			groupvec <- as.character(input_table[, group])
+			use_comp_group_num <- unique(c(2, length(unique(groupvec))))
+			for(i in use_comp_group_num){
+				all_name <- combn(unique(groupvec), i)
+				use_method <- switch(method, KW = "Kruskal-Wallis Rank Sum Test", wilcox = "Wilcoxon Rank Sum Test", t.test = "t.test")
+				for(j in 1:ncol(all_name)){
+					table_compare <- input_table[groupvec %in% as.character(all_name[, j]), ]
+					table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
+					formu <- reformulate(group, "Value")
+					if(i == 2){
+						if(method == "t.test"){
+							res1 <- t.test(formu, data = table_compare, ...)
+							max_group_select <- tapply(table_compare$Value, table_compare[, group], mean) %>% {.[which.max(.)]} %>% names
+						}else{
+							if(method == "wilcox"){
+								res1 <- suppressWarnings(wilcox.test(formu, data = table_compare, ...))
+								max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
+							}else{
+								if(method == "KW" & length(use_comp_group_num) == 1){
+									res1 <- kruskal.test(formu, data = table_compare, ...)
+									max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
+								}else{
+									next
+								}
+							}
+						}
+					}else{
+						if(method == "KW"){
+							res1 <- kruskal.test(formu, data = table_compare, ...)
+							max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
+						}else{
+							next
+						}
+					}
+					res2 <- res1$p.value
+					res_list$comnames %<>% c(., paste0(as.character(all_name[,j]), collapse = " - "))
+					res_list$p_value %<>% c(., res2)
+					res_list$measure_use %<>% c(., measure)
+					res_list$test_method %<>% c(., use_method)
+					res_list$max_group %<>% c(., max_group_select)
+					if(is.null(group_by)){
+						res_list$group_by %<>% c(., NA)
+					}else{
+						res_list$group_by %<>% c(., group_by)
+					}
+				}
+			}
+			res_list
+		},
+		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, group_by = NULL, ...){
+			use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
+			input_table[, group] %<>% factor(., levels = unique(as.character(.)))
+			formu <- reformulate(group, "Value")
+			dunnTest_raw <- FSA::dunnTest(formu, data = input_table, ...)
+			max_group <- lapply(dunnTest_raw$res$Comparison, function(x){
+				group_select <- unlist(strsplit(x, split = " - "))
+				table_compare_select <- input_table[as.character(input_table[, group]) %in% group_select, ]
+				tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
+			}) %>% unlist
+			if(is.null(group_by)){
+				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_raw$res)
+			}else{
+				dunnTest_res <- data.frame(Measure = measure, by_group = group_by, Test_method = use_method, Group = max_group, dunnTest_raw$res)
+			}
+			dunnTest_res
+		},
+		anova_test = function(input_table = NULL, group = NULL, measure = NULL, compare_result = NULL, ...){
+			model <- aov(reformulate(group, "Value"), input_table)
+			out <- agricolae::duncan.test(model, group, main = measure, ...)
+			res2 <- out$groups[, "groups", drop = FALSE]
+			res2$groups <- as.character(res2$groups)
+			res2 <- data.frame(rownames(res2), res2, stringsAsFactors = FALSE, check.names = FALSE)
+			colnames(res2) <- c("name", measure)
+			if(is.null(compare_result)){
+				compare_result <- res2
+			}else{
+				compare_result <- dplyr::full_join(compare_result, res2, by = c("name" = "name"))
+			}
+			compare_result
+		}
+	),
 	lock_objects = FALSE,
 	lock_class = FALSE
 )
