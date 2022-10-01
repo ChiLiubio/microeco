@@ -193,6 +193,7 @@ Test the difference of environmental variable across groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_diff(
   group = NULL,
+  by_group = NULL,
   method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
   measure = NULL,
   p_adjust_method = "fdr",
@@ -205,6 +206,8 @@ Test the difference of environmental variable across groups.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{group}}{default NULL; a colname of sample_table used to compare values across groups.}
+
+\item{\code{by_group}}{default NULL; perform the differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).}
 
 \item{\code{method}}{default "KW"; see the following available options:
 \describe{

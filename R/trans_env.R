@@ -85,6 +85,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Test the difference of environmental variable across groups.
 		#'
 		#' @param group default NULL; a colname of sample_table used to compare values across groups.
+		#' @param by_group default NULL; perform the differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
@@ -107,7 +108,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$cal_diff(group = "Group", method = "KW_dunn")
 		#' t1$cal_diff(group = "Group", method = "anova")
 		#' }
-		cal_diff = function(group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
+		cal_diff = function(group = NULL, by_group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], 
+			measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
 			if(is.null(group)){
 				stop("Please provide the group parameter!")
 			}else{
@@ -123,7 +125,7 @@ trans_env <- R6Class(classname = "trans_env",
 			tem_data <- clone(self$dataset)
 			# use test method in trans_alpha
 			tem_data$alpha_diversity <- env_data
-			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
+			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group))
 			suppressMessages(tem_data1$cal_diff(method = method, measure = measure, p_adjust_method = p_adjust_method, anova_set = anova_set, ...))
 			self$res_diff <- tem_data1$res_diff
 			self$res_diff_tmp <- tem_data1
