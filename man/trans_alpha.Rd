@@ -24,7 +24,8 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 
 \donttest{
 t1$cal_diff(method = "KW")
-t1$cal_diff(method = "KW_dunn")
+t1$cal_diff(method = "anova")
+t1 <- trans_alpha$new(dataset = dataset, group = "Type", by_group = "Group")
 t1$cal_diff(method = "anova")
 }
 
@@ -33,7 +34,12 @@ t1$cal_diff(method = "anova")
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_alpha(measure = "Shannon", group = "Group")
+t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+t1$cal_diff(method = "wilcox")
+t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
+t1 <- trans_alpha$new(dataset = dataset, group = "Type", by_group = "Group")
+t1$cal_diff(method = "wilcox")
+t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
 }
 }
 \section{Methods}{
@@ -61,7 +67,7 @@ t1$plot_alpha(measure = "Shannon", group = "Group")
 
 \item{\code{group}}{default NULL; the sample column used for the statistics; If provided, can return \code{data_stat}.}
 
-\item{\code{by_group}}{default NULL; perform the differential test among groups within each by_group.}
+\item{\code{by_group}}{default NULL; perform the differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).}
 
 \item{\code{order_x}}{default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.}
 }
@@ -131,7 +137,8 @@ NULL can disuse the p value adjustment.}
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_diff(method = "KW")
-t1$cal_diff(method = "KW_dunn")
+t1$cal_diff(method = "anova")
+t1 <- trans_alpha$new(dataset = dataset, group = "Type", by_group = "Group")
 t1$cal_diff(method = "anova")
 }
 }
@@ -154,7 +161,6 @@ Plotting the alpha diversity.
   add_sig_label = "Significance",
   add_sig_text_size = 3.88,
   use_boxplot = TRUE,
-  boxplot_color = TRUE,
   boxplot_add = "jitter",
   order_x_mean = FALSE,
   y_start = 1.01,
@@ -162,6 +168,7 @@ Plotting the alpha diversity.
   xtext_angle = NULL,
   xtext_size = 15,
   ytitle_size = 17,
+  barwidth = 0.9,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -185,8 +192,6 @@ This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis M
 
 \item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
 
-\item{\code{boxplot_color}}{default TRUE; TRUE: use color_values, FALSE: use "black".}
-
 \item{\code{boxplot_add}}{default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.}
 
 \item{\code{order_x_mean}}{default FALSE; whether order x axis by the means of groups from large to small.}
@@ -202,6 +207,8 @@ this parameter is also used to label the letters of anova result with the fixed 
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
+\item{\code{barwidth}}{default 0.9; the bar width in plot; applied when by_group is not NULL.}
+
 \item{\code{...}}{parameters pass to \code{ggpubr::ggboxplot} function.}
 }
 \if{html}{\out{</div>}}
@@ -212,7 +219,12 @@ ggplot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_alpha(measure = "Shannon", group = "Group")
+t1 <- trans_alpha$new(dataset = dataset, group = "Group")
+t1$cal_diff(method = "wilcox")
+t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
+t1 <- trans_alpha$new(dataset = dataset, group = "Type", by_group = "Group")
+t1$cal_diff(method = "wilcox")
+t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
 }
 }
 \if{html}{\out{</div>}}
