@@ -172,7 +172,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(method != "anova"){
 					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
 				}else{
-					output <- rownames_to_column(output, var = "Group")
 					output <- reshape2::melt(output, id.vars = "Group", variable.name = "Taxa", value.name = "Significance")
 				}
 			}
