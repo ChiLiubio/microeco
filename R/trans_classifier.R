@@ -123,7 +123,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to Boruta function of Boruta package.
 		#' @return optimized data_feature in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
 		#' }
 		cal_feature_sel = function(
@@ -166,7 +166,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param prop.train default 3/4; the ratio of the dataset used for the training.
 		#' @return data_train and data_test in the object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_split(prop.train = 3/4)
 		#' }
 		cal_split = function(prop.train = 3/4){

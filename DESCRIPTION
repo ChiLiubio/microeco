@@ -16,12 +16,12 @@ Description: A series of statistical and plotting approaches in microbial commun
 URL: https://github.com/ChiLiubio/microeco
 Depends: R (>= 3.5.0)
 Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2, RColorBrewer, reshape2
-Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, mice
+Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, igraph, rgexf, mice, GGally
 License: GPL-3
 LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2022-09-12
+Packaged: 2022-10-04
 Repository: CRAN
-Date/Publication: 2022-09-12
+Date/Publication: 2022-10-04
 RoxygenNote: 7.2.1

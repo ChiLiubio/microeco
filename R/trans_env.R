@@ -152,10 +152,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ... default parameters passed to \code{GGally::ggpairs}.
 		#' @return \code{ggmatrix}.
 		#' @examples
-		#' \donttest{
-		#' t1$cal_autocor(method = "GGally")
+		#' \dontrun{
 		#' # Spearman correlation
-		#' t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
+		#' t1$cal_autocor(upper = list(continuous = GGally::wrap("cor", method= "spearman")))
 		#' }
 		cal_autocor = function(group = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.8, ...){
 			if(!requireNamespace("GGally", quietly = TRUE)){
@@ -371,8 +370,8 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("Please first run cal_ordination function !")
 			}
 			res_ordination <- self$res_ordination
-			scrs <- scores(res_ordination ,choices = c(1, 2), display = c("sp", "wa", "cn"))
-			scrs$biplot <- scores(res_ordination, choices=c(1, 2), "bp", scaling="sites")
+			scrs <- scores(res_ordination)
+			scrs$biplot <- scores(res_ordination, choices = c(1, 2), "bp", scaling = "sites")
 			df_sites <- cbind.data.frame(scrs$sites, self$dataset$sample_table[rownames(scrs$sites), ])
 			colnames(df_sites)[1:2] <- c("x","y")
 			
@@ -391,7 +390,7 @@ trans_env <- R6Class(classname = "trans_env",
 				colnames(df_species)[1:2] <- c("x","y")
 				multiplier_spe <- vegan:::ordiArrowMul(scrs$biplot_spe)
 				df_arrows_spe <- scrs$biplot_spe * multiplier_spe
-				colnames(df_arrows_spe)<-c("x","y")
+				colnames(df_arrows_spe) <- c("x","y")
 				df_arrows_spe <- dropallfactors(cbind.data.frame(
 					df_arrows_spe, 
 					self$dataset$tax_table[rownames(df_arrows_spe), self$taxa_level, drop = FALSE]

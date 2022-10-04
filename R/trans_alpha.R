@@ -212,6 +212,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}else{
 					for(k in measure){
+						div_table <- data_alpha[data_alpha$Measure == k, ]
 						model <- aov(reformulate(anova_set, "Value"), div_table)
 						compare_result[[k]] <- summary(model)
 					}

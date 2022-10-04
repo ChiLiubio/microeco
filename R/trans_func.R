@@ -631,6 +631,7 @@ trans_func <- R6Class(classname = "trans_func",
 			otu_table_reduced <- raw_otu_table_reduced[, -1]
 			# for the calculation
 			otu_table_reduced_aggregated <- aggregate(x = otu_table_reduced[, -1, drop = FALSE], by = list(otu_table_reduced[,1]), sum)
+			self$res_tax4fun2_otu_table_reduced_aggregated <- otu_table_reduced_aggregated
 
 			# Write unknown fraction to log file
 			if((ncol(otu_table) - 1) == 1){
@@ -662,6 +663,7 @@ trans_func <- R6Class(classname = "trans_func",
 				reference_file <- read.delim(file = reference_file_path)
 				reference_profile <- rbind(reference_profile, as.numeric(reference_file[, n]))
 			}
+			self$res_tax4fun2_reference_profile <- reference_profile
 			
 			# all the required KEGG files are stored in Tax4Fun2_KEGG Rdata
 			data("Tax4Fun2_KEGG", envir=environment())
@@ -760,7 +762,7 @@ trans_func <- R6Class(classname = "trans_func",
 			for(reference_id in otu_table_reduced_aggregated$Group.1){
 				rownumber <- c(rownumber, which(row.names(distance_matrix) == reference_id))
 			}
-			distance_matrix_reduced <- distance_matrix[rownumber,rownumber]
+			distance_matrix_reduced <- distance_matrix[rownumber, rownumber]
 			distance_matrix_mean <- mean(as.dist(distance_matrix))
 			distance_matrix_reduced_mean <- mean(as.dist(distance_matrix_reduced))
 			rm(distance_matrix)
@@ -773,14 +775,13 @@ trans_func <- R6Class(classname = "trans_func",
 			rel_functional_redundancy_tab <- NULL
 			for(sample_use in 2:ncol(otu_table_reduced_aggregated)){
 				print(paste('Calculate functional redundancy for sample', names(otu_table_reduced_aggregated[sample_use])))
-				functional_prediction_sample <- reference_profile * as.numeric(otu_table_reduced_aggregated[,sample_use])
-				functional_prediction_sample_mod <- ifelse(functional_prediction_sample>=1,1,0)
+				functional_prediction_sample <- reference_profile * as.numeric(otu_table_reduced_aggregated[, sample_use])
+				functional_prediction_sample_mod <- ifelse(functional_prediction_sample >= 1, 1, 0)
 
 				abs_functional_redundancy_sample <- NULL
 				rel_functional_redundancy_sample <- NULL
-				for(i in 1:nrow(ko_list))
-				{
-				  ko_count <- functional_prediction_sample_mod[,i]
+				for(i in 1:nrow(ko_list)){
+				  ko_count <- functional_prediction_sample_mod[, i]
 				  aFRI <- (mean(as.dist(distance_matrix_reduced * ko_count)) * (sum(ko_count) / length(ko_count))) / distance_matrix_mean
 				  rFRI <- (mean(as.dist(distance_matrix_reduced * ko_count)) * (sum(ko_count) / length(ko_count))) / distance_matrix_reduced_mean
 				  abs_functional_redundancy_sample <- c(abs_functional_redundancy_sample, aFRI)
@@ -790,11 +791,10 @@ trans_func <- R6Class(classname = "trans_func",
 				rel_functional_redundancy_tab <- cbind(rel_functional_redundancy_tab, rel_functional_redundancy_sample)
 			}
 
-			abs_functional_redundancy_tab <- data.frame(abs_functional_redundancy_tab)
-			rel_functional_redundancy_tab <- data.frame(rel_functional_redundancy_tab)
+			abs_functional_redundancy_tab %<>% as.data.frame
+			rel_functional_redundancy_tab %<>% as.data.frame
 
-			colnames(abs_functional_redundancy_tab) <- names(self$otu_table)[2:ncol(otu_table_reduced_aggregated)]
-			colnames(rel_functional_redundancy_tab) <- names(self$otu_table)[2:ncol(otu_table_reduced_aggregated)]
+			colnames(abs_functional_redundancy_tab) <- colnames(rel_functional_redundancy_tab) <- colnames(otu_table_reduced_aggregated)[2:ncol(otu_table_reduced_aggregated)]
 
 			abs_functional_redundancy_final <- data.frame(KO = ko_list$ko, abs_functional_redundancy_tab, description = ko_list$description)
 			rel_functional_redundancy_final <- data.frame(KO = ko_list$ko, rel_functional_redundancy_tab, description = ko_list$description)

@@ -31,10 +31,9 @@ t1$cal_diff(group = "Group", method = "anova")
 ## Method `trans_env$cal_autocor`
 ## ------------------------------------------------
 
-\donttest{
-t1$cal_autocor(method = "GGally")
+\dontrun{
 # Spearman correlation
-t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
+t1$cal_autocor(upper = list(continuous = GGally::wrap("cor", method= "spearman")))
 }
 
 ## ------------------------------------------------
@@ -296,10 +295,9 @@ Calculate the autocorrelations among environmental variables and plot the result
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$cal_autocor(method = "GGally")
+\preformatted{\dontrun{
 # Spearman correlation
-t1$cal_autocor(upper = list(continuous = wrap("cor", method= "spearman")))
+t1$cal_autocor(upper = list(continuous = GGally::wrap("cor", method= "spearman")))
 }
 }
 \if{html}{\out{</div>}}

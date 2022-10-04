@@ -100,12 +100,12 @@ trans_network <- R6Class(classname = "trans_network",
 				{.[apply(., 1, sum)/sum(.) > filter_thres, ]}
 			# check filtered data
 			if(nrow(use_abund) == 0){
-				stop("Aftering filtering, no feature is remained! Please try to lower filter_thres!")
+				stop("After filtering, no feature is remained! Please try to lower filter_thres!")
 			}else{
 				if(nrow(use_abund) == 1){
-					stop("Aftering filtering, only one feature is remained! Please try to lower filter_thres!")
+					stop("After filtering, only one feature is remained! Please try to lower filter_thres!")
 				}else{
-					message("Aftering filtering, ", nrow(use_abund), " features are remained ...")
+					message("After filtering, ", nrow(use_abund), " features are remained ...")
 					use_abund %<>% t %>% as.data.frame
 				}
 			}

@@ -35,7 +35,7 @@ t1$cal_preProcess(method = c("center", "scale", "nzv"))
 ## Method `trans_classifier$cal_feature_sel`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
 }
 
@@ -43,7 +43,7 @@ t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
 ## Method `trans_classifier$cal_split`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_split(prop.train = 3/4)
 }
 
@@ -239,7 +239,7 @@ optimized data_feature in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
 }
 }
@@ -269,7 +269,7 @@ data_train and data_test in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_split(prop.train = 3/4)
 }
 }
