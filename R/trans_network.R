@@ -96,8 +96,10 @@ trans_network <- R6Class(classname = "trans_network",
 			if(taxa_level != "OTU"){
 				use_dataset <- use_dataset$merge_taxa(taxa = taxa_level)
 			}
-			use_abund <- use_dataset$otu_table %>% 
-				{.[apply(., 1, sum)/sum(.) > filter_thres, ]}
+			rel_abund <- use_dataset$otu_table %>% {apply(., 1, sum)/sum(.)}
+			use_abund <- use_dataset$otu_table %>% {.[rel_abund > filter_thres, ]}
+			rel_abund %<>% {. * 100} %>% .[rownames(use_abund)]
+			
 			# check filtered data
 			if(nrow(use_abund) == 0){
 				stop("After filtering, no feature is remained! Please try to lower filter_thres!")
@@ -170,6 +172,7 @@ trans_network <- R6Class(classname = "trans_network",
 			self$tax_table <- use_dataset$tax_table
 			self$data_abund <- use_abund
 			self$taxa_level <- taxa_level
+			self$data_relabund <- rel_abund
 		},
 		#' @description
 		#' Construct network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
@@ -554,12 +557,11 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
-			use_abund <- self$data_abund
+			# Add abundance info
+			sum_abund <- self$data_relabund
 			node_table <- data.frame(name = V(network)$name) %>% `rownames<-`(.[, 1])
 			node_table$degree <- igraph::degree(network)[rownames(node_table)]
 			node_table$betweenness <- betweenness(network)[rownames(node_table)]
-			# Add abundance info
-			sum_abund <- apply(use_abund, 2, function(x) sum(x) * 100/sum(use_abund))
 			# Same with the above operation to make the names corresponded
 			if(self$taxa_level != "OTU"){
 				# create a replace_table to match the taxa name and marker name when taxa_level is not "OTU"
