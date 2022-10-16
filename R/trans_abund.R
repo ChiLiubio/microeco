@@ -355,7 +355,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
-			
+			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
+
 			if(pheatmap == FALSE){
 				# order x axis samples and facet
 				plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
@@ -365,7 +366,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if (is.null(max_abundance)){
 					max_abundance <- max(plot_data$Abundance)
 				}
-				plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 
 				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))

@@ -412,13 +412,11 @@ trans_network <- R6Class(classname = "trans_network",
 				b[abs(b) < beemStatic_t_strength] <- 0
 				network <- graph.adjacency(b, mode='directed', weighted='weight')
 				V(network)$name <- rownames(use_abund)
-				V(network)$RelativeAbundance <- rowMeans(beemStatic:::tss(use_abund))
 			}
 			if(network_method != "COR"){
 				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
 			}
 			E(network)$weight <- abs(E(network)$weight)
-			
 			message("---------------- ", Sys.time()," : Finish ----------------")
 			
 			nodes_raw <- data.frame(cbind(V(network), V(network)$name))
@@ -464,6 +462,9 @@ trans_network <- R6Class(classname = "trans_network",
 						gsub("^.__", "", .))
 				}
 			}
+			# add abundance to the node property
+			V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
+			
 			self$res_network <- network
 			message('The result network is stored in object$res_network ...')
 		},
