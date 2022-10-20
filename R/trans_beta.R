@@ -350,14 +350,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' Transform sample distances within groups or between groups.
 		#'
 		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
+		#' @param by_group default NULL; one or more colnames of sample_table in microtable object; 
+		#'   If provided, generate paired sample information in the final table. This is especially useful for filtering values further.
 		#' @return \code{res_group_distance} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance(within_group = TRUE)
 		#' }
-		cal_group_distance = function(within_group = TRUE){
+		cal_group_distance = function(within_group = TRUE, by_group = NULL){
 			if(within_group == T){
-				self$res_group_distance <- private$within_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
+				self$res_group_distance <- private$within_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group, by_group = by_group)
 			}else{
 				self$res_group_distance <- private$between_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
 			}
@@ -374,7 +376,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	 if provided, used for the specific significance filtering, such as \code{c("ns", "*")}.
 		#' @param pair_compare_filter_match default NULL; only available when \code{hide_ns = FALSE}; 
 		#' 	 if provided, remove the matched groups; use the regular express to match the paired groups.
-		#' @param pair_compare_filter_select default NULL; numeric vector;only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
+		#' @param pair_compare_filter_select default NULL; numeric vector; only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
 		#'   This parameter must be a numeric vector used to select the paired combination of groups. For example, \code{pair_compare_filter_select = c(1, 3)} 
 		#'   can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
 		#'   The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_match} can not be both used together.
@@ -553,21 +555,43 @@ trans_beta <- R6Class(classname = "trans_beta",
 		}
 		),
 	private = list(
-		within_group_distance = function(distance, sampleinfo, type){
-			all_group <- as.character(sampleinfo[,type]) %>% unique
-			res <- list()
-			for (i in all_group) {
-				res[[i]] <- as.vector(as.dist(distance[sampleinfo[,type] == i, sampleinfo[,type] == i]))
+		within_group_distance = function(distance, sampleinfo, type, by_group = NULL){
+			if(!is.null(by_group)){
+				if(!all(by_group %in% colnames(sampleinfo))){
+					stop("Input by_group must be colnames of sample_table in the microtable object!")
+				}
 			}
-			res <- reshape2::melt(res) 
+			all_group <- as.character(sampleinfo[, type]) %>% unique
+			res <- data.frame()
+			for(i in all_group){
+				select_sample <- sampleinfo[, type] == i
+				# filter group with sample number < 2
+				if(sum(select_sample) < 2){
+					next
+				}
+				distance_res <- distance[select_sample, select_sample] %>% as.dist %>% as.vector
+				distance_res <- data.frame(value = distance_res, group = i)
+				if(!is.null(by_group)){
+					for(j in by_group){
+						tmp <- sampleinfo[select_sample, j]
+						paired_comb <- combn(length(tmp), 2)
+						merged_bygroup <- lapply(seq_len(ncol(paired_comb)), function(x){paste0(sort(tmp[paired_comb[, x]]), collapse = " vs ")}) %>% unlist
+						distance_res %<>% cbind(., merged_bygroup)
+					}
+				}
+				res %<>% rbind(., distance_res)
+			}
 			colnames(res)[2] <- type
+			if(ncol(res) > 2){
+				colnames(res)[3:ncol(res)] <- by_group
+			}
 			res
 		},
 		between_group_distance = function(distance, sampleinfo, type) {
 			all_group <- as.character(sampleinfo[,type]) %>% unique
 			com1 <- combn(all_group,2)
 			res <- list()
-			for (i in seq_len(ncol(com1))) {
+			for(i in seq_len(ncol(com1))){
 				f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1,i], ])
 				s_name <- rownames(sampleinfo[sampleinfo[, type] == com1[2,i], ])
 				vsname <- paste0(com1[1,i], " vs ", com1[2,i])

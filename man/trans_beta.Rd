@@ -322,13 +322,16 @@ A wrapper for \code{betadisper} function in vegan package for multivariate homog
 \subsection{Method \code{cal_group_distance()}}{
 Transform sample distances within groups or between groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(within_group = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(within_group = TRUE, by_group = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{within_group}}{default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.}
+
+\item{\code{by_group}}{default NULL; one or more colnames of sample_table in microtable object; 
+If provided, generate paired sample information in the final table. This is especially useful for filtering values further.}
 }
 \if{html}{\out{</div>}}
 }
@@ -382,7 +385,7 @@ if provided, used for the specific significance filtering, such as \code{c("ns",
 \item{\code{pair_compare_filter_match}}{default NULL; only available when \code{hide_ns = FALSE}; 
 if provided, remove the matched groups; use the regular express to match the paired groups.}
 
-\item{\code{pair_compare_filter_select}}{default NULL; numeric vector;only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
+\item{\code{pair_compare_filter_select}}{default NULL; numeric vector; only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
 This parameter must be a numeric vector used to select the paired combination of groups. For example, \code{pair_compare_filter_select = c(1, 3)} 
 can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
 The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_match} can not be both used together.}
