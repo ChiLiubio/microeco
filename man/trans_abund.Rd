@@ -120,12 +120,12 @@ Please alter this parameter when the prefix is not standard.}
 
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
 
-\item{\code{input_taxaname}}{default NULL; character vector; if some taxa are selected, input taxa names.}
+\item{\code{input_taxaname}}{default NULL; character vector; input taxa names for selecting some taxa.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{data_abund} stored in the object for plotting.
+\code{data_abund} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

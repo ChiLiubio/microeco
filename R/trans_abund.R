@@ -21,8 +21,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
 		#'  Please alter this parameter when the prefix is not standard.
 		#' @param use_percentage default TRUE; show the abundance percentage.
-		#' @param input_taxaname default NULL; character vector; if some taxa are selected, input taxa names.
-		#' @return \code{data_abund} stored in the object for plotting. 
+		#' @param input_taxaname default NULL; character vector; input taxa names for selecting some taxa.
+		#' @return \code{data_abund} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -65,7 +65,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			if(delete_full_prefix == T | delete_part_prefix == T){
 				if(is.null(prefix)){
-					prefix <- paste0(tolower(substr(taxrank, 1, 1)), "__")
+					prefix <- ".__"
 				}
 				if(delete_part_prefix == T){
 					delete_full_prefix <- FALSE
@@ -112,8 +112,13 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(length(use_taxanames) > ntaxa_use){
 					use_taxanames %<>% .[1:ntaxa_use]
 				}
-			} else {
-				use_taxanames %<>% .[. %in% input_taxaname]
+			}else{
+				# make sure input_taxaname are in use_taxanames
+				if(!any(input_taxaname %in% use_taxanames)){
+					stop("input_taxaname do not match to taxa names! Please check the input!")
+				}else{
+					use_taxanames <- input_taxaname[input_taxaname %in% use_taxanames]
+				}
 			}
 			# generate ylab title and store it
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
