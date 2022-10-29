@@ -55,14 +55,19 @@ t1$cal_group_distance(within_group = TRUE)
 }
 
 ## ------------------------------------------------
+## Method `trans_beta$cal_group_distance_diff`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_group_distance_diff()
+}
+
+## ------------------------------------------------
 ## Method `trans_beta$plot_group_distance`
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_group_distance(distance_pair_stat = TRUE)
-t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE)
-t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE, hide_ns_more = c("ns", "*"))
-t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3)
+t1$plot_group_distance()
 }
 
 ## ------------------------------------------------
@@ -80,6 +85,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \item \href{#method-trans_beta-cal_manova}{\code{trans_beta$cal_manova()}}
 \item \href{#method-trans_beta-cal_betadisper}{\code{trans_beta$cal_betadisper()}}
 \item \href{#method-trans_beta-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
+\item \href{#method-trans_beta-cal_group_distance_diff}{\code{trans_beta$cal_group_distance_diff()}}
 \item \href{#method-trans_beta-plot_group_distance}{\code{trans_beta$plot_group_distance()}}
 \item \href{#method-trans_beta-plot_clustering}{\code{trans_beta$plot_clustering()}}
 \item \href{#method-trans_beta-clone}{\code{trans_beta$clone()}}
@@ -350,22 +356,42 @@ t1$cal_group_distance(within_group = TRUE)
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_beta-cal_group_distance_diff"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-cal_group_distance_diff}{}}}
+\subsection{Method \code{cal_group_distance_diff()}}{
+Differential test of distances among groups.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance_diff(comp_bygroup = FALSE, ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_group_distance_diff} stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_group_distance_diff()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_beta-plot_group_distance"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-plot_group_distance}{}}}
 \subsection{Method \code{plot_group_distance()}}{
 Plotting the distance between samples within or between groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_group_distance(
-  plot_group_order = NULL,
-  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  distance_pair_stat = FALSE,
-  hide_ns = FALSE,
-  hide_ns_more = NULL,
-  pair_compare_filter_match = NULL,
-  pair_compare_filter_select = NULL,
-  pair_compare_method = "wilcox.test",
-  plot_distance_xtype = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_group_distance(plot_group_order = NULL, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -373,26 +399,7 @@ Plotting the distance between samples within or between groups.
 \describe{
 \item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the plot.}
 
-\item{\code{color_values}}{colors for presentation.}
-
-\item{\code{distance_pair_stat}}{default FALSE; whether do the paired comparisions.}
-
-\item{\code{hide_ns}}{default FALSE; whether hide the "ns" pairs, i.e. non significant comparisions.}
-
-\item{\code{hide_ns_more}}{default NULL; character vector; available when \code{hide_ns = TRUE}; 
-if provided, used for the specific significance filtering, such as \code{c("ns", "*")}.}
-
-\item{\code{pair_compare_filter_match}}{default NULL; only available when \code{hide_ns = FALSE}; 
-if provided, remove the matched groups; use the regular express to match the paired groups.}
-
-\item{\code{pair_compare_filter_select}}{default NULL; numeric vector; only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
-This parameter must be a numeric vector used to select the paired combination of groups. For example, \code{pair_compare_filter_select = c(1, 3)} 
-can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
-The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_match} can not be both used together.}
-
-\item{\code{pair_compare_method}}{default \code{wilcox.test}; \code{wilcox.test}, \code{kruskal.test}, \code{t.test} or \code{anova}.}
-
-\item{\code{plot_distance_xtype}}{default NULL; number used to make x axis text generate angle.}
+\item{\code{...}}{parameters (except measure) passed to \code{plot_alpha} function of \code{\link{trans_alpha}} class.}
 }
 \if{html}{\out{</div>}}
 }
@@ -402,10 +409,7 @@ The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_ma
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_group_distance(distance_pair_stat = TRUE)
-t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE)
-t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE, hide_ns_more = c("ns", "*"))
-t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3)
+t1$plot_group_distance()
 }
 }
 \if{html}{\out{</div>}}

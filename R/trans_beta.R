@@ -358,51 +358,62 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$cal_group_distance(within_group = TRUE)
 		#' }
 		cal_group_distance = function(within_group = TRUE, by_group = NULL){
-			if(within_group == T){
-				self$res_group_distance <- private$within_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group, by_group = by_group)
+			if(within_group){
+				res <- private$within_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
 			}else{
-				self$res_group_distance <- private$between_group_distance(distance = self$use_matrix, sampleinfo=self$sample_table, type = self$group)
+				res <- private$between_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group)
 			}
+			colnames(res)[colnames(res) == "value"] <- "Value"
+			self$res_group_distance <- res
+			self$res_group_distance_bygroup <- by_group
 			message('The result is stored in object$res_group_distance ...')
+		},
+		#' @description
+		#' Differential test of distances among groups.
+		#'
+		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
+		#' @return \code{res_group_distance_diff} stored in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_group_distance_diff()
+		#' }
+		cal_group_distance_diff = function(comp_bygroup = FALSE, ...){
+			res_group_distance <- self$res_group_distance
+			# use method in trans_alpha
+			temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
+			res_group_distance$Measure <- "group_distance"
+			temp1$data_alpha <- res_group_distance
+			if(!comp_bygroup){
+				temp1$group <- self$group
+			}else{
+				if(!is.null(self$res_group_distance_bygroup)){
+					temp1$group <- self$res_group_distance_bygroup
+				}else{
+					stop("comp_bygroup is TRUE, but no by_group found! Please rerun cal_group_distance function!")
+				}
+			}
+			suppressMessages(temp1$cal_diff(...))
+			self$res_group_distance_diff <- temp1$res_diff
+			self$res_group_distance_diff_tmp <- temp1
+			message('The result is stored in object$res_group_distance_diff ...')
 		},
 		#' @description
 		#' Plotting the distance between samples within or between groups.
 		#'
 		#' @param plot_group_order default NULL; a vector used to order the groups in the plot.
-		#' @param color_values colors for presentation.
-		#' @param distance_pair_stat default FALSE; whether do the paired comparisions.
-		#' @param hide_ns default FALSE; whether hide the "ns" pairs, i.e. non significant comparisions.
-		#' @param hide_ns_more default NULL; character vector; available when \code{hide_ns = TRUE}; 
-		#' 	 if provided, used for the specific significance filtering, such as \code{c("ns", "*")}.
-		#' @param pair_compare_filter_match default NULL; only available when \code{hide_ns = FALSE}; 
-		#' 	 if provided, remove the matched groups; use the regular express to match the paired groups.
-		#' @param pair_compare_filter_select default NULL; numeric vector; only available when \code{hide_ns = FALSE}; if provided, only select those input groups.
-		#'   This parameter must be a numeric vector used to select the paired combination of groups. For example, \code{pair_compare_filter_select = c(1, 3)} 
-		#'   can be used to select "CW"-"IW" and "IW"-"TW" from all the three pairs "CW"-"IW", "CW"-"TW" and "IW"-"TW" of ordered groups ("CW", "IW", "TW").
-		#'   The parameter \code{pair_compare_filter_select} and \code{pair_compare_filter_match} can not be both used together.
-		#' @param pair_compare_method default \code{wilcox.test}; \code{wilcox.test}, \code{kruskal.test}, \code{t.test} or \code{anova}.
-		#' @param plot_distance_xtype default NULL; number used to make x axis text generate angle.
+		#' @param ... parameters (except measure) passed to \code{plot_alpha} function of \code{\link{trans_alpha}} class.
 		#' @return \code{ggplot}.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_group_distance(distance_pair_stat = TRUE)
-		#' t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE)
-		#' t1$plot_group_distance(distance_pair_stat = TRUE, hide_ns = TRUE, hide_ns_more = c("ns", "*"))
-		#' t1$plot_group_distance(distance_pair_stat = TRUE, pair_compare_filter_select = 3)
+		#' t1$plot_group_distance()
 		#' }
-		plot_group_distance = function(
-			plot_group_order = NULL,
-			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-			distance_pair_stat = FALSE,
-			hide_ns = FALSE,
-			hide_ns_more = NULL,
-			pair_compare_filter_match = NULL,
-			pair_compare_filter_select = NULL,
-			pair_compare_method = "wilcox.test",
-			plot_distance_xtype = NULL
-			){
+		plot_group_distance = function(plot_group_order = NULL, ...){
 			group_distance <- self$res_group_distance
-			group <- self$group
+			if(!is.null(self$res_group_distance_diff)){
+				group <- self$res_group_distance_diff_tmp$group
+			}else{
+				group <- self$group
+			}
 			if(self$measure %in% c("wei_unifrac", "unwei_unifrac", "bray", "jaccard")){
 				titlename <- switch(self$measure, 
 					wei_unifrac = "Weighted Unifrac", 
@@ -420,59 +431,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			message("The ordered groups are ", paste0(levels(group_distance[, group]), collapse = " "), " ...")
 			
-			p <- ggplot(group_distance, aes_string(x = group, y = "value", color = group)) +
-				theme_bw() +
-				theme(panel.grid=element_blank()) +
-				geom_boxplot(outlier.size =1,width=.6,linetype=1) +
-				stat_summary(fun="mean", geom="point", shape=20, size=3, fill="white") +
-				xlab("") +
-				ylab(ylabname) +
-				theme(axis.text=element_text(size=12)) +
-				theme(axis.title=element_text(size=17), legend.position = "none") +
-				scale_color_manual(values=color_values)
-			if(!is.null(plot_distance_xtype)){
-				p <- p + theme(axis.text.x = element_text(angle = plot_distance_xtype, colour = "black", vjust = 1, hjust = 1, size = 10))
+			if(is.null(self$res_group_distance_diff)){
+				temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
+				group_distance$Measure <- "group_distance"
+				temp1$data_alpha <- group_distance
+				temp1$group <- "Group"
+				p <- temp1$plot_alpha(add_sig = FALSE, measure = "group_distance", ...) + ylab(ylabname)
+			}else{
+				self$res_group_distance_diff_tmp$res_diff <- self$res_group_distance_diff
+				p <- self$res_group_distance_diff_tmp$plot_alpha(measure = "group_distance", ...) + ylab(ylabname)
 			}
-			if(distance_pair_stat == T){
-				# first generate pairs
-				comparisons_list <- levels(group_distance[, group]) %>% 
-					combn(., 2)
-				# filter based on the significance
-				if(hide_ns){
-					pre_filter <- ggpubr::compare_means(reformulate(group, "value"), group_distance)
-					if(is.null(hide_ns_more)){
-						filter_mark <- "ns"
-					}else{
-						filter_mark <- hide_ns_more
-					}
-					comparisons_list %<>% .[, !(pre_filter$p.signif %in% filter_mark), drop = FALSE]
-				}else{
-					# remove specific groups
-					if(!is.null(pair_compare_filter_match) & !is.null(pair_compare_filter_select)){
-						stop("The parameter pair_compare_filter_select and pair_compare_filter_match can not be both used together!")
-					}
-					if(!is.null(pair_compare_filter_match)){
-						comparisons_list %<>% {.[, unlist(lapply(as.data.frame(.), function(x) any(grepl(pair_compare_filter_match, x)))), drop = FALSE]}
-					}
-					if(!is.null(pair_compare_filter_select)){
-						if(!is.numeric(pair_compare_filter_select)){
-							stop("The parameter pair_compare_filter_select must be numeric !")
-						}
-						messages_use <- unlist(lapply(as.data.frame(comparisons_list[, pair_compare_filter_select, drop = FALSE]), 
-							function(x){paste0(x, collapse = "-")}))
-						
-						message("Selected groups are ", paste0(messages_use, collapse = " "), " ...")
-						comparisons_list %<>% .[, pair_compare_filter_select, drop = FALSE]
-					}
-				}
-				# generate the list
-				comparisons_list %<>% {lapply(seq_len(ncol(.)), function(x) .[, x])}
-				
-				p <- p + ggpubr::stat_compare_means(comparisons = comparisons_list, method = pair_compare_method, 
-						tip.length=0.01, label = "p.signif", symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1),
-						symbols = c("****", "***", "**", "*", "ns")))
-			}
-			
 			p
 		},
 		#' @description
@@ -587,9 +555,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			res
 		},
-		between_group_distance = function(distance, sampleinfo, type) {
-			all_group <- as.character(sampleinfo[,type]) %>% unique
-			com1 <- combn(all_group,2)
+		between_group_distance = function(distance, sampleinfo, type){
+			all_group <- as.character(sampleinfo[, type]) %>% unique
+			com1 <- combn(all_group, 2)
 			res <- list()
 			for(i in seq_len(ncol(com1))){
 				f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1,i], ])
