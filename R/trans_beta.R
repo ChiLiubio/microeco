@@ -350,8 +350,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' Transform sample distances within groups or between groups.
 		#'
 		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
-		#' @param by_group default NULL; one or more colnames of sample_table in microtable object; 
-		#'   If provided, generate paired sample information in the final table. This is especially useful for filtering values further.
+		#' @param by_group default NULL; one colname name of sample_table in \code{microtable} object.
+		#'   If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
+		#'   When \code{within_group = TRUE}, by_group parameter is the format of paired groups.
+		#'   When \code{within_group = FALSE}, by_group parameter is the format same with the group information in \code{sample_table}.
 		#' @return \code{res_group_distance} stored in object.
 		#' @examples
 		#' \donttest{
@@ -371,7 +373,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Differential test of distances among groups.
 		#'
-		#' @param comp_bygroup default FALSE; whether perform the differential test using by_group column coming from function \code{cal_group_distance}.
+		#' @param comp_bygroup default FALSE; whether perform the differential test using by_group column coming from the return of function \code{cal_group_distance}.
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
 		#' @return \code{res_group_distance_diff} stored in object.
 		#' @examples

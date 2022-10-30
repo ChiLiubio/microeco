@@ -336,8 +336,10 @@ Transform sample distances within groups or between groups.
 \describe{
 \item{\code{within_group}}{default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.}
 
-\item{\code{by_group}}{default NULL; one or more colnames of sample_table in microtable object; 
-If provided, generate paired sample information in the final table. This is especially useful for filtering values further.}
+\item{\code{by_group}}{default NULL; one colname name of sample_table in \code{microtable} object.
+If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
+When \code{within_group = TRUE}, by_group parameter is the format of paired groups.
+When \code{within_group = FALSE}, by_group parameter is the format same with the group information in \code{sample_table}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -367,7 +369,7 @@ Differential test of distances among groups.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{comp_bygroup}}{default FALSE; whether perform the differential test using by_group column coming from function \code{cal_group_distance}.}
+\item{\code{comp_bygroup}}{default FALSE; whether perform the differential test using by_group column coming from the return of function \code{cal_group_distance}.}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.}
 }
