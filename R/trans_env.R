@@ -696,6 +696,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
 		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
+		#' @param by_group default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.
 		#' @param ... paremeters pass to \code{\link{mantel}} of vegan package.
 		#' @return \code{res_mantel} in object.
 		#' @examples
@@ -710,6 +711,7 @@ trans_env <- R6Class(classname = "trans_env",
 			use_measure = NULL, 
 			method = "pearson", 
 			p_adjust_method = "fdr",
+			by_group = NULL,
 			...
 			){
 			if(is.null(self$dataset) & is.null(add_matrix)){
@@ -741,34 +743,22 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				env_data <- env_data[, select_env_data]
 			}
-			veg.dist <- as.dist(use_matrix[rownames(env_data), rownames(env_data)])
-			variable_name <- c()
-			corr_res <- c()
-			p_res <- c()
-			# with Scaling and Centering normalization
-			for(i in 1:ncol(env_data)){
-				env.dist <- vegdist(scale(env_data[, i, drop=FALSE]), "euclid")
-				if(partial_mantel == T){
-					zdis <- vegdist(scale(env_data[, -i, drop=FALSE]), "euclid")
-					man1 <- mantel.partial(veg.dist, env.dist, zdis, method = method, ...)
-				}else{
-					man1 <- mantel(veg.dist, env.dist, method = method, ...)
-				}
-				variable_name <- c(variable_name, colnames(env_data)[i])
-				corr_res <- c(corr_res, man1$statistic)
-				p_res <- c(p_res, man1$signif)
-			}
-			if(partial_mantel == T){
-				mantel_type <- rep("partial mantel test", length(p_res))
+			if(is.null(by_group)){
+				veg_dist <- as.dist(use_matrix[rownames(env_data), rownames(env_data)])
+				res_mantel <- private$mantel_test(env = env_data, veg = veg_dist, partial_mantel = partial_mantel, method = method, 
+					p_adjust_method = p_adjust_method, by_group = by_group, ...)
 			}else{
-				mantel_type <- rep("mantel test", length(p_res))
+				res_mantel <- data.frame()
+				all_groups <- self$dataset$sample_table %>% dropallfactors %>% .[, by_group] %>% unique
+				for(k in all_groups){
+					use_sample_names <- self$dataset$sample_table %>% .[.[, by_group] == k, ] %>% rownames
+					use_env_data <- env_data[use_sample_names, ]
+					use_veg_dist <- as.dist(use_matrix[use_sample_names, use_sample_names])
+					tmp_res <- private$mantel_test(env = use_env_data, veg = use_veg_dist, partial_mantel = partial_mantel, 
+						method = method, p_adjust_method = p_adjust_method, by_group = k, ...)
+					res_mantel %<>% rbind(., tmp_res)
+				}
 			}
-			cor_method <- rep(method, length(p_res))
-			p_adjusted <- p.adjust(p_res, method = p_adjust_method)
-			significance <- cut(p_adjusted, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
-			res_mantel <- data.frame(variable_name, mantel_type, cor_method, corr_res, p_res, p_adjusted, significance)
-			colnames(res_mantel) <- c("Variables", "mantel type", "Correlation method", "Correlation coefficient","p.value", "p.adjusted", "Significance")
-
 			self$res_mantel <- res_mantel
 			message('The result is stored in object$res_mantel ...')
 		},
@@ -1365,6 +1355,38 @@ trans_env <- R6Class(classname = "trans_env",
 			res <- data.frame(newx, newy)
 			colnames(res) <- colnames(arr)
 			res
+		},
+		mantel_test = function(env, veg, partial_mantel, method, p_adjust_method, by_group, ...){
+			variable_name <- c()
+			corr_res <- c()
+			p_res <- c()
+			# with Scaling and Centering normalization
+			for(i in 1:ncol(env)){
+				env_dist <- vegdist(scale(env[, i, drop = FALSE]), "euclid")
+				if(partial_mantel == T){
+					zdis <- vegdist(scale(env[, -i, drop = FALSE]), "euclid")
+					man1 <- mantel.partial(veg, env_dist, zdis, method = method, ...)
+				}else{
+					man1 <- mantel(veg, env_dist, method = method, ...)
+				}
+				variable_name <- c(variable_name, colnames(env)[i])
+				corr_res <- c(corr_res, man1$statistic)
+				p_res <- c(p_res, man1$signif)
+			}
+			if(partial_mantel == T){
+				mantel_type <- rep("partial mantel test", length(p_res))
+			}else{
+				mantel_type <- rep("mantel test", length(p_res))
+			}
+			cor_method <- rep(method, length(p_res))
+			p_adjusted <- p.adjust(p_res, method = p_adjust_method)
+			significance <- cut(p_adjusted, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+			if(is.null(by_group)){
+				by_group <- "All"
+			}
+			res_mantel <- data.frame(by_group, variable_name, mantel_type, cor_method, corr_res, p_res, p_adjusted, significance)
+			colnames(res_mantel) <- c("by_group", "Variables", "mantel type", "Correlation method", "Correlation coefficient","p.value", "p.adjusted", "Significance")
+			res_mantel
 		}
 	),
 	lock_class = FALSE,

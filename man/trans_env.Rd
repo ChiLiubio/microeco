@@ -583,6 +583,7 @@ Mantel test between beta diversity matrix and environmental data.
   use_measure = NULL,
   method = "pearson",
   p_adjust_method = "fdr",
+  by_group = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -601,6 +602,8 @@ Mantel test between beta diversity matrix and environmental data.
 \item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.}
+
+\item{\code{by_group}}{default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.}
 
 \item{\code{...}}{paremeters pass to \code{\link{mantel}} of vegan package.}
 }
