@@ -361,7 +361,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(within_group){
 				res <- private$within_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
 			}else{
-				res <- private$between_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group)
+				res <- private$between_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
 			}
 			colnames(res)[colnames(res) == "value"] <- "Value"
 			self$res_group_distance <- res
@@ -371,6 +371,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Differential test of distances among groups.
 		#'
+		#' @param comp_bygroup default FALSE; whether perform the differential test using by_group column coming from function \code{cal_group_distance}.
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
 		#' @return \code{res_group_distance_diff} stored in object.
 		#' @examples
@@ -555,18 +556,43 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			res
 		},
-		between_group_distance = function(distance, sampleinfo, type){
+		between_group_distance = function(distance, sampleinfo, type, by_group = NULL){
 			all_group <- as.character(sampleinfo[, type]) %>% unique
 			com1 <- combn(all_group, 2)
-			res <- list()
+			res <- data.frame()
 			for(i in seq_len(ncol(com1))){
-				f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1,i], ])
-				s_name <- rownames(sampleinfo[sampleinfo[, type] == com1[2,i], ])
-				vsname <- paste0(com1[1,i], " vs ", com1[2,i])
-				res[[vsname]] <- as.vector(distance[f_name, s_name])
+				if(is.null(by_group)){
+					f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1, i], ])
+					s_name <- rownames(sampleinfo[sampleinfo[, type] == com1[2, i], ])
+					vsname <- paste0(com1[1,i], " vs ", com1[2,i])
+					distance_res <- as.vector(distance[f_name, s_name])
+					distance_res <- data.frame(Value = distance_res, vsname)
+				}else{
+					if(length(by_group) > 1){
+						stop("The length of by_group must be one!")
+					}
+					tmp <- sampleinfo %>% dropallfactors %>% .[, by_group] %>% unique
+					distance_res <- data.frame()
+					for(j in tmp){
+						f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1, i] & sampleinfo[, by_group] == j, ])
+						s_name <- rownames(sampleinfo[sampleinfo[, type] == com1[2, i] & sampleinfo[, by_group] == j, ])
+						vsname <- paste0(com1[1,i], " vs ", com1[2,i])
+						tmp_dis <- as.vector(distance[f_name, s_name])
+						if(length(tmp_dis) == 0){
+							next
+						}else{
+							tmp_dis <- data.frame(Value = tmp_dis, name = vsname)
+							tmp_dis %<>% cbind(., by_group = j)
+							distance_res %<>% rbind(., tmp_dis)
+						}
+					}
+				}
+				res %<>% rbind(., distance_res)
 			}
-			res <- reshape2::melt(res) 
 			colnames(res)[2] <- type
+			if(ncol(res) > 2){
+				colnames(res)[3:ncol(res)] <- by_group
+			}
 			res
 		},
 		paired_group_manova = function(sample_info_use, use_matrix, group, measure, p_adjust_method, ...){

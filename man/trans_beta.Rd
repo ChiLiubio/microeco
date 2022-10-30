@@ -367,6 +367,8 @@ Differential test of distances among groups.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{comp_bygroup}}{default FALSE; whether perform the differential test using by_group column coming from function \code{cal_group_distance}.}
+
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.}
 }
 \if{html}{\out{</div>}}
