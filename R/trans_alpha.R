@@ -92,7 +92,17 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "anova")
 		#' }
 		cal_diff = function(method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
+			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova"))
 			group <- self$group
+			if(is.null(group)){
+				if(method != "anova"){
+					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
+				}else{
+					if(is.null(anova_set)){
+						stop("Both anova_set and group is NULL! Please provide either group or anova_set!")
+					}
+				}
+			}
 			# 'by_group' for test inside each by_group instead of all groups in 'group'
 			by_group <- self$by_group
 			data_alpha <- self$data_alpha
@@ -103,7 +113,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					stop("One or more measures input not in the object$data_alpha! Please check the input!")
 				}
 			}
-			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova"))
 			if(is.null(by_group)){
 				if(method %in% c("wilcox", "t.test") & length(unique(as.character(data_alpha[, group]))) > 10){
 					stop("There are too many groups to do paired comparisons! please use method = 'KW' or 'KW_dunn' or 'anova' !")
@@ -211,14 +220,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						colnames(compare_result)[2] <- "Group"
 					}
 				}else{
+					# to make multi-factor distinct from one-way anova
+					method <- "anova_set"
+					compare_result <- data.frame()
 					for(k in measure){
 						div_table <- data_alpha[data_alpha$Measure == k, ]
 						model <- aov(reformulate(anova_set, "Value"), div_table)
-						compare_result[[k]] <- summary(model)
+						tmp <- summary(model)[[1]]
+						tmp1 <- data.frame(method = paste0("anova_set for ", anova_set), Measure = k, Factors = rownames(tmp), 
+							Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
+						compare_result %<>% rbind(., tmp1)
 					}
+					compare_result$Significance <- cut(compare_result$P.unadj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 				}
 			}else{
-				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 				compare_result$Significance %<>% as.character
 			}
 			self$res_diff <- compare_result
@@ -351,8 +367,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			if(add_sig & group == self$group){
 				diff_res <- self$res_diff
-				if(cal_diff_method == "anova"){
-					if(inherits(diff_res, "data.frame")){
+				if(grepl("anova", cal_diff_method)){
+					if(cal_diff_method == "anova"){
 						if(is.null(by_group)){
 							x_axis_order <- levels(use_data[, group])
 							diff_res %<>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]

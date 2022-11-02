@@ -36,7 +36,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
 		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
 		#'   }
-		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table}.
+		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
+		#' 	  It is necessary when method is not "anova" or method is "anova" but anova_set is not provided.
+		#' 	  Once group is provided, the return res_abund will have mean and sd values for group.
 		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
 		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
@@ -107,24 +109,27 @@ trans_diff <- R6Class(classname = "trans_diff",
 			# in case of dataset changes
 			tmp_dataset <- clone(dataset)
 			sampleinfo <- tmp_dataset$sample_table
-			if(is.null(group)){
+			if(is.null(group) & method != "anova"){
 				stop("The group parameter need to be provided for differential test among groups!")
 			}else{
-				if(length(group) > 1){
-					stop("Please provide only one colname of sample_table for group parameter!")
-				}else{
-					if(! group %in% colnames(sampleinfo)){
-						stop("Please provide a correct colname of sample_table for group parameter!")
+				if(!is.null(group)){
+					if(length(group) > 1){
+						stop("Please provide only one colname of sample_table for group parameter!")
+					}else{
+						if(! group %in% colnames(sampleinfo)){
+							stop("Please provide a correct colname of sample_table for group parameter!")
+						}
 					}
 				}
 			}
 			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw"))
 			
-			if(is.factor(sampleinfo[, group])){
-				self$group_order <- levels(sampleinfo[, group])
-				sampleinfo[, group] %<>% as.character
-			}
-			
+			if(!is.null(group)){
+				if(is.factor(sampleinfo[, group])){
+					self$group_order <- levels(sampleinfo[, group])
+					sampleinfo[, group] %<>% as.character
+				}
+			}			
 			################################
 			# generate abudance table
 			if(is.null(tmp_dataset$taxa_abund)){
@@ -172,7 +177,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(method != "anova"){
 					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
 				}else{
-					output <- reshape2::melt(output, id.vars = "Group", variable.name = "Taxa", value.name = "Significance")
+					if(tem_data1$cal_diff_method == "anova"){
+						output <- reshape2::melt(output, id.vars = "Group", variable.name = "Taxa", value.name = "Significance")
+					}else{
+						# make sure multi-way distinct from one-way
+						method <- tem_data1$cal_diff_method
+					}
 				}
 			}
 			if(method %in% c("lefse", "rf")){
@@ -399,21 +409,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 				output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 			}
 			#######################################
-			# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
-			if(grepl("lefse", method, ignore.case = TRUE)){
-				res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
-			}else{
-				if(grepl("rf", method, ignore.case = TRUE)){
-					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
-				}else{
-					res_abund <- reshape2::melt(rownames_to_column(abund_table, "Taxa"), id.vars = "Taxa")
-				}
-			}
-			colnames(res_abund) <- c("Taxa", "Sample", "Abund")
-			res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
-			res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
-			colnames(res_abund)[colnames(res_abund) == group] <- "Group"
-			#######################################
 			if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC", "ALDEx2_t")){
 				if(taxa_level == "all"){
 					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
@@ -611,6 +606,24 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output$P.adj <- output[, ALDEx2_sig %>% .[. %in% colnames(output)] %>% .[1]]
 				}
 			}
+			#######################################
+			# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
+			if(grepl("lefse", method, ignore.case = TRUE)){
+				res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
+			}else{
+				if(grepl("rf", method, ignore.case = TRUE)){
+					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
+				}else{
+					res_abund <- reshape2::melt(rownames_to_column(abund_table, "Taxa"), id.vars = "Taxa")
+				}
+			}
+			# further calculate mean and sd of res_abund with group parameter
+			if(!is.null(group)){
+				colnames(res_abund) <- c("Taxa", "Sample", "Abund")
+				res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
+				res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
+				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
+			}
 			if(method %in% c("metagenomeSeq", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")){
 				output %<>% dropallfactors(unfac2num = TRUE)
 				colnames(output)[1:2] <- c("Comparison", "Taxa")
@@ -699,7 +712,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_data <- self$res_abund
 			method <- self$method
 			diff_data <- self$res_diff
-
+			if(method == "anova_set"){
+				stop("The function can not be applied to multi-way anova!")
+			}
 			# sort according to different columns
 			if(method == "metastat"){
 				message('Reorder taxa according to qvalue in res_diff from low to high ...')
@@ -955,6 +970,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 			){
 			use_data <- self$res_diff
 			method <- self$method
+			if(method == "anova_set"){
+				stop("The function can not be applied to multi-way anova!")
+			}
 			if(method == "lefse"){
 				colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
 				ylab_title <- "LDA score"

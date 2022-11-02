@@ -125,7 +125,9 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         see also the test parameter in \code{ALDEx2::aldex} function.}
 }}
 
-\item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table}.}
+\item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
+It is necessary when method is not "anova" or method is "anova" but anova_set is not provided.
+Once group is provided, the return res_abund will have mean and sd values for group.}
 
 \item{\code{taxa_level}}{default "all"; 'all' represents using abundance data at all taxonomic ranks; 
 For testing at a specific rank, provide taxonomic rank name, such as "Genus".
