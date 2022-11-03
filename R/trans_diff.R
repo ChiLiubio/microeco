@@ -29,6 +29,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
+		#'        call \code{ancombc2} function from \code{ANCOMBC} package; 
 		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
 		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
 		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
@@ -58,14 +59,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package when method = "rf".
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".
 		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.
-		#' @param ANCOMBC_formula default NULL; same with the formula parameter in \code{ANCOMBC::ancombc} function; If NULL; assign the group parameter to it automatically.
 		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
 		#'   applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
 		#'   for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
 		#'   and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
 		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter);
+		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level and global parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
@@ -102,7 +102,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 			rf_ntree = 1000,
 			group_choose_paired = NULL,
 			metagenomeSeq_count = 1,
-			ANCOMBC_formula = NULL,
 			ALDEx2_sig = c("wi.eBH", "kw.eBH"),
 			...
 			){
@@ -527,17 +526,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(!require("file2meco")){
 					stop("Please install file2meco package! The function meco2phyloseq is required!")
 				}
-				if(is.null(ANCOMBC_formula)){
-					ANCOMBC_formula <- group
-				}
 				if(ncol(all_name) > 1){
-					message("First run the global test ...")
+					message("First run the global test for multiple groups ...")
 					use_dataset <- clone(tmp_dataset)
 					suppressMessages(use_dataset$cal_abund(rel = FALSE))
 					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 					newdata$tidy_dataset()
 					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ancombc(phyloseq = newdata, group = group, formula = ANCOMBC_formula, global = TRUE, ...)
+					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, ...)
 					res <- res_raw$res_global
 					colnames(res) <- c("W", "P.unadj", "P.adj", "diff_abn")
 					res <- cbind.data.frame(feature = rownames(res), res)
@@ -546,9 +542,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					res <- cbind.data.frame(compare = comparisions, res)
 					output <- rbind.data.frame(output, res)
 				}
-				message("Total ", ncol(all_name), " paired group for test ...")
+				# for paired test
+				message("Total ", ncol(all_name), " paired groups for test ...")
 				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
+					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
 					use_dataset <- clone(tmp_dataset)
 					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
 					use_dataset$tidy_dataset()
@@ -556,10 +553,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 					newdata$tidy_dataset()
 					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ancombc(phyloseq = newdata, group = group, formula = ANCOMBC_formula, ...)
+					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, ...)
 					res_raw2 <- res_raw$res
-					res <- data.frame(feature = rownames(res_raw2$W), W = res_raw2$W[, 1], P.unadj = res_raw2$p_val[, 1], 
-						P.adj = res_raw2$q_val[, 1], diff_abn = res_raw2$diff_abn[, 1])
+					res <- data.frame(feature = rownames(res_raw2), 
+						W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
+						P.unadj = res_raw2[, which(grepl("^p_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
+						P.adj = res_raw2[, which(grepl("^q_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
+						diff_abn = res_raw2[, which(grepl("^diff_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))])
 					rownames(res) <- NULL
 					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
 					res <- cbind.data.frame(compare = add_name, res)
@@ -581,7 +581,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					suppressMessages(use_dataset$cal_abund(rel = FALSE))
 					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 					newdata$tidy_dataset()
-					
 					res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
 					res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
 					rownames(res) <- NULL

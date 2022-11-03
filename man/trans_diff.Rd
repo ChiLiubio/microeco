@@ -92,7 +92,6 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   rf_ntree = 1000,
   group_choose_paired = NULL,
   metagenomeSeq_count = 1,
-  ANCOMBC_formula = NULL,
   ALDEx2_sig = c("wi.eBH", "kw.eBH"),
   ...
 )}\if{html}{\out{</div>}}
@@ -117,6 +116,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
   \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
+     call \code{ancombc2} function from \code{ANCOMBC} package; 
      Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
      (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
   \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
@@ -160,8 +160,6 @@ NULL mean disuse the p value adjustment; So when \code{p_adjust_method = NULL}, 
 
 \item{\code{metagenomeSeq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.}
 
-\item{\code{ANCOMBC_formula}}{default NULL; same with the formula parameter in \code{ANCOMBC::ancombc} function; If NULL; assign the group parameter to it automatically.}
-
 \item{\code{ALDEx2_sig}}{default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
 applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
 for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
@@ -169,7 +167,7 @@ and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw
 the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except formula and global parameters; please see ANCOMBC_formula parameter);
+passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level and global parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".}
 }
 \if{html}{\out{</div>}}
