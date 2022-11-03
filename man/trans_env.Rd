@@ -193,10 +193,7 @@ Test the difference of environmental variable across groups.
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_diff(
   group = NULL,
   by_group = NULL,
-  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
-  measure = NULL,
-  p_adjust_method = "fdr",
-  anova_set = NULL,
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1],
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -214,22 +211,18 @@ Test the difference of environmental variable across groups.
   \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-  \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+  \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
+        For multi-factor anova, see \code{aov}}
+  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+        see \code{scheirerRayHare} function of \code{rcompanion} package}
 }}
 
-\item{\code{measure}}{default NULL; a vector; if null, all variables will be calculated.}
-
-\item{\code{p_adjust_method}}{default "fdr"; \code{p.adjust} method; see method parameter of \code{p.adjust} function for available options.}
-
-\item{\code{anova_set}}{default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.}
-
-\item{\code{...}}{parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{FSA::dunnTest} function (\code{method = "KW_dunn"}) or
-\code{agricolae::duncan.test} (\code{method = "anova"}).}
+\item{\code{...}}{parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_diff} in object. A \code{data.frame} generally. A list for anova when \code{anova_set} is assigned.
+\code{res_diff} in object.
   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 }

@@ -8,7 +8,8 @@ This class is a wrapper for a series of differential abundance test and indicato
  LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
  non-parametric Kruskal-Wallis Rank Sum Test,
- Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t test, anova, 
+ Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t-test, anova, 
+ Scheirer Ray Hare test, 
  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7> and R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>.
 }
@@ -77,7 +78,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
-    "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
+    "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -112,7 +113,9 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in \code{FSA} package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-  \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+  \item{\strong{'anova'}}{ANOVA for one-way or multi-factor analysis; see \code{cal_diff} function of \code{trans_alpha} class}
+  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+        see \code{scheirerRayHare} function of \code{rcompanion} package}
   \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
      Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
      (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
@@ -126,7 +129,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 }}
 
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
-It is necessary when method is not "anova" or method is "anova" but anova_set is not provided.
+It is necessary when method is not "anova" or method is "anova" but formula is not provided.
 Once group is provided, the return res_abund will have mean and sd values for group.}
 
 \item{\code{taxa_level}}{default "all"; 'all' represents using abundance data at all taxonomic ranks; 

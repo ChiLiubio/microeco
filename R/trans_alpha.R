@@ -64,7 +64,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			self$by_group <- by_group
 		},
 		#' @description
-		#' Test the difference of alpha diversity across groups.
+		#' Test the difference of alpha diversity.
 		#'
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
@@ -72,16 +72,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+		#'     \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
+		#'     	  For multi-factor anova, see \code{\link{aov}}}
+		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'   }
 		#' @param measure default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 		#'    NULL can disuse the p value adjustment.
-		#' @param anova_set default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.
+		#' @param formula default NULL; applied to two-way or multi-factor anova analysis when method = \code{"anova"} or \code{"scheirerRayHare"}; 
+		#'   specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
+		#'   such as \code{'block + N*P*K'}.
 		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
 		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}).
-		#' @return \code{res_diff} in object. A \code{data.frame} generally. A list for anova when anova_set is assigned.
+		#' @return \code{res_diff} in object with the format \code{data.frame}.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
 		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
@@ -91,15 +96,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1 <- trans_alpha$new(dataset = dataset, group = "Type", by_group = "Group")
 		#' t1$cal_diff(method = "anova")
 		#' }
-		cal_diff = function(method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
-			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova"))
+		cal_diff = function(
+			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1], 
+			measure = NULL, 
+			p_adjust_method = "fdr", 
+			formula = NULL,
+			...
+			){
+			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare"))
 			group <- self$group
 			if(is.null(group)){
-				if(method != "anova"){
+				if(!method %in% c("anova", "scheirerRayHare")){
 					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
 				}else{
-					if(is.null(anova_set)){
-						stop("Both anova_set and group is NULL! Please provide either group or anova_set!")
+					if(is.null(formula)){
+						stop("Both formula and group is NULL! Please provide either group or formula!")
 					}
 				}
 			}
@@ -117,9 +128,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				if(method %in% c("wilcox", "t.test") & length(unique(as.character(data_alpha[, group]))) > 10){
 					stop("There are too many groups to do paired comparisons! please use method = 'KW' or 'KW_dunn' or 'anova' !")
 				}
-			}
-			if(!is.null(anova_set)){
-				method <- "anova"
 			}
 			if(!is.null(by_group)){
 				all_bygroups <- as.character(data_alpha[, by_group])
@@ -186,54 +194,56 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}
 			}
-			if(method == "anova"){
-				if(is.null(anova_set)){
-					compare_result <- NULL
-				}else{
-					compare_result <- list()
-				}
-				if(is.null(anova_set)){
-					if(is.null(by_group)){
-						for(k in measure){
-							div_table <- data_alpha[data_alpha$Measure == k, ]
-							compare_result <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = compare_result, ...)
-						}
-						colnames(compare_result)[1] <- "Group"
-					}else{
-						for(each_group in unique_bygroups){
-							test <- data_alpha[all_bygroups == each_group, ]
-							if(length(unique(as.character(test[, group]))) < 2){
-								message("Skip the by_group: ", each_group, " as groups number < 2!")
-								next
-							}
-							tmp_measure <- NULL
-							for(k in measure){
-								# regenerate table for test
-								div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
-								tmp_measure <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = tmp_measure, ...)
-							}
-							if(!is.null(tmp_measure)){
-								tmp_measure <- cbind.data.frame(by_group = each_group, tmp_measure)
-								compare_result %<>% rbind.data.frame(., tmp_measure)
-							}
-						}
-						colnames(compare_result)[2] <- "Group"
-					}
-				}else{
-					# to make multi-factor distinct from one-way anova
-					method <- "anova_set"
-					compare_result <- data.frame()
+			if(method == "anova" & is.null(formula)){
+				compare_result <- NULL
+				if(is.null(by_group)){
 					for(k in measure){
 						div_table <- data_alpha[data_alpha$Measure == k, ]
-						model <- aov(reformulate(anova_set, "Value"), div_table)
-						tmp <- summary(model)[[1]]
-						tmp1 <- data.frame(method = paste0("anova_set for ", anova_set), Measure = k, Factors = rownames(tmp), 
-							Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
-						compare_result %<>% rbind(., tmp1)
+						compare_result <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = compare_result, ...)
 					}
-					compare_result$Significance <- cut(compare_result$P.unadj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
+					colnames(compare_result)[1] <- "Group"
+				}else{
+					for(each_group in unique_bygroups){
+						test <- data_alpha[all_bygroups == each_group, ]
+						if(length(unique(as.character(test[, group]))) < 2){
+							message("Skip the by_group: ", each_group, " as groups number < 2!")
+							next
+						}
+						tmp_measure <- NULL
+						for(k in measure){
+							# regenerate table for test
+							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
+							tmp_measure <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = tmp_measure, ...)
+						}
+						if(!is.null(tmp_measure)){
+							tmp_measure <- cbind.data.frame(by_group = each_group, tmp_measure)
+							compare_result %<>% rbind.data.frame(., tmp_measure)
+						}
+					}
+					colnames(compare_result)[2] <- "Group"
 				}
-			}else{
+			}
+			if(method %in% c("anova", "scheirerRayHare") & !is.null(formula)){
+				# to make multi-factor distinct from one-way anova
+				compare_result <- data.frame()
+				for(k in measure){
+					div_table <- data_alpha[data_alpha$Measure == k, ]
+					if(method == "anova"){
+						model <- aov(reformulate(formula, "Value"), div_table)
+						tmp <- summary(model)[[1]]
+						tmp1 <- data.frame(method = paste0(method, " formula for ", formula), Measure = k, Factors = rownames(tmp), 
+							Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
+					}else{
+						invisible(capture.output(tmp <- rcompanion::scheirerRayHare(reformulate(formula, "Value"), div_table)))
+						tmp1 <- data.frame(method = paste0(method, " formula for ", formula), Measure = k, Factors = rownames(tmp), 
+							Df = tmp$Df, Fvalue = tmp$H, P.unadj = tmp$p.value)
+					}
+					compare_result %<>% rbind(., tmp1)
+				}
+				compare_result$Significance <- cut(compare_result$P.unadj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
+				method <- paste0(method, "-formula")
+			}
+			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare"), "-formula"))){
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 				compare_result$Significance %<>% as.character
 			}

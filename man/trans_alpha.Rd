@@ -92,13 +92,13 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \if{html}{\out{<a id="method-trans_alpha-cal_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_alpha-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
-Test the difference of alpha diversity across groups.
+Test the difference of alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
-  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1],
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1],
   measure = NULL,
   p_adjust_method = "fdr",
-  anova_set = NULL,
+  formula = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -112,7 +112,10 @@ Test the difference of alpha diversity across groups.
   \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-  \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+  \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
+        For multi-factor anova, see \code{\link{aov}}}
+  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+        see \code{scheirerRayHare} function of \code{rcompanion} package}
 }}
 
 \item{\code{measure}}{default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
@@ -121,7 +124,9 @@ e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 NULL can disuse the p value adjustment.}
 
-\item{\code{anova_set}}{default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.}
+\item{\code{formula}}{default NULL; applied to two-way or multi-factor anova analysis when method = \code{"anova"} or \code{"scheirerRayHare"}; 
+specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
+such as \code{'block + N*P*K'}.}
 
 \item{\code{...}}{parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
 (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}).}
@@ -129,7 +134,7 @@ NULL can disuse the p value adjustment.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_diff} in object. A \code{data.frame} generally. A list for anova when anova_set is assigned.
+\code{res_diff} in object with the format \code{data.frame}.
   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 }

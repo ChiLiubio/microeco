@@ -6,7 +6,8 @@
 #'  LEfSe based on the Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>,
 #'  random forest <doi:10.1016/j.geoderma.2018.09.035>, metastat based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>,
 #'  non-parametric Kruskal-Wallis Rank Sum Test,
-#'  Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t test, anova, 
+#'  Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t-test, anova, 
+#'  Scheirer Ray Hare test, 
 #'  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
 #'  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7> and R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>.
 #' 
@@ -24,7 +25,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+		#'     \item{\strong{'anova'}}{ANOVA for one-way or multi-factor analysis; see \code{cal_diff} function of \code{trans_alpha} class}
+		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
 		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
 		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
@@ -37,7 +40,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
-		#' 	  It is necessary when method is not "anova" or method is "anova" but anova_set is not provided.
+		#' 	  It is necessary when method is not "anova" or method is "anova" but formula is not provided.
 		#' 	  Once group is provided, the return res_abund will have mean and sd values for group.
 		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
@@ -85,7 +88,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
+			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -109,7 +112,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			# in case of dataset changes
 			tmp_dataset <- clone(dataset)
 			sampleinfo <- tmp_dataset$sample_table
-			if(is.null(group) & method != "anova"){
+			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare")){
 				stop("The group parameter need to be provided for differential test among groups!")
 			}else{
 				if(!is.null(group)){
@@ -122,7 +125,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 			}
-			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw"))
+			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
+				"anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw"))
 			
 			if(!is.null(group)){
 				if(is.factor(sampleinfo[, group])){
@@ -163,7 +167,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 			################################
 			
-			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova")){
+			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")){
 				if(method == "KW_dunn"){
 					# filter taxa with equal abudance across all samples
 					abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
@@ -174,7 +178,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
 				suppressMessages(tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...))
 				output <- tem_data1$res_diff
-				if(method != "anova"){
+				if(! method %in% c("anova")){
 					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
 				}else{
 					if(tem_data1$cal_diff_method == "anova"){
@@ -712,8 +716,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_data <- self$res_abund
 			method <- self$method
 			diff_data <- self$res_diff
-			if(method == "anova_set"){
-				stop("The function can not be applied to multi-way anova!")
+			if(grepl("formula", method)){
+				stop("The function can not be applied to multi-factor analysis!")
 			}
 			# sort according to different columns
 			if(method == "metastat"){
@@ -970,7 +974,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			){
 			use_data <- self$res_diff
 			method <- self$method
-			if(method == "anova_set"){
+			if(grepl("formula", method)){
 				stop("The function can not be applied to multi-way anova!")
 			}
 			if(method == "lefse"){

@@ -92,14 +92,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-		#'     \item{\strong{'anova'}}{Duncan's multiple range test for anova}
+		#'     \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
+		#'     	  For multi-factor anova, see \code{aov}}
+		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'   }
-		#' @param measure default NULL; a vector; if null, all variables will be calculated.
-		#' @param p_adjust_method default "fdr"; \code{p.adjust} method; see method parameter of \code{p.adjust} function for available options.
-		#' @param anova_set default NULL; specified group set for anova, such as \code{'block + N*P*K'}, see \code{\link{aov}}.
-		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{FSA::dunnTest} function (\code{method = "KW_dunn"}) or
-		#'   \code{agricolae::duncan.test} (\code{method = "anova"}).
-		#' @return \code{res_diff} in object. A \code{data.frame} generally. A list for anova when \code{anova_set} is assigned.
+		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
+		#' @return \code{res_diff} in object.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
 		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
@@ -108,11 +107,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$cal_diff(group = "Group", method = "KW_dunn")
 		#' t1$cal_diff(group = "Group", method = "anova")
 		#' }
-		cal_diff = function(group = NULL, by_group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova")[1], 
-			measure = NULL, p_adjust_method = "fdr", anova_set = NULL, ...){
-			if(is.null(group)){
-				stop("Please provide the group parameter!")
-			}else{
+		cal_diff = function(group = NULL, by_group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1], ...){
+			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare")){
+				stop("The group parameter is necessary for the method: ", method, "!")
+			}
+			if(!is.null(group)){
 				if(!group %in% colnames(self$dataset$sample_table)){
 					stop("Provided parameter group must be one colname of sample_table! Please check it!")
 				}
@@ -126,7 +125,7 @@ trans_env <- R6Class(classname = "trans_env",
 			# use test method in trans_alpha
 			tem_data$alpha_diversity <- env_data
 			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group))
-			suppressMessages(tem_data1$cal_diff(method = method, measure = measure, p_adjust_method = p_adjust_method, anova_set = anova_set, ...))
+			suppressMessages(tem_data1$cal_diff(method = method, ...))
 			self$res_diff <- tem_data1$res_diff
 			self$res_diff_tmp <- tem_data1
 			self$group <- group
