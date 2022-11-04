@@ -105,13 +105,19 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			){
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare"))
 			group <- self$group
-			if(is.null(group)){
-				if(!method %in% c("anova", "scheirerRayHare")){
+			if(method == "scheirerRayHare" & is.null(formula)){
+				if(is.null(formula)){
+					stop("formula is necessary! Please provide formula parameter!")
+				}
+			}
+			if(!method %in% c("anova", "scheirerRayHare")){
+				if(is.null(group)){
 					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
-				}else{
-					if(is.null(formula)){
-						stop("Both formula and group is NULL! Please provide either group or formula!")
-					}
+				}
+			}
+			if(method == "anova"){
+				if(is.null(group) & is.null(formula)){
+					stop("Both formula and group is NULL! Please provide either formula or group in the object creation!")
 				}
 			}
 			# 'by_group' for test inside each by_group instead of all groups in 'group'
