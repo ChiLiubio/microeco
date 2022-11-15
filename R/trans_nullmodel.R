@@ -13,8 +13,8 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param filter_thres default 0; the relative abundance threshold. 
 		#' @param taxa_number default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.
-		#' @param group default NULL; which group column name in sample_table is selected.
-		#' @param select_group default NULL; the group name, used following the group to filter samples.
+		#' @param group default NULL; which column name in sample_table is selected as the group for the following selection.
+		#' @param select_group default NULL; the full name in \code{group}, which is used to select samples.
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
@@ -35,7 +35,17 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			){
 			use_set <- clone(dataset)
 			if(!is.null(group)){
-				use_set$sample_table <- base::subset(use_set$sample_table, use_set$sample_table[, group] %in% select_group)
+				if(!group %in% colnames(use_set$sample_table)){
+					stop("Provided group parameter is not the colname of sample_table!")
+				}
+				if(is.null(select_group)){
+					stop("Parameter group is provided, but select_group is not provided!")
+				}else{
+					use_set$sample_table %<>% base::subset(.[, group] %in% select_group)
+					if(nrow(use_set$sample_table) == 0){
+						stop("Please check the input parameter select_group! After selection, no row is remained!")
+					}
+				}
 			}
 			use_set$tidy_dataset()
 

@@ -30,6 +30,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
 		#'        call \code{ancombc2} function from \code{ANCOMBC} package; 
+		#'        only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;
+		#'        For more flexible usages, please see and use \code{ancombc2} function directly;
 		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
 		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
 		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
@@ -65,7 +67,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
 		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level and global parameters);
+		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
@@ -132,7 +134,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					self$group_order <- levels(sampleinfo[, group])
 					sampleinfo[, group] %<>% as.character
 				}
-			}			
+			}
 			################################
 			# generate abudance table
 			if(is.null(tmp_dataset$taxa_abund)){
@@ -533,7 +535,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 					newdata$tidy_dataset()
 					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, ...)
+					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
 					res <- res_raw$res_global
 					colnames(res) <- c("W", "P.unadj", "P.adj", "diff_abn")
 					res <- cbind.data.frame(feature = rownames(res), res)
@@ -553,7 +555,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 					newdata$tidy_dataset()
 					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, ...)
+					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
 					res_raw2 <- res_raw$res
 					res <- data.frame(feature = rownames(res_raw2), 
 						W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 

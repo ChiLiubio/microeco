@@ -175,9 +175,9 @@ t1$cal_tNST_test()
 
 \item{\code{taxa_number}}{default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.}
 
-\item{\code{group}}{default NULL; which group column name in sample_table is selected.}
+\item{\code{group}}{default NULL; which column name in sample_table is selected as the group for the following selection.}
 
-\item{\code{select_group}}{default NULL; the group name, used following the group to filter samples.}
+\item{\code{select_group}}{default NULL; the full name in \code{group}, which is used to select samples.}
 
 \item{\code{env_cols}}{default NULL; number or name vector to select the environmental data in dataset$sample_table.}
 

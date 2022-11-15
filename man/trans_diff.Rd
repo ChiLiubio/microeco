@@ -117,6 +117,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         see \code{scheirerRayHare} function of \code{rcompanion} package}
   \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
      call \code{ancombc2} function from \code{ANCOMBC} package; 
+     only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;
+     For more flexible usages, please see and use \code{ancombc2} function directly;
      Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
      (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
   \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
@@ -167,7 +169,7 @@ and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw
 the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
-passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level and global parameters);
+passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".}
 }
 \if{html}{\out{</div>}}
