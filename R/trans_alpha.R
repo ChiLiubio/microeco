@@ -170,7 +170,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						res_list <- private$kwwitt_test(method = method, input_table = div_table, group = group, res_list = res_list, measure = k, by_ID = by_ID, ...)
 					}else{
 						for(each_group in unique_bygroups){
-							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
+							if(is.null(by_ID)){
+								div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
+							}else{
+								div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, by_ID, "Value")]
+							}
 							if(length(unique(as.character(div_table[, group]))) < 2){
 								next
 							}
