@@ -8,8 +8,12 @@
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param group default NULL; the sample column used for the statistics; If provided, can return \code{data_stat}.
-		#' @param by_group default NULL; perform the differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).
+		#' @param group default NULL; a column of sample_table used for the statistics; If provided, can return \code{data_stat}.
+		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
+		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
+		#' @param by_ID default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
+		#'   such as the data of plant compartments for different plant species (ID). 
+		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
 		#' @param order_x default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.
 		#' @return \code{data_alpha} and \code{data_stat} stored in the object.
 		#' @examples
@@ -17,7 +21,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' data(dataset)
 		#' t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 		#' }
-		initialize = function(dataset = NULL, group = NULL, by_group = NULL, order_x = NULL) {
+		initialize = function(dataset = NULL, group = NULL, by_group = NULL, by_ID = NULL, order_x = NULL) {
 			if(is.null(dataset)){
 				message("Parameter dataset not provided. Please run the functions with your other customized data!")
 				self$data_alpha <- NULL
@@ -48,6 +52,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					stop("Provided by_group: ", by_group, " is not found in dataset$sample_table!")
 				}
 			}
+			if(! is.null(by_ID)){
+				if(! by_ID %in% colnames(data_alpha)){
+					stop("Provided by_ID: ", by_ID, " is not found in dataset$sample_table!")
+				}
+			}
 			if(! is.null(group)){
 				if(is.null(dataset)){
 					stop("Parameter dataset not provided, but group is provided!")
@@ -62,6 +71,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			self$group <- group
 			self$by_group <- by_group
+			self$by_ID <- by_ID
 		},
 		#' @description
 		#' Test the difference of alpha diversity.
@@ -105,6 +115,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			){
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare"))
 			group <- self$group
+			
 			if(method == "scheirerRayHare" & is.null(formula)){
 				if(is.null(formula)){
 					stop("formula is necessary! Please provide formula parameter!")
@@ -123,6 +134,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			# 'by_group' for test inside each by_group instead of all groups in 'group'
 			by_group <- self$by_group
 			data_alpha <- self$data_alpha
+			by_ID <- self$by_ID
+
 			if(is.null(measure)){
 				measure <- unique(as.character(data_alpha$Measure))
 			}else{
@@ -149,8 +162,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				res_list$group_by <- c()
 				for(k in measure){
 					if(is.null(by_group)){
-						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
-						res_list <- private$kwwitt_test(method = method, input_table = div_table, group = group, res_list = res_list, measure = k, ...)
+						if(is.null(by_ID)){
+							div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
+						}else{
+							div_table <- data_alpha[data_alpha$Measure == k, c(group, by_ID, "Value")]
+						}
+						res_list <- private$kwwitt_test(method = method, input_table = div_table, group = group, res_list = res_list, measure = k, by_ID = by_ID, ...)
 					}else{
 						for(each_group in unique_bygroups){
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
@@ -158,7 +175,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								next
 							}
 							res_list <- private$kwwitt_test(method = method, input_table = div_table, group = group, res_list = res_list, 
-								group_by = each_group, measure = k, ...)
+								group_by = each_group, measure = k, by_ID = by_ID, ...)
 						}
 					}
 				}
@@ -556,9 +573,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(!is.null(self$data_stat)) cat(paste("data_stat have", ncol(self$data_stat), "columns: ", paste0(colnames(self$data_stat), collapse = ", "), "\n"))
 			invisible(self)
 		}
-		),
+	),
 	private = list(
-		kwwitt_test = function(method = NULL, input_table = NULL, group = NULL, res_list = NULL, group_by = NULL, measure = NULL, ...){
+		kwwitt_test = function(method = NULL, input_table = NULL, group = NULL, res_list = NULL, group_by = NULL, measure = NULL, by_ID = NULL, ...){
+			if(!is.null(by_ID)){
+				if(method == "KW"){
+					stop("Please use wilcox instead of KW when by_ID is provided!")
+				}
+			}
 			groupvec <- as.character(input_table[, group])
 			use_comp_group_num <- unique(c(2, length(unique(groupvec))))
 			for(i in use_comp_group_num){
@@ -566,15 +588,40 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				use_method <- switch(method, KW = "Kruskal-Wallis Rank Sum Test", wilcox = "Wilcoxon Rank Sum Test", t.test = "t.test")
 				for(j in 1:ncol(all_name)){
 					table_compare <- input_table[groupvec %in% as.character(all_name[, j]), ]
-					table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
-					formu <- reformulate(group, "Value")
+					if(is.null(by_ID)){
+						table_compare[, group] %<>% factor(., levels = unique(as.character(.)))
+						formu <- reformulate(group, "Value")
+					}else{
+						table_compare %<>% dropallfactors
+						tmp <- table(table_compare[, by_ID])
+						# check the missing item for paired comparison
+						if(length(unique(tmp)) > 1){
+							# delete the missing item
+							tmp %<>% .[. != min(.)]
+							table_compare %<>% .[.[, by_ID] %in% names(tmp), ]
+						}
+						order_ID <- unique(table_compare[, by_ID])
+						order_group <- unique(table_compare[, group])
+						x_value_table <- table_compare[table_compare[, group] == order_group[1], ]
+						y_value_table <- table_compare[table_compare[, group] == order_group[2], ]
+						x_value <- x_value_table[match(x_value_table[, by_ID], order_ID), "Value"]
+						y_value <- y_value_table[match(y_value_table[, by_ID], order_ID), "Value"]
+					}
 					if(i == 2){
 						if(method == "t.test"){
-							res1 <- t.test(formu, data = table_compare, ...)
+							if(is.null(by_ID)){
+								res1 <- t.test(formu, data = table_compare, ...)
+							}else{
+								res1 <- t.test(x = x_value, y = y_value, paired = TRUE, ...)
+							}
 							max_group_select <- tapply(table_compare$Value, table_compare[, group], mean) %>% {.[which.max(.)]} %>% names
 						}else{
 							if(method == "wilcox"){
-								res1 <- suppressWarnings(wilcox.test(formu, data = table_compare, ...))
+								if(is.null(by_ID)){
+									res1 <- suppressWarnings(wilcox.test(formu, data = table_compare, ...))
+								}else{
+									res1 <- suppressWarnings(wilcox.test(x = x_value, y = y_value, paired = TRUE, ...))
+								}
 								max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
 							}else{
 								if(method == "KW" & length(use_comp_group_num) == 1){

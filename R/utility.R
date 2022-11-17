@@ -106,11 +106,11 @@ tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore
 }
 
 # inner function
-summarySE_inter = function(usedata = NULL, measurevar, groupvars = NULL, na.rm = TRUE) {
-	length2 <- function(x, na.rm=TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
+summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm = TRUE) {
+	length2 <- function(x, na.rm = TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
 	datac <- usedata %>% 
 			dplyr::grouped_df(groupvars) %>% 
-			dplyr::summarise(N = length2(!!sym(measurevar), na.rm=na.rm), Mean = mean(!!sym(measurevar), na.rm=na.rm), SD = stats::sd(!!sym(measurevar), na.rm=na.rm)) %>%
+			dplyr::summarise(N = length2(!!sym(measurevar), na.rm = na.rm), Mean = mean(!!sym(measurevar), na.rm = na.rm), SD = stats::sd(!!sym(measurevar), na.rm = na.rm)) %>%
 			as.data.frame
 	datac$SE <- datac$SD / sqrt(datac$N)
 	datac

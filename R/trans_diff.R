@@ -69,6 +69,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
 		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".
+		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
+		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
+		#'   Same with the \code{by_group} parameter in trans_alpha class. 
+		#'   Only useful when method is one of \code{c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")}.
+		#' @param by_ID default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
+		#'   such as the data of plant compartments for different plant species (ID). 
+		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
+		#'   Same with the \code{by_ID} parameter in trans_alpha class.
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
@@ -105,6 +113,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			group_choose_paired = NULL,
 			metagenomeSeq_count = 1,
 			ALDEx2_sig = c("wi.eBH", "kw.eBH"),
+			by_group = NULL,
+			by_ID = NULL,
 			...
 			){
 			if(is.null(dataset)){
@@ -176,7 +186,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tem_data <- clone(tmp_dataset)
 				# use test method in trans_alpha
 				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
-				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group))
+				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
 				suppressMessages(tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...))
 				output <- tem_data1$res_diff
 				if(! method %in% c("anova")){
