@@ -366,6 +366,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 					stop("Input by_group parameter must be colnames of sample_table in the microtable object!")
 				}
 			}
+			if(is.null(self$group)){
+				stop("The group inside the object is NULL! ",
+					"Please provide the group parameter when creating the trans_beta object!")
+			}
 			if(within_group){
 				res <- private$within_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
 			}else{
