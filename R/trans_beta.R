@@ -284,7 +284,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param manova_all default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 		#'    FALSE represents test for all the paired groups.
 		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
-		#' @param group default NULL; a column name of sample_table used for manova. If NULL, search group stored in the object.
+		#'    manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.
+		#' @param group default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
 		#' @param p_adjust_method default "fdr"; p.adjust method when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
 		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object.
@@ -360,6 +361,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$cal_group_distance(within_group = TRUE)
 		#' }
 		cal_group_distance = function(within_group = TRUE, by_group = NULL){
+			if(!is.null(by_group)){
+				if(!all(by_group %in% colnames(self$sample_table))){
+					stop("Input by_group parameter must be colnames of sample_table in the microtable object!")
+				}
+			}
 			if(within_group){
 				res <- private$within_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
 			}else{
@@ -527,11 +533,6 @@ trans_beta <- R6Class(classname = "trans_beta",
 		),
 	private = list(
 		within_group_distance = function(distance, sampleinfo, type, by_group = NULL){
-			if(!is.null(by_group)){
-				if(!all(by_group %in% colnames(sampleinfo))){
-					stop("Input by_group must be colnames of sample_table in the microtable object!")
-				}
-			}
 			all_group <- as.character(sampleinfo[, type]) %>% unique
 			res <- data.frame()
 			for(i in all_group){
@@ -590,6 +591,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 					}
 				}
 				res %<>% rbind(., distance_res)
+			}
+			if(nrow(res) == 0){
+				if(!is.null(by_group)){
+					stop("No result is obtained! Please check the input by_group parameter! ", 
+						"This probably comes from the wrong names in ", by_group, " of the sample information table! ",
+						"Wrong names can lead to no overlap among ", type, " for each element of ", by_group, "!")
+				}
 			}
 			colnames(res)[2] <- type
 			if(ncol(res) > 2){

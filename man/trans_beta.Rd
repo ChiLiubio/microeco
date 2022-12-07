@@ -272,9 +272,10 @@ Calculate perMANOVA based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R veg
 \item{\code{manova_all}}{default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 FALSE represents test for all the paired groups.}
 
-\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.}
+\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
+manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.}
 
-\item{\code{group}}{default NULL; a column name of sample_table used for manova. If NULL, search group stored in the object.}
+\item{\code{group}}{default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.}
 
