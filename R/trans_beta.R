@@ -353,8 +353,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
 		#' @param by_group default NULL; one colname name of sample_table in \code{microtable} object.
 		#'   If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
-		#'   When \code{within_group = TRUE}, by_group parameter is the format of paired groups.
-		#'   When \code{within_group = FALSE}, by_group parameter is the format same with the group information in \code{sample_table}.
+		#'   When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
+		#'   When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.
 		#' @return \code{res_group_distance} stored in object.
 		#' @examples
 		#' \donttest{
@@ -373,33 +373,40 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			colnames(res)[colnames(res) == "value"] <- "Value"
 			self$res_group_distance <- res
-			self$res_group_distance_bygroup <- by_group
 			message('The result is stored in object$res_group_distance ...')
 		},
 		#' @description
 		#' Differential test of distances among groups.
 		#'
-		#' @param comp_bygroup default FALSE; whether perform the differential test using by_group column coming from the return of function \code{cal_group_distance}.
+		#' @param group default NULL; a column name of \code{object$res_group_distance} used for the statistics; If NULL, use the \code{group} inside the object.
+		#' @param by_group default NULL; a column of \code{object$res_group_distance} used to perform the differential test 
+		#'   among elements in \code{group} parameter for each element in \code{by_group} parameter. So \code{by_group} has a larger scale than \code{group} parameter.
+		#'   This \code{by_group} is very different from the \code{by_group} parameter in the \code{cal_group_distance} function.
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
 		#' @return \code{res_group_distance_diff} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance_diff()
 		#' }
-		cal_group_distance_diff = function(comp_bygroup = FALSE, ...){
+		cal_group_distance_diff = function(group = NULL, by_group = NULL, ...){
 			res_group_distance <- self$res_group_distance
 			# use method in trans_alpha
 			temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
 			res_group_distance$Measure <- "group_distance"
 			temp1$data_alpha <- res_group_distance
-			if(!comp_bygroup){
+			if(is.null(group)){
 				temp1$group <- self$group
 			}else{
-				if(!is.null(self$res_group_distance_bygroup)){
-					temp1$group <- self$res_group_distance_bygroup
-				}else{
-					stop("comp_bygroup is TRUE, but no by_group found! Please rerun cal_group_distance function!")
+				temp1$group <- group
+			}
+			if(! temp1$group %in% colnames(res_group_distance)){
+				stop("The group parameter: ", group, " is not in object$res_group_distance!")
+			}
+			if(!is.null(by_group)){
+				if(! by_group %in% colnames(res_group_distance)){
+					stop("Provided by_group parameter: ", by_group, " is not in object$res_group_distance!")
 				}
+				temp1$by_group <- by_group
 			}
 			suppressMessages(temp1$cal_diff(...))
 			self$res_group_distance_diff <- temp1$res_diff

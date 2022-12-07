@@ -339,8 +339,8 @@ Transform sample distances within groups or between groups.
 
 \item{\code{by_group}}{default NULL; one colname name of sample_table in \code{microtable} object.
 If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
-When \code{within_group = TRUE}, by_group parameter is the format of paired groups.
-When \code{within_group = FALSE}, by_group parameter is the format same with the group information in \code{sample_table}.}
+When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
+When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -364,13 +364,17 @@ t1$cal_group_distance(within_group = TRUE)
 \subsection{Method \code{cal_group_distance_diff()}}{
 Differential test of distances among groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance_diff(comp_bygroup = FALSE, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance_diff(group = NULL, by_group = NULL, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{comp_bygroup}}{default FALSE; whether perform the differential test using by_group column coming from the return of function \code{cal_group_distance}.}
+\item{\code{group}}{default NULL; a column name of \code{object$res_group_distance} used for the statistics; If NULL, use the \code{group} inside the object.}
+
+\item{\code{by_group}}{default NULL; a column of \code{object$res_group_distance} used to perform the differential test 
+among elements in \code{group} parameter for each element in \code{by_group} parameter. So \code{by_group} has a larger scale than \code{group} parameter.
+This \code{by_group} is very different from the \code{by_group} parameter in the \code{cal_group_distance} function.}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.}
 }
