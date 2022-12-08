@@ -35,7 +35,7 @@ If you do not already have R/RStudio installed, do as follows.
 
 Put R in the computer env PATH, for example your_directory\R-4.1.0\bin\x64 
 
-Open RStudio...Tools...Global Options...Packages, select the appropriate mirror in Primary CRAN repository.
+Open RStudio -> Tools -> Global Options -> Packages, select the appropriate mirror in Primary CRAN repository.
 
 ## Install microeco
 
@@ -58,6 +58,8 @@ devtools::install_github("ChiLiubio/microeco")
 See the detailed package **tutorial** (https://chiliubio.github.io/microeco_tutorial/).
 The tutorial can also be downloaded to the computer to open (https://github.com/ChiLiubio/microeco_tutorial/releases).
 Please use the class name to search the help documents (e.g., `?microtable`).
+Before creating a new issue in the [Issues](https://github.com/ChiLiubio/microeco/issues), 
+please read the guideline (https://chiliubio.github.io/microeco_tutorial/notes.html#github-issues).
 Creating the basic microtable object from other tools/platforms (e.g. QIIME, QIIME2, HUMAnN, Kraken2 and phyloseq) 
 can be easily achieved with the package file2meco (https://github.com/ChiLiubio/file2meco).
 
