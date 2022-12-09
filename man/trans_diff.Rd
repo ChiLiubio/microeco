@@ -238,6 +238,7 @@ Plot the abundance of differential taxa
   y_increase = 0.05,
   text_y_size = 10,
   coord_flip = TRUE,
+  xtext_angle = 45,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -284,9 +285,12 @@ For method = "anova"; the stat position is calculated for each point, i.e. Value
 \item{\code{y_increase}}{default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
 In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.}
 
-\item{\code{text_y_size}}{default 10; the size for the y axis text.}
+\item{\code{text_y_size}}{default 10; the size for the y axis text, i.e. feature text.}
 
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.}
+
+\item{\code{xtext_angle}}{default NULL; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
+only useful when coord_flip = FALSE.}
 
 \item{\code{...}}{parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.}
 }

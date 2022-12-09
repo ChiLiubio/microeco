@@ -688,8 +688,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   For method = "anova"; the stat position is calculated for each point, i.e. Value = Mean+SD or Mean+SE.
 		#' @param y_increase default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
 		#' 	  In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.
-		#' @param text_y_size default 10; the size for the y axis text.
+		#' @param text_y_size default 10; the size for the y axis text, i.e. feature text.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.
+		#' @param xtext_angle default NULL; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
+		#' 	  only useful when coord_flip = FALSE.
 		#' @param ... parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.
 		#' @return ggplot.
 		#' @examples
@@ -722,6 +724,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			y_increase = 0.05,
 			text_y_size = 10,
 			coord_flip = TRUE,
+			xtext_angle = 45,
 			...
 			){
 			abund_data <- self$res_abund
@@ -943,9 +946,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) +
 					theme(axis.title.y = element_blank(), axis.text.y = element_text(size = text_y_size, color = "black"))
 			}else{
-				p <- p + guides(fill = guide_legend(reverse = FALSE, ncol=1), color = "none") +
-					theme(axis.text.x = element_text(angle = 45, colour = "black", vjust = 1, hjust = 1, size = text_y_size)) +
-					theme(axis.title.x = element_blank(), axis.text.x = element_text(size = text_y_size, color = "black")) +
+				p <- p + guides(fill = guide_legend(reverse = FALSE, ncol = 1), color = "none")
+				if(xtext_angle != 0){
+					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = text_y_size))
+				}else{
+					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", size = text_y_size))
+				}
+				p <- p + theme(axis.title.x = element_blank(), axis.text.x = element_text(size = text_y_size, color = "black")) +
 					theme(plot.margin = unit(c(.1, .1, .1, 1), "cm"))
 			}
 			p
