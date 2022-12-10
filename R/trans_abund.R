@@ -230,25 +230,25 @@ trans_abund <- R6Class(classname = "trans_abund",
 				plot_data$Sample %<>% factor(., levels = order_x_clustering)
 			}
 			if(use_alluvium){
-				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy", color = "Taxonomy",  weight = "Abundance", 
-					alluvium = "Taxonomy", stratum = "Taxonomy")) +
+				p <- ggplot(plot_data, aes(
+						x = .data[["Sample"]], y = .data[["Abundance"]], 
+						fill = .data[["Taxonomy"]], color = .data[["Taxonomy"]], 
+						weight = .data[["Abundance"]], 
+						alluvium = .data[["Taxonomy"]], stratum = .data[["Taxonomy"]]
+					)) +
 					ggalluvial::geom_flow(alpha = .4, width = 3/15) +
 					ggalluvial::geom_stratum(width = .2) +
-					scale_color_manual(values = rev(bar_colors_use)) +
-					scale_y_continuous(expand = c(0, 0))
+					scale_color_manual(values = rev(bar_colors_use))
 			}else{
-				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", fill = "Taxonomy"))
+				p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Abundance"]], fill = .data[["Taxonomy"]]))
 				if(bar_type == "full"){
 					if(self$use_percentage == T){
-						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + 
-							scale_y_continuous(expand = c(0, 0))
+						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
 					}else{
 						p <- p + geom_bar(stat = "identity", position = "fill", show.legend = T, width = barwidth)
-						p <- p + scale_y_continuous(limits = c(0,1), expand = c(0, 0))
 					}
 				}else{
-					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth) + 
-						scale_y_continuous(expand = c(0, 0))
+					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
 				}
 			}
 			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("")
@@ -257,7 +257,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}else{
 				p <- p + ylab(self$ylabname)		
 			}
-			if(!is.null(facet)) {
+			if(!is.null(facet)){
 				if(length(facet) == 1){
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 				}else{
@@ -265,24 +265,29 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
+			}else{
+				if(bar_type == "full" & self$use_percentage == FALSE){
+					p <- p + scale_y_continuous(limits = c(0, 1), expand = c(0, 0))
+				}else{
+					p <- p + scale_y_continuous(expand = c(0, 0))
+				}
 			}
+
 			p <- p + theme(panel.grid = element_blank(), panel.border = element_blank()) + 
 				theme(axis.line.y = element_line(color = "grey60", linetype = "solid", lineend = "square"))
 			if(legend_text_italic == T) {
 				p <- p + theme(legend.text = element_text(face = 'italic'))
 			}
 			
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
-			if(!xtext_keep){
-				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
-			}
-			p <- p + theme(axis.title.y= element_text(size=ytitle_size))
+			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size, xtext_keep = xtext_keep)
+
+			p <- p + theme(axis.title.y = element_text(size = ytitle_size))
 			if(xtitle_keep == F) {
 				p <- p + theme(axis.title.x = element_blank())
 			}
-			p <- p + guides(fill=guide_legend(title=self$taxrank))
+			p <- p + guides(fill = guide_legend(title = self$taxrank))
 			if(use_alluvium){
-			p <- p + guides(color = guide_legend(title=self$taxrank))
+				p <- p + guides(color = guide_legend(title = self$taxrank))
 			}
 			p
 		},
@@ -361,7 +366,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 
-				p <- ggplot(plot_data, aes_string(x = "Sample", y = "Taxonomy", label = formatC("Abundance", format = "f", digits = 1)))
+				p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Taxonomy"]], label = .data[[formatC("Abundance", format = "f", digits = 1)]]))
 				
 				if(withmargin == T){
 					p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
@@ -393,10 +398,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if (!is.null(ytext_size)){
 					p <- p + theme(axis.text.y = element_text(size = ytext_size))
 				}
-				p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
-				if(!xtext_keep) {
-					p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.title.x = element_blank())
-				}
+				p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size, xtext_keep = xtext_keep)
 				if(grid_clean){
 					p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
 				}
@@ -433,8 +435,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param middlesize default 1; The middle line size.
 		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
 		#' @param xtext_size default 10; x axis text size.
-		#' @param xtext_keep default TRUE; whether retain x text.
-		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param ... parameters pass to \code{\link{geom_boxplot}}.
 		#' @return ggplot2 plot. 
@@ -455,8 +455,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			middlesize = 1,
 			xtext_type_hor = FALSE,
 			xtext_size = 10,
-			xtext_keep = TRUE,
-			xtitle_keep = TRUE,
 			ytitle_size = 17,
 			...
 			){
@@ -466,7 +464,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 			plot_data$Taxonomy %<>% factor(., levels = use_taxanames)
 
-			p <- ggplot(plot_data, aes_string(x = "Taxonomy", y = "Abundance")) 
+			p <- ggplot(plot_data, aes(x = .data[["Taxonomy"]], y = .data[["Abundance"]])) 
 			p <- p + ylab(self$ylabname) + guides(col = guide_legend(reverse = TRUE)) + xlab("")
 			if (plot_flip == T){ 
 				p <- p + coord_flip()
@@ -475,29 +473,22 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + geom_boxplot(color = color_values[1], ...)
 			} else {
 				if(boxfill == T){
-					p <- p + geom_boxplot(aes_string(color = group, fill = group), ...)
+					p <- p + geom_boxplot(aes(color = .data[[group]], fill = .data[[group]]), ...)
 					p <- p + scale_fill_manual(values = color_values)
 					p <- p + scale_color_manual(values = color_values) + guides(color = "none")
 					## Change the default middle line
 					dat <- ggplot_build(p)$data[[1]]
 					p <- p + geom_segment(data=dat, aes(x=xmin, xend=xmax, y=middle, yend=middle), colour = middlecolor, size=middlesize)
 				} else {	 
-					p <- p + geom_boxplot(aes_string(color = group), ...) + scale_color_manual(values = color_values)
+					p <- p + geom_boxplot(aes(color = .data[[group]]), ...) + scale_color_manual(values = color_values)
 				}
 			}
 			if(show_point == T){
 				p <- p + geom_point(size = point_size, color = point_color, alpha = point_alpha, position = "jitter")
-			}			
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
-
-			if(!xtext_keep){
-				p <- p + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 			}
+			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
 
-			if(xtitle_keep == F) {
-				p <- p + theme(axis.title.x = element_blank())
-			}
 			if(!is.null(group)) {
 				p <- p + guides(fill=guide_legend(title=group))
 			}
@@ -548,7 +539,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 			plot_data$Taxonomy %<>% factor(., levels = use_taxanames)
 						
-			p <- ggplot(plot_data, aes_string(x = "Sample", y = "Abundance", color = "Taxonomy", group = "Taxonomy"))
+			p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Abundance"]], color = .data[["Taxonomy"]], group = .data[["Taxonomy"]]))
 			if(("SE" %in% colnames(plot_data)) & plot_SE){
 				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), width = errorbar_width, position = position, size = errorbar_size)
 			}else{
@@ -641,11 +632,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			plot_data
 		},
-		ggplot_xtext_type = function(xtext_type_hor, xtext_size){
-			if(xtext_type_hor == T){
-				theme(axis.text.x = element_text(colour = "black", size = xtext_size))
-			} else {
-				theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
+		ggplot_xtext_type = function(xtext_type_hor, xtext_size, xtext_keep = TRUE){
+			if(xtext_keep){
+				if(xtext_type_hor == T){
+					theme(axis.text.x = element_text(colour = "black", size = xtext_size))
+				}else{
+					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
+				}
+			}else{
+				theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 			}
 		},
 		blank_theme = 

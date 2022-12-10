@@ -346,8 +346,6 @@ Box plot.
   middlesize = 1,
   xtext_type_hor = FALSE,
   xtext_size = 10,
-  xtext_keep = TRUE,
-  xtitle_keep = TRUE,
   ytitle_size = 17,
   ...
 )}\if{html}{\out{</div>}}
@@ -379,10 +377,6 @@ Box plot.
 \item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
 
 \item{\code{xtext_size}}{default 10; x axis text size.}
-
-\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
-
-\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
