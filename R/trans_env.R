@@ -832,6 +832,9 @@ trans_env <- R6Class(classname = "trans_env",
 					}
 				}
 				abund_table %<>% .[!grepl("__$", rownames(.)), ]
+				if(nrow(abund_table) == 0){
+					stop("No available feature! Please check the input data!")
+				}
 				if(use_data %in% names(self$dataset$taxa_abund) & !is.null(use_taxa_num)){
 					if(nrow(abund_table) > use_taxa_num){
 						abund_table %<>% .[1:use_taxa_num, ] 
@@ -850,7 +853,7 @@ trans_env <- R6Class(classname = "trans_env",
 				abund_table <- abund_table[sel_sample_names, ]
 			}
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
-			abund_table <- abund_table[rownames(env_data), ]
+			abund_table <- abund_table[rownames(env_data), , drop = FALSE]
 			if(is.null(by_group)){
 				groups <- rep("All", nrow(env_data))
 			}else{
