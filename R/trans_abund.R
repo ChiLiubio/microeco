@@ -146,13 +146,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plotting.
 		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
-		#' @param facet default NULL; if using facet, providing a group column name of sample_table, such as, "Group".
-		#' @param facet2 default NULL; the second facet, used with facet parameter together; facet2 should have a finer scale;
-		#'   use this parameter, please first install package \code{ggh4x} using \code{install.packages("ggh4x")}.
-		#' @param facet3 default NULL; the third facet, used with \code{facet} and \code{facet2} parameter together.
-		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
-		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2"); 
-		#'   If multiple facets are used, please manually assign factors in sample_table of microtable object.
+		#' @param facet default NULL; a character vector for the facet; a group column name of \code{sample_table}, such as, \code{"Group"};
+		#'    If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
+		#'    the latter facet should have a finer scale than the former one;
+		#'    Please use factors in \code{sample_table} to adjust the facet orders in the plot;
+		#'    When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
 		#' @param x_axis_name NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.
 		#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
@@ -177,10 +175,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			bar_type = "full",
 			others_color = "grey90",
 			facet = NULL,
-			facet2 = NULL,
-			facet3 = NULL,
-			facet4 = NULL,
-			order_facet = NULL,
 			order_x = NULL,
 			x_axis_name = NULL,
 			barwidth = NULL,
@@ -216,13 +210,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 				plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 			}
-			# order x axis samples and facet
+			# order x axis samples
 			plot_data <- private$adjust_axis_facet(
 				plot_data = plot_data, 
 				x_axis_name = x_axis_name, 
-				order_x = order_x, 
-				facet = facet, 
-				order_facet = order_facet)
+				order_x = order_x
+				)
 
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
@@ -265,10 +258,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + ylab(self$ylabname)		
 			}
 			if(!is.null(facet)) {
-				if(is.null(facet2)){
+				if(length(facet) == 1){
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 				}else{
-					p <- p + ggh4x::facet_nested(reformulate(c(facet, facet2, facet3, facet4)), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+					p <- p + ggh4x::facet_nested(reformulate(facet), nest_line = element_line(linetype = 2), scales = "free", space = "free")
 				}
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
@@ -298,12 +291,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'
 		#' @param color_values default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
 		#' 	  colors palette for the plotting.
-		#' @param facet default NULL; a character string; if using facet, provide a column name in sample_table, such as "Group".
-		#' @param facet2 default NULL; the second facet, used with facet parameter together; \code{facet2} should have a finer scale;
-		#'   use this parameter, please first install package \code{ggh4x}.
-		#' @param facet3 default NULL; the third facet, used with \code{facet} and \code{facet2} parameter together.
-		#' @param facet4 default NULL; the fourth facet, used with facet, facet2 and facet3 parameter together.
-		#' @param order_facet NULL; vector; used to order the facet, such as, c("Group1", "Group3", "Group2").
+		#' @param facet default NULL; a character vector for the facet; a group column name of sample_table, such as, \code{"Group"};
+		#'    If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
+		#'    the latter facet should have a finer scale than the former one;
+		#'    Please use factors in \code{sample_table} to adjust the facet orders in the plot;
+		#'    use multiple facets, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
 		#' @param withmargin default TRUE; whether retain the tile margin.
@@ -333,10 +325,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		plot_heatmap = function(
 			color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")), 
 			facet = NULL,
-			facet2 = NULL,
-			facet3 = NULL,
-			facet4 = NULL,
-			order_facet = NULL,
 			x_axis_name = NULL,
 			order_x = NULL,
 			withmargin = TRUE,
@@ -363,8 +351,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 
 			if(pheatmap == FALSE){
-				# order x axis samples and facet
-				plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x, facet = facet, order_facet = order_facet)
+				# order x axis samples
+				plot_data <- private$adjust_axis_facet(plot_data = plot_data, x_axis_name = x_axis_name, order_x = order_x)
 				if (is.null(min_abundance)){
 					min_abundance <- ifelse(min(plot_data$Abundance) > 0.001, min(plot_data$Abundance), 0.001)
 				}
@@ -393,14 +381,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
 						limits = c(min_abundance, max_abundance))
 				}
-				if(!is.null(order_facet)) {
-					plot_data[, facet] <- factor(plot_data[, facet], levels = unique(order_facet))
-				}
 				if(!is.null(facet)){
-					if(is.null(facet2)){
+					if(length(facet) == 1){
 						p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
 					}else{
-						p <- p + ggh4x::facet_nested(reformulate(c(facet, facet2, facet3, facet4)), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+						p <- p + ggh4x::facet_nested(reformulate(facet), nest_line = element_line(linetype = 2), scales = "free", space = "free")
 					}
 					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
 				}
@@ -637,7 +622,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		}
 		),
 	private = list(
-		adjust_axis_facet = function(plot_data, x_axis_name, order_x, facet, order_facet){
+		adjust_axis_facet = function(plot_data, x_axis_name, order_x){
 			# order x axis samples and facet
 			if(!is.null(x_axis_name)){
 				colnames(plot_data)[colnames(plot_data) == "Sample"] <- "Sample_rownames_before"
@@ -652,13 +637,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 					stop("This may be wrong. Only one sample used to order the samples!")
 				}else{
 					plot_data$Sample %<>% factor(., levels = order_x)
-				}
-			}
-			if(!is.null(order_facet)){
-				if(is.null(facet)){
-					stop("You provide order_facet. It is necessary to provide facet!")
-				}else{
-					plot_data[, facet] %<>% factor(., levels = order_facet)
 				}
 			}
 			plot_data
