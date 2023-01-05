@@ -330,17 +330,17 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 		#'
 		#' @param ... the parameters passing to \code{vegan::envfit} function.
-		#' @return \code{res_ordination_envsquare} in object.
+		#' @return \code{res_ordination_envfit} in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_ordination_envsquare()
+		#' t1$cal_ordination_envfit()
 		#' }
-		cal_ordination_envsquare = function(...){
+		cal_ordination_envfit = function(...){
 			if(is.null(self$res_ordination)){
 				stop("Please first run cal_ordination function to obtain the ordination result!")
 			}else{
-				self$res_ordination_envsquare <- vegan::envfit(self$res_ordination, self$data_env, ...)
-				message('Result is stored in object$res_ordination_envsquare ...')
+				self$res_ordination_envfit <- vegan::envfit(self$res_ordination, self$data_env, ...)
+				message('Result is stored in object$res_ordination_envfit ...')
 			}
 		},
 		#' @description

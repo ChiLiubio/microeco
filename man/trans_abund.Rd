@@ -178,8 +178,9 @@ Bar plot.
 
 \item{\code{facet}}{default NULL; a character vector for the facet; a group column name of \code{sample_table}, such as, \code{"Group"};
 If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
-the latter facet should have a finer scale than the former one;
-Please use factors in \code{sample_table} to adjust the facet orders in the plot;
+The latter should have a finer scale than the former one;
+Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
+assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.}
 
 \item{\code{order_x}}{default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").}
@@ -264,11 +265,12 @@ Plot the heatmap.
 \item{\code{color_values}}{default rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")); 
 colors palette for the plotting.}
 
-\item{\code{facet}}{default NULL; a character vector for the facet; a group column name of sample_table, such as, \code{"Group"};
+\item{\code{facet}}{default NULL; a character vector for the facet; a group column name of \code{sample_table}, such as, \code{"Group"};
 If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
-the latter facet should have a finer scale than the former one;
-Please use factors in \code{sample_table} to adjust the facet orders in the plot;
-use multiple facets, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.}
+The latter should have a finer scale than the former one;
+Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
+assigning factors in the \code{data_abund} table of \code{trans_abund} object.
+When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.}
 
 \item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
 

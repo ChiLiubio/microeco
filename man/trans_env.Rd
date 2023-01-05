@@ -47,11 +47,11 @@ t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 }
 
 ## ------------------------------------------------
-## Method `trans_env$cal_ordination_envsquare`
+## Method `trans_env$cal_ordination_envfit`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_ordination_envsquare()
+t1$cal_ordination_envfit()
 }
 
 ## ------------------------------------------------
@@ -125,7 +125,7 @@ t1$plot_scatterfit(x =
 \item \href{#method-trans_env-plot_diff}{\code{trans_env$plot_diff()}}
 \item \href{#method-trans_env-cal_autocor}{\code{trans_env$cal_autocor()}}
 \item \href{#method-trans_env-cal_ordination}{\code{trans_env$cal_ordination()}}
-\item \href{#method-trans_env-cal_ordination_envsquare}{\code{trans_env$cal_ordination_envsquare()}}
+\item \href{#method-trans_env-cal_ordination_envfit}{\code{trans_env$cal_ordination_envfit()}}
 \item \href{#method-trans_env-trans_ordination}{\code{trans_env$trans_ordination()}}
 \item \href{#method-trans_env-plot_ordination}{\code{trans_env$plot_ordination()}}
 \item \href{#method-trans_env-cal_mantel}{\code{trans_env$cal_mantel()}}
@@ -354,12 +354,12 @@ t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_env-cal_ordination_envsquare"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_env-cal_ordination_envsquare}{}}}
-\subsection{Method \code{cal_ordination_envsquare()}}{
+\if{html}{\out{<a id="method-trans_env-cal_ordination_envfit"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_ordination_envfit}{}}}
+\subsection{Method \code{cal_ordination_envfit()}}{
 Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination_envsquare(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination_envfit(...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -370,12 +370,12 @@ Fits each environmental vector onto the ordination to obtain the contribution of
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_ordination_envsquare} in object.
+\code{res_ordination_envfit} in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_ordination_envsquare()
+t1$cal_ordination_envfit()
 }
 }
 \if{html}{\out{</div>}}
