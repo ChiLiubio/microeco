@@ -320,11 +320,26 @@ trans_env <- R6Class(classname = "trans_env",
 			message('The original ordination result is stored in object$res_ordination ...')
 			self$res_ordination_R2 <- unlist(RsquareAdj(res_ordination))
 			message('The R2 is stored in object$res_ordination_R2 ...')
-			# test for sig.environ.variables
-			self$res_ordination_terms <- anova(res_ordination, by = "terms", permu = 1000)
-			message('The terms anova result is stored in object$res_ordination_terms ...')
-			self$res_ordination_axis <- anova(res_ordination, by = "axis", perm.max = 1000)
-			message('The axis anova result is stored in object$res_ordination_axis ...')
+		},
+		#' @description
+		#' Use anova to test the significance of the terms and axis in ordination.
+		#'
+		#' @param ... the parameters passing to \code{anova} function.
+		#' @return \code{res_ordination_terms and res_ordination_axis} in object.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_ordination_anova()
+		#' }
+		cal_ordination_anova = function(...){
+			if(is.null(self$res_ordination)){
+				stop("Please first run cal_ordination function to obtain the ordination result!")
+			}else{
+				# test for sig.environ.variables
+				self$res_ordination_terms <- anova(self$res_ordination, by = "terms", permu = 1000, ...)
+				message('The terms anova result is stored in object$res_ordination_terms ...')
+				self$res_ordination_axis <- anova(self$res_ordination, by = "axis", perm.max = 1000, ...)
+				message('The axis anova result is stored in object$res_ordination_axis ...')
+			}
 		},
 		#' @description
 		#' Fits each environmental vector onto the ordination to obtain the contribution of each variable.

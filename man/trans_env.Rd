@@ -47,6 +47,14 @@ t1$cal_ordination(method = "CCA", taxa_level = "Genus")
 }
 
 ## ------------------------------------------------
+## Method `trans_env$cal_ordination_anova`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_ordination_anova()
+}
+
+## ------------------------------------------------
 ## Method `trans_env$cal_ordination_envfit`
 ## ------------------------------------------------
 
@@ -125,6 +133,7 @@ t1$plot_scatterfit(x =
 \item \href{#method-trans_env-plot_diff}{\code{trans_env$plot_diff()}}
 \item \href{#method-trans_env-cal_autocor}{\code{trans_env$cal_autocor()}}
 \item \href{#method-trans_env-cal_ordination}{\code{trans_env$cal_ordination()}}
+\item \href{#method-trans_env-cal_ordination_anova}{\code{trans_env$cal_ordination_anova()}}
 \item \href{#method-trans_env-cal_ordination_envfit}{\code{trans_env$cal_ordination_envfit()}}
 \item \href{#method-trans_env-trans_ordination}{\code{trans_env$trans_ordination()}}
 \item \href{#method-trans_env-plot_ordination}{\code{trans_env$plot_ordination()}}
@@ -346,6 +355,36 @@ only available when method = "dbRDA".}
 t1$cal_ordination(method = "dbRDA", use_measure = "bray")
 t1$cal_ordination(method = "RDA", taxa_level = "Genus")
 t1$cal_ordination(method = "CCA", taxa_level = "Genus")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_env-cal_ordination_anova"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_ordination_anova}{}}}
+\subsection{Method \code{cal_ordination_anova()}}{
+Use anova to test the significance of the terms and axis in ordination.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination_anova(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{the parameters passing to \code{anova} function.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_ordination_terms and res_ordination_axis} in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_ordination_anova()
 }
 }
 \if{html}{\out{</div>}}
