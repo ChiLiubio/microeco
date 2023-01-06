@@ -11,6 +11,7 @@ This class is a wrapper for a series of operations on the original files and the
 including the microtable object creation, data reduction, data rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxa abundance calculation, 
 alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
+\cr
 Online tutorial website: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} \cr
 Download tutorial: \href{https://github.com/ChiLiubio/microeco_tutorial/releases}{https://github.com/ChiLiubio/microeco_tutorial/releases}
 }
@@ -35,6 +36,14 @@ dataset$tidy_dataset()
 ## ------------------------------------------------
 
 dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+
+## ------------------------------------------------
+## Method `microtable$filter_taxa`
+## ------------------------------------------------
+
+\donttest{
+dataset$filter_taxa(rel_abund = 0.0001, freq = 2)
+}
 
 ## ------------------------------------------------
 ## Method `microtable$rarefy_samples`
@@ -153,6 +162,7 @@ class(dataset$beta_diversity)
 \itemize{
 \item \href{#method-microtable-new}{\code{microtable$new()}}
 \item \href{#method-microtable-filter_pollution}{\code{microtable$filter_pollution()}}
+\item \href{#method-microtable-filter_taxa}{\code{microtable$filter_taxa()}}
 \item \href{#method-microtable-rarefy_samples}{\code{microtable$rarefy_samples()}}
 \item \href{#method-microtable-tidy_dataset}{\code{microtable$tidy_dataset()}}
 \item \href{#method-microtable-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
@@ -261,6 +271,43 @@ None
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-microtable-filter_taxa"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-filter_taxa}{}}}
+\subsection{Method \code{filter_taxa()}}{
+Filter the feature with low abundance and/or low occurrence frequency.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$filter_taxa(rel_abund = 0, freq = 1, include_lowest = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{rel_abund}}{default 0; the relative abundance threshold, such as 0.0001.}
+
+\item{\code{freq}}{default 1; the occurrence frequency threshold. 
+For example, the number 2 represents filtering the feature that occurs less than 2 times.
+A number smaller than 1 is also allowable. 
+For instance, the number 0.1 represents filtering the feature that occurs in less than 10\% samples.}
+
+\item{\code{include_lowest}}{default TRUE; whether include the feature with the threshold.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a new \code{microtable} object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+dataset$filter_taxa(rel_abund = 0.0001, freq = 2)
+}
 }
 \if{html}{\out{</div>}}
 

@@ -6,6 +6,7 @@
 #' including the microtable object creation, data reduction, data rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxa abundance calculation, 
 #' alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 #' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
+#' \cr
 #' Online tutorial website: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} \cr
 #' Download tutorial: \href{https://github.com/ChiLiubio/microeco_tutorial/releases}{https://github.com/ChiLiubio/microeco_tutorial/releases}
 #' 
@@ -99,6 +100,74 @@ microtable <- R6Class(classname = "microtable",
 			message(paste("Total", filter_num, "taxa are removed from tax_table ..."))
 			self$tax_table <- tax_table_use
 			if(self$auto_tidy) self$tidy_dataset()
+		},
+		#' @description
+		#' Filter the feature with low abundance and/or low occurrence frequency.
+		#'
+		#' @param rel_abund default 0; the relative abundance threshold, such as 0.0001.
+		#' @param freq default 1; the occurrence frequency threshold. 
+		#' 	 For example, the number 2 represents filtering the feature that occurs less than 2 times.
+		#' 	 A number smaller than 1 is also allowable. 
+		#' 	 For instance, the number 0.1 represents filtering the feature that occurs in less than 10\% samples.
+		#' @param include_lowest default TRUE; whether include the feature with the threshold.
+		#' @return a new \code{microtable} object.
+		#' @examples
+		#' \donttest{
+		#' dataset$filter_taxa(rel_abund = 0.0001, freq = 2)
+		#' }
+		filter_taxa = function(rel_abund = 0, freq = 1, include_lowest = TRUE){
+			raw_otu_table <- self$otu_table
+			if(rel_abund != 0){
+				if(rel_abund >= 1){
+					stop("rel_abund must be smaller than 1!")
+				}
+				taxa_raw_abund <- self$taxa_sums()
+				taxa_rel_abund <- taxa_raw_abund/sum(taxa_raw_abund)
+				if(include_lowest){
+					abund_names <- taxa_rel_abund[taxa_rel_abund < rel_abund] %>% names
+				}else{
+					abund_names <- taxa_rel_abund[taxa_rel_abund <= rel_abund] %>% names
+				}
+				if(length(abund_names) == nrow(raw_otu_table)){
+					stop("No feature remained! Please check the rel_abund parameter!")
+				}else{
+					message(length(abund_names), " features filtered based on the abundance ...")
+				}
+			}else{
+				abund_names <- c()
+			}
+			if(freq != 0){
+				if(freq < 1){
+					message("freq smaller than 1; first convert it to an integer ...")
+					freq <- round(ncol(raw_otu_table) * freq)
+					message("Use converted freq integer: ", freq, " for the following filtering ...")
+				}
+				taxa_occur_num <- apply(raw_otu_table, 1, function(x){sum(x != 0)})
+				if(include_lowest){
+					freq_names <- taxa_occur_num[taxa_occur_num < freq] %>% names
+				}else{
+					freq_names <- taxa_occur_num[taxa_occur_num <= freq] %>% names
+				}
+				if(length(freq_names) == nrow(raw_otu_table)){
+					stop("No feature remained! Please check the freq parameter!")
+				}else{
+					message(length(freq_names), " features filtered based on the occurrence...")
+				}
+			}else{
+				freq_names <- c()
+			}
+			filter_names <- c(abund_names, freq_names) %>% unique
+			if(length(filter_names) == 0){
+				new_table <- raw_otu_table
+			}else{
+				if(length(filter_names) == nrow(raw_otu_table)){
+					stop("All features are filtered! Please adjust the parameters")
+				}else{
+					new_table <- raw_otu_table[! rownames(raw_otu_table) %in% filter_names, ]
+				}
+			}
+			self$otu_table <- new_table
+			self$tidy_dataset()
 		},
 		#' @description
 		#' Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} of \code{vegan} package for the alternative method.
