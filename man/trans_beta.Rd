@@ -329,7 +329,12 @@ A wrapper for \code{betadisper} function in vegan package for multivariate homog
 \subsection{Method \code{cal_group_distance()}}{
 Transform sample distances within groups or between groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(within_group = TRUE, by_group = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(
+  within_group = TRUE,
+  by_group = NULL,
+  ordered_group = NULL,
+  sep = " vs "
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -341,6 +346,10 @@ Transform sample distances within groups or between groups.
 If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
 When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
 When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.}
+
+\item{\code{ordered_group}}{default NULL; a vector representing the ordered elements of \code{group} parameter; only useful when within_group = FALSE.}
+
+\item{\code{sep}}{default TRUE; a character string to separate the group names after merging them into a new name.}
 }
 \if{html}{\out{</div>}}
 }

@@ -355,12 +355,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
 		#'   When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
 		#'   When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.
+		#' @param ordered_group default NULL; a vector representing the ordered elements of \code{group} parameter; only useful when within_group = FALSE.
+		#' @param sep default TRUE; a character string to separate the group names after merging them into a new name.
 		#' @return \code{res_group_distance} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance(within_group = TRUE)
 		#' }
-		cal_group_distance = function(within_group = TRUE, by_group = NULL){
+		cal_group_distance = function(within_group = TRUE, by_group = NULL, ordered_group = NULL, sep = " vs "){
 			if(!is.null(by_group)){
 				if(!all(by_group %in% colnames(self$sample_table))){
 					stop("Input by_group parameter must be colnames of sample_table in the microtable object!")
@@ -371,9 +373,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 					"Please provide the group parameter when creating the trans_beta object!")
 			}
 			if(within_group){
-				res <- private$within_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
+				res <- private$within_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group, sep = sep)
 			}else{
-				res <- private$between_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group)
+				res <- private$between_group_distance(distance = self$use_matrix, sampleinfo = self$sample_table, type = self$group, by_group = by_group, 
+					ordered_group = ordered_group, sep = sep)
 			}
 			colnames(res)[colnames(res) == "value"] <- "Value"
 			self$res_group_distance <- res
@@ -543,7 +546,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		}
 		),
 	private = list(
-		within_group_distance = function(distance, sampleinfo, type, by_group = NULL){
+		within_group_distance = function(distance, sampleinfo, type, by_group = NULL, sep = " vs "){
 			all_group <- as.character(sampleinfo[, type]) %>% unique
 			res <- data.frame()
 			for(i in all_group){
@@ -558,7 +561,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					for(j in by_group){
 						tmp <- sampleinfo[select_sample, j]
 						paired_comb <- combn(length(tmp), 2)
-						merged_bygroup <- lapply(seq_len(ncol(paired_comb)), function(x){paste0(sort(tmp[paired_comb[, x]]), collapse = " vs ")}) %>% unlist
+						merged_bygroup <- lapply(seq_len(ncol(paired_comb)), function(x){paste0(sort(tmp[paired_comb[, x]]), collapse = sep)}) %>% unlist
 						distance_res %<>% cbind(., merged_bygroup)
 					}
 				}
@@ -570,15 +573,26 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			res
 		},
-		between_group_distance = function(distance, sampleinfo, type, by_group = NULL){
+		between_group_distance = function(distance, sampleinfo, type, by_group = NULL, ordered_group = NULL, sep = " vs "){
 			all_group <- as.character(sampleinfo[, type]) %>% unique
+			# first check ordered_group
+			if(!is.null(ordered_group)){
+				ordered_group %<>% as.character
+				if(!all(all_group %in% ordered_group)){
+					stop("Please check the ordered_group! Part of groups are missing!")
+				}
+			}
 			com1 <- combn(all_group, 2)
 			res <- data.frame()
 			for(i in seq_len(ncol(com1))){
 				if(is.null(by_group)){
 					f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1, i], ])
 					s_name <- rownames(sampleinfo[sampleinfo[, type] == com1[2, i], ])
-					vsname <- paste0(com1[1,i], " vs ", com1[2,i])
+					if(!is.null(ordered_group)){
+						vsname <- paste0(ordered_group[ordered_group %in% c(com1[1, i], com1[2, i])], collapse = sep)
+					}else{
+						vsname <- paste0(com1[1, i], sep, com1[2, i])
+					}
 					distance_res <- as.vector(distance[f_name, s_name])
 					distance_res <- data.frame(Value = distance_res, vsname)
 				}else{
@@ -590,7 +604,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 					for(j in tmp){
 						f_name <- rownames(sampleinfo[sampleinfo[, type] == com1[1, i] & sampleinfo[, by_group] == j, ])
 						s_name <- rownames(sampleinfo[sampleinfo[, type] == com1[2, i] & sampleinfo[, by_group] == j, ])
-						vsname <- paste0(com1[1,i], " vs ", com1[2,i])
+						if(!is.null(ordered_group)){
+							vsname <- paste0(ordered_group[ordered_group %in% c(com1[1, i], com1[2, i])], collapse = sep)
+						}else{
+							vsname <- paste0(com1[1, i], sep, com1[2, i])
+						}
 						tmp_dis <- as.vector(distance[f_name, s_name])
 						if(length(tmp_dis) == 0){
 							next
