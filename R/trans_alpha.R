@@ -86,12 +86,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     	  For multi-factor anova, see \code{\link{aov}}}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
+		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'   }
 		#' @param measure default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 		#'    NULL can disuse the p value adjustment.
-		#' @param formula default NULL; applied to two-way or multi-factor anova analysis when method = \code{"anova"} or \code{"scheirerRayHare"}; 
+		#' @param formula default NULL; applied to two-way or multi-factor anova analysis when method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"}; 
 		#'   specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
 		#'   such as \code{'block + N*P*K'}.
 		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
@@ -107,13 +108,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "anova")
 		#' }
 		cal_diff = function(
-			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1], 
+			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme")[1], 
 			measure = NULL, 
 			p_adjust_method = "fdr", 
 			formula = NULL,
 			...
 			){
-			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare"))
+			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme"))
 			group <- self$group
 			
 			if(method == "scheirerRayHare" & is.null(formula)){
@@ -121,7 +122,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					stop("formula is necessary! Please provide formula parameter!")
 				}
 			}
-			if(!method %in% c("anova", "scheirerRayHare")){
+			if(!method %in% c("anova", "scheirerRayHare", "lme")){
 				if(is.null(group)){
 					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
 				}
@@ -270,7 +271,23 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result$Significance <- cut(compare_result$P.unadj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 				method <- paste0(method, "-formula")
 			}
-			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare"), "-formula"))){
+			if(method %in% "lme"){
+				if(is.null(formula)){
+					stop("Please provide formula parameter for the method lme!")
+				}
+				if(length(measure) > 1){
+					stop("More than 1 measures are found! Please select a measure with measure parameter!")
+				}
+				compare_result <- list()
+				div_table <- data_alpha[data_alpha$Measure == measure, ]
+				compare_result$model <- lmerTest::lmer(reformulate(formula, "Value"), div_table)
+				compare_result$summary <- summary(compare_result$model)
+				compare_result$anova <- anova(compare_result$model)
+				compare_result$ranova <- lmerTest::ranova(compare_result$model)
+				compare_result$r2 <- performance::r2(compare_result$model)
+				compare_result$p_value <- parameters::p_value(compare_result$model)
+			}
+			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare"), "-formula"), "lme")){
 				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 				compare_result$Significance %<>% as.character
 			}

@@ -106,7 +106,7 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 Test the difference of alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
-  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1],
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme")[1],
   measure = NULL,
   p_adjust_method = "fdr",
   formula = NULL,
@@ -127,6 +127,7 @@ Test the difference of alpha diversity.
         For multi-factor anova, see \code{\link{aov}}}
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
+  \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 }}
 
 \item{\code{measure}}{default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
@@ -135,7 +136,7 @@ e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 NULL can disuse the p value adjustment.}
 
-\item{\code{formula}}{default NULL; applied to two-way or multi-factor anova analysis when method = \code{"anova"} or \code{"scheirerRayHare"}; 
+\item{\code{formula}}{default NULL; applied to two-way or multi-factor anova analysis when method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"}; 
 specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
 such as \code{'block + N*P*K'}.}
 
