@@ -96,7 +96,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
 		#'   such as \code{'block + N*P*K'}.
 		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
-		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}).
+		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}) or \code{lmerTest::lmer} (\code{method = "lme"}).
 		#' @return \code{res_diff} in object with the format \code{data.frame}.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
 		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
@@ -280,7 +280,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				compare_result <- list()
 				div_table <- data_alpha[data_alpha$Measure == measure, ]
-				compare_result$model <- lmerTest::lmer(reformulate(formula, "Value"), div_table)
+				compare_result$model <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
 				compare_result$summary <- summary(compare_result$model)
 				compare_result$anova <- anova(compare_result$model)
 				compare_result$ranova <- lmerTest::ranova(compare_result$model)

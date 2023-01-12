@@ -141,7 +141,7 @@ specified set for independent variables, i.e. the latter part of the formula in 
 such as \code{'block + N*P*K'}.}
 
 \item{\code{...}}{parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
-(\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}).}
+(\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}) or \code{lmerTest::lmer} (\code{method = "lme"}).}
 }
 \if{html}{\out{</div>}}
 }
