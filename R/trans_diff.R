@@ -41,6 +41,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
 		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
 		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
+		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}		
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
 		#' 	  It is necessary when method is not "anova" or method is "anova" but formula is not provided.
@@ -98,7 +99,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		initialize = function(
 			dataset = NULL,
-			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")[1],
+			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -123,7 +124,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			# in case of dataset changes
 			tmp_dataset <- clone(dataset)
 			sampleinfo <- tmp_dataset$sample_table
-			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare")){
+			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg")){
 				stop("The group parameter need to be provided for differential test among groups!")
 			}else{
 				if(!is.null(group)){
@@ -137,7 +138,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-				"anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw"))
+				"anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg"))
 			
 			if(!is.null(group)){
 				if(is.factor(sampleinfo[, group])){
@@ -178,7 +179,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 			################################
 			
-			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")){
+			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg")){
 				if(method == "KW_dunn"){
 					# filter taxa with equal abudance across all samples
 					abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
@@ -187,15 +188,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 				# use test method in trans_alpha
 				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
 				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
-				suppressMessages(tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...))
+				tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
 				output <- tem_data1$res_diff
-				if(! method %in% c("anova")){
+				if(! method %in% "anova"){
 					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
 				}else{
+					# multi-way anova has formula in the final method; one-way is the original 'anova'
 					if(tem_data1$cal_diff_method == "anova"){
 						output <- reshape2::melt(output, id.vars = "Group", variable.name = "Taxa", value.name = "Significance")
 					}else{
-						# make sure multi-way distinct from one-way
 						method <- tem_data1$cal_diff_method
 					}
 				}
