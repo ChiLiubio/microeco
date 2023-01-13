@@ -96,6 +96,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'     	  For multi-factor anova, see \code{aov}}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
+		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'   }
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
 		#' @return \code{res_diff} in object.
@@ -107,7 +108,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$cal_diff(group = "Group", method = "KW_dunn")
 		#' t1$cal_diff(group = "Group", method = "anova")
 		#' }
-		cal_diff = function(group = NULL, by_group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1], ...){
+		cal_diff = function(group = NULL, by_group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme")[1], ...){
 			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare")){
 				stop("The group parameter is necessary for the method: ", method, "!")
 			}

@@ -202,7 +202,7 @@ Test the difference of environmental variable across groups.
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_diff(
   group = NULL,
   by_group = NULL,
-  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")[1],
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme")[1],
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -224,6 +224,7 @@ Test the difference of environmental variable across groups.
         For multi-factor anova, see \code{aov}}
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
+  \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 }}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.}

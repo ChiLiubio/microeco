@@ -389,13 +389,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param by_group default NULL; a column of \code{object$res_group_distance} used to perform the differential test 
 		#'   among elements in \code{group} parameter for each element in \code{by_group} parameter. So \code{by_group} has a larger scale than \code{group} parameter.
 		#'   This \code{by_group} is very different from the \code{by_group} parameter in the \code{cal_group_distance} function.
+		#' @param by_ID default NULL; a column of \code{object$res_group_distance} used to perform paired t test or paired wilcox test for the paired data,
+		#'   such as the data of plant compartments for different plant species (ID). 
+		#'   So \code{by_ID} should be the smallest unit of sample collection without any repetition in it.
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
 		#' @return \code{res_group_distance_diff} stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance_diff()
 		#' }
-		cal_group_distance_diff = function(group = NULL, by_group = NULL, ...){
+		cal_group_distance_diff = function(group = NULL, by_group = NULL, by_ID = NULL, ...){
 			res_group_distance <- self$res_group_distance
 			# use method in trans_alpha
 			temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
@@ -414,6 +417,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 					stop("Provided by_group parameter: ", by_group, " is not in object$res_group_distance!")
 				}
 				temp1$by_group <- by_group
+			}
+			if(!is.null(by_ID)){
+				if(! by_ID %in% colnames(res_group_distance)){
+					stop("Provided by_ID parameter: ", by_ID, " is not in object$res_group_distance!")
+				}
+				temp1$by_ID <- by_ID
 			}
 			suppressMessages(temp1$cal_diff(...))
 			self$res_group_distance_diff <- temp1$res_diff
