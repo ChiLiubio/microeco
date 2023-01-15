@@ -147,9 +147,13 @@ trans_venn <- R6Class(classname = "trans_venn",
 			colnumber <- self$colnumber
 			ratio <- self$ratio
 			res_names <- self$res_names
-			switch_num <- colnumber-1
+			switch_num <- colnumber - 1
 			summary_table <- self$data_summary
-			
+
+			if(colnumber > 5 & petal_plot == F){
+				message("The number of elements is larger than 5! Automatically change petal_plot = TRUE! An alternative way of visualization is to use plot_bar function ...")
+				petal_plot <- TRUE
+			}
 			# text position in venn
 			if(is.null(text_name_position)){
 				text_name_position <- switch(switch_num, 
@@ -325,9 +329,6 @@ trans_venn <- R6Class(classname = "trans_venn",
 					y = other_text_position[2], 
 					label = other_text_show, 
 					size = other_text_size)				
-			}
-			if(colnumber > 5 & petal_plot == F){
-				stop("This colnumber > 5! Please use petal_plot = TRUE !")
 			}
 			p
 		},
