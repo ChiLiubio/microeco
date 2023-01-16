@@ -78,8 +78,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
-    "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw",
-    "betareg")[1],
+    "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg",
+    "lme")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -131,7 +131,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
   \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
         see also the test parameter in \code{ALDEx2::aldex} function.}
-  \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}        
+  \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
+  \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 }}
 
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
