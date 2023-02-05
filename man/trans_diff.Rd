@@ -183,7 +183,8 @@ such as the data of plant compartments for different plant species (ID).
 So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
 Same with the \code{by_ID} parameter in trans_alpha class.}
 
-\item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of "KW", "KW_dunn", "wilcox", "t.test" and "anova";
+\item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
+"KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".}
 }

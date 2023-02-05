@@ -187,6 +187,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# filter taxa with equal abudance across all samples
 					abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
 				}
+				if(method == "betareg"){
+					abund_table %<>% {. + 0.000001}/1.000002
+				}
 				tem_data <- clone(tmp_dataset)
 				# use test method in trans_alpha
 				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
