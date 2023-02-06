@@ -82,10 +82,10 @@ trans_func <- R6Class(classname = "trans_func",
 			tax1 <- self$tax_table
 			if(for_what == "prok"){
 				if(grepl("FAPROTAX", prok_database, ignore.case = TRUE)){
-					# Copyright (c) 2021, Stilianos Louca. All rights reserved.
+					# Copyright (c) 2023, Stilianos Louca. All rights reserved.
 					# developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
 					data("prok_func_FAPROTAX", envir=environment())
-					message("FAPROTAX v1.2.4. Please also cite the original FAPROTAX paper: Louca et al. (2016).")
+					message("FAPROTAX v1.2.6. Please also cite the original FAPROTAX paper: Louca et al. (2016).")
 					message("Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 					# collapse taxonomy
 					tax1 <- apply(tax1, 1, function(x){paste0(x, collapse = ";")}) %>% 
@@ -112,8 +112,19 @@ trans_func <- R6Class(classname = "trans_func",
 							}
 						}
 					}
+					# identify the subtraction part among groups
+					for(i in names(prok_func_FAPROTAX$func_subtract_groups)){
+						if(length(prok_func_FAPROTAX$func_subtract_groups[[i]]) == 0){
+							next
+						}else{
+							for(j in seq_along(prok_func_FAPROTAX$func_subtract_groups[[i]])){
+								res[, i] <- res[, i] - res[, prok_func_FAPROTAX$func_subtract_groups[[i]][j]]
+							}
+						}
+					}
 					# only use 1 to represent existence
 					res[res > 1] <- 1
+					res[res < 0] <- 0
 					otu_func_table <- res[tax1, ]
 					rownames(otu_func_table) <- names(tax1)
 					otu_func_table$anaerobic_chemoheterotrophy <- 0
