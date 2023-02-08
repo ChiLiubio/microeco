@@ -110,10 +110,11 @@ microtable <- R6Class(classname = "microtable",
 		#' 	 A number smaller than 1 is also allowable. 
 		#' 	 For instance, the number 0.1 represents filtering the feature that occurs in less than 10\% samples.
 		#' @param include_lowest default TRUE; whether include the feature with the threshold.
-		#' @return a new \code{microtable} object.
+		#' @return None
 		#' @examples
 		#' \donttest{
-		#' dataset$filter_taxa(rel_abund = 0.0001, freq = 2)
+		#' d1 <- clone(dataset)
+		#' d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 		#' }
 		filter_taxa = function(rel_abund = 0, freq = 1, include_lowest = TRUE){
 			raw_otu_table <- self$otu_table
@@ -298,105 +299,6 @@ microtable <- R6Class(classname = "microtable",
 			self$tax_table <- tax_table_use
 		},
 		#' @description
-		#' Calculate the taxonomic abundance at each taxonomic rank.
-		#'
-		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; used to select columns to merge and calculate abundances.
-		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
-		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.
-		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
-		#'   Very useful when multiple mapping info exist.
-		#' @param split_by default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; see sep in separate_rows function.
-		#' @param split_column default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
-		#'     fixed column or columns used for the splitting in tax_table in each abundance calculation; 
-		#'     list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
-		#' @return taxa_abund in object.
-		#' @examples
-		#' \donttest{
-		#' dataset$cal_abund()
-		#' }
-		cal_abund = function(
-			select_cols = NULL, 
-			rel = TRUE, 
-			split_group = FALSE, 
-			split_by = "&&", 
-			split_column = NULL
-			){
-			taxa_abund = list()
-			if(is.null(self$tax_table)){
-				stop("No tax_table found! Please check your data!")
-			}
-			# check data corresponding
-			if(nrow(self$tax_table) != nrow(self$otu_table)){
-				message("The row number of tax_table is not equal to that of otu_table ...")
-				message("Automatically applying tidy_dataset() function to trim the data ...")
-				self$tidy_dataset()
-				print(self)
-			}
-			if(nrow(self$sample_table) != ncol(self$otu_table)){
-				message("The sample numbers of sample_table is not equal to that of otu_table ...")
-				message("Automatically applying tidy_dataset() function to trim the data ...")
-				self$tidy_dataset()
-				print(self)
-			}
-			
-			# check whether no row in tax_table
-			if(nrow(self$tax_table) == 0){
-				stop("0 rows in tax_table! Please check your data!")
-			}
-			if(is.null(select_cols)){
-				select_cols <- 1:ncol(self$tax_table)
-			}else{
-				if(!is.numeric(select_cols)){
-					if(any(! select_cols %in% colnames(self$tax_table))){
-						stop("Part of input names of select_cols are not in the tax_table!")
-					}else{
-						select_cols <- match(select_cols, colnames(self$tax_table))
-					}
-				}
-			}
-			if(split_group){
-				if(is.null(split_column)){
-					stop("Spliting rows by one or more columns require split_column parameter! Please set split_column and try again!")
-				}
-			}
-			for(i in seq_along(select_cols)) {
-				taxrank <- colnames(self$tax_table)[select_cols[i]]
-				# assign the columns used for the splitting
-				if(!is.null(split_column)){
-					if(is.list(split_column)){
-						use_split_column <- split_column[[i]]
-					}else{
-						use_split_column <- split_column
-					}
-				}
-				taxa_abund[[taxrank]] <- private$transform_data_proportion(
-											self, 
-											columns = select_cols[1:i], 
-											rel = rel, 
-											split_group = split_group, 
-											split_by = split_by, 
-											split_column = use_split_column)
-			}
-			self$taxa_abund <- taxa_abund
-			message('The result is stored in object$taxa_abund ...')
-		},
-		#' @description
-		#' Save taxonomic abundance to the computer local place.
-		#'
-		#' @param dirpath default "taxa_abund"; directory name to save the taxonomic abundance files.
-		#' @examples
-		#' \dontrun{
-		#' dataset$save_abund(dirpath = "taxa_abund")
-		#' }
-		save_abund = function(dirpath = "taxa_abund"){
-			if(!dir.exists(dirpath)){
-				dir.create(dirpath)
-			}
-			for(i in names(self$taxa_abund)){
-				write.csv(self$taxa_abund[[i]], file = paste0(dirpath, "/", i, "_abund.csv"), row.names = TRUE)
-			}
-		},
-		#' @description
 		#' Sum the species number for each sample.
 		#'
 		#' @return species number of samples.
@@ -547,6 +449,105 @@ microtable <- R6Class(classname = "microtable",
 			rownames(new_abund) <- name1[rownames(new_abund), "otuname"]
 			new_tax <- tax[rownames(new_abund), , drop = FALSE]
 			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax, auto_tidy = self$auto_tidy)
+		},
+		#' @description
+		#' Calculate the taxonomic abundance at each taxonomic rank.
+		#'
+		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; used to select columns to merge and calculate abundances.
+		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
+		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.
+		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
+		#'   Very useful when multiple mapping info exist.
+		#' @param split_by default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; see sep in separate_rows function.
+		#' @param split_column default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
+		#'     fixed column or columns used for the splitting in tax_table in each abundance calculation; 
+		#'     list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
+		#' @return taxa_abund in object.
+		#' @examples
+		#' \donttest{
+		#' dataset$cal_abund()
+		#' }
+		cal_abund = function(
+			select_cols = NULL, 
+			rel = TRUE, 
+			split_group = FALSE, 
+			split_by = "&&", 
+			split_column = NULL
+			){
+			taxa_abund = list()
+			if(is.null(self$tax_table)){
+				stop("No tax_table found! Please check your data!")
+			}
+			# check data corresponding
+			if(nrow(self$tax_table) != nrow(self$otu_table)){
+				message("The row number of tax_table is not equal to that of otu_table ...")
+				message("Automatically applying tidy_dataset() function to trim the data ...")
+				self$tidy_dataset()
+				print(self)
+			}
+			if(nrow(self$sample_table) != ncol(self$otu_table)){
+				message("The sample numbers of sample_table is not equal to that of otu_table ...")
+				message("Automatically applying tidy_dataset() function to trim the data ...")
+				self$tidy_dataset()
+				print(self)
+			}
+			
+			# check whether no row in tax_table
+			if(nrow(self$tax_table) == 0){
+				stop("0 rows in tax_table! Please check your data!")
+			}
+			if(is.null(select_cols)){
+				select_cols <- 1:ncol(self$tax_table)
+			}else{
+				if(!is.numeric(select_cols)){
+					if(any(! select_cols %in% colnames(self$tax_table))){
+						stop("Part of input names of select_cols are not in the tax_table!")
+					}else{
+						select_cols <- match(select_cols, colnames(self$tax_table))
+					}
+				}
+			}
+			if(split_group){
+				if(is.null(split_column)){
+					stop("Spliting rows by one or more columns require split_column parameter! Please set split_column and try again!")
+				}
+			}
+			for(i in seq_along(select_cols)) {
+				taxrank <- colnames(self$tax_table)[select_cols[i]]
+				# assign the columns used for the splitting
+				if(!is.null(split_column)){
+					if(is.list(split_column)){
+						use_split_column <- split_column[[i]]
+					}else{
+						use_split_column <- split_column
+					}
+				}
+				taxa_abund[[taxrank]] <- private$transform_data_proportion(
+											self, 
+											columns = select_cols[1:i], 
+											rel = rel, 
+											split_group = split_group, 
+											split_by = split_by, 
+											split_column = use_split_column)
+			}
+			self$taxa_abund <- taxa_abund
+			message('The result is stored in object$taxa_abund ...')
+		},
+		#' @description
+		#' Save taxonomic abundance to the computer local place.
+		#'
+		#' @param dirpath default "taxa_abund"; directory name to save the taxonomic abundance files.
+		#' @examples
+		#' \dontrun{
+		#' dataset$save_abund(dirpath = "taxa_abund")
+		#' }
+		save_abund = function(dirpath = "taxa_abund"){
+			if(!dir.exists(dirpath)){
+				dir.create(dirpath)
+			}
+			for(i in names(self$taxa_abund)){
+				write.csv(self$taxa_abund[[i]], file = paste0(dirpath, "/", i, "_abund.csv"), row.names = TRUE)
+			}
 		},
 		#' @description
 		#' Calculate alpha diversity in \code{microtable} object.

@@ -6,7 +6,7 @@
 \description{
 This class is a wrapper for the taxonomic abundance transformations and plotting. 
 The transformed data style is the long-format for \code{ggplot2} plotting.
-The plotting methods include bar plot, boxplot, heatmap and pie chart.
+The plotting methods include bar plot, boxplot, heatmap, pie chart and line chart.
 }
 \examples{
 

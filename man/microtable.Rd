@@ -42,7 +42,8 @@ dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 ## ------------------------------------------------
 
 \donttest{
-dataset$filter_taxa(rel_abund = 0.0001, freq = 2)
+d1 <- clone(dataset)
+d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 }
 
 ## ------------------------------------------------
@@ -65,22 +66,6 @@ dataset$tidy_dataset(main_data = TRUE)
 
 \donttest{
 dataset$add_rownames2taxonomy()
-}
-
-## ------------------------------------------------
-## Method `microtable$cal_abund`
-## ------------------------------------------------
-
-\donttest{
-dataset$cal_abund()
-}
-
-## ------------------------------------------------
-## Method `microtable$save_abund`
-## ------------------------------------------------
-
-\dontrun{
-dataset$save_abund(dirpath = "taxa_abund")
 }
 
 ## ------------------------------------------------
@@ -140,6 +125,22 @@ dataset$merge_taxa(taxa = "Genus")
 }
 
 ## ------------------------------------------------
+## Method `microtable$cal_abund`
+## ------------------------------------------------
+
+\donttest{
+dataset$cal_abund()
+}
+
+## ------------------------------------------------
+## Method `microtable$save_abund`
+## ------------------------------------------------
+
+\dontrun{
+dataset$save_abund(dirpath = "taxa_abund")
+}
+
+## ------------------------------------------------
 ## Method `microtable$cal_alphadiv`
 ## ------------------------------------------------
 
@@ -166,8 +167,6 @@ class(dataset$beta_diversity)
 \item \href{#method-microtable-rarefy_samples}{\code{microtable$rarefy_samples()}}
 \item \href{#method-microtable-tidy_dataset}{\code{microtable$tidy_dataset()}}
 \item \href{#method-microtable-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
-\item \href{#method-microtable-cal_abund}{\code{microtable$cal_abund()}}
-\item \href{#method-microtable-save_abund}{\code{microtable$save_abund()}}
 \item \href{#method-microtable-sample_sums}{\code{microtable$sample_sums()}}
 \item \href{#method-microtable-taxa_sums}{\code{microtable$taxa_sums()}}
 \item \href{#method-microtable-sample_names}{\code{microtable$sample_names()}}
@@ -175,6 +174,8 @@ class(dataset$beta_diversity)
 \item \href{#method-microtable-rename_taxa}{\code{microtable$rename_taxa()}}
 \item \href{#method-microtable-merge_samples}{\code{microtable$merge_samples()}}
 \item \href{#method-microtable-merge_taxa}{\code{microtable$merge_taxa()}}
+\item \href{#method-microtable-cal_abund}{\code{microtable$cal_abund()}}
+\item \href{#method-microtable-save_abund}{\code{microtable$save_abund()}}
 \item \href{#method-microtable-cal_alphadiv}{\code{microtable$cal_alphadiv()}}
 \item \href{#method-microtable-save_alphadiv}{\code{microtable$save_alphadiv()}}
 \item \href{#method-microtable-cal_betadiv}{\code{microtable$cal_betadiv()}}
@@ -301,12 +302,13 @@ For instance, the number 0.1 represents filtering the feature that occurs in les
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a new \code{microtable} object.
+None
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$filter_taxa(rel_abund = 0.0001, freq = 2)
+d1 <- clone(dataset)
+d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 }
 }
 \if{html}{\out{</div>}}
@@ -402,81 +404,6 @@ NULL, a new tax_table stored in the object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 dataset$add_rownames2taxonomy()
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-microtable-cal_abund"></a>}}
-\if{latex}{\out{\hypertarget{method-microtable-cal_abund}{}}}
-\subsection{Method \code{cal_abund()}}{
-Calculate the taxonomic abundance at each taxonomic rank.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(
-  select_cols = NULL,
-  rel = TRUE,
-  split_group = FALSE,
-  split_by = "&&",
-  split_column = NULL
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{select_cols}}{default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; used to select columns to merge and calculate abundances.
-This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
-
-\item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.}
-
-\item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
-Very useful when multiple mapping info exist.}
-
-\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; see sep in separate_rows function.}
-
-\item{\code{split_column}}{default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
-fixed column or columns used for the splitting in tax_table in each abundance calculation; 
-list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-taxa_abund in object.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-dataset$cal_abund()
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-microtable-save_abund"></a>}}
-\if{latex}{\out{\hypertarget{method-microtable-save_abund}{}}}
-\subsection{Method \code{save_abund()}}{
-Save taxonomic abundance to the computer local place.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(dirpath = "taxa_abund")}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{dirpath}}{default "taxa_abund"; directory name to save the taxonomic abundance files.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-dataset$save_abund(dirpath = "taxa_abund")
 }
 }
 \if{html}{\out{</div>}}
@@ -659,6 +586,81 @@ a new merged \code{microtable} object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 dataset$merge_taxa(taxa = "Genus")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-microtable-cal_abund"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-cal_abund}{}}}
+\subsection{Method \code{cal_abund()}}{
+Calculate the taxonomic abundance at each taxonomic rank.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(
+  select_cols = NULL,
+  rel = TRUE,
+  split_group = FALSE,
+  split_by = "&&",
+  split_column = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{select_cols}}{default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; used to select columns to merge and calculate abundances.
+This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
+
+\item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.}
+
+\item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
+Very useful when multiple mapping info exist.}
+
+\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; see sep in separate_rows function.}
+
+\item{\code{split_column}}{default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
+fixed column or columns used for the splitting in tax_table in each abundance calculation; 
+list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+taxa_abund in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+dataset$cal_abund()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-microtable-save_abund"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-save_abund}{}}}
+\subsection{Method \code{save_abund()}}{
+Save taxonomic abundance to the computer local place.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(dirpath = "taxa_abund")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dirpath}}{default "taxa_abund"; directory name to save the taxonomic abundance files.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+dataset$save_abund(dirpath = "taxa_abund")
 }
 }
 \if{html}{\out{</div>}}

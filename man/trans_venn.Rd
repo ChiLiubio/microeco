@@ -4,8 +4,8 @@
 \alias{trans_venn}
 \title{Create \code{trans_venn} object.}
 \description{
-This class is a wrapper for a series of venn analysis related methods, including venn result, 2- to 5-way venn diagram, 
-more than 5-way petal plot and venn result transformations based on David et al. (2012) <doi:10.1128/AEM.01459-12>.
+This class is a wrapper for a series of venn analysis related methods, including 2- to 5-way venn diagram, 
+more than 5-way petal or bar plot and intersection transformations based on David et al. (2012) <doi:10.1128/AEM.01459-12>.
 }
 \examples{
 
