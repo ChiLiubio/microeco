@@ -173,7 +173,7 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("Please provide a correct group name!")
 				}
 				merge_data <- cbind.data.frame(sample_table[, group, drop = FALSE], env_data[rownames(sample_table), ])
-				g <- GGally::ggpairs(merge_data, aes_string(color = group, alpha = alpha),  ...)
+				g <- GGally::ggpairs(merge_data, aes_meco(colour = group, alpha = alpha),  ...)
 				# Loop through each plot changing relevant scales 
 				for(i in 1:g$nrow){
 					for(j in 1:g$ncol){
@@ -545,7 +545,7 @@ trans_env <- R6Class(classname = "trans_env",
 			if("point" %in% plot_type){
 				p <- p + geom_point(
 					data = df_sites, 
-					aes_string("x", "y", colour = plot_color, shape = plot_shape), 
+					aes_meco("x", "y", colour = plot_color, shape = plot_shape), 
 					size = point_size,
 					alpha = point_alpha,
 					...
@@ -601,7 +601,7 @@ trans_env <- R6Class(classname = "trans_env",
 				combined_centroid_xy <- merge(df_sites, centroid_xy, by.x = plot_color, by.y = "group")
 				p <- p + geom_segment(
 					data = combined_centroid_xy, 
-					aes_string(x = "x", xend = "cx", y = "y", yend = "cy", color = plot_color),
+					aes_meco(x = "x", xend = "cx", y = "y", yend = "cy", colour = plot_color),
 					alpha = centroid_segment_alpha, 
 					size = centroid_segment_size, 
 					linetype = centroid_segment_linetype
@@ -614,7 +614,7 @@ trans_env <- R6Class(classname = "trans_env",
 					ellipse_chull_fill_color <- NULL
 					ellipse_chull_alpha <- 0
 				}
-				mapping <- aes_string(x = "x", y = "y", group = plot_color, color = plot_color, fill = ellipse_chull_fill_color)
+				mapping <- aes_meco(x = "x", y = "y", group = plot_color, colour = plot_color, fill = ellipse_chull_fill_color)
 				if("ellipse" %in% plot_type){
 					p <- p + ggplot2::stat_ellipse(
 						mapping = mapping, 
@@ -661,7 +661,7 @@ trans_env <- R6Class(classname = "trans_env",
 				if(is.null(taxa_nudge_x) & is.null(taxa_nudge_y)){
 					p <- p + ggrepel::geom_text_repel(
 						data = df_arrows_spe1, 
-						aes_string("x", "y", label = self$taxa_level), 
+						aes_meco("x", "y", label = self$taxa_level), 
 						size = taxa_text_size, 
 						color = taxa_text_color, 
 						segment.alpha = .01, 
@@ -689,7 +689,7 @@ trans_env <- R6Class(classname = "trans_env",
 						}
 					}
 					for(j in seq_len(nrow(df_arrows_spe1))){
-						p <- p + ggrepel::geom_text_repel(data = df_arrows_spe1[j, ], aes_string("x", "y", label = self$taxa_level), size = taxa_text_size, 
+						p <- p + ggrepel::geom_text_repel(data = df_arrows_spe1[j, ], aes_meco("x", "y", label = self$taxa_level), size = taxa_text_size, 
 							color = taxa_text_color, segment.alpha = .01, parse = TRUE, nudge_x = taxa_nudge_x[j], nudge_y = taxa_nudge_y[j])
 					}
 				}
@@ -697,7 +697,7 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!is.null(add_sample_label)){
 				p <- p + ggrepel::geom_text_repel(
 					data = df_sites,
-					mapping = aes_string(x = "x", y = "y", label = add_sample_label)
+					mapping = aes_meco(x = "x", y = "y", label = add_sample_label)
 					)
 			}
 			p
@@ -1303,9 +1303,9 @@ trans_env <- R6Class(classname = "trans_env",
 				plot_shape <- NULL
 			}
 			if(is.null(group)){
-				p <- ggplot(use_data, aes_string(x = "x", y = "y"))
+				p <- ggplot(use_data, aes_meco(x = "x", y = "y"))
 			}else{
-				p <- ggplot(use_data, aes_string(x = "x", y = "y", color = "Group", shape = plot_shape))
+				p <- ggplot(use_data, aes_meco(x = "x", y = "y", colour = "Group", shape = plot_shape))
 			}
 			p <- p + geom_point(size = point_size, alpha = point_alpha)
 			if(is.null(group)){

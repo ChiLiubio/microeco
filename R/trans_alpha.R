@@ -425,10 +425,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						)
 				}
 			}else{
-				p <- ggplot(use_data, aes_string(x = group, y = "Value")) + 
+				p <- ggplot(use_data, aes_meco(x = group, y = "Value")) + 
 					theme_minimal() +
-					stat_summary(fun.data=mean_se, fun.args = list(mult=1), geom="errorbar", width=0.2) +
-					stat_summary(fun.y=mean, geom="point", size = rel(3)) + 
+					stat_summary(fun.data = mean_se, fun.args = list(mult = 1), geom = "errorbar", width = 0.2) +
+					stat_summary(fun = mean, geom = "point", size = rel(3)) + 
 					theme(
 						axis.title = element_text(face = "bold",size = rel(1.8)),
 						axis.line.x = element_line(colour="black"),

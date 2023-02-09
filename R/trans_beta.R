@@ -212,7 +212,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				combined[, plot_color] %<>% factor(., levels = plot_group_order)
 			}
 			
-			p <- ggplot(combined, aes_string(x = plot_x, y = plot_y, color = plot_color, shape = plot_shape))
+			p <- ggplot(combined, aes_meco(x = plot_x, y = plot_y, colour = plot_color, shape = plot_shape))
 			if("point" %in% plot_type){
 				p <- p + geom_point(alpha = point_alpha, size = point_size)
 			}
@@ -231,7 +231,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				combined_centroid_xy <- merge(combined, centroid_xy, by.x = plot_color, by.y = "group")
 				p <- p + geom_segment(
 					data = combined_centroid_xy, 
-					aes_string(x = plot_x, xend = "cx", y = plot_y, yend = "cy", color = plot_color),
+					aes_meco(x = plot_x, xend = "cx", y = plot_y, yend = "cy", colour = plot_color),
 					alpha = centroid_segment_alpha, 
 					size = centroid_segment_size, 
 					linetype = centroid_segment_linetype
@@ -244,7 +244,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					ellipse_chull_fill_color <- NULL
 					ellipse_chull_alpha <- 0
 				}
-				mapping <- aes_string(x = plot_x, y = plot_y, group = plot_color, color = plot_color, fill = ellipse_chull_fill_color)
+				mapping <- aes_meco(x = plot_x, y = plot_y, group = plot_color, colour = plot_color, fill = ellipse_chull_fill_color)
 				if("ellipse" %in% plot_type){
 					p <- p + ggplot2::stat_ellipse(
 						mapping = mapping, 
@@ -268,7 +268,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 			}
 			if(!is.null(add_sample_label)){
-				p <- p + ggrepel::geom_text_repel(aes_string(label = add_sample_label))
+				p <- p + ggrepel::geom_text_repel(aes_meco(label = add_sample_label))
 			}
 			if(!is.null(plot_color)){
 				p <- p + scale_color_manual(values = color_values)
@@ -521,19 +521,19 @@ trans_beta <- R6Class(classname = "trans_beta",
 					g1 <- g1 + geom_text(data=hc_d_measure$label, aes(x=x, y=y, label=label, hjust=-0.1), size=4)
 				}else{
 					if(length(replace_name) > 1){
-						g1 <- g1 + geom_text(data=data2, aes_string(x="x", y="y", label = "replace_name_use", hjust=-0.1), size=4)
+						g1 <- g1 + geom_text(data=data2, aes_meco(x="x", y="y", label = "replace_name_use", hjust=-0.1), size=4)
 					}else{
-						g1 <- g1 + geom_text(data=data2, aes_string(x="x", y="y", label = replace_name, hjust=-0.1), size=4)
+						g1 <- g1 + geom_text(data=data2, aes_meco(x="x", y="y", label = replace_name, hjust=-0.1), size=4)
 					}
 				}
 			} else {
 				if(is.null(replace_name)){
-					g1 <- g1 + geom_text(data=data2, aes_string(x="x", y="y", label="label", hjust=-0.1, color = group), size=4)
+					g1 <- g1 + geom_text(data=data2, aes_meco(x="x", y="y", label="label", hjust=-0.1, colour = group), size=4)
 				}else{
 					if(length(replace_name) > 1){
-						g1 <- g1 + geom_text(data=data2, aes_string(x="x", y="y", label="replace_name_use", hjust=-0.1, color = group), size=4)
+						g1 <- g1 + geom_text(data=data2, aes_meco(x="x", y="y", label="replace_name_use", hjust=-0.1, colour = group), size=4)
 					}else{
-						g1 <- g1 + geom_text(data=data2, aes_string(x="x", y="y", label=replace_name, hjust=-0.1, color = group), size=4)
+						g1 <- g1 + geom_text(data=data2, aes_meco(x="x", y="y", label=replace_name, hjust=-0.1, colour = group), size=4)
 					}
 				}
 				g1 <- g1 + scale_color_manual(values = use_colors)

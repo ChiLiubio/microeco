@@ -557,8 +557,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 					newdata <- file2meco::meco2phyloseq(newdata)
 					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
 					res <- res_raw$res_global
-					colnames(res) <- c("W", "P.unadj", "P.adj", "diff_abn")
-					res <- cbind.data.frame(feature = rownames(res), res)
+					colnames(res) <- c("feature", "W", "P.unadj", "P.adj", "diff_abn")
+					rownames(res) <- NULL
 					group_vec <- use_dataset$sample_table[, group] %>% as.character %>% unique
 					comparisions <- paste0(group_vec, collapse = " - ")
 					res <- cbind.data.frame(compare = comparisions, res)
@@ -577,7 +577,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					newdata <- file2meco::meco2phyloseq(newdata)
 					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
 					res_raw2 <- res_raw$res
-					res <- data.frame(feature = rownames(res_raw2), 
+					res <- data.frame(feature = res_raw2$taxon, 
 						W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
 						P.unadj = res_raw2[, which(grepl("^p_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
 						P.adj = res_raw2[, which(grepl("^q_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 

@@ -717,8 +717,8 @@ trans_network <- R6Class(classname = "trans_network",
 				}else{
 					g <- g + geom_edge_link(aes(col = label, width = weight), alpha = 0.8)
 				}
-				g <- g + geom_node_point(aes_string(col = node_color), size = ggraph_node_size, alpha = 0.5) +
-					geom_node_text(aes_string(col = ggraph_text_color, label = node_label), size = ggraph_text_size, repel = TRUE) +
+				g <- g + geom_node_point(aes_meco(colour = node_color), size = ggraph_node_size, alpha = 0.5) +
+					geom_node_text(aes_meco(colour = ggraph_text_color, label = node_label), size = ggraph_text_size, repel = TRUE) +
 					scale_edge_width(range = c(0.5, 2)) +
 					theme_void()
 			}
@@ -1394,7 +1394,7 @@ trans_network <- R6Class(classname = "trans_network",
 						}
 						p <- p + ggrepel::geom_text_repel(
 							data = label_data, 
-							aes_string("p", "z", label = add_label_text), 
+							aes_meco("p", "z", label = add_label_text), 
 							size = label_text_size, 
 							color = label_text_color, 
 							segment.alpha = .01, 
@@ -1444,7 +1444,7 @@ trans_network <- R6Class(classname = "trans_network",
 			use_data %<>% .[as.character(.[, use_level]) %in% use_taxa, ]
 			use_data[, use_level] %<>% factor(., levels = use_taxa)
 
-			p <- ggplot(use_data, aes_string(x = use_level, y = "value", color = plot_color, shape = plot_shape, size = plot_size)) + 
+			p <- ggplot(use_data, aes_meco(x = use_level, y = "value", colour = plot_color, shape = plot_shape, size = plot_size)) + 
 				geom_point(position = "jitter", ...) +
 				scale_color_manual(values = color_values) +
 				scale_shape_manual(values = shape_values) +				

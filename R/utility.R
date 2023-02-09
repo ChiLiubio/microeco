@@ -211,5 +211,33 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 	data.frame(label = as.character(as.expression(res)))
 }
 
+aes_meco <- function (x, y, ...){
+    mapping <- list(...)
+    if (!missing(x)) 
+        mapping["x"] <- list(x)
+    if (!missing(y)) 
+        mapping["y"] <- list(y)
+    caller_env <- parent.frame()
+    mapping <- lapply(mapping, function(x) {
+        if (is.character(x)) {
+            x <- rlang::parse_expr(x)
+        }
+        new_aesthetic(x, env = caller_env)
+    })
+    structure(mapping, class = "uneval")
+}
 
+new_aesthetic <- function (x, env = globalenv()){
+    if (rlang::is_quosure(x)) {
+        if (!rlang::quo_is_symbolic(x)) {
+            x <- rlang::quo_get_expr(x)
+        }
+        return(x)
+    }
+    if (rlang::is_symbolic(x)) {
+        x <- rlang::new_quosure(x, env = env)
+        return(x)
+    }
+    x
+}
 

@@ -376,7 +376,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				.[order(.$Counts, decreasing = TRUE), ]
 			plot_data[, 1] %<>% factor(., levels = .)
 			
-			g1 <- ggplot(plot_data, aes_string(x = "rowname", y = "Counts")) +
+			g1 <- ggplot(plot_data, aes(x = rowname, y = Counts)) +
 				theme_classic() +
 				geom_col(color = bar_color, fill = bar_fill) +
 				ylab(up_y_title) +
@@ -398,9 +398,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 			data2$variable %<>% factor(., levels = levels(plot_data[, 1]))
 			data3 <- data2[!is.na(data2$value), ]
 			#data2$value[is.na(data2$value)] <- 0
-			g2 <- ggplot(data2, aes_string(x = "variable", y = "rowname")) +
+			g2 <- ggplot(data2, aes(x = variable, y = rowname)) +
 				theme_bw() +
-				geom_point(aes_string(x = "variable", y = "rowname"), data = data3, size = point_size, color = point_color, inherit.aes = FALSE) +
+				geom_point(aes(x = variable, y = rowname), data = data3, size = point_size, color = point_color, inherit.aes = FALSE) +
 				theme(legend.position = "none") +
 				theme(axis.title = element_blank(), axis.text.x = element_blank(), axis.ticks = element_blank()) +
 				theme(axis.text = element_text(size = bottom_y_text_size)) +
