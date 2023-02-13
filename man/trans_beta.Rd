@@ -30,7 +30,6 @@ t1$cal_ordination(ordination = "PCoA")
 t1$plot_ordination(plot_type = "point")
 t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
 t1$plot_ordination(plot_color = "Group", plot_type = c("point", "ellipse"))
-t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
 t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
 	  centroid_segment_linetype = 1)
 
@@ -242,7 +241,6 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 \preformatted{t1$plot_ordination(plot_type = "point")
 t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
 t1$plot_ordination(plot_color = "Group", plot_type = c("point", "ellipse"))
-t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
 t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
 	  centroid_segment_linetype = 1)
 }

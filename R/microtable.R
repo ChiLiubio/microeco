@@ -552,7 +552,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @description
 		#' Calculate alpha diversity in \code{microtable} object.
 		#'
-		#' @param measures default NULL; one or more indexes from "Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD"; 
+		#' @param measures default NULL; one or more indexes of \code{c("Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD")}; 
 		#'   If null, use all those measures. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on \code{vegan::diversity} function;
 		#'   'Chao1' and 'ACE' depend on the function \code{vegan::estimateR}; 'PD' depends on the function \code{picante::pd}.
 		#' @param PD TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.
@@ -590,16 +590,20 @@ microtable <- R6Class(classname = "microtable",
 			if("InvSimpson" %in% measures){
 				outlist <- c(outlist, list(invsimpson = vegan::diversity(OTU, index = "invsimpson")))
 			}
-			if("Fisher" %in% measures) {
-				fisher = tryCatch(vegan::fisher.alpha(OTU, se = TRUE), warning = function(w) {
-					suppressWarnings(vegan::fisher.alpha(OTU, se = TRUE)[, c("alpha", "se")])
-				})
-				if (!is.null(dim(fisher))) {
+			if("Fisher" %in% measures){
+				fisher <- tryCatch(vegan::fisher.alpha(OTU, se = TRUE), 
+					warning = function(w){suppressWarnings(vegan::fisher.alpha(OTU, se = TRUE)[, c("alpha", "se")])},
+					error = function(e){c("Skip the index Fisher because of an error ...")}
+					)
+				if(!is.null(dim(fisher))) {
 					colnames(fisher)[1:2] <- c("Fisher", "se.fisher")
 					outlist <- c(outlist, list(fisher))
-				}
-				else {
-					outlist <- c(outlist, Fisher = list(fisher))
+				}else{
+					if(is.numeric(fisher)){
+						outlist <- c(outlist, Fisher = list(fisher))
+					}else{
+						message(fisher)
+					}
 				}
 			}
 			if(is.null(measures)){

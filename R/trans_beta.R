@@ -169,7 +169,6 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$plot_ordination(plot_type = "point")
 		#' t1$plot_ordination(plot_color = "Group", plot_shape = "Group", plot_type = "point")
 		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "ellipse"))
-		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "chull"))
 		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
 		#' 	  centroid_segment_linetype = 1)
 		plot_ordination = function(

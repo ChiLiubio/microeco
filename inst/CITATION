@@ -1,18 +1,14 @@
-citHeader("To cite microeco in publications use:")
 
-citEntry(entry="article",
+bibentry(bibtype = "Article",
+         textVersion = "Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao. microeco: an R package for data mining in microbial community ecology. FEMS Microbiology Ecology, 2021, Volume 97, Issue 2, fiaa255.",
+         header = "To cite microeco in publications use:",
          title = "microeco: An R package for data mining in microbial community ecology",
-         author = personList( as.person("Chi Liu"),
-                              as.person("Yaoming Cui"),
-                              as.person("Xiangzhen Li"),
-                              as.person("Minjie Yao*")),
+         author = c("Chi Liu", "Yaoming Cui", "Xiangzhen Li", "Minjie Yao"),
          year = "2021",
          journal = "FEMS Microbiology Ecology",
          volume = "97",
 		 number = "2",
          pages = "fiaa255",
          doi = "10.1093/femsec/fiaa255",
-         url = "https://doi.org/10.1093/femsec/fiaa255",
-         textVersion = "Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao, microeco: an R package for data mining in microbial community ecology, FEMS Microbiology Ecology, Volume 97, Issue 2, February 2021, fiaa255."
+         url = "https://doi.org/10.1093/femsec/fiaa255"
 )
-
