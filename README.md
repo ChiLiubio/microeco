@@ -39,7 +39,7 @@ Open RStudio -> Tools -> Global Options -> Packages, select the appropriate mirr
 
 ## Install microeco
 
-Install microeco package from CRAN directly.
+Install microeco package from CRAN.
 
 ```r
 install.packages("microeco")
