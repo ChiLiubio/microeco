@@ -1092,22 +1092,11 @@ trans_env <- R6Class(classname = "trans_env",
 					}else{
 						p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
 						if(cluster_ggplot %in% c("row", "both")){
-							dendro_data_plot <- ggdendro::dendro_data(as.dendrogram(row_cluster))
-							row_plot <- ggplot(data = ggdendro::segment(dendro_data_plot)) + 
-								geom_segment(aes(x = x, y = y, xend = xend, yend = yend), color = "grey30") +
-								coord_flip() +
-								scale_y_reverse(expand = c(0, 0)) +
-								theme_void()
-
+							row_plot <- ggtree::ggtree(row_cluster, hang = 0)
 							p %<>% aplot::insert_left(row_plot, width = cluster_height_rows)
 						}
 						if(cluster_ggplot %in% c("col", "both")){
-							dendro_data_plot <- ggdendro::dendro_data(as.dendrogram(col_cluster))
-							col_plot <- ggplot(data = ggdendro::segment(dendro_data_plot)) + 
-								geom_segment(aes(x = x, y = y, xend = xend, yend = yend), color = "grey30") +
-								scale_y_continuous(expand = c(0, 0)) +
-								theme_void()
-							
+							col_plot <- ggtree::ggtree(col_cluster, hang = 0) + ggtree::layout_dendrogram()							
 							p %<>% aplot::insert_top(col_plot, height = cluster_height_cols)
 						}
 					}
