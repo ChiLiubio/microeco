@@ -4,17 +4,17 @@ An R package for data mining in microbial community ecology
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
-![](https://img.shields.io/badge/Release-0.14.0-orange.svg) ![](https://img.shields.io/badge/Test-0.14.2-red.svg)
+![](https://img.shields.io/badge/Release-0.14.1-orange.svg) ![](https://img.shields.io/badge/Test-0.14.2-red.svg)
 
 ## Background
-In microbial community ecology, with the development of high-throughput sequencing techniques,
+With the development of high-throughput sequencing techniques,
 the increasing data amount and complexity make the microbiome data analysis and management a challenge.
-There has been a lot of R packages created for the microbiome profiling analysis.
-However, it is still difficult to perform data mining fast and efficiently.
+Though there has been a lot of R packages created for the microbiome profiling analysis,
+it is still difficult to perform data mining fast, efficiently and comprehensively.
 Therefore, we created R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
 
 ## Main Features
-  + R6 Class to store and analyze data; fast, flexible and modularized
+  + R6 Class to store and analyze data: flexible and modularized
   + Taxonomic abundance analysis
   + Venn diagram
   + Alpha diversity
