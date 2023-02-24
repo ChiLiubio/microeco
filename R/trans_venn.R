@@ -335,40 +335,45 @@ trans_venn <- R6Class(classname = "trans_venn",
 			p
 		},
 		#' @description
-		#' Plot the intersections using histogram. Especially useful when samples > 5.
+		#' Plot the intersections using , i.e. UpSet plot. Especially useful when samples > 5.
 		#'
-		#' @param bottom_y_text_size default 12; y axis text size, i.e. sample name size, of bottom plot.
-		#' @param bottom_height default 1; bottom plot height relative to the bar plot. 1 represents the height of bottom plot is same with the bar plot.
+		#' @param left_plot default TRUE; whether add the left bar plot to show the feature number of each sample.
+		#' @param sort_samples default TRUE; whether sort samples according to the number of features in each sample.
+		#'   If FALSE, use the sample orders in sample_table of the raw dataset.
 		#' @param up_y_title default "Intersection set"; y axis title of upper plot.
 		#' @param up_y_title_size default 15; y axis title size of upper plot.
 		#' @param up_y_text_size default 4; y axis text size of upper plot.
-		#' @param bar_fill default "grey70"; bar fill color of upper plot.
-		#' @param point_size default 3; point size of bottom plot.
-		#' @param point_color default "black"; point color of bottom plot.
-		#' @param sort_samples default TRUE; whether sort samples according to the number of features in each sample.
-		#' @param left_set default TRUE; whether add the left bar plot to show the feature number of each sample.
-		#' @param left_width default 0.3; left bar plot width relative to the right and bottom plot.
-		#' @param left_fill default "grey70"; fill color for the left bar plot presenting feature number.
+		#' @param up_bar_fill default "grey70"; bar fill color of upper plot.
+		#' @param bottom_y_text_size default 12; y axis text size, i.e. sample name size, of bottom sample plot.
+		#' @param bottom_height default 1; bottom plot height relative to the upper bar plot. 1 represents the height of bottom plot is same with the upper bar plot.
+		#' @param bottom_point_size default 3; point size of bottom plot.
+		#' @param bottom_point_color default "black"; point color of bottom plot.
+		#' @param bottom_background_fill default "grey95"; fill color for the striped background in the bottom sample plot.
+		#' @param left_width default 0.3; left bar plot width relative to the right bottom plot.
+		#' @param left_bar_fill default "grey70"; fill color for the left bar plot presenting feature number.
 		#' @param left_x_text_size default 10; x axis text size of the left bar plot.
+		#' @param left_background_fill default "grey95"; fill color for the striped background in the left plot.
 		#' @return a ggplot2 object.
 		#' @examples
 		#' \donttest{
 		#' t2 <- t1$plot_bar()
 		#' }
 		plot_bar = function(
-			bottom_y_text_size = 12,
-			bottom_height = 1,
+			left_plot = TRUE,
+			sort_samples = TRUE,
 			up_y_title = "Intersection size",
 			up_y_title_size = 15,
 			up_y_text_size = 8,
-			bar_fill = "grey70",
-			point_size = 3,
-			point_color = "black",
-			sort_samples = TRUE,
-			left_set = TRUE,
+			up_bar_fill = "grey70",
+			bottom_y_text_size = 12,
+			bottom_height = 1,
+			bottom_point_size = 3,
+			bottom_point_color = "black",
+			bottom_background_fill = "grey95",
 			left_width = 0.3,
-			left_fill = "grey70",
-			left_x_text_size = 10
+			left_bar_fill = "grey70",
+			left_x_text_size = 10,
+			left_background_fill = "grey95"
 			){
 			colnumber <- self$colnumber
 			ratio <- self$ratio
@@ -382,9 +387,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 				stop("Please change name_joint parameter when creating trans_venn object!")
 			}
 			if(sort_samples){
-				sample_levels <- names(sort(samplesum, decreasing = TRUE))
+				sample_levels <- sort(samplesum, decreasing = TRUE) %>% names %>% rev
 			}else{
-				sample_levels <- res_names
+				sample_levels <- res_names %>% rev
 			}
 			
 			plot_data <- summary_table %>% 
@@ -394,62 +399,69 @@ trans_venn <- R6Class(classname = "trans_venn",
 			
 			g1 <- ggplot(plot_data, aes(x = rowname, y = Counts)) +
 				theme_classic() +
-				geom_col(color = bar_fill, fill = bar_fill) +
+				geom_col(color = up_bar_fill, fill = up_bar_fill) +
 				ylab(up_y_title) +
 				theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
 				theme(axis.text = element_text(size = up_y_text_size), axis.title = element_text(size = up_y_title_size))
 			
-			data2 <- matrix(nrow = colnumber, ncol = nrow(plot_data)) %>% as.data.frame
-			rownames(data2) <- res_names
-			colnames(data2) <- plot_data[, 1]
-			for(i in colnames(data2)){
+			matrix_data <- matrix(nrow = colnumber, ncol = nrow(plot_data)) %>% as.data.frame
+			rownames(matrix_data) <- sample_levels
+			colnames(matrix_data) <- plot_data[, 1]
+			for(i in colnames(matrix_data)){
 				tmp <- strsplit(i, name_joint, fixed = TRUE) %>% unlist
-				for(j in rownames(data2)){
+				for(j in rownames(matrix_data)){
 					if(j %in% tmp){
-						data2[j, i] <- 1
+						matrix_data[j, i] <- 1
 					}
 				}
 			}
-			data2 %<>% rownames_to_column %>% reshape2::melt(., id.vars = "rowname")
-			data2$variable %<>% factor(., levels = levels(plot_data[, 1]))
-			data2$rowname %<>% factor(levels = rev(sample_levels))
-			data3 <- data2[!is.na(data2$value), ]
-			data4 <- data2
-			data4$value <- 1
-			#data2$value[is.na(data2$value)] <- 0
-			g2 <- ggplot(data2, aes(x = variable, y = rowname))
+			sample_long <- matrix_data %>% rownames_to_column %>% reshape2::melt(., id.vars = "rowname")
+			sample_long$variable %<>% factor(., levels = levels(plot_data[, 1]))
+			sample_long$rowname %<>% factor(levels = sample_levels)
+			sample_ture <- sample_long[!is.na(sample_long$value), ]
+			sample_all <- sample_long
+			sample_all$value <- 1
+
+			g2 <- ggplot(sample_long, aes(x = variable, y = rowname))
 				#theme(plot.background = element_rect(fill = "white", colour = "white", size = 0.1))
-			for(i in seq_len(length(unique(data3$rowname)))){
+			for(i in seq_len(length(unique(sample_ture$rowname)))){
 				if(i %% 2 == 1){
-					g2 <- g2 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = "grey97", colour = "grey97")
+					g2 <- g2 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = bottom_background_fill, colour = bottom_background_fill)
 				}else{
 					g2 <- g2 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = "white", colour = "white")
 				}
 			}
 			g2 <- g2 + 
-				geom_point(aes(x = variable, y = rowname), data = data4, size = point_size, color = "grey92", inherit.aes = FALSE) +
-				geom_point(aes(x = variable, y = rowname), data = data3, size = point_size, color = point_color, inherit.aes = FALSE) +
+				geom_point(aes(x = variable, y = rowname), data = sample_all, size = bottom_point_size, color = "grey92", inherit.aes = FALSE) +
+				geom_point(aes(x = variable, y = rowname), data = sample_ture, size = bottom_point_size, color = bottom_point_color, inherit.aes = FALSE) +
 				theme_bw() +
 				theme(legend.position = "none") +
 				theme(axis.title = element_blank(), axis.text.x = element_blank(), axis.ticks = element_blank()) +
 				theme(axis.text = element_text(size = bottom_y_text_size)) +
 				theme(panel.border = element_blank()) +
 				theme(panel.grid = element_blank())
-				
-			if(left_set){
+			
+			line_data <- matrix_data
+			line_data[] <- lapply(line_data, function(x){x <- 1:length(x); x})
+			line_data[is.na(matrix_data)] <- NA
+
+			line_data2 <- data.frame(y = apply(line_data, 2, min, na.rm = TRUE), yend = apply(line_data, 2, max, na.rm = TRUE), x = 1:ncol(line_data), xend = 1:ncol(line_data))
+			g2 <- g2 + geom_segment(aes(x = x, y = y, xend = xend, yend = yend), data = line_data2)
+
+			if(left_plot){
 				g3_data <- data.frame(number = samplesum, rowname = names(samplesum))
-				g3_data$rowname %<>% factor(levels = rev(sample_levels))
+				g3_data$rowname %<>% factor(levels = sample_levels)
 
 				g3 <- ggplot(g3_data, aes(x = number, y = rowname))
 				for(i in seq_len(length(unique(g3_data$rowname)))){
 					if(i %% 2 == 1){
-						g3 <- g3 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = "grey97", colour = "grey97")
+						g3 <- g3 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = left_background_fill, colour = left_background_fill)
 					}else{
 						g3 <- g3 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = "white", colour = "white")
 					}
 				}
 				g3 <- g3 + 
-					geom_col(color = left_fill, fill = left_fill) +
+					geom_col(color = left_bar_fill, fill = left_bar_fill) +
 					theme_bw() +
 					theme(legend.position = "none") +
 					scale_x_reverse() +
