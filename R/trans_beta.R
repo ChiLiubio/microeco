@@ -466,7 +466,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
 				group_distance$Measure <- "group_distance"
 				temp1$data_alpha <- group_distance
-				temp1$group <- "Group"
+				temp1$group <- group
 				p <- temp1$plot_alpha(add_sig = FALSE, measure = "group_distance", ...) + ylab(ylabname)
 			}else{
 				self$res_group_distance_diff_tmp$res_diff <- self$res_group_distance_diff
