@@ -84,7 +84,7 @@ trans_func <- R6Class(classname = "trans_func",
 				if(grepl("FAPROTAX", prok_database, ignore.case = TRUE)){
 					# Copyright (c) 2023, Stilianos Louca. All rights reserved.
 					# developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
-					data("prok_func_FAPROTAX", envir=environment())
+					data("prok_func_FAPROTAX", envir = environment())
 					message("FAPROTAX v1.2.6. Please also cite the original FAPROTAX paper: Louca et al. (2016).")
 					message("Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 					# collapse taxonomy
@@ -282,6 +282,10 @@ trans_func <- R6Class(classname = "trans_func",
 				}
 				otu_func_table %<>% .[, -1]
 				self$fungi_database <- fungi_database
+			}
+			if(any(is.na(otu_func_table))){
+				warning("NA found in the final table! Convert NA to 0 ...")
+				otu_func_table[is.na(otu_func_table)] <- 0
 			}
 			self$res_spe_func <- otu_func_table
 			message('The functional binary table is stored in object$res_spe_func ...')
