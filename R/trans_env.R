@@ -786,7 +786,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
-		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.
+		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; P value adjustment type.
+		#' 	  Env: adjustment for each environmental variable separately; Taxa: adjustment for each taxon separately; 
+		#' 	  Type: adjustment according to the groups provided. If `by_group` is NULL, adjustment is performed for all the data together.
+		#' 	  If `by_group` is provided, for each group in it separately.
+		#' 	  These three options are the first three colnames of return table `res_cor`.
 		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
 		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".

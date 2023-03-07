@@ -692,7 +692,11 @@ Actually, it can also be used for calculating other correlation between any two 
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.}
 
-\item{\code{p_adjust_type}}{default "Env"; "Type", "Taxa" or "Env"; p.adjust type; Env: environmental data; Taxa: taxa data; Type: group used.}
+\item{\code{p_adjust_type}}{default "Env"; "Type", "Taxa" or "Env"; P value adjustment type.
+Env: adjustment for each environmental variable separately; Taxa: adjustment for each taxon separately; 
+Type: adjustment according to the groups provided. If `by_group` is NULL, adjustment is performed for all the data together.
+If `by_group` is provided, for each group in it separately.
+These three options are the first three colnames of return table `res_cor`.}
 
 \item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
 
