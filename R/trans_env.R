@@ -241,8 +241,12 @@ trans_env <- R6Class(classname = "trans_env",
 							message("Calculating done ...")
 						}
 						if(!is.null(use_measure)){
-							use_matrix <- self$dataset$beta_diversity[[use_measure]]
-							message("Use ", use_measure, " in dataset$beta_diversity for dbRDA ...")
+							if(! use_measure %in% names(self$dataset$beta_diversity)){
+								stop("Please make sure use_measure: ", use_measure, " is in the dataset$beta_diversity!")
+							}else{
+								use_matrix <- self$dataset$beta_diversity[[use_measure]]
+								message("Use ", use_measure, " in dataset$beta_diversity for dbRDA ...")
+							}
 						}else{
 							use_matrix <- self$dataset$beta_diversity[[1]]
 							message("Parameter use_measure not provided; use the first matrix in dataset$beta_diversity ...")
