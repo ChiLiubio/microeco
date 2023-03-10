@@ -568,29 +568,31 @@ microtable <- R6Class(classname = "microtable",
 			renamevec    <-     c("Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher")
 			names(renamevec) <- c("S.obs", "coverage", "S.chao1", "S.ACE", "shannon", "simpson", "invsimpson", "fisher")
 			if(is.null(measures)){
-				measures <- as.character(renamevec)
+				use_measures <- as.character(renamevec)
+			}else{
+				use_measures <- measures
 			}
-			if(any(measures %in% names(renamevec))){
-				measures[measures %in% names(renamevec)] <- renamevec[names(renamevec) %in% measures]
+			if(any(use_measures %in% names(renamevec))){
+				use_measures[use_measures %in% names(renamevec)] <- renamevec[names(renamevec) %in% use_measures]
 			}
-			if(!any(measures %in% renamevec)){
+			if(!any(use_measures %in% renamevec)){
 				stop("None of the `measures` you provided are supported. Try default `NULL` instead.")
 			}
 			outlist <- vector("list")
 			estimRmeas <- c("Chao1", "Observed", "ACE")
-			if(any(estimRmeas %in% measures)){
+			if(any(estimRmeas %in% use_measures)){
 				outlist <- c(outlist, list(t(data.frame(vegan::estimateR(OTU), check.names = FALSE))))
 			}
-			if("Shannon" %in% measures){
+			if("Shannon" %in% use_measures){
 				outlist <- c(outlist, list(shannon = vegan::diversity(OTU, index = "shannon")))
 			}
-			if("Simpson" %in% measures){
+			if("Simpson" %in% use_measures){
 				outlist <- c(outlist, list(simpson = vegan::diversity(OTU, index = "simpson")))
 			}
-			if("InvSimpson" %in% measures){
+			if("InvSimpson" %in% use_measures){
 				outlist <- c(outlist, list(invsimpson = vegan::diversity(OTU, index = "invsimpson")))
 			}
-			if("Fisher" %in% measures){
+			if("Fisher" %in% use_measures){
 				fisher <- tryCatch(vegan::fisher.alpha(OTU, se = TRUE), 
 					warning = function(w){suppressWarnings(vegan::fisher.alpha(OTU, se = TRUE)[, c("alpha", "se")])},
 					error = function(e){c("Skip the index Fisher because of an error ...")}
@@ -606,7 +608,7 @@ microtable <- R6Class(classname = "microtable",
 					}
 				}
 			}
-			if(is.null(measures)){
+			if("Coverage" %in% use_measures){
 				outlist <- c(outlist, list(coverage = private$goods(OTU)))
 			}
 			if(PD){
