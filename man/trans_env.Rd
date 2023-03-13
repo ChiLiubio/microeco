@@ -847,6 +847,7 @@ Scatter plot and add fitted line. The most important thing is to make sure that 
   line_se_color = "grey70",
   pvalue_trim = 4,
   cor_coef_trim = 3,
+  lm_equation = TRUE,
   lm_fir_trim = 2,
   lm_sec_trim = 2,
   lm_squ_trim = 2,
@@ -916,6 +917,8 @@ If provided, overlook the levels in the group of dataset$sample_table.}
 \item{\code{pvalue_trim}}{default 4; trim the decimal places of p value.}
 
 \item{\code{cor_coef_trim}}{default 3; trim the decimal places of correlation coefficient.}
+
+\item{\code{lm_equation}}{default TRUE; whether include the equation in the label when `type = "lm"`.}
 
 \item{\code{lm_fir_trim}}{default 2; trim the decimal places of regression first coefficient.}
 

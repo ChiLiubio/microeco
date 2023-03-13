@@ -1162,6 +1162,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param line_color default "black"; fitted line color only useful when group = NULL.
 		#' @param pvalue_trim default 4; trim the decimal places of p value.
 		#' @param cor_coef_trim default 3; trim the decimal places of correlation coefficient.
+		#' @param lm_equation default TRUE; whether include the equation in the label when `type = "lm"`.
 		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
 		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
 		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
@@ -1200,6 +1201,7 @@ trans_env <- R6Class(classname = "trans_env",
 			line_se_color = "grey70",
 			pvalue_trim = 4, 
 			cor_coef_trim = 3,
+			lm_equation = TRUE,
 			lm_fir_trim = 2,
 			lm_sec_trim = 2,
 			lm_squ_trim = 2,
@@ -1316,6 +1318,7 @@ trans_env <- R6Class(classname = "trans_env",
 				label_sep = label_sep, 
 				pvalue_trim = pvalue_trim,
 				cor_coef_trim = cor_coef_trim,
+				lm_equation = lm_equation,
 				lm_fir_trim = lm_fir_trim, 
 				lm_sec_trim = lm_sec_trim,
 				lm_squ_trim = lm_squ_trim,
@@ -1395,12 +1398,12 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			cor_method <- rep(method, length(p_res))
 			p_adjusted <- p.adjust(p_res, method = p_adjust_method)
-			significance <- cut(p_adjusted, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+			significance <- cut(p_adjusted, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", ""))
 			if(is.null(by_group)){
 				by_group <- "All"
 			}
 			res_mantel <- data.frame(by_group, variable_name, mantel_type, cor_method, corr_res, p_res, p_adjusted, significance)
-			colnames(res_mantel) <- c("by_group", "Variables", "mantel type", "Correlation method", "Correlation coefficient","p.value", "p.adjusted", "Significance")
+			colnames(res_mantel) <- c("by_group", "Variables", "mantel type", "Correlation method", "Correlation coefficient", "p.value", "p.adjusted", "Significance")
 			res_mantel
 		}
 	),

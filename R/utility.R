@@ -132,7 +132,7 @@ color_palette_20 <- c("#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#9
 # developed based on the stat_cor of ggpubr package
 stat_corlm <- function(mapping = NULL, data = NULL, 
 	type = c("cor", "lm")[1], cor_method = "pearson", label_sep = ";",
-	pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2,
+	pvalue_trim = 4, lm_equation = TRUE, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2,
 	label.x.npc = "left", label.y.npc = "top", label.x = NULL, label.y = NULL,
 	geom = "text", position = "identity", na.rm = FALSE, show.legend = NA,
 	inherit.aes = TRUE, ...
@@ -142,7 +142,7 @@ stat_corlm <- function(mapping = NULL, data = NULL,
 		position = position, show.legend = show.legend, inherit.aes = inherit.aes,
 		params = list(label.x.npc  = label.x.npc , label.y.npc  = label.y.npc, label.x = label.x, label.y = label.y,
 			type = type, cor_method = cor_method, label_sep = label_sep,
-			pvalue_trim = pvalue_trim, cor_coef_trim = cor_coef_trim, lm_fir_trim = lm_fir_trim, lm_sec_trim = lm_sec_trim, lm_squ_trim = lm_squ_trim,
+			pvalue_trim = pvalue_trim, lm_equation = lm_equation, cor_coef_trim = cor_coef_trim, lm_fir_trim = lm_fir_trim, lm_sec_trim = lm_sec_trim, lm_squ_trim = lm_squ_trim,
 			parse = TRUE, na.rm = na.rm, ...)
 	)
 }
@@ -151,7 +151,7 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 	required_aes = c("x", "y"),
 	default_aes = aes(hjust = ..hjust.., vjust = ..vjust..),
 	compute_group = function(data, scales, type, cor_method, label_sep,
-		pvalue_trim, cor_coef_trim, lm_fir_trim, lm_sec_trim, lm_squ_trim,
+		pvalue_trim, lm_equation, cor_coef_trim, lm_fir_trim, lm_sec_trim, lm_squ_trim,
 		label.x.npc, label.y.npc, label.x, label.y
 		){
 		if(length(unique(data$x)) < 2){
@@ -161,6 +161,7 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 		.test <- .corlm_test(
 			data$x, data$y, type = type, cor_method = cor_method, label_sep = label_sep,
 			pvalue_trim = pvalue_trim,
+			lm_equation = lm_equation,
 			cor_coef_trim = cor_coef_trim, 
 			lm_fir_trim = lm_fir_trim, 
 			lm_sec_trim = lm_sec_trim, 
@@ -178,7 +179,7 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 .corlm_test <- function(
 	x, y, 
 	type, cor_method = "pearson", label_sep = ";",
-	pvalue_trim = 4, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2
+	pvalue_trim = 4, lm_equation = TRUE, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2
 	){
 	label_sep_use <- paste0("*`", label_sep, "`~")
 	if(type == "cor"){
@@ -205,8 +206,11 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 		lm_ab_exp <- substitute(italic(y) == lm_b %.% italic(x)*lm_a, lm_var)
 		lm_r2_exp <- substitute(~italic(R)^2~"="~lm_r2, lm_var)
 		lm_p_exp <- substitute(~italic(P)*lm_p, lm_var)
-		
-		res <- paste0(c(lm_ab_exp, label_sep_use, lm_r2_exp, label_sep_use, lm_p_exp), collapse = "")
+		if(lm_equation){
+			res <- paste0(c(lm_ab_exp, label_sep_use, lm_r2_exp, label_sep_use, lm_p_exp), collapse = "")
+		}else{
+			res <- paste0(c(lm_r2_exp, label_sep_use, lm_p_exp), collapse = "")
+		}
 	}
 	data.frame(label = as.character(as.expression(res)))
 }
