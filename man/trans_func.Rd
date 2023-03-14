@@ -174,10 +174,10 @@ t1$cal_spe_func(fungi_database = "FungalTraits")
 \if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func_perc}{}}}
 \subsection{Method \code{cal_spe_func_perc()}}{
 Calculating the percentages of species with specific trait in communities.
-The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community.
-So this method is a simple calculation of functional redundancy without the consideration of phylogenetic distance among taxa.
+The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
+So this method is one representation of functional redundancy without the consideration of phylogenetic distance among taxa.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(abundance_weighted = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(abundance_weighted = FALSE, perc = TRUE, dec = 2)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -185,6 +185,11 @@ So this method is a simple calculation of functional redundancy without the cons
 \describe{
 \item{\code{abundance_weighted}}{default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
 If TRUE, calculate the functional individual percentage.}
+
+\item{\code{perc}}{default TRUE; whether to use percentages in the result. If TRUE, value is bounded between 0 and 100.
+If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.}
+
+\item{\code{dec}}{default 2; remained decimal places.}
 }
 \if{html}{\out{</div>}}
 }

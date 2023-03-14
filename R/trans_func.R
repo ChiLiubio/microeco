@@ -292,22 +292,24 @@ trans_func <- R6Class(classname = "trans_func",
 		},
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities.
-		#' The percentages of the taxa with specific trait can reflect the potential of the corresponding function in the community.
-		#' So this method is a simple calculation of functional redundancy without the consideration of phylogenetic distance among taxa.
+		#' The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
+		#' So this method is one representation of functional redundancy without the consideration of phylogenetic distance among taxa.
 		#'
 		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
 		#' 	  If TRUE, calculate the functional individual percentage.
+		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, value is bounded between 0 and 100.
+		#' 	  If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.
+		#' @param dec default 2; remained decimal places.
 		#' @return \code{res_spe_func_perc} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func_perc(abundance_weighted = TRUE)
 		#' }
-		cal_spe_func_perc = function(
-			abundance_weighted = FALSE
-			){
+		cal_spe_func_perc = function(abundance_weighted = FALSE, perc = TRUE, dec = 2){
 			if(is.null(self$res_spe_func)){
 				stop("Please first run cal_spe_func function !")
 			}
+			bound_value <- ifelse(perc, 100, 1)
 			res_spe_func <- self$res_spe_func
 			otu_table <- self$otu_table
 			res_spe_func_perc <- sapply(colnames(otu_table), function(input_samplecolumn){
@@ -318,12 +320,12 @@ trans_func <- R6Class(classname = "trans_func",
 				res_table <- unlist(lapply(colnames(res_spe_func), function(x){
 					if(abundance_weighted){
 						(res_spe_func[names(sample_otu), x, drop = TRUE] * sample_otu) %>% 
-							{sum(.) * 100/sum(sample_otu)} %>% 
-							{round(., 2)}
+							{sum(.) * bound_value/sum(sample_otu)} %>% 
+							{round(., dec)}
 					}else{
 						res_spe_func[names(sample_otu), x, drop = TRUE] %>% 
-							{sum(. != 0) * 100/length(.)} %>% 
-							{round(., 2)}
+							{sum(. != 0) * bound_value/length(.)} %>% 
+							{round(., dec)}
 					}
 				}))
 				res_table
