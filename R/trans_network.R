@@ -202,7 +202,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#'        see Li et al. (2021) <doi:10.1371/journal.pcbi.1009343> for algorithm details}
 		#'   }
 		#' @param COR_p_thres default 0.01; the p value threshold for the correlation-based network.
-		#' @param COR_p_adjust default "fdr"; p value adjustment method, see method of p.adjust function for available options.
+		#' @param COR_p_adjust default "fdr"; p value adjustment method, see \code{method} parameter of \code{p.adjust} function for available options,
+		#' 	  in which \code{COR_p_adjust = "none"} means giving up the p value adjustment.
 		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges; FALSE represents weight = 1 for all edges.
 		#' @param COR_cut default 0.6; correlation coefficient threshold for the correlation network.
 		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
@@ -412,6 +413,9 @@ trans_network <- R6Class(classname = "trans_network",
 				b[abs(b) < beemStatic_t_strength] <- 0
 				network <- graph.adjacency(b, mode='directed', weighted='weight')
 				V(network)$name <- rownames(use_abund)
+			}
+			if(ecount(network) == 0){
+				stop("No edge found in the network! Please check the input parameters!")
 			}
 			if(network_method != "COR"){
 				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')

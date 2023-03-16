@@ -339,7 +339,8 @@ Construct network based on the correlation method or \code{SpiecEasi} package or
 
 \item{\code{COR_p_thres}}{default 0.01; the p value threshold for the correlation-based network.}
 
-\item{\code{COR_p_adjust}}{default "fdr"; p value adjustment method, see method of p.adjust function for available options.}
+\item{\code{COR_p_adjust}}{default "fdr"; p value adjustment method, see \code{method} parameter of \code{p.adjust} function for available options,
+in which \code{COR_p_adjust = "none"} means giving up the p value adjustment.}
 
 \item{\code{COR_weight}}{default TRUE; whether use correlation coefficient as the weight of edges; FALSE represents weight = 1 for all edges.}
 

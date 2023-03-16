@@ -792,9 +792,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; P value adjustment type.
 		#' 	  Env: adjustment for each environmental variable separately; Taxa: adjustment for each taxon separately; 
-		#' 	  Type: adjustment according to the groups provided. If `by_group` is NULL, adjustment is performed for all the data together.
-		#' 	  If `by_group` is provided, for each group in it separately.
-		#' 	  These three options are the first three colnames of return table `res_cor`.
+		#' 	  Type: adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
+		#' 	  If \code{by_group} is provided, for each group in it separately.
+		#' 	  These three options are the first three colnames of return table \code{res_cor}.
 		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
 		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
@@ -1162,7 +1162,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param line_color default "black"; fitted line color only useful when group = NULL.
 		#' @param pvalue_trim default 4; trim the decimal places of p value.
 		#' @param cor_coef_trim default 3; trim the decimal places of correlation coefficient.
-		#' @param lm_equation default TRUE; whether include the equation in the label when `type = "lm"`.
+		#' @param lm_equation default TRUE; whether include the equation in the label when \code{type = "lm"}.
 		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
 		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
 		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
