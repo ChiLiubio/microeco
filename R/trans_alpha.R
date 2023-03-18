@@ -97,6 +97,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"}; 
 		#'   specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
 		#'   such as \code{'block + N*P*K'}.
+		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
+		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
 		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
 		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or \code{lmerTest::lmer} (\code{method = "lme"}) or 
 		#'   \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or
@@ -116,6 +118,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			measure = NULL, 
 			p_adjust_method = "fdr", 
 			formula = NULL,
+			KW_dunn_letter = TRUE,
 			...
 			){
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg"))
@@ -212,47 +215,42 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				for(k in measure){
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
-						res_table <- private$kdunn_test(input_table = div_table, group = group, measure = k, ...)
-						compare_result %<>% rbind(., res_table)
+						tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, ...)
+						compare_result %<>% rbind(., tmp_res)
 					}else{
 						for(each_group in unique_bygroups){
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
 							if(length(unique(as.character(div_table[, group]))) < 3){
+								message("Skip the by_group: ", each_group, " as groups number < 3!")
 								next
 							}
-							res_table <- private$kdunn_test(input_table = div_table, group = group, group_by = each_group, measure = k, ...)
-							compare_result %<>% rbind(., res_table)
+							tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, ...)
+							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
+							compare_result %<>% rbind(., tmp_res)
 						}
 					}
 				}
 			}
 			if(method == "anova" & is.null(formula)){
-				compare_result <- NULL
-				if(is.null(by_group)){
-					for(k in measure){
+				compare_result <- data.frame()
+				for(k in measure){
+					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, ]
-						compare_result <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = compare_result, ...)
-					}
-					colnames(compare_result)[1] <- "Group"
-				}else{
-					for(each_group in unique_bygroups){
-						test <- data_alpha[all_bygroups == each_group, ]
-						if(length(unique(as.character(test[, group]))) < 2){
-							message("Skip the by_group: ", each_group, " as groups number < 2!")
-							next
-						}
-						tmp_measure <- NULL
-						for(k in measure){
-							# regenerate table for test
+						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, ...)
+						compare_result %<>% rbind(., tmp_res)
+					}else{
+						for(each_group in unique_bygroups){
+							test <- data_alpha[all_bygroups == each_group, ]
+							if(length(unique(as.character(test[, group]))) < 2){
+								message("Skip the by_group: ", each_group, " as groups number < 2!")
+								next
+							}
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
-							tmp_measure <- private$anova_test(input_table = div_table, group = group, measure = k, compare_result = tmp_measure, ...)
-						}
-						if(!is.null(tmp_measure)){
-							tmp_measure <- cbind.data.frame(by_group = each_group, tmp_measure)
-							compare_result %<>% rbind.data.frame(., tmp_measure)
+							tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, ...)
+							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
+							compare_result %<>% rbind.data.frame(., tmp_res)
 						}
 					}
-					colnames(compare_result)[2] <- "Group"
 				}
 			}
 			if(method %in% c("anova", "scheirerRayHare", "betareg") & !is.null(formula)){
@@ -308,18 +306,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result$p_value <- parameters::p_value(compare_result$model)
 			}
 			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme")){
-				compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
-				compare_result$Significance %<>% as.character
+				if("P.adj" %in% colnames(compare_result)){
+					compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
+					compare_result$Significance %<>% as.character
+				}
 			}
 			self$res_diff <- compare_result
 			self$cal_diff_method <- method
+			self$measure <- measure
 			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
 		#' Plotting the alpha diversity.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
-		#' @param measure default Shannon; alpha diversity measurement; see names of alpha_diversity of dataset, 
+		#' @param measure default Shannon; one alpha diversity measurement; see names of alpha_diversity of dataset, 
 		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
 		#' @param add_sig default TRUE; wheter add significance label using the result of cal_diff function, i.e. \code{object$res_diff};
@@ -376,16 +377,35 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			by_group <- self$by_group
 			if(add_sig){
 				if(is.null(self$res_diff)){
-					message("No object$res_diff found. Only plot the data. To use difference test result, ",
-						"please first run cal_diff function ......")
+					message("No res_diff found! Only plot the data ...")
 					add_sig <- FALSE
 				}
+				if(is.null(self$group)){
+					add_sig <- FALSE
+				}else{
+					if(group != self$group){
+						add_sig <- FALSE
+					}
+				}
 			}
-			if(! measure %in% self$data_alpha$Measure){
-				stop("Please provide a correct measure parameter !")
+			if(is.null(measure)){
+				if(!is.null(self$measure)){
+					message("Use the measure in the object ...")
+					measure <- self$measure[1]
+				}else{
+					message("Input measure is NULL! Select the first one ...")
+					measure <- unique(self$data_alpha$Measure)[1]
+				}
 			}else{
-				use_data <- self$data_alpha[self$data_alpha$Measure == measure, ]
+				if(length(measure) > 1){
+					stop("Input measure must be one!")
+				}else{
+					if(! measure %in% self$data_alpha$Measure){
+						stop("Please provide a correct measure parameter !")
+					}	
+				}
 			}
+			use_data <- self$data_alpha[self$data_alpha$Measure == measure, ]
 			if(order_x_mean){
 				if(is.null(by_group)){
 					mean_orders <- names(sort(tapply(use_data$Value, use_data[, group], mean), decreasing = TRUE))
@@ -439,14 +459,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						plot.margin=unit(c(10,5,5,5),"mm")
 						)
 			}
-			if(add_sig & group == self$group){
+			if(add_sig){
 				diff_res <- self$res_diff
-				if(grepl("anova", cal_diff_method)){
-					if(cal_diff_method == "anova"){
+				if(cal_diff_method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova")){
+					if("Letter" %in% colnames(diff_res)){
 						if(is.null(by_group)){
+							tmp <- diff_res[diff_res$Measure == measure, ]
+							rownames(tmp) <- tmp$Group
 							x_axis_order <- levels(use_data[, group])
-							diff_res %<>% `row.names<-`(.[,1]) %>% .[, -1, drop = FALSE]
-							add_letter_text <- diff_res[x_axis_order, measure]
+							add_letter_text <- tmp[x_axis_order, "Letter"]
 							group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
 								{. + max(.) * y_increase}
 							textdata <- data.frame(
@@ -460,7 +481,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							x_mid <- c()
 							annotations <- c()
 							y_position <- c()
-							
 							all_by_groups <- levels(use_data[, by_group])
 							all_groups <- levels(use_data[, group])
 							tmp_use_data <- dropallfactors(use_data)
@@ -473,7 +493,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								for(i in x_axis_order){
 									# first determine the bar range
 									mid_num <- match(j, all_by_groups) - 1
-									check_anno <- diff_res[diff_res$by_group == j & diff_res$Group == i, measure]
+									check_anno <- diff_res[diff_res$by_group == j & diff_res$Group == i & diff_res$Measure == measure, "Letter"]
 									if(length(check_anno) == 0){
 										annotations %<>% c(., "")
 									}else{
@@ -493,99 +513,99 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							)
 						}
 						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
-					}
-				}else{
-					use_diff_data <- diff_res %>% .[.$Measure == measure, ]
-					# check group numbers
-					if(cal_diff_method == "KW"){
-						comp_group_num <- sapply(use_diff_data$Comparison, function(x){length(unlist(gregexpr(" - ", x)))})
-						paired_add_sig <- ifelse(any(comp_group_num > 1), FALSE, TRUE)
 					}else{
-						paired_add_sig <- TRUE
-					}
-					if(paired_add_sig){
-						if(! add_sig_label %in% colnames(use_diff_data)){
-							stop("Please provide a correct add_sig_label parameter! Must be a colname of object$res_diff !")
-						}
-						if(is.numeric(use_diff_data[, add_sig_label])){
-							use_diff_data[, add_sig_label] %<>% round(., 4)
-						}
-						annotations <- c()
-						y_position <- c()
-						x_min <- c()
-						x_max <- c()
-						if(is.null(by_group)){
-							x_axis_order <- levels(use_data[, group])
-							y_start <- max(use_data$Value) * y_start
-							for(i in seq_len(nrow(use_diff_data))){
-								annotations %<>% c(., use_diff_data[i, add_sig_label])
-								x_min %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\1", use_diff_data[i, "Comparison"]), x_axis_order))
-								x_max %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\2", use_diff_data[i, "Comparison"]), x_axis_order))
-								y_position %<>% c(., y_start * (1 + i * y_increase))
-							}
+						use_diff_data <- diff_res %>% .[.$Measure == measure, ]
+						# check group numbers
+						if(cal_diff_method == "KW"){
+							comp_group_num <- sapply(use_diff_data$Comparison, function(x){length(unlist(gregexpr(" - ", x)))})
+							paired_add_sig <- ifelse(any(comp_group_num > 1), FALSE, TRUE)
 						}else{
-							all_by_groups <- levels(use_data[, by_group])
-							all_groups <- levels(use_data[, group])
-							tmp_use_data <- dropallfactors(use_data)
-							
-							diff_by_groups <- use_diff_data$by_group %>% unique
-							for(j in diff_by_groups){
-								select_tmp_data <- tmp_use_data %>% .[.[, by_group] == j, ]
-								# y axix starting position
-								y_start_use <- max(select_tmp_data$Value) * y_start
-								x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
-								# identify the start x position for each by_group
-								start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
-								increase_bar_mid <- barwidth/length(x_axis_order)
-								# loop for each group of use_diff_data
-								tmp_diff_res <- use_diff_data[use_diff_data$by_group == j, ]
-								for(i in seq_len(nrow(tmp_diff_res))){
-									annotations %<>% c(., tmp_diff_res[i, add_sig_label])
-									# first determine the bar range
-									mid_num <- match(j, all_by_groups) - 1
-									x_min %<>% c(., mid_num + 
-										(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\1", tmp_diff_res[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
-									x_max %<>% c(., mid_num + 
-										(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\2", tmp_diff_res[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
-									y_position %<>% c(., y_start_use * (1 + i * y_increase))
+							paired_add_sig <- TRUE
+						}
+						if(paired_add_sig){
+							if(! add_sig_label %in% colnames(use_diff_data)){
+								stop("Please provide a correct add_sig_label parameter! Must be a colname of object$res_diff !")
+							}
+							if(is.numeric(use_diff_data[, add_sig_label])){
+								use_diff_data[, add_sig_label] %<>% round(., 4)
+							}
+							annotations <- c()
+							y_position <- c()
+							x_min <- c()
+							x_max <- c()
+							if(is.null(by_group)){
+								x_axis_order <- levels(use_data[, group])
+								y_start <- max(use_data$Value) * y_start
+								for(i in seq_len(nrow(use_diff_data))){
+									annotations %<>% c(., use_diff_data[i, add_sig_label])
+									x_min %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\1", use_diff_data[i, "Comparison"]), x_axis_order))
+									x_max %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\2", use_diff_data[i, "Comparison"]), x_axis_order))
+									y_position %<>% c(., y_start * (1 + i * y_increase))
+								}
+							}else{
+								all_by_groups <- levels(use_data[, by_group])
+								all_groups <- levels(use_data[, group])
+								tmp_use_data <- dropallfactors(use_data)
+								
+								diff_by_groups <- use_diff_data$by_group %>% unique
+								for(j in diff_by_groups){
+									select_tmp_data <- tmp_use_data %>% .[.[, by_group] == j, ]
+									# y axix starting position
+									y_start_use <- max(select_tmp_data$Value) * y_start
+									x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
+									# identify the start x position for each by_group
+									start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
+									increase_bar_mid <- barwidth/length(x_axis_order)
+									# loop for each group of use_diff_data
+									tmp_diff_res <- use_diff_data[use_diff_data$by_group == j, ]
+									for(i in seq_len(nrow(tmp_diff_res))){
+										annotations %<>% c(., tmp_diff_res[i, add_sig_label])
+										# first determine the bar range
+										mid_num <- match(j, all_by_groups) - 1
+										x_min %<>% c(., mid_num + 
+											(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\1", tmp_diff_res[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
+										x_max %<>% c(., mid_num + 
+											(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\2", tmp_diff_res[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
+										y_position %<>% c(., y_start_use * (1 + i * y_increase))
+									}
 								}
 							}
-						}
-						p <- p + ggsignif::geom_signif(
-							annotations = annotations,
-							y_position = y_position, 
-							xmin = x_min, 
-							xmax = x_max,
-							textsize = add_sig_text_size
-						)
-					}else{
-						if(is.null(by_group)){
-							comp_group_num <- sapply(use_diff_data$Comparison, function(x){length(unlist(gregexpr(" - ", x)))})
-							y_position <- max(use_data$Value) * y_start
-							annotations <- use_diff_data[, add_sig_label]
-							textdata <- data.frame(
-								x = comp_group_num/2, 
-								y = y_position, 
-								add = annotations, 
-								stringsAsFactors = FALSE
+							p <- p + ggsignif::geom_signif(
+								annotations = annotations,
+								y_position = y_position, 
+								xmin = x_min, 
+								xmax = x_max,
+								textsize = add_sig_text_size
 							)
-							p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
 						}else{
-							x_mid <- c()
-							annotations <- c()
-							all_by_groups <- levels(use_data[, by_group])
-							diff_by_groups <- use_diff_data$by_group %>% unique
-							for(j in diff_by_groups){
-								x_mid %<>% c(., match(j, all_by_groups))
-								annotations %<>% c(., use_diff_data[use_diff_data$by_group == j, add_sig_label])
+							if(is.null(by_group)){
+								comp_group_num <- sapply(use_diff_data$Comparison, function(x){length(unlist(gregexpr(" - ", x)))})
+								y_position <- max(use_data$Value) * y_start
+								annotations <- use_diff_data[, add_sig_label]
+								textdata <- data.frame(
+									x = comp_group_num/2, 
+									y = y_position, 
+									add = annotations, 
+									stringsAsFactors = FALSE
+								)
+								p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
+							}else{
+								x_mid <- c()
+								annotations <- c()
+								all_by_groups <- levels(use_data[, by_group])
+								diff_by_groups <- use_diff_data$by_group %>% unique
+								for(j in diff_by_groups){
+									x_mid %<>% c(., match(j, all_by_groups))
+									annotations %<>% c(., use_diff_data[use_diff_data$by_group == j, add_sig_label])
+								}
+								textdata <- data.frame(
+									x = x_mid, 
+									y = max(use_data$Value) * y_start, 
+									add = annotations, 
+									stringsAsFactors = FALSE
+								)
+								p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
 							}
-							textdata <- data.frame(
-								x = x_mid, 
-								y = max(use_data$Value) * y_start, 
-								add = annotations, 
-								stringsAsFactors = FALSE
-							)
-							p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
 						}
 					}
 				}
@@ -696,9 +716,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			res_list
 		},
-		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, group_by = NULL, ...){
+		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, KW_dunn_letter = TRUE, ...){
 			use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
-			input_table[, group] %<>% factor(., levels = unique(as.character(.)))
+			orderd_groups <- tapply(input_table[, "Value"], input_table[, group], median) %>% sort(decreasing = TRUE) %>% names
+			input_table[, group] %<>% factor(., levels = orderd_groups)
 			formu <- reformulate(group, "Value")
 			dunnTest_raw <- FSA::dunnTest(formu, data = input_table, ...)
 			max_group <- lapply(dunnTest_raw$res$Comparison, function(x){
@@ -706,26 +727,24 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				table_compare_select <- input_table[as.character(input_table[, group]) %in% group_select, ]
 				tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
 			}) %>% unlist
-			if(is.null(group_by)){
-				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_raw$res)
+			if(KW_dunn_letter){
+				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_raw$res, threshold = 0.05)
+				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, dunnTest_final)
 			}else{
-				dunnTest_res <- data.frame(Measure = measure, by_group = group_by, Test_method = use_method, Group = max_group, dunnTest_raw$res)
+				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_raw$res)
 			}
 			dunnTest_res
 		},
-		anova_test = function(input_table = NULL, group = NULL, measure = NULL, compare_result = NULL, ...){
+		anova_test = function(input_table = NULL, group = NULL, measure = NULL, ...){
 			model <- aov(reformulate(group, "Value"), input_table)
 			out <- agricolae::duncan.test(model, group, main = measure, ...)
-			res2 <- out$groups[, "groups", drop = FALSE]
-			res2$groups <- as.character(res2$groups)
-			res2 <- data.frame(rownames(res2), res2, stringsAsFactors = FALSE, check.names = FALSE)
-			colnames(res2) <- c("name", measure)
-			if(is.null(compare_result)){
-				compare_result <- res2
-			}else{
-				compare_result <- dplyr::full_join(compare_result, res2, by = c("name" = "name"))
-			}
-			compare_result
+			res1 <- out$groups[, "groups", drop = FALSE]
+			res1$groups <- as.character(res1$groups)
+			res1 <- data.frame(rownames(res1), res1, stringsAsFactors = FALSE, check.names = FALSE)
+			colnames(res1) <- c("Group", "Letter")
+			rownames(res1) <- NULL
+			res2 <- data.frame(Measure = measure, Test_method = "anova", res1)
+			res2
 		}
 	),
 	lock_objects = FALSE,

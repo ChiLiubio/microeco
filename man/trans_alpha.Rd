@@ -111,6 +111,7 @@ Test the difference of alpha diversity.
   measure = NULL,
   p_adjust_method = "fdr",
   formula = NULL,
+  KW_dunn_letter = TRUE,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -142,6 +143,9 @@ NULL can disuse the p value adjustment.}
 method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"}; 
 specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
 such as \code{'block + N*P*K'}.}
+
+\item{\code{KW_dunn_letter}}{default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
+\code{FALSE} means significances are shown by asterisk for paired comparison.}
 
 \item{\code{...}}{parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
 (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or \code{lmerTest::lmer} (\code{method = "lme"}) or 
@@ -200,7 +204,7 @@ Plotting the alpha diversity.
 \describe{
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.}
 
-\item{\code{measure}}{default Shannon; alpha diversity measurement; see names of alpha_diversity of dataset, 
+\item{\code{measure}}{default Shannon; one alpha diversity measurement; see names of alpha_diversity of dataset, 
 e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
