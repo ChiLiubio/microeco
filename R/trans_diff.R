@@ -52,7 +52,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
 		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
 		#' 	  the function will use the features in input \code{microtable$otu_table} automatically.
-		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only useful when method != "metastat".
+		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only available when method != "metastat".
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 		#'    NULL mean disuse the p value adjustment; So when \code{p_adjust_method = NULL}, P.adj is same with P.unadj.
@@ -198,15 +198,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
 				output <- tem_data1$res_diff
 				if(method != "lme"){
-					if(! method %in% "anova"){
-						colnames(output)[colnames(output) == "Measure"] <- "Taxa"
-					}else{
-						# multi-way anova has formula in the final method; one-way is the original 'anova'
-						if(tem_data1$cal_diff_method == "anova"){
-							output <- reshape2::melt(output, id.vars = "Group", variable.name = "Taxa", value.name = "Significance")
-						}else{
-							method <- tem_data1$cal_diff_method
-						}
+					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
+					# multi-way anova has formula in the final method; one-way is the original 'anova'
+					method <- tem_data1$cal_diff_method
+					if("Letter" %in% colnames(output)){
+						output <- cbind.data.frame(output, Significance = output$Letter)
 					}
 				}
 			}
@@ -701,7 +697,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param text_y_size default 10; the size for the y axis text, i.e. feature text.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.
 		#' @param xtext_angle default NULL; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
-		#' 	  only useful when coord_flip = FALSE.
+		#' 	  only available when coord_flip = FALSE.
 		#' @param ... parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.
 		#' @return ggplot.
 		#' @examples
@@ -751,9 +747,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}else{
 				# lefse and rf are ordered
 				if(! method %in% c("lefse", "rf", "anova")){
-					message('Reorder taxa according to P.adj in res_diff from low to high ...')
-					diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
-					# diff_data %<>% .[.$P.adj < 0.05, ]
+					if("P.adj" %in% colnames(diff_data)){
+						message('Reorder taxa according to P.adj in res_diff from low to high ...')
+						diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
+						# diff_data %<>% .[.$P.adj < 0.05, ]
+					}
 				}
 			}
 			if(is.null(select_group)){
@@ -824,12 +822,20 @@ trans_diff <- R6Class(classname = "trans_diff",
 				color_values %<>% rev
 			}
 			
+			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group)) +
+				theme_bw() +
+				geom_bar(stat="identity", position = position_dodge(), width = barwidth)
+			if(use_se == T){
+				p <- p + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(barwidth), color = "black")
+			}else{
+				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
+			}
 			# get labels info
 			if(add_sig){
 				# assign labels by factor orders
 				x_axis_order <- levels(abund_data$Group)
 				if(! add_sig_label %in% colnames(diff_data)){
-					stop("add_sig_label parameter must be one of colnames of object$res_diff!")
+					stop("The add_sig_label parameter must be one of colnames of object$res_diff!")
 				}
 				if(is.factor(diff_data[, add_sig_label])){
 					diff_data[, add_sig_label] %<>% as.character
@@ -855,9 +861,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						add = add_letter_text, 
 						stringsAsFactors = FALSE
 						)
+					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, inherit.aes = FALSE)
 				}else{
 					# show all the comparisions
-					if(method != "anova"){
+					if(! "Letter" %in% colnames(diff_data)){
 						if(any(grepl("\\s-\\s", x_axis_order))){
 							stop("The group names have ' - ' characters, which can hinder the group recognition and mapping in the plot! Please rename groups and rerun!")
 						}
@@ -882,6 +889,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 								y_position %<>% c(., y_start_use * (1 + i * y_increase))
 							}
 						}
+						p <- p + ggsignif::geom_signif(
+							annotations = annotations,
+							y_position = y_position, 
+							xmin = x_min, 
+							xmax = x_max,
+							color = add_sig_label_color,
+							tip_length = add_sig_tip_length,
+							...
+						)
 					}else{
 						x_mid <- c()
 						annotations <- c()
@@ -910,41 +926,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 							y = y_position, 
 							add = annotations, 
 							stringsAsFactors = FALSE
-							)
-					}
-				}
-			}
-			
-			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group)) +
-				theme_bw() +
-				geom_bar(stat="identity", position = position_dodge(), width = barwidth)
-			if(use_se == T){
-				p <- p + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(barwidth), color = "black")
-			}else{
-				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
-			}
-			if(add_sig){
-				if((length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW", "ALDEx2_kw")) | 
-					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ANCOMBC")){
-					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, inherit.aes = FALSE)
-				}else{
-					if(method != "anova"){
-						p <- p + ggsignif::geom_signif(
-							annotations = annotations,
-							y_position = y_position, 
-							xmin = x_min, 
-							xmax = x_max,
-							color = add_sig_label_color,
-							tip_length = add_sig_tip_length,
-							...
-							)
-					}else{
+						)
 						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, inherit.aes = FALSE)
 					}
 				}
 			}
-			p <- p +
-				scale_color_manual(values = color_values) +
+
+			p <- p + scale_color_manual(values = color_values) +
 				scale_fill_manual(values = color_values) +
 				ylab("Relative abundance") +
 				theme(legend.position = "right") +
@@ -1182,7 +1170,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				stop("This function currently can only be used for method = 'lefse' or 'rf' !")
 			}
 			if(self$taxa_level != "all"){
-				stop("This function is only useful when taxa_level = 'all' !")
+				stop("This function is available only when taxa_level = 'all' !")
 			}
 			if(!is.null(use_feature_num)){
 				marker_table %<>% .[1:use_feature_num, ]
