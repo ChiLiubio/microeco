@@ -790,7 +790,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
-		#' @param p_adjust_type default "Env"; "Type", "Taxa" or "Env"; P value adjustment type.
+		#' 	  \code{p_adjust_method = "none"} can disable the p value adjustment.
+		#' @param p_adjust_type default "Type"; "Type", "Taxa" or "Env"; P value adjustment type.
 		#' 	  Env: adjustment for each environmental variable separately; Taxa: adjustment for each taxon separately; 
 		#' 	  Type: adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
 		#' 	  If \code{by_group} is provided, for each group in it separately.
@@ -810,13 +811,14 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 		#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
+		#' t1$cal_cor(use_data = "other", p_adjust_method = "none", other_taxa = t2$res_diff$Taxa[1:40])
 		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
 			select_env_data = NULL,
 			cor_method = c("pearson", "spearman", "kendall")[1],
 			p_adjust_method = "fdr",
-			p_adjust_type = c("Type", "Taxa", "Env")[3],
+			p_adjust_type = c("Type", "Taxa", "Env")[1],
 			add_abund_table = NULL,
 			by_group = NULL,
 			use_taxa_num = NULL,

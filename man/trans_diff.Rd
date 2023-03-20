@@ -145,7 +145,7 @@ For testing at a specific rank, provide taxonomic rank name, such as "Genus".
 If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
 the function will use the features in input \code{microtable$otu_table} automatically.}
 
-\item{\code{filter_thres}}{default 0; the relative abundance threshold, such as 0.0005; only useful when method != "metastat".}
+\item{\code{filter_thres}}{default 0; the relative abundance threshold, such as 0.0005; only available when method != "metastat".}
 
 \item{\code{alpha}}{default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.}
 
@@ -295,7 +295,7 @@ In addition, this parameter is also used to label the letters of anova result wi
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.}
 
 \item{\code{xtext_angle}}{default NULL; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
-only useful when coord_flip = FALSE.}
+only available when coord_flip = FALSE.}
 
 \item{\code{...}}{parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.}
 }
