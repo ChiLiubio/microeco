@@ -791,11 +791,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' 	  \code{p_adjust_method = "none"} can disable the p value adjustment.
-		#' @param p_adjust_type default "Type"; "Type", "Taxa" or "Env"; P value adjustment type.
-		#' 	  Env: adjustment for each environmental variable separately; Taxa: adjustment for each taxon separately; 
-		#' 	  Type: adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
+		#' @param p_adjust_type default "All"; "All", "Type", "Taxa" or "Env"; P value adjustment type.
+		#' 	  "Env": adjustment for each environmental variable separately; 
+		#' 	  "Taxa": adjustment for each taxon separately; 
+		#' 	  "Type": adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
 		#' 	  If \code{by_group} is provided, for each group in it separately.
 		#' 	  These three options are the first three colnames of return table \code{res_cor}.
+		#' 	  "All": adjustment for all the data together no matter whether \code{by_group} is provided. If \code{by_group} is NULL, it is same with the "Type" option.
 		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
 		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
@@ -811,14 +813,14 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 		#' t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
-		#' t1$cal_cor(use_data = "other", p_adjust_method = "none", other_taxa = t2$res_diff$Taxa[1:40])
+		#' t1$cal_cor(use_data = "other", p_adjust_type = "Env", other_taxa = t2$res_diff$Taxa[1:40])
 		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
 			select_env_data = NULL,
 			cor_method = c("pearson", "spearman", "kendall")[1],
 			p_adjust_method = "fdr",
-			p_adjust_type = c("Type", "Taxa", "Env")[1],
+			p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
 			add_abund_table = NULL,
 			by_group = NULL,
 			use_taxa_num = NULL,
@@ -899,18 +901,17 @@ trans_env <- R6Class(classname = "trans_env",
 			res$Pvalue %<>% as.numeric
 			res$Correlation %<>% as.numeric
 			res$AdjPvalue <- rep(0, nrow(res))
-			choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
-			comb_names2 <- comb_names[choose_col, ] %>% 
-				t %>% 
-				as.data.frame %>% 
-				unique %>% 
-				t %>% 
-				as.data.frame(stringsAsFactors = FALSE)
-			# p value adjust by groups
-			for(i in seq_len(ncol(comb_names2))){
-				x <- comb_names2[, i]
-				row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)))
-				res$AdjPvalue[row_sel] <- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
+			if(p_adjust_type == "All"){
+				res$AdjPvalue <- p.adjust(res$Pvalue, method = p_adjust_method)
+			}else{
+				choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
+				comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
+				# p value adjustment separately
+				for(i in seq_len(ncol(comb_names2))){
+					x <- comb_names2[, i]
+					row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)))
+					res$AdjPvalue[row_sel] <- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
+				}
 			}
 			res$Significance <- cut(res$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
 			res <- res[complete.cases(res), ]

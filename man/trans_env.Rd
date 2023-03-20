@@ -103,7 +103,7 @@ t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
-t1$cal_cor(use_data = "other", p_adjust_method = "none", other_taxa = t2$res_diff$Taxa[1:40])
+t1$cal_cor(use_data = "other", p_adjust_type = "Env", other_taxa = t2$res_diff$Taxa[1:40])
 }
 
 ## ------------------------------------------------
@@ -670,7 +670,7 @@ Actually, it can also be used for calculating other correlation between any two 
   select_env_data = NULL,
   cor_method = c("pearson", "spearman", "kendall")[1],
   p_adjust_method = "fdr",
-  p_adjust_type = c("Type", "Taxa", "Env")[1],
+  p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
   add_abund_table = NULL,
   by_group = NULL,
   use_taxa_num = NULL,
@@ -694,11 +694,13 @@ Actually, it can also be used for calculating other correlation between any two 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 \code{p_adjust_method = "none"} can disable the p value adjustment.}
 
-\item{\code{p_adjust_type}}{default "Type"; "Type", "Taxa" or "Env"; P value adjustment type.
-Env: adjustment for each environmental variable separately; Taxa: adjustment for each taxon separately; 
-Type: adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
+\item{\code{p_adjust_type}}{default "All"; "All", "Type", "Taxa" or "Env"; P value adjustment type.
+"Env": adjustment for each environmental variable separately; 
+"Taxa": adjustment for each taxon separately; 
+"Type": adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
 If \code{by_group} is provided, for each group in it separately.
-These three options are the first three colnames of return table \code{res_cor}.}
+These three options are the first three colnames of return table \code{res_cor}.
+"All": adjustment for all the data together no matter whether \code{by_group} is provided. If \code{by_group} is NULL, it is same with the "Type" option.}
 
 \item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
 
@@ -727,7 +729,7 @@ please see the example.}
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
-t1$cal_cor(use_data = "other", p_adjust_method = "none", other_taxa = t2$res_diff$Taxa[1:40])
+t1$cal_cor(use_data = "other", p_adjust_type = "Env", other_taxa = t2$res_diff$Taxa[1:40])
 }
 }
 \if{html}{\out{</div>}}
