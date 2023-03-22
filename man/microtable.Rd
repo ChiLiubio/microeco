@@ -138,7 +138,7 @@ dataset$cal_abund()
 
 \dontrun{
 dataset$save_abund(dirpath = "taxa_abund")
-dataset$save_abund(mpa = TRUE, rm_un = TRUE, sep = "\t")
+dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 }
 
 ## ------------------------------------------------
@@ -653,7 +653,7 @@ Save taxonomic abundance to local file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(
   dirpath = "taxa_abund",
-  mpa = FALSE,
+  merge_all = FALSE,
   rm_un = FALSE,
   rm_pattern = "__$",
   sep = ",",
@@ -666,7 +666,7 @@ Save taxonomic abundance to local file.
 \describe{
 \item{\code{dirpath}}{default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if it does not exist.}
 
-\item{\code{mpa}}{default FALSE; Whether save data with mpa format. 'mpa' format means taxonomic abundances at all levels are merged into one file.}
+\item{\code{merge_all}}{default FALSE; Whether merge all tables into one. The merged file format is generally called 'mpa' style.}
 
 \item{\code{rm_un}}{default FALSE; Whether remove unclassified taxa in which the name ends with '__' generally.}
 
@@ -684,7 +684,7 @@ default \code{','} correspond to the file name suffix 'csv'. The option \code{'\
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 dataset$save_abund(dirpath = "taxa_abund")
-dataset$save_abund(mpa = TRUE, rm_un = TRUE, sep = "\t")
+dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 }
 }
 \if{html}{\out{</div>}}

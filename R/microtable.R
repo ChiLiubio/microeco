@@ -540,7 +540,7 @@ microtable <- R6Class(classname = "microtable",
 		#' Save taxonomic abundance to local file.
 		#'
 		#' @param dirpath default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if it does not exist.
-		#' @param mpa default FALSE; Whether save data with mpa format. 'mpa' format means taxonomic abundances at all levels are merged into one file.
+		#' @param merge_all default FALSE; Whether merge all tables into one. The merged file format is generally called 'mpa' style.
 		#' @param rm_un default FALSE; Whether remove unclassified taxa in which the name ends with '__' generally.
 		#' @param rm_pattern default "__$"; The pattern searched through the merged taxonomic names. See also \code{pattern} parameter in \code{\link{grepl}} function. 
 		#' 	  Only available when \code{rm_un = TRUE}. The default "__$" means removing the names end with '__'.
@@ -550,14 +550,14 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' \dontrun{
 		#' dataset$save_abund(dirpath = "taxa_abund")
-		#' dataset$save_abund(mpa = TRUE, rm_un = TRUE, sep = "\t")
+		#' dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 		#' }
-		save_abund = function(dirpath = "taxa_abund", mpa = FALSE, rm_un = FALSE, rm_pattern = "__$", sep = ",", ...){
+		save_abund = function(dirpath = "taxa_abund", merge_all = FALSE, rm_un = FALSE, rm_pattern = "__$", sep = ",", ...){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
 			}
 			suffix <- switch(sep, ',' = "csv", '\t' = "tsv", "txt")
-			if(mpa){
+			if(merge_all){
 				res <- data.frame()
 				for(i in names(self$taxa_abund)){
 					res %<>% rbind(., self$taxa_abund[[i]])
