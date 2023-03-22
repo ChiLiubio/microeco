@@ -138,6 +138,7 @@ dataset$cal_abund()
 
 \dontrun{
 dataset$save_abund(dirpath = "taxa_abund")
+dataset$save_abund(dirpath = "taxa_abund", mpa = TRUE, rm_un = TRUE)
 }
 
 ## ------------------------------------------------
@@ -602,6 +603,7 @@ Calculate the taxonomic abundance at each taxonomic rank.
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(
   select_cols = NULL,
   rel = TRUE,
+  merge_by = "|",
   split_group = FALSE,
   split_by = "&&",
   split_column = NULL
@@ -615,6 +617,8 @@ Calculate the taxonomic abundance at each taxonomic rank.
 This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
 
 \item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.}
+
+\item{\code{merge_by}}{default "|"; the symbol to merge and concatenate taxonomic names of different levels.}
 
 \item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
 Very useful when multiple mapping info exist.}
@@ -647,13 +651,25 @@ dataset$cal_abund()
 \subsection{Method \code{save_abund()}}{
 Save taxonomic abundance to the computer local place.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(dirpath = "taxa_abund")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(
+  dirpath = "taxa_abund",
+  mpa = FALSE,
+  rm_un = FALSE,
+  rm_pattern = "__$"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dirpath}}{default "taxa_abund"; directory name to save the taxonomic abundance files.}
+\item{\code{dirpath}}{default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if it does not exist.}
+
+\item{\code{mpa}}{default FALSE; Whether save data with mpa format. 'mpa' format means taxonomic abundances at all levels are merged into one file.}
+
+\item{\code{rm_un}}{default FALSE; Whether remove unclassified taxa in which the name ends with '__' generally.}
+
+\item{\code{rm_pattern}}{default "__$"; The pattern searched through the merged taxonomic names. See also \code{pattern} parameter in \code{\link{grepl}} function. 
+Only available when \code{rm_un = TRUE}. The default "__$" means removing the names end with '__'.}
 }
 \if{html}{\out{</div>}}
 }
@@ -661,6 +677,7 @@ Save taxonomic abundance to the computer local place.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 dataset$save_abund(dirpath = "taxa_abund")
+dataset$save_abund(dirpath = "taxa_abund", mpa = TRUE, rm_un = TRUE)
 }
 }
 \if{html}{\out{</div>}}
