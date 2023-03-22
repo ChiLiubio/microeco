@@ -138,7 +138,7 @@ dataset$cal_abund()
 
 \dontrun{
 dataset$save_abund(dirpath = "taxa_abund")
-dataset$save_abund(dirpath = "taxa_abund", mpa = TRUE, rm_un = TRUE)
+dataset$save_abund(mpa = TRUE, rm_un = TRUE, sep = "\t")
 }
 
 ## ------------------------------------------------
@@ -649,13 +649,15 @@ dataset$cal_abund()
 \if{html}{\out{<a id="method-microtable-save_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-save_abund}{}}}
 \subsection{Method \code{save_abund()}}{
-Save taxonomic abundance to the computer local place.
+Save taxonomic abundance to local file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(
   dirpath = "taxa_abund",
   mpa = FALSE,
   rm_un = FALSE,
-  rm_pattern = "__$"
+  rm_pattern = "__$",
+  sep = ",",
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -670,6 +672,11 @@ Save taxonomic abundance to the computer local place.
 
 \item{\code{rm_pattern}}{default "__$"; The pattern searched through the merged taxonomic names. See also \code{pattern} parameter in \code{\link{grepl}} function. 
 Only available when \code{rm_un = TRUE}. The default "__$" means removing the names end with '__'.}
+
+\item{\code{sep}}{default ","; the field separator string. Same with \code{sep} parameter in \code{\link{write.table}} function.
+default \code{','} correspond to the file name suffix 'csv'. The option \code{'\t'} correspond to the file name suffix 'tsv'. For other options, suffix are all 'txt'.}
+
+\item{\code{...}}{parameters passed to \code{\link{write.table}}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -677,7 +684,7 @@ Only available when \code{rm_un = TRUE}. The default "__$" means removing the na
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 dataset$save_abund(dirpath = "taxa_abund")
-dataset$save_abund(dirpath = "taxa_abund", mpa = TRUE, rm_un = TRUE)
+dataset$save_abund(mpa = TRUE, rm_un = TRUE, sep = "\t")
 }
 }
 \if{html}{\out{</div>}}

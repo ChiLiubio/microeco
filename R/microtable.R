@@ -528,6 +528,7 @@ microtable <- R6Class(classname = "microtable",
 											self, 
 											columns = select_cols[1:i], 
 											rel = rel, 
+											merge_by = merge_by,
 											split_group = split_group, 
 											split_by = split_by, 
 											split_column = use_split_column)
@@ -536,22 +537,26 @@ microtable <- R6Class(classname = "microtable",
 			message('The result is stored in object$taxa_abund ...')
 		},
 		#' @description
-		#' Save taxonomic abundance to the computer local place.
+		#' Save taxonomic abundance to local file.
 		#'
 		#' @param dirpath default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if it does not exist.
 		#' @param mpa default FALSE; Whether save data with mpa format. 'mpa' format means taxonomic abundances at all levels are merged into one file.
 		#' @param rm_un default FALSE; Whether remove unclassified taxa in which the name ends with '__' generally.
 		#' @param rm_pattern default "__$"; The pattern searched through the merged taxonomic names. See also \code{pattern} parameter in \code{\link{grepl}} function. 
 		#' 	  Only available when \code{rm_un = TRUE}. The default "__$" means removing the names end with '__'.
+		#' @param sep default ","; the field separator string. Same with \code{sep} parameter in \code{\link{write.table}} function.
+		#' 	  default \code{','} correspond to the file name suffix 'csv'. The option \code{'\t'} correspond to the file name suffix 'tsv'. For other options, suffix are all 'txt'.
+		#' @param ... parameters passed to \code{\link{write.table}}.
 		#' @examples
 		#' \dontrun{
 		#' dataset$save_abund(dirpath = "taxa_abund")
-		#' dataset$save_abund(dirpath = "taxa_abund", mpa = TRUE, rm_un = TRUE)
+		#' dataset$save_abund(mpa = TRUE, rm_un = TRUE, sep = "\t")
 		#' }
-		save_abund = function(dirpath = "taxa_abund", mpa = FALSE, rm_un = FALSE, rm_pattern = "__$"){
+		save_abund = function(dirpath = "taxa_abund", mpa = FALSE, rm_un = FALSE, rm_pattern = "__$", sep = ",", ...){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
 			}
+			suffix <- switch(sep, ',' = "csv", '\t' = "tsv", "txt")
 			if(mpa){
 				res <- data.frame()
 				for(i in names(self$taxa_abund)){
@@ -561,8 +566,8 @@ microtable <- R6Class(classname = "microtable",
 				if(rm_un){
 					res %<>% .[!grepl(rm_pattern, .$Taxa), ]
 				}
-				save_path <- paste0(dirpath, "/mpa_abund.tsv")
-				write.table(res, file = save_path, row.names = FALSE, quote = FALSE, sep = "\t")
+				save_path <- paste0(dirpath, "/mpa_abund.", suffix)
+				write.table(res, file = save_path, row.names = FALSE, sep = sep, ...)
 				message('Save abundance to ', save_path, ' ...')
 			}else{
 				for(i in names(self$taxa_abund)){
@@ -570,7 +575,9 @@ microtable <- R6Class(classname = "microtable",
 					if(rm_un){
 						tmp %<>% .[!grepl(rm_pattern, rownames(.)), ]
 					}
-					write.csv(tmp, file = paste0(dirpath, "/", i, "_abund.csv"), row.names = TRUE)
+					tmp <- data.frame(Taxa = rownames(tmp), tmp)
+					save_path <- paste0(dirpath, "/", i, "_abund.", suffix)
+					write.table(tmp, file = save_path, row.names = FALSE, sep = sep, ...)
 				}
 			}
 		},
