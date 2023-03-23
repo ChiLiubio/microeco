@@ -2,7 +2,7 @@
 #' Create trans_classifier object for machine-learning-based model prediction.
 #'
 #' @description
-#' This class is a wrapper for methods of machine-learning-based classification models, including data pre-processing, feature selection, 
+#' This class is a wrapper for methods of machine-learning-based classification or regression models, including data pre-processing, feature selection, 
 #' data split, model training, prediction, confusionMatrix and ROC (Receiver Operator Characteristic) or PR (Precision-Recall) curve.
 #'
 #' Author(s): Felipe Mansoldo and Chi Liu
@@ -15,7 +15,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
 		#' @param x.predictors default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
-		#'   data.frame represents other customized data. See the following available options:
+		#'   data.frame represents other customized input. See the following available options:
 		#'   \describe{
 		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
 		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
@@ -37,7 +37,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				x.predictors = "all",
 				y.response = NULL,
 				n.cores = 1
-			) {
+			){
 			if (is.null(dataset)) {
 				stop("No dataset provided!")
 			}
@@ -45,9 +45,37 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(is.null(y.response)){
 				stop("No y.response provided!")
 			}
-			if ( nlevels(as.factor(sampleinfo[, y.response])) < 2 ) {
-				stop("Response variable must have at least 2 factors!")
+			if(!y.response %in% colnames(sampleinfo)){
+				stop("Input y.response must be dataset$sample_table!")
 			}
+			# parse y.response
+			response_data <- sampleinfo[, y.response]
+			if(is.numeric(response_data)){
+				self$type <- "Regression"
+				self$data_response <- response_data
+				message("Regression for ", y.response)
+			}else{
+				self$type <- "Classification"
+				if(nlevels(as.factor(response_data)) < 2) {
+					stop("Response variable must have at least 2 factors!")
+				}
+				if(nlevels(as.factor(response_data)) == 2){
+					ClassificationCase = "2 groups"
+				}else{
+					ClassificationCase = "2+ groups"
+				}
+				# self$ClassificationCase <- ClassificationCase
+				message("Classification type = ", ClassificationCase)
+
+				ClassNames <- make.names(response_data, unique = F)
+				MapNames <- data.frame(OriginalNames = response_data, ClassNames = ClassNames)
+				if(!identical(MapNames$OriginalNames, MapNames$ClassNames)){
+					message("Factor names are non-standard. A correction was made and the change map was saved in object$data_MapNames ...")
+				}
+				self$data_MapNames <- MapNames
+				self$data_response <- ClassNames
+			}
+			
 			# x.predictors must be character or data.frame
 			if(is.character(x.predictors)){
 				if (grepl("all", x.predictors, ignore.case = TRUE)) {
@@ -67,25 +95,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			abund_table %<>% {
 				.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]
 			}
-			
-			if (nlevels(as.factor(sampleinfo[, y.response]))==2){
-				ClassificationCase = "2 groups"
-			}else{
-				ClassificationCase = "2+ groups"
-			}
-			# self$ClassificationCase <- ClassificationCase
-			message("Classification type = ", ClassificationCase)
-
-			ClassNames <- make.names(sampleinfo[, y.response], unique = F)
-			MapNames <- data.frame(OriginalNames = sampleinfo[, y.response], ClassNames = ClassNames)
-			self$MapNames <- MapNames
 			DataX <- abund_table %>% t() %>% as.data.frame()			
 			message("Total feature numbers: ", ncol(DataX))
 			
-			if(all.equal(MapNames$OriginalNames, MapNames$ClassNames) != TRUE){
-				message("Factor names are non-standard. A correction was made and the change map was saved in object$MapNames ...")
-			}
-			# message("Start clasification for: ", y.response, " ...")
 			if(n.cores > 1){
 				message("Registering cores = ", n.cores)
 				doParallel::registerDoParallel(n.cores)
@@ -93,7 +105,6 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			# use data_feature to make it easily remember and search
 			self$data_feature <- DataX
 			message("The feature table is stored in object$data_feature ...")
-			self$data_response <- y.response
 			message("The response variable is stored in object$data_response ...")
 		},
 		#' @description
@@ -133,17 +144,20 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			...
 			){
 			# ClassNames
-			ClassNames <- self$MapNames$ClassNames
+			data_response <- self$data_response
+			if(self$type == "Classification"){
+				data_response <- factor(data_response)
+			}
 			DataX <- self$data_feature
 			
 			###################### ----------------
 			######################    BORUTA
 			boruta.list <- list()
 			boura.fs <- function(i){
-				boruta.res <- Boruta::Boruta(x = DataX, y = factor(ClassNames), 
+				boruta.res <- Boruta::Boruta(x = DataX, y = data_response, 
 					maxRuns = boruta.maxRuns, pValue = boruta.pValue, ...)
 				boruta.stats <- data.frame(Boruta::attStats(boruta.res))
-				boruta.list[[i]] <- rownames(boruta.stats[boruta.stats$decision =='Confirmed',])
+				boruta.list[[i]] <- rownames(boruta.stats[boruta.stats$decision =='Confirmed', ])
 			}
 			message("Running Feature Selection (Boruta) ...")
 			boruta.list <- parallel::mclapply(1:boruta.repetitions, boura.fs)
@@ -155,9 +169,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			message("End of Feature Selection - Total of selected features = ", boruta.n.features)
 			######################    BORUTA end
 			###################### ----------------
-			
-			# reassign
-			self$data_feature <- DataX[,boruta.list.top]
+			self$data_feature <- DataX[, boruta.list.top]
 			message("The selected features is reassigned to object$data_feature ...")
 		},
 		#' @description
@@ -174,16 +186,17 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			######################    DATA SPLIT: TRAIN and TEST
 			######################
 			message("Creating training set and testing set ...")
-			ClassNames <- self$MapNames$ClassNames
+			data_response <- self$data_response
+			if(self$type == "Classification"){
+				data_response %<>% factor
+			}
 			DataX <- self$data_feature
-			y.response <- self$data_response
 
-			DataX.boruta <- data.frame(Class = factor(ClassNames), DataX)
-			SplitData <- rsample::initial_split(DataX.boruta, prop = prop.train, strata = "Class")
+			data_all <- data.frame(Response = data_response, DataX)
+			SplitData <- rsample::initial_split(data_all, prop = prop.train, strata = "Response")
 			train_data <- rsample::training(SplitData)
 			test_data <- rsample::testing(SplitData)
-			message("Stratified sampling using the variable ", y.response,
-			", with the proportion of ", prop.train*100 ,"% for the training set ...")
+			message("Stratified sampling with the proportion of ", prop.train*100 ,"% for the training set ...")
 
 			###################### 
 			######################    DATA SPLIT end
@@ -196,10 +209,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Control parameters for the following training. See trainControl function of caret package for details.
 		#' 
 		#' @param method default 'repeatedcv'; 'repeatedcv': Repeated k-Fold cross validation; 
-		#' 	 see method parameter in trainControl function of caret package for available options.
+		#' 	 see method parameter in \code{trainControl} function of \code{caret} package for available options.
 		#' @param classProbs default TRUE; should class probabilities be computed for classification models?;
-		#' 	 see classProbs parameter in caret::trainControl function.
-		#' @param savePredictions default TRUE; see savePredictions parameter in caret::trainControl function
+		#' 	 see classProbs parameter in \code{caret::trainControl} function.
+		#' @param savePredictions default TRUE; see \code{savePredictions} parameter in \code{caret::trainControl} function.
 		#' @param ... parameters pass to trainControl function of caret package.
 		#' @return trainControl in the object.
 		#' @examples
@@ -212,6 +225,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			savePredictions = TRUE,
 			...
 			){
+			if(classProbs){
+				if(self$type == "Regression"){
+					classProbs <- FALSE
+				}
+			}
 			trainControl <- caret::trainControl(method = method,
 								   classProbs = classProbs,
 								   savePredictions = savePredictions,
@@ -223,10 +241,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Run the model training.
 		#' 
 		#' @param method default "rf"; "rf": random forest; see method in caret::train function for other options.
-		#' @param metric default "Accuracy"; see metric in caret::train function for other options.
 		#' @param max.mtry default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.
 		#' @param max.ntree default 200; for method = "rf"; maximum number of trees used to optimize the model.
-		#' @param ... parameters pass to train function of caret package.
+		#' @param ... parameters pass to \code{caret::train} function.
 		#' @return res_train in the object.
 		#' @examples
 		#' \dontrun{
@@ -237,7 +254,6 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' }
 		cal_train = function(
 			method = "rf",
-			metric = "Accuracy",
 			max.mtry = 2,
 			max.ntree = 200,
 			...
@@ -246,16 +262,16 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			trControl <- self$trainControl
 			
 			###################### ----------------
-			if(method == "rf"){
+			if(method == "rf" & self$type == "Classification"){
 				# Optimization of RF parameters
 				message("Optimization of Random Forest parameters ...")
 
 				tunegrid <- expand.grid(.mtry=seq(from =1, to = max.mtry) )
 				modellist<- list()
-				#
+				
 				for (ntree in c(100, max.ntree)) {
-					fit <- caret::train(Class ~ ., data = train_data, method = method, metric=metric, 
-									  tuneGrid=tunegrid, trControl=trControl, ntree=ntree, ...)
+					fit <- caret::train(Response ~ ., data = train_data, method = method,
+									  tuneGrid = tunegrid, trControl = trControl, ntree = ntree, ...)
 					key <- toString(ntree)
 					modellist[[key]] <- fit
 				}
@@ -269,8 +285,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				#tunegrid <- expand.grid(.mtry=seq(from = 1, to=4, by = 0.5))
 				modellist <- list()
 
-				fit <- caret::train(Class ~ ., data = train_data, method = method, 
-					metric = metric, tuneGrid = tunegrid, 
+				fit <- caret::train(Response ~ ., data = train_data, method = method, 
+					tuneGrid = tunegrid, 
 					trControl = trControl, ntree = ntree)
 
 				message("ntree used:", ntree)
@@ -278,11 +294,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 
 				tunegrid <- expand.grid(.mtry=fit$bestTune$mtry)
 				res_train <- caret::train(x=train_data[,2:ncol(train_data)], y = train_data[,1], method = method, 
-										 metric = metric, tuneGrid = tunegrid, trControl = trControl, ntree = ntree, ...)
+										 tuneGrid = tunegrid, trControl = trControl, ntree = ntree, ...)
 
 				######################Optimization of RF parameters end				
 			}else{
-				res_train <- caret::train(Class ~ ., data = train_data, method = method, trControl = trControl, ...)
+				res_train <- caret::train(Response ~ ., data = train_data, method = method, trControl = trControl, ...)
 			}
 			self$res_train <- res_train
 			message('The training result is stored in object$res_train ...')
@@ -318,41 +334,40 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		cal_predict = function(positive_class = NULL){
 			###################### ----------------
 			######################    Evaluation for the test set
-			######################
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")
 			}
 			fit.best <- self$res_train
 			test_data <- self$data_test
-			MapNames <- self$MapNames
 
 			fit.best.predict <- predict(fit.best, test_data[, 2:ncol(test_data)])
 			self$res_predict <- fit.best.predict
 			message('The result of model prediction is stored in object$res_predict ...')
 
-			###################### 
 			######################    end: Evaluation for the test set
-			###################### ----------------			
-			if (is.null(positive_class)){
-				positive_class <- levels(test_data[, 1])[1]
+			###################### ----------------
+			if(self$type == "Classification"){
+				if (is.null(positive_class)){
+					positive_class <- levels(test_data[, 1])[1]
+				}
+				positive_class.display <- self$data_MapNames %>% dplyr::filter(ClassNames %in% positive_class) %>% 
+						dplyr::select(OriginalNames) %>% unique() %>% dplyr::pull()
+
+				message('Calculating confusionMatrix with positive class = ', positive_class.display, " ...")
+
+				confusion.fit.best <- caret::confusionMatrix(as.factor(fit.best.predict), 
+											as.factor(test_data[,1]), 
+											positive = positive_class)
+
+				self$res_confusion_fit <- confusion.fit.best
+				message('The result of confusionMatrix is stored in object$res_confusion_fit ...')
+				confusion.data.sts <- data.frame(confusion.fit.best$overall)
+				Confusion.Sts <- data.frame("Overall Statistics" = paste0(round(confusion.data.sts[,1],2) * 100,"%")  )
+				rownames(Confusion.Sts) <- rownames(confusion.data.sts)
+				self$res_confusion_stats <- Confusion.Sts
+				message('The statistics of confusionMatrix is stored in object$res_confusion_stats ...')
+				message('Model prediction Accuracy = ',Confusion.Sts$Overall.Statistics[1])
 			}
-			positive_class.display <- MapNames %>% dplyr::filter(ClassNames %in% positive_class) %>% 
-					dplyr::select(OriginalNames) %>% unique() %>% dplyr::pull()
-
-			message('Calculating confusionMatrix with positive class = ', positive_class.display, " ...")
-
-			confusion.fit.best <- caret::confusionMatrix(as.factor(fit.best.predict), 
-										as.factor(test_data[,1]), 
-										positive = positive_class)
-
-			self$res_confusion_fit <- confusion.fit.best
-			message('The result of confusionMatrix is stored in object$res_confusion_fit ...')
-			confusion.data.sts <- data.frame(confusion.fit.best$overall)
-			Confusion.Sts <- data.frame("Overall Statistics" = paste0(round(confusion.data.sts[,1],2) * 100,"%")  )
-			rownames(Confusion.Sts) <- rownames(confusion.data.sts)
-			self$res_confusion_stats <- Confusion.Sts
-			message('The statistics of confusionMatrix is stored in object$res_confusion_stats ...')
-			message('Model prediction Accuracy = ',Confusion.Sts$Overall.Statistics[1])
 		},
 		#' @description
 		#' Plot the cross-tabulation of observed and predicted classes with associated statistics.
@@ -368,10 +383,13 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			plot_confusion = TRUE, 
 			plot_statistics = TRUE
 			){
+			if(self$type == "Regression"){
+				stop("The function can only be available for the Classification !")
+			}
 			if(is.null(self$res_confusion_fit)){
 				stop("Please first run cal_predict to get the prediction performance !")
 			}
-# 			color_values = RColorBrewer::brewer.pal(8, "Dark2")
+			
 			p1 <- ggplot(data = as.data.frame(self$res_confusion_fit$table) ,
 					aes(x = Reference, y = Prediction)) +
 				geom_tile(aes(fill = log(Freq)), colour = "white") +
@@ -407,6 +425,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' t1$cal_ROC()
 		#' }
 		cal_ROC = function(input = "pred"){
+			if(self$type == "Regression"){
+				stop("The function can only be available for the Classification !")
+			}
 			input <- match.arg(input, c("pred", "train"))
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")

@@ -4,7 +4,7 @@
 \alias{trans_classifier}
 \title{Create trans_classifier object for machine-learning-based model prediction.}
 \description{
-This class is a wrapper for methods of machine-learning-based classification models, including data pre-processing, feature selection, 
+This class is a wrapper for methods of machine-learning-based classification or regression models, including data pre-processing, feature selection, 
 data split, model training, prediction, confusionMatrix and ROC (Receiver Operator Characteristic) or PR (Precision-Recall) curve.
 
 Author(s): Felipe Mansoldo and Chi Liu
@@ -143,7 +143,7 @@ Create the trans_classifier object.
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
 \item{\code{x.predictors}}{default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
-data.frame represents other customized data. See the following available options:
+data.frame represents other customized input. See the following available options:
 \describe{
   \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
   \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
@@ -296,12 +296,12 @@ Control parameters for the following training. See trainControl function of care
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{method}}{default 'repeatedcv'; 'repeatedcv': Repeated k-Fold cross validation; 
-see method parameter in trainControl function of caret package for available options.}
+see method parameter in \code{trainControl} function of \code{caret} package for available options.}
 
 \item{\code{classProbs}}{default TRUE; should class probabilities be computed for classification models?;
-see classProbs parameter in caret::trainControl function.}
+see classProbs parameter in \code{caret::trainControl} function.}
 
-\item{\code{savePredictions}}{default TRUE; see savePredictions parameter in caret::trainControl function}
+\item{\code{savePredictions}}{default TRUE; see \code{savePredictions} parameter in \code{caret::trainControl} function.}
 
 \item{\code{...}}{parameters pass to trainControl function of caret package.}
 }
@@ -327,13 +327,7 @@ t1$set_trainControl(method = 'repeatedcv')
 \subsection{Method \code{cal_train()}}{
 Run the model training.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_train(
-  method = "rf",
-  metric = "Accuracy",
-  max.mtry = 2,
-  max.ntree = 200,
-  ...
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_train(method = "rf", max.mtry = 2, max.ntree = 200, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -341,13 +335,11 @@ Run the model training.
 \describe{
 \item{\code{method}}{default "rf"; "rf": random forest; see method in caret::train function for other options.}
 
-\item{\code{metric}}{default "Accuracy"; see metric in caret::train function for other options.}
-
 \item{\code{max.mtry}}{default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.}
 
 \item{\code{max.ntree}}{default 200; for method = "rf"; maximum number of trees used to optimize the model.}
 
-\item{\code{...}}{parameters pass to train function of caret package.}
+\item{\code{...}}{parameters pass to \code{caret::train} function.}
 }
 \if{html}{\out{</div>}}
 }
