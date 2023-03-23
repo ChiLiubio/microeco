@@ -123,549 +123,551 @@ trans_diff <- R6Class(classname = "trans_diff",
 			...
 			){
 			if(is.null(dataset)){
-				stop("No dataset provided!")
-			}
-			# in case of dataset changes
-			tmp_dataset <- clone(dataset)
-			sampleinfo <- tmp_dataset$sample_table
-			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme")){
-				stop("The group parameter need to be provided for differential test among groups!")
+				self$method <- NULL
+				message("Input dataset is NULL. Please run the functions with customized data ...")
 			}else{
-				if(!is.null(group)){
-					if(length(group) > 1){
-						stop("Please provide only one colname of sample_table for group parameter!")
-					}else{
-						if(! group %in% colnames(sampleinfo)){
-							stop("Please provide a correct colname of sample_table for group parameter!")
-						}
-					}
-				}
-			}
-			method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-				"anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme"))
-			
-			if(!is.null(group)){
-				if(is.factor(sampleinfo[, group])){
-					self$group_order <- levels(sampleinfo[, group])
-					sampleinfo[, group] %<>% as.character
-				}
-			}
-			################################
-			# generate abudance table
-			if(is.null(tmp_dataset$taxa_abund)){
-				message("No taxa_abund found. First calculate it with cal_abund function ...")
-				tmp_dataset$cal_abund()
-			}
-			# make sure the taxa_level can be found from tax_table
-			if(grepl("all", taxa_level, ignore.case = TRUE)){
-				abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
-			}else{
-				# make sure taxa_level can be extracted from taxa_abund
-				if(! taxa_level %in% names(tmp_dataset$taxa_abund)){
-					# recalculate taxa_abund with rownames as features in otu_table
-					message("Provided taxa_level: ", taxa_level, " not in tax_table of dataset; use features in otu_table ...")
-					tmp_dataset$add_rownames2taxonomy(use_name = taxa_level)
-					suppressMessages(tmp_dataset$cal_abund(rel = TRUE))
-				}
-				abund_table <- tmp_dataset$taxa_abund[[taxa_level]]
-			}
-			if(filter_thres > 0){
-				if(filter_thres >= 1){
-					stop("Parameter filter_thres represents relative abudance. It should be smaller than 1 !")
+				# in case of dataset changes
+				tmp_dataset <- clone(dataset)
+				sampleinfo <- tmp_dataset$sample_table
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme")){
+					stop("The group parameter need to be provided for differential test among groups!")
 				}else{
-					abund_table %<>% .[apply(., 1, mean) > filter_thres, ]
-				}
-			}
-			if(grepl("lefse", method, ignore.case = TRUE)){
-				abund_table %<>% {. * lefse_norm}
-				self$lefse_norm <- lefse_norm
-			}
-			abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
-			################################
-			
-			if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme")){
-				if(method == "KW_dunn"){
-					# filter taxa with equal abudance across all samples
-					abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
-				}
-				if(method == "betareg"){
-					abund_table %<>% {. + 0.000001}/1.000002
-				}
-				tem_data <- clone(tmp_dataset)
-				# use test method in trans_alpha
-				tem_data$alpha_diversity <- as.data.frame(t(abund_table))
-				tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
-				tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
-				output <- tem_data1$res_diff
-				if(method != "lme"){
-					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
-					# multi-way anova has formula in the final method; one-way is the original 'anova'
-					method <- tem_data1$cal_diff_method
-					if("Letter" %in% colnames(output)){
-						output <- cbind.data.frame(output, Significance = output$Letter)
-					}
-				}
-			}
-			if(method %in% c("lefse", "rf")){
-				# differential test
-				group_vec <- sampleinfo[, group] %>% as.factor
-				comparisions <- paste0(levels(group_vec), collapse = " - ")
-
-				message("Start Kruskal-Wallis rank sum test for ", group, " ...")
-				res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec, method = "kruskal.test")))
-				
-				pvalue_raw <- unlist(lapply(res_class, function(x) x$p_value))
-				names(pvalue_raw) <- rownames(abund_table)
-				pvalue_raw[is.nan(pvalue_raw)] <- 1
-				message(sum(pvalue_raw < alpha), " taxa found significant ...")
-				if(is.null(p_adjust_method)){
-					pvalue <- pvalue_raw
-				}else{
-					pvalue <- p.adjust(pvalue_raw, method = p_adjust_method)
-				}
-				# select significant taxa
-				sel_taxa <- pvalue < alpha
-				message("After P value adjustment, ", sum(sel_taxa), " taxa found significant ...")
-				if(sum(sel_taxa) == 0){
-					stop("No significant taxa found! Stop running!")
-				}
-
-				abund_table_sub <- abund_table[sel_taxa, ]
-				pvalue_sub <- pvalue[sel_taxa]
-				class_taxa_median_sub <- lapply(res_class, function(x) x$med) %>% do.call(cbind, .) %>% .[, sel_taxa]
-			}
-			if(method == "rf"){
-				# change the name in case of additional problem from the taxonomic names
-				nametable <- cbind.data.frame(name = rownames(abund_table_sub), repl = paste0("t", 1:nrow(abund_table_sub)), stringsAsFactors = FALSE)
-				rownames(nametable) <- nametable$repl
-				predictors <- t(abund_table_sub)
-				colnames(predictors) <- nametable$repl
-				res <- NULL
-				if(all(table(as.character(sampleinfo[, group])) < 4)){
-					if(nresam < 1){
-						message("The sample number in all your group less than 4, automatically set nresam = 1 for random forest analysis !")
-						nresam <- 1
-					}
-				}
-				for(num in seq_len(boots)){
-					# resampling
-					sample_names_resample <- rownames(predictors)[base::sample(1:nrow(predictors), size = ceiling(nrow(predictors) * nresam))]
-					predictors_sub <- predictors[sample_names_resample, ]
-					sampleinfo_resample <- sampleinfo[sample_names_resample, , drop = FALSE]
-					# make sure the groups and samples numbers right
-					if(length(unique(sampleinfo_resample[, group])) != length(unique(sampleinfo[, group])) | min(table(sampleinfo_resample[, group])) < 2){
-						next
-					}
-					rf_data <- data.frame(response = as.factor(sampleinfo_resample[, group]), predictors_sub, stringsAsFactors = FALSE)
-					tem_classify <- randomForest::randomForest(response~., data = rf_data, ntree = rf_ntree)
-					# use importance to evaluate
-					imp <- randomForest::importance(tem_classify)
-					colnames(imp)[1] <- num
-					if(is.null(res)){
-						res <- imp
-					}else{
-						res <- cbind(res, imp[rownames(res), , drop = FALSE])
-					}
-				}
-				res <- apply(res, 1, mean) %>% as.data.frame
-				use_method <- ifelse(length(levels(group_vec)) > 2, "Kruskal-Wallis rank sum test & Random Forest", "Wilcoxon rank sum test & Random Forest")
-				Taxa_name <- nametable[rownames(res), "name"]
-				res <- data.frame(
-					Comparison = comparisions,
-					Taxa = Taxa_name,
-					Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)])[Taxa_name], 
-					Method = use_method,
-					MeanDecreaseGini = res[, 1], 
-					stringsAsFactors = FALSE)
-				output <- dplyr::arrange(res, dplyr::desc(MeanDecreaseGini))
-				rownames(output) <- output$Taxa
-				output$P.unadj <- pvalue_raw[as.character(output$Taxa)]
-				output$P.adj <- pvalue_sub[as.character(output$Taxa)]
-				output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
-			}
-			if(method == "lefse"){
-				all_class_pairs <- combn(unique(as.character(group_vec)), 2)
-				# check the difference among subgroups
-				if(!is.null(lefse_subgroup)){
-					message("Start lefse subgroup biomarkers check for ", lefse_subgroup, " ...")
-					all_sub_number <- as.data.table(sampleinfo)[, .N, by = c(group, lefse_subgroup)] %>% as.data.frame %>% .$N
-					if(all(all_sub_number < lefse_min_subsam)){
-						stop("All sample numbers for subgroups < ", lefse_min_subsam, "! Please consider using small lefse_min_subsam parameter!")
-					}
-					remove_list_total <- list()
-					# for each group paires
-					for(i in seq_len(ncol(all_class_pairs))){
-						y1 <- all_class_pairs[, i]
-						y1_sub_pairs <- expand.grid(
-							unique(sampleinfo[sampleinfo[, group] == y1[1], lefse_subgroup]), 
-							unique(sampleinfo[sampleinfo[, group] == y1[2], lefse_subgroup]), 
-							stringsAsFactors = FALSE
-							) %>% t
-						y1_sub_pairs <- y1_sub_pairs[, unlist(lapply(1:ncol(y1_sub_pairs), function(x){
-							ifelse(any(c(sum(sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y1_sub_pairs[1, x]) < lefse_min_subsam, 
-								sum(sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y1_sub_pairs[2, x]) < lefse_min_subsam)), FALSE, TRUE)
-						})), drop = FALSE]
-						if(ncol(y1_sub_pairs) == 0) next
-						res_sub_total <- list()
-						# check each subgroup pairs under fixed group pair condition
-						for(j in 1:ncol(y1_sub_pairs)){
-							y2 <- y1_sub_pairs[, j]
-							abund_table_sub_y2 <- abund_table_sub[, c(
-								rownames(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], ]), 
-								rownames(sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], ])
-								)]
-							group_vec_sub2 <- c(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], group], 
-								sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], group])
-							res_sub <- lapply(seq_len(nrow(abund_table_sub_y2)), function(x) private$test_mark(abund_table_sub_y2[x,], group_vec_sub2))
-							res_sub_total[[j]] <- res_sub
-						}
-						raw_median <- class_taxa_median_sub[y1, ] %>% 
-							{.[1, ] > .[2, ]} %>% 
-							as.vector
-						check_median_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) {y$med[y1, 1] %>% {.[1] > .[2]}}))) %>% as.data.frame
-						check_median_sub[] <- lapply(check_median_sub, function(x) x == raw_median)
-						check_p_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) y$p_value))) %>% as.data.frame
-						remove_list <- unlist(lapply(seq_len(nrow(check_median_sub)), function(x){
-							if(all(unlist(check_median_sub[x, ]))){
-								FALSE
-							}else{
-								if(any(check_p_sub[x, !unlist(check_median_sub[x, ])] < alpha)){
-									TRUE
-								}else{
-									FALSE
-								}
+					if(!is.null(group)){
+						if(length(group) > 1){
+							stop("Please provide only one colname of sample_table for group parameter!")
+						}else{
+							if(! group %in% colnames(sampleinfo)){
+								stop("Please provide a correct colname of sample_table for group parameter!")
 							}
-						}))
-						remove_list_total[[i]] <- remove_list
-					}
-					if(!identical(remove_list_total, list())){
-						remove_list_total %<>% do.call(cbind, .) %>% apply(., 1, any)
-						message("Remove ", sum(remove_list_total), " biomarkers after subgroup check ...")
-						abund_table_sub %<>% .[!remove_list_total, ]
-						if(nrow(abund_table_sub) == 0){
-							stop("No biomarkers remained after subgroup check! stop running!")
 						}
-						pvalue_sub %<>% .[!remove_list_total]
-						class_taxa_median_sub %<>% .[, !remove_list_total]
 					}
 				}
-				res_lda <- list()
-				# bootstrap default 30 times
-				for(num in seq_len(boots)){
-					res_lda_pair <- list()
-					# resampling samples
-					sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * nresam))]
-					abund_table_sub_resample <- abund_table_sub[, sample_names_resample]
-					sampleinfo_resample <- sampleinfo[sample_names_resample, , drop = FALSE]
-					# make sure the groups and samples numbers available					
-					if(sum(table(as.character(sampleinfo_resample[, group])) > 1) < 2){
-						res_lda[[num]] <- NA
-						next
+				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
+					"anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme"))
+				
+				if(!is.null(group)){
+					if(is.factor(sampleinfo[, group])){
+						self$group_order <- levels(sampleinfo[, group])
+						sampleinfo[, group] %<>% as.character
 					}
-					# cycle all paired groups
-					for(i in seq_len(ncol(all_class_pairs))){
-						sel_samples <- sampleinfo_resample[, group] %in% all_class_pairs[, i]
-						# make sure the groups and samples numbers available
-						if(length(table(as.character(sampleinfo_resample[sel_samples, group]))) < 2){
-							res_lda_pair[[i]] <- NA
-							next
-						}
-						if(min(table(as.character(sampleinfo_resample[sel_samples, group]))) < 2){
-							res_lda_pair[[i]] <- NA
-							next
-						}
-						group_vec_lda <- sampleinfo_resample[sel_samples, group] %>% as.character %>% as.factor
-						abund_table_sub_lda <- abund_table_sub_resample[, sel_samples]
-						abund_table_sub_lda %<>% .[apply(., 1, sd) > 1.0e-10, ]
-						if(is.null(lefse_subgroup)){
-							abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda)
-						}else{
-							subgroup_vec <- sampleinfo_resample[sel_samples, lefse_subgroup] %>% as.character %>% as.factor
-							# consider subgroup as a independent variable
-							abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
-						}
-						# LDA analysis
-						check_res <- tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <- TRUE})
-						if(rlang::is_true(check_res)) {
-							res_lda_pair[[i]] <- NA
-							next
-						}else{
-							# calculate effect size
-							w <- mod1$scaling[,1]
-							w_unit <- w/sqrt(sum(w^2))
-							w_unit %<>% {.[!grepl("lefse_subgroup", names(.))]}
-							ss <- abund1[, !colnames(abund1) %in% c("Group", "lefse_subgroup")]
-							xy_matrix <- as.matrix(ss)
-							LD <- xy_matrix %*% w_unit
-							effect_size <- tapply(LD, group_vec_lda, mean) %>% as.vector %>% {.[1] - .[2]} %>% abs
-							coeff <- w_unit * effect_size %>% abs
-							coeff[is.nan(coeff)] <- 0
-							names(coeff) %<>% gsub("^`|`$", "", .)
-							rres <- mod1$means %>% as.data.frame
-							colnames(rres) %<>% gsub("^`|`$", "", .)
-							rres <- rres[, rownames(abund_table_sub_lda)]
-							rres1 <- apply(rres, 2, function(x) abs(x[1] - x[2]))
-							res_lda_pair[[i]] <- (rres1 + coeff[names(rres1)]) *0.5
-						}
-					}
-					res_lda[[num]] <- res_lda_pair
 				}
-				# obtain the final lda value
-				res <- sapply(rownames(abund_table_sub), function(k){
-					unlist(lapply(seq_len(ncol(all_class_pairs)), function(p){
-						unlist(lapply(res_lda, function(x){ x[[p]][k]})) %>% .[!is.na(.)] %>% mean
-					})) %>% 
-					.[!is.na(.)] %>% 
-					.[!is.nan(.)] %>% 
-					max
-				})
-				res <- sapply(res, function(x) {log10(1 + abs(x)) * ifelse(x > 0, 1, -1)})
-				output <- cbind.data.frame(Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)]), 
-					LDA = res,
-					P.unadj = pvalue_raw[names(pvalue_sub)],
-					P.adj = pvalue_sub)
-				output %<>% .[order(.$LDA, decreasing = TRUE), ]
-				output <- cbind.data.frame(Comparison = comparisions, Taxa = rownames(output), Method = "LEfSe", output)
-				message("Minimum LDA score: ", range(output$LDA)[1], " maximum LDA score: ", range(output$LDA)[2])
-				output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
-			}
-			#######################################
-			if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC", "ALDEx2_t")){
-				if(taxa_level == "all"){
-					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+				################################
+				# generate abudance table
+				if(is.null(tmp_dataset$taxa_abund)){
+					message("No taxa_abund found. First calculate it with cal_abund function ...")
+					tmp_dataset$cal_abund()
 				}
-				if(is.null(group_choose_paired)){
-					all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
+				# make sure the taxa_level can be found from tax_table
+				if(grepl("all", taxa_level, ignore.case = TRUE)){
+					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
 				}else{
-					all_name <- combn(unique(group_choose_paired), 2)
+					# make sure taxa_level can be extracted from taxa_abund
+					if(! taxa_level %in% names(tmp_dataset$taxa_abund)){
+						# recalculate taxa_abund with rownames as features in otu_table
+						message("Provided taxa_level: ", taxa_level, " not in tax_table of dataset; use features in otu_table ...")
+						tmp_dataset$add_rownames2taxonomy(use_name = taxa_level)
+						suppressMessages(tmp_dataset$cal_abund(rel = TRUE))
+					}
+					abund_table <- tmp_dataset$taxa_abund[[taxa_level]]
 				}
-				output <- data.frame()
-			}
-			if(method == "metastat"){
-				# transform data
-				ranknumber <- which(colnames(tmp_dataset$tax_table) %in% taxa_level)
-				abund <- tmp_dataset$otu_table
-				tax <- tmp_dataset$tax_table[, 1:ranknumber, drop=FALSE]
-				merged_taxonomy <- apply(tax, 1, paste, collapse="|")
-				abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
-					reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
-				abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
-					.[, c("Abundance"):=NULL] %>% 
-					setkey(Display, Sample) %>% 
-					unique() %>% 
-					as.data.frame()
-				new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
-					`row.names<-`(.[,1]) %>% 
-					.[,-1, drop = FALSE]
-				new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
-
-				message("Total ", ncol(all_name), " paired group for calculation ...")
-				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
-					use_data <- new_abund[ , unlist(lapply(as.character(all_name[,i]), function(x) which(as.character(sampleinfo[, group]) %in% x)))]
-					use_data %<>% .[!grepl("__$", rownames(.)), ]
-					use_data <- use_data[apply(use_data, 1, sum) != 0, ]
-					g <- sum(as.character(sampleinfo[, group]) == as.character(all_name[1, i])) + 1
-					# calculate metastat
-					res <- private$calculate_metastat(inputdata = use_data, g = g)
-					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-					res <- cbind.data.frame(compare = add_name, res)
-					output <- rbind.data.frame(output, res)
-				}
-				output %<>% dropallfactors(unfac2num = TRUE)
-				colnames(output)[1:2] <- c("Comparison", "Taxa")
-				max_group <- lapply(seq_len(nrow(output)), function(x){
-					group_select <- unlist(strsplit(output[x, "Comparison"], split = " - "))
-					ifelse(output[x, "mean(group1)"] > output[x, "mean(group2)"], group_select[1], group_select[2])
-				}) %>% unlist
-				output$Significance <- cut(output$qvalue, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
-				output <- data.frame(output, Group = max_group)
-			}
-			if(method == "metagenomeSeq"){
-				if(!require("metagenomeSeq")){
-					stop("metagenomeSeq package not installed !")
-				}
-				message("Total ", ncol(all_name), " paired group for calculation ...")
-				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
-					use_dataset <- clone(tmp_dataset)
-					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
-					use_dataset$tidy_dataset()
-					suppressMessages(use_dataset$cal_abund(rel = FALSE))
-					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], 
-						sample_table = use_dataset$sample_table)
-					newdata$tidy_dataset()
-					obj <- newMRexperiment(
-						newdata$otu_table, 
-						phenoData= AnnotatedDataFrame(newdata$sample_table)
-#						featureData = AnnotatedDataFrame(use_dataset$tax_table)
-						)
-					## Normalization and Statistical testing
-					obj_1 <- cumNorm(obj)
-					pd <- pData(obj)
-					colnames(pd)[which(colnames(pd) == group)] <- "Group"
-					# construct linear model
-					mod <- model.matrix(~1 + Group, data = pd)
-					objres1 <- fitFeatureModel(obj_1, mod)
-					# extract the result
-					tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
-					p <- objres1@pvalues
-					if(is.null(p_adjust_method)){
-						padj <- p
+				if(filter_thres > 0){
+					if(filter_thres >= 1){
+						stop("Parameter filter_thres represents relative abudance. It should be smaller than 1 !")
 					}else{
-						if (p_adjust_method == "ihw-ubiquity" | p_adjust_method == "ihw-abundance") {
-							padj <- MRihw(objres1, p, p_adjust_method, 0.1)
-						} else {
-							padj <- p.adjust(p, method = p_adjust_method)
+						abund_table %<>% .[apply(., 1, mean) > filter_thres, ]
+					}
+				}
+				if(grepl("lefse", method, ignore.case = TRUE)){
+					abund_table %<>% {. * lefse_norm}
+					self$lefse_norm <- lefse_norm
+				}
+				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
+				################################
+				
+				if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme")){
+					if(method == "KW_dunn"){
+						# filter taxa with equal abudance across all samples
+						abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
+					}
+					if(method == "betareg"){
+						abund_table %<>% {. + 0.000001}/1.000002
+					}
+					tem_data <- clone(tmp_dataset)
+					# use test method in trans_alpha
+					tem_data$alpha_diversity <- as.data.frame(t(abund_table))
+					tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
+					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
+					output <- tem_data1$res_diff
+					if(method != "lme"){
+						colnames(output)[colnames(output) == "Measure"] <- "Taxa"
+						# multi-way anova has formula in the final method; one-way is the original 'anova'
+						method <- tem_data1$cal_diff_method
+						if("Letter" %in% colnames(output)){
+							output <- cbind.data.frame(output, Significance = output$Letter)
 						}
 					}
-					srt <- order(p, decreasing = FALSE)
-					valid <- 1:length(padj)
-					if (metagenomeSeq_count > 0) {
-						np <- rowSums(objres1@counts)
-						valid <- intersect(valid, which(np >= metagenomeSeq_count))
+				}
+				if(method %in% c("lefse", "rf")){
+					# differential test
+					group_vec <- sampleinfo[, group] %>% as.factor
+					comparisions <- paste0(levels(group_vec), collapse = " - ")
+
+					message("Start Kruskal-Wallis rank sum test for ", group, " ...")
+					res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec, method = "kruskal.test")))
+					
+					pvalue_raw <- unlist(lapply(res_class, function(x) x$p_value))
+					names(pvalue_raw) <- rownames(abund_table)
+					pvalue_raw[is.nan(pvalue_raw)] <- 1
+					message(sum(pvalue_raw < alpha), " taxa found significant ...")
+					if(is.null(p_adjust_method)){
+						pvalue <- pvalue_raw
+					}else{
+						pvalue <- p.adjust(pvalue_raw, method = p_adjust_method)
 					}
-					srt <- srt[which(srt %in% valid)]
-					res <- cbind(tb[, 1:2], p)
-					res <- cbind(res, padj)
-					res <- as.data.frame(res[srt, ])
-					colnames(res) <- c(colnames(tb)[1:2], "P.unadj", "P.adj")
-					res <- cbind.data.frame(feature = rownames(res), res)
-					rownames(res) <- NULL
-					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-					res <- cbind.data.frame(compare = add_name, res)
-					output <- rbind.data.frame(output, res)
+					# select significant taxa
+					sel_taxa <- pvalue < alpha
+					message("After P value adjustment, ", sum(sel_taxa), " taxa found significant ...")
+					if(sum(sel_taxa) == 0){
+						stop("No significant taxa found! Stop running!")
+					}
+
+					abund_table_sub <- abund_table[sel_taxa, ]
+					pvalue_sub <- pvalue[sel_taxa]
+					class_taxa_median_sub <- lapply(res_class, function(x) x$med) %>% do.call(cbind, .) %>% .[, sel_taxa]
 				}
-			}
-			if(method == "ANCOMBC"){
-				if(!require("ANCOMBC")){
-					stop("ANCOMBC package is not installed !")
+				if(method == "rf"){
+					# change the name in case of additional problem from the taxonomic names
+					nametable <- cbind.data.frame(name = rownames(abund_table_sub), repl = paste0("t", 1:nrow(abund_table_sub)), stringsAsFactors = FALSE)
+					rownames(nametable) <- nametable$repl
+					predictors <- t(abund_table_sub)
+					colnames(predictors) <- nametable$repl
+					res <- NULL
+					if(all(table(as.character(sampleinfo[, group])) < 4)){
+						if(nresam < 1){
+							message("The sample number in all your group less than 4, automatically set nresam = 1 for random forest analysis !")
+							nresam <- 1
+						}
+					}
+					for(num in seq_len(boots)){
+						# resampling
+						sample_names_resample <- rownames(predictors)[base::sample(1:nrow(predictors), size = ceiling(nrow(predictors) * nresam))]
+						predictors_sub <- predictors[sample_names_resample, ]
+						sampleinfo_resample <- sampleinfo[sample_names_resample, , drop = FALSE]
+						# make sure the groups and samples numbers right
+						if(length(unique(sampleinfo_resample[, group])) != length(unique(sampleinfo[, group])) | min(table(sampleinfo_resample[, group])) < 2){
+							next
+						}
+						rf_data <- data.frame(response = as.factor(sampleinfo_resample[, group]), predictors_sub, stringsAsFactors = FALSE)
+						tem_classify <- randomForest::randomForest(response~., data = rf_data, ntree = rf_ntree)
+						# use importance to evaluate
+						imp <- randomForest::importance(tem_classify)
+						colnames(imp)[1] <- num
+						if(is.null(res)){
+							res <- imp
+						}else{
+							res <- cbind(res, imp[rownames(res), , drop = FALSE])
+						}
+					}
+					res <- apply(res, 1, mean) %>% as.data.frame
+					use_method <- ifelse(length(levels(group_vec)) > 2, "Kruskal-Wallis rank sum test & Random Forest", "Wilcoxon rank sum test & Random Forest")
+					Taxa_name <- nametable[rownames(res), "name"]
+					res <- data.frame(
+						Comparison = comparisions,
+						Taxa = Taxa_name,
+						Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)])[Taxa_name], 
+						Method = use_method,
+						MeanDecreaseGini = res[, 1], 
+						stringsAsFactors = FALSE)
+					output <- dplyr::arrange(res, dplyr::desc(MeanDecreaseGini))
+					rownames(output) <- output$Taxa
+					output$P.unadj <- pvalue_raw[as.character(output$Taxa)]
+					output$P.adj <- pvalue_sub[as.character(output$Taxa)]
+					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 				}
-				if(!require("file2meco")){
-					stop("Please install file2meco package! The function meco2phyloseq is required!")
+				if(method == "lefse"){
+					all_class_pairs <- combn(unique(as.character(group_vec)), 2)
+					# check the difference among subgroups
+					if(!is.null(lefse_subgroup)){
+						message("Start lefse subgroup biomarkers check for ", lefse_subgroup, " ...")
+						all_sub_number <- as.data.table(sampleinfo)[, .N, by = c(group, lefse_subgroup)] %>% as.data.frame %>% .$N
+						if(all(all_sub_number < lefse_min_subsam)){
+							stop("All sample numbers for subgroups < ", lefse_min_subsam, "! Please consider using small lefse_min_subsam parameter!")
+						}
+						remove_list_total <- list()
+						# for each group paires
+						for(i in seq_len(ncol(all_class_pairs))){
+							y1 <- all_class_pairs[, i]
+							y1_sub_pairs <- expand.grid(
+								unique(sampleinfo[sampleinfo[, group] == y1[1], lefse_subgroup]), 
+								unique(sampleinfo[sampleinfo[, group] == y1[2], lefse_subgroup]), 
+								stringsAsFactors = FALSE
+								) %>% t
+							y1_sub_pairs <- y1_sub_pairs[, unlist(lapply(1:ncol(y1_sub_pairs), function(x){
+								ifelse(any(c(sum(sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y1_sub_pairs[1, x]) < lefse_min_subsam, 
+									sum(sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y1_sub_pairs[2, x]) < lefse_min_subsam)), FALSE, TRUE)
+							})), drop = FALSE]
+							if(ncol(y1_sub_pairs) == 0) next
+							res_sub_total <- list()
+							# check each subgroup pairs under fixed group pair condition
+							for(j in 1:ncol(y1_sub_pairs)){
+								y2 <- y1_sub_pairs[, j]
+								abund_table_sub_y2 <- abund_table_sub[, c(
+									rownames(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], ]), 
+									rownames(sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], ])
+									)]
+								group_vec_sub2 <- c(sampleinfo[sampleinfo[, group] == y1[1] & sampleinfo[, lefse_subgroup] == y2[1], group], 
+									sampleinfo[sampleinfo[, group] == y1[2] & sampleinfo[, lefse_subgroup] == y2[2], group])
+								res_sub <- lapply(seq_len(nrow(abund_table_sub_y2)), function(x) private$test_mark(abund_table_sub_y2[x,], group_vec_sub2))
+								res_sub_total[[j]] <- res_sub
+							}
+							raw_median <- class_taxa_median_sub[y1, ] %>% 
+								{.[1, ] > .[2, ]} %>% 
+								as.vector
+							check_median_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) {y$med[y1, 1] %>% {.[1] > .[2]}}))) %>% as.data.frame
+							check_median_sub[] <- lapply(check_median_sub, function(x) x == raw_median)
+							check_p_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) y$p_value))) %>% as.data.frame
+							remove_list <- unlist(lapply(seq_len(nrow(check_median_sub)), function(x){
+								if(all(unlist(check_median_sub[x, ]))){
+									FALSE
+								}else{
+									if(any(check_p_sub[x, !unlist(check_median_sub[x, ])] < alpha)){
+										TRUE
+									}else{
+										FALSE
+									}
+								}
+							}))
+							remove_list_total[[i]] <- remove_list
+						}
+						if(!identical(remove_list_total, list())){
+							remove_list_total %<>% do.call(cbind, .) %>% apply(., 1, any)
+							message("Remove ", sum(remove_list_total), " biomarkers after subgroup check ...")
+							abund_table_sub %<>% .[!remove_list_total, ]
+							if(nrow(abund_table_sub) == 0){
+								stop("No biomarkers remained after subgroup check! stop running!")
+							}
+							pvalue_sub %<>% .[!remove_list_total]
+							class_taxa_median_sub %<>% .[, !remove_list_total]
+						}
+					}
+					res_lda <- list()
+					# bootstrap default 30 times
+					for(num in seq_len(boots)){
+						res_lda_pair <- list()
+						# resampling samples
+						sample_names_resample <- colnames(abund_table_sub)[base::sample(1:ncol(abund_table_sub), size = ceiling(ncol(abund_table_sub) * nresam))]
+						abund_table_sub_resample <- abund_table_sub[, sample_names_resample]
+						sampleinfo_resample <- sampleinfo[sample_names_resample, , drop = FALSE]
+						# make sure the groups and samples numbers available					
+						if(sum(table(as.character(sampleinfo_resample[, group])) > 1) < 2){
+							res_lda[[num]] <- NA
+							next
+						}
+						# cycle all paired groups
+						for(i in seq_len(ncol(all_class_pairs))){
+							sel_samples <- sampleinfo_resample[, group] %in% all_class_pairs[, i]
+							# make sure the groups and samples numbers available
+							if(length(table(as.character(sampleinfo_resample[sel_samples, group]))) < 2){
+								res_lda_pair[[i]] <- NA
+								next
+							}
+							if(min(table(as.character(sampleinfo_resample[sel_samples, group]))) < 2){
+								res_lda_pair[[i]] <- NA
+								next
+							}
+							group_vec_lda <- sampleinfo_resample[sel_samples, group] %>% as.character %>% as.factor
+							abund_table_sub_lda <- abund_table_sub_resample[, sel_samples]
+							abund_table_sub_lda %<>% .[apply(., 1, sd) > 1.0e-10, ]
+							if(is.null(lefse_subgroup)){
+								abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda)
+							}else{
+								subgroup_vec <- sampleinfo_resample[sel_samples, lefse_subgroup] %>% as.character %>% as.factor
+								# consider subgroup as a independent variable
+								abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
+							}
+							# LDA analysis
+							check_res <- tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <- TRUE})
+							if(rlang::is_true(check_res)) {
+								res_lda_pair[[i]] <- NA
+								next
+							}else{
+								# calculate effect size
+								w <- mod1$scaling[,1]
+								w_unit <- w/sqrt(sum(w^2))
+								w_unit %<>% {.[!grepl("lefse_subgroup", names(.))]}
+								ss <- abund1[, !colnames(abund1) %in% c("Group", "lefse_subgroup")]
+								xy_matrix <- as.matrix(ss)
+								LD <- xy_matrix %*% w_unit
+								effect_size <- tapply(LD, group_vec_lda, mean) %>% as.vector %>% {.[1] - .[2]} %>% abs
+								coeff <- w_unit * effect_size %>% abs
+								coeff[is.nan(coeff)] <- 0
+								names(coeff) %<>% gsub("^`|`$", "", .)
+								rres <- mod1$means %>% as.data.frame
+								colnames(rres) %<>% gsub("^`|`$", "", .)
+								rres <- rres[, rownames(abund_table_sub_lda)]
+								rres1 <- apply(rres, 2, function(x) abs(x[1] - x[2]))
+								res_lda_pair[[i]] <- (rres1 + coeff[names(rres1)]) *0.5
+							}
+						}
+						res_lda[[num]] <- res_lda_pair
+					}
+					# obtain the final lda value
+					res <- sapply(rownames(abund_table_sub), function(k){
+						unlist(lapply(seq_len(ncol(all_class_pairs)), function(p){
+							unlist(lapply(res_lda, function(x){ x[[p]][k]})) %>% .[!is.na(.)] %>% mean
+						})) %>% 
+						.[!is.na(.)] %>% 
+						.[!is.nan(.)] %>% 
+						max
+					})
+					res <- sapply(res, function(x) {log10(1 + abs(x)) * ifelse(x > 0, 1, -1)})
+					output <- cbind.data.frame(Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)]), 
+						LDA = res,
+						P.unadj = pvalue_raw[names(pvalue_sub)],
+						P.adj = pvalue_sub)
+					output %<>% .[order(.$LDA, decreasing = TRUE), ]
+					output <- cbind.data.frame(Comparison = comparisions, Taxa = rownames(output), Method = "LEfSe", output)
+					message("Minimum LDA score: ", range(output$LDA)[1], " maximum LDA score: ", range(output$LDA)[2])
+					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 				}
-				if(ncol(all_name) > 1){
-					message("First run the global test for multiple groups ...")
+				#######################################
+				if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC", "ALDEx2_t")){
+					if(taxa_level == "all"){
+						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+					}
+					if(is.null(group_choose_paired)){
+						all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
+					}else{
+						all_name <- combn(unique(group_choose_paired), 2)
+					}
+					output <- data.frame()
+				}
+				if(method == "metastat"){
+					# transform data
+					ranknumber <- which(colnames(tmp_dataset$tax_table) %in% taxa_level)
+					abund <- tmp_dataset$otu_table
+					tax <- tmp_dataset$tax_table[, 1:ranknumber, drop=FALSE]
+					merged_taxonomy <- apply(tax, 1, paste, collapse="|")
+					abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
+						reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
+					abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
+						.[, c("Abundance"):=NULL] %>% 
+						setkey(Display, Sample) %>% 
+						unique() %>% 
+						as.data.frame()
+					new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
+						`row.names<-`(.[,1]) %>% 
+						.[,-1, drop = FALSE]
+					new_abund <- new_abund[order(apply(new_abund, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
+
+					message("Total ", ncol(all_name), " paired group for calculation ...")
+					for(i in 1:ncol(all_name)) {
+						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
+						use_data <- new_abund[ , unlist(lapply(as.character(all_name[,i]), function(x) which(as.character(sampleinfo[, group]) %in% x)))]
+						use_data %<>% .[!grepl("__$", rownames(.)), ]
+						use_data <- use_data[apply(use_data, 1, sum) != 0, ]
+						g <- sum(as.character(sampleinfo[, group]) == as.character(all_name[1, i])) + 1
+						# calculate metastat
+						res <- private$calculate_metastat(inputdata = use_data, g = g)
+						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+						res <- cbind.data.frame(compare = add_name, res)
+						output <- rbind.data.frame(output, res)
+					}
+					output %<>% dropallfactors(unfac2num = TRUE)
+					colnames(output)[1:2] <- c("Comparison", "Taxa")
+					max_group <- lapply(seq_len(nrow(output)), function(x){
+						group_select <- unlist(strsplit(output[x, "Comparison"], split = " - "))
+						ifelse(output[x, "mean(group1)"] > output[x, "mean(group2)"], group_select[1], group_select[2])
+					}) %>% unlist
+					output$Significance <- cut(output$qvalue, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+					output <- data.frame(output, Group = max_group)
+				}
+				if(method == "metagenomeSeq"){
+					if(!require("metagenomeSeq")){
+						stop("metagenomeSeq package not installed !")
+					}
+					message("Total ", ncol(all_name), " paired group for calculation ...")
+					for(i in 1:ncol(all_name)) {
+						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
+						use_dataset <- clone(tmp_dataset)
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+						use_dataset$tidy_dataset()
+						suppressMessages(use_dataset$cal_abund(rel = FALSE))
+						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], 
+							sample_table = use_dataset$sample_table)
+						newdata$tidy_dataset()
+						obj <- newMRexperiment(
+							newdata$otu_table, 
+							phenoData= AnnotatedDataFrame(newdata$sample_table)
+	#						featureData = AnnotatedDataFrame(use_dataset$tax_table)
+							)
+						## Normalization and Statistical testing
+						obj_1 <- cumNorm(obj)
+						pd <- pData(obj)
+						colnames(pd)[which(colnames(pd) == group)] <- "Group"
+						# construct linear model
+						mod <- model.matrix(~1 + Group, data = pd)
+						objres1 <- fitFeatureModel(obj_1, mod)
+						# extract the result
+						tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
+						p <- objres1@pvalues
+						if(is.null(p_adjust_method)){
+							padj <- p
+						}else{
+							if (p_adjust_method == "ihw-ubiquity" | p_adjust_method == "ihw-abundance") {
+								padj <- MRihw(objres1, p, p_adjust_method, 0.1)
+							} else {
+								padj <- p.adjust(p, method = p_adjust_method)
+							}
+						}
+						srt <- order(p, decreasing = FALSE)
+						valid <- 1:length(padj)
+						if (metagenomeSeq_count > 0) {
+							np <- rowSums(objres1@counts)
+							valid <- intersect(valid, which(np >= metagenomeSeq_count))
+						}
+						srt <- srt[which(srt %in% valid)]
+						res <- cbind(tb[, 1:2], p)
+						res <- cbind(res, padj)
+						res <- as.data.frame(res[srt, ])
+						colnames(res) <- c(colnames(tb)[1:2], "P.unadj", "P.adj")
+						res <- cbind.data.frame(feature = rownames(res), res)
+						rownames(res) <- NULL
+						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+						res <- cbind.data.frame(compare = add_name, res)
+						output <- rbind.data.frame(output, res)
+					}
+				}
+				if(method == "ANCOMBC"){
+					if(!require("ANCOMBC")){
+						stop("ANCOMBC package is not installed !")
+					}
+					if(!require("file2meco")){
+						stop("Please install file2meco package! The function meco2phyloseq is required!")
+					}
+					if(ncol(all_name) > 1){
+						message("First run the global test for multiple groups ...")
+						use_dataset <- clone(tmp_dataset)
+						suppressMessages(use_dataset$cal_abund(rel = FALSE))
+						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
+						newdata$tidy_dataset()
+						newdata <- file2meco::meco2phyloseq(newdata)
+						res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
+						res <- res_raw$res_global
+						colnames(res) <- c("feature", "W", "P.unadj", "P.adj", "diff_abn")
+						rownames(res) <- NULL
+						group_vec <- use_dataset$sample_table[, group] %>% as.character %>% unique
+						comparisions <- paste0(group_vec, collapse = " - ")
+						res <- cbind.data.frame(compare = comparisions, res)
+						output <- rbind.data.frame(output, res)
+					}
+					# for paired test
+					message("Total ", ncol(all_name), " paired groups for test ...")
+					for(i in 1:ncol(all_name)) {
+						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
+						use_dataset <- clone(tmp_dataset)
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+						use_dataset$tidy_dataset()
+						suppressMessages(use_dataset$cal_abund(rel = FALSE))
+						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
+						newdata$tidy_dataset()
+						newdata <- file2meco::meco2phyloseq(newdata)
+						res_raw <- ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
+						res_raw2 <- res_raw$res
+						res <- data.frame(feature = res_raw2$taxon, 
+							W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
+							P.unadj = res_raw2[, which(grepl("^p_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
+							P.adj = res_raw2[, which(grepl("^q_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
+							diff_abn = res_raw2[, which(grepl("^diff_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))])
+						rownames(res) <- NULL
+						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+						res <- cbind.data.frame(compare = add_name, res)
+						output <- rbind.data.frame(output, res)
+					}
+				}
+				if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
+					if(!require("ALDEx2")){
+						stop("ALDEx2 package is not installed !")
+					}
+				}
+				if(method == "ALDEx2_t"){
+					message("Total ", ncol(all_name), " paired group for test ...")				
+					for(i in 1:ncol(all_name)) {
+						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
+						use_dataset <- clone(tmp_dataset)
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+						use_dataset$tidy_dataset()
+						suppressMessages(use_dataset$cal_abund(rel = FALSE))
+						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
+						newdata$tidy_dataset()
+						res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
+						res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
+						rownames(res) <- NULL
+						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+						res <- cbind.data.frame(compare = add_name, res) %>%
+							.[, !grepl("^rab\\.", colnames(.))]
+						output <- rbind.data.frame(output, res)
+					}
+				}
+				if(method == "ALDEx2_kw"){
+					if(taxa_level == "all"){
+						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+					}
 					use_dataset <- clone(tmp_dataset)
-					suppressMessages(use_dataset$cal_abund(rel = FALSE))
-					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
-					newdata$tidy_dataset()
-					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
-					res <- res_raw$res_global
-					colnames(res) <- c("feature", "W", "P.unadj", "P.adj", "diff_abn")
-					rownames(res) <- NULL
-					group_vec <- use_dataset$sample_table[, group] %>% as.character %>% unique
-					comparisions <- paste0(group_vec, collapse = " - ")
-					res <- cbind.data.frame(compare = comparisions, res)
-					output <- rbind.data.frame(output, res)
-				}
-				# for paired test
-				message("Total ", ncol(all_name), " paired groups for test ...")
-				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
-					use_dataset <- clone(tmp_dataset)
-					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
 					use_dataset$tidy_dataset()
 					suppressMessages(use_dataset$cal_abund(rel = FALSE))
-					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
-					newdata$tidy_dataset()
-					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
-					res_raw2 <- res_raw$res
-					res <- data.frame(feature = res_raw2$taxon, 
-						W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
-						P.unadj = res_raw2[, which(grepl("^p_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
-						P.adj = res_raw2[, which(grepl("^q_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
-						diff_abn = res_raw2[, which(grepl("^diff_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))])
-					rownames(res) <- NULL
-					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-					res <- cbind.data.frame(compare = add_name, res)
-					output <- rbind.data.frame(output, res)
-				}
-			}
-			if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
-				if(!require("ALDEx2")){
-					stop("ALDEx2 package is not installed !")
-				}
-			}
-			if(method == "ALDEx2_t"){
-				message("Total ", ncol(all_name), " paired group for test ...")				
-				for(i in 1:ncol(all_name)) {
-					message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
-					use_dataset <- clone(tmp_dataset)
-					use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
-					use_dataset$tidy_dataset()
-					suppressMessages(use_dataset$cal_abund(rel = FALSE))
-					newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
-					newdata$tidy_dataset()
-					res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
+					res_raw <- ALDEx2::aldex(use_dataset$taxa_abund[[taxa_level]], use_dataset$sample_table[, group], test = "kw", ...)
 					res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
-					rownames(res) <- NULL
-					add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-					res <- cbind.data.frame(compare = add_name, res) %>%
-						.[, !grepl("^rab\\.", colnames(.))]
-					output <- rbind.data.frame(output, res)
+					comparisions <- paste0(unique(as.character(use_dataset$sample_table[, group])), collapse = " - ")
+					output <- cbind.data.frame(compare = comparisions, res)
 				}
-			}
-			if(method == "ALDEx2_kw"){
-				if(taxa_level == "all"){
-					stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
+				if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
+					if(! any(colnames(output) %in% ALDEx2_sig)){
+						stop("ALDEx2_sig is not found in the result! Please check the input!")
+					}else{
+						output$P.adj <- output[, ALDEx2_sig %>% .[. %in% colnames(output)] %>% .[1]]
+					}
 				}
-				use_dataset <- clone(tmp_dataset)
-				use_dataset$tidy_dataset()
-				suppressMessages(use_dataset$cal_abund(rel = FALSE))
-				res_raw <- ALDEx2::aldex(use_dataset$taxa_abund[[taxa_level]], use_dataset$sample_table[, group], test = "kw", ...)
-				res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
-				comparisions <- paste0(unique(as.character(use_dataset$sample_table[, group])), collapse = " - ")
-				output <- cbind.data.frame(compare = comparisions, res)
-			}
-			if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
-				if(! any(colnames(output) %in% ALDEx2_sig)){
-					stop("ALDEx2_sig is not found in the result! Please check the input!")
+				#######################################
+				# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
+				if(grepl("lefse", method, ignore.case = TRUE)){
+					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
 				}else{
-					output$P.adj <- output[, ALDEx2_sig %>% .[. %in% colnames(output)] %>% .[1]]
+					if(grepl("rf", method, ignore.case = TRUE)){
+						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
+					}else{
+						res_abund <- reshape2::melt(rownames_to_column(abund_table, "Taxa"), id.vars = "Taxa")
+					}
 				}
-			}
-			#######################################
-			# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
-			if(grepl("lefse", method, ignore.case = TRUE)){
-				res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
-			}else{
-				if(grepl("rf", method, ignore.case = TRUE)){
-					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
-				}else{
-					res_abund <- reshape2::melt(rownames_to_column(abund_table, "Taxa"), id.vars = "Taxa")
+				# further calculate mean and sd of res_abund with group parameter
+				if(!is.null(group)){
+					colnames(res_abund) <- c("Taxa", "Sample", "Abund")
+					res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
+					res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
+					colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				}
+				if(method %in% c("metagenomeSeq", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")){
+					output %<>% dropallfactors(unfac2num = TRUE)
+					colnames(output)[1:2] <- c("Comparison", "Taxa")
+					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+					# filter the unknown taxa in output
+					output %<>% .[.$Taxa %in% res_abund$Taxa, ]
+					# get enriched group
+					output$Group <- lapply(seq_along(output$Taxa), function(x){
+						select_group_split <- strsplit(output[x, "Comparison"], split = " - ") %>% unlist
+						res_abund[res_abund$Taxa == output[x, "Taxa"] & res_abund$Group %in% select_group_split, ] %>%
+						{.[which.max(.$Mean), "Group"]}
+					}) %>% unlist
+				}
+				self$res_diff <- output
+				message(method , " analysis result is stored in object$res_diff ...")
+				self$res_abund <- res_abund
+				message('Taxa abundance data is stored in object$res_abund ...')
+				# save abund_table for the cladogram
+				self$abund_table <- abund_table
+				self$method <- method
+				self$taxa_level <- taxa_level
 			}
-			# further calculate mean and sd of res_abund with group parameter
-			if(!is.null(group)){
-				colnames(res_abund) <- c("Taxa", "Sample", "Abund")
-				res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
-				res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
-				colnames(res_abund)[colnames(res_abund) == group] <- "Group"
-			}
-			if(method %in% c("metagenomeSeq", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")){
-				output %<>% dropallfactors(unfac2num = TRUE)
-				colnames(output)[1:2] <- c("Comparison", "Taxa")
-				output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
-				# filter the unknown taxa in output
-				output %<>% .[.$Taxa %in% res_abund$Taxa, ]
-				# get enriched group
-				output$Group <- lapply(seq_along(output$Taxa), function(x){
-					select_group_split <- strsplit(output[x, "Comparison"], split = " - ") %>% unlist
-					res_abund[res_abund$Taxa == output[x, "Taxa"] & res_abund$Group %in% select_group_split, ] %>%
-					{.[which.max(.$Mean), "Group"]}
-				}) %>% unlist
-			}
-			self$res_diff <- output
-			message(method , " analysis result is stored in object$res_diff ...")
-			self$res_abund <- res_abund
-			message('Taxa abundance data is stored in object$res_abund ...')
-			# save abund_table for the cladogram
-			self$abund_table <- abund_table
-			self$method <- method
-			self$taxa_level <- taxa_level
 		},
 		#' @description
 		#' Plot the abundance of differential taxa
@@ -695,8 +697,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param y_increase default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
 		#' 	  In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.
 		#' @param text_y_size default 10; the size for the y axis text, i.e. feature text.
-		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.
-		#' @param xtext_angle default NULL; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
+		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
+		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 		#' 	  only available when coord_flip = FALSE.
 		#' @param ... parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.
 		#' @return ggplot.
@@ -969,7 +971,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  If NULL, the function can first check whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.
 		#' @param axis_text_y default 12; the size for the y axis text.
-		#' @param plot_vertical default TRUE; whether use vertical bar plot or horizontal.
+		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
+		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
+		#' 	  only available when coord_flip = FALSE.
 		#' @param ... parameters pass to \code{\link{geom_bar}}
 		#' @return ggplot.
 		#' @examples
@@ -985,52 +989,63 @@ trans_diff <- R6Class(classname = "trans_diff",
 			keep_prefix = TRUE,
 			group_order = NULL,
 			axis_text_y = 12,
-			plot_vertical = TRUE,
+			coord_flip = TRUE,
+			xtext_angle = 45,
 			...
 			){
 			use_data <- self$res_diff
 			method <- self$method
-			if(grepl("formula", method)){
-				stop("The function can not be applied to multi-way anova!")
-			}
-			if(method == "lefse"){
-				colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
-				ylab_title <- "LDA score"
-			}else{
-				if(method == "rf"){
-					colnames(use_data)[colnames(use_data) == "MeanDecreaseGini"] <- "Value"
-					ylab_title <- "MeanDecreaseGini"
+			if(!is.null(method)){
+				if(grepl("formula", method)){
+					stop("The function can not be applied to multi-way anova!")
+				}
+				if(method == "lefse"){
+					colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
+					ylab_title <- "LDA score"
 				}else{
-					if(method == "metastat"){
-						use_data %<>% .[.$qvalue < 0.05, ]
-						use_data$Value <- 1 - use_data$qvalue
-						ylab_title <- "1 - qvalue"
+					if(method == "rf"){
+						colnames(use_data)[colnames(use_data) == "MeanDecreaseGini"] <- "Value"
+						ylab_title <- "MeanDecreaseGini"
 					}else{
-						if(method != "anova"){
-							use_data %<>% .[.$P.adj < 0.05, ]
-							use_data$Value <- 1 - use_data$P.adj
-							ylab_title <- "1 - P.adjust"
+						if(method == "metastat"){
+							use_data %<>% .[.$qvalue < 0.05, ]
+							use_data$Value <- 1 - use_data$qvalue
+							ylab_title <- "1 - qvalue"
 						}else{
-							stop("This function can not be used to ", method," currently!")
+							if(method != "anova"){
+								use_data %<>% .[.$P.adj < 0.05, ]
+								use_data$Value <- 1 - use_data$P.adj
+								ylab_title <- "1 - P.adjust"
+							}else{
+								stop("This function can not be used to ", method," currently!")
+							}
 						}
 					}
 				}
-			}
-			if(!method %in% c("lefse", "rf")){
-				if(length(unique(use_data$Comparison)) > 1){
-					# make sure the Group not replicated for multiple comparisions
-					if(is.null(select_group)){
-						message('Multiple comparisions found. But select_group parameter not provided. Select the first group pair to show ...')
-						select_group <- unique(use_data$Comparison)[1]
-					}else{
-						if(length(select_group) > 1){
-							stop("The select_group parameter should only have one element! Please check the input!")
+				if(!method %in% c("lefse", "rf")){
+					if(length(unique(use_data$Comparison)) > 1){
+						# make sure the Group not replicated for multiple comparisions
+						if(is.null(select_group)){
+							message('Multiple comparisions found. But select_group parameter not provided. Select the first group pair to show ...')
+							select_group <- unique(use_data$Comparison)[1]
+						}else{
+							if(length(select_group) > 1){
+								stop("The select_group parameter should only have one element! Please check the input!")
+							}
+							if(! select_group %in% use_data$Comparison){
+								stop("The select_group parameter must be one of elements of object$res_diff$Comparison!")
+							}
 						}
-						if(! select_group %in% use_data$Comparison){
-							stop("The select_group parameter must be one of elements of object$res_diff$Comparison!")
-						}
+						use_data %<>% .[.$Comparison %in% select_group, ]
 					}
-					use_data %<>% .[.$Comparison %in% select_group, ]
+				}
+			}else{
+				if(is.null(use_data)){
+					stop("The res_diff should be provided when method is NULL!")
+				}else{
+					if(!"Value" %in% colnames(use_data)){
+						stop("No Value column found in the object$res_diff!")
+					}
 				}
 			}
 			if(nrow(use_data) == 0){
@@ -1060,41 +1075,55 @@ trans_diff <- R6Class(classname = "trans_diff",
 				sel_num <- 1:nrow(use_data)
 			}
 			use_data %<>% .[sel_num, ]
-			if(is.null(group_order)){
-				if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
-					use_data$Group %<>% factor(., levels = self$group_order)
+			if("Group" %in% colnames(use_data)){
+				if(is.null(group_order)){
+					if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
+						use_data$Group %<>% factor(., levels = self$group_order)
+					}else{
+						use_data$Group %<>% as.character %>% as.factor
+					}
 				}else{
-					use_data$Group %<>% as.character %>% as.factor
+					use_data$Group %<>% factor(., levels = group_order)
+				}
+				if(length(color_values) < length(levels(use_data$Group))){
+					stop("Please provide color_values parameter with more colors!")
+				}
+				# rearrange orders
+				if(length(levels(use_data$Group)) == 2){
+					use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
+						if(x == levels(use_data$Group)[1]){
+							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
+						}else{
+							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = FALSE), "Taxa"]
+						}
+					})))))
+					use_data[use_data$Group == levels(use_data$Group)[2], "Value"] %<>% {. * -1}
+				}else{
+					use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
+						use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
+					})))))
 				}
 			}else{
-				use_data$Group %<>% factor(., levels = group_order)
-			}
-			if(length(color_values) < length(levels(use_data$Group))){
-				stop("Please provide color_values parameter with more colors!")
-			}
-			
-			# rearrange orders
-			if(length(levels(use_data$Group)) == 2){
-				use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
-					if(x == levels(use_data$Group)[1]){
-						use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
-					}else{
-						use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = FALSE), "Taxa"]
-					}
-				})))))
-				use_data[use_data$Group == levels(use_data$Group)[2], "Value"] %<>% {. * -1}
-			}else{
-				use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
-					use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
-				})))))
+				use_data %<>% .[order(.$Value, decreasing = TRUE), ]
+				if(coord_flip){
+					use_data$Taxa %<>% factor(., levels = rev(.))
+				}else{
+					use_data$Taxa %<>% factor(., levels = .)
+				}
+				ylab_title <- "Value"
 			}
 			self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
 			
-			p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
-				geom_bar(stat="identity", position = position_dodge(), ...) +
+			if("Group" %in% colnames(use_data)){
+				p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
+					scale_color_manual(values = color_values) +
+					scale_fill_manual(values = color_values)
+			}else{
+				p <- ggplot(use_data, aes(x = Taxa, y = Value))
+			}
+			p <- p +
+				geom_bar(stat = "identity", position = position_dodge(), ...) +
 				theme_bw() +
-				scale_color_manual(values = color_values) +
-				scale_fill_manual(values = color_values) +
 				ylab(ylab_title) +
 				xlab("") +
 				theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
@@ -1102,9 +1131,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.grid.minor.x = element_blank()) +
 				theme(panel.border = element_blank()) +
 				theme(axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"))
-				
-			if(plot_vertical == T){
+			
+			if(coord_flip){
 				p <- p + coord_flip()
+			}else{
+				if(xtext_angle != 0){
+					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1))
+				}else{
+					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black"))
+				}
 			}
 			p
 		},

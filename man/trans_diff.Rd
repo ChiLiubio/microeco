@@ -292,9 +292,9 @@ In addition, this parameter is also used to label the letters of anova result wi
 
 \item{\code{text_y_size}}{default 10; the size for the y axis text, i.e. feature text.}
 
-\item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical, horizontal.}
+\item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
 
-\item{\code{xtext_angle}}{default NULL; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
+\item{\code{xtext_angle}}{default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 only available when coord_flip = FALSE.}
 
 \item{\code{...}}{parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.}
@@ -338,7 +338,8 @@ Bar plot for indicator index, such as LDA score and P value.
   keep_prefix = TRUE,
   group_order = NULL,
   axis_text_y = 12,
-  plot_vertical = TRUE,
+  coord_flip = TRUE,
+  xtext_angle = 45,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -365,7 +366,10 @@ If provided, this parameter can overwrite the levels in the group of \code{micro
 
 \item{\code{axis_text_y}}{default 12; the size for the y axis text.}
 
-\item{\code{plot_vertical}}{default TRUE; whether use vertical bar plot or horizontal.}
+\item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
+
+\item{\code{xtext_angle}}{default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
+only available when coord_flip = FALSE.}
 
 \item{\code{...}}{parameters pass to \code{\link{geom_bar}}}
 }
