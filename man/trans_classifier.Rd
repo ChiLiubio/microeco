@@ -75,6 +75,14 @@ t1$cal_feature_imp()
 }
 
 ## ------------------------------------------------
+## Method `trans_classifier$plot_feature_imp`
+## ------------------------------------------------
+
+\dontrun{
+t1$plot_feature_imp(use_number = 1:20, coord_flip = FALSE)
+}
+
+## ------------------------------------------------
 ## Method `trans_classifier$cal_predict`
 ## ------------------------------------------------
 
@@ -116,6 +124,7 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 \item \href{#method-trans_classifier-set_trainControl}{\code{trans_classifier$set_trainControl()}}
 \item \href{#method-trans_classifier-cal_train}{\code{trans_classifier$cal_train()}}
 \item \href{#method-trans_classifier-cal_feature_imp}{\code{trans_classifier$cal_feature_imp()}}
+\item \href{#method-trans_classifier-plot_feature_imp}{\code{trans_classifier$plot_feature_imp()}}
 \item \href{#method-trans_classifier-cal_predict}{\code{trans_classifier$cal_predict()}}
 \item \href{#method-trans_classifier-plot_confusionMatrix}{\code{trans_classifier$plot_confusionMatrix()}}
 \item \href{#method-trans_classifier-cal_ROC}{\code{trans_classifier$cal_ROC()}}
@@ -378,11 +387,42 @@ Get feature importance from the training model.
 }
 \subsection{Returns}{
 res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
+  For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$cal_feature_imp()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_classifier-plot_feature_imp"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-plot_feature_imp}{}}}
+\subsection{Method \code{plot_feature_imp()}}{
+Bar plot for feature importance.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_feature_imp(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters pass to \code{plot_diff_bar} function of \code{trans_diff} package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$plot_feature_imp(use_number = 1:20, coord_flip = FALSE)
 }
 }
 \if{html}{\out{</div>}}

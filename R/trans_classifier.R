@@ -308,6 +308,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Get feature importance from the training model.
 		#' @param ... parameters pass to varImp function of caret package.
 		#' @return res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
+		#'   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_feature_imp()
@@ -320,6 +321,25 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			
 			self$res_feature_imp <- res_feature_imp
 			message('The feature importance is stored in object$res_feature_imp ...')
+		},
+		#' @description
+		#' Bar plot for feature importance.
+		#' @param ... parameters pass to \code{plot_diff_bar} function of \code{trans_diff} package.
+		#' @return ggplot2 object.
+		#' @examples
+		#' \dontrun{
+		#' t1$plot_feature_imp(use_number = 1:20, coord_flip = FALSE)
+		#' }
+		plot_feature_imp = function(...){
+			if(is.null(self$res_feature_imp)){
+				stop("Please first run cal_feature_imp !")
+			}
+			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), Value = self$res_feature_imp[, 1])
+			tmp$Taxa %<>% gsub("\\.(.__)", "\\|\\1", .)
+			
+			suppressMessages(trans_diff_tmp <- trans_diff$new(dataset = NULL))
+			trans_diff_tmp$res_diff <- tmp
+			trans_diff_tmp$plot_diff_bar(coord_flip = FALSE, ...)
 		},
 		#' @description
 		#' Run the prediction.
