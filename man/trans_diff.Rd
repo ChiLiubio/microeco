@@ -79,7 +79,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
-    "t.test", "anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg",
+    "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "betareg",
     "lme")[1],
   group = NULL,
   taxa_level = "all",
@@ -119,8 +119,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'anova'}}{ANOVA for one-way or multi-factor analysis; see \code{cal_diff} function of \code{trans_alpha} class}
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
-  \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
-     call \code{ancombc2} function from \code{ANCOMBC} package; 
+  \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
+     based on the \code{ancombc2} function from \code{ANCOMBC} package; 
      only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;
      For more flexible usages, please see and use \code{ancombc2} function directly;
      Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
@@ -186,7 +186,7 @@ Same with the \code{by_ID} parameter in trans_alpha class.}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
-passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level, global and fix_formula parameters);
+passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".}
 }
 \if{html}{\out{</div>}}

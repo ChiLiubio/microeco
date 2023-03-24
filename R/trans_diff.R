@@ -29,8 +29,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'anova'}}{ANOVA for one-way or multi-factor analysis; see \code{cal_diff} function of \code{trans_alpha} class}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
-		#'     \item{\strong{'ANCOMBC'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC); 
-		#'        call \code{ancombc2} function from \code{ANCOMBC} package; 
+		#'     \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
+		#'        based on the \code{ancombc2} function from \code{ANCOMBC} package; 
 		#'        only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;
 		#'        For more flexible usages, please see and use \code{ancombc2} function directly;
 		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
@@ -71,7 +71,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
-		#' 	 passed to \code{ANCOMBC::ancombc} function when method is "ANCOMBC" (except tax_level, global and fix_formula parameters);
+		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".
 		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
 		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
@@ -103,7 +103,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", 
-				"ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme")[1],
+				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -143,7 +143,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme"))
+					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme"))
 				
 				if(!is.null(group)){
 					if(is.factor(sampleinfo[, group])){
@@ -431,7 +431,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 				}
 				#######################################
-				if(method %in% c("metastat", "metagenomeSeq", "ANCOMBC", "ALDEx2_t")){
+				if(method %in% c("metastat", "metagenomeSeq", "ancombc2", "ALDEx2_t")){
 					if(taxa_level == "all"){
 						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
 					}
@@ -538,7 +538,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						output <- rbind.data.frame(output, res)
 					}
 				}
-				if(method == "ANCOMBC"){
+				if(method == "ancombc2"){
 					if(!require("ANCOMBC")){
 						stop("ANCOMBC package is not installed !")
 					}
@@ -552,7 +552,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 						newdata$tidy_dataset()
 						newdata <- file2meco::meco2phyloseq(newdata)
-						res_raw <- ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
+						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
 						res <- res_raw$res_global
 						colnames(res) <- c("feature", "W", "P.unadj", "P.adj", "diff_abn")
 						rownames(res) <- NULL
@@ -646,7 +646,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
 					colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				}
-				if(method %in% c("metagenomeSeq", "ANCOMBC", "ALDEx2_t", "ALDEx2_kw")){
+				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw")){
 					output %<>% dropallfactors(unfac2num = TRUE)
 					colnames(output)[1:2] <- c("Comparison", "Taxa")
 					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
@@ -757,10 +757,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			if(is.null(select_group)){
-				if(method == "ANCOMBC"){
+				if(method == "ancombc2"){
 					if(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1){
 						if(any(sapply(gregexpr(" - ", t1$res_diff$Comparison), length) == 1)){
-							message("For ANCOMBC, both global and paired test are found. No select_group provided, use the global test result ...")
+							message("For ancombc2, both global and paired test are found. No select_group provided, use the global test result ...")
 							diff_data %<>% .[.$Comparison == diff_data$Comparison[1], ]
 						}
 					}
@@ -855,7 +855,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				
 				# for groups > 3, show the global comparision
 				if((length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW", "ALDEx2_kw")) | 
-					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ANCOMBC")){
+					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ancombc2")){
 					add_letter_text <- diff_data[match(all_taxa, diff_data$Taxa), add_sig_label]
 					textdf <- data.frame(
 						x = all_taxa, 
