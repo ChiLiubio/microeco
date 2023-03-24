@@ -312,7 +312,9 @@ Construct network based on the correlation method or \code{SpiecEasi} package or
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; The option details: 
+\item{\code{network_method}}{default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; 
+\code{network_method = NULL} means skipping the network construction for the customized use.
+The option details: 
 \describe{
   \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in \code{object$res_cor_p} returned from \code{trans_network$new}; 
         See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}

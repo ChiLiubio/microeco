@@ -77,107 +77,112 @@ trans_network <- R6Class(classname = "trans_network",
 			add_data = NULL,
 			...
 			){
-			use_dataset <- clone(dataset)
-			if(!is.null(env_cols)){
-				env_data <- use_dataset$sample_table[, env_cols, drop = FALSE]
-			}
-			if(!is.null(add_data)){
-				env_data <- add_data[rownames(add_data) %in% rownames(use_dataset$sample_table), ]
-			}
-			if(!is.null(env_cols) | !is.null(add_data)){
-				use_dataset$sample_table %<>% .[rownames(.) %in% rownames(env_data), ]
-				use_dataset$tidy_dataset(main_data = TRUE)
-				env_data %<>% .[rownames(use_dataset$sample_table), ] %>%
-					dropallfactors(unfac2num = TRUE)
-				env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
-				env_data[] <- lapply(env_data, as.numeric)
-				self$data_env <- env_data
-			}
-			if(taxa_level != "OTU"){
-				use_dataset <- use_dataset$merge_taxa(taxa = taxa_level)
-			}
-			rel_abund <- use_dataset$otu_table %>% {apply(., 1, sum)/sum(.)}
-			use_abund <- use_dataset$otu_table %>% {.[rel_abund > filter_thres, ]}
-			rel_abund %<>% {. * 100} %>% .[rownames(use_abund)]
-			
-			# check filtered data
-			if(nrow(use_abund) == 0){
-				stop("After filtering, no feature is remained! Please try to lower filter_thres!")
+			if(is.null(dataset)){
+				message("Input dataset not provided. Please run the functions with your other customized data!")
 			}else{
-				if(nrow(use_abund) == 1){
-					stop("After filtering, only one feature is remained! Please try to lower filter_thres!")
+				use_dataset <- clone(dataset)
+				if(!is.null(env_cols)){
+					env_data <- use_dataset$sample_table[, env_cols, drop = FALSE]
+				}
+				if(!is.null(add_data)){
+					env_data <- add_data[rownames(add_data) %in% rownames(use_dataset$sample_table), ]
+				}
+				if(!is.null(env_cols) | !is.null(add_data)){
+					use_dataset$sample_table %<>% .[rownames(.) %in% rownames(env_data), ]
+					use_dataset$tidy_dataset(main_data = TRUE)
+					env_data %<>% .[rownames(use_dataset$sample_table), ] %>%
+						dropallfactors(unfac2num = TRUE)
+					env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
+					env_data[] <- lapply(env_data, as.numeric)
+					self$data_env <- env_data
+				}
+				if(taxa_level != "OTU"){
+					use_dataset <- use_dataset$merge_taxa(taxa = taxa_level)
+				}
+				rel_abund <- use_dataset$otu_table %>% {apply(., 1, sum)/sum(.)}
+				use_abund <- use_dataset$otu_table %>% {.[rel_abund > filter_thres, ]}
+				rel_abund %<>% {. * 100} %>% .[rownames(use_abund)]
+				
+				# check filtered data
+				if(nrow(use_abund) == 0){
+					stop("After filtering, no feature is remained! Please try to lower filter_thres!")
 				}else{
-					message("After filtering, ", nrow(use_abund), " features are remained ...")
-					use_abund %<>% t %>% as.data.frame
-				}
-			}
-			if((!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
-				use_abund <- cbind.data.frame(use_abund, env_data)
-			}
-
-			if(!is.null(cor_method)){
-				cor_method <- match.arg(cor_method, c("bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"))
-				if(cor_method == "bray"){
-					tmp <- vegan::vegdist(t(use_abund), method = "bray") %>% as.matrix
-					tmp <- 1 - tmp
-					cor_result <- private$get_cor_p_list(tmp)
-				}
-				if(cor_method %in% c("pearson", "spearman")){
-					if(use_NetCoMi_pearson_spearman){
-						private$check_NetCoMi()
-						netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
-						cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
+					if(nrow(use_abund) == 1){
+						stop("After filtering, only one feature is remained! Please try to lower filter_thres!")
 					}else{
-						if(use_WGCNA_pearson_spearman){
-							cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
+						message("After filtering, ", nrow(use_abund), " features are remained ...")
+						use_abund %<>% t %>% as.data.frame
+					}
+				}
+				if((!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
+					use_abund <- cbind.data.frame(use_abund, env_data)
+				}
+				if(!is.null(cor_method)){
+					cor_method <- match.arg(cor_method, c("bray", "pearson", "spearman", "bicor", "sparcc", "cclasso", "ccrepe"))
+					if(cor_method == "bray"){
+						tmp <- vegan::vegdist(t(use_abund), method = "bray") %>% as.matrix
+						tmp <- 1 - tmp
+						cor_result <- private$get_cor_p_list(tmp)
+					}
+					if(cor_method %in% c("pearson", "spearman")){
+						if(use_NetCoMi_pearson_spearman){
+							private$check_NetCoMi()
+							netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
+							cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 						}else{
-							cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
+							if(use_WGCNA_pearson_spearman){
+								cor_result <- WGCNA::corAndPvalue(x = use_abund, method = cor_method, nThreads = nThreads)
+							}else{
+								cor_result <- private$cal_corr(inputtable = use_abund, cor_method = cor_method)
+							}
 						}
 					}
-				}
-				if(cor_method == "sparcc"){
-					use_sparcc_method <- match.arg(use_sparcc_method, c("NetCoMi", "SpiecEasi"))
-					if(use_sparcc_method == "NetCoMi"){
+					if(cor_method == "sparcc"){
+						use_sparcc_method <- match.arg(use_sparcc_method, c("NetCoMi", "SpiecEasi"))
+						if(use_sparcc_method == "NetCoMi"){
+							private$check_NetCoMi()
+							netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
+							cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
+						}else{
+							try_find <- try(find.package("SpiecEasi"), silent = TRUE)
+							if(inherits(try_find, "try-error")){
+								stop("SpiecEasi package is used for the SparCC calculation, but it is not installed! See https://github.com/zdk123/SpiecEasi for the installation")
+							}
+							bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
+							cor_result <- SpiecEasi::pval.sparccboot(bootres)
+							# reshape the results
+							use_names <- colnames(bootres$data)
+							com_res <- t(combn(use_names, 2))
+							res <- cbind.data.frame(com_res, cor = cor_result$cors, p = cor_result$pvals, stringsAsFactors = FALSE)
+							res_cor <- private$vec2mat(datatable = res, use_names = use_names, value_var = "cor", rep_value = 1)
+							res_p <- private$vec2mat(datatable = res, use_names = use_names, value_var = "p", rep_value = 0)
+							cor_result <- list(cor = res_cor, p = res_p)
+						}
+					}
+					if(cor_method %in% c("bicor", "cclasso", "ccrepe")){
 						private$check_NetCoMi()
 						netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
 						cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
-					}else{
-						try_find <- try(find.package("SpiecEasi"), silent = TRUE)
-						if(inherits(try_find, "try-error")){
-							stop("SpiecEasi package is used for the SparCC calculation, but it is not installed! See https://github.com/zdk123/SpiecEasi for the installation")
-						}
-						bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
-						cor_result <- SpiecEasi::pval.sparccboot(bootres)
-						# reshape the results
-						use_names <- colnames(bootres$data)
-						com_res <- t(combn(use_names, 2))
-						res <- cbind.data.frame(com_res, cor = cor_result$cors, p = cor_result$pvals, stringsAsFactors = FALSE)
-						res_cor <- private$vec2mat(datatable = res, use_names = use_names, value_var = "cor", rep_value = 1)
-						res_p <- private$vec2mat(datatable = res, use_names = use_names, value_var = "p", rep_value = 0)
-						cor_result <- list(cor = res_cor, p = res_p)
 					}
+					self$res_cor_p <- cor_result
+					message('The correlation result list is stored in object$res_cor_p ...')
+				}else{
+					self$res_cor_p <- NULL
 				}
-				if(cor_method %in% c("bicor", "cclasso", "ccrepe")){
-					private$check_NetCoMi()
-					netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
-					cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
-				}
-				self$res_cor_p <- cor_result
-				message('The correlation result list is stored in object$res_cor_p ...')
-			}else{
-				self$res_cor_p <- NULL
+				self$sample_table <- use_dataset$sample_table
+				# store taxonomic table for the following analysis
+				self$tax_table <- use_dataset$tax_table
+				self$data_abund <- use_abund
+				self$taxa_level <- taxa_level
+				self$data_relabund <- rel_abund
 			}
-			self$sample_table <- use_dataset$sample_table
-			# store taxonomic table for the following analysis
-			self$tax_table <- use_dataset$tax_table
-			self$data_abund <- use_abund
-			self$taxa_level <- taxa_level
-			self$data_relabund <- rel_abund
 		},
 		#' @description
 		#' Construct network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
 		#'
-		#' @param network_method default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; The option details: 
+		#' @param network_method default "COR"; "COR", "SpiecEasi", "gcoda", "FlashWeave" or "beemStatic"; 
+		#'   \code{network_method = NULL} means skipping the network construction for the customized use.
+		#'   The option details: 
 		#'   \describe{
 		#'     \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in \code{object$res_cor_p} returned from \code{trans_network$new}; 
 		#'     	  See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}
@@ -262,215 +267,219 @@ trans_network <- R6Class(classname = "trans_network",
 			...
 			){
 			private$check_igraph()
-			sampleinfo <- self$sample_table
-			taxa_level <- self$taxa_level
-			taxa_table <- self$tax_table
-			
-			network_method <- match.arg(network_method, c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic"))
-			
-			message("---------------- ", Sys.time()," : Start ----------------")
-			if(network_method == "COR"){
-				cortable <- self$res_cor_p$cor
-				# p adjustment for the converted vector
-				raw_p <- self$res_cor_p$p
-				if(ncol(cortable) != ncol(raw_p)){
-					stop("Correlation table and p value table have different column numbers !")
+			if(!is.null(network_method)){
+				sampleinfo <- self$sample_table
+				taxa_level <- self$taxa_level
+				taxa_table <- self$tax_table
+				
+				network_method <- match.arg(network_method, c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic"))
+				
+				message("---------------- ", Sys.time()," : Start ----------------")
+				if(network_method == "COR"){
+					cortable <- self$res_cor_p$cor
+					# p adjustment for the converted vector
+					raw_p <- self$res_cor_p$p
+					if(ncol(cortable) != ncol(raw_p)){
+						stop("Correlation table and p value table have different column numbers !")
+					}
+					raw_vector_p <- raw_p %>% as.dist %>% as.numeric
+					message("Perform p value adjustment with ", COR_p_adjust, " method ...")
+					adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
+					# to matrix
+					use_names <- colnames(raw_p)
+					names_combn <- t(combn(use_names, 2))
+					table_convert <- cbind.data.frame(names_combn, adjust.p = adp_raw, stringsAsFactors = FALSE)
+					adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
+					# make sure same names between cortable and adp
+					if(! identical(colnames(cortable), colnames(adp))){
+						adp <- adp[colnames(cortable), colnames(cortable)]
+					}
+					if(COR_optimization == T){
+						#find out threshold of correlation 
+						message("Start COR optimizing ...")
+						tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2], seq_by = COR_optimization_seq)
+						message("The optimized COR threshold: ", tc1, "...\n")
+					}
+					else {
+						tc1 <- COR_cut
+					}
+					diag(cortable) <- 0
+					cor_matrix <- as.matrix(cortable)
+					cor_matrix[abs(cortable) >= tc1] <- 1
+					cor_matrix[adp > COR_p_thres] <- 0
+					cor_matrix[cor_matrix != 1] <- 0
+					diag(cor_matrix) <- 0
+					network <- graph.adjacency(cor_matrix, mode = "undirected")
+					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
+					E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
+					if(COR_weight == T){
+						E(network)$weight <- unlist(lapply(seq_len(nrow(edges)), function(x) abs(cortable[edges[x, 1], edges[x, 2]])))
+					}else{
+						E(network)$weight <- rep.int(1, ecount(network))
+					}
 				}
-				raw_vector_p <- raw_p %>% as.dist %>% as.numeric
-				message("Perform p value adjustment with ", COR_p_adjust, " method ...")
-				adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
-				# to matrix
-				use_names <- colnames(raw_p)
-				names_combn <- t(combn(use_names, 2))
-				table_convert <- cbind.data.frame(names_combn, adjust.p = adp_raw, stringsAsFactors = FALSE)
-				adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
-				# make sure same names between cortable and adp
-				if(! identical(colnames(cortable), colnames(adp))){
-					adp <- adp[colnames(cortable), colnames(cortable)]
+				if(network_method == "SpiecEasi"){
+					if(!require("SpiecEasi")){
+						stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
+					}
+					SpiecEasi_method <- match.arg(SpiecEasi_method, c("glasso", "mb"))
+					use_abund <- self$data_abund %>% as.matrix
+					# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
+					spieceasi_fit <- SpiecEasi::spiec.easi(use_abund, method = SpiecEasi_method, ...)
+					# use the way from NetCoMi package
+					if(SpiecEasi_method == "glasso"){
+						assoMat <- stats::cov2cor(as.matrix(getOptCov(spieceasi_fit))) * SpiecEasi::getRefit(spieceasi_fit)
+					}else{
+						assoMat <- SpiecEasi::symBeta(SpiecEasi::getOptBeta(spieceasi_fit), mode = "ave")
+					}
+					assoMat %<>% as.matrix
+					network <- adj2igraph(assoMat)
+					V(network)$name <- colnames(use_abund)
 				}
-				if(COR_optimization == T){
-					#find out threshold of correlation 
-					message("Start COR optimizing ...")
-					tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2], seq_by = COR_optimization_seq)
-					message("The optimized COR threshold: ", tc1, "...\n")
+				if(network_method == "gcoda"){
+					if(!require("NetCoMi")){
+						stop("NetCoMi package is not installed! Please see https://github.com/stefpeschel/NetCoMi ")
+					}
+					netConstruct_raw <- netConstruct(self$data_abund, measure = network_method, ...)
+					self$res_gcoda_raw <- netConstruct_raw
+					message("The raw file is stored in object$res_gcoda_raw ...")
+					asso_matrix <- netConstruct_raw$assoMat1
+					network <- SpiecEasi::adj2igraph(asso_matrix)
+					V(network)$name <- colnames(asso_matrix)
 				}
-				else {
-					tc1 <- COR_cut
-				}
-				diag(cortable) <- 0
-				cor_matrix <- as.matrix(cortable)
-				cor_matrix[abs(cortable) >= tc1] <- 1
-				cor_matrix[adp > COR_p_thres] <- 0
-				cor_matrix[cor_matrix != 1] <- 0
-				diag(cor_matrix) <- 0
-				network <- graph.adjacency(cor_matrix, mode = "undirected")
-				edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-				E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
-				if(COR_weight == T){
-					E(network)$weight <- unlist(lapply(seq_len(nrow(edges)), function(x) abs(cortable[edges[x, 1], edges[x, 2]])))
-				}else{
-					E(network)$weight <- rep.int(1, ecount(network))
-				}
-			}
-			if(network_method == "SpiecEasi"){
-				if(!require("SpiecEasi")){
-					stop("SpiecEasi package is not installed! See https://github.com/zdk123/SpiecEasi ")
-				}
-				SpiecEasi_method <- match.arg(SpiecEasi_method, c("glasso", "mb"))
-				use_abund <- self$data_abund %>% as.matrix
-				# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
-				spieceasi_fit <- SpiecEasi::spiec.easi(use_abund, method = SpiecEasi_method, ...)
-				# use the way from NetCoMi package
-				if(SpiecEasi_method == "glasso"){
-					assoMat <- stats::cov2cor(as.matrix(getOptCov(spieceasi_fit))) * SpiecEasi::getRefit(spieceasi_fit)
-				}else{
-					assoMat <- SpiecEasi::symBeta(SpiecEasi::getOptBeta(spieceasi_fit), mode = "ave")
-				}
-				assoMat %<>% as.matrix
-				network <- adj2igraph(assoMat)
-				V(network)$name <- colnames(use_abund)
-			}
-			if(network_method == "gcoda"){
-				if(!require("NetCoMi")){
-					stop("NetCoMi package is not installed! Please see https://github.com/stefpeschel/NetCoMi ")
-				}
-				netConstruct_raw <- netConstruct(self$data_abund, measure = network_method, ...)
-				self$res_gcoda_raw <- netConstruct_raw
-				message("The raw file is stored in object$res_gcoda_raw ...")
-				asso_matrix <- netConstruct_raw$assoMat1
-				network <- SpiecEasi::adj2igraph(asso_matrix)
-				V(network)$name <- colnames(asso_matrix)
-			}
-			if(network_method == "FlashWeave"){
-				use_abund <- self$data_abund
-				oldwd <- getwd()
-				# make sure working directory can not be changed by the function when quit.
-				on.exit(setwd(oldwd))
+				if(network_method == "FlashWeave"){
+					use_abund <- self$data_abund
+					oldwd <- getwd()
+					# make sure working directory can not be changed by the function when quit.
+					on.exit(setwd(oldwd))
 
-				if(is.null(FlashWeave_tempdir)){
-					tem_dir <- tempdir()
-				}else{
-					# check the directory
-					tem_dir <- FlashWeave_tempdir
-					if(!dir.exists(tem_dir)){
-						stop("The input temporary directory: ", tem_dir, " does not exist!")
-					}
-				}
-				setwd(tem_dir)
-				write.table(use_abund, "taxa_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
-				L1 <- "using FlashWeave\n"
-				L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
-				if(FlashWeave_meta_data == T){
-					if(is.null(self$data_env)){
-						stop("FlashWeave_meta_data is TRUE, but object$env_data not found! 
-							Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
-					}
-					meta_data <- self$data_env
-					write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
-					L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
-				}else{
-					L3 <- "\n"
-				}
-				if(FlashWeave_meta_data == T){
-					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", FlashWeave_other_para)), ")\n")
-				}else{
-					L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", FlashWeave_other_para)), ")\n")
-				}
-				L5 <- 'save_network("network_FlashWeave.gml", netw_results)'
-				L <- paste0(L1, L2, L3, L4, L5)
-				openfile <- file("calculate_network.jl", "wb")
-				write(L, file = openfile)
-				close(openfile)
-				message("The temporary files are in ", tem_dir, " ...")
-				message("Check Julia ...")
-				check_out <- system(command = "julia -help", intern = TRUE)
-				if(length(check_out) == 0){
-					stop("Julia language not found in the system path! Install it from https://julialang.org/downloads/ and add bin directory to the path!")
-				}
-				message("Run the FlashWeave ...")
-				system("julia calculate_network.jl")
-				network <- read_graph("network_FlashWeave.gml", format = "gml")
-				network <- set_vertex_attr(network, "name", value = V(network)$label)
-			}
-			if(network_method == "beemStatic"){
-				if(!require("beemStatic")){
-					stop("beemStatic package is not installed! See https://github.com/CSB5/BEEM-static ")
-				}
-				use_abund <- self$data_abund %>% t %>% as.data.frame
-				taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
-				message("The feature table has ", nrow(use_abund), " taxa. The taxon with the lowest occurrence frequency was ", names(taxa_low)[1], 
-					", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
-					"please filter more taxa with low abundance using filter_thres parameter when creating the trans_network object ...")
-				beem.out <- func.EM(use_abund, ...)
-				self$res_beemStatic_raw <- beem.out
-				message('beemStatic result is stored in object$res_beemStatic_raw ...')
-				# modified based on the showInteraction function
-				b <- t(beem2param(beem.out)$b.est)
-				diag(b) <- 0
-				if(!is.null(beem.out$resample)){
-					b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
-				}
-				b[abs(b) < beemStatic_t_strength] <- 0
-				network <- graph.adjacency(b, mode='directed', weighted='weight')
-				V(network)$name <- rownames(use_abund)
-			}
-			if(ecount(network) == 0){
-				stop("No edge found in the network! Please check the input parameters!")
-			}
-			if(network_method != "COR"){
-				E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
-			}
-			E(network)$weight <- abs(E(network)$weight)
-			message("---------------- ", Sys.time()," : Finish ----------------")
-			
-			nodes_raw <- data.frame(cbind(V(network), V(network)$name))
-			# delete uncultured taxa when the taxa level is not OTU
-			if(taxa_level != "OTU"){
-				delete_nodes <- taxa_table %>% 
-					.[grepl("__$|uncultured", .[, taxa_level]), ] %>% 
-					rownames %>% 
-					.[. %in% rownames(nodes_raw)]
-				network %<>% delete_vertices(delete_nodes)
-				nodes_raw <- data.frame(cbind(V(network), V(network)$name))
-			}
-			if(delete_unlinked_nodes){
-				edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-				delete_nodes <- rownames(nodes_raw) %>% 
-					.[! . %in% as.character(c(edges[,1], edges[,2]))]
-				network %<>% delete_vertices(delete_nodes)	
-			}
-			V(network)$taxa <- V(network)$name
-			if(!is.null(add_taxa_name)){
-				if(!is.null(taxa_table)){
-					for(i in add_taxa_name){
-						if(i %in% colnames(taxa_table)){
-							network <- set_vertex_attr(network, i, value = V(network)$name %>% 
-								taxa_table[., i] %>% 
-								gsub("^.__", "", .))
-						}else{
-							message("Skip adding taxonomy: ", i, " to node as it is not in colnames of tax_table ...")
+					if(is.null(FlashWeave_tempdir)){
+						tem_dir <- tempdir()
+					}else{
+						# check the directory
+						tem_dir <- FlashWeave_tempdir
+						if(!dir.exists(tem_dir)){
+							stop("The input temporary directory: ", tem_dir, " does not exist!")
 						}
 					}
-				}else{
-					message('Skip adding taxonomy to node as tax_table is not found ...')
+					setwd(tem_dir)
+					write.table(use_abund, "taxa_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+					L1 <- "using FlashWeave\n"
+					L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
+					if(FlashWeave_meta_data == T){
+						if(is.null(self$data_env)){
+							stop("FlashWeave_meta_data is TRUE, but object$env_data not found! 
+								Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
+						}
+						meta_data <- self$data_env
+						write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+						L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
+					}else{
+						L3 <- "\n"
+					}
+					if(FlashWeave_meta_data == T){
+						L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", FlashWeave_other_para)), ")\n")
+					}else{
+						L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", FlashWeave_other_para)), ")\n")
+					}
+					L5 <- 'save_network("network_FlashWeave.gml", netw_results)'
+					L <- paste0(L1, L2, L3, L4, L5)
+					openfile <- file("calculate_network.jl", "wb")
+					write(L, file = openfile)
+					close(openfile)
+					message("The temporary files are in ", tem_dir, " ...")
+					message("Check Julia ...")
+					check_out <- system(command = "julia -help", intern = TRUE)
+					if(length(check_out) == 0){
+						stop("Julia language not found in the system path! Install it from https://julialang.org/downloads/ and add bin directory to the path!")
+					}
+					message("Run the FlashWeave ...")
+					system("julia calculate_network.jl")
+					network <- read_graph("network_FlashWeave.gml", format = "gml")
+					network <- set_vertex_attr(network, "name", value = V(network)$label)
 				}
-			}
-			if(taxa_level != "OTU"){
-				if(usename_rawtaxa_when_taxalevel_notOTU == T){
-					network <- set_vertex_attr(network, taxa_level, value = V(network)$name %>% 
-						taxa_table[., taxa_level] %>% 
-						gsub("^.__", "", .))
-				}else{
-					network <- set_vertex_attr(network, "name", value = V(network)$name %>% 
-						taxa_table[., taxa_level] %>% 
-						gsub("^.__", "", .))
+				if(network_method == "beemStatic"){
+					if(!require("beemStatic")){
+						stop("beemStatic package is not installed! See https://github.com/CSB5/BEEM-static ")
+					}
+					use_abund <- self$data_abund %>% t %>% as.data.frame
+					taxa_low <- apply(use_abund, 1, function(x) sum(x != 0)) %>% .[which.min(.)]
+					message("The feature table has ", nrow(use_abund), " taxa. The taxon with the lowest occurrence frequency was ", names(taxa_low)[1], 
+						", found in ", taxa_low[1], " samples of total ", ncol(use_abund), " samples. If an error occurs because of low frequency, ",
+						"please filter more taxa with low abundance using filter_thres parameter when creating the trans_network object ...")
+					beem.out <- func.EM(use_abund, ...)
+					self$res_beemStatic_raw <- beem.out
+					message('beemStatic result is stored in object$res_beemStatic_raw ...')
+					# modified based on the showInteraction function
+					b <- t(beem2param(beem.out)$b.est)
+					diag(b) <- 0
+					if(!is.null(beem.out$resample)){
+						b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
+					}
+					b[abs(b) < beemStatic_t_strength] <- 0
+					network <- graph.adjacency(b, mode='directed', weighted='weight')
+					V(network)$name <- rownames(use_abund)
 				}
+				if(ecount(network) == 0){
+					stop("No edge found in the network! Please check the input parameters!")
+				}
+				if(network_method != "COR"){
+					E(network)$label <- ifelse(E(network)$weight > 0, '+', '-')
+				}
+				E(network)$weight <- abs(E(network)$weight)
+				message("---------------- ", Sys.time()," : Finish ----------------")
+				
+				nodes_raw <- data.frame(cbind(V(network), V(network)$name))
+				# delete uncultured taxa when the taxa level is not OTU
+				if(taxa_level != "OTU"){
+					delete_nodes <- taxa_table %>% 
+						.[grepl("__$|uncultured", .[, taxa_level]), ] %>% 
+						rownames %>% 
+						.[. %in% rownames(nodes_raw)]
+					network %<>% delete_vertices(delete_nodes)
+					nodes_raw <- data.frame(cbind(V(network), V(network)$name))
+				}
+				if(delete_unlinked_nodes){
+					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
+					delete_nodes <- rownames(nodes_raw) %>% 
+						.[! . %in% as.character(c(edges[,1], edges[,2]))]
+					network %<>% delete_vertices(delete_nodes)	
+				}
+				V(network)$taxa <- V(network)$name
+				if(!is.null(add_taxa_name)){
+					if(!is.null(taxa_table)){
+						for(i in add_taxa_name){
+							if(i %in% colnames(taxa_table)){
+								network <- set_vertex_attr(network, i, value = V(network)$name %>% 
+									taxa_table[., i] %>% 
+									gsub("^.__", "", .))
+							}else{
+								message("Skip adding taxonomy: ", i, " to node as it is not in colnames of tax_table ...")
+							}
+						}
+					}else{
+						message('Skip adding taxonomy to node as tax_table is not found ...')
+					}
+				}
+				if(taxa_level != "OTU"){
+					if(usename_rawtaxa_when_taxalevel_notOTU == T){
+						network <- set_vertex_attr(network, taxa_level, value = V(network)$name %>% 
+							taxa_table[., taxa_level] %>% 
+							gsub("^.__", "", .))
+					}else{
+						network <- set_vertex_attr(network, "name", value = V(network)$name %>% 
+							taxa_table[., taxa_level] %>% 
+							gsub("^.__", "", .))
+					}
+				}
+				# add abundance to the node property
+				V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
+				
+				self$res_network <- network
+				message('The result network is stored in object$res_network ...')
+			}else{
+				message('No network_method selected! Please manually assign object$res_network!')
 			}
-			# add abundance to the node property
-			V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
-			
-			self$res_network <- network
-			message('The result network is stored in object$res_network ...')
 		},
 		#' @description
 		#' Calculate network modules and add module names to the network node properties.
