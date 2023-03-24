@@ -79,8 +79,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
-    "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "betareg",
-    "lme")[1],
+    "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2",
+    "betareg", "lme")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -132,6 +132,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
   \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
         see also the test parameter in \code{ALDEx2::aldex} function.}
+  \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
   \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
   \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 }}
@@ -187,7 +188,8 @@ Same with the \code{by_ID} parameter in trans_alpha class.}
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
-passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".}
+passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
+passed to \code{DESeq2::DESeq} function when method = "DESeq2".}
 }
 \if{html}{\out{</div>}}
 }

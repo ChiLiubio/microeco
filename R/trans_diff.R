@@ -42,6 +42,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
 		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
 		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
+		#'     \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
 		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
 		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'   }
@@ -72,7 +73,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
 		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
-		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw".
+		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
+		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2".
 		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
 		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
 		#'   Same with the \code{by_group} parameter in trans_alpha class. 
@@ -103,7 +105,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", 
-				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme")[1],
+				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "betareg", "lme")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -143,7 +145,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "betareg", "lme"))
+					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "betareg", "lme"))
 				
 				if(!is.null(group)){
 					if(is.factor(sampleinfo[, group])){
@@ -431,7 +433,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
 				}
 				#######################################
-				if(method %in% c("metastat", "metagenomeSeq", "ancombc2", "ALDEx2_t")){
+				if(method %in% c("metastat", "metagenomeSeq", "ancombc2", "ALDEx2_t", "DESeq2")){
 					if(taxa_level == "all"){
 						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
 					}
@@ -537,6 +539,35 @@ trans_diff <- R6Class(classname = "trans_diff",
 						res <- cbind.data.frame(compare = add_name, res)
 						output <- rbind.data.frame(output, res)
 					}
+				}
+				if(method == "DESeq2"){
+					if(!require("DESeq2")){
+						stop("DESeq2 package not installed !")
+					}
+					use_dataset <- clone(tmp_dataset)
+					use_dataset$tidy_dataset()
+					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					if(length(group) > 1){
+						stop("Multiple factors are not supported currently!")
+					}
+					if(!is.factor(use_dataset$sample_table[, group])){
+						use_dataset$sample_table[, group] %<>% as.factor
+					}
+					deseq_obj <- DESeqDataSetFromMatrix(countData = use_dataset$taxa_abund[[taxa_level]],
+												  colData = use_dataset$sample_table,
+												  design = reformulate(group))
+					res_deseq <- DESeq(deseq_obj, ...)
+					for(i in seq_len(ncol(all_name))){
+						res <- results(res_deseq, contrast = c(group, all_name[, i]))
+						res <- data.frame(res)
+						res$compare <- paste0(as.character(all_name[, i]), collapse = " - ")
+						res$Taxa <- rownames(res)
+						rownames(res) <- NULL
+						output <- rbind.data.frame(output, res)
+					}
+					output <- output[, c("compare", "Taxa", colnames(output)[1:(ncol(output) - 2)])]
+					colnames(output)[colnames(output) == "padj"] <- "P.adj"
+					colnames(output)[colnames(output) == "pvalue"] <- "P.unadj"
 				}
 				if(method == "ancombc2"){
 					if(!require("ANCOMBC")){
@@ -646,7 +677,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
 					colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 				}
-				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw")){
+				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2")){
 					output %<>% dropallfactors(unfac2num = TRUE)
 					colnames(output)[1:2] <- c("Comparison", "Taxa")
 					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
