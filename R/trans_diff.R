@@ -772,25 +772,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(grepl("formula", method)){
 				stop("The function can not be applied to multi-factor analysis!")
 			}
-			# sort according to different columns
-			if(method == "metastat"){
-				message('Reorder taxa according to qvalue in res_diff from low to high ...')
-				diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
-				# diff_data %<>% .[.$qvalue < 0.05, ]
-			}else{
-				# lefse and rf are ordered
-				if(! method %in% c("lefse", "rf", "anova")){
-					if("P.adj" %in% colnames(diff_data)){
-						message('Reorder taxa according to P.adj in res_diff from low to high ...')
-						diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
-						# diff_data %<>% .[.$P.adj < 0.05, ]
-					}
-				}
-			}
+			# first determine how to select compared groups
 			if(is.null(select_group)){
 				if(method == "ancombc2"){
 					if(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1){
-						if(any(sapply(gregexpr(" - ", t1$res_diff$Comparison), length) == 1)){
+						if(any(sapply(gregexpr(" - ", diff_data$Comparison), length) == 1)){
 							message("For ancombc2, both global and paired test are found. No select_group provided, use the global test result ...")
 							diff_data %<>% .[.$Comparison == diff_data$Comparison[1], ]
 						}
@@ -806,6 +792,21 @@ trans_diff <- R6Class(classname = "trans_diff",
 				diff_data %<>% .[.$Comparison %in% select_group, ]
 				select_group_split <- strsplit(select_group, split = " - ") %>% unlist
 				abund_data %<>% .[.$Group %in% select_group_split, ]
+			}
+			# sort according to different columns
+			if(method == "metastat"){
+				message('Reorder taxa according to qvalue in res_diff from low to high ...')
+				diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
+				# diff_data %<>% .[.$qvalue < 0.05, ]
+			}else{
+				# lefse and rf are ordered
+				if(! method %in% c("lefse", "rf", "anova")){
+					if("P.adj" %in% colnames(diff_data)){
+						message('Reorder taxa according to P.adj in res_diff from low to high ...')
+						diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
+						# diff_data %<>% .[.$P.adj < 0.05, ]
+					}
+				}
 			}
 			if(nrow(diff_data) == 0){
 				stop("No significant taxa can be used to plot the abudance!")
@@ -826,6 +827,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				diff_data %<>% .[.$Taxa %in% unique(as.character(diff_data$Taxa))[use_number], ]
 				diff_data$Taxa %<>% factor(., levels = rev(unique(as.character(.))))
 			}else{
+				message('Use provided select_taxa to filter and reorder taxa ...')
 				diff_data %<>% .[.$Taxa %in% select_taxa, ]
 				if(nrow(diff_data) == 0){
 					stop("No significant taxa can be used to plot the abudance!")
