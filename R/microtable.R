@@ -453,9 +453,10 @@ microtable <- R6Class(classname = "microtable",
 		#' @description
 		#' Calculate the taxonomic abundance at each taxonomic rank.
 		#'
-		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; used to select columns to merge and calculate abundances.
+		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; 
+		#'   applied to select columns to merge and calculate abundances according to ordered hierarchical levels.
 		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
-		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.
+		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance (i.e. raw values) will be summed.
 		#' @param merge_by default "|"; the symbol to merge and concatenate taxonomic names of different levels.
 		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
 		#'   Very useful when multiple mapping info exist.
@@ -476,7 +477,7 @@ microtable <- R6Class(classname = "microtable",
 			split_by = "&&", 
 			split_column = NULL
 			){
-			taxa_abund = list()
+			taxa_abund <- list()
 			if(is.null(self$tax_table)){
 				stop("No tax_table found! Please check your data!")
 			}
@@ -499,7 +500,7 @@ microtable <- R6Class(classname = "microtable",
 				stop("0 rows in tax_table! Please check your data!")
 			}
 			if(is.null(select_cols)){
-				select_cols <- 1:ncol(self$tax_table)
+				select_cols <- seq_len(ncol(self$tax_table))
 			}else{
 				if(!is.numeric(select_cols)){
 					if(any(! select_cols %in% colnames(self$tax_table))){
@@ -514,7 +515,7 @@ microtable <- R6Class(classname = "microtable",
 					stop("Spliting rows by one or more columns require split_column parameter! Please set split_column and try again!")
 				}
 			}
-			for(i in seq_along(select_cols)) {
+			for(i in seq_along(select_cols)){
 				taxrank <- colnames(self$tax_table)[select_cols[i]]
 				# assign the columns used for the splitting
 				if(!is.null(split_column)){

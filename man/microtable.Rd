@@ -613,10 +613,11 @@ Calculate the taxonomic abundance at each taxonomic rank.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{select_cols}}{default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; used to select columns to merge and calculate abundances.
+\item{\code{select_cols}}{default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; 
+applied to select columns to merge and calculate abundances according to ordered hierarchical levels.
 This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
 
-\item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance will be summed.}
+\item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance (i.e. raw values) will be summed.}
 
 \item{\code{merge_by}}{default "|"; the symbol to merge and concatenate taxonomic names of different levels.}
 
