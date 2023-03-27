@@ -23,7 +23,7 @@ t1 <- trans_nullmodel$new(dataset, filter_thres = 0.0005, add_data = env_data_16
 ## Method `trans_nullmodel$cal_mantel_corr`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_mantel_corr(use_env = "pH")
 }
 
@@ -31,7 +31,7 @@ t1$cal_mantel_corr(use_env = "pH")
 ## Method `trans_nullmodel$plot_mantel_corr`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$plot_mantel_corr()
 }
 
@@ -55,7 +55,7 @@ t1$cal_betamntd(abundance.weighted = TRUE)
 ## Method `trans_nullmodel$cal_ses_betampd`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 # only run 50 times for the example; default 1000
 t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 }
@@ -64,7 +64,7 @@ t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 ## Method `trans_nullmodel$cal_ses_betamntd`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 # only run 50 times for the example; default 1000
 t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
@@ -73,7 +73,7 @@ t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics =
 ## Method `trans_nullmodel$cal_rcbray`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 # only run 50 times for the example; default 1000
 t1$cal_rcbray(runs = 50)
 }
@@ -82,7 +82,7 @@ t1$cal_rcbray(runs = 50)
 ## Method `trans_nullmodel$cal_process`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_process(use_betamntd = TRUE)
 }
 
@@ -234,7 +234,7 @@ res_mantel_corr in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_mantel_corr(use_env = "pH")
 }
 }
@@ -266,7 +266,7 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$plot_mantel_corr()
 }
 }
@@ -387,7 +387,7 @@ res_ses_betampd in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 # only run 50 times for the example; default 1000
 t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 }
@@ -447,7 +447,7 @@ res_ses_betamntd in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 # only run 50 times for the example; default 1000
 t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 }
@@ -486,7 +486,7 @@ res_rcbray in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 # only run 50 times for the example; default 1000
 t1$cal_rcbray(runs = 50)
 }
@@ -517,7 +517,7 @@ res_rcbray in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_process(use_betamntd = TRUE)
 }
 }

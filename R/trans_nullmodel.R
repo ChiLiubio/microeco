@@ -94,7 +94,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param ... parameters pass to \code{\link{mantel.correlog}}
 		#' @return res_mantel_corr in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_mantel_corr(use_env = "pH")
 		#' }
 		cal_mantel_corr = function(
@@ -151,7 +151,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param point_size default 3; the point size.
 		#' @return ggplot.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$plot_mantel_corr()
 		#' }
 		plot_mantel_corr = function(point_shape = 22, point_size = 3){
@@ -269,7 +269,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of \code{picante::randomizeMatrix} function.
 		#' @return res_ses_betampd in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' # only run 50 times for the example; default 1000
 		#' t1$cal_ses_betampd(runs = 50, abundance.weighted = TRUE)
 		#' }
@@ -321,7 +321,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param iterations default 1000; iteration number for part null models to perform; see iterations parameter of \code{picante::randomizeMatrix} function.
 		#' @return res_ses_betamntd in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' # only run 50 times for the example; default 1000
 		#' t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics = FALSE)
 		#' }
@@ -415,7 +415,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param null.model default "independentswap"; see more available options in \code{randomizeMatrix} function of \code{picante} package.
 		#' @return res_rcbray in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' # only run 50 times for the example; default 1000
 		#' t1$cal_rcbray(runs = 50)
 		#' }
@@ -441,7 +441,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
 		#' @return res_rcbray in object.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$cal_process(use_betamntd = TRUE)
 		#' }
 		cal_process = function(use_betamntd = TRUE){
