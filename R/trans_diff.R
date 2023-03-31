@@ -56,7 +56,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only available when method != "metastat".
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
-		#'    NULL mean disuse the p value adjustment; So when \code{p_adjust_method = NULL}, P.adj is same with P.unadj.
+		#'    "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
@@ -221,11 +221,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 					names(pvalue_raw) <- rownames(abund_table)
 					pvalue_raw[is.nan(pvalue_raw)] <- 1
 					message(sum(pvalue_raw < alpha), " taxa found significant ...")
-					if(is.null(p_adjust_method)){
-						pvalue <- pvalue_raw
-					}else{
-						pvalue <- p.adjust(pvalue_raw, method = p_adjust_method)
-					}
+
+					pvalue <- p.adjust(pvalue_raw, method = p_adjust_method)
 					# select significant taxa
 					sel_taxa <- pvalue < alpha
 					message("After P value adjustment, ", sum(sel_taxa), " taxa found significant ...")
@@ -513,14 +510,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						# extract the result
 						tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
 						p <- objres1@pvalues
-						if(is.null(p_adjust_method)){
-							padj <- p
+						if(p_adjust_method == "ihw-ubiquity" | p_adjust_method == "ihw-abundance"){
+							padj <- MRihw(objres1, p, p_adjust_method, 0.1)
 						}else{
-							if (p_adjust_method == "ihw-ubiquity" | p_adjust_method == "ihw-abundance") {
-								padj <- MRihw(objres1, p, p_adjust_method, 0.1)
-							} else {
-								padj <- p.adjust(p, method = p_adjust_method)
-							}
+							padj <- p.adjust(p, method = p_adjust_method)
 						}
 						srt <- order(p, decreasing = FALSE)
 						valid <- 1:length(padj)
