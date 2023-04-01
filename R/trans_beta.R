@@ -9,8 +9,8 @@
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} class.
-		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in \code{microtable$beta_diversity}; 
-		#' 	 used for ordination, manova or group distance. The measure must be one of names of microtable$beta_diversity list. 
+		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix stored in \code{microtable$beta_diversity}; 
+		#' 	 used for ordination, manova or group distance. The measure must be one of names in microtable$beta_diversity list. 
 		#' 	 Please see \code{microtable$cal_betadiv} function for more details.
 		#' @param group default NULL; sample group used for manova, betadisper or group distance.
 		#' @return parameters stored in the object.
@@ -47,6 +47,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 						}
 					}
 					self$use_matrix <- dataset$beta_diversity[[measure]]
+				}
+			}
+			if(!is.null(group)){
+				if(! group %in% colnames(dataset$sample_table)){
+					stop("Provided group must be one of colnames in sample_table of dataset!")
 				}
 			}
 			self$sample_table <- dataset$sample_table
@@ -311,6 +316,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 						stop("Please provide the group parameter!")
 					}else{
 						group <- self$group
+					}
+				}else{
+					if(! group %in% colnames(metadata)){
+						stop("Provided group must be one of colnames in sample_table!")
 					}
 				}
 				if(manova_all){
@@ -648,11 +657,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 			R2 <- c()
 			p_value <- c()
 			matrix_total <- use_matrix[rownames(sample_info_use), rownames(sample_info_use)]
-			groupvec <- as.character(sample_info_use[ , group])
-			all_name <- combn(unique(sample_info_use[ , group]), 2)
+			groupvec <- as.character(sample_info_use[, group])
+			all_name <- combn(unique(sample_info_use[, group]), 2)
 			for(i in 1:ncol(all_name)) {
 				matrix_compare <- matrix_total[groupvec %in% as.character(all_name[,i]), groupvec %in% as.character(all_name[,i])]
-				sample_info_compare <- sample_info_use[groupvec %in% as.character(all_name[,i]), ]
+				sample_info_compare <- sample_info_use[groupvec %in% as.character(all_name[,i]), , drop = FALSE]
 				ad <- adonis2(reformulate(group, substitute(as.dist(matrix_compare))), data = sample_info_compare, ...)
 				comnames <- c(comnames, paste0(as.character(all_name[,i]), collapse = " vs "))
 				F %<>% c(., ad$F[1])

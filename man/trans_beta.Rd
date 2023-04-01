@@ -103,8 +103,8 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} class.}
 
-\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix you add in \code{microtable$beta_diversity}; 
-used for ordination, manova or group distance. The measure must be one of names of microtable$beta_diversity list. 
+\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix stored in \code{microtable$beta_diversity}; 
+used for ordination, manova or group distance. The measure must be one of names in microtable$beta_diversity list. 
 Please see \code{microtable$cal_betadiv} function for more details.}
 
 \item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance.}
