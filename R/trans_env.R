@@ -32,19 +32,23 @@ trans_env <- R6Class(classname = "trans_env",
 			){
 			# support all the dataset, env_cols and add_data = NULL from v0.7.0
 			if(is.null(dataset)){
-				message("The dataset not provided. Remember to provide additional data in the correponding function ...\n")
+				message("The dataset not provided. Remember to provide additional data in the correponding function ...")
 			}
 			if(is.null(add_data)){
 				if(!is.null(env_cols)){
 					env_data <- dataset$sample_table[, env_cols, drop = FALSE]
 				}else{
 					env_data <- NULL
-					message("Both env_cols and add_data are NULL. Remember to provide additional data in the correponding function ...\n")
+					message("Both env_cols and add_data are NULL. Remember to provide additional data in the correponding function ...")
 				}
 			}else{
 				if(is.null(dataset)){
 					env_data <- add_data
 				}else{
+					# first check rownames of add_data
+					if(!any(rownames(add_data) %in% rownames(dataset$sample_table))){
+						stop("No valid rowname in add_data! Rownames must be sample names in the input add_data!")
+					}
 					env_data <- add_data[rownames(add_data) %in% rownames(dataset$sample_table), , drop = FALSE]
 				}
 			}
@@ -53,13 +57,13 @@ trans_env <- R6Class(classname = "trans_env",
 				use_dataset <- clone(dataset)
 				if(!is.null(env_data)){
 					inter_sum <- sum(rownames(use_dataset$sample_table) %in% rownames(env_data))
-					if(inter_sum == 0){
-						stop("No sample names of sample_table found in env_data! Please check the names of env_data!")
-					}
 					if(inter_sum < nrow(use_dataset$sample_table)){
-						message(nrow(use_dataset$sample_table) - inter_sum, " sample(s) not found in env_data and removed!")
+						message(nrow(use_dataset$sample_table) - inter_sum, " sample(s) not found in environmental data ...")
+						filter_names <- use_dataset$sample_table %>% rownames %>% .[!. %in% rownames(env_data)]
+						message("Filter sample(s): ", paste(filter_names, collapse = " "), " ...")
 						use_dataset$sample_table %<>% base::subset(rownames(.) %in% rownames(env_data))
 						use_dataset$tidy_dataset(main_data = FALSE)
+						message("The pruned microtable is stored in object$dataset ...")
 					}
 					env_data %<>% .[rownames(use_dataset$sample_table), , drop = FALSE]
 				}
@@ -79,7 +83,7 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 			}
 			self$data_env <- env_data
-			message("Env data is stored in object$data_env ...\n")
+			message("Env data is stored in object$data_env ...")
 		},
 		#' @description
 		#' Test the difference of environmental variable across groups.
