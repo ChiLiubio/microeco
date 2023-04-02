@@ -229,7 +229,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(sum(sel_taxa) == 0){
 						stop("No significant taxa found! Stop running!")
 					}
-
 					abund_table_sub <- abund_table[sel_taxa, ]
 					pvalue_sub <- pvalue[sel_taxa]
 					class_taxa_median_sub <- lapply(res_class, function(x) x$med) %>% do.call(cbind, .) %>% .[, sel_taxa]
@@ -1234,7 +1233,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 				stop("This function is available only when taxa_level = 'all' !")
 			}
 			if(!is.null(use_feature_num)){
-				marker_table %<>% .[1:use_feature_num, ]
+				if(use_feature_num > nrow(marker_table)){
+					message("Input use_feature_num ", use_feature_num, " larger than available features number ", nrow(marker_table), " ! ", 
+						"Use ", nrow(marker_table), " instead of it ...")
+				}else{
+					message("Select ", use_feature_num, " significant features ...")
+					marker_table %<>% .[1:use_feature_num, ]
+				}
 			}
 			if(only_select_show == T){
 				marker_table %<>% .[.$Taxa %in% select_show_labels, ]
@@ -1251,8 +1256,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			
 			# filter redundant groups
-			color_groups %<>% .[. %in% unique(marker_table$Group)]
-			marker_table %<>% .[.$Group %in% color_groups, ]
+			if(! all(color_groups %in% unique(marker_table$Group))){
+				tmp_message <- color_groups[! color_groups %in% unique(marker_table$Group)]
+				message("Part of groups in group_order, ", paste(tmp_message, collapse = " "), ", not found in the feature table ...")
+				color_groups %<>% .[. %in% unique(marker_table$Group)]
+			}
+			if(! all(unique(marker_table$Group) %in% color_groups)){
+				tmp_message <- unique(marker_table$Group)[! unique(marker_table$Group) %in% color_groups]
+				message("Part of groups in the feature table, ", paste(tmp_message, collapse = " "), ", not found in the group_order ...")
+				marker_table %<>% .[.$Group %in% color_groups, ]
+			}
 			# get the color palette
 			if(length(color) < length(unique(marker_table$Group))){
 				stop("Please provide enough color palette! There are ", length(unique(marker_table$Group)), 
@@ -1261,71 +1274,20 @@ trans_diff <- R6Class(classname = "trans_diff",
 				color <- color[1:length(unique(marker_table$Group))]
 			}
 
-			# filter the taxa with unidentified classification or with space, in case of the unexpected error in the following operations
-			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]} %>%
-				{.[!grepl("\\s", rownames(.)), ]} %>%
-				# also filter uncleared classification to make it in line with the lefse above
-				{.[!grepl("Incertae_sedis|unculture", rownames(.), ignore.case = TRUE), ]}
-
-			if(!is.null(use_taxa_num)){
-				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
-			}
-			if(!is.null(filter_taxa)){
-				abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
-			}
-			abund_table %<>% .[sort(rownames(.)), ]
-
-			tree_table <- data.frame(taxa = row.names(abund_table), abd = rowMeans(abund_table), stringsAsFactors = FALSE) %>%
-				dplyr::mutate(taxa =  paste("r__Root", .data$taxa, sep = sep), abd = .data$abd/max(.data$abd)*100)
-			taxa_split <- strsplit(tree_table$taxa, split = sep, fixed = TRUE)
-			nodes <- purrr::map_chr(taxa_split, utils::tail, n = 1)
-
-			# check whether some nodes duplicated from bad classification
-			if(any(duplicated(nodes))){
-				del <- nodes %>% .[duplicated(.)] %>% unique
-				for(i in del){
-					tree_table %<>% .[!grepl(paste0("\\|", i, "($|\\|)"), .$taxa), ]
-				}
-				taxa_split <- strsplit(tree_table$taxa, split = sep, fixed = TRUE)
-				nodes <- purrr::map_chr(taxa_split, utils::tail, n = 1)
-			}
-
-			# add root node
-			nodes %<>% c("r__Root", .)
-			# levels used for extend of clade label
-			label_levels <- purrr::map_chr(nodes, ~ gsub("__.*$", "", .x)) %>%
-				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% .[!duplicated(.)]))
-
-			# root must be a parent node
-			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1]) %>% c("root", .)
-
-			## add index for nodes
-			is_tip <- !nodes %in% nodes_parent
-			index <- vector("integer", length(is_tip))
-			index[is_tip] <- 1:sum(is_tip)
-			index[!is_tip] <- (sum(is_tip)+1):length(is_tip)
-
-			edges <- cbind(parent = index[match(nodes_parent, nodes)], child = index)
-			edges <- edges[!is.na(edges[, 1]), ]
-			# not label the tips
-			node_label <- nodes[!is_tip]
-			phylo <- structure(list(
-				edge = edges, 
-				node.label = node_label, 
-				tip.label = nodes[is_tip], 
-				edge.length = rep(1, nrow(edges)), 
-				Nnode = length(node_label)
-				), class = "phylo")
-			mapping <- data.frame(
-				node = index, 
-				abd = c(100, tree_table$abd),
-				node_label = nodes, 
-				stringsAsFactors = FALSE)
-			mapping$node_class <- label_levels
-			tree <- tidytree::treedata(phylo = phylo, data = tibble::as_tibble(mapping))
-			tree <- ggtree::ggtree(tree, size = 0.2, layout = 'circular')
+			# first plot background circular tree
+			tree <- private$plot_backgroud_tree(abund_table = abund_table, use_taxa_num = use_taxa_num, filter_taxa = filter_taxa, sep = sep)
 			
-			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color, color_groups = color_groups)
+			# generate annotation
+			annotation <- private$generate_cladogram_annotation(marker_table, tree = tree, color = color, color_groups = color_groups, sep = sep)
+			# check again filtered groups
+			if(!is.null(use_taxa_num)){
+				if(! all(color_groups %in% unique(annotation$enrich_group))){
+					tmp_message <- color_groups[! color_groups %in% unique(annotation$enrich_group)]
+					message("Biomarkers in group(s), ", paste(tmp_message, collapse = " "), ", not found in the background tree!", 
+						" Please try to enlarge parameter use_taxa_num from ", use_taxa_num, " to a larger one ...")
+					color_groups %<>% .[. %in% unique(annotation$enrich_group)]
+				}
+			}
 			# backgroup hilight
 			annotation_info <- dplyr::left_join(annotation, tree$data, by = c("node" = "label")) %>%
 				dplyr::mutate(label = .data$node, id = .data$node.y, level = as.numeric(.data$node_class))
@@ -1338,7 +1300,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			)
 			hilights_g <- purrr::pmap(hilight_para, ggtree::geom_hilight)
 			tree <- purrr::reduce(hilights_g, `+`, .init = tree)
-
+			
 			# hilight legend
 			hilights_df <- dplyr::distinct(annotation_info, .data$enrich_group, .data$color)
 			hilights_df$x <- 0
@@ -1350,7 +1312,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 			# add legend
 			tree <- tree + 
-				geom_rect(aes_(xmin = ~x, xmax = ~x, ymax = ~y, ymin = ~y, fill = ~enrich_group), data = hilights_df, inherit.aes = FALSE) +
+				geom_rect(aes(xmin = x, xmax = x, ymax = y, ymin = y, fill = enrich_group), data = hilights_df, inherit.aes = FALSE) +
 				guides(fill = guide_legend(title = NULL, order = 1, override.aes = list(fill = hilights_df$color)))
 
 			# set nodes color and size
@@ -1466,6 +1428,71 @@ trans_diff <- R6Class(classname = "trans_diff",
 				colnames(med) <- taxaname
 				list(p_value = res1$p.value, med = med)
 			}
+		},
+		# plot the background tree according to raw abundance table
+		plot_backgroud_tree = function(abund_table, use_taxa_num = NULL, filter_taxa = NULL, sep = "|"){
+			# filter the taxa with unidentified classification or with space, in case of the unexpected error in the following operations
+			abund_table %<>% {.[!grepl("\\|.__\\|", rownames(.)), ]} %>%
+				{.[!grepl("\\s", rownames(.)), ]} %>%
+				# also filter uncleared classification to make it in line with the lefse above
+				{.[!grepl("Incertae_sedis|unculture", rownames(.), ignore.case = TRUE), ]}
+			
+			if(!is.null(use_taxa_num)){
+				message("Select ", use_taxa_num, " most abundant taxa as the background cladogram ...")
+				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
+			}
+			if(!is.null(filter_taxa)){
+				abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
+			}
+			abund_table %<>% .[sort(rownames(.)), ]
+			tree_table <- data.frame(taxa = row.names(abund_table), abd = rowMeans(abund_table), stringsAsFactors = FALSE) %>%
+				dplyr::mutate(taxa = paste("r__Root", .data$taxa, sep = sep), abd = .data$abd/max(.data$abd)*100)
+			taxa_split <- strsplit(tree_table$taxa, split = sep, fixed = TRUE)
+			nodes <- purrr::map_chr(taxa_split, utils::tail, n = 1)
+			# check whether some nodes duplicated from bad classification
+			if(any(duplicated(nodes))){
+				del <- nodes %>% .[duplicated(.)] %>% unique
+				for(i in del){
+					tree_table %<>% .[!grepl(paste0("\\|", i, "($|\\|)"), .$taxa), ]
+				}
+				taxa_split <- strsplit(tree_table$taxa, split = sep, fixed = TRUE)
+				nodes <- purrr::map_chr(taxa_split, utils::tail, n = 1)
+			}
+			# add root node
+			nodes %<>% c("r__Root", .)
+			# levels used for extending clade label
+			label_levels <- purrr::map_chr(nodes, ~ gsub("__.*$", "", .x)) %>%
+				factor(levels = rev(unlist(lapply(taxa_split, function(x) gsub("(.)__.*", "\\1", x))) %>% .[!duplicated(.)]))
+
+			# root must be a parent node
+			nodes_parent <- purrr::map_chr(taxa_split, ~ .x[length(.x) - 1]) %>% c("root", .)
+
+			# add index for nodes
+			is_tip <- !nodes %in% nodes_parent
+			index <- vector("integer", length(is_tip))
+			index[is_tip] <- 1:sum(is_tip)
+			index[!is_tip] <- (sum(is_tip) + 1):length(is_tip)
+
+			edges <- cbind(parent = index[match(nodes_parent, nodes)], child = index)
+			edges <- edges[!is.na(edges[, 1]), ]
+			# not label the tips
+			node_label <- nodes[!is_tip]
+			phylo <- structure(list(
+				edge = edges, 
+				node.label = node_label, 
+				tip.label = nodes[is_tip], 
+				edge.length = rep(1, nrow(edges)), 
+				Nnode = length(node_label)
+				), class = "phylo")
+			mapping <- data.frame(
+				node = index, 
+				abd = c(100, tree_table$abd),
+				node_label = nodes, 
+				stringsAsFactors = FALSE)
+			mapping$node_class <- label_levels
+			tree <- tidytree::treedata(phylo = phylo, data = tibble::as_tibble(mapping))
+			tree <- ggtree::ggtree(tree, size = 0.2, layout = 'circular')
+			tree
 		},
 		# generate the cladogram annotation table
 		generate_cladogram_annotation = function(marker_table, tree, color, color_groups, sep = "|") {
