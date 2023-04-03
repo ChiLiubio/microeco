@@ -4,8 +4,8 @@
 \alias{trans_abund}
 \title{Create \code{trans_abund} object for plotting taxonomic abundance.}
 \description{
-This class is a wrapper for the taxonomic abundance transformations and plotting. 
-The transformed data style is the long-format for \code{ggplot2} plotting.
+This class is a wrapper for the taxonomic abundance transformations and visualization.
+The converted data style is the long-format for \code{ggplot2} plot.
 The plotting methods include bar plot, boxplot, heatmap, pie chart and line chart.
 }
 \examples{
@@ -103,19 +103,19 @@ t1$plot_pie(facet_nrow = 1)
 
 \item{\code{taxrank}}{default "Phylum"; taxonomic rank.}
 
-\item{\code{show}}{default 0; the relative abundance threshold used for filtering.}
+\item{\code{show}}{default 0; the relative abundance threshold for filtering the taxa with low abundance.}
 
-\item{\code{ntaxa}}{default 10; how many taxa will be used, ordered by abundance from high to low; 
-this parameter does not conflict with the parameter show; both can be used.}
+\item{\code{ntaxa}}{default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
+This parameter does not conflict with the parameter \code{show}. Both can be used.}
 
-\item{\code{groupmean}}{default NULL; calculating mean abundance for each group; select a group column name in \code{microtable$sample_table}.}
+\item{\code{groupmean}}{default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.}
 
 \item{\code{delete_full_prefix}}{default TRUE; whether delete both the prefix of taxonomy and the character in front of them.}
 
 \item{\code{delete_part_prefix}}{default FALSE; whether only delete the prefix of taxonomy.}
 
 \item{\code{prefix}}{default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
- default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
+default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
 Please alter this parameter when the prefix is not standard.}
 
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
@@ -170,28 +170,28 @@ Bar plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plot.}
 
-\item{\code{bar_type}}{default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.}
+\item{\code{bar_type}}{default "full"; "full" or "notfull"; if \code{"full"}, total abundance are summed to 1 or 100 percentage.}
 
 \item{\code{others_color}}{default "grey90"; the color for "others" taxa.}
 
-\item{\code{facet}}{default NULL; a character vector for the facet; a group column name of \code{sample_table}, such as, \code{"Group"};
+\item{\code{facet}}{default NULL; a character vector for the facet; group column name of \code{sample_table}, such as, \code{"Group"};
 If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
 The latter should have a finer scale than the former one;
 Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
 assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.}
 
-\item{\code{order_x}}{default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").}
+\item{\code{order_x}}{default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as \code{c("S1", "S3", "S2")}.}
 
 \item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.}
 
-\item{\code{barwidth}}{default NULL; bar width, see width in \code{\link{geom_bar}}.}
+\item{\code{barwidth}}{default NULL; bar width, see \code{width} in \code{\link{geom_bar}}.}
 
-\item{\code{use_alluvium}}{default FALSE; whether add alluvium plot}
+\item{\code{use_alluvium}}{default FALSE; whether add alluvium plot. If \code{TRUE}, please first install \code{ggalluvial} package.}
 
-\item{\code{clustering}}{default FALSE; whether order samples by the clustering}
+\item{\code{clustering}}{default FALSE; whether order samples by the clustering.}
 
 \item{\code{facet_color}}{default "grey95"; facet background color.}
 

@@ -2,8 +2,8 @@
 #' Create \code{trans_abund} object for plotting taxonomic abundance.
 #'
 #' @description
-#' This class is a wrapper for the taxonomic abundance transformations and plotting. 
-#' The transformed data style is the long-format for \code{ggplot2} plotting.
+#' This class is a wrapper for the taxonomic abundance transformations and visualization.
+#' The converted data style is the long-format for \code{ggplot2} plot.
 #' The plotting methods include bar plot, boxplot, heatmap, pie chart and line chart.
 #'
 #' @export
@@ -11,15 +11,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 	public = list(
 		#' @param dataset default NULL; the object of \code{\link{microtable}} class.
 		#' @param taxrank default "Phylum"; taxonomic rank.
-		#' @param show default 0; the relative abundance threshold used for filtering.
-		#' @param ntaxa default 10; how many taxa will be used, ordered by abundance from high to low; 
-		#'   this parameter does not conflict with the parameter show; both can be used.
-		#' @param groupmean default NULL; calculating mean abundance for each group; select a group column name in \code{microtable$sample_table}.
+		#' @param show default 0; the relative abundance threshold for filtering the taxa with low abundance.
+		#' @param ntaxa default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
+		#'   This parameter does not conflict with the parameter \code{show}. Both can be used.
+		#' @param groupmean default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.
 		#' @param delete_full_prefix default TRUE; whether delete both the prefix of taxonomy and the character in front of them.
 		#' @param delete_part_prefix default FALSE; whether only delete the prefix of taxonomy.
 		#' @param prefix default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
 		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
-		#'  Please alter this parameter when the prefix is not standard.
+		#'   Please alter this parameter when the prefix is not standard.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; input taxa names for selecting some taxa.
 		#' @return \code{data_abund} stored in the object.
@@ -143,20 +143,20 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Bar plot.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plotting.
-		#' @param bar_type default "full"; "full" or "notfull"; if full, the total abundance sum to 1 or 100 percentage.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plot.
+		#' @param bar_type default "full"; "full" or "notfull"; if \code{"full"}, total abundance are summed to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
-		#' @param facet default NULL; a character vector for the facet; a group column name of \code{sample_table}, such as, \code{"Group"};
+		#' @param facet default NULL; a character vector for the facet; group column name of \code{sample_table}, such as, \code{"Group"};
 		#'    If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
 		#'    The latter should have a finer scale than the former one;
 		#'    Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
 		#'    assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 		#'    When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.
-		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
+		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as \code{c("S1", "S3", "S2")}.
 		#' @param x_axis_name NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.
-		#' @param barwidth default NULL; bar width, see width in \code{\link{geom_bar}}.
-		#' @param use_alluvium default FALSE; whether add alluvium plot
-		#' @param clustering default FALSE; whether order samples by the clustering
+		#' @param barwidth default NULL; bar width, see \code{width} in \code{\link{geom_bar}}.
+		#' @param use_alluvium default FALSE; whether add alluvium plot. If \code{TRUE}, please first install \code{ggalluvial} package.
+		#' @param clustering default FALSE; whether order samples by the clustering.
 		#' @param facet_color default "grey95"; facet background color.
 		#' @param strip_text default 11; facet text size.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
