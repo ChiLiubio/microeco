@@ -932,7 +932,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Fit degrees to a power law distribution. First, perform a bootstrapping hypothesis test to determine whether degrees follow a power law distribution.
 		#' If the distribution follows power law, then fit degrees to power law distribution and return the parameters.
 		#'
-		#' @param ... parameters pass to fit_power_law function in igraph package.
+		#' @param ... parameters pass to bootstrap_p function in poweRlaw package.
 		#' @return \code{res_powerlaw_p} and \code{res_powerlaw_fit}; see \code{poweRlaw::bootstrap_p} function for the bootstrapping p value details;
 		#'   see \code{igraph::fit_power_law} function for the power law fit return details.
 		#' @examples
@@ -951,7 +951,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Estimated lower bound of degree: ', est_xmin$xmin)
 			resdispl$setXmin(est_xmin)
 			message('Perform bootstrapping ...')
-			bootstrap_res <- poweRlaw::bootstrap_p(resdispl)
+			bootstrap_res <- poweRlaw::bootstrap_p(resdispl, ...)
 			self$res_powerlaw_p <- bootstrap_res
 			message('Bootstrap result is stored in object$res_powerlaw_p ...')
 			message('Bootstrap p value: ', bootstrap_res$p)
@@ -959,7 +959,7 @@ trans_network <- R6Class(classname = "trans_network",
 				message("The p value < 0.05; Degrees do not follow power law distribution ...")
 			}else{
 				message("Degrees follow power law distribution ...")
-				res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = est_xmin$xmin, ...)
+				res_powerlaw_fit <- fit_power_law(degree_dis + 1, xmin = est_xmin$xmin)
 				message("The estimated alpha: ", res_powerlaw_fit$alpha)
 				self$res_powerlaw_fit <- res_powerlaw_fit
 				message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')

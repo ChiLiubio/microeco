@@ -828,7 +828,7 @@ If the distribution follows power law, then fit degrees to power law distributio
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to fit_power_law function in igraph package.}
+\item{\code{...}}{parameters pass to bootstrap_p function in poweRlaw package.}
 }
 \if{html}{\out{</div>}}
 }
