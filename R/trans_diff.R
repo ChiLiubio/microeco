@@ -227,7 +227,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					sel_taxa <- pvalue < alpha
 					message("After P value adjustment, ", sum(sel_taxa), " taxa found significant ...")
 					if(sum(sel_taxa) == 0){
-						stop("No significant taxa found! Stop running!")
+						stop('No significant feature found! It is feasible to disable p value adjustment by adding p_adjust_method = "none"!')
+					}
+					if(sum(sel_taxa) == 1){
+						stop('Only one significant feature found! It is feasible to disable p value adjustment by adding p_adjust_method = "none"!')
 					}
 					abund_table_sub <- abund_table[sel_taxa, ]
 					pvalue_sub <- pvalue[sel_taxa]
