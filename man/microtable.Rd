@@ -7,8 +7,8 @@
 microtable.
 }
 \description{
-This class is a wrapper for a series of operations on the original files and the basic manipulations,
-including the microtable object creation, data reduction, data rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxa abundance calculation, 
+This class is a wrapper for a series of operations on the input files and basic manipulations,
+including microtable object creation, data trimming, data filtering, rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxonomic abundance calculation, 
 alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
 \cr
@@ -203,7 +203,7 @@ class(dataset$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame; necessary; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
+\item{\code{otu_table}}{data.frame; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
 
 \item{\code{sample_table}}{data.frame; default NULL; The sample information table; rownames are samples; columns are sample metadata; 
 If not provided, the function can generate a table automatically according to the sample names in otu_table.}
@@ -212,7 +212,7 @@ If not provided, the function can generate a table automatically according to th
 
 \item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree; use \code{read.tree} function in ape package for input.}
 
-\item{\code{rep_fasta}}{\code{list} or \code{DNAStringSet}; default NULL; The representative sequences; 
+\item{\code{rep_fasta}}{\code{DNAStringSet} or \code{list} format; default NULL; The representative sequences; 
 use \code{read.fasta} function in \code{seqinr} package or \code{readDNAStringSet} function in \code{Biostrings} package for input.}
 
 \item{\code{auto_tidy}}{default FALSE; Whether trim the files in the \code{microtable} object automatically;
@@ -254,7 +254,7 @@ dataset$tidy_dataset()
 \if{html}{\out{<a id="method-microtable-filter_pollution"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-filter_pollution}{}}}
 \subsection{Method \code{filter_pollution()}}{
-Filter the taxa considered as pollution from \code{microtable$tax_table}.
+Filter the features considered pollution in \code{microtable$tax_table}.
 This operation will remove any line of the \code{microtable$tax_table} containing any the word in taxa parameter regardless of word case.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$filter_pollution(taxa = c("mitochondria", "chloroplast"))}\if{html}{\out{</div>}}
@@ -263,7 +263,7 @@ This operation will remove any line of the \code{microtable$tax_table} containin
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{taxa}}{default: c("mitochondria", "chloroplast"); filter mitochondria and chloroplast, or others as needed.}
+\item{\code{taxa}}{default \code{c("mitochondria", "chloroplast")}; filter mitochondria and chloroplast, or others as needed.}
 }
 \if{html}{\out{</div>}}
 }
@@ -321,7 +321,7 @@ d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 \if{html}{\out{<a id="method-microtable-rarefy_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
-Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} of \code{vegan} package for the alternative method.
+Rarefy communities to make all samples have same feature number. See also \code{\link{rrarefy}} of \code{vegan} package for the alternative method.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(sample.size = NULL, rngseed = 123, replace = TRUE)}\if{html}{\out{</div>}}
 }
@@ -329,7 +329,7 @@ Rarefy communities to make all samples have same species number. See also \code{
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{sample.size}}{default:NULL; species number, If not provided, use minimum number of all samples.}
+\item{\code{sample.size}}{default:NULL; feature number, If not provided, use minimum number of all samples.}
 
 \item{\code{rngseed}}{random seed; default: 123.}
 
@@ -508,7 +508,7 @@ dataset$taxa_names()
 \if{html}{\out{<a id="method-microtable-rename_taxa"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-rename_taxa}{}}}
 \subsection{Method \code{rename_taxa()}}{
-Rename the taxa, including the rownames of \code{otu_table}, rownames of \code{tax_table}, tip labels of \code{phylo_tree} and \code{rep_fasta}.
+Rename the features, including the rownames of \code{otu_table}, rownames of \code{tax_table}, tip labels of \code{phylo_tree} and \code{rep_fasta}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rename_taxa(newname_prefix = "ASV_")}\if{html}{\out{</div>}}
 }
@@ -516,12 +516,12 @@ Rename the taxa, including the rownames of \code{otu_table}, rownames of \code{t
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{newname_prefix}}{default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rowname order of \code{otu_table}.}
+\item{\code{newname_prefix}}{default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rownames order of \code{otu_table}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-renamed dataset.
+None; renamed dataset.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -576,7 +576,7 @@ Merge taxa according to specific taxonomic rank to generate a new \code{microtab
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{taxa}}{the specific rank in \code{tax_table}.}
+\item{\code{taxa}}{default "Genus"; the specific rank in \code{tax_table}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -598,7 +598,7 @@ dataset$merge_taxa(taxa = "Genus")
 \if{html}{\out{<a id="method-microtable-cal_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-cal_abund}{}}}
 \subsection{Method \code{cal_abund()}}{
-Calculate the taxonomic abundance at each taxonomic rank.
+Calculate the taxonomic abundance at each taxonomic level or selected levels.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_abund(
   select_cols = NULL,
@@ -622,18 +622,19 @@ This is very useful if there are commented columns or some columns with multiple
 \item{\code{merge_by}}{default "|"; the symbol to merge and concatenate taxonomic names of different levels.}
 
 \item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
-Very useful when multiple mapping info exist.}
+Very useful when multiple mapping information exist.}
 
-\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; see sep in separate_rows function.}
+\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; 
+see \code{sep} parameter in \code{separate_rows} function of tidyr package.}
 
 \item{\code{split_column}}{default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
-fixed column or columns used for the splitting in tax_table in each abundance calculation; 
+fixed column or columns used for the splitting in tax_table for each abundance calculation; 
 list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-taxa_abund in object.
+taxa_abund list in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -650,7 +651,7 @@ dataset$cal_abund()
 \if{html}{\out{<a id="method-microtable-save_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-save_abund}{}}}
 \subsection{Method \code{save_abund()}}{
-Save taxonomic abundance to local file.
+Save taxonomic abundance as local file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$save_abund(
   dirpath = "taxa_abund",
@@ -665,7 +666,7 @@ Save taxonomic abundance to local file.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dirpath}}{default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if it does not exist.}
+\item{\code{dirpath}}{default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if not found.}
 
 \item{\code{merge_all}}{default FALSE; Whether merge all tables into one. The merged file format is generally called 'mpa' style.}
 
@@ -697,7 +698,7 @@ dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 \if{html}{\out{<a id="method-microtable-cal_alphadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-cal_alphadiv}{}}}
 \subsection{Method \code{cal_alphadiv()}}{
-Calculate alpha diversity in \code{microtable} object.
+Calculate alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_alphadiv(measures = NULL, PD = FALSE)}\if{html}{\out{</div>}}
 }
@@ -709,7 +710,7 @@ Calculate alpha diversity in \code{microtable} object.
 If null, use all those measures. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on \code{vegan::diversity} function;
 'Chao1' and 'ACE' depend on the function \code{vegan::estimateR}; 'PD' depends on the function \code{picante::pd}.}
 
-\item{\code{PD}}{TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.}
+\item{\code{PD}}{default FALSE; whether Faith's phylogenetic diversity should be calculated.}
 }
 \if{html}{\out{</div>}}
 }
@@ -749,7 +750,7 @@ Save alpha diversity table to the computer.
 \if{html}{\out{<a id="method-microtable-cal_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
-Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac.
+Calculate beta diversity, including Bray-Curtis, Jaccard, and UniFrac.
 See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(method = NULL, unifrac = FALSE, binary = FALSE, ...)}\if{html}{\out{</div>}}
@@ -759,9 +760,9 @@ See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{method}}{default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
-see \code{\link{vegdist}} function and method parameter in \code{vegan} package.}
+see \code{\link{vegdist}} function and \code{method} parameter in \code{vegan} package.}
 
-\item{\code{unifrac}}{default FALSE; TRUE or FALSE, whether unifrac index should be calculated.}
+\item{\code{unifrac}}{default FALSE; whether UniFrac index should be calculated.}
 
 \item{\code{binary}}{default FALSE; TRUE is used for jaccard and unweighted unifrac; optional for other indexes.}
 
@@ -770,7 +771,7 @@ see \code{\link{vegdist}} function and method parameter in \code{vegan} package.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-beta_diversity stored in object.
+beta_diversity list stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

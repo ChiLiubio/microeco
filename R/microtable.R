@@ -2,8 +2,8 @@
 #' Create \code{microtable} object to store and manage all the basic files.
 #'
 #' @description
-#' This class is a wrapper for a series of operations on the original files and the basic manipulations,
-#' including the microtable object creation, data reduction, data rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxa abundance calculation, 
+#' This class is a wrapper for a series of operations on the input files and basic manipulations,
+#' including microtable object creation, data trimming, data filtering, rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxonomic abundance calculation, 
 #' alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 #' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
 #' \cr
@@ -13,12 +13,12 @@
 #' @export
 microtable <- R6Class(classname = "microtable",
 	public = list(
-		#' @param otu_table data.frame; necessary; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.
+		#' @param otu_table data.frame; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.
 		#' @param sample_table data.frame; default NULL; The sample information table; rownames are samples; columns are sample metadata; 
-		#' 	If not provided, the function can generate a table automatically according to the sample names in otu_table.
+		#' 	 If not provided, the function can generate a table automatically according to the sample names in otu_table.
 		#' @param tax_table data.frame; default NULL; The taxonomic information table; rownames are features; column names are taxonomic classes.
 		#' @param phylo_tree phylo; default NULL; The phylogenetic tree; use \code{read.tree} function in ape package for input.
-		#' @param rep_fasta \code{list} or \code{DNAStringSet}; default NULL; The representative sequences; 
+		#' @param rep_fasta \code{DNAStringSet} or \code{list} format; default NULL; The representative sequences; 
 		#'   use \code{read.fasta} function in \code{seqinr} package or \code{readDNAStringSet} function in \code{Biostrings} package for input.
 		#' @param auto_tidy default FALSE; Whether trim the files in the \code{microtable} object automatically;
 		#'   If TRUE, running the functions in \code{microtable} class can invoke the \code{tidy_dataset} function automatically.
@@ -79,10 +79,10 @@ microtable <- R6Class(classname = "microtable",
 			if(self$auto_tidy) self$tidy_dataset()
 		},
 		#' @description
-		#' Filter the taxa considered as pollution from \code{microtable$tax_table}.
+		#' Filter the features considered pollution in \code{microtable$tax_table}.
 		#' This operation will remove any line of the \code{microtable$tax_table} containing any the word in taxa parameter regardless of word case.
 		#'
-		#' @param taxa default: c("mitochondria", "chloroplast"); filter mitochondria and chloroplast, or others as needed.
+		#' @param taxa default \code{c("mitochondria", "chloroplast")}; filter mitochondria and chloroplast, or others as needed.
 		#' @return None
 		#' @examples 
 		#' dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
@@ -171,9 +171,9 @@ microtable <- R6Class(classname = "microtable",
 			self$tidy_dataset()
 		},
 		#' @description
-		#' Rarefy communities to make all samples have same species number. See also \code{\link{rrarefy}} of \code{vegan} package for the alternative method.
+		#' Rarefy communities to make all samples have same feature number. See also \code{\link{rrarefy}} of \code{vegan} package for the alternative method.
 		#'
-		#' @param sample.size default:NULL; species number, If not provided, use minimum number of all samples.
+		#' @param sample.size default:NULL; feature number, If not provided, use minimum number of all samples.
 		#' @param rngseed random seed; default: 123.
 		#' @param replace default: TRUE; See \code{\link{sample}} for the random sampling.
 		#' @return None; rarefied dataset.
@@ -343,10 +343,10 @@ microtable <- R6Class(classname = "microtable",
 			rownames(self$tax_table)
 		},
 		#' @description
-		#' Rename the taxa, including the rownames of \code{otu_table}, rownames of \code{tax_table}, tip labels of \code{phylo_tree} and \code{rep_fasta}.
+		#' Rename the features, including the rownames of \code{otu_table}, rownames of \code{tax_table}, tip labels of \code{phylo_tree} and \code{rep_fasta}.
 		#'
-		#' @param newname_prefix default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rowname order of \code{otu_table}.
-		#' @return renamed dataset.
+		#' @param newname_prefix default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rownames order of \code{otu_table}.
+		#' @return None; renamed dataset.
 		#' @examples
 		#' \donttest{
 		#' dataset$rename_taxa()
@@ -409,7 +409,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @description
 		#' Merge taxa according to specific taxonomic rank to generate a new \code{microtable}.
 		#'
-		#' @param taxa the specific rank in \code{tax_table}.
+		#' @param taxa default "Genus"; the specific rank in \code{tax_table}.
 		#' @return a new merged \code{microtable} object.
 		#' @examples
 		#' \donttest{
@@ -451,7 +451,7 @@ microtable <- R6Class(classname = "microtable",
 			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax, auto_tidy = self$auto_tidy)
 		},
 		#' @description
-		#' Calculate the taxonomic abundance at each taxonomic rank.
+		#' Calculate the taxonomic abundance at each taxonomic level or selected levels.
 		#'
 		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; 
 		#'   applied to select columns to merge and calculate abundances according to ordered hierarchical levels.
@@ -459,12 +459,13 @@ microtable <- R6Class(classname = "microtable",
 		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance (i.e. raw values) will be summed.
 		#' @param merge_by default "|"; the symbol to merge and concatenate taxonomic names of different levels.
 		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
-		#'   Very useful when multiple mapping info exist.
-		#' @param split_by default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; see sep in separate_rows function.
+		#'   Very useful when multiple mapping information exist.
+		#' @param split_by default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; 
+		#'   see \code{sep} parameter in \code{separate_rows} function of tidyr package.
 		#' @param split_column default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
-		#'     fixed column or columns used for the splitting in tax_table in each abundance calculation; 
-		#'     list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
-		#' @return taxa_abund in object.
+		#'   fixed column or columns used for the splitting in tax_table for each abundance calculation; 
+		#'   list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
+		#' @return taxa_abund list in object.
 		#' @examples
 		#' \donttest{
 		#' dataset$cal_abund()
@@ -538,9 +539,9 @@ microtable <- R6Class(classname = "microtable",
 			message('The result is stored in object$taxa_abund ...')
 		},
 		#' @description
-		#' Save taxonomic abundance to local file.
+		#' Save taxonomic abundance as local file.
 		#'
-		#' @param dirpath default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if it does not exist.
+		#' @param dirpath default "taxa_abund"; directory to save the taxonomic abundance files. It will be created if not found.
 		#' @param merge_all default FALSE; Whether merge all tables into one. The merged file format is generally called 'mpa' style.
 		#' @param rm_un default FALSE; Whether remove unclassified taxa in which the name ends with '__' generally.
 		#' @param rm_pattern default "__$"; The pattern searched through the merged taxonomic names. See also \code{pattern} parameter in \code{\link{grepl}} function. 
@@ -583,12 +584,12 @@ microtable <- R6Class(classname = "microtable",
 			}
 		},
 		#' @description
-		#' Calculate alpha diversity in \code{microtable} object.
+		#' Calculate alpha diversity.
 		#'
 		#' @param measures default NULL; one or more indexes of \code{c("Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD")}; 
 		#'   If null, use all those measures. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on \code{vegan::diversity} function;
 		#'   'Chao1' and 'ACE' depend on the function \code{vegan::estimateR}; 'PD' depends on the function \code{picante::pd}.
-		#' @param PD TRUE or FALSE, whether phylogenetic tree should be calculated, default FALSE.
+		#' @param PD default FALSE; whether Faith's phylogenetic diversity should be calculated.
 		#' @return alpha_diversity stored in object.
 		#' @examples
 		#' \donttest{
@@ -669,15 +670,15 @@ microtable <- R6Class(classname = "microtable",
 			write.csv(self$alpha_diversity, file = paste0(dirpath, "/", "alpha_diversity.csv"), row.names = TRUE)
 		},
 		#' @description
-		#' Calculate beta diversity in microtable object, including Bray-Curtis, Jaccard, and UniFrac.
+		#' Calculate beta diversity, including Bray-Curtis, Jaccard, and UniFrac.
 		#' See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 		#'
 		#' @param method default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
-		#'   see \code{\link{vegdist}} function and method parameter in \code{vegan} package. 
-		#' @param unifrac default FALSE; TRUE or FALSE, whether unifrac index should be calculated.
+		#'   see \code{\link{vegdist}} function and \code{method} parameter in \code{vegan} package. 
+		#' @param unifrac default FALSE; whether UniFrac index should be calculated.
 		#' @param binary default FALSE; TRUE is used for jaccard and unweighted unifrac; optional for other indexes.
 		#' @param ... parameters passed to \code{\link{vegdist}} function.
-		#' @return beta_diversity stored in object.
+		#' @return beta_diversity list stored in object.
 		#' @examples
 		#' \donttest{
 		#' dataset$cal_betadiv(unifrac = FALSE)
