@@ -124,6 +124,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 			by_ID = NULL,
 			...
 			){
+			if(is.null(p_adjust_method)){
+				message('Redefine p_adjust_method = "fdr" instead of NULL. To disable p value adjustment, please use p_adjust_method = "none" ...')
+				p_adjust_method <- "fdr"
+			}
 			if(is.null(dataset)){
 				self$method <- NULL
 				message("Input dataset is NULL. Please run the functions with customized data ...")
@@ -227,10 +231,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 					sel_taxa <- pvalue < alpha
 					message("After P value adjustment, ", sum(sel_taxa), " taxa found significant ...")
 					if(sum(sel_taxa) == 0){
-						stop('No significant feature found! It is feasible to disable p value adjustment by adding p_adjust_method = "none"!')
+						if(p_adjust_method == "none"){
+							stop('No significant feature found!')
+						}else{
+							stop('No significant feature found! To disable p value adjustment, please use p_adjust_method = "none"!')
+						}
 					}
 					if(sum(sel_taxa) == 1){
-						stop('Only one significant feature found! It is feasible to disable p value adjustment by adding p_adjust_method = "none"!')
+						if(p_adjust_method == "none"){
+							stop('Only one significant feature found! Stop running subsequent process!')
+						}else{
+							stop('Only one significant feature found! Stop running subsequent process! To disable p value adjustment, please use p_adjust_method = "none"!')
+						}
 					}
 					abund_table_sub <- abund_table[sel_taxa, ]
 					pvalue_sub <- pvalue[sel_taxa]
