@@ -7,7 +7,7 @@
 #' alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 #' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
 #' \cr
-#' Online tutorial website: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} \cr
+#' Online tutorial: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} \cr
 #' Download tutorial: \href{https://github.com/ChiLiubio/microeco_tutorial/releases}{https://github.com/ChiLiubio/microeco_tutorial/releases}
 #' 
 #' @export
