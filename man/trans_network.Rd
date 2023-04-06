@@ -152,6 +152,14 @@ test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
 }
 
 ## ------------------------------------------------
+## Method `trans_network$random_network`
+## ------------------------------------------------
+
+\dontrun{
+t1$random_network(runs = 100)
+}
+
+## ------------------------------------------------
 ## Method `trans_network$trans_comm`
 ## ------------------------------------------------
 
@@ -177,6 +185,7 @@ t2 <- t1$trans_comm(use_col = "module")
 \item \href{#method-trans_network-cal_powerlaw}{\code{trans_network$cal_powerlaw()}}
 \item \href{#method-trans_network-cal_sum_links}{\code{trans_network$cal_sum_links()}}
 \item \href{#method-trans_network-plot_sum_links}{\code{trans_network$plot_sum_links()}}
+\item \href{#method-trans_network-random_network}{\code{trans_network$random_network()}}
 \item \href{#method-trans_network-trans_comm}{\code{trans_network$trans_comm()}}
 \item \href{#method-trans_network-print}{\code{trans_network$print()}}
 \item \href{#method-trans_network-clone}{\code{trans_network$clone()}}
@@ -912,6 +921,44 @@ chorddiag plot
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_network-random_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_network-random_network}{}}}
+\subsection{Method \code{random_network()}}{
+Generate random networks, compare them with the empirical network and get the p value of topological properties.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$random_network(runs = 100, output_sim = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{runs}}{default 100; simulation number of random network.}
+
+\item{\code{output_sim}}{default FALSE; whether output each simulated network result.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a data.frame with the following components:
+\describe{
+  \item{\code{Observed}}{Topological properties of empirical network}
+  \item{\code{Mean_sim}}{Mean of properties of simulated networks}
+  \item{\code{SD_sim}}{SD of properties of simulated networks}
+  \item{\code{p_value}}{Significance, i.e. p values}
+}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$random_network(runs = 100)
 }
 }
 \if{html}{\out{</div>}}

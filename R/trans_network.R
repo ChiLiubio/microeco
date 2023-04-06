@@ -1056,6 +1056,58 @@ trans_network <- R6Class(classname = "trans_network",
 			chorddiag::chorddiag(use_data, groupColors = groupColors, ...)
 		},
 		#' @description
+		#' Generate random networks, compare them with the empirical network and get the p value of topological properties.
+		#'
+		#' @param runs default 100; simulation number of random network.
+		#' @param output_sim default FALSE; whether output each simulated network result.
+		#' @return a data.frame with the following components:
+		#' \describe{
+		#'   \item{\code{Observed}}{Topological properties of empirical network}
+		#'   \item{\code{Mean_sim}}{Mean of properties of simulated networks}
+		#'   \item{\code{SD_sim}}{SD of properties of simulated networks}
+		#'   \item{\code{p_value}}{Significance, i.e. p values}
+		#' }
+		#' @examples
+		#' \dontrun{
+		#' t1$random_network(runs = 100)
+		#' }
+		random_network = function(runs = 100, output_sim = FALSE){
+			res_network <- self$res_network
+			if(is.null(res_network)){
+				stop("Please first run cal_network function to obtain a network!")
+			}
+			if(is.null(self$res_network_attr)){
+				message("Topological properties have not been calculated! First run cal_network_attr function ...")
+				self$cal_network_attr()
+			}
+			res <- data.frame(emp = self$res_network_attr[, 1])
+			print("Start simulations:")
+			for(i in seq_len(runs)){
+				if(i %% 10 == 0){
+					print(i)
+				}
+				rand <- erdos.renyi.game(vcount(res_network), ecount(res_network), type = 'gnm')
+				suppressMessages(tmp <- trans_network$new(dataset = NULL))
+				suppressMessages(tmp$cal_network(network_method = NULL))
+				tmp$res_network <- rand
+				suppressMessages(tmp$cal_network_attr())
+				res %<>% cbind(., tmp$res_network_attr)
+			}
+			colnames(res) <- c("emp", paste0("sim", seq_len(runs)))
+			sig_right <- apply(res, 1, function(x){(sum(x >= x[1]))/length(x)})
+			sig_left <- apply(res, 1, function(x){(sum(x <= x[1]))/length(x)})
+			p_value <- sapply(seq_along(sig_right), function(x){ifelse(sig_right[x] <= sig_left[x], sig_right[x], sig_left[x])})
+			output <- data.frame(Observed = t1$res_network_attr[, 1], 
+				Mean_sim = apply(res[, 2:ncol(res)], 1, mean),
+				SD_sim = apply(res[, 2:ncol(res)], 1, sd),
+				p_value = p_value
+			)
+			if(output_sim){
+				output %<>% cbind.data.frame(., res[, 2:ncol(res)])
+			}
+			output
+		},
+		#' @description
 		#' Transform classifed features to community-like microtable object for further analysis, such as module-taxa table.
 		#'
 		#' @param use_col default "module"; which column to use as the 'community'; must be one of the name of res_node_table from function \code{get_node_table}.

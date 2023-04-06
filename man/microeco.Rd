@@ -10,7 +10,7 @@ Download tutorial: \href{https://github.com/ChiLiubio/microeco_tutorial/releases
 
 For each R6 class, please open the help document by search the class name.
 For example, to search microtable class, please run the command \code{help(microtable)} or \code{?microtable}.\cr
-Another way to open the help document is to click the following links collected:\cr
+Another way to open the help document of R6 class is to click the following links collected:\cr
 \code{\link{microtable}}\cr
 \code{\link{trans_abund}}\cr
 \code{\link{trans_venn}}\cr
