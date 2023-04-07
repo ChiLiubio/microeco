@@ -1067,6 +1067,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   \item{\code{SD_sim}}{SD of properties of simulated networks}
 		#'   \item{\code{p_value}}{Significance, i.e. p values}
 		#' }
+		#' When \code{output_sim = TRUE}, the columns from the five to the last are each simulated result.
 		#' @examples
 		#' \dontrun{
 		#' t1$random_network(runs = 100)

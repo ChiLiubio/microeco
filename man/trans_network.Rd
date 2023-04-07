@@ -954,6 +954,7 @@ a data.frame with the following components:
   \item{\code{SD_sim}}{SD of properties of simulated networks}
   \item{\code{p_value}}{Significance, i.e. p values}
 }
+When \code{output_sim = TRUE}, the columns from the five to the last are each simulated result.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
