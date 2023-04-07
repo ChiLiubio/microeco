@@ -933,6 +933,8 @@ test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
 \if{latex}{\out{\hypertarget{method-trans_network-random_network}{}}}
 \subsection{Method \code{random_network()}}{
 Generate random networks, compare them with the empirical network and get the p value of topological properties.
+The generation of random graph is based on the \code{erdos.renyi.game} function of igraph package.
+The numbers of vertices and edges in the random graph are same with the empirical network stored in the object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$random_network(runs = 100, output_sim = FALSE)}\if{html}{\out{</div>}}
 }

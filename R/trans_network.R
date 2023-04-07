@@ -1057,6 +1057,8 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		#' @description
 		#' Generate random networks, compare them with the empirical network and get the p value of topological properties.
+		#' The generation of random graph is based on the \code{erdos.renyi.game} function of igraph package.
+		#' The numbers of vertices and edges in the random graph are same with the empirical network stored in the object.
 		#'
 		#' @param runs default 100; simulation number of random network.
 		#' @param output_sim default FALSE; whether output each simulated network result.
@@ -1087,7 +1089,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(i %% 10 == 0){
 					print(i)
 				}
-				rand <- erdos.renyi.game(vcount(res_network), ecount(res_network), type = 'gnm')
+				rand <- igraph::erdos.renyi.game(vcount(res_network), ecount(res_network), type = 'gnm')
 				suppressMessages(tmp <- trans_network$new(dataset = NULL))
 				suppressMessages(tmp$cal_network(network_method = NULL))
 				tmp$res_network <- rand
