@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_venn.R
 \name{trans_venn}
 \alias{trans_venn}
-\title{Create \code{trans_venn} object for the Venn diagram and UpSet plot.}
+\title{Create \code{trans_venn} object for the Venn diagram, petal plot and UpSet plot.}
 \description{
 This class is a wrapper for a series of intersection analysis related methods, including 2- to 5-way venn diagram, 
 more than 5-way petal or UpSet plot and intersection transformations based on David et al. (2012) <doi:10.1128/AEM.01459-12>.
@@ -71,12 +71,12 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
+\item{\code{dataset}}{the object of \code{\link{microtable}} class.}
 
-\item{\code{sample_names}}{default NULL; if provided, filter the samples.}
+\item{\code{sample_names}}{default NULL; character vector of sample names; If provided, filter the samples not found in the vector.}
 
-\item{\code{ratio}}{default NULL; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
-NULL: no additional percentage.}
+\item{\code{ratio}}{default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
+"seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.}
 
 \item{\code{add_abund_table}}{default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
 Features must be rows.}
@@ -86,7 +86,7 @@ Features must be rows.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{data_details} and \code{data_summary} stored in trans_venn object.
+\code{data_details} and \code{data_summary} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -135,19 +135,19 @@ Plot venn diagram.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_circle}}{default \code{RColorBrewer::brewer.pal(8, "Dark2")}; color pallete}
+\item{\code{color_circle}}{default \code{RColorBrewer::brewer.pal(8, "Dark2")}; color pallete.}
 
-\item{\code{fill_color}}{default TRUE; whether fill the area color}
+\item{\code{fill_color}}{default TRUE; whether fill the area color.}
 
-\item{\code{text_size}}{default 4.5; text size in plot}
+\item{\code{text_size}}{default 4.5; text size in plot.}
 
-\item{\code{text_name_size}}{default 6; name size in plot}
+\item{\code{text_name_size}}{default 6; name size in plot.}
 
-\item{\code{text_name_position}}{default NULL; name position in plot}
+\item{\code{text_name_position}}{default NULL; name position in plot.}
 
-\item{\code{alpha}}{default .3; alpha for transparency}
+\item{\code{alpha}}{default .3; alpha for transparency.}
 
-\item{\code{linesize}}{default 1.1; cycle line size}
+\item{\code{linesize}}{default 1.1; cycle line size.}
 
 \item{\code{petal_plot}}{default FALSE; whether use petal plot.}
 
@@ -155,27 +155,27 @@ Plot venn diagram.
 
 \item{\code{petal_color_center}}{default "#BEBADA"; color of the center in the petal plot.}
 
-\item{\code{petal_a}}{default 4; the length of the ellipse}
+\item{\code{petal_a}}{default 4; the length of the ellipse.}
 
-\item{\code{petal_r}}{default 1; scaling up the size of the ellipse}
+\item{\code{petal_r}}{default 1; scaling up the size of the ellipse.}
 
-\item{\code{petal_use_lim}}{default c(-12, 12); the width of the plot}
+\item{\code{petal_use_lim}}{default c(-12, 12); the width of the plot.}
 
-\item{\code{petal_center_size}}{default 40; petal center circle size}
+\item{\code{petal_center_size}}{default 40; petal center circle size.}
 
-\item{\code{petal_move_xy}}{default 4; the distance of text to circle}
+\item{\code{petal_move_xy}}{default 4; the distance of text to circle.}
 
-\item{\code{petal_move_k}}{default 2.3; the distance of title to circle}
+\item{\code{petal_move_k}}{default 2.3; the distance of title to circle.}
 
-\item{\code{petal_move_k_count}}{default 1.3; the distance of data text to circle}
+\item{\code{petal_move_k_count}}{default 1.3; the distance of data text to circle.}
 
-\item{\code{petal_text_move}}{default 40; the distance between two data text}
+\item{\code{petal_text_move}}{default 40; the distance between two data text.}
 
-\item{\code{other_text_show}}{default NULL; other characters used to show in the plot}
+\item{\code{other_text_show}}{default NULL; other characters used to show in the plot.}
 
-\item{\code{other_text_position}}{default c(1, 1); the text position for text in \code{other_text_show}}
+\item{\code{other_text_position}}{default c(1, 1); the text position for text in \code{other_text_show}.}
 
-\item{\code{other_text_size}}{default 5; the text size for text in \code{other_text_show}}
+\item{\code{other_text_size}}{default 5; the text size for text in \code{other_text_show}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -197,7 +197,7 @@ t1$plot_venn()
 \if{html}{\out{<a id="method-trans_venn-plot_bar"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_venn-plot_bar}{}}}
 \subsection{Method \code{plot_bar()}}{
-Plot the intersections using , i.e. UpSet plot. Especially useful when samples > 5.
+Plot the intersections using histogram, i.e. UpSet plot. Especially useful when samples > 5.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$plot_bar(
   left_plot = TRUE,
@@ -272,7 +272,7 @@ t2 <- t1$plot_bar()
 \if{html}{\out{<a id="method-trans_venn-trans_comm"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_venn-trans_comm}{}}}
 \subsection{Method \code{trans_comm()}}{
-Transform venn result to community-like microtable object for further composition analysis.
+Transform intersection result to community-like microtable object for further composition analysis.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$trans_comm(use_frequency = TRUE)}\if{html}{\out{</div>}}
 }

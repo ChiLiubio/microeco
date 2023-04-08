@@ -1,5 +1,5 @@
 #' @title
-#' Create \code{trans_venn} object for the Venn diagram and UpSet plot.
+#' Create \code{trans_venn} object for the Venn diagram, petal plot and UpSet plot.
 #'
 #' @description
 #' This class is a wrapper for a series of intersection analysis related methods, including 2- to 5-way venn diagram, 
@@ -8,14 +8,14 @@
 #' @export
 trans_venn <- R6Class(classname = "trans_venn",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param sample_names default NULL; if provided, filter the samples.
-		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; numratio: calculate number percentage; seqratio: calculate sequence percentage; 
-		#' 	 NULL: no additional percentage.
+		#' @param dataset the object of \code{\link{microtable}} class.
+		#' @param sample_names default NULL; character vector of sample names; If provided, filter the samples not found in the vector.
+		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
+		#' 	 "seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.
 		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
 		#'   Features must be rows.
 		#' @param name_joint default "&"; the joint mark for generating multi-sample names.
-		#' @return \code{data_details} and \code{data_summary} stored in trans_venn object.
+		#' @return \code{data_details} and \code{data_summary} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -25,7 +25,6 @@ trans_venn <- R6Class(classname = "trans_venn",
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_abund_table = NULL, name_joint = "&"
 			){
 			if(!is.null(dataset)){
-				# first clone the dataset
 				use_dataset <- clone(dataset)
 				if(!is.null(sample_names)){
 					use_dataset$sample_table %<>% .[rownames(.) %in% sample_names, ]
@@ -44,7 +43,6 @@ trans_venn <- R6Class(classname = "trans_venn",
 					abund <- add_abund_table
 				}
 			}
-
 			res_names <- colnames(abund)
 			colnumber <- ncol(abund)
 			abund1 <- cbind.data.frame(OTU = rownames(abund), abund)
@@ -55,7 +53,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			setmatrix[setmatrix >= 1] <- 1
 			samplesum <- apply(setmatrix, 2, sum)
 			# Create all possible sample combinations within requested complexity levels
-			# modified from the method of systemPipeR package
+			# modified from the method in systemPipeR package
 			allcombl <- lapply(1:colnumber, function(x) combn(colnames(setmatrix), m = x, simplify = FALSE)) %>% unlist(recursive = FALSE)
 			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix = setmatrix, allcombl = allcombl, index = x, setunion = setunion))
 			names(venn_list) <- sapply(allcombl, paste, collapse = name_joint)
@@ -68,17 +66,17 @@ trans_venn <- R6Class(classname = "trans_venn",
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
 			if(!is.null(ratio)){
 				if(!ratio %in% c("seqratio", "numratio")){
-					stop("Provided parameter ratio must be 'seqratio' or 'numratio' !")
+					stop("Provided parameter ratio must be one of NULL, 'seqratio' or 'numratio' !")
 				}
 				if(ratio == "seqratio"){
-					venn_count_abund[,2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[,2]), 3) * 100, "%")
+					venn_count_abund[, 2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[, 2]), 3) * 100, "%")
 				}else{
-					venn_count_abund[,2] <- paste0(round(venn_count_abund[,1]/sum(venn_count_abund[,1]), 3) * 100, "%")
+					venn_count_abund[, 2] <- paste0(round(venn_count_abund[,1]/sum(venn_count_abund[, 1]), 3) * 100, "%")
 				}
 			}
 			# make sure the length of elements are same
 			venn_maxlen <- max(sapply(venn_list, length))
-			venn_table <- lapply(venn_list, function (x) {
+			venn_table <- lapply(venn_list, function(x) {
 				fill_length <- venn_maxlen - length(x)
 				c(x, rep("", fill_length))
 			})
@@ -97,27 +95,27 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @description
 		#' Plot venn diagram.
 		#'
-		#' @param color_circle default \code{RColorBrewer::brewer.pal(8, "Dark2")}; color pallete
-		#' @param fill_color default TRUE; whether fill the area color
-		#' @param text_size default 4.5; text size in plot
-		#' @param text_name_size default 6; name size in plot
-		#' @param text_name_position default NULL; name position in plot
-		#' @param alpha default .3; alpha for transparency
-		#' @param linesize default 1.1; cycle line size
+		#' @param color_circle default \code{RColorBrewer::brewer.pal(8, "Dark2")}; color pallete.
+		#' @param fill_color default TRUE; whether fill the area color.
+		#' @param text_size default 4.5; text size in plot.
+		#' @param text_name_size default 6; name size in plot.
+		#' @param text_name_position default NULL; name position in plot.
+		#' @param alpha default .3; alpha for transparency.
+		#' @param linesize default 1.1; cycle line size.
 		#' @param petal_plot default FALSE; whether use petal plot.
 		#' @param petal_color default "#BEAED4"; color of the petals.
 		#' @param petal_color_center default "#BEBADA"; color of the center in the petal plot.
-		#' @param petal_a default 4; the length of the ellipse
-		#' @param petal_r default 1; scaling up the size of the ellipse
-		#' @param petal_use_lim default c(-12, 12); the width of the plot
-		#' @param petal_center_size default 40; petal center circle size
-		#' @param petal_move_xy default 4; the distance of text to circle
-		#' @param petal_move_k default 2.3; the distance of title to circle
-		#' @param petal_move_k_count default 1.3; the distance of data text to circle
-		#' @param petal_text_move default 40; the distance between two data text
-		#' @param other_text_show default NULL; other characters used to show in the plot
-		#' @param other_text_position default c(1, 1); the text position for text in \code{other_text_show}
-		#' @param other_text_size default 5; the text size for text in \code{other_text_show}
+		#' @param petal_a default 4; the length of the ellipse.
+		#' @param petal_r default 1; scaling up the size of the ellipse.
+		#' @param petal_use_lim default c(-12, 12); the width of the plot.
+		#' @param petal_center_size default 40; petal center circle size.
+		#' @param petal_move_xy default 4; the distance of text to circle.
+		#' @param petal_move_k default 2.3; the distance of title to circle.
+		#' @param petal_move_k_count default 1.3; the distance of data text to circle.
+		#' @param petal_text_move default 40; the distance between two data text.
+		#' @param other_text_show default NULL; other characters used to show in the plot.
+		#' @param other_text_position default c(1, 1); the text position for text in \code{other_text_show}.
+		#' @param other_text_size default 5; the text size for text in \code{other_text_show}.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -290,8 +288,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 					  private$main_theme
 				
 				for(i in 1:nPetals){
-					rotate <- 90 - (i-1)*360/nPetals
-					rotate2 <- rotate*pi/180
+					rotate <- 90 - (i - 1) * 360/nPetals
+					rotate2 <- rotate * pi/180
 					if(rotate < -90){
 						rotate <- rotate + 180
 					}
@@ -313,7 +311,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- p + geom_point(aes(x = 0, y = 0), shape = 16, size = petal_center_size, colour = petal_color_center)
 				p <- p + annotate("text", 
 					x = 0, 
-					y = 0 + sum(abs(petal_use_lim))/(petal_text_move*2), 
+					y = 0 + sum(abs(petal_use_lim))/(petal_text_move * 2), 
 					label = plot_data[nrow(plot_data), 1], 
 					size = text_size)
 				
@@ -335,7 +333,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			p
 		},
 		#' @description
-		#' Plot the intersections using , i.e. UpSet plot. Especially useful when samples > 5.
+		#' Plot the intersections using histogram, i.e. UpSet plot. Especially useful when samples > 5.
 		#'
 		#' @param left_plot default TRUE; whether add the left bar plot to show the feature number of each sample.
 		#' @param sort_samples default TRUE; whether sort samples according to the number of features in each sample.
@@ -480,7 +478,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			}
 		},
 		#' @description
-		#' Transform venn result to community-like microtable object for further composition analysis.
+		#' Transform intersection result to community-like microtable object for further composition analysis.
 		#'
 		#' @param use_frequency default TRUE; whether only use OTUs occurrence frequency, i.e. presence/absence data; if FALSE, use abundance data.
 		#' @return a new \code{\link{microtable}} class.
