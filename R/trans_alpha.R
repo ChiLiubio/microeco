@@ -1,17 +1,17 @@
-#' @title Create \code{trans_alpha} object for alpha diversity statistics and plotting.
+#' @title Create \code{trans_alpha} object for alpha diversity statistics and plot.
 #'
 #' @description
-#' This class is a wrapper for a series of alpha diversity related analysis, including the statistics and plotting based on 
+#' This class is a wrapper for a series of alpha diversity related analysis, including the statistics and visualization based on 
 #' An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 #'
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param group default NULL; a column of sample_table used for the statistics; If provided, can return \code{data_stat}.
-		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
-		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
-		#' @param by_ID default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
+		#' @param dataset the object of \code{\link{microtable}} class.
+		#' @param group default NULL; a column of \code{sample_table} used for the statistics; If provided, can return \code{data_stat}.
+		#' @param by_group default NULL; a column of \code{sample_table} used to perform the differential test 
+		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
+		#' @param by_ID default NULL; a column of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
 		#' @param order_x default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.
@@ -74,25 +74,25 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			self$by_ID <- by_ID
 		},
 		#' @description
-		#' Test the difference of alpha diversity.
+		#' Differential test of alpha diversity.
 		#'
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
-		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
 		#'     	  For multi-factor anova, see \code{\link{aov}}}
-		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'     \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
 		#'   }
-		#' @param measure default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
-		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
+		#' @param measure default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
-		#'    NULL can disuse the p value adjustment.
+		#'    \code{NULL} can disable the p value adjustment.
 		#' @param formula default NULL; applied to two-way or multi-factor anova analysis when 
 		#'   method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"}; 
 		#'   specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
@@ -103,7 +103,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or \code{lmerTest::lmer} (\code{method = "lme"}) or 
 		#'   \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or
 		#'   \code{betareg::betareg} (\code{method = "betareg"}).
-		#' @return \code{res_diff} in object with the format \code{data.frame}.
+		#' @return \code{res_diff} stored in object with the format \code{data.frame}.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
 		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 		#' @examples
@@ -317,15 +317,16 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
-		#' Plotting the alpha diversity.
+		#' Plot the alpha diversity.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
 		#' @param measure default Shannon; one alpha diversity measurement; see names of alpha_diversity of dataset, 
 		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
 		#' @param group default NULL; group name used for the plot.
-		#' @param add_sig default TRUE; wheter add significance label using the result of cal_diff function, i.e. \code{object$res_diff};
-		#'   This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.
-		#' @param add_sig_label default "Significance"; select a colname of \code{object$res_diff} for the label text, such as 'P.adj' or 'Significance'.
+		#' @param add_sig default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
+		#'   This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.
+		#' @param add_sig_label default "Significance"; select a colname of \code{object$res_diff} for the label text when 'Letter' is not in the table, 
+		#'   such as 'P.adj' or 'Significance'.
 		#' @param add_sig_text_size default 3.88; the size of text in added label.
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.

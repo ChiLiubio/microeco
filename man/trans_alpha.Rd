@@ -2,9 +2,9 @@
 % Please edit documentation in R/trans_alpha.R
 \name{trans_alpha}
 \alias{trans_alpha}
-\title{Create \code{trans_alpha} object for alpha diversity statistics and plotting.}
+\title{Create \code{trans_alpha} object for alpha diversity statistics and plot.}
 \description{
-This class is a wrapper for a series of alpha diversity related analysis, including the statistics and plotting based on 
+This class is a wrapper for a series of alpha diversity related analysis, including the statistics and visualization based on 
 An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
 }
 \examples{
@@ -69,14 +69,14 @@ t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
+\item{\code{dataset}}{the object of \code{\link{microtable}} class.}
 
-\item{\code{group}}{default NULL; a column of sample_table used for the statistics; If provided, can return \code{data_stat}.}
+\item{\code{group}}{default NULL; a column of \code{sample_table} used for the statistics; If provided, can return \code{data_stat}.}
 
-\item{\code{by_group}}{default NULL; a column of sample_table used to perform the differential test 
-among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.}
+\item{\code{by_group}}{default NULL; a column of \code{sample_table} used to perform the differential test 
+among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.}
 
-\item{\code{by_ID}}{default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
+\item{\code{by_ID}}{default NULL; a column of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
 such as the data of plant compartments for different plant species (ID). 
 So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.}
 
@@ -103,7 +103,7 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \if{html}{\out{<a id="method-trans_alpha-cal_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_alpha-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
-Test the difference of alpha diversity.
+Differential test of alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
   method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme",
@@ -123,21 +123,21 @@ Test the difference of alpha diversity.
 \describe{
   \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
   \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
-  \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+  \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
   \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
         For multi-factor anova, see \code{\link{aov}}}
-  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
+  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
   \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
   \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
 }}
 
-\item{\code{measure}}{default NULL; a vector; if null, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
-e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+\item{\code{measure}}{default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
-NULL can disuse the p value adjustment.}
+\code{NULL} can disable the p value adjustment.}
 
 \item{\code{formula}}{default NULL; applied to two-way or multi-factor anova analysis when 
 method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"}; 
@@ -155,7 +155,7 @@ such as \code{'block + N*P*K'}.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_diff} in object with the format \code{data.frame}.
+\code{res_diff} stored in object with the format \code{data.frame}.
   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
   For non-parametric methods, maximum median value; For t.test, maximum mean value.
 }
@@ -177,7 +177,7 @@ t1$cal_diff(method = "anova")
 \if{html}{\out{<a id="method-trans_alpha-plot_alpha"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_alpha-plot_alpha}{}}}
 \subsection{Method \code{plot_alpha()}}{
-Plotting the alpha diversity.
+Plot the alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -209,10 +209,11 @@ e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
-\item{\code{add_sig}}{default TRUE; wheter add significance label using the result of cal_diff function, i.e. \code{object$res_diff};
-This is manily designed to add post hoc test of anova or Dunn's Kruskal-Wallis Multiple Comparisons to make the label adding easy.}
+\item{\code{add_sig}}{default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
+This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.}
 
-\item{\code{add_sig_label}}{default "Significance"; select a colname of \code{object$res_diff} for the label text, such as 'P.adj' or 'Significance'.}
+\item{\code{add_sig_label}}{default "Significance"; select a colname of \code{object$res_diff} for the label text when 'Letter' is not in the table, 
+such as 'P.adj' or 'Significance'.}
 
 \item{\code{add_sig_text_size}}{default 3.88; the size of text in added label.}
 
