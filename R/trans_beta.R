@@ -2,7 +2,7 @@
 #'
 #' @description
 #' This class is a wrapper for a series of beta-diversity related analysis, 
-#' including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
+#' including ordination calculation and plot based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 #' clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and PERMDISP.
 #'
 #' @export
@@ -10,9 +10,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} class.
 		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix stored in \code{microtable$beta_diversity}; 
-		#' 	 used for ordination, manova or group distance. The measure must be one of names in microtable$beta_diversity list. 
-		#' 	 Please see \code{microtable$cal_betadiv} function for more details.
-		#' @param group default NULL; sample group used for manova, betadisper or group distance.
+		#' 	 used for ordination, manova, group distance comparision, etc. The measure must be one of names in \code{microtable$beta_diversity} list. 
+		#' 	 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.
+		#' @param group default NULL; sample group used for manova, betadisper or group distance comparision.
 		#' @return parameters stored in the object.
 		#' @examples
 		#' data(dataset)
@@ -21,13 +21,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 			dataset = NULL, 
 			measure = NULL, 
 			group = NULL
-			) {
+			){
 			if(is.null(dataset)){
 				stop("dataset is necessary !")
 			}
 			if(!is.null(measure)){
 				if(is.null(dataset$beta_diversity)){
-					stop("No dataset$beta_diversity found! Please first use microtable$cal_betadiv to calculate ", measure, " !")
+					stop("No beta_diversity list found in the input dataset! Please first use cal_betadiv function in microtable class to calculate it!")
 				}else{
 					if(length(measure) > 1){
 						stop("The input measure should only have one element! Please check it!")
@@ -65,12 +65,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 			self$dataset <- use_dataset
 		},
 		#' @description
-		#' Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+		#' Unconstrained ordination.
 		#'
 		#' @param ordination default "PCoA"; "PCA", "PCoA" or "NMDS". PCA: principal component analysis; 
 		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
-		#' @param ncomp default 3; the returned dimensions.
-		#' @param trans_otu default FALSE; whether species abundance will be square transformed, used for PCA.
+		#' @param ncomp default 3; dimensions needed in the result.
+		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
 		#' @return \code{res_ordination} stored in the object.
 		#' @examples
@@ -145,7 +145,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			self$ordination <- ordination
 		},
 		#' @description
-		#' Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+		#' Plot the ordination result.
 		#'
 		#' @param plot_type default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
 		#'   \describe{
@@ -156,19 +156,19 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   }
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see \code{ggplot2} tutorial.
-		#' @param plot_color default NULL; a colname of sample_table to assign colors to different groups in plot.
-		#' @param plot_shape default NULL; a colname of sample_table to assign shapes to different groups in plot.
+		#' @param plot_color default NULL; a colname of \code{sample_table} to assign colors to different groups in plot.
+		#' @param plot_shape default NULL; a colname of \code{sample_table} to assign shapes to different groups in plot.
 		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
-		#' @param add_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
-		#' @param point_size default 3; point size in plot when "point" is in plot_type.
-		#' @param point_alpha default .8; point transparency in plot when "point" is in plot_type.
-		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in plot_type.
-		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in plot_type.
-		#' @param centroid_segment_linetype default 3; the line type related with centroid in plot when "centroid" is in plot_type.
+		#' @param add_sample_label default NULL; a column name in \code{sample_table}; If provided, show the point name in plot.
+		#' @param point_size default 3; point size when "point" is in \code{plot_type} parameter.
+		#' @param point_alpha default .8; point transparency in plot when "point" is in \code{plot_type} parameter.
+		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in \code{plot_type} parameter.
+		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in \code{plot_type} parameter.
+		#' @param centroid_segment_linetype default 3; the line type related with centroid in plot when "centroid" is in \code{plot_type} parameter.
 		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
-		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
-		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.
-		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.
+		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in \code{plot_type} parameter.
+		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in \code{plot_type} parameter.
+		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{\link{stat_ellipse}}.
 		#' @return \code{ggplot}.
 		#' @examples
 		#' t1$plot_ordination(plot_type = "point")
@@ -290,7 +290,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
 		#'    manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.
 		#' @param group default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
-		#' @param p_adjust_method default "fdr"; p.adjust method when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
+		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
 		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object.
 		#' @examples
@@ -356,7 +356,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The result is stored in object$res_betadisper ...')
 		},
 		#' @description
-		#' Transform sample distances within groups or between groups.
+		#' Convert sample distances within groups or between groups.
 		#'
 		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
 		#' @param by_group default NULL; one colname name of sample_table in \code{microtable} object.

@@ -5,7 +5,7 @@
 \title{Create \code{trans_beta} object for beta-diversity analysis based on the distance matrix}
 \description{
 This class is a wrapper for a series of beta-diversity related analysis, 
-including several ordination calculations and plotting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
+including ordination calculation and plot based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x> and PERMDISP.
 }
 \examples{
@@ -104,10 +104,10 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \item{\code{dataset}}{the object of \code{\link{microtable}} class.}
 
 \item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix stored in \code{microtable$beta_diversity}; 
-used for ordination, manova or group distance. The measure must be one of names in microtable$beta_diversity list. 
-Please see \code{microtable$cal_betadiv} function for more details.}
+used for ordination, manova, group distance comparision, etc. The measure must be one of names in \code{microtable$beta_diversity} list. 
+Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.}
 
-\item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance.}
+\item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance comparision.}
 }
 \if{html}{\out{</div>}}
 }
@@ -128,7 +128,7 @@ t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
 \if{html}{\out{<a id="method-trans_beta-cal_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_ordination}{}}}
 \subsection{Method \code{cal_ordination()}}{
-Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+Unconstrained ordination.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
   ordination = "PCoA",
@@ -144,9 +144,9 @@ Ordination based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
 \item{\code{ordination}}{default "PCoA"; "PCA", "PCoA" or "NMDS". PCA: principal component analysis; 
 PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.}
 
-\item{\code{ncomp}}{default 3; the returned dimensions.}
+\item{\code{ncomp}}{default 3; dimensions needed in the result.}
 
-\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed, used for PCA.}
+\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA will be scaled.}
 }
@@ -168,7 +168,7 @@ PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 \if{html}{\out{<a id="method-trans_beta-plot_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-plot_ordination}{}}}
 \subsection{Method \code{plot_ordination()}}{
-Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+Plot the ordination result.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_ordination(
   plot_type = "point",
@@ -205,31 +205,31 @@ Plotting the ordination result based on An et al. (2019) <doi:10.1016/j.geoderma
 
 \item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see \code{ggplot2} tutorial.}
 
-\item{\code{plot_color}}{default NULL; a colname of sample_table to assign colors to different groups in plot.}
+\item{\code{plot_color}}{default NULL; a colname of \code{sample_table} to assign colors to different groups in plot.}
 
-\item{\code{plot_shape}}{default NULL; a colname of sample_table to assign shapes to different groups in plot.}
+\item{\code{plot_shape}}{default NULL; a colname of \code{sample_table} to assign shapes to different groups in plot.}
 
 \item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the legend of plot.}
 
-\item{\code{add_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
+\item{\code{add_sample_label}}{default NULL; a column name in \code{sample_table}; If provided, show the point name in plot.}
 
-\item{\code{point_size}}{default 3; point size in plot when "point" is in plot_type.}
+\item{\code{point_size}}{default 3; point size when "point" is in \code{plot_type} parameter.}
 
-\item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in plot_type.}
+\item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in \code{plot_type} parameter.}
 
-\item{\code{centroid_segment_alpha}}{default 0.6; segment transparency in plot when "centroid" is in plot_type.}
+\item{\code{centroid_segment_alpha}}{default 0.6; segment transparency in plot when "centroid" is in \code{plot_type} parameter.}
 
-\item{\code{centroid_segment_size}}{default 1; segment size in plot when "centroid" is in plot_type.}
+\item{\code{centroid_segment_size}}{default 1; segment size in plot when "centroid" is in \code{plot_type} parameter.}
 
-\item{\code{centroid_segment_linetype}}{default 3; the line type related with centroid in plot when "centroid" is in plot_type.}
+\item{\code{centroid_segment_linetype}}{default 3; the line type related with centroid in plot when "centroid" is in \code{plot_type} parameter.}
 
 \item{\code{ellipse_chull_fill}}{default TRUE; whether fill colors to the area of ellipse or chull.}
 
-\item{\code{ellipse_chull_alpha}}{default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.}
+\item{\code{ellipse_chull_alpha}}{default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in \code{plot_type} parameter.}
 
-\item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in plot_type.}
+\item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in \code{plot_type} parameter.}
 
-\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.}
+\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{\link{stat_ellipse}}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -275,7 +275,7 @@ manova_set has higher priority than manova_all parameter. If manova_set is provi
 
 \item{\code{group}}{default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.}
 
 \item{\code{...}}{parameters passed to \code{\link{adonis2}} function of \code{vegan} package.}
 }
@@ -325,7 +325,7 @@ A wrapper for \code{betadisper} function in vegan package for multivariate homog
 \if{html}{\out{<a id="method-trans_beta-cal_group_distance"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_group_distance}{}}}
 \subsection{Method \code{cal_group_distance()}}{
-Transform sample distances within groups or between groups.
+Convert sample distances within groups or between groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(
   within_group = TRUE,
