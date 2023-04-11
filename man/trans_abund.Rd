@@ -88,6 +88,7 @@ t1$plot_pie(facet_nrow = 1)
   show = 0,
   ntaxa = 10,
   groupmean = NULL,
+  group_morestats = FALSE,
   delete_full_prefix = TRUE,
   delete_part_prefix = FALSE,
   prefix = NULL,
@@ -109,6 +110,10 @@ t1$plot_pie(facet_nrow = 1)
 This parameter does not conflict with the parameter \code{show}. Both can be used.}
 
 \item{\code{groupmean}}{default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.}
+
+\item{\code{group_morestats}}{default FALSE; only available when \code{groupmean} parameter is provided; 
+Whether output more statistics for each group, including min, max, median and quantile;
+Thereinto, quantile25 and quantile75 denote 25\% and 75\% quantiles, respectively.}
 
 \item{\code{delete_full_prefix}}{default TRUE; whether delete both the prefix of taxonomy and the character in front of them.}
 

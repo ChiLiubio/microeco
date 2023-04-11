@@ -106,12 +106,20 @@ tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore
 }
 
 # inner function
-summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm = TRUE) {
+summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm = TRUE, more = FALSE) {
 	length2 <- function(x, na.rm = TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
-	datac <- usedata %>% 
-			dplyr::grouped_df(groupvars) %>% 
-			dplyr::summarise(N = length2(!!sym(measurevar), na.rm = na.rm), Mean = mean(!!sym(measurevar), na.rm = na.rm), SD = stats::sd(!!sym(measurevar), na.rm = na.rm)) %>%
-			as.data.frame
+	datac <- usedata %>% dplyr::grouped_df(groupvars)
+	if(more){
+	datac %<>% dplyr::summarise(N = length2(!!sym(measurevar), na.rm = na.rm), Mean = mean(!!sym(measurevar), na.rm = na.rm), SD = stats::sd(!!sym(measurevar), na.rm = na.rm), 
+				Median = stats::median(!!sym(measurevar), na.rm = na.rm), Min = min(!!sym(measurevar), na.rm = na.rm), Max = max(!!sym(measurevar), na.rm = na.rm),
+				quantile25 = unname(stats::quantile(!!sym(measurevar),  probs = 0.25)),
+				quantile75 = unname(stats::quantile(!!sym(measurevar),  probs = 0.75))
+				)
+	}else{
+		datac %<>% dplyr::summarise(N = length2(!!sym(measurevar), na.rm = na.rm), Mean = mean(!!sym(measurevar), na.rm = na.rm), 
+			SD = stats::sd(!!sym(measurevar), na.rm = na.rm))
+	}
+	datac %<>% as.data.frame
 	datac$SE <- datac$SD / sqrt(datac$N)
 	datac
 }

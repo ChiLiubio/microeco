@@ -15,6 +15,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param ntaxa default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
 		#'   This parameter does not conflict with the parameter \code{show}. Both can be used.
 		#' @param groupmean default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.
+		#' @param group_morestats default FALSE; only available when \code{groupmean} parameter is provided; 
+		#'   Whether output more statistics for each group, including min, max, median and quantile;
+		#'   Thereinto, quantile25 and quantile75 denote 25\% and 75\% quantiles, respectively.
 		#' @param delete_full_prefix default TRUE; whether delete both the prefix of taxonomy and the character in front of them.
 		#' @param delete_part_prefix default FALSE; whether only delete the prefix of taxonomy.
 		#' @param prefix default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
@@ -34,6 +37,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			show = 0, 
 			ntaxa = 10, 
 			groupmean = NULL,
+			group_morestats = FALSE,
 			delete_full_prefix = TRUE,
 			delete_part_prefix = FALSE,
 			prefix = NULL,
@@ -86,7 +90,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(!is.null(groupmean)){
 				message(paste0(groupmean, " column is used to calculate mean abundance ..."))
 				# abund_data[, groupmean] %<>% as.character
-				abund_data <- microeco:::summarySE_inter(abund_data, measurevar = "Abundance", groupvars = c("Taxonomy", groupmean))
+				abund_data <- microeco:::summarySE_inter(abund_data, measurevar = "Abundance", groupvars = c("Taxonomy", groupmean), more = group_morestats)
 				colnames(abund_data)[colnames(abund_data) == "Mean"] <- "Abundance"
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
 				if(is.factor(sample_table[, groupmean])){
