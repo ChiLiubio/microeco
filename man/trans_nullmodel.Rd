@@ -114,19 +114,19 @@ t1$cal_Cscore(by_group = "Group", normalise = FALSE)
 }
 
 ## ------------------------------------------------
-## Method `trans_nullmodel$cal_tNST`
+## Method `trans_nullmodel$cal_NST`
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
+t1$cal_NST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 }
 
 ## ------------------------------------------------
-## Method `trans_nullmodel$cal_tNST_test`
+## Method `trans_nullmodel$cal_NST_test`
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_tNST_test()
+t1$cal_NST_test()
 }
 }
 \section{Methods}{
@@ -144,8 +144,8 @@ t1$cal_tNST_test()
 \item \href{#method-trans_nullmodel-cal_NRI}{\code{trans_nullmodel$cal_NRI()}}
 \item \href{#method-trans_nullmodel-cal_NTI}{\code{trans_nullmodel$cal_NTI()}}
 \item \href{#method-trans_nullmodel-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
-\item \href{#method-trans_nullmodel-cal_tNST}{\code{trans_nullmodel$cal_tNST()}}
-\item \href{#method-trans_nullmodel-cal_tNST_test}{\code{trans_nullmodel$cal_tNST_test()}}
+\item \href{#method-trans_nullmodel-cal_NST}{\code{trans_nullmodel$cal_NST()}}
+\item \href{#method-trans_nullmodel-cal_NST_test}{\code{trans_nullmodel$cal_NST_test()}}
 \item \href{#method-trans_nullmodel-clone}{\code{trans_nullmodel$clone()}}
 }
 }
@@ -644,31 +644,34 @@ t1$cal_Cscore(by_group = "Group", normalise = FALSE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_nullmodel-cal_tNST"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_tNST}{}}}
-\subsection{Method \code{cal_tNST()}}{
-Calculate normalized stochasticity ratio (NST) based on the \code{tNST} function of \code{NST} package.
+\if{html}{\out{<a id="method-trans_nullmodel-cal_NST"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_NST}{}}}
+\subsection{Method \code{cal_NST()}}{
+Calculate normalized stochasticity ratio (NST) based on the \code{NST} package.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_tNST(group, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_NST(method = "tNST", group, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{group}}{a colname of sample_table; 
-the function can select the data from sample_table to generate a one-column (n x 1) matrix and provide it to the group parameter of tNST function.}
+\item{\code{method}}{default "tNST"; \code{'tNST'} or \code{'pNST'}. See the help document of \code{tNST} or \code{pNST} function in \code{NST} package for more details.}
 
-\item{\code{...}}{paremeters pass to \code{NST::tNST} function; see the documents of \code{tNST} function for more details.}
+\item{\code{group}}{a colname of \code{sample_table} in microtable object; 
+the function can select the data from sample_table to generate a one-column (n x 1) matrix and 
+provide it to the group parameter of \code{tNST} or \code{pNST} function.}
+
+\item{\code{...}}{paremeters pass to \code{NST::tNST} or \code{NST::pNST} function; see the document of corresponding function for more details.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-.
+list stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
+t1$cal_NST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -677,12 +680,12 @@ t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRU
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_nullmodel-cal_tNST_test"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_tNST_test}{}}}
-\subsection{Method \code{cal_tNST_test()}}{
+\if{html}{\out{<a id="method-trans_nullmodel-cal_NST_test"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_NST_test}{}}}
+\subsection{Method \code{cal_NST_test()}}{
 Test the significance of NST difference between each pair of groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_tNST_test(method = "nst.boot", ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_NST_test(method = "nst.boot", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -690,17 +693,17 @@ Test the significance of NST difference between each pair of groups.
 \describe{
 \item{\code{method}}{default "nst.boot"; "nst.boot" or "nst.panova"; see \code{NST::nst.boot} function or \code{NST::nst.panova} function for the details.}
 
-\item{\code{...}}{paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"}
+\item{\code{...}}{paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova".}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-.
+list. See the Return part of \code{NST::nst.boot} function or \code{NST::nst.panova} function in NST package.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_tNST_test()
+t1$cal_NST_test()
 }
 }
 \if{html}{\out{</div>}}

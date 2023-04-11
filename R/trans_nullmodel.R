@@ -539,45 +539,57 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 		},
 		#' @description
-		#' Calculate normalized stochasticity ratio (NST) based on the \code{tNST} function of \code{NST} package.
+		#' Calculate normalized stochasticity ratio (NST) based on the \code{NST} package.
 		#'
-		#' @param group a colname of sample_table; 
-		#' 	  the function can select the data from sample_table to generate a one-column (n x 1) matrix and provide it to the group parameter of tNST function. 
-		#' @param ... paremeters pass to \code{NST::tNST} function; see the documents of \code{tNST} function for more details.
-		#' @return .
+		#' @param method default "tNST"; \code{'tNST'} or \code{'pNST'}. See the help document of \code{tNST} or \code{pNST} function in \code{NST} package for more details.
+		#' @param group a colname of \code{sample_table} in microtable object; 
+		#' 	  the function can select the data from sample_table to generate a one-column (n x 1) matrix and 
+		#' 	  provide it to the group parameter of \code{tNST} or \code{pNST} function. 
+		#' @param ... paremeters pass to \code{NST::tNST} or \code{NST::pNST} function; see the document of corresponding function for more details.
+		#' @return list stored in object.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_tNST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
+		#' t1$cal_NST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)
 		#' }
-		cal_tNST = function(group, ...){
+		cal_NST = function(method = "tNST", group, ...){
 			comm <- self$data_comm
 			group <- self$sample_table[, group, drop = FALSE]
-			res <- NST::tNST(comm = comm, group = group, ...)
-			self$res_tNST <- res
-			message('The result is stored in object$res_tNST ...')
+			method <- match.arg(method, c("tNST", "pNST"))
+			message('Perform ', method, ' analysis ...')
+			if(method == "tNST"){
+				res <- NST::tNST(comm = comm, group = group, ...)
+			}else{
+				tree <- self$data_tree
+				if(is.null(tree)){
+					stop("No phylogenetic tree found! It is necessary for pNST function!")
+				}
+				res <- NST::pNST(comm = comm, tree = tree, group = group, ...)
+			}
+			self$res_NST <- res
+			message('The result is stored in object$res_NST ...')
 		},
 		#' @description
 		#' Test the significance of NST difference between each pair of groups.
 		#'
 		#' @param method default "nst.boot"; "nst.boot" or "nst.panova"; see \code{NST::nst.boot} function or \code{NST::nst.panova} function for the details.
-		#' @param ... paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova"
-		#' @return .
+		#' @param ... paremeters pass to NST::nst.boot when method = "nst.boot" or NST::nst.panova when method = "nst.panova".
+		#' @return list. See the Return part of \code{NST::nst.boot} function or \code{NST::nst.panova} function in NST package.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_tNST_test()
+		#' t1$cal_NST_test()
 		#' }
-		cal_tNST_test = function(method = "nst.boot", ...){
-			if(is.null(self$res_tNST)){
-				stop("Please first run cal_tNST function!")
+		cal_NST_test = function(method = "nst.boot", ...){
+			if(is.null(self$res_NST)){
+				stop("Please first run cal_NST function!")
 			}else{
-				if(is.null(self$res_tNST$details)){
-					stop("Please first run cal_tNST function with the parameter: output.rand = TRUE ")
+				if(is.null(self$res_NST$details)){
+					stop("Please first run cal_NST function with the parameter: output.rand = TRUE ")
 				}
 			}
 			if(method == "nst.boot"){
-				NST::nst.boot(nst.result = self$res_tNST, ...)
+				NST::nst.boot(nst.result = self$res_NST, ...)
 			}else{
-				NST::nst.panova(nst.result = self$res_tNST, ...)
+				NST::nst.panova(nst.result = self$res_NST, ...)
 			}
 		}
 	),
