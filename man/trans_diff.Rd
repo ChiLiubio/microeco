@@ -11,7 +11,8 @@ This class is a wrapper for a series of differential abundance test and indicato
  Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t-test, anova, 
  Scheirer Ray Hare test, 
  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
- R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7>, R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15> and
+ R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7>, R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>, 
+ R package \code{MicrobiomeStat} <doi:10.1186/s13059-022-02655-5> and
  beta regression <doi:10.18637/jss.v034.i02>.
 }
 \examples{
@@ -80,7 +81,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
     "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2",
-    "betareg", "lme")[1],
+    "linda", "betareg", "lme")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -133,6 +134,11 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
         see also the test parameter in \code{ALDEx2::aldex} function.}
   \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
+  \item{\strong{'linda'}}{Linear Model for Differential Abundance Analysis of High-dimensional Compositional Data 
+        based on the \code{linda} function of \code{MicrobiomeStat} package. 
+        Here the group parameter is passed to formula parameter in \code{linda} function with the prefix '~'.
+        The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
+       Reference: <doi:10.1186/s13059-022-02655-5>}
   \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
   \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 }}
@@ -176,9 +182,9 @@ and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw
 the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).}
 
 \item{\code{by_group}}{default NULL; a column of sample_table used to perform the differential test 
-among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
-Same with the \code{by_group} parameter in trans_alpha class. 
-Only useful when method is one of \code{c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")}.}
+among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
+Same with the \code{by_group} parameter in \code{trans_alpha} class. 
+Only available when method is one of \code{c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")}.}
 
 \item{\code{by_ID}}{default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
 such as the data of plant compartments for different plant species (ID). 
@@ -189,7 +195,8 @@ Same with the \code{by_ID} parameter in trans_alpha class.}
 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
-passed to \code{DESeq2::DESeq} function when method = "DESeq2".}
+passed to \code{DESeq2::DESeq} function when method = "DESeq2";
+passed to \code{MicrobiomeStat::linda} function when method = "linda".}
 }
 \if{html}{\out{</div>}}
 }

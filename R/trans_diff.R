@@ -9,7 +9,8 @@
 #'  Dunn's Kruskal-Wallis Multiple Comparisons based on the \code{FSA} package, Wilcoxon Rank Sum and Signed Rank Tests, t-test, anova, 
 #'  Scheirer Ray Hare test, 
 #'  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
-#'  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7>, R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15> and
+#'  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7>, R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>, 
+#'  R package \code{MicrobiomeStat} <doi:10.1186/s13059-022-02655-5> and
 #'  beta regression <doi:10.18637/jss.v034.i02>.
 #' 
 #' @export
@@ -43,6 +44,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
 		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
 		#'     \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
+		#'     \item{\strong{'linda'}}{Linear Model for Differential Abundance Analysis of High-dimensional Compositional Data 
+		#'     	  based on the \code{linda} function of \code{MicrobiomeStat} package. 
+		#'     	  Here the group parameter is passed to formula parameter in \code{linda} function with the prefix '~'.
+		#'     	  The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
+		#'     	 Reference: <doi:10.1186/s13059-022-02655-5>}
 		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
 		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'   }
@@ -74,11 +80,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
 		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
-		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2".
+		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
+		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda".
 		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
-		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a larger scale than \code{group} parameter.
-		#'   Same with the \code{by_group} parameter in trans_alpha class. 
-		#'   Only useful when method is one of \code{c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")}.
+		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
+		#'   Same with the \code{by_group} parameter in \code{trans_alpha} class. 
+		#'   Only available when method is one of \code{c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")}.
 		#' @param by_ID default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
@@ -105,7 +112,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", 
-				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "betareg", "lme")[1],
+				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "betareg", "lme")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -132,29 +139,32 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$method <- NULL
 				message("Input dataset is NULL. Please run the functions with customized data ...")
 			}else{
+				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
+					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "betareg", "lme"))
 				# in case of dataset changes
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
 				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme")){
-					stop("The group parameter need to be provided for differential test among groups!")
+					stop("The group parameter is necessary for differential test among groups!")
 				}else{
 					if(!is.null(group)){
-						if(length(group) > 1){
-							stop("Please provide only one colname of sample_table for group parameter!")
-						}else{
-							if(! group %in% colnames(sampleinfo)){
-								stop("Please provide a correct colname of sample_table for group parameter!")
+						if(! method %in% c("linda")){
+							if(length(group) > 1){
+								stop("Please provide only one colname of sample_table for group parameter!")
+							}else{
+								if(! group %in% colnames(sampleinfo)){
+									stop("Please provide a correct colname of sample_table for group parameter!")
+								}
 							}
 						}
 					}
 				}
-				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "betareg", "lme"))
-				
 				if(!is.null(group)){
-					if(is.factor(sampleinfo[, group])){
-						self$group_order <- levels(sampleinfo[, group])
-						sampleinfo[, group] %<>% as.character
+					if(group %in% colnames(sampleinfo)){
+						if(is.factor(sampleinfo[, group])){
+							self$group_order <- levels(sampleinfo[, group])
+							sampleinfo[, group] %<>% as.character
+						}
 					}
 				}
 				################################
@@ -188,7 +198,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					self$lefse_norm <- lefse_norm
 				}
 				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
-				################################
 				
 				if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme")){
 					if(method == "KW_dunn"){
@@ -445,9 +454,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				#######################################
 				if(method %in% c("metastat", "metagenomeSeq", "ancombc2", "ALDEx2_t", "DESeq2")){
-					if(taxa_level == "all"){
-						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
-					}
+					private$check_taxa_level_all(taxa_level)
 					if(is.null(group_choose_paired)){
 						all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
 					}else{
@@ -666,6 +673,50 @@ trans_diff <- R6Class(classname = "trans_diff",
 						output$P.adj <- output[, ALDEx2_sig %>% .[. %in% colnames(output)] %>% .[1]]
 					}
 				}
+				if(method == "linda"){
+					if(!require("MicrobiomeStat")){
+						stop("MicrobiomeStat package is not installed!")
+					}
+					private$check_taxa_level_all(taxa_level)
+					use_dataset <- clone(tmp_dataset)
+					use_dataset$tidy_dataset()
+					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					if(!grepl("^~", group)){
+						use_formula <- paste0("~", group)
+					}else{
+						use_formula <- group
+						group %<>% gsub("^~", "", .)
+					}
+					message("Perform linda with formula: ", use_formula, " ...")
+					res <- MicrobiomeStat::linda(as.matrix(use_dataset$taxa_abund[[taxa_level]]), use_dataset$sample_table, formula = use_formula, 
+						feature.dat.type = 'count', ...)
+					self$res_diff_raw <- res
+					message('Original result is stored in object$res_diff_raw ...')
+					group_filter <- gsub(" ", "", group)
+					group_split <- strsplit(group, split = "+", fixed = TRUE) %>% unlist
+					group_split %<>% .[. %in% colnames(use_dataset$sample_table)]
+					list_groups <- list()
+					for(j in group_split){
+						list_groups[[j]] <- use_dataset$sample_table[, j] %>% as.character %>% unique
+					}
+					output <- data.frame()
+					for(i in names(res$output)){
+						message('Tidy and merge the table: ', i,' ...')
+						tmp <- res$output[[i]]
+						# identify group name and elements
+						for(j in names(list_groups)){
+							if(i %in% paste0(j, list_groups[[j]])){
+								tmp_group_element1 <- gsub(j, "", i)
+								tmp_group_element2 <- paste0(j, list_groups[[j]]) %>% .[!. %in% names(res$output)] %>% gsub(j, "", .)
+								tmp <- data.frame(compare = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
+								output %<>% rbind(., tmp)
+							}else{
+								next
+							}
+						}
+					}
+					colnames(output)[colnames(output) %in% c("pvalue", "padj")] <- c("P.unadj", "P.adj")
+				}
 				#######################################
 				# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
 				if(grepl("lefse", method, ignore.case = TRUE)){
@@ -679,23 +730,32 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				# further calculate mean and sd of res_abund with group parameter
 				if(!is.null(group)){
-					colnames(res_abund) <- c("Taxa", "Sample", "Abund")
-					res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
-					res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
-					colnames(res_abund)[colnames(res_abund) == group] <- "Group"
+					if(group %in% colnames(sampleinfo)){
+						colnames(res_abund) <- c("Taxa", "Sample", "Abund")
+						res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
+						res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
+						colnames(res_abund)[colnames(res_abund) == group] <- "Group"
+					}
 				}
-				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2")){
+				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda")){
 					output %<>% dropallfactors(unfac2num = TRUE)
 					colnames(output)[1:2] <- c("Comparison", "Taxa")
 					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
-					# filter the unknown taxa in output
-					output %<>% .[.$Taxa %in% res_abund$Taxa, ]
-					# get enriched group
-					output$Group <- lapply(seq_along(output$Taxa), function(x){
-						select_group_split <- strsplit(output[x, "Comparison"], split = " - ") %>% unlist
-						res_abund[res_abund$Taxa == output[x, "Taxa"] & res_abund$Group %in% select_group_split, ] %>%
-						{.[which.max(.$Mean), "Group"]}
-					}) %>% unlist
+					if(group %in% colnames(sampleinfo)){
+						# filter the unknown taxa in output
+						output %<>% .[.$Taxa %in% res_abund$Taxa, ]
+						# get enriched group
+						output$Group <- lapply(seq_along(output$Taxa), function(x){
+							select_group_split <- strsplit(output[x, "Comparison"], split = " - ") %>% unlist
+							res_abund[res_abund$Taxa == output[x, "Taxa"] & res_abund$Group %in% select_group_split, ] %>%
+							{.[which.max(.$Mean), "Group"]}
+						}) %>% unlist
+					}
+				}
+				if(method == "linda"){
+					if(! group %in% colnames(sampleinfo)){
+						method <- paste0("linda formula: ", group)
+					}
 				}
 				self$res_diff <- output
 				message(method , " analysis result is stored in object$res_diff ...")
@@ -1037,7 +1097,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			method <- self$method
 			if(!is.null(method)){
 				if(grepl("formula", method)){
-					stop("The function can not be applied to multi-way anova!")
+					stop("The function can not be applied to multi-factor analysis!")
 				}
 				if(method == "lefse"){
 					colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
@@ -1412,6 +1472,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		}
 		),
 	private = list(
+		check_taxa_level_all = function(taxa_level){
+			if(taxa_level == "all"){
+				stop("The taxa_level parameter cannot be 'all' for this method! Please provide a taxonomic level, such as 'Genus' !")
+			}
+		},
 		# group test for lefse or rf
 		test_mark = function(dataframe, group, min_num_nonpara = 1, method = NULL){
 			d1 <- as.data.frame(t(dataframe))
