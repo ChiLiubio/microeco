@@ -610,7 +610,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
 						newdata$tidy_dataset()
 						newdata <- file2meco::meco2phyloseq(newdata)
-						res_raw <- ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
+						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
 						res_raw2 <- res_raw$res
 						res <- data.frame(feature = res_raw2$taxon, 
 							W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 

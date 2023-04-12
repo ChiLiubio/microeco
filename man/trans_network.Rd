@@ -438,7 +438,7 @@ the following are available functions (options) from igraph package: "cluster_fa
 For the details of these functions, see the help document, such as \code{help(cluster_fast_greedy)};
 Note that the default "cluster_fast_greedy" method can only be used for undirected network. 
 If the user selects \code{network_method = "beemStatic"} in cal_network function or provides other directed network, 
-please use cluster_optimal or others for the modules identification.}
+please use "cluster_edge_betweenness", "cluster_infomap", "cluster_walktrap" or others for the modules identification.}
 
 \item{\code{module_name_prefix}}{default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.}

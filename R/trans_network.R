@@ -173,9 +173,9 @@ trans_network <- R6Class(classname = "trans_network",
 				# store taxonomic table for the following analysis
 				self$tax_table <- use_dataset$tax_table
 				self$data_abund <- use_abund
-				self$taxa_level <- taxa_level
 				self$data_relabund <- rel_abund
 			}
+			self$taxa_level <- taxa_level
 		},
 		#' @description
 		#' Construct network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
@@ -276,6 +276,9 @@ trans_network <- R6Class(classname = "trans_network",
 				
 				message("---------------- ", Sys.time()," : Start ----------------")
 				if(network_method == "COR"){
+					if(is.null(self$res_cor_p)){
+						stop("The res_cor_p list in the object is NULL! Please check the created object!")
+					}
 					cortable <- self$res_cor_p$cor
 					# p adjustment for the converted vector
 					raw_p <- self$res_cor_p$p
@@ -491,7 +494,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' 	 For the details of these functions, see the help document, such as \code{help(cluster_fast_greedy)};
 		#' 	 Note that the default "cluster_fast_greedy" method can only be used for undirected network. 
 		#' 	 If the user selects \code{network_method = "beemStatic"} in cal_network function or provides other directed network, 
-		#' 	 please use cluster_optimal or others for the modules identification.
+		#' 	 please use "cluster_edge_betweenness", "cluster_infomap", "cluster_walktrap" or others for the modules identification.
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
 		#' @return \code{res_network} with modules, stored in object.
