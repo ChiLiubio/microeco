@@ -488,13 +488,13 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Calculate network modules and add module names to the network node properties.
 		#'
 		#' @param method default "cluster_fast_greedy"; the method used to find the optimal community structure of a graph;
-		#' 	 the following are available functions (options) from igraph package: "cluster_fast_greedy", "cluster_optimal",
-		#' 	 "cluster_edge_betweenness", "cluster_infomap", "cluster_label_prop", "cluster_leading_eigen",
-		#' 	 "cluster_louvain", "cluster_spinglass", "cluster_walktrap". 
-		#' 	 For the details of these functions, see the help document, such as \code{help(cluster_fast_greedy)};
-		#' 	 Note that the default "cluster_fast_greedy" method can only be used for undirected network. 
-		#' 	 If the user selects \code{network_method = "beemStatic"} in cal_network function or provides other directed network, 
-		#' 	 please use "cluster_edge_betweenness", "cluster_infomap", "cluster_walktrap" or others for the modules identification.
+		#' 	 the following are available functions (options) from igraph package: \cr
+		#' 	 \code{"cluster_fast_greedy"}, \code{"cluster_walktrap"}, \code{"cluster_edge_betweenness"}, \cr
+		#' 	 \code{"cluster_infomap"}, \code{"cluster_label_prop"}, \code{"cluster_leading_eigen"}, \cr
+		#' 	 \code{"cluster_louvain"}, \code{"cluster_spinglass"}, \code{"cluster_optimal"}. \cr
+		#' 	 For the details of these functions, please see the help document, such as \code{help(cluster_fast_greedy)};
+		#' 	 Note that the default \code{"cluster_fast_greedy"} method can not be applied to directed network. 
+		#' 	 If directed network is provided, the function can automatically switch the default method from \code{"cluster_fast_greedy"} to \code{"cluster_walktrap"}.
 		#' @param module_name_prefix default "M"; the prefix of module names; module names are made of the module_name_prefix and numbers;
 		#'   numbers are assigned according to the sorting result of node numbers in modules with decreasing trend.
 		#' @return \code{res_network} with modules, stored in object.
@@ -512,6 +512,14 @@ trans_network <- R6Class(classname = "trans_network",
 			network <- self$res_network
 			if(!is.character(method)){
 				stop("The parameter method must be character!")
+			}
+			if(method == "cluster_fast_greedy" & is_directed(network)){
+				message('The default method "cluster_fast_greedy" can not be applied to directed network! ',
+					'Automatically switch to method "cluster_walktrap" ...')
+				message('Invoke cluster_walktrap function to find densely connected subgraphs ...')
+				method <- "cluster_walktrap"
+			}else{
+				message('Use ', method, ' function to partition modules ...')
 			}
 			# use NSE
 			res_member <- parse(text = paste0(method, "(network)")) %>% eval
