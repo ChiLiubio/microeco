@@ -23,7 +23,7 @@ Another way to open the help document of R6 class is to click the following link
 \code{\link{trans_env}}\cr
 \code{\link{trans_func}}\cr
 
-To cite microeco package in publications, please run the following command to get the reference: \code{\strong{citation("microeco")}}\cr
+To cite microeco package in publications, please run the following command to get the reference: \code{citation("microeco")}\cr
 To read the paper, please turn to the publication website \href{https://doi.org/10.1093/femsec/fiaa255}{https://doi.org/10.1093/femsec/fiaa255}
 }
 \keyword{Description}
