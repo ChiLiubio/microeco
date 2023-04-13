@@ -448,11 +448,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$plot_group_distance()
 		#' }
 		plot_group_distance = function(plot_group_order = NULL, ...){
-			group_distance <- self$res_group_distance
-			if(!is.null(self$res_group_distance_diff)){
-				group <- self$res_group_distance_diff_tmp$group
-			}else{
+			if(is.null(self$res_group_distance_diff)){
+				group_distance <- self$res_group_distance
 				group <- self$group
+			}else{
+				group_distance <- self$res_group_distance_diff_tmp$data_alpha
+				group <- self$res_group_distance_diff_tmp$group
 			}
 			if(self$measure %in% c("wei_unifrac", "unwei_unifrac", "bray", "jaccard")){
 				titlename <- switch(self$measure, 
@@ -464,10 +465,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}else{
 				ylabname <- self$measure
 			}
-			if (!is.null(plot_group_order)) {
+			if(!is.null(plot_group_order)) {
 				group_distance[, group] %<>% factor(., levels = plot_group_order)
 			}else{
-				group_distance[, group] %<>% as.factor
+				if(!is.factor(group_distance[, group])){
+					group_distance[, group] %<>% as.factor
+				}
 			}
 			message("The ordered groups are ", paste0(levels(group_distance[, group]), collapse = " "), " ...")
 			
@@ -478,7 +481,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 				temp1$group <- group
 				p <- temp1$plot_alpha(add_sig = FALSE, measure = "group_distance", ...) + ylab(ylabname)
 			}else{
+				# reassign res_diff for the case of customized manipulation on the object
 				self$res_group_distance_diff_tmp$res_diff <- self$res_group_distance_diff
+				# reassign group_distance for factors
+				self$res_group_distance_diff_tmp$data_alpha <- group_distance
 				p <- self$res_group_distance_diff_tmp$plot_alpha(measure = "group_distance", ...) + ylab(ylabname)
 			}
 			p
