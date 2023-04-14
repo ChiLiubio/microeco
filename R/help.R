@@ -22,7 +22,8 @@
 #' \code{\link{trans_func}}\cr
 #' 
 #' To cite microeco package in publications, please run the following command to get the reference: \code{citation("microeco")}\cr
-#' To read the paper, please turn to the publication website \href{https://doi.org/10.1093/femsec/fiaa255}{https://doi.org/10.1093/femsec/fiaa255}
+#' To read the paper, please turn to the publication website 
+#'   \href{https://academic.oup.com/femsec/article/97/2/fiaa255/6041020}{https://academic.oup.com/femsec/article/97/2/fiaa255/6041020}
 #' @keywords Description
 #' @name microeco
 NULL
