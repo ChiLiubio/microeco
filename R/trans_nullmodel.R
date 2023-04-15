@@ -546,7 +546,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' 	  the function can select the data from sample_table to generate a one-column (n x 1) matrix and 
 		#' 	  provide it to the group parameter of \code{tNST} or \code{pNST} function. 
 		#' @param ... paremeters pass to \code{NST::tNST} or \code{NST::pNST} function; see the document of corresponding function for more details.
-		#' @return list stored in object.
+		#' @return res_NST stored in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_NST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE)

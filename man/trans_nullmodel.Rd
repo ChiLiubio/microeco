@@ -666,7 +666,7 @@ provide it to the group parameter of \code{tNST} or \code{pNST} function.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-list stored in object.
+res_NST stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
