@@ -2,10 +2,10 @@
 % Please edit documentation in R/trans_env.R
 \name{trans_env}
 \alias{trans_env}
-\title{Create \code{trans_env} object for the analysis of the effects of environmental factors on communities.}
+\title{Create \code{trans_env} object for analyzing the effects of environmental factors on communities.}
 \description{
 This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
-mantel test, correlation analysis and linear fitting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+mantel test, correlation analysis and linear fitting.
 }
 \examples{
 
@@ -170,18 +170,18 @@ This parameter should be used in the case that all the required environmental da
 Otherwise, please use \code{add_data} parameter.}
 
 \item{\code{add_data}}{default NULL; \code{data.frame} format; provide the environmental data in the format \code{data.frame}; rownames should be sample names.
-This parameter should be used when the your \code{microtable$sample_table} object has no environmental data. 
+This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.}
 
-\item{\code{character2numeric}}{default TRUE; whether transform the characters or factors to numeric attributes.}
+\item{\code{character2numeric}}{default TRUE; whether convert the characters or factors to numeric attributes.}
 
 \item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data;
-If TRUE, the function can run the interpolation with the \code{mice} package; to use this parameter, please first install mice package.}
+If TRUE, the function can run the interpolation with the \code{mice} package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{data_env} stored in the \code{trans_env} object.
+\code{data_env} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -254,7 +254,7 @@ t1$cal_diff(group = "Group", method = "anova")
 \if{html}{\out{<a id="method-trans_env-plot_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-plot_diff}{}}}
 \subsection{Method \code{plot_diff()}}{
-Plotting values of environmental variables across groups and add the significance label.
+Plot environmental variables across groups and add the significance label.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_diff(...)}\if{html}{\out{</div>}}
 }
@@ -334,22 +334,22 @@ Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{v
 \item{\code{feature_sel}}{default FALSE; whether perform the feature selection based on forward selection method.}
 
 \item{\code{taxa_level}}{default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
-If use otu_table; please input "OTU".}
+If use otu_table; please set \code{taxa_level = "OTU"}.}
 
-\item{\code{taxa_filter_thres}}{default NULL; If want to filter taxa, provide the relative abundance threshold.}
+\item{\code{taxa_filter_thres}}{default NULL; The relative abundance threshold used to filter taxa when method is "RDA" or "CCA".}
 
 \item{\code{use_measure}}{default NULL; a name of beta diversity matrix; only useful when parameter \code{method = "dbRDA"};
-If not provided, use the first beta diversity matrix automatically.}
+If not provided, use the first beta diversity matrix in the \code{microtable$beta_diversity} automatically.}
 
 \item{\code{add_matrix}}{default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 only available when method = "dbRDA".}
 
-\item{\code{...}}{paremeters pass to dbrda or rda or cca function according to the input of method.}
+\item{\code{...}}{paremeters pass to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_ordination}, \code{res_ordination_R2}, \code{res_ordination_terms} and \code{res_ordination_axis} in object.
+\code{res_ordination} and \code{res_ordination_R2} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -428,7 +428,7 @@ t1$cal_ordination_envfit()
 \if{html}{\out{<a id="method-trans_env-trans_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-trans_ordination}{}}}
 \subsection{Method \code{trans_ordination()}}{
-transform ordination result for the following plotting.
+Transform ordination results for the following plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$trans_ordination(
   show_taxa = 10,
@@ -458,7 +458,7 @@ transform ordination result for the following plotting.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_ordination_trans} in object.
+\code{res_ordination_trans} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -511,9 +511,9 @@ plot ordination result.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{plot_color}}{default NULL; a colname of sample_table to assign colors to different groups in plot.}
+\item{\code{plot_color}}{default NULL; a colname of \code{sample_table} to assign colors to different groups.}
 
-\item{\code{plot_shape}}{default NULL; a colname of sample_table to assign shapes to different groups in plot.}
+\item{\code{plot_shape}}{default NULL; a colname of \code{sample_table} to assign shapes to different groups.}
 
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.}
 
@@ -625,13 +625,14 @@ Mantel test between beta diversity matrix and environmental data.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.}
+\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in \code{data_env} of the object; 
+if not provided, automatically select the columns with numeric attributes.}
 
-\item{\code{partial_mantel}}{default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.}
+\item{\code{partial_mantel}}{default FALSE; whether use partial mantel test; If TRUE, use other all measurements as the zdis in each calculation.}
 
-\item{\code{add_matrix}}{default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.}
+\item{\code{add_matrix}}{default NULL; additional distance matrix provided when the beta diversity matrix in the dataset is not used.}
 
-\item{\code{use_measure}}{default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
+\item{\code{use_measure}}{default NULL; a name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.}
 
 \item{\code{method}}{default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.}
 
@@ -662,8 +663,8 @@ t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 \if{html}{\out{<a id="method-trans_env-cal_cor"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-cal_cor}{}}}
 \subsection{Method \code{cal_cor()}}{
-Calculating the correlations between taxa abundance and environmental variables.
-Actually, it can also be used for calculating other correlation between any two variables from two tables.
+Calculate the correlations between taxa abundance and environmental variables.
+Actually, it can also be applied for calculating other correlation between any two variables from two tables.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
@@ -766,7 +767,7 @@ Plot correlation heatmap.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_vector}}{default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high value.}
+\item{\code{color_vector}}{default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.}
 
 \item{\code{color_palette}}{default NULL; a customized palette with more color values; if provided, use it instead of color_vector.}
 
@@ -822,7 +823,7 @@ t1$plot_cor(pheatmap = FALSE)
 \if{html}{\out{<a id="method-trans_env-plot_scatterfit"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-plot_scatterfit}{}}}
 \subsection{Method \code{plot_scatterfit()}}{
-Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
+Scatter plot with fitted line. The most important thing is to make sure that the input x and y
  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
  assigned according to the column selection of the \code{data_env} inside.

@@ -1,9 +1,9 @@
 #' @title 
-#' Create \code{trans_env} object for the analysis of the effects of environmental factors on communities.
+#' Create \code{trans_env} object for analyzing the effects of environmental factors on communities.
 #'
 #' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
-#' mantel test, correlation analysis and linear fitting based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>.
+#' mantel test, correlation analysis and linear fitting.
 #'
 #' @export
 trans_env <- R6Class(classname = "trans_env",
@@ -13,12 +13,12 @@ trans_env <- R6Class(classname = "trans_env",
 		#'    This parameter should be used in the case that all the required environmental data is in \code{sample_table} of your \code{microtable} object.
 		#'    Otherwise, please use \code{add_data} parameter.
 		#' @param add_data default NULL; \code{data.frame} format; provide the environmental data in the format \code{data.frame}; rownames should be sample names.
-		#'   This parameter should be used when the your \code{microtable$sample_table} object has no environmental data. 
+		#'   This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 		#'   Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.
-		#' @param character2numeric default TRUE; whether transform the characters or factors to numeric attributes.
+		#' @param character2numeric default TRUE; whether convert the characters or factors to numeric attributes.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
-		#'   If TRUE, the function can run the interpolation with the \code{mice} package; to use this parameter, please first install mice package.
-		#' @return \code{data_env} stored in the \code{trans_env} object.
+		#'   If TRUE, the function can run the interpolation with the \code{mice} package.
+		#' @return \code{data_env} stored in the object.
 		#' @examples
 		#' data(dataset)
 		#' data(env_data_16S)
@@ -52,7 +52,6 @@ trans_env <- R6Class(classname = "trans_env",
 					env_data <- add_data[rownames(add_data) %in% rownames(dataset$sample_table), , drop = FALSE]
 				}
 			}
-			
 			if(!is.null(dataset)){
 				use_dataset <- clone(dataset)
 				if(!is.null(env_data)){
@@ -137,7 +136,7 @@ trans_env <- R6Class(classname = "trans_env",
 			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
-		#' Plotting values of environmental variables across groups and add the significance label.
+		#' Plot environmental variables across groups and add the significance label.
 		#'
 		#' @param ... parameters passed to \code{plot_alpha} of \code{trans_alpha} class. Please see \code{trans_alpha$plot_alpha} function for all the available parameters.
 		plot_diff = function(...){
@@ -195,14 +194,14 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
 		#' @param feature_sel default FALSE; whether perform the feature selection based on forward selection method.
 		#' @param taxa_level default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
-		#'   If use otu_table; please input "OTU".
-		#' @param taxa_filter_thres default NULL; If want to filter taxa, provide the relative abundance threshold.
+		#'   If use otu_table; please set \code{taxa_level = "OTU"}.
+		#' @param taxa_filter_thres default NULL; The relative abundance threshold used to filter taxa when method is "RDA" or "CCA".
 		#' @param use_measure default NULL; a name of beta diversity matrix; only useful when parameter \code{method = "dbRDA"};
-		#' 	 If not provided, use the first beta diversity matrix automatically.
+		#' 	 If not provided, use the first beta diversity matrix in the \code{microtable$beta_diversity} automatically.
 		#' @param add_matrix default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
-		#' @param ... paremeters pass to dbrda or rda or cca function according to the input of method.
-		#' @return \code{res_ordination}, \code{res_ordination_R2}, \code{res_ordination_terms} and \code{res_ordination_axis} in object.
+		#' @param ... paremeters pass to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.
+		#' @return \code{res_ordination} and \code{res_ordination_R2} in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ordination(method = "dbRDA", use_measure = "bray")
@@ -368,7 +367,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' transform ordination result for the following plotting.
+		#' Transform ordination results for the following plot.
 		#'
 		#' @param show_taxa default 10; taxa number shown in the plot.
 		#' @param adjust_arrow_length default FALSE; whether adjust the arrow length to be clearer.
@@ -376,7 +375,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param max_perc_env default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.
 		#' @param min_perc_tax default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.
 		#' @param max_perc_tax default 0.8; used for scaling up the maximum of tax arrow; multiply by the maximum distance between samples and origin.
-		#' @return \code{res_ordination_trans} in object.
+		#' @return \code{res_ordination_trans} in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env = 1)
@@ -448,8 +447,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' plot ordination result.
 		#'
-		#' @param plot_color default NULL; a colname of sample_table to assign colors to different groups in plot.
-		#' @param plot_shape default NULL; a colname of sample_table to assign shapes to different groups in plot.
+		#' @param plot_color default NULL; a colname of \code{sample_table} to assign colors to different groups.
+		#' @param plot_shape default NULL; a colname of \code{sample_table} to assign shapes to different groups.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see ggplot2 tutorial.
 		#' @param env_text_color default "black"; environmental variable text color.
@@ -713,10 +712,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Mantel test between beta diversity matrix and environmental data.
 		#'
-		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
-		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other measurements as the zdis.
-		#' @param add_matrix default NULL; additional distance matrix provided, if you donot want to use the beta diversity matrix in the dataset.
-		#' @param use_measure default NULL; name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
+		#' @param select_env_data default NULL; numeric or character vector to select columns in \code{data_env} of the object; 
+		#' 	 if not provided, automatically select the columns with numeric attributes.
+		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other all measurements as the zdis in each calculation.
+		#' @param add_matrix default NULL; additional distance matrix provided when the beta diversity matrix in the dataset is not used.
+		#' @param use_measure default NULL; a name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
 		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' @param by_group default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.
@@ -786,8 +786,8 @@ trans_env <- R6Class(classname = "trans_env",
 			message('The result is stored in object$res_mantel ...')
 		},
 		#' @description
-		#' Calculating the correlations between taxa abundance and environmental variables.
-		#' Actually, it can also be used for calculating other correlation between any two variables from two tables.
+		#' Calculate the correlations between taxa abundance and environmental variables.
+		#' Actually, it can also be applied for calculating other correlation between any two variables from two tables.
 		#'
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
 		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
@@ -930,7 +930,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Plot correlation heatmap.
 		#'
-		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high value.
+		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.
 		#' @param color_palette default NULL; a customized palette with more color values; if provided, use it instead of color_vector.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
@@ -1128,7 +1128,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' Scatter plot and add fitted line. The most important thing is to make sure that the input x and y
+		#' Scatter plot with fitted line. The most important thing is to make sure that the input x and y
 		#'  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
 		#'  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
 		#'  assigned according to the column selection of the \code{data_env} inside.
