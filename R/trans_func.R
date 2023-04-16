@@ -1,10 +1,10 @@
 #' @title
-#' Create \code{trans_func} object for functional analysis.
+#' Create \code{trans_func} object for functional prediction.
 #'
 #' @description
-#' This class is a wrapper for a series of functional analysis on species and communities, including the prokaryotes function identification based on 
+#' This class is a wrapper for a series of functional prediction analysis on species and communities, including the prokaryotic trait prediction based on 
 #' Louca et al. (2016) <doi:10.1126/science.aaf4507> and Lim et al. (2020) <10.1038/s41597-020-0516-5>, 
-#' or fungi function identification based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>; 
+#' or fungal trait prediction based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>; 
 #' functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 #'
 #' @export
@@ -14,8 +14,9 @@ trans_func <- R6Class(classname = "trans_func",
 		#' Create the \code{trans_func} object. This function can identify the data type for Prokaryotes or Fungi automatically.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @return \code{for_what}: "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for not identified according to the Kingdom information, 
-		#' at this time, if you want to use the functions to identify species traits, you need provide "prok" or "fungi" manually, e.g. \code{dataset$for_what <- "prok"}.
+		#' @return \code{for_what}: "prok" or "fungi" or NA, "prok" represent prokaryotes. "fungi" represent fungi. NA stand for unknown according to the Kingdom information. 
+		#' In this case, if the user still want to use the function to identify species traits, please provide "prok" or "fungi" manually, 
+		#' e.g. \code{t1$for_what <- "prok"}.
 		#' @examples
 		#' data(dataset)
 		#' t1 <- trans_func$new(dataset = dataset)
@@ -35,26 +36,26 @@ trans_func <- R6Class(classname = "trans_func",
 					if(any(grepl("Fungi", all_Kingdom, ignore.case = TRUE))){
 						for_what <- "fungi"
 					}else{
-						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table! 
-							Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi'")
+						message("No Bacteria, Archaea or Fungi found in the Kingdom of tax_table in the input dataset! ",
+							"Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi' !")
 					}
 				}
 			}else{
-				message("No Kingdom found in the tax_table! Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi'")
+				message("No Kingdom column found in the tax_table! Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi'")
 			}
 			self$for_what <- for_what
 		},
 		#' @description
-		#' Confirm traits of each feature by matching the taxonomic assignments to the functional database.
+		#' Identify traits of each feature by matching taxonomic assignments to functional database.
 		#'
-		#' @param prok_database default "FAPROTAX"; "FAPROTAX" or "NJC19"; select a prokaryotic trait database; see the details:
+		#' @param prok_database default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic trait database; see the details:
 		#'   \describe{
 		#'     \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4; Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
 		#'     	  Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
 		#'     \item{\strong{'NJC19'}}{NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. 
 		#'     	  Scientific Data, 7(1). <10.1038/s41597-020-0516-5>}
 		#'   }
-		#' @param fungi_database default "FUNGuild"; "FUNGuild" or "FungalTraits"; select a fungal trait database; see the details:
+		#' @param fungi_database default "FUNGuild"; \code{"FUNGuild"} or \code{"FungalTraits"}; select a fungal trait database; see the details:
 		#'   \describe{
 		#'     \item{\strong{'FUNGuild'}}{Nguyen et al. (2016) FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild.
 		#'     	  Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>}
@@ -354,7 +355,7 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 		},
 		#' @description
-		#' Plot the percentages of species with specific trait in communities or network modules.
+		#' Plot the percentages of species with specific trait in communities.
 		#'
 		#' @param filter_func default NULL; a vector of function names used to show in the plot.
 		#' @param use_group_list default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
@@ -438,9 +439,9 @@ trans_func <- R6Class(classname = "trans_func",
 			g1
 		},
 		#' @description
-		#' Predict functional potential of communities using tax4fun.
+		#' Predict functional potential of communities using \code{tax4fun} package.
 		#' please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
-		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. g__) .
+		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. 'g__') .
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the feature table in local place.
 		#' @param folderReferenceData default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.
