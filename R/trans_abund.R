@@ -164,7 +164,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param facet_color default "grey95"; facet background color.
 		#' @param strip_text default 11; facet text size.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
-		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_angle default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap; 
 		#' @param xtext_size default 10; x axis text size.
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
@@ -188,7 +188,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			facet_color= "grey95",
 			strip_text = 11,
 			legend_text_italic = FALSE,
-			xtext_type_hor = TRUE,
+			xtext_angle = 0,
 			xtext_size = 10,
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
@@ -284,7 +284,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + theme(legend.text = element_text(face = 'italic'))
 			}
 			
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size, xtext_keep = xtext_keep)
+			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size, xtext_keep = xtext_keep)
 
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size))
 			if(xtitle_keep == F) {
@@ -323,7 +323,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param grid_clean default TRUE; whether remove grid lines.
-		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_angle default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap; 
 		#' @param legend_title default "\% Relative\\nAbundance"; legend title text.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
 		#' @param ... paremeters pass to pheatmap when pheatmap = TRUE.
@@ -352,7 +352,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
 			grid_clean = TRUE,
-			xtext_type_hor = TRUE,
+			xtext_angle = 0,
 			legend_title = "% Relative\nAbundance",
 			pheatmap = FALSE,
 			...
@@ -404,7 +404,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if (!is.null(ytext_size)){
 					p <- p + theme(axis.text.y = element_text(size = ytext_size))
 				}
-				p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size, xtext_keep = xtext_keep)
+				p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size, xtext_keep = xtext_keep)
 				if(grid_clean){
 					p <- p + theme(panel.border = element_blank(), panel.grid = element_blank())
 				}
@@ -439,7 +439,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param boxfill default TRUE; Whether fill the box with colors.
 		#' @param middlecolor default "grey95"; The middle line color.
 		#' @param middlesize default 1; The middle line size.
-		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_angle default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap; 
 		#' @param xtext_size default 10; x axis text size.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param ... parameters pass to \code{\link{geom_boxplot}}.
@@ -459,7 +459,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			boxfill = TRUE,
 			middlecolor = "grey95",
 			middlesize = 1,
-			xtext_type_hor = FALSE,
+			xtext_angle = 0,
 			xtext_size = 10,
 			ytitle_size = 17,
 			...
@@ -492,7 +492,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(show_point == T){
 				p <- p + geom_point(size = point_size, color = point_color, alpha = point_alpha, position = "jitter")
 			}
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
+			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size)
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
 
 			if(!is.null(group)) {
@@ -513,7 +513,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param line_size default 0.8; line size.
 		#' @param line_alpha default 0.8; line transparency.
 		#' @param line_type default 1; an integer; line type.
-		#' @param xtext_type_hor default TRUE; x axis text horizontal, if FALSE; text slant.
+		#' @param xtext_angle default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap; 
 		#' @param xtext_size default 10; x axis text size.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @return ggplot2 plot. 
@@ -522,7 +522,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5)
 		#' t1$plot_line(point_size = 3)
 		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
-		#' t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
+		#' t1$plot_line(point_size = 5, errorbar_size = 1, xtext_angle = 30)
 		#' }
 		plot_line = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
@@ -535,7 +535,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			line_size = 0.8, 
 			line_alpha = 0.8, 
 			line_type = 1,
-			xtext_type_hor = FALSE,
+			xtext_angle = 0,
 			xtext_size = 10,
 			ytitle_size = 17
 			){
@@ -556,7 +556,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p <- p + geom_point(size = point_size, alpha = point_alpha, position = position)
 			p <- p + geom_line(size = line_size, alpha = line_alpha, linetype = line_type, position = position)
 			p <- p + ylab(self$ylabname) + guides(col = guide_legend(title=self$taxrank, reverse = TRUE)) + xlab("")
-			p <- p + private$ggplot_xtext_type(xtext_type_hor = xtext_type_hor, xtext_size = xtext_size)
+			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size)
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
 			p <- p + scale_color_manual(values = color_values)
 			
@@ -638,12 +638,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			plot_data
 		},
-		ggplot_xtext_type = function(xtext_type_hor, xtext_size, xtext_keep = TRUE){
+		ggplot_xtext_type = function(xtext_angle, xtext_size, xtext_keep = TRUE){
 			if(xtext_keep){
-				if(xtext_type_hor == T){
+				if(xtext_angle == 0){
 					theme(axis.text.x = element_text(colour = "black", size = xtext_size))
 				}else{
-					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
+					theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
 				}
 			}else{
 				theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())

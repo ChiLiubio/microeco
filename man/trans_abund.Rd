@@ -52,7 +52,7 @@ t1$plot_box(group = "Group")
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5)
 t1$plot_line(point_size = 3)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
-t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
+t1$plot_line(point_size = 5, errorbar_size = 1, xtext_angle = 30)
 }
 
 ## ------------------------------------------------
@@ -163,7 +163,7 @@ Bar plot.
   facet_color = "grey95",
   strip_text = 11,
   legend_text_italic = FALSE,
-  xtext_type_hor = TRUE,
+  xtext_angle = 0,
   xtext_size = 10,
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
@@ -204,7 +204,7 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 
 \item{\code{legend_text_italic}}{default FALSE; whether use italic in legend.}
 
-\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+\item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
 
 \item{\code{xtext_size}}{default 10; x axis text size.}
 
@@ -257,7 +257,7 @@ Plot the heatmap.
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
   grid_clean = TRUE,
-  xtext_type_hor = TRUE,
+  xtext_angle = 0,
   legend_title = "\% Relative\\nAbundance",
   pheatmap = FALSE,
   ...
@@ -309,7 +309,7 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 
 \item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
 
-\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+\item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
 
 \item{\code{legend_title}}{default "\% Relative\\nAbundance"; legend title text.}
 
@@ -351,7 +351,7 @@ Box plot.
   boxfill = TRUE,
   middlecolor = "grey95",
   middlesize = 1,
-  xtext_type_hor = FALSE,
+  xtext_angle = 0,
   xtext_size = 10,
   ytitle_size = 17,
   ...
@@ -381,7 +381,7 @@ Box plot.
 
 \item{\code{middlesize}}{default 1; The middle line size.}
 
-\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+\item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
 
 \item{\code{xtext_size}}{default 10; x axis text size.}
 
@@ -422,7 +422,7 @@ Plot the line chart.
   line_size = 0.8,
   line_alpha = 0.8,
   line_type = 1,
-  xtext_type_hor = FALSE,
+  xtext_angle = 0,
   xtext_size = 10,
   ytitle_size = 17
 )}\if{html}{\out{</div>}}
@@ -451,7 +451,7 @@ Plot the line chart.
 
 \item{\code{line_type}}{default 1; an integer; line type.}
 
-\item{\code{xtext_type_hor}}{default TRUE; x axis text horizontal, if FALSE; text slant.}
+\item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
 
 \item{\code{xtext_size}}{default 10; x axis text size.}
 
@@ -468,7 +468,7 @@ ggplot2 plot.
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5)
 t1$plot_line(point_size = 3)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Genus", ntaxa = 5, groupmean = "Group")
-t1$plot_line(point_size = 5, errorbar_size = 1, xtext_type_hor = TRUE)
+t1$plot_line(point_size = 5, errorbar_size = 1, xtext_angle = 30)
 }
 }
 \if{html}{\out{</div>}}
