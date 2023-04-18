@@ -167,8 +167,7 @@ Bar plot.
   xtext_size = 10,
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
-  ytitle_size = 17,
-  ylab_title = NULL
+  ytitle_size = 17
 )}\if{html}{\out{</div>}}
 }
 
@@ -213,8 +212,6 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 \item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
-
-\item{\code{ylab_title}}{default NULL; y axis title.}
 }
 \if{html}{\out{</div>}}
 }

@@ -169,7 +169,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
-		#' @param ylab_title default NULL; y axis title.
 		#' @return ggplot2 plot. 
 		#' @examples
 		#' \donttest{
@@ -192,8 +191,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtext_size = 10,
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
-			ytitle_size = 17,
-			ylab_title = NULL
+			ytitle_size = 17
 			){
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
@@ -256,12 +254,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
 				}
 			}
-			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("")
-			if(!is.null(ylab_title)){
-				p <- p + ylab(ylab_title)
-			}else{
-				p <- p + ylab(self$ylabname)		
-			}
+			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("") + ylab(self$ylabname)
+			
 			if(!is.null(facet)){
 				if(length(facet) == 1){
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
