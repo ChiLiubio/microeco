@@ -286,16 +286,20 @@ microtable <- R6Class(classname = "microtable",
 		#' dataset$add_rownames2taxonomy()
 		#' }
 		add_rownames2taxonomy = function(use_name = "OTU"){
+			self$tidy_dataset()
 			if(is.null(self$tax_table)){
-				stop("The tax_table in the microtable object is NULL ! However it is necessary!")
+				message("The tax_table in the microtable object is NULL! Create one ...")
+				tax_table_use <- data.frame(rownames(self$otu_table), stringsAsFactors = FALSE)
+				rownames(tax_table_use) <- rownames(self$otu_table)
 			}else{
 				tax_table_use <- self$tax_table
-			}
-			tax_table_use <- data.frame(tax_table_use, rownames(tax_table_use), check.names = FALSE, stringsAsFactors = FALSE)
-			if(use_name %in% colnames(tax_table_use)){
-				stop("The input use_name: ", use_name, " has been used in the raw tax_table! Please check it!")
+				tax_table_use <- data.frame(tax_table_use, rownames(tax_table_use), check.names = FALSE, stringsAsFactors = FALSE)
+				if(use_name %in% colnames(tax_table_use)){
+					stop("The input use_name: ", use_name, " has been used in the raw tax_table! Please check it!")
+				}
 			}
 			colnames(tax_table_use)[ncol(tax_table_use)] <- use_name
+			message("Use ", use_name, " as the name of new column in tax_table ...")
 			self$tax_table <- tax_table_use
 		},
 		#' @description
