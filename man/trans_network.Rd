@@ -2,11 +2,11 @@
 % Please edit documentation in R/trans_network.R
 \name{trans_network}
 \alias{trans_network}
-\title{Create \code{trans_network} object for co-occurrence network analysis.}
+\title{Create \code{trans_network} object for network analysis.}
 \description{
 This class is a wrapper for a series of network analysis methods, 
 including the network construction, network attributes analysis,
-eigengene analysis, network subsetting, node and edge properties, network visualization and other network operations.
+eigengene analysis, network subsetting, node and edge properties, network visualization and other operations.
 }
 \examples{
 
@@ -217,26 +217,27 @@ Create the \code{trans_network} object, store the important intermediate data
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
+\item{\code{dataset}}{default NULL; the object of \code{\link{microtable}} class. Default NULL means customized analysis.}
 
-\item{\code{cor_method}}{default NULL; NULL or one of "bray", "pearson", "spearman", "bicor", "sparcc", "cclasso" and "ccrepe";
+\item{\code{cor_method}}{default NULL; NULL or one of "bray", "pearson", "spearman", "sparcc", "bicor", "cclasso" and "ccrepe";
 All the methods refered to \code{NetCoMi} package are performed based on \code{netConstruct} function of \code{NetCoMi} package and require
 \code{NetCoMi} to be installed from Github (\href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi});
 For the algorithm details, please see Peschel et al. 2020 Brief. Bioinform <doi: 10.1093/bib/bbaa290>;
 \describe{
   \item{\strong{NULL}}{NULL denotes non-correlation network, i.e. do not use correlation-based network. 
-    If so, the return res_cor_p list will be NULL, and COR option in \code{network_method} parameter of \code{cal_network} function can not be used.}
+    If so, the return res_cor_p list will be NULL.}
   \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on \code{vegan::vegdist} function}
   \item{\strong{'pearson'}}{Pearson correlation; If \code{use_WGCNA_pearson_spearman} and \code{use_NetCoMi_pearson_spearman} are both FALSE, 
     use the function \code{cor.test} in R; \code{use_WGCNA_pearson_spearman = TRUE} invoke \code{corAndPvalue} function of \code{WGCNA} package; 
     \code{use_NetCoMi_pearson_spearman = TRUE} invoke \code{netConstruct} function of \code{NetCoMi} package}
   \item{\strong{'spearman'}}{Spearman correlation; other details are same with the 'pearson' option}
-  \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on \code{WGCNA::bicor} function; 
-    require \code{WGCNA} and \code{NetCoMi} packages to be installed}
   \item{\strong{'sparcc'}}{SparCC algorithm (Friedman & Alm, PLoS Comp Biol, 2012, <doi:10.1371/journal.pcbi.1002687>);
        use NetCoMi package when \code{use_sparcc_method = "NetCoMi"}; use \code{SpiecEasi} package when \code{use_sparcc_method = "SpiecEasi"} 
        and require \code{SpiecEasi} to be installed from Github
        (\href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi})}
+  \item{\strong{'bicor'}}{Calculate biweight midcorrelation efficiently for matrices based on \code{WGCNA::bicor} function; 
+    This option can invoke \code{netConstruct} function of \code{NetCoMi} package;
+    Make sure \code{WGCNA} and \code{NetCoMi} packages are both installed}
   \item{\strong{'cclasso'}}{Correlation inference of Composition data through Lasso method based on \code{netConstruct} function of \code{NetCoMi} package; 
        for details, see \code{NetCoMi::cclasso} function}
   \item{\strong{'ccrepe'}}{Calculates compositionality-corrected p-values and q-values for compositional data 
@@ -251,7 +252,7 @@ The important difference between NetCoMi and others is the features of zero hand
 \item{\code{use_sparcc_method}}{default \code{c("NetCoMi", "SpiecEasi")[1]}; 
 use \code{NetCoMi} package or \code{SpiecEasi} package to perform SparCC when \code{cor_method = "sparcc"}.}
 
-\item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature table directly; 
+\item{\code{taxa_level}}{default "OTU"; taxonomic rank; 'OTU' denotes using feature abundance table; 
 other available options should be one of the colnames of \code{tax_table} of input dataset.}
 
 \item{\code{filter_thres}}{default 0; the relative abundance threshold.}
@@ -263,7 +264,7 @@ other available options should be one of the colnames of \code{tax_table} of inp
 \item{\code{env_cols}}{default NULL; numeric or character vector to select the column names of environmental data in dataset$sample_table;
 the environmental data can be used in the correlation network (as the nodes) or \code{FlashWeave} network.}
 
-\item{\code{add_data}}{default NULL; provide environmental table additionally instead of \code{env_cols} parameter; rownames must be sample names.}
+\item{\code{add_data}}{default NULL; provide environmental variable table additionally instead of \code{env_cols} parameter; rownames must be sample names.}
 
 \item{\code{...}}{parameters pass to \code{NetCoMi::netConstruct} for other operations, such as zero handling and/or data normalization 
 when cor_method and other parameters refer to \code{NetCoMi} package.}
@@ -294,7 +295,7 @@ t1 <- trans_network$new(dataset = dataset, cor_method = NULL)
 \if{html}{\out{<a id="method-trans_network-cal_network"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-cal_network}{}}}
 \subsection{Method \code{cal_network()}}{
-Construct network based on the correlation method or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
+Construct network based on the \code{igraph} package or \code{SpiecEasi} package or \code{julia FlashWeave} package or \code{beemStatic} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$cal_network(
   network_method = c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic")[1],
@@ -325,27 +326,26 @@ Construct network based on the correlation method or \code{SpiecEasi} package or
 \code{network_method = NULL} means skipping the network construction for the customized use.
 The option details: 
 \describe{
-  \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrixes in \code{object$res_cor_p} returned from \code{trans_network$new}; 
+  \item{\strong{'COR'}}{correlation-based network; use the correlation and p value matrices in \code{res_cor_p} list stored in the object; 
         See Deng et al. (2012) <doi:10.1186/1471-2105-13-113> for other details}
-  \item{\strong{'SpiecEasi'}}{\code{SpiecEasi} network; relies on algorithms for sparse neighborhood and inverse covariance selection;
+  \item{\strong{'SpiecEasi'}}{\code{SpiecEasi} network; relies on algorithms of sparse neighborhood and inverse covariance selection;
         belong to the category of conditional dependence and graphical models;
         see \href{https://github.com/zdk123/SpiecEasi}{https://github.com/zdk123/SpiecEasi} for installing the R package; 
         see Kurtz et al. (2015) <doi:10.1371/journal.pcbi.1004226> for the algorithm details}
   \item{\strong{'gcoda'}}{hypothesize the logistic normal distribution of microbiome data; use penalized maximum likelihood method to estimate
-        the sparse structure of inverse covariance for latent normal variables to address the high
-        dimensionality of the microbiome data;
+        the sparse structure of inverse covariance for latent normal variables to address the high dimensionality of the microbiome data;
         belong to the category of conditional dependence and graphical models;
         depend on the R \code{NetCoMi} package \href{https://github.com/stefpeschel/NetCoMi}{https://github.com/stefpeschel/NetCoMi}; 
         see FANG et al. (2017) <doi:10.1089/cmb.2017.0054> for the algorithm details}
   \item{\strong{'FlashWeave'}}{\code{FlashWeave} network; Local-to-global learning framework; belong to the category of conditional dependence and graphical models;
      good performance on heterogenous datasets to find direct associations among taxa;
      see \href{https://github.com/meringlab/FlashWeave.jl}{https://github.com/meringlab/FlashWeave.jl} for installing \code{julia} language and 
-     \code{FlashWeave} package; julia must be in the computer system env path, otherwise the program can not find julia;
+     \code{FlashWeave} package; julia must be in the computer system env path, otherwise the program can not find it;
      see Tackmann et al. (2019) <doi:10.1016/j.cels.2019.08.002> for the algorithm details}
   \item{\strong{'beemStatic'}}{\code{beemStatic} network;
      extend generalized Lotka-Volterra model to cases of cross-sectional datasets to infer interaction among taxa based on expectation-maximization algorithm;
      see \href{https://github.com/CSB5/BEEM-static}{https://github.com/CSB5/BEEM-static} for installing the R package;
-     see Li et al. (2021) <doi:10.1371/journal.pcbi.1009343> for algorithm details}
+     see Li et al. (2021) <doi:10.1371/journal.pcbi.1009343> for the algorithm details}
 }}
 
 \item{\code{COR_p_thres}}{default 0.01; the p value threshold for the correlation-based network.}
@@ -368,10 +368,10 @@ see https://doi.org/10.1186/1471-2105-13-113}
 
 \item{\code{FlashWeave_tempdir}}{default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.}
 
-\item{\code{FlashWeave_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the object$env_data in the object and
-generate a file for meta_data_path parameter of FlashWeave.}
+\item{\code{FlashWeave_meta_data}}{default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the \code{env_data} in the object and
+generate a file for meta_data_path parameter of FlashWeave package.}
 
-\item{\code{FlashWeave_other_para}}{default \code{"alpha=0.01,sensitive=true,heterogeneous=true"}; the parameters used for FlashWeave;
+\item{\code{FlashWeave_other_para}}{default \code{"alpha=0.01,sensitive=true,heterogeneous=true"}; the parameters passed to julia FlashWeave package;
 user can change the parameters or add more according to FlashWeave help document;
 An exception is meta_data_path parameter as it is generated based on the data inside the object, see FlashWeave_meta_data parameter for the description.}
 
