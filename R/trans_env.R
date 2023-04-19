@@ -138,7 +138,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Plot environmental variables across groups and add the significance label.
 		#'
-		#' @param ... parameters passed to \code{plot_alpha} of \code{trans_alpha} class. Please see \code{trans_alpha$plot_alpha} function for all the available parameters.
+		#' @param ... parameters passed to \code{plot_alpha} in \code{\link{trans_alpha}} class. 
+		#' 	 Please see \code{plot_alpha} function of \code{\link{trans_alpha}} for all the available parameters.
 		plot_diff = function(...){
 			if(is.null(self$res_diff_tmp)){
 				stop("Please first run cal_diff function!")
@@ -200,7 +201,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' 	 If not provided, use the first beta diversity matrix in the \code{microtable$beta_diversity} automatically.
 		#' @param add_matrix default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
-		#' @param ... paremeters pass to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.
+		#' @param ... paremeters passed to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.
 		#' @return \code{res_ordination} and \code{res_ordination_R2} in the object.
 		#' @examples
 		#' \donttest{
@@ -332,7 +333,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Use anova to test the significance of the terms and axis in ordination.
 		#'
-		#' @param ... the parameters passing to \code{anova} function.
+		#' @param ... the parameters passed to \code{anova} function.
 		#' @return \code{res_ordination_terms and res_ordination_axis} in object.
 		#' @examples
 		#' \donttest{
@@ -352,7 +353,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Fits each environmental vector onto the ordination to obtain the contribution of each variable.
 		#'
-		#' @param ... the parameters passing to \code{vegan::envfit} function.
+		#' @param ... the parameters passed to \code{vegan::envfit} function.
 		#' @return \code{res_ordination_envfit} in object.
 		#' @examples
 		#' \donttest{
@@ -488,7 +489,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_nudge_y default NULL; numeric vector to adjust the taxa text y axis position; passed to nudge_y parameter of ggrepel::geom_text_repel function;
 		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows_spe}. For example, 
 		#'   if 3 taxa are shown, taxa_nudge_y should be something like \code{c(-0.2, 0, 0.4)}.
-		#' @param ... paremeters pass to \code{geom_point} for controlling sample points.
+		#' @param ... paremeters passed to \code{geom_point} for controlling sample points.
 		#' @return ggplot object.
 		#' @examples
 		#' \donttest{
@@ -720,7 +721,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' @param by_group default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.
-		#' @param ... paremeters pass to \code{\link{mantel}} of vegan package.
+		#' @param ... paremeters passed to \code{\link{mantel}} of vegan package.
 		#' @return \code{res_mantel} in object.
 		#' @examples
 		#' \donttest{
@@ -949,7 +950,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".
 		#' @param text_y_position default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
-		#' @param ... paremeters pass to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.
+		#' @param ... paremeters passed to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.
 		#' @return plot.
 		#' @examples
 		#' \donttest{
@@ -1173,7 +1174,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
 		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
 		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
-		#' @param ... other arguments to pass to \code{geom_text} or \code{geom_label}.
+		#' @param ... other arguments passed to \code{geom_text} or \code{geom_label}.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{

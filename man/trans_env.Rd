@@ -262,7 +262,8 @@ Plot environmental variables across groups and add the significance label.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters passed to \code{plot_alpha} of \code{trans_alpha} class. Please see \code{trans_alpha$plot_alpha} function for all the available parameters.}
+\item{\code{...}}{parameters passed to \code{plot_alpha} in \code{\link{trans_alpha}} class. 
+Please see \code{plot_alpha} function of \code{\link{trans_alpha}} for all the available parameters.}
 }
 \if{html}{\out{</div>}}
 }
@@ -344,7 +345,7 @@ If not provided, use the first beta diversity matrix in the \code{microtable$bet
 \item{\code{add_matrix}}{default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 only available when method = "dbRDA".}
 
-\item{\code{...}}{paremeters pass to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.}
+\item{\code{...}}{paremeters passed to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.}
 }
 \if{html}{\out{</div>}}
 }
@@ -376,7 +377,7 @@ Use anova to test the significance of the terms and axis in ordination.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{the parameters passing to \code{anova} function.}
+\item{\code{...}}{the parameters passed to \code{anova} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -406,7 +407,7 @@ Fits each environmental vector onto the ordination to obtain the contribution of
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{the parameters passing to \code{vegan::envfit} function.}
+\item{\code{...}}{the parameters passed to \code{vegan::envfit} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -578,7 +579,7 @@ if 3 taxa are shown, taxa_nudge_x should be something like \code{c(0.3, -0.2, 0)
 default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows_spe}. For example, 
 if 3 taxa are shown, taxa_nudge_y should be something like \code{c(-0.2, 0, 0.4)}.}
 
-\item{\code{...}}{paremeters pass to \code{geom_point} for controlling sample points.}
+\item{\code{...}}{paremeters passed to \code{geom_point} for controlling sample points.}
 }
 \if{html}{\out{</div>}}
 }
@@ -640,7 +641,7 @@ if not provided, automatically select the columns with numeric attributes.}
 
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.}
 
-\item{\code{...}}{paremeters pass to \code{\link{mantel}} of vegan package.}
+\item{\code{...}}{paremeters passed to \code{\link{mantel}} of vegan package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -801,7 +802,7 @@ Only available when pheatmap = FALSE.}
 
 \item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
 
-\item{\code{...}}{paremeters pass to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.}
+\item{\code{...}}{paremeters passed to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.}
 }
 \if{html}{\out{</div>}}
 }
@@ -932,7 +933,7 @@ If provided, overlook the levels in the group of dataset$sample_table.}
 
 \item{\code{lm_squ_trim}}{default 2; trim the decimal places of regression R square.}
 
-\item{\code{...}}{other arguments to pass to \code{geom_text} or \code{geom_label}.}
+\item{\code{...}}{other arguments passed to \code{geom_text} or \code{geom_label}.}
 }
 \if{html}{\out{</div>}}
 }
