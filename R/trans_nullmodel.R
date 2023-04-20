@@ -591,6 +591,31 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}else{
 				NST::nst.panova(nst.result = self$res_NST, ...)
 			}
+		},
+		#' @description
+		#' Convert NST paired long format table to symmetric matrix form.
+		#'
+		#' @param column default 10; which column is selected for the conversion. See the columns of \code{res_NST$index.pair} stored in the object.
+		#' @return symmetric matrix.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_NST_convert(column = 10)
+		#' }
+		cal_NST_convert = function(column = 10){
+			if(is.null(self$res_NST)){
+				stop("Please first run cal_NST function!")
+			}
+			if(length(column) > 1){
+				message("The column has multiple elements! Only select the first one ...")
+				column <- column[1]
+			}
+			if(column > ncol(self$res_NST$index.pair)){
+				stop("Please provide a correct column number!")
+			}
+			message("Select the column: ", colnames(self$res_NST$index.pair)[column], " ...")
+			res <- private$fin_matrix_full(self$res_NST$index.pair[, c(1, 2, column)])
+			res <- private$fin_matrix_convert(res)			
+			res
 		}
 	),
 	private = list(
@@ -601,19 +626,31 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		},
 		fin_matrix = function(all_samples, beta_obs_z){
 			res <- data.frame(t(combn(all_samples, 2)), beta_obs_z)
-			colnames(res) <- c("S1", "S2", "distance")
-			res1 <- rbind.data.frame(
-				res, 
-				data.frame(S1 = res$S2, S2 = res$S1, distance = res$distance), 
-				data.frame(S1 = all_samples, S2 = all_samples, distance = 0)
+			res <- private$fin_matrix_full(res)
+			res <- private$fin_matrix_convert(res, ordered_names = all_samples)			
+			res
+		},
+		fin_matrix_full = function(longdata){
+			colnames(longdata) <- c("S1", "S2", "distance")
+			sample_names <- c(longdata[, 1], longdata[, 2]) %>% unique
+			longdatafull <- rbind.data.frame(
+				longdata, 
+				data.frame(S1 = longdata$S2, S2 = longdata$S1, distance = longdata$distance), 
+				data.frame(S1 = sample_names, S2 = sample_names, distance = 0)
 				)
-			res1 <- reshape2::dcast(res1, S1~S2, value.var = "distance") %>% 
+			longdatafull
+		},
+		fin_matrix_convert = function(longdatafull, ordered_names = NULL){
+			if(is.null(ordered_names)){
+				ordered_names <- longdatafull[, 1] %>% unique
+			}
+			square_matrix <- reshape2::dcast(longdatafull, S1~S2, value.var = "distance") %>% 
 				`row.names<-`(.[,1]) %>% 
 				.[, -1, drop = FALSE] %>%
-				.[all_samples, all_samples] %>% 
+				.[ordered_names, ordered_names] %>% 
 				as.matrix
 			
-			res1
+			square_matrix
 		},
 		betampd = function(comm = NULL, dis = NULL, abundance.weighted = FALSE){
 			dis %<>% .[colnames(comm), colnames(comm)]

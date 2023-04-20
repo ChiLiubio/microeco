@@ -128,6 +128,14 @@ t1$cal_NST(group = "Group", dist.method = "bray", output.rand = TRUE, SES = TRUE
 \dontrun{
 t1$cal_NST_test()
 }
+
+## ------------------------------------------------
+## Method `trans_nullmodel$cal_NST_convert`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_NST_convert(column = 10)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -146,6 +154,7 @@ t1$cal_NST_test()
 \item \href{#method-trans_nullmodel-cal_Cscore}{\code{trans_nullmodel$cal_Cscore()}}
 \item \href{#method-trans_nullmodel-cal_NST}{\code{trans_nullmodel$cal_NST()}}
 \item \href{#method-trans_nullmodel-cal_NST_test}{\code{trans_nullmodel$cal_NST_test()}}
+\item \href{#method-trans_nullmodel-cal_NST_convert}{\code{trans_nullmodel$cal_NST_convert()}}
 \item \href{#method-trans_nullmodel-clone}{\code{trans_nullmodel$clone()}}
 }
 }
@@ -704,6 +713,36 @@ list. See the Return part of \code{NST::nst.boot} function or \code{NST::nst.pan
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$cal_NST_test()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_nullmodel-cal_NST_convert"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_NST_convert}{}}}
+\subsection{Method \code{cal_NST_convert()}}{
+Convert NST paired long format table to symmetric matrix form.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_NST_convert(column = 10)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{column}}{default 10; which column is selected for the conversion. See the columns of \code{res_NST$index.pair} stored in the object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+symmetric matrix.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_NST_convert(column = 10)
 }
 }
 \if{html}{\out{</div>}}
