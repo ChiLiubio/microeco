@@ -1,5 +1,5 @@
 #' @title 
-#' Create \code{trans_env} object for analyzing the effects of environmental factors on communities.
+#' Create \code{trans_env} object to analyze the effects of environmental factors on communities.
 #'
 #' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
@@ -85,15 +85,15 @@ trans_env <- R6Class(classname = "trans_env",
 			message("Env data is stored in object$data_env ...")
 		},
 		#' @description
-		#' Test the difference of environmental variable across groups.
+		#' Test the difference of environmental variables across groups.
 		#'
-		#' @param group default NULL; a colname of sample_table used to compare values across groups.
-		#' @param by_group default NULL; perform the differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).
+		#' @param group default NULL; a colname of \code{sample_table} used to compare values across groups.
+		#' @param by_group default NULL; perform differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
-		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
+		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups}
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
 		#'     	  For multi-factor anova, see \code{aov}}
@@ -102,9 +102,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'   }
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
-		#' @return \code{res_diff} in object.
+		#' @return \code{res_diff} stored in the object.
 		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
-		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
+		#'   For non-parametric methods, median value; For t.test, mean value.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(group = "Group", method = "KW")
@@ -153,7 +153,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param group default NULL; a colname of sample_table; used to perform calculations for different groups.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.
 		#' @param alpha default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.
-		#' @param ... default parameters passed to \code{GGally::ggpairs}.
+		#' @param ... parameters passed to \code{GGally::ggpairs}.
 		#' @return \code{ggmatrix}.
 		#' @examples
 		#' \dontrun{
@@ -196,13 +196,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param feature_sel default FALSE; whether perform the feature selection based on forward selection method.
 		#' @param taxa_level default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
 		#'   If use otu_table; please set \code{taxa_level = "OTU"}.
-		#' @param taxa_filter_thres default NULL; The relative abundance threshold used to filter taxa when method is "RDA" or "CCA".
-		#' @param use_measure default NULL; a name of beta diversity matrix; only useful when parameter \code{method = "dbRDA"};
+		#' @param taxa_filter_thres default NULL; relative abundance threshold used to filter taxa when method is "RDA" or "CCA".
+		#' @param use_measure default NULL; a name of beta diversity matrix; only available when parameter \code{method = "dbRDA"};
 		#' 	 If not provided, use the first beta diversity matrix in the \code{microtable$beta_diversity} automatically.
 		#' @param add_matrix default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
-		#' @param ... paremeters passed to \code{dbrda}, \code{rda} or \code{cca} function according to the input of \code{method} parameter.
-		#' @return \code{res_ordination} and \code{res_ordination_R2} in the object.
+		#' @param ... paremeters passed to \code{dbrda}, \code{rda} or \code{cca} function according to the \code{method} parameter.
+		#' @return \code{res_ordination} and \code{res_ordination_R2} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ordination(method = "dbRDA", use_measure = "bray")
@@ -333,8 +333,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Use anova to test the significance of the terms and axis in ordination.
 		#'
-		#' @param ... the parameters passed to \code{anova} function.
-		#' @return \code{res_ordination_terms and res_ordination_axis} in object.
+		#' @param ... parameters passed to \code{anova} function.
+		#' @return \code{res_ordination_terms and res_ordination_axis} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ordination_anova()
@@ -351,10 +351,10 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' Fits each environmental vector onto the ordination to obtain the contribution of each variable.
+		#' Fit each environmental vector onto the ordination to obtain the contribution of each variable.
 		#'
 		#' @param ... the parameters passed to \code{vegan::envfit} function.
-		#' @return \code{res_ordination_envfit} in object.
+		#' @return \code{res_ordination_envfit} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_ordination_envfit()
@@ -376,7 +376,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param max_perc_env default 0.8; used for scaling up the maximum of env arrow; multiply by the maximum distance between samples and origin.
 		#' @param min_perc_tax default 0.1; used for scaling up the minimum of tax arrow; multiply by the maximum distance between samples and origin.
 		#' @param max_perc_tax default 0.8; used for scaling up the maximum of tax arrow; multiply by the maximum distance between samples and origin.
-		#' @return \code{res_ordination_trans} in the object.
+		#' @return \code{res_ordination_trans} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$trans_ordination(adjust_arrow_length = TRUE, min_perc_env = 0.1, max_perc_env = 1)
@@ -458,7 +458,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_arrow_color default "firebrick1"; taxa arrow color.
 		#' @param env_text_size default 3.7; environmental variable text size.
 		#' @param taxa_text_size default 3; taxa text size.
-		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text in the plot.
+		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text.
 		#' @param plot_type default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
 		#'   \describe{
 		#'     \item{\strong{'point'}}{add point}
@@ -466,15 +466,15 @@ trans_env <- R6Class(classname = "trans_env",
 		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
 		#'     \item{\strong{'centroid'}}{add centroid line of each group}
 		#'   }
-		#' @param point_size default 3; point size in plot when "point" is in plot_type.
-		#' @param point_alpha default .8; point transparency in plot when "point" is in plot_type.
-		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in plot_type.
-		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in plot_type.
-		#' @param centroid_segment_linetype default 3; an integer; the line type related with centroid in plot when "centroid" is in plot_type.
+		#' @param point_size default 3; point size in plot when "point" is in \code{plot_type}.
+		#' @param point_alpha default .8; point transparency in plot when "point" is in \code{plot_type}.
+		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in \code{plot_type}.
+		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in \code{plot_type}.
+		#' @param centroid_segment_linetype default 3; an integer; the line type related with centroid in plot when "centroid" is in \code{plot_type}.
 		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
-		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in plot_type.
-		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in plot_type.
-		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in plot_type; see type in \code{\link{stat_ellipse}}.
+		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in \code{plot_type}.
+		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in \code{plot_type}.
+		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type}; see type in \code{\link{stat_ellipse}}.
 		#' @param add_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
 		#' @param env_nudge_x default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of \code{ggrepel::geom_text_repel} function;
 		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows}. For example, 
@@ -533,7 +533,7 @@ trans_env <- R6Class(classname = "trans_env",
 			...
 			){
 			if(is.null(self$res_ordination_trans)){
-				stop("Please first run trans_ordination function !")
+				stop("Please first run trans_ordination function!")
 			}
 			if(is.null(plot_color)){
 				if(any(c("ellipse", "chull", "centroid") %in% plot_type)){
@@ -787,11 +787,11 @@ trans_env <- R6Class(classname = "trans_env",
 			message('The result is stored in object$res_mantel ...')
 		},
 		#' @description
-		#' Calculate the correlations between taxa abundance and environmental variables.
-		#' Actually, it can also be applied for calculating other correlation between any two variables from two tables.
+		#' Calculate the correlations between taxonomic abundance and environmental variables.
+		#' Actually, it can also be applied to other correlation between any two variables from two tables.
 		#'
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
-		#'    "all": use all merged taxa abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
+		#'    "all": use all merged taxonomic abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
 		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
@@ -812,7 +812,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
-		#' @return \code{res_cor} in object.
+		#' @return \code{res_cor} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
@@ -950,7 +950,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".
 		#' @param text_y_position default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
-		#' @param ... paremeters passed to \code{ggplot2::geom_tile} or pheatmap, depending on the \code{pheatmap} parameter is FALSE or TRUE.
+		#' @param ... paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.
 		#' @return plot.
 		#' @examples
 		#' \donttest{
@@ -1129,36 +1129,37 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' Scatter plot with fitted line. The most important thing is to make sure that the input x and y
+		#' 	Scatter plot with fitted line based on the correlation or regression.\cr
+		#' 	The most important thing is to make sure that the input x and y
 		#'  have correponding sample orders. If one of x and y is a matrix, the other will be also transformed to matrix with Euclidean distance.
 		#'  Then, both of them are transformed to be vectors. If x or y is a vector with a single value, x or y will be
-		#'  assigned according to the column selection of the \code{data_env} inside.
+		#'  assigned according to the column selection of the \code{data_env} in the object.
 		#'
-		#' @param x default NULL; a single numeric or character value or a vector or a distance matrix used for the x axis.
-		#'     If x is a single value, it will be used to select the column of \code{data_env} inside.
+		#' @param x default NULL; a single numeric or character value, a vector, or a distance matrix used for the x axis.
+		#'     If x is a single value, it will be used to select the column of \code{data_env} in the object.
 		#'     If x is a distance matrix, it will be transformed to be a vector.
-		#' @param y default NULL; a single numeric or character value or a vector or a distance matrix used for the y axis.
-		#'     If y is a single value, it will be used to select the column of \code{data_env} inside.
+		#' @param y default NULL; a single numeric or character value, a vector, or a distance matrix used for the y axis.
+		#'     If y is a single value, it will be used to select the column of \code{data_env} in the object.
 		#'     If y is a distance matrix, it will be transformed to be a vector.
-		#' @param group default NULL; a character vector; if length is 1, must be a colname of dataset$sample_table;
-		#'    Otherwise, group should be a vector with same length of x/y (for vector) or ncol of x/y (for matrix).
-		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot when group is not NULL; 
-		#' 	  If group_order is NULL and group is provided, the function can first check whether the group column of dataset$sample_table is factor. 
-		#' 	  If provided, overlook the levels in the group of dataset$sample_table.
+		#' @param group default NULL; a character vector; if length is 1, must be a colname of \code{sample_table} in the input dataset;
+		#'    Otherwise, group should be a vector having same length with x/y (for vector) or column number of x/y (for matrix).
+		#' @param group_order default NULL; a vector used to order groups, i.e. reorder the legend and colors in plot when group is not NULL; 
+		#' 	  If group_order is NULL and group is provided, the function can first check whether the group column of \code{sample_table} is factor. 
+		#' 	  If group_order is provided, disable the group orders or factor levels in the \code{group} column of \code{sample_table}.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for different groups.
 		#' @param shape_values default NULL; a numeric vector for point shape types of groups when group is not NULL, see ggplot2 tutorial.
 		#' @param type default c("cor", "lm")[1]; "cor": correlation; "lm" for regression.
 		#' @param cor_method default "pearson"; one of "pearson", "kendall" and "spearman"; correlation method.
 		#' @param label_sep default ";"; the separator string between different label parts.
-		#' @param label.x.npc default "left"; can be numeric or character vector of the same length as the number of groups and/or panels. If too short they will be recycled.
+		#' @param label.x.npc default "left"; can be numeric or character vector of the same length as the number of groups and/or panels. If too short, they will be recycled.
 		#' \describe{
 		#'   \item{numeric}{value should be between 0 and 1. Coordinates to be used for positioning the label, expressed in "normalized parent coordinates"}
 		#'   \item{character}{allowed values include: i) one of c('right', 'left', 'center', 'centre', 'middle') for x-axis; ii) and one of 
 		#'      c( 'bottom', 'top', 'center', 'centre', 'middle') for y-axis.}
 		#' }
-		#' @param label.y.npc default "top"; same usage with label.x.npc; see also label.y.npc parameter of \code{ggpubr::stat_cor} package.
-		#' @param label.x default NULL; x axis absolute position for adding the statictic label.
-		#' @param label.y default NULL; x axis absolute position for adding the statictic label.
+		#' @param label.y.npc default "top"; same usage with label.x.npc; also see \code{label.y.npc} parameter of \code{ggpubr::stat_cor} function.
+		#' @param label.x default NULL; x axis absolute position for adding the statistic label.
+		#' @param label.y default NULL; x axis absolute position for adding the statistic label.
 		#' @param x_axis_title default ""; the title of x axis.
 		#' @param y_axis_title default ""; the title of y axis.
 		#' @param point_size default 5; point size value.
@@ -1167,13 +1168,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param line_se default TRUE; Whether show the confidence interval for the fitting.
 		#' @param line_se_color default "grey70"; the color to fill the confidence interval when \code{line_se = TRUE}.
 		#' @param line_alpha default 1; alpha value for the line color transparency.
-		#' @param line_color default "black"; fitted line color only useful when group = NULL.
+		#' @param line_color default "black"; fitted line color; only available when \code{group = NULL}.
 		#' @param pvalue_trim default 4; trim the decimal places of p value.
 		#' @param cor_coef_trim default 3; trim the decimal places of correlation coefficient.
 		#' @param lm_equation default TRUE; whether include the equation in the label when \code{type = "lm"}.
-		#' @param lm_fir_trim default 2; trim the decimal places of regression first coefficient.
-		#' @param lm_sec_trim default 2; trim the decimal places of regression second coefficient.
-		#' @param lm_squ_trim default 2; trim the decimal places of regression R square.
+		#' @param lm_fir_trim default 2; trim the decimal places of first coefficient in regression.
+		#' @param lm_sec_trim default 2; trim the decimal places of second coefficient in regression.
+		#' @param lm_squ_trim default 2; trim the decimal places of R square in regression.
 		#' @param ... other arguments passed to \code{geom_text} or \code{geom_label}.
 		#' @return ggplot.
 		#' @examples
