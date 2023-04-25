@@ -63,6 +63,15 @@ t1$plot_line(point_size = 5, errorbar_size = 1, xtext_angle = 30)
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
 t1$plot_pie(facet_nrow = 1)
 }
+
+## ------------------------------------------------
+## Method `trans_abund$plot_tern`
+## ------------------------------------------------
+
+\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
+t1$plot_tern()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -73,6 +82,7 @@ t1$plot_pie(facet_nrow = 1)
 \item \href{#method-trans_abund-plot_box}{\code{trans_abund$plot_box()}}
 \item \href{#method-trans_abund-plot_line}{\code{trans_abund$plot_line()}}
 \item \href{#method-trans_abund-plot_pie}{\code{trans_abund$plot_pie()}}
+\item \href{#method-trans_abund-plot_tern}{\code{trans_abund$plot_tern()}}
 \item \href{#method-trans_abund-print}{\code{trans_abund$print()}}
 \item \href{#method-trans_abund-clone}{\code{trans_abund$clone()}}
 }
@@ -130,7 +140,9 @@ Please alter this parameter when the prefix is not standard.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{data_abund} stored in the object.
+\code{data_abund} stored in the object. The column 'all_mean_abund' reprensents mean relative abundance across all the samples.
+  So the values in one taxon are all same across all the samples.
+  If the sum of column 'Abundance' in one sample is larger than 1, the 'Abundance', 'SD' and 'SE' has been multiplied by 100.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -508,6 +520,42 @@ ggplot2 plot.
 \preformatted{\donttest{
 t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
 t1$plot_pie(facet_nrow = 1)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_abund-plot_tern"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_abund-plot_tern}{}}}
+\subsection{Method \code{plot_tern()}}{
+Ternary Diagrams.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_tern(
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  color_legend_guide_size = 4
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
+
+\item{\code{color_legend_guide_size}}{default 4; The size of legend guide for color.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
+t1$plot_tern()
 }
 }
 \if{html}{\out{</div>}}

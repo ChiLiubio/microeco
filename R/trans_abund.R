@@ -25,7 +25,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   Please alter this parameter when the prefix is not standard.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; input taxa names for selecting some taxa.
-		#' @return \code{data_abund} stored in the object.
+		#' @return \code{data_abund} stored in the object. The column 'all_mean_abund' reprensents mean relative abundance across all the samples.
+		#'   So the values in one taxon are all same across all the samples.
+		#'   If the sum of column 'Abundance' in one sample is larger than 1, the 'Abundance', 'SD' and 'SE' has been multiplied by 100.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -83,7 +85,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 			abund_data %<>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
 				dplyr::summarise(Abundance = sum(Abundance)) %>%
 				as.data.frame(stringsAsFactors = FALSE)
-			
+			# sort according to the abundance
+			abund_data$Taxonomy %<>% as.character
+			mean_abund <- tapply(abund_data$Abundance, abund_data$Taxonomy, FUN = mean)
+			# add the mean abundance of all samples
+			all_mean_abund <- data.frame(Taxonomy = names(mean_abund), all_mean_abund = mean_abund)
+			rownames(all_mean_abund) <- NULL
 			# add sample table
 			abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))}
 			# calculate mean vlaues for each group
@@ -97,9 +104,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 					abund_data$Sample %<>% factor(., levels = levels(sample_table[, groupmean]))
 				}
 			}
-			# sort according to the abundance
-			abund_data$Taxonomy %<>% as.character
-			mean_abund <- tapply(abund_data$Abundance, abund_data$Taxonomy, FUN = mean)
+			abund_data <- dplyr::left_join(abund_data, all_mean_abund, by = c("Taxonomy" = "Taxonomy"))
+			# get ordered taxa
 			use_taxanames <- as.character(rev(names(sort(mean_abund))))
 			if(!is.null(ntaxa)){
 				ntaxa_theshold <- ntaxa_use <- ntaxa
@@ -595,6 +601,43 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p
 		},
+		#' @description
+		#' Ternary Diagrams.
+		#'
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
+		#' @param color_legend_guide_size default 4; The size of legend guide for color.
+		#' @return ggplot2 plot. 
+		#' @examples
+		#' \donttest{
+		#' t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 6, groupmean = "Group")
+		#' t1$plot_tern()
+		#' }
+		plot_tern = function(
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			color_legend_guide_size = 4
+			){
+			data_abund <- self$data_abund
+			use_taxanames <- self$data_taxanames
+			if(length(unique(data_abund$Sample)) != 3){
+				stop("Ternary diagrams can only be used for three samples!")
+			}
+			data_abund %<>% {.[.$Taxonomy %in% use_taxanames, ]}
+			data_abund$Taxonomy %<>% factor(., levels = use_taxanames)
+			plot_data <- reshape2::dcast(data_abund, Taxonomy + all_mean_abund ~ Sample, value.var = "Abundance")
+			colnames(plot_data)[2] <- "Abundance"
+			if(is.factor(data_abund$Sample)){
+				sample_names <- levels(data_abund$Sample)
+			}else{
+				sample_names <- unique(data_abund$Sample)
+			}
+			p <- ggtern::ggtern(data = plot_data, aes_meco(x = sample_names[1], y = sample_names[2], z = sample_names[3])) +
+				theme_bw() +
+				geom_point(aes(color = Taxonomy, size = Abundance)) +
+				scale_color_manual(values = color_values) +
+				scale_fill_manual(values = color_values) +
+				guides(color = guide_legend(override.aes = list(size = color_legend_guide_size)))
+			p
+		},		
 		#' @description
 		#' Print the trans_abund object.
 		print = function(){
