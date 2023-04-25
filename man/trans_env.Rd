@@ -770,12 +770,12 @@ Plot correlation heatmap.
 \describe{
 \item{\code{color_vector}}{default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.}
 
-\item{\code{color_palette}}{default NULL; a customized palette with more color values; if provided, use it instead of color_vector.}
+\item{\code{color_palette}}{default NULL; a customized palette with more color values to be used instead of the parameter \code{color_vector}.}
 
 \item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 
-\item{\code{filter_feature}}{default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
-For example, filter_feature = "" can be used to filter features that only have "", no any "*".}
+\item{\code{filter_feature}}{default NULL; character vector; used to filter features that only have significance labels in the \code{filter_feature} vector. 
+For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".}
 
 \item{\code{ylab_type_italic}}{default FALSE; whether use italic type for y lab text.}
 
@@ -787,20 +787,19 @@ For example, filter_feature = "" can be used to filter features that only have "
 
 \item{\code{text_x_order}}{default NULL; character vector; provide customized text order for x axis.}
 
-\item{\code{font_family}}{default NULL; font family used in \code{ggplot2}; only available when pheatmap = FALSE.}
+\item{\code{font_family}}{default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.}
 
-\item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for \code{ggplot2} based heatmap; 
-available options: "none", "row", "col" or "both". "none": no any clustering used;
-"row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
-Only available when pheatmap = FALSE.}
+\item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
+"none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
+Only available when \code{pheatmap = FALSE}.}
 
-\item{\code{cluster_height_rows}}{default 0.2, the dendrogram plot height for rows; available when cluster_ggplot != "none".}
+\item{\code{cluster_height_rows}}{default 0.2, the dendrogram plot height for rows; available when \code{cluster_ggplot} is not "none".}
 
-\item{\code{cluster_height_cols}}{default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".}
+\item{\code{cluster_height_cols}}{default 0.2, the dendrogram plot height for columns; available when \code{cluster_ggplot} is not "none".}
 
-\item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.}
+\item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.}
 
-\item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.}
+\item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when \code{pheatmap = TRUE}.}
 
 \item{\code{...}}{paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.}
 }

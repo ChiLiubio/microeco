@@ -932,24 +932,23 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Plot correlation heatmap.
 		#'
 		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.
-		#' @param color_palette default NULL; a customized palette with more color values; if provided, use it instead of color_vector.
+		#' @param color_palette default NULL; a customized palette with more color values to be used instead of the parameter \code{color_vector}.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
-		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the filter_feature vector. 
-		#'   For example, filter_feature = "" can be used to filter features that only have "", no any "*".
+		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the \code{filter_feature} vector. 
+		#'   For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.
 		#' @param text_x_order default NULL; character vector; provide customized text order for x axis.
-		#' @param font_family default NULL; font family used in \code{ggplot2}; only available when pheatmap = FALSE.
-		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap; 
-		#'   available options: "none", "row", "col" or "both". "none": no any clustering used;
-		#'   "row": add clustering for rows; "col": add clustering for columns; "both":  add clustering for both rows and columns.
-		#'   Only available when pheatmap = FALSE.
-		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when cluster_ggplot != "none".
-		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available cluster_ggplot != "none".
-		#' @param text_y_position default "right"; "left" or "right"; the y axis text position; ggplot2 based heatmap.
-		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when pheatmap = TRUE.
+		#' @param font_family default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.
+		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
+		#'   "none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
+		#'   Only available when \code{pheatmap = FALSE}.
+		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when \code{cluster_ggplot} is not "none".
+		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available when \code{cluster_ggplot} is not "none".
+		#' @param text_y_position default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.
+		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when \code{pheatmap = TRUE}.
 		#' @param ... paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.
 		#' @return plot.
 		#' @examples
@@ -975,23 +974,22 @@ trans_env <- R6Class(classname = "trans_env",
 			...
 			){
 			if(is.null(self$res_cor)){
-				stop("Please first run cal_cor function to get plot data !")
+				stop("Please first run cal_cor function to get plot data!")
 			}
 			if(length(color_vector) != 3){
-				stop("color_vector parameter must have three values !")
+				stop("color_vector parameter must have three values!")
 			}
 			cluster_ggplot <- match.arg(cluster_ggplot, c("none", "row", "col", "both"))
 			use_data <- self$res_cor
-			
 			# filter features
 			if(!is.null(filter_feature)){
-				x1 <- unlist(lapply(unique(use_data$Taxa), function(x){
-					t2 <- use_data %>% .[.$Taxa == x, "Significance"] %>% {all(. %in% filter_feature)}
-					if(t2 == F){
+				use_feature <- unlist(lapply(unique(use_data$Taxa), function(x){
+					tmp <- use_data %>% .[.$Taxa == x, "Significance"] %>% {all(. %in% filter_feature)}
+					if(tmp == F){
 						x
 					}
 				}))
-				use_data %<>% .[.$Taxa %in% x1, ]
+				use_data %<>% .[.$Taxa %in% use_feature, ]
 			}
 			if(keep_full_name == F){
 				use_data$Taxa %<>% gsub(".*\\|", "", .)
@@ -1035,7 +1033,6 @@ trans_env <- R6Class(classname = "trans_env",
 					}
 				}
 			}
-			
 			# check whether the cor values all larger or smaller than 0
 			if(all(use_data$Correlation >= 0) | all(use_data$Correlation <= 0)){
 				color_palette <- color_vector
@@ -1071,7 +1068,6 @@ trans_env <- R6Class(classname = "trans_env",
 					color_vector_use <- colorRampPalette(color_palette)(100)
 					myBreaks <- NA
 				}
-				
 				p <- pheatmap(
 					clu_data, 
 					clustering_distance_row = "correlation", 
@@ -1093,10 +1089,9 @@ trans_env <- R6Class(classname = "trans_env",
 					geom_tile(...)
 				if(is.null(color_palette)){
 					p <- p + scale_fill_gradient2(low = color_vector[1], high = color_vector[3], mid = color_vector[2])
-				} else {
+				}else{
 					p <- p + scale_fill_gradientn(colours = color_palette)
 				}
-				
 				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = self$cor_method) +
 					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
