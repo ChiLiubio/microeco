@@ -200,8 +200,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 			ytitle_size = 17
 			){
 			plot_data <- self$data_abund
+			# try to filter useless columns
+			plot_data %<>% .[, ! colnames(.) %in% c("N", "SD", "SE", "Median", "Min", "Max", "quantile25", "quantile75", "all_mean_abund")]
 			use_taxanames <- self$data_taxanames
-
 			if(bar_type == "full"){
 				# make sure whether taxonomy info are all in selected use_taxanames in case of special data
 				if(!all(plot_data$Taxonomy %in% use_taxanames)){
@@ -209,7 +210,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 					new_data <- plot_data %>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
 						dplyr::summarise(Abundance = sum(Abundance)) %>%
 						as.data.frame(stringsAsFactors = FALSE)
-					plot_data_merge <- plot_data[, ! colnames(plot_data) %in% c("Taxonomy", "Abundance", "N", "SD", "SE"), drop = FALSE] %>% unique
+					plot_data_merge <- plot_data[, ! colnames(plot_data) %in% c("Taxonomy", "Abundance"), drop = FALSE] %>% unique
 					plot_data <- dplyr::left_join(new_data, plot_data_merge, by = c("Sample" = "Sample"))
 					plot_data$Taxonomy %<>% factor(., levels = rev(c(use_taxanames, "Others")))
 				}else{
@@ -225,7 +226,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				x_axis_name = x_axis_name, 
 				order_x = order_x
 				)
-
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
 			bar_colors_use <- color_values[1:length(unique(plot_data$Taxonomy))]
@@ -261,7 +261,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 			}
 			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("") + ylab(self$ylabname)
-			
 			if(!is.null(facet)){
 				if(length(facet) == 1){
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
@@ -277,15 +276,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + scale_y_continuous(expand = c(0, 0))
 				}
 			}
-
 			p <- p + theme(panel.grid = element_blank(), panel.border = element_blank()) + 
 				theme(axis.line.y = element_line(color = "grey60", linetype = "solid", lineend = "square"))
 			if(legend_text_italic == T) {
 				p <- p + theme(legend.text = element_text(face = 'italic'))
 			}
-			
 			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size, xtext_keep = xtext_keep)
-
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size))
 			if(xtitle_keep == F) {
 				p <- p + theme(axis.title.x = element_blank())
