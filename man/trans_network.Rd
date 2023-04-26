@@ -896,7 +896,7 @@ Plot the summed linkages among taxa using chorddiag package <https://github.com/
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_sum_links(
   plot_pos = TRUE,
   plot_num = NULL,
-  color_values = NULL,
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -908,7 +908,7 @@ Plot the summed linkages among taxa using chorddiag package <https://github.com/
 
 \item{\code{plot_num}}{default NULL; number of taxa presented in the plot.}
 
-\item{\code{color_values}}{default NULL; If not provided, use \code{microeco::color_palette_20} or \code{randomcoloR} package to generate random colors (for taxa > 20).}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for taxa.}
 
 \item{\code{...}}{parameters pass to \code{chorddiag::chorddiag} function.}
 }

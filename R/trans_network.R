@@ -1020,51 +1020,49 @@ trans_network <- R6Class(classname = "trans_network",
 		#'
 		#' @param plot_pos default TRUE; If TRUE, plot the summed positive linkages; If FALSE, plot the summed negative linkages.
 		#' @param plot_num default NULL; number of taxa presented in the plot.
-		#' @param color_values default NULL; If not provided, use \code{microeco::color_palette_20} or \code{randomcoloR} package to generate random colors (for taxa > 20).
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for taxa.
 		#' @param ... parameters pass to \code{chorddiag::chorddiag} function.
 		#' @return chorddiag plot
 		#' @examples
 		#' \dontrun{
 		#' test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
 		#' }
-		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = NULL, ...){
+		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
 			if(is.null(self$res_sum_links_pos) & is.null(self$res_sum_links_neg)){
 				stop("Please first run cal_sum_links function!")
 			}
 			if(plot_pos == T){
 				message("Extract the positive link information ...")
 				if(is.null(self$res_sum_links_pos)){
-					stop("res_sum_links_pos is object is NULL! So no positive information can be used!")
+					stop("res_sum_links_pos in object is NULL! No positive links can be used!")
 				}else{
 					use_data <- self$res_sum_links_pos
 				}
 			}else{
 				message("Extract the negative link information ...")
 				if(is.null(self$res_sum_links_neg)){
-					stop("res_sum_links_neg is object is NULL! So no negative information can be used!")
+					stop("res_sum_links_neg in object is NULL! No negative links can be used!")
 				}else{
 					use_data <- self$res_sum_links_neg
 				}
 			}
 			if(!is.null(plot_num)){
 				if(plot_num > ncol(use_data)){
-					message("The plot_num provided is larger than the total taxa number! Use the taxa number instead of it ...")
+					message("The plot_num provided is larger than the total taxa number. Use the taxa number instead of it ...")
 					plot_num <- ncol(use_data)
 				}
 				use_data %<>% .[1:plot_num, 1:plot_num]
 			}
 			if(is.null(color_values)){
-				if(nrow(use_data) <= 20){
-					groupColors <- color_palette_20
-				}else{
-					message("The taxa number > 20. Use randomcoloR package to generate random color values ...")
-					if(!require("randomcoloR")){
-						stop("Please first install randomcoloR package from CRAN !")
-					}
-					groupColors <- unname(randomcoloR::distinctColorPalette(nrow(use_data)))
+				stop("Please provide the color_values parameter!")
+			}else{
+				if(nrow(use_data) > length(color_values)){
+					message("The taxa number ", nrow(use_data), " is larger than the length of input color_values ", length(color_values), 
+						". Only select ", length(color_values), " taxa ...")
+					use_data %<>% .[1:length(color_values), 1:length(color_values)]
 				}
 			}
-			chorddiag::chorddiag(use_data, groupColors = groupColors, ...)
+			chorddiag::chorddiag(use_data, groupColors = color_values, ...)
 		},
 		#' @description
 		#' Generate random networks, compare them with the empirical network and get the p value of topological properties.
