@@ -492,7 +492,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Plotting clustering result based on the \code{ggdendro} package.
 		#'
-		#' @param use_colors colors for presentation.
+		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color palette for the text.
 		#' @param measure default NULL; beta diversity index; If NULL, using the measure when creating object
 		#' @param group default NULL; if provided, use this group to assign color.
 		#' @param replace_name default NULL; if provided, use this as label.
@@ -500,7 +500,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @examples
 		#' t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 		plot_clustering = function(
-			use_colors = RColorBrewer::brewer.pal(8, "Dark2"), 
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
 			measure = NULL, 
 			group = NULL, 
 			replace_name = NULL
@@ -550,7 +550,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 						g1 <- g1 + geom_text(data=data2, aes_meco(x="x", y="y", label=replace_name, hjust=-0.1, colour = group), size=4)
 					}
 				}
-				g1 <- g1 + scale_color_manual(values = use_colors)
+				g1 <- g1 + scale_color_manual(values = color_values)
 			}
 			g1 <- g1 + theme(legend.position="none") + coord_flip() +
 				scale_x_discrete(labels=ggdendro::label(hc_d_measure)$label) +

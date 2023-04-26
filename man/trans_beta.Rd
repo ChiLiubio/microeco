@@ -449,7 +449,7 @@ t1$plot_group_distance()
 Plotting clustering result based on the \code{ggdendro} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_clustering(
-  use_colors = RColorBrewer::brewer.pal(8, "Dark2"),
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   measure = NULL,
   group = NULL,
   replace_name = NULL
@@ -459,7 +459,7 @@ Plotting clustering result based on the \code{ggdendro} package.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_colors}}{colors for presentation.}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color palette for the text.}
 
 \item{\code{measure}}{default NULL; beta diversity index; If NULL, using the measure when creating object}
 
