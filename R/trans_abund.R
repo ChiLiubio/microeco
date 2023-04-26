@@ -590,7 +590,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				plot_data$Taxonomy %<>% factor(., levels = c(use_taxanames, "Others"))
 			}
 			plot_data$label <- paste0(round(plot_data$Abundance, 1), "%")
-			
 			p <- ggplot(plot_data, aes(x = '', y = Abundance, fill = Taxonomy, label = label)) + 
 				geom_bar(width = 1, stat = "identity") +
 				coord_polar("y", start = 0)
