@@ -476,6 +476,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(is.null(group)) {
 				p <- p + geom_boxplot(color = color_values[1], ...)
 			} else {
+				color_values <- expand_colors(color_values, length(unique(plot_data[, group])))
 				if(boxfill == T){
 					p <- p + geom_boxplot(aes(color = .data[[group]], fill = .data[[group]]), ...)
 					p <- p + scale_fill_manual(values = color_values)
@@ -539,10 +540,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
-
 			plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
 			plot_data$Taxonomy %<>% factor(., levels = use_taxanames)
-						
+			color_values <- expand_colors(color_values, length(use_taxanames))
+			
 			p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Abundance"]], color = .data[["Taxonomy"]], group = .data[["Taxonomy"]]))
 			if(("SE" %in% colnames(plot_data)) & plot_SE){
 				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), width = errorbar_width, position = position, size = errorbar_size)
@@ -590,6 +591,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 					dplyr::summarise(Abundance = sum(Abundance)) %>%
 					as.data.frame(stringsAsFactors = FALSE)
 				plot_data$Taxonomy %<>% factor(., levels = c(use_taxanames, "Others"))
+				color_values <- expand_colors(color_values, length(use_taxanames) + 1)
+			}else{
+				color_values <- expand_colors(color_values, length(use_taxanames))
 			}
 			plot_data$label <- paste0(round(plot_data$Abundance, 1), "%")
 			p <- ggplot(plot_data, aes(x = '', y = Abundance, fill = Taxonomy, label = label)) + 
@@ -632,9 +636,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
-			if(length(color_values) < length(use_taxanames)){
-				stop("Please provide color_values with more colors! ", length(use_taxanames), " are needed!")
-			}
 			# sum others to one
 			if(any(!plot_data$Taxonomy %in% use_taxanames)){
 				plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
@@ -642,10 +643,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 					dplyr::summarise(Abundance = sum(Abundance)) %>%
 					as.data.frame(stringsAsFactors = FALSE)
 				plot_data$Taxonomy %<>% factor(., levels = c(use_taxanames, "Others"))
-				if(length(color_values) == length(use_taxanames)){
-					message("The colors in color_values are not enough. Add one grey70 in it ...")
-					color_values <- c(color_values, "grey70")
-				}
+				color_values <- expand_colors(color_values, length(use_taxanames) + 1)
+			}else{
+				color_values <- expand_colors(color_values, length(use_taxanames))
 			}
 			plot_data$label <- paste0(round(plot_data$Abundance, 1), "%")
 
@@ -684,10 +684,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			plot_data <- self$data_abund
 			use_taxanames <- self$data_taxanames
-			if(length(color_values) < length(use_taxanames)){
-				message("Provided color_values only have ", length(color_values), "! Use the default colors in ggradar package!")
-				color_values <- NULL
-			}
+			color_values <- expand_colors(color_values, length(use_taxanames))
 			plot_data <- plot_data[plot_data$Taxonomy %in% use_taxanames, ]
 			if(self$use_percentage){
 				plot_data$Abundance %<>% {./100}
@@ -727,6 +724,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}else{
 				sample_names <- unique(data_abund$Sample)
 			}
+			color_values <- expand_colors(color_values, length(use_taxanames))
+
 			p <- ggtern::ggtern(data = plot_data, aes_meco(x = sample_names[1], y = sample_names[2], z = sample_names[3])) +
 				theme_bw() +
 				geom_point(aes(color = Taxonomy, size = Abundance)) +
