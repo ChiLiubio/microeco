@@ -229,10 +229,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
 			if(any(grepl("Others", as.character(plot_data$Taxonomy)))){
-				bar_colors_use <- color_values[1:(length(unique(plot_data$Taxonomy)) - 1)]
+				bar_colors_use <- expand_colors(color_values, length(unique(plot_data$Taxonomy)) - 1)
 				bar_colors_use <- c(bar_colors_use, others_color)
 			}else{
-				bar_colors_use <- color_values[1:length(unique(plot_data$Taxonomy))]
+				bar_colors_use <- expand_colors(color_values, length(unique(plot_data$Taxonomy)))
 			}
 			if(clustering){
 				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance", fun.aggregate = sum) %>% 

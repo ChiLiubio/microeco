@@ -1,3 +1,32 @@
+# inner function to add colors when not enough to use
+expand_colors <- function(color_values, output_length){
+	if(output_length <= length(color_values)){
+		total_colors <- color_values[1:output_length]
+	}else{
+		message("Input colors are not enough to use. Add more colors automatically via color interpolation ...")
+		# generate a color list
+		ceiling_cycle_times <- ceiling(output_length/length(color_values))
+		total_cycle_times <- lapply(seq_along(color_values), function(x){
+			if((ceiling_cycle_times - 1) * length(color_values) + x <= output_length){
+				# not enough
+				ceiling_cycle_times
+			}else{
+				ceiling_cycle_times - 1
+			}
+		}) %>% unlist
+		total_color_list <- lapply(seq_along(color_values), function(x){
+			colorRampPalette(c(color_values[x], "white"))(total_cycle_times[x] + 1)
+		})
+		total_colors <- lapply(seq_len(ceiling_cycle_times), function(x){
+			unlist(lapply(total_color_list, function(y){
+				if((x + 1) <= length(y)){
+					y[x]
+				}
+			}))
+		}) %>% unlist
+	}
+	total_colors
+}
 
 #' Copy an R6 class object completely
 #'
