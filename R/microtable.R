@@ -49,6 +49,9 @@ microtable <- R6Class(classname = "microtable",
 			if(missing(otu_table)){
 				stop("otu_table must be provided!")
 			}
+			if(!inherits(otu_table, "data.frame")){
+				stop("The input otu_table must be data.frame format!")
+			}
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric vector! Please check the otu_table!")
 			}else{
@@ -60,15 +63,25 @@ microtable <- R6Class(classname = "microtable",
 				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% 
 					`row.names<-`(.$SampleID)
 			}else{
+				if(!inherits(sample_table, "data.frame")){
+					stop("The input sample_table must be data.frame format!")
+				}
 				self$sample_table <- sample_table
+			}
+			if(!is.null(tax_table)){
+				if(!inherits(tax_table, "data.frame")){
+					stop("The input tax_table must be data.frame format!")
+				}
 			}
 			# check whether phylogenetic tree is rooted
 			if(!is.null(phylo_tree)){
+				if(!inherits(dataset$phylo_tree, "phylo")){
+					stop("The input phylo_tree must be phylo format! Please use read.tree function in ape package to read the phylogenetic tree!")
+				}
 				if(!ape::is.rooted(phylo_tree)){
 					phylo_tree <- ape::multi2di(phylo_tree)
 				}
 			}
-			
 			self$tax_table <- tax_table
 			self$phylo_tree <- phylo_tree
 			self$rep_fasta <- rep_fasta
