@@ -153,7 +153,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Bar plot.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plot.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the bars.
 		#' @param bar_type default "full"; "full" or "notfull"; if \code{"full"}, total abundance are summed to 1 or 100 percentage.
 		#' @param others_color default "grey90"; the color for "others" taxa.
 		#' @param facet default NULL; a character vector for the facet; group column name of \code{sample_table}, such as, \code{"Group"};
@@ -181,7 +181,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' t1$plot_bar(facet = "Group", xtext_keep = FALSE)
 		#' }
 		plot_bar = function(
-			color_values = RColorBrewer::brewer.pal(12, "Paired"),
+			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			bar_type = "full",
 			others_color = "grey90",
 			facet = NULL,
@@ -228,9 +228,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 				)
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
-			bar_colors_use <- color_values[1:length(unique(plot_data$Taxonomy))]
 			if(any(grepl("Others", as.character(plot_data$Taxonomy)))){
-				bar_colors_use[length(bar_colors_use)] <- others_color
+				bar_colors_use <- color_values[1:(length(unique(plot_data$Taxonomy)) - 1)]
+				bar_colors_use <- c(bar_colors_use, others_color)
+			}else{
+				bar_colors_use <- color_values[1:length(unique(plot_data$Taxonomy))]
 			}
 			if(clustering){
 				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance", fun.aggregate = sum) %>% 
@@ -425,7 +427,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Box plot.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the box.
 		#' @param group default NULL; a column name of sample table to show abundance across groups.
 		#' @param show_point default FALSE; whether show points in plot.
 		#' @param point_color default "black"; If show_point TRUE; use the color
@@ -499,7 +501,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Plot the line chart.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the points and lines.
 		#' @param plot_SE default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.
 		#' @param position default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.
 		#' @param errorbar_size default 1; errorbar size.
@@ -561,7 +563,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Pie chart.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for each section.
 		#' @param facet_nrow default 1; how many rows in the plot.
 		#' @param strip_text default 11; sample title size.
 		#' @param add_label default FALSE; Whether add the percentage label in each section of pie chart.
@@ -610,7 +612,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Donut chart based on the \code{ggpubr::ggdonutchart} function.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the donut.
 		#' @param label default TRUE; whether show the percentage label.
 		#' @param facet_nrow default 1; how many rows in the plot.
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
@@ -699,7 +701,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @description
 		#' Ternary diagrams based on the \code{ggtern} package.
 		#'
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the samples.
 		#' @param color_legend_guide_size default 4; The size of legend guide for color.
 		#' @return ggplot2 object. 
 		#' @examples

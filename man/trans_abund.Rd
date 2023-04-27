@@ -183,7 +183,7 @@ t1 <- trans_abund$new(dataset = dataset, taxrank = "Phylum", ntaxa = 10)
 Bar plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_bar(
-  color_values = RColorBrewer::brewer.pal(12, "Paired"),
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   bar_type = "full",
   others_color = "grey90",
   facet = NULL,
@@ -206,7 +206,7 @@ Bar plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(12, "Paired"); colors palette for the plot.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the bars.}
 
 \item{\code{bar_type}}{default "full"; "full" or "notfull"; if \code{"full"}, total abundance are summed to 1 or 100 percentage.}
 
@@ -390,7 +390,7 @@ Box plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the box.}
 
 \item{\code{group}}{default NULL; a column name of sample table to show abundance across groups.}
 
@@ -460,7 +460,7 @@ Plot the line chart.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the points and lines.}
 
 \item{\code{plot_SE}}{default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.}
 
@@ -523,7 +523,7 @@ Pie chart.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for each section.}
 
 \item{\code{facet_nrow}}{default 1; how many rows in the plot.}
 
@@ -568,7 +568,7 @@ Donut chart based on the \code{ggpubr::ggdonutchart} function.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the donut.}
 
 \item{\code{label}}{default TRUE; whether show the percentage label.}
 
@@ -646,7 +646,7 @@ Ternary diagrams based on the \code{ggtern} package.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the plotting.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the samples.}
 
 \item{\code{color_legend_guide_size}}{default 4; The size of legend guide for color.}
 }
