@@ -431,6 +431,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}
 			}
+			color_values <- expand_colors(color_values, length(unique(use_data[, group])))
 			if(use_boxplot){
 				if(is.null(by_group)){
 					p <- ggpubr::ggboxplot(
