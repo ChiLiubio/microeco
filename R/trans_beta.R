@@ -211,10 +211,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 			model <- self$res_ordination$model
 			plot_x <- colnames(self$res_ordination$scores)[1]
 			plot_y <- colnames(self$res_ordination$scores)[2]
-			
 			if(!is.null(plot_group_order)){
 				combined[, plot_color] %<>% factor(., levels = plot_group_order)
 			}
+			if(!is.null(plot_color)){
+				color_values <- expand_colors(color_values, length(unique(combined[, plot_color])))
+			}			
 			
 			p <- ggplot(combined, aes_meco(x = plot_x, y = plot_y, colour = plot_color, shape = plot_shape))
 			if("point" %in% plot_type){
