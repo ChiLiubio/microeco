@@ -676,8 +676,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   Select a column name of \code{object$res_node_table}, such as "module".
 		#' @param ggraph_layout default "fr"; for \code{method = "ggraph"}; see \code{layout} parameter of \code{create_layout} function in \code{ggraph} package.
 		#' @param ggraph_node_size default 2; for \code{method = "ggraph"}; the node size.
-		#' @param ggraph_text_color default NULL; for \code{method = "ggraph"}; a column name of object$res_node_table;
-		#'   User can select other column names or change the content of object$res_node_table.
+		#' @param ggraph_node_text default TRUE; for \code{method = "ggraph"}; whether show the label text of nodes.
+		#' @param ggraph_text_color default NULL; for \code{method = "ggraph"}; a column name of object$res_node_table used to assign label text colors.
 		#' @param ggraph_text_size default 3; for \code{method = "ggraph"}; the node label text size.
 		#' @param networkD3_node_legend default TRUE; used for \code{method = "networkD3"}; logical value to enable node colour legends;
 		#'   Please see the legend parameter in networkD3::forceNetwork function.
@@ -696,6 +696,7 @@ trans_network <- R6Class(classname = "trans_network",
 			node_color = NULL, 
 			ggraph_layout = "fr",
 			ggraph_node_size = 2,
+			ggraph_node_text = TRUE,
 			ggraph_text_color = NULL,
 			ggraph_text_size = 3,
 			networkD3_node_legend = TRUE, 
@@ -741,9 +742,11 @@ trans_network <- R6Class(classname = "trans_network",
 				}else{
 					g <- g + geom_edge_link(aes(col = label, width = weight), alpha = 0.8)
 				}
-				g <- g + geom_node_point(aes_meco(colour = node_color), size = ggraph_node_size, alpha = 0.5) +
-					geom_node_text(aes_meco(colour = ggraph_text_color, label = node_label), size = ggraph_text_size, repel = TRUE) +
-					scale_edge_width(range = c(0.5, 2)) +
+				g <- g + geom_node_point(aes_meco(colour = node_color), size = ggraph_node_size, alpha = 0.5)
+				if(ggraph_node_text){
+					g <- g + geom_node_text(aes_meco(colour = ggraph_text_color, label = node_label), size = ggraph_text_size, repel = TRUE)
+				}
+				g <- g + scale_edge_width(range = c(0.5, 2)) +
 					theme_void()
 			}
 			if(method == "networkD3"){

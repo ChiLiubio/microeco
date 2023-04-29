@@ -616,6 +616,7 @@ the interested nodes and edges in a large network. In contrast, the igraph and g
   node_color = NULL,
   ggraph_layout = "fr",
   ggraph_node_size = 2,
+  ggraph_node_text = TRUE,
   ggraph_text_color = NULL,
   ggraph_text_size = 3,
   networkD3_node_legend = TRUE,
@@ -645,8 +646,9 @@ Select a column name of \code{object$res_node_table}, such as "module".}
 
 \item{\code{ggraph_node_size}}{default 2; for \code{method = "ggraph"}; the node size.}
 
-\item{\code{ggraph_text_color}}{default NULL; for \code{method = "ggraph"}; a column name of object$res_node_table;
-User can select other column names or change the content of object$res_node_table.}
+\item{\code{ggraph_node_text}}{default TRUE; for \code{method = "ggraph"}; whether show the label text of nodes.}
+
+\item{\code{ggraph_text_color}}{default NULL; for \code{method = "ggraph"}; a column name of object$res_node_table used to assign label text colors.}
 
 \item{\code{ggraph_text_size}}{default 3; for \code{method = "ggraph"}; the node label text size.}
 
