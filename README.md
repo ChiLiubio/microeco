@@ -31,9 +31,9 @@ Therefore, we created R microeco package (abbreviated and pronounced as **_[miː
 If you do not already have R/RStudio installed, do as follows.
 
 1. Install [R](https://www.r-project.org/)
-2. Install [RStudio](https://rstudio.com/)
+2. Install [RStudio](https://posit.co/downloads/)
 
-Put R in the computer env PATH, for example your_directory\R-4.1.0\bin\x64 
+Put R in the computer env PATH, for example your_directory\R-4.3.0\bin\x64 
 
 Open RStudio -> Tools -> Global Options -> Packages, select the appropriate mirror in Primary CRAN repository.
 
