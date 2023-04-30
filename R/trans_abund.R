@@ -13,7 +13,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param taxrank default "Phylum"; taxonomic rank.
 		#' @param show default 0; the relative abundance threshold for filtering the taxa with low abundance.
 		#' @param ntaxa default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
-		#'   This parameter does not conflict with the parameter \code{show}. Both can be used.
+		#'   This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means it is unavailable.
 		#' @param groupmean default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.
 		#' @param group_morestats default FALSE; only available when \code{groupmean} parameter is provided; 
 		#'   Whether output more statistics for each group, including min, max, median and quantile;
@@ -25,6 +25,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   Please alter this parameter when the prefix is not standard.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; input taxa names for selecting some taxa.
+		#' @param high_level default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
+		#'   It is necessary for the legend with nested taxonomic levels in the bar plot.
+		#' @param high_level_fix_nsub default NULL; an integer, used to fix the number of selected abundant taxa in each taxon from higher taxonomic level.
+		#'   If the total number under one taxon of higher level is less than the high_level_fix_nsub, the total number will be used.
+		#'   When \code{high_level_fix_nsub} is provided, the taxa number of higher level is calculated as: \code{ceiling(ntaxa/high_level_fix_nsub)}.
+		#'   Note that \code{ntaxa} means either the parameter \code{ntaxa} or the taxonomic number obtained by filtering according to the \code{show} parameter.
 		#' @return \code{data_abund} stored in the object. The column 'all_mean_abund' reprensents mean relative abundance across all the samples.
 		#'   So the values in one taxon are all same across all the samples.
 		#'   If the sum of column 'Abundance' in one sample is larger than 1, the 'Abundance', 'SD' and 'SE' has been multiplied by 100.
@@ -44,7 +50,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 			delete_part_prefix = FALSE,
 			prefix = NULL,
 			use_percentage = TRUE, 
-			input_taxaname = NULL
+			input_taxaname = NULL,
+			high_level = NULL,
+			high_level_fix_nsub = NULL
 			){
 			if(is.null(dataset)){
 				stop("No dataset provided!")
@@ -64,7 +72,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				rownames_to_column(var = "Taxonomy") %>% 
 				reshape2::melt(id.vars = "Taxonomy") %>% 
 				`colnames<-`(c("Taxonomy", "Sample", "Abundance"))
-
 			check_nd <- grepl("__$", abund_data$Taxonomy)
 			if(any(check_nd)){
 				abund_data$Taxonomy[check_nd] %<>% paste0(., "unidentified")
@@ -105,6 +112,24 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 			}
 			abund_data <- dplyr::left_join(abund_data, all_mean_abund, by = c("Taxonomy" = "Taxonomy"))
+			if(!is.null(high_level)){
+				if(length(high_level) > 1){
+					warning("Input high_level has multiple elements! Only select the first one!")
+					high_level <- high_level[1]
+				}
+				message("Add higher taxonomic level into the table ...")
+				if(! high_level %in% colnames(dataset$tax_table)){
+					stop("Provided high_level must be a colname of input dataset$tax_table!")
+				}else{
+					# delete the prefix to make two tables consistent
+					if(is.null(prefix)){
+						prefix <- ".__"
+					}
+					extract_tax_table <- dataset$tax_table[, c(high_level, taxrank)] %>% unique
+					extract_tax_table[, taxrank] %<>% gsub(prefix, "", .)
+					abund_data <- dplyr::left_join(abund_data, extract_tax_table, by = c("Taxonomy" = taxrank))
+				}
+			}
 			# get ordered taxa
 			use_taxanames <- as.character(rev(names(sort(mean_abund))))
 			if(!is.null(ntaxa)){
@@ -119,18 +144,35 @@ trans_abund <- R6Class(classname = "trans_abund",
 			use_taxanames %<>% .[!grepl("unidentified|unculture|Incertae.sedis", .)]
 			# identify used taxa
 			if(is.null(input_taxaname)){
-				if(length(use_taxanames) > ntaxa_use){
-					use_taxanames %<>% .[1:ntaxa_use]
+				if(is.null(high_level_fix_nsub)){
+					if(length(use_taxanames) > ntaxa_use){
+						use_taxanames %<>% .[1:ntaxa_use]
+					}
+				}else{
+					high_level_n <- ceiling(ntaxa_use/high_level_fix_nsub)
+					high_level_ordered_taxa <- abund_data[match(names(mean_abund), abund_data$Taxonomy), high_level] %>% unique %>% .[1:high_level_n]
+					use_taxanames <- lapply(high_level_ordered_taxa, function(x){
+						tmp <- abund_data[abund_data[, high_level] == x, ]
+						tmp <- names(mean_abund) %>% .[. %in% tmp$Taxonomy]
+						tmp[1:ifelse(length(tmp) < high_level_fix_nsub, length(tmp), high_level_fix_nsub)]
+					}) %>% unlist
 				}
 			}else{
 				# make sure input_taxaname are in use_taxanames
 				if(!any(input_taxaname %in% use_taxanames)){
-					stop("input_taxaname do not match to taxa names! Please check the input!")
+					stop("The input_taxaname does not match to taxa names! Please check the input!")
 				}else{
 					use_taxanames <- input_taxaname[input_taxaname %in% use_taxanames]
 				}
 			}
-			# generate ylab title and store it
+			if(!is.null(high_level)){
+				# sort the taxa in high levels according to the sum of abundances
+				tmp <- abund_data[abund_data$Taxonomy %in% use_taxanames, c(high_level, "Abundance")]
+				tmp <- tapply(tmp$Abundance, tmp[, high_level], FUN = sum)
+				data_taxanames_highlevel <- as.character(names(sort(tmp, decreasing = TRUE)))
+				self$data_taxanames_highlevel <- data_taxanames_highlevel
+			}
+			# ylab title for different cases; more clear
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
 				if(use_percentage == T){
 					abund_data$Abundance %<>% {. * 100}
@@ -140,7 +182,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}else{
 					ylabname <- "Relative abundance"
 				}
-			} else {
+			}else{
 				ylabname <- paste0("Relative abundance (", taxrank, " > ", show*100, "%)")
 			}
 			self$use_percentage <- use_percentage
@@ -148,6 +190,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			self$taxrank <- taxrank
 			self$data_abund <- abund_data
 			self$data_taxanames <- use_taxanames
+			self$high_level <- high_level
 			message('The transformed abundance data is stored in object$data_abund ...')
 		},
 		#' @description
@@ -175,6 +218,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
+		#' @param ggnested default FALSE; whether use nested legend. Need \code{ggnested} package to be installed (https://github.com/gmteunisse/ggnested).
+		#'   To make it available, please assign \code{high_level} parameter when creating the object.
+		#' @param high_level_add_other default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
+		#'   Only available when \code{ggnested = TRUE}.
 		#' @return ggplot2 object. 
 		#' @examples
 		#' \donttest{
@@ -197,14 +244,31 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtext_size = 10,
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
-			ytitle_size = 17
+			ytitle_size = 17,
+			ggnested = FALSE,
+			high_level_add_other = FALSE
 			){
 			plot_data <- self$data_abund
 			# try to filter useless columns
 			plot_data %<>% .[, ! colnames(.) %in% c("N", "SD", "SE", "Median", "Min", "Max", "quantile25", "quantile75", "all_mean_abund")]
 			use_taxanames <- self$data_taxanames
+			if(ggnested){
+				if(is.null(self$high_level)){
+					stop("The high_level is necessary when ggnested = TRUE! Please assign high_level parameter when creating the object!")
+				}
+				if(high_level_add_other){
+					plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
+					use_taxanames %<>% c(., "Others")
+					new_data <- plot_data %>% dplyr::group_by(!!! syms(c(self$high_level, "Taxonomy", "Sample"))) %>% 
+						dplyr::summarise(Abundance = sum(Abundance)) %>%
+						as.data.frame(stringsAsFactors = FALSE)
+					plot_data_merge <- plot_data[, ! colnames(plot_data) %in% c(self$high_level, "Taxonomy", "Abundance"), drop = FALSE] %>% unique
+					plot_data <- dplyr::left_join(new_data, plot_data_merge, by = c("Sample" = "Sample"))
+				}
+				bar_type <- "notfull"
+			}
 			if(bar_type == "full"){
-				# make sure whether taxonomy info are all in selected use_taxanames in case of special data
+				# make sure that taxonomy info are all in selected use_taxanames in case of special data
 				if(!all(plot_data$Taxonomy %in% use_taxanames)){
 					plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
 					new_data <- plot_data %>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
@@ -217,8 +281,17 @@ trans_abund <- R6Class(classname = "trans_abund",
 					plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
 				}
 			}else{
+				if(ggnested){
+					plot_data %<>% .[.[, self$high_level] %in% self$data_taxanames_highlevel, ]
+					plot_data[, self$high_level] %<>% factor(., levels = self$data_taxanames_highlevel)
+				}
 				plot_data %<>% {.[.$Taxonomy %in% use_taxanames, ]}
-				plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
+				# two legend ordering types depending on ggnested
+				if(ggnested){
+					plot_data$Taxonomy %<>% factor(., levels = use_taxanames)
+				}else{
+					plot_data$Taxonomy %<>% factor(., levels = rev(use_taxanames))
+				}
 			}
 			# order x axis samples
 			plot_data <- private$adjust_axis_facet(
@@ -228,11 +301,16 @@ trans_abund <- R6Class(classname = "trans_abund",
 				)
 			# arrange plot_data--Abundance according to the Taxonomy-group column factor-levels
 			plot_data <- plot_data[unlist(lapply(levels(plot_data$Taxonomy), function(x) which(plot_data$Taxonomy == x))),]
-			if(any(grepl("Others", as.character(plot_data$Taxonomy)))){
-				bar_colors_use <- expand_colors(color_values, length(unique(plot_data$Taxonomy)) - 1)
-				bar_colors_use <- c(bar_colors_use, others_color)
+			if(!ggnested){
+				if(any(grepl("Others", as.character(plot_data$Taxonomy)))){
+					bar_colors_use <- expand_colors(color_values, length(unique(plot_data$Taxonomy)) - 1)
+					bar_colors_use <- c(bar_colors_use, others_color)
+				}else{
+					bar_colors_use <- expand_colors(color_values, length(unique(plot_data$Taxonomy)))
+				}
 			}else{
-				bar_colors_use <- expand_colors(color_values, length(unique(plot_data$Taxonomy)))
+				# high_level determine the colors
+				bar_colors_use <- expand_colors(color_values, length(unique(plot_data[, self$high_level])))
 			}
 			if(clustering){
 				data_clustering <- reshape2::dcast(plot_data, Sample ~ Taxonomy, value.var = "Abundance", fun.aggregate = sum) %>% 
@@ -251,7 +329,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 					ggalluvial::geom_stratum(width = .2) +
 					scale_color_manual(values = rev(bar_colors_use))
 			}else{
-				p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Abundance"]], fill = .data[["Taxonomy"]]))
+				if(ggnested){
+					p <- ggnested::ggnested(plot_data, aes_meco(x = "Sample", y = "Abundance", main_group = self$high_level, sub_group = "Taxonomy"), main_palette = bar_colors_use)
+				}else{
+					p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Abundance"]], fill = .data[["Taxonomy"]]))
+				}
 				if(bar_type == "full"){
 					if(self$use_percentage == T){
 						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
@@ -262,7 +344,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
 				}
 			}
-			p <- p + scale_fill_manual(values = rev(bar_colors_use)) + xlab("") + ylab(self$ylabname)
+			if(!ggnested){
+				p <- p + scale_fill_manual(values = rev(bar_colors_use))
+			}
+			p <- p + xlab("") + ylab(self$ylabname)
 			if(!is.null(facet)){
 				if(length(facet) == 1){
 					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
@@ -289,7 +374,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + theme(axis.title.x = element_blank())
 			}
 			p <- p + guides(fill = guide_legend(title = self$taxrank))
-			if(use_alluvium){
+			if(use_alluvium | ggnested){
 				p <- p + guides(color = guide_legend(title = self$taxrank))
 			}
 			p

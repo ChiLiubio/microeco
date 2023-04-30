@@ -123,7 +123,9 @@ t1$plot_tern()
   delete_part_prefix = FALSE,
   prefix = NULL,
   use_percentage = TRUE,
-  input_taxaname = NULL
+  input_taxaname = NULL,
+  high_level = NULL,
+  high_level_fix_nsub = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -137,7 +139,7 @@ t1$plot_tern()
 \item{\code{show}}{default 0; the relative abundance threshold for filtering the taxa with low abundance.}
 
 \item{\code{ntaxa}}{default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
-This parameter does not conflict with the parameter \code{show}. Both can be used.}
+This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means it is unavailable.}
 
 \item{\code{groupmean}}{default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.}
 
@@ -156,6 +158,14 @@ Please alter this parameter when the prefix is not standard.}
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
 
 \item{\code{input_taxaname}}{default NULL; character vector; input taxa names for selecting some taxa.}
+
+\item{\code{high_level}}{default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
+It is necessary for the legend with nested taxonomic levels in the bar plot.}
+
+\item{\code{high_level_fix_nsub}}{default NULL; an integer, used to fix the number of selected abundant taxa in each taxon from higher taxonomic level.
+If the total number under one taxon of higher level is less than the high_level_fix_nsub, the total number will be used.
+When \code{high_level_fix_nsub} is provided, the taxa number of higher level is calculated as: \code{ceiling(ntaxa/high_level_fix_nsub)}.
+Note that \code{ntaxa} means either the parameter \code{ntaxa} or the taxonomic number obtained by filtering according to the \code{show} parameter.}
 }
 \if{html}{\out{</div>}}
 }
@@ -199,7 +209,9 @@ Bar plot.
   xtext_size = 10,
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
-  ytitle_size = 17
+  ytitle_size = 17,
+  ggnested = FALSE,
+  high_level_add_other = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -244,6 +256,12 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 \item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
+
+\item{\code{ggnested}}{default FALSE; whether use nested legend. Need \code{ggnested} package to be installed (https://github.com/gmteunisse/ggnested).
+To make it available, please assign \code{high_level} parameter when creating the object.}
+
+\item{\code{high_level_add_other}}{default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
+Only available when \code{ggnested = TRUE}.}
 }
 \if{html}{\out{</div>}}
 }
