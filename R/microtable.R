@@ -5,7 +5,7 @@
 #' This class is a wrapper for a series of operations on the input files and basic manipulations,
 #' including microtable object creation, data trimming, data filtering, rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxonomic abundance calculation, 
 #' alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
-#' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
+#' Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228-8235.2005> and other basic operations.\cr
 #' \cr
 #' Online tutorial: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} \cr
 #' Download tutorial: \href{https://github.com/ChiLiubio/microeco_tutorial/releases}{https://github.com/ChiLiubio/microeco_tutorial/releases}
@@ -39,11 +39,11 @@ microtable <- R6Class(classname = "microtable",
 		#' data(taxonomy_table_16S)
 		#' data(sample_info_16S)
 		#' data(phylo_tree_16S)
-		#' dataset <- microtable$new(otu_table = otu_table_16S)
-		#' dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
+		#' m1 <- microtable$new(otu_table = otu_table_16S)
+		#' m1 <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
 		#'   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 		#' # trim the files in the dataset
-		#' dataset$tidy_dataset()
+		#' m1$tidy_dataset()
 		initialize = function(otu_table, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, rep_fasta = NULL, auto_tidy = FALSE)
 			{
 			if(missing(otu_table)){
@@ -75,7 +75,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			# check whether phylogenetic tree is rooted
 			if(!is.null(phylo_tree)){
-				if(!inherits(dataset$phylo_tree, "phylo")){
+				if(!inherits(phylo_tree, "phylo")){
 					stop("The input phylo_tree must be phylo format! Please use read.tree function in ape package to read the phylogenetic tree!")
 				}
 				if(!ape::is.rooted(phylo_tree)){
@@ -98,7 +98,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @param taxa default \code{c("mitochondria", "chloroplast")}; filter mitochondria and chloroplast, or others as needed.
 		#' @return None
 		#' @examples 
-		#' dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+		#' m1$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 		filter_pollution = function(taxa = c("mitochondria", "chloroplast")){
 			if(is.null(self$tax_table)){
 				stop("The tax_table in the microtable object is NULL ! Please check it!")
@@ -126,7 +126,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return None
 		#' @examples
 		#' \donttest{
-		#' d1 <- clone(dataset)
+		#' d1 <- clone(m1)
 		#' d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 		#' }
 		filter_taxa = function(rel_abund = 0, freq = 1, include_lowest = TRUE){
@@ -192,7 +192,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return None; rarefied dataset.
 		#' @examples
 		#' \donttest{
-		#' dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+		#' m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
 		#' }
 		rarefy_samples = function(sample.size = NULL, rngseed = 123, replace = TRUE){
 			set.seed(rngseed)
@@ -235,7 +235,7 @@ microtable <- R6Class(classname = "microtable",
 		#' 	  including \code{taxa_abund}, \code{alpha_diversity} and \code{beta_diversity}, are all trimed.
 		#' @return None, object of \code{microtable} itself cleaned up. 
 		#' @examples
-		#' dataset$tidy_dataset(main_data = TRUE)
+		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
 			# check whether there is 0 abundance in otu_table
 			self$otu_table <- private$check_abund_table(self$otu_table)
@@ -296,7 +296,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return NULL, a new tax_table stored in the object.
 		#' @examples
 		#' \donttest{
-		#' dataset$add_rownames2taxonomy()
+		#' m1$add_rownames2taxonomy()
 		#' }
 		add_rownames2taxonomy = function(use_name = "OTU"){
 			self$tidy_dataset()
@@ -321,7 +321,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return species number of samples.
 		#' @examples
 		#' \donttest{
-		#' dataset$sample_sums()
+		#' m1$sample_sums()
 		#' }
 		sample_sums = function(){
 			colSums(self$otu_table)
@@ -332,7 +332,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return species number of taxa.
 		#' @examples
 		#' \donttest{
-		#' dataset$taxa_sums()
+		#' m1$taxa_sums()
 		#' }
 		taxa_sums = function(){
 			rowSums(self$otu_table)
@@ -343,7 +343,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return sample names.
 		#' @examples
 		#' \donttest{
-		#' dataset$sample_names()
+		#' m1$sample_names()
 		#' }
 		sample_names = function(){
 			rownames(self$sample_table)
@@ -354,7 +354,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return taxa names.
 		#' @examples
 		#' \donttest{
-		#' dataset$taxa_names()
+		#' m1$taxa_names()
 		#' }
 		taxa_names = function(){
 			rownames(self$tax_table)
@@ -366,7 +366,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return None; renamed dataset.
 		#' @examples
 		#' \donttest{
-		#' dataset$rename_taxa()
+		#' m1$rename_taxa()
 		#' }
 		rename_taxa = function(newname_prefix = "ASV_"){
 			self$tidy_dataset()
@@ -391,7 +391,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return a new merged microtable object.
 		#' @examples
 		#' \donttest{
-		#' dataset$merge_samples(use_group = "Group")
+		#' m1$merge_samples(use_group = "Group")
 		#' }
 		merge_samples = function(use_group){
 			otu_table <- self$otu_table
@@ -430,7 +430,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return a new merged \code{microtable} object.
 		#' @examples
 		#' \donttest{
-		#' dataset$merge_taxa(taxa = "Genus")
+		#' m1$merge_taxa(taxa = "Genus")
 		#' }
 		merge_taxa = function(taxa = "Genus"){
 			# Agglomerate all OTUs by given taxonomic level
@@ -476,14 +476,13 @@ microtable <- R6Class(classname = "microtable",
 		#' @param ... parameters passed to \code{\link{write.table}}.
 		#' @examples
 		#' \dontrun{
-		#' dataset$save_table()
+		#' m1$save_table()
 		#' }
 		save_table = function(dirpath = "basic_files", sep = ",", ...){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
 			}
 			suffix <- switch(sep, ',' = "csv", '\t' = "tsv", "txt")
-			
 			tmp <- self$otu_table
 			tmp <- data.frame(ID = rownames(tmp), tmp)
 			save_path <- paste0(dirpath, "/feature_table.", suffix)
@@ -541,7 +540,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @return taxa_abund list in object.
 		#' @examples
 		#' \donttest{
-		#' dataset$cal_abund()
+		#' m1$cal_abund()
 		#' }
 		cal_abund = function(
 			select_cols = NULL, 
@@ -624,8 +623,8 @@ microtable <- R6Class(classname = "microtable",
 		#' @param ... parameters passed to \code{\link{write.table}}.
 		#' @examples
 		#' \dontrun{
-		#' dataset$save_abund(dirpath = "taxa_abund")
-		#' dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
+		#' m1$save_abund(dirpath = "taxa_abund")
+		#' m1$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 		#' }
 		save_abund = function(dirpath = "taxa_abund", merge_all = FALSE, rm_un = FALSE, rm_pattern = "__$", sep = ",", ...){
 			if(!dir.exists(dirpath)){
@@ -666,8 +665,8 @@ microtable <- R6Class(classname = "microtable",
 		#' @return alpha_diversity stored in object.
 		#' @examples
 		#' \donttest{
-		#' dataset$cal_alphadiv(measures = NULL, PD = FALSE)
-		#' class(dataset$alpha_diversity)
+		#' m1$cal_alphadiv(measures = NULL, PD = FALSE)
+		#' class(m1$alpha_diversity)
 		#' }
 		cal_alphadiv = function(measures = NULL, PD = FALSE){
 			# modified based on the alpha diversity analysis of phyloseq package
@@ -754,8 +753,8 @@ microtable <- R6Class(classname = "microtable",
 		#' @return beta_diversity list stored in object.
 		#' @examples
 		#' \donttest{
-		#' dataset$cal_betadiv(unifrac = FALSE)
-		#' class(dataset$beta_diversity)
+		#' m1$cal_betadiv(unifrac = FALSE)
+		#' class(m1$beta_diversity)
 		#' }
 		cal_betadiv = function(method = NULL, unifrac = FALSE, binary = FALSE, ...){
 			res <- list()

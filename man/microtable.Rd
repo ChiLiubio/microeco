@@ -10,7 +10,7 @@ microtable.
 This class is a wrapper for a series of operations on the input files and basic manipulations,
 including microtable object creation, data trimming, data filtering, rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxonomic abundance calculation, 
 alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
-Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005> and other basic operations.\cr
+Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228-8235.2005> and other basic operations.\cr
 \cr
 Online tutorial: \href{https://chiliubio.github.io/microeco_tutorial/}{https://chiliubio.github.io/microeco_tutorial/} \cr
 Download tutorial: \href{https://github.com/ChiLiubio/microeco_tutorial/releases}{https://github.com/ChiLiubio/microeco_tutorial/releases}
@@ -25,24 +25,24 @@ data(otu_table_16S)
 data(taxonomy_table_16S)
 data(sample_info_16S)
 data(phylo_tree_16S)
-dataset <- microtable$new(otu_table = otu_table_16S)
-dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
+m1 <- microtable$new(otu_table = otu_table_16S)
+m1 <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 # trim the files in the dataset
-dataset$tidy_dataset()
+m1$tidy_dataset()
 
 ## ------------------------------------------------
 ## Method `microtable$filter_pollution`
 ## ------------------------------------------------
 
-dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+m1$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 
 ## ------------------------------------------------
 ## Method `microtable$filter_taxa`
 ## ------------------------------------------------
 
 \donttest{
-d1 <- clone(dataset)
+d1 <- clone(m1)
 d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 }
 
@@ -51,21 +51,21 @@ d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 ## ------------------------------------------------
 
 \donttest{
-dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
 }
 
 ## ------------------------------------------------
 ## Method `microtable$tidy_dataset`
 ## ------------------------------------------------
 
-dataset$tidy_dataset(main_data = TRUE)
+m1$tidy_dataset(main_data = TRUE)
 
 ## ------------------------------------------------
 ## Method `microtable$add_rownames2taxonomy`
 ## ------------------------------------------------
 
 \donttest{
-dataset$add_rownames2taxonomy()
+m1$add_rownames2taxonomy()
 }
 
 ## ------------------------------------------------
@@ -73,7 +73,7 @@ dataset$add_rownames2taxonomy()
 ## ------------------------------------------------
 
 \donttest{
-dataset$sample_sums()
+m1$sample_sums()
 }
 
 ## ------------------------------------------------
@@ -81,7 +81,7 @@ dataset$sample_sums()
 ## ------------------------------------------------
 
 \donttest{
-dataset$taxa_sums()
+m1$taxa_sums()
 }
 
 ## ------------------------------------------------
@@ -89,7 +89,7 @@ dataset$taxa_sums()
 ## ------------------------------------------------
 
 \donttest{
-dataset$sample_names()
+m1$sample_names()
 }
 
 ## ------------------------------------------------
@@ -97,7 +97,7 @@ dataset$sample_names()
 ## ------------------------------------------------
 
 \donttest{
-dataset$taxa_names()
+m1$taxa_names()
 }
 
 ## ------------------------------------------------
@@ -105,7 +105,7 @@ dataset$taxa_names()
 ## ------------------------------------------------
 
 \donttest{
-dataset$rename_taxa()
+m1$rename_taxa()
 }
 
 ## ------------------------------------------------
@@ -113,7 +113,7 @@ dataset$rename_taxa()
 ## ------------------------------------------------
 
 \donttest{
-dataset$merge_samples(use_group = "Group")
+m1$merge_samples(use_group = "Group")
 }
 
 ## ------------------------------------------------
@@ -121,7 +121,7 @@ dataset$merge_samples(use_group = "Group")
 ## ------------------------------------------------
 
 \donttest{
-dataset$merge_taxa(taxa = "Genus")
+m1$merge_taxa(taxa = "Genus")
 }
 
 ## ------------------------------------------------
@@ -129,7 +129,7 @@ dataset$merge_taxa(taxa = "Genus")
 ## ------------------------------------------------
 
 \dontrun{
-dataset$save_table()
+m1$save_table()
 }
 
 ## ------------------------------------------------
@@ -137,7 +137,7 @@ dataset$save_table()
 ## ------------------------------------------------
 
 \donttest{
-dataset$cal_abund()
+m1$cal_abund()
 }
 
 ## ------------------------------------------------
@@ -145,8 +145,8 @@ dataset$cal_abund()
 ## ------------------------------------------------
 
 \dontrun{
-dataset$save_abund(dirpath = "taxa_abund")
-dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
+m1$save_abund(dirpath = "taxa_abund")
+m1$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 }
 
 ## ------------------------------------------------
@@ -154,8 +154,8 @@ dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 ## ------------------------------------------------
 
 \donttest{
-dataset$cal_alphadiv(measures = NULL, PD = FALSE)
-class(dataset$alpha_diversity)
+m1$cal_alphadiv(measures = NULL, PD = FALSE)
+class(m1$alpha_diversity)
 }
 
 ## ------------------------------------------------
@@ -163,8 +163,8 @@ class(dataset$alpha_diversity)
 ## ------------------------------------------------
 
 \donttest{
-dataset$cal_betadiv(unifrac = FALSE)
-class(dataset$beta_diversity)
+m1$cal_betadiv(unifrac = FALSE)
+class(m1$beta_diversity)
 }
 }
 \section{Methods}{
@@ -248,11 +248,11 @@ an object of class \code{microtable} with the following components:
 data(taxonomy_table_16S)
 data(sample_info_16S)
 data(phylo_tree_16S)
-dataset <- microtable$new(otu_table = otu_table_16S)
-dataset <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
+m1 <- microtable$new(otu_table = otu_table_16S)
+m1 <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 # trim the files in the dataset
-dataset$tidy_dataset()
+m1$tidy_dataset()
 }
 \if{html}{\out{</div>}}
 
@@ -281,7 +281,7 @@ None
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$filter_pollution(taxa = c("mitochondria", "chloroplast"))
+\preformatted{m1$filter_pollution(taxa = c("mitochondria", "chloroplast"))
 }
 \if{html}{\out{</div>}}
 
@@ -317,7 +317,7 @@ None
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-d1 <- clone(dataset)
+d1 <- clone(m1)
 d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 }
 }
@@ -352,7 +352,7 @@ None; rarefied dataset.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$rarefy_samples(sample.size = min(dataset$sample_sums()), replace = TRUE)
+m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -382,7 +382,7 @@ None, object of \code{microtable} itself cleaned up.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{dataset$tidy_dataset(main_data = TRUE)
+\preformatted{m1$tidy_dataset(main_data = TRUE)
 }
 \if{html}{\out{</div>}}
 
@@ -413,7 +413,7 @@ NULL, a new tax_table stored in the object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$add_rownames2taxonomy()
+m1$add_rownames2taxonomy()
 }
 }
 \if{html}{\out{</div>}}
@@ -436,7 +436,7 @@ species number of samples.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$sample_sums()
+m1$sample_sums()
 }
 }
 \if{html}{\out{</div>}}
@@ -459,7 +459,7 @@ species number of taxa.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$taxa_sums()
+m1$taxa_sums()
 }
 }
 \if{html}{\out{</div>}}
@@ -482,7 +482,7 @@ sample names.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$sample_names()
+m1$sample_names()
 }
 }
 \if{html}{\out{</div>}}
@@ -505,7 +505,7 @@ taxa names.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$taxa_names()
+m1$taxa_names()
 }
 }
 \if{html}{\out{</div>}}
@@ -535,7 +535,7 @@ None; renamed dataset.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$rename_taxa()
+m1$rename_taxa()
 }
 }
 \if{html}{\out{</div>}}
@@ -565,7 +565,7 @@ a new merged microtable object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$merge_samples(use_group = "Group")
+m1$merge_samples(use_group = "Group")
 }
 }
 \if{html}{\out{</div>}}
@@ -595,7 +595,7 @@ a new merged \code{microtable} object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$merge_taxa(taxa = "Genus")
+m1$merge_taxa(taxa = "Genus")
 }
 }
 \if{html}{\out{</div>}}
@@ -627,7 +627,7 @@ default \code{','} correspond to the file name suffix 'csv'. The option \code{'\
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-dataset$save_table()
+m1$save_table()
 }
 }
 \if{html}{\out{</div>}}
@@ -680,7 +680,7 @@ taxa_abund list in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$cal_abund()
+m1$cal_abund()
 }
 }
 \if{html}{\out{</div>}}
@@ -726,8 +726,8 @@ default \code{','} correspond to the file name suffix 'csv'. The option \code{'\
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-dataset$save_abund(dirpath = "taxa_abund")
-dataset$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
+m1$save_abund(dirpath = "taxa_abund")
+m1$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 }
 }
 \if{html}{\out{</div>}}
@@ -761,8 +761,8 @@ alpha_diversity stored in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$cal_alphadiv(measures = NULL, PD = FALSE)
-class(dataset$alpha_diversity)
+m1$cal_alphadiv(measures = NULL, PD = FALSE)
+class(m1$alpha_diversity)
 }
 }
 \if{html}{\out{</div>}}
@@ -817,8 +817,8 @@ beta_diversity list stored in object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-dataset$cal_betadiv(unifrac = FALSE)
-class(dataset$beta_diversity)
+m1$cal_betadiv(unifrac = FALSE)
+class(m1$beta_diversity)
 }
 }
 \if{html}{\out{</div>}}
