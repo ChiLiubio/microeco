@@ -125,6 +125,14 @@ dataset$merge_taxa(taxa = "Genus")
 }
 
 ## ------------------------------------------------
+## Method `microtable$save_table`
+## ------------------------------------------------
+
+\dontrun{
+dataset$save_table()
+}
+
+## ------------------------------------------------
 ## Method `microtable$cal_abund`
 ## ------------------------------------------------
 
@@ -175,6 +183,7 @@ class(dataset$beta_diversity)
 \item \href{#method-microtable-rename_taxa}{\code{microtable$rename_taxa()}}
 \item \href{#method-microtable-merge_samples}{\code{microtable$merge_samples()}}
 \item \href{#method-microtable-merge_taxa}{\code{microtable$merge_taxa()}}
+\item \href{#method-microtable-save_table}{\code{microtable$save_table()}}
 \item \href{#method-microtable-cal_abund}{\code{microtable$cal_abund()}}
 \item \href{#method-microtable-save_abund}{\code{microtable$save_abund()}}
 \item \href{#method-microtable-cal_alphadiv}{\code{microtable$cal_alphadiv()}}
@@ -587,6 +596,38 @@ a new merged \code{microtable} object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 dataset$merge_taxa(taxa = "Genus")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-microtable-save_table"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-save_table}{}}}
+\subsection{Method \code{save_table()}}{
+Save each basic data in microtable object as local file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$save_table(dirpath = "basic_files", sep = ",", ...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{dirpath}}{default "basic_files"; directory to save the tables, phylogenetic tree and sequences in microtable object. It will be created if not found.}
+
+\item{\code{sep}}{default ","; the field separator string, used to save tables. Same with \code{sep} parameter in \code{\link{write.table}} function.
+default \code{','} correspond to the file name suffix 'csv'. The option \code{'\t'} correspond to the file name suffix 'tsv'. For other options, suffix are all 'txt'.}
+
+\item{\code{...}}{parameters passed to \code{\link{write.table}}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+dataset$save_table()
 }
 }
 \if{html}{\out{</div>}}

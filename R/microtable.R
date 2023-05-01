@@ -468,6 +468,62 @@ microtable <- R6Class(classname = "microtable",
 			microtable$new(sample_table = sampleinfo, otu_table = new_abund, tax_table = new_tax, auto_tidy = self$auto_tidy)
 		},
 		#' @description
+		#' Save each basic data in microtable object as local file.
+		#'
+		#' @param dirpath default "basic_files"; directory to save the tables, phylogenetic tree and sequences in microtable object. It will be created if not found.
+		#' @param sep default ","; the field separator string, used to save tables. Same with \code{sep} parameter in \code{\link{write.table}} function.
+		#' 	  default \code{','} correspond to the file name suffix 'csv'. The option \code{'\t'} correspond to the file name suffix 'tsv'. For other options, suffix are all 'txt'.
+		#' @param ... parameters passed to \code{\link{write.table}}.
+		#' @examples
+		#' \dontrun{
+		#' dataset$save_table()
+		#' }
+		save_table = function(dirpath = "basic_files", sep = ",", ...){
+			if(!dir.exists(dirpath)){
+				dir.create(dirpath)
+			}
+			suffix <- switch(sep, ',' = "csv", '\t' = "tsv", "txt")
+			
+			tmp <- self$otu_table
+			tmp <- data.frame(ID = rownames(tmp), tmp)
+			save_path <- paste0(dirpath, "/feature_table.", suffix)
+			write.table(tmp, file = save_path, row.names = FALSE, sep = sep, ...)
+			message('Save feature abundance to ', save_path, ' ...')
+			tmp <- self$sample_table
+			tmp <- data.frame(ID = rownames(tmp), tmp)
+			save_path <- paste0(dirpath, "/sample_table.", suffix)
+			write.table(tmp, file = save_path, row.names = FALSE, sep = sep, ...)
+			message('Save metadata to ', save_path, ' ...')
+			if(!is.null(self$tax_table)){
+				tmp <- self$tax_table
+				tmp <- data.frame(ID = rownames(tmp), tmp)
+				save_path <- paste0(dirpath, "/tax_table.", suffix)
+				write.table(tmp, file = save_path, row.names = FALSE, sep = sep, ...)
+				message('Save taxonomic information to ', save_path, ' ...')
+			}
+			if(!is.null(self$phylo_tree)){
+				tmp <- self$phylo_tree
+				save_path <- file.path(dirpath, "phylo_tree.tre")
+				ape::write.tree(tmp, file = save_path)
+				message('Save phylogenetic tree to ', save_path, ' ...')
+			}
+			if(!is.null(self$rep_fasta)){
+				# check sequence types
+				tmp <- self$rep_fasta
+				save_path <- file.path(dirpath, "rep_fasta.fasta")
+				if(inherits(tmp, "list")){
+					seqinr::write.fasta(tmp, names = names(tmp), file.out = save_path)
+				}else{
+					if(inherits(tmp, "DNAStringSet")){
+						Biostrings::writeXStringSet(x = tmp, filepath = save_path)
+					}else{
+						stop("Unknown fasta format! Must be either list (from read.fasta of seqinr package) or DNAStringSet (from readDNAStringSet of Biostrings package)!")
+					}
+				}
+				message('Save sequences to ', save_path, ' ...')
+			}
+		},
+		#' @description
 		#' Calculate the taxonomic abundance at each taxonomic level or selected levels.
 		#'
 		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; 
