@@ -292,11 +292,11 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			all_samples <- rownames(comm)
 			betaobs_vec <- as.vector(betaobs)
 			cat("Simulate betaMPD ...\n")
-			beta_rand <- sapply(seq_len(runs), function(x){
+			beta_rand <- lapply(seq_len(runs), function(x){
 				private$show_run(x = x, runs = runs)
 				rand_data <- private$null_model(null.model = null.model, comm = comm, dis = dis, tip.label = NULL, iterations = iterations)
-				as.dist(private$betampd(comm = rand_data$comm, dis = rand_data$dis, abundance.weighted = abundance.weighted))
-			}, simplify = "array")
+				as.vector(as.dist(private$betampd(comm = rand_data$comm, dis = rand_data$dis, abundance.weighted = abundance.weighted)))
+			}) %>% do.call("cbind", .)
 			message("---------------- ", Sys.time()," : End ----------------")
 			
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
@@ -369,13 +369,13 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 										 abundance.weighted = abundance.weighted, exclude.consp = exclude.conspecifics)
 				betaobs_vec <- as.vector(betaobs)
 				cat("Simulate betaMNTD ...\n")
-				beta_rand <- sapply(seq_len(runs), function(x){
+				beta_rand <- lapply(seq_len(runs), function(x){
 					private$show_run(x = x, runs = runs)
 					rand_data <- private$null_model(null.model = null.model, comm = comm, dis = NULL, tip.label = pd.big$tip.label, iterations = iterations)
-					iCAMP::bmntd.big(comm = rand_data$comm, pd.desc = pd.big$pd.file,
+					as.vector(iCAMP::bmntd.big(comm = rand_data$comm, pd.desc = pd.big$pd.file,
 						pd.spname = rand_data$tip.label, pd.wd = pd.big$pd.wd,
-						abundance.weighted = abundance.weighted, exclude.consp = exclude.conspecifics)
-				}, simplify = "array")
+						abundance.weighted = abundance.weighted, exclude.consp = exclude.conspecifics))
+				}) %>% do.call("cbind", .)
 			}else{
 				dis <- cophenetic(self$data_tree) %>% .[colnames(comm), colnames(comm)]
 				cat("Calculate observed betaMNTD ...\n")
@@ -387,17 +387,17 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					) %>% as.dist
 				betaobs_vec <- as.vector(betaobs)
 				cat("Simulate betaMNTD ...\n")
-				beta_rand <- sapply(seq_len(runs), function(x){
+				beta_rand <- lapply(seq_len(runs), function(x){
 					private$show_run(x = x, runs = runs)
 					rand_data <- private$null_model(null.model = null.model, comm = comm, dis = dis, tip.label = NULL, iterations = iterations)
-					as.dist(private$betamntd(
+					as.vector(as.dist(private$betamntd(
 						comm = rand_data$comm, 
 						dis = rand_data$dis, 
 						abundance.weighted = abundance.weighted, 
 						exclude.conspecifics = exclude.conspecifics
 						)
-					)
-				}, simplify = "array")
+					))
+				}) %>% do.call("cbind", .)
 			}
 			beta_rand_mean <- apply(X = beta_rand, MARGIN = 1, FUN = mean, na.rm = TRUE)
 			beta_rand_sd <- apply(X = beta_rand, MARGIN = 1, FUN = sd, na.rm = TRUE)
@@ -423,12 +423,12 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- self$data_comm
 			betaobs_vec <- as.vector(vegdist(comm, method="bray"))
 			all_samples <- rownames(comm)
-			beta_rand <- sapply(seq_len(runs), function(x){
+			beta_rand <- lapply(seq_len(runs), function(x){
 				if(verbose){
 					private$show_run(x = x, runs = runs)
 				}
-				vegdist(picante::randomizeMatrix(comm, null.model = null.model), "bray")
-			}, simplify = "array") %>% as.data.frame
+				as.vector(vegdist(picante::randomizeMatrix(comm, null.model = null.model), "bray"))
+			}) %>% do.call("cbind", .) %>% as.data.frame
 			beta_rand[, (runs + 1)] <- betaobs_vec
 			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x > x[length(x)])/length(x)})
 			beta_obs_z <- (beta_obs_z - 0.5) * 2
@@ -620,7 +620,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	),
 	private = list(
 		show_run = function(x, runs){
-			if(x %% 10 == 0){
+			if(x %% 20 == 0){
 				cat(paste0("Runs: ", x, " of ", runs,"\n"))
 			}
 		},
