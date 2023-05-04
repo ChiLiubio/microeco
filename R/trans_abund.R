@@ -218,6 +218,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param xtext_keep default TRUE; whether retain x text.
 		#' @param xtitle_keep default TRUE; whether retain x title.
 		#' @param ytitle_size default 17; y axis title size.
+		#' @param coord_flip default FALSE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
 		#' @param ggnested default FALSE; whether use nested legend. Need \code{ggnested} package to be installed (https://github.com/gmteunisse/ggnested).
 		#'   To make it available, please assign \code{high_level} parameter when creating the object.
 		#' @param high_level_add_other default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
@@ -245,6 +246,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			xtext_keep = TRUE,
 			xtitle_keep = TRUE,
 			ytitle_size = 17,
+			coord_flip = FALSE,
 			ggnested = FALSE,
 			high_level_add_other = FALSE
 			){
@@ -349,10 +351,15 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p <- p + xlab("") + ylab(self$ylabname)
 			if(!is.null(facet)){
-				if(length(facet) == 1){
-					p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+				if(coord_flip){
+					facet_formula <- reformulate(".", paste0(facet, collapse = " + "))
 				}else{
-					p <- p + ggh4x::facet_nested(reformulate(facet), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+					facet_formula <- reformulate(facet, ".")
+				}
+				if(length(facet) == 1){
+					p <- p + facet_grid(facet_formula, scales = "free", space = "free")
+				}else{
+					p <- p + ggh4x::facet_nested(facet_formula, nest_line = element_line(linetype = 2), scales = "free", space = "free")
 				}
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
@@ -376,6 +383,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p <- p + guides(fill = guide_legend(title = self$taxrank))
 			if(use_alluvium | ggnested){
 				p <- p + guides(color = guide_legend(title = self$taxrank))
+			}
+			if(coord_flip){
+				p <- p + coord_flip()
 			}
 			p
 		},

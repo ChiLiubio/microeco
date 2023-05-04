@@ -210,6 +210,7 @@ Bar plot.
   xtext_keep = TRUE,
   xtitle_keep = TRUE,
   ytitle_size = 17,
+  coord_flip = FALSE,
   ggnested = FALSE,
   high_level_add_other = FALSE
 )}\if{html}{\out{</div>}}
@@ -256,6 +257,8 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 \item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
+
+\item{\code{coord_flip}}{default FALSE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
 
 \item{\code{ggnested}}{default FALSE; whether use nested legend. Need \code{ggnested} package to be installed (https://github.com/gmteunisse/ggnested).
 To make it available, please assign \code{high_level} parameter when creating the object.}
