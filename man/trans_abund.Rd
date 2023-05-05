@@ -202,6 +202,8 @@ Bar plot.
   barwidth = NULL,
   use_alluvium = FALSE,
   clustering = FALSE,
+  clustering_plot = FALSE,
+  cluster_plot_width = 0.2,
   facet_color = "grey95",
   strip_text = 11,
   legend_text_italic = FALSE,
@@ -241,6 +243,11 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 \item{\code{use_alluvium}}{default FALSE; whether add alluvium plot. If \code{TRUE}, please first install \code{ggalluvial} package.}
 
 \item{\code{clustering}}{default FALSE; whether order samples by the clustering.}
+
+\item{\code{clustering_plot}}{default FALSE; whether add clustering plot.
+If \code{clustering_plot = TRUE}, \code{clustering} will be also TRUE in any case for the clustering.}
+
+\item{\code{cluster_plot_width}}{default 0.2, the dendrogram plot width; available when \code{clustering_plot = TRUE}.}
 
 \item{\code{facet_color}}{default "grey95"; facet background color.}
 
