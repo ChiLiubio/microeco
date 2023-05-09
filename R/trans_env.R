@@ -1026,6 +1026,9 @@ trans_env <- R6Class(classname = "trans_env",
 			if(! cell_value %in% colnames(use_data)){
 				stop(cell_value, " is not found in the columns of object$res_cor! Please check the data!")
 			}
+			if(! xvalue %in% colnames(use_data)){
+				stop(xvalue, " is not found in the columns of object$res_cor! Please check the data!")
+			}
 			# filter features
 			if(!is.null(filter_feature)){
 				use_feature <- unlist(lapply(unique(use_data$Taxa), function(x){
