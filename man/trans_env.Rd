@@ -155,7 +155,7 @@ t1$plot_scatterfit(x =
   dataset = NULL,
   env_cols = NULL,
   add_data = NULL,
-  character2numeric = TRUE,
+  character2numeric = FALSE,
   complete_na = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -173,7 +173,7 @@ Otherwise, please use \code{add_data} parameter.}
 This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.}
 
-\item{\code{character2numeric}}{default TRUE; whether convert the characters or factors to numeric attributes.}
+\item{\code{character2numeric}}{default FALSE; whether convert the characters or factors to numeric values.}
 
 \item{\code{complete_na}}{default FALSE; Whether fill the NA (missing value) in the environmental data;
 If TRUE, the function can run the interpolation with the \code{mice} package.}

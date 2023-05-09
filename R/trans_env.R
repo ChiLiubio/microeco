@@ -15,7 +15,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param add_data default NULL; \code{data.frame} format; provide the environmental data in the format \code{data.frame}; rownames should be sample names.
 		#'   This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 		#'   Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.
-		#' @param character2numeric default TRUE; whether convert the characters or factors to numeric attributes.
+		#' @param character2numeric default FALSE; whether convert the characters or factors to numeric values.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
 		#'   If TRUE, the function can run the interpolation with the \code{mice} package.
 		#' @return \code{data_env} stored in the object.
@@ -27,7 +27,7 @@ trans_env <- R6Class(classname = "trans_env",
 			dataset = NULL, 
 			env_cols = NULL, 
 			add_data = NULL, 
-			character2numeric = TRUE, 
+			character2numeric = FALSE, 
 			complete_na = FALSE
 			){
 			# support all the dataset, env_cols and add_data = NULL from v0.7.0
@@ -71,13 +71,13 @@ trans_env <- R6Class(classname = "trans_env",
 				self$dataset <- NULL
 			}
 			if(!is.null(env_data)){
-				if(complete_na == T){
+				if(complete_na){
 					env_data[env_data == ""] <- NA
 					env_data %<>% dropallfactors(., unfac2num = TRUE)
 					env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 					env_data %<>% mice::mice(print = FALSE) %>% mice::complete(., 1)
 				}
-				if(character2numeric == T){
+				if(character2numeric){
 					env_data %<>% dropallfactors(., unfac2num = TRUE, char2num = TRUE)
 				}
 			}
@@ -1017,13 +1017,14 @@ trans_env <- R6Class(classname = "trans_env",
 			if(self$cor_method == "maaslin2"){
 				message("Show the coef values of Maaslin2 method in the heatmap ...")
 				cell_value <- "coef"
+				message("Use name column of object$res_cor as the variables ...")
 				xvalue <- "name"
 			}else{
 				cell_value <- "Correlation"
 				xvalue <- "Env"
 			}
 			if(! cell_value %in% colnames(use_data)){
-				stop("The cell_value must be a column name of object$res_cor! Please check the data!")
+				stop(cell_value, " is not found in the columns of object$res_cor! Please check the data!")
 			}
 			# filter features
 			if(!is.null(filter_feature)){
