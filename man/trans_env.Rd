@@ -198,7 +198,7 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 \if{html}{\out{<a id="method-trans_env-cal_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
-Test the difference of environmental variables across groups.
+Differential test of environmental variables across groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_diff(
   group = NULL,
@@ -670,7 +670,7 @@ Actually, it can also be applied to other correlation between any two variables 
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
   select_env_data = NULL,
-  cor_method = c("pearson", "spearman", "kendall")[1],
+  cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
   p_adjust_method = "fdr",
   p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
   add_abund_table = NULL,
@@ -679,7 +679,10 @@ Actually, it can also be applied to other correlation between any two variables 
   other_taxa = NULL,
   group_use = NULL,
   group_select = NULL,
-  taxa_name_full = TRUE
+  taxa_name_full = TRUE,
+  tmp_input_maaslin2 = "tmp_input",
+  tmp_output_maaslin2 = "tmp_output",
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -691,7 +694,9 @@ Actually, it can also be applied to other correlation between any two variables 
 
 \item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.}
 
-\item{\code{cor_method}}{default "pearson"; "pearson", "spearman" or "kendall"; correlation method.}
+\item{\code{cor_method}}{default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
+"pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
+"maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 \code{p_adjust_method = "none"} can disable the p value adjustment.}
@@ -719,6 +724,12 @@ please see the example.}
 \item{\code{group_select}}{default NULL; the group name used; remain samples within the group.}
 
 \item{\code{taxa_name_full}}{default TRUE; Whether use the complete taxonomic name of taxa.}
+
+\item{\code{tmp_input_maaslin2}}{default "tmp_input"; the temporary folder used to save the input files for Maaslin2.}
+
+\item{\code{tmp_output_maaslin2}}{default "tmp_output"; the temporary folder used to save the output files of Maaslin2.}
+
+\item{\code{...}}{parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.}
 }
 \if{html}{\out{</div>}}
 }

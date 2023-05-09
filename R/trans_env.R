@@ -85,7 +85,7 @@ trans_env <- R6Class(classname = "trans_env",
 			message("Env data is stored in object$data_env ...")
 		},
 		#' @description
-		#' Test the difference of environmental variables across groups.
+		#' Differential test of environmental variables across groups.
 		#'
 		#' @param group default NULL; a colname of \code{sample_table} used to compare values across groups.
 		#' @param by_group default NULL; perform differential test among groups (\code{group} parameter) within each group (\code{by_group} parameter).
@@ -793,7 +793,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
 		#'    "all": use all merged taxonomic abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
 		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
-		#' @param cor_method default "pearson"; "pearson", "spearman" or "kendall"; correlation method.
+		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
+		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
+		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' 	  \code{p_adjust_method = "none"} can disable the p value adjustment.
 		#' @param p_adjust_type default "All"; "All", "Type", "Taxa" or "Env"; P value adjustment type.
@@ -812,6 +814,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
+		#' @param tmp_input_maaslin2 default "tmp_input"; the temporary folder used to save the input files for Maaslin2.
+		#' @param tmp_output_maaslin2 default "tmp_output"; the temporary folder used to save the output files of Maaslin2.
+		#' @param ... parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.
 		#' @return \code{res_cor} stored in the object.
 		#' @examples
 		#' \donttest{
@@ -823,7 +828,7 @@ trans_env <- R6Class(classname = "trans_env",
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
 			select_env_data = NULL,
-			cor_method = c("pearson", "spearman", "kendall")[1],
+			cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
 			p_adjust_method = "fdr",
 			p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
 			add_abund_table = NULL,
@@ -832,15 +837,21 @@ trans_env <- R6Class(classname = "trans_env",
 			other_taxa = NULL,
 			group_use = NULL,
 			group_select = NULL,
-			taxa_name_full = TRUE
+			taxa_name_full = TRUE,
+			tmp_input_maaslin2 = "tmp_input",
+			tmp_output_maaslin2 = "tmp_output",
+			...
 			){
 			if(is.null(self$data_env)){
 				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
 				env_data <- self$data_env
 			}
-			if(is.null(select_env_data)){
-				env_data <- env_data[, unlist(lapply(env_data, is.numeric)), drop = FALSE]
+			cor_method <- match.arg(cor_method, c("pearson", "spearman", "kendall", "maaslin2"))
+			if(cor_method != "maaslin2"){
+				if(is.null(select_env_data)){
+					env_data <- env_data[, unlist(lapply(env_data, is.numeric)), drop = FALSE]
+				}
 			}
 			if(!is.null(add_abund_table)){
 				abund_table <- add_abund_table
@@ -887,38 +898,60 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
 			abund_table <- abund_table[rownames(env_data), , drop = FALSE]
-			if(is.null(by_group)){
-				groups <- rep("All", nrow(env_data))
-			}else{
-				groups <- self$dataset$sample_table[, by_group] %>% as.character
-				message("Perform correlation by the groups in ", by_group, " of sample_table, respectively ...")
-			}
-			comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% 
-				t %>% 
-				as.data.frame(stringsAsFactors = FALSE)
-			res <- sapply(comb_names, function(x){
-				suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
-				{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
+			if(cor_method == "maaslin2"){
+				save_env_data <- data.frame(ID = rownames(env_data), env_data)
+				save_abund_table <- data.frame(ID = rownames(abund_table), abund_table)
+				if(!dir.exists(tmp_input_maaslin2)){
+					dir.create(tmp_input_maaslin2)
 				}
-			)
-			res %<>% t %>% as.data.frame(stringsAsFactors = FALSE)
-			colnames(res) <- c("Type", "Taxa", "Env", "Correlation","Pvalue")
-			res$Pvalue %<>% as.numeric
-			res$Correlation %<>% as.numeric
-			res$AdjPvalue <- rep(0, nrow(res))
-			if(p_adjust_type == "All"){
-				res$AdjPvalue <- p.adjust(res$Pvalue, method = p_adjust_method)
+				path_metadata <- file.path(tmp_input_maaslin2, "tmp_metadata.tsv")
+				path_abundance <- file.path(tmp_input_maaslin2, "tmp_abundance.tsv")
+				write.table(save_env_data, path_metadata, row.names = FALSE)
+				write.table(save_abund_table, path_abundance, row.names = FALSE)
+				if(!dir.exists(tmp_output_maaslin2)){
+					dir.create(tmp_output_maaslin2)
+				}
+				fit_data <- Maaslin2::Maaslin2(save_abund_table, save_env_data, output = tmp_output_maaslin2, ...)
+				res <- fit_data$results
+				res <- data.frame(Type = "All", res)
+				colnames(res)[colnames(res) == "feature"] <- "Taxa"
+				colnames(res)[colnames(res) == "metadata"] <- "Env"
+				colnames(res)[colnames(res) == "pval"] <- "Pvalue"
+				colnames(res)[colnames(res) == "qval"] <- "AdjPvalue"
 			}else{
-				choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
-				comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
-				# p value adjustment separately
-				for(i in seq_len(ncol(comb_names2))){
-					x <- comb_names2[, i]
-					row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)))
-					res$AdjPvalue[row_sel] <- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
+				if(is.null(by_group)){
+					groups <- rep("All", nrow(env_data))
+				}else{
+					groups <- self$dataset$sample_table[, by_group] %>% as.character
+					message("Perform correlation by the groups in ", by_group, " of sample_table, respectively ...")
+				}
+				comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% 
+					t %>% 
+					as.data.frame(stringsAsFactors = FALSE)
+				res <- sapply(comb_names, function(x){
+					suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
+					{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
+					}
+				)
+				res %<>% t %>% as.data.frame(stringsAsFactors = FALSE)
+				colnames(res) <- c("Type", "Taxa", "Env", "Correlation","Pvalue")
+				res$Pvalue %<>% as.numeric
+				res$Correlation %<>% as.numeric
+				res$AdjPvalue <- rep(0, nrow(res))
+				if(p_adjust_type == "All"){
+					res$AdjPvalue <- p.adjust(res$Pvalue, method = p_adjust_method)
+				}else{
+					choose_col <- which(c("Type", "Taxa", "Env") %in% p_adjust_type)
+					comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
+					# p value adjustment separately
+					for(i in seq_len(ncol(comb_names2))){
+						x <- comb_names2[, i]
+						row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)))
+						res$AdjPvalue[row_sel] <- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
+					}
 				}
 			}
-			res$Significance <- cut(res$AdjPvalue, breaks=c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", ""))
+			res$Significance <- cut(res$AdjPvalue, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", ""))
 			res <- res[complete.cases(res), ]
 			res$Env %<>% factor(., levels = unique(as.character(.)))
 			if(taxa_name_full == F){
@@ -981,6 +1014,17 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			cluster_ggplot <- match.arg(cluster_ggplot, c("none", "row", "col", "both"))
 			use_data <- self$res_cor
+			if(self$cor_method == "maaslin2"){
+				message("Show the coef values of Maaslin2 method in the heatmap ...")
+				cell_value <- "coef"
+				xvalue <- "name"
+			}else{
+				cell_value <- "Correlation"
+				xvalue <- "Env"
+			}
+			if(! cell_value %in% colnames(use_data)){
+				stop("The cell_value must be a column name of object$res_cor! Please check the data!")
+			}
 			# filter features
 			if(!is.null(filter_feature)){
 				use_feature <- unlist(lapply(unique(use_data$Taxa), function(x){
@@ -998,14 +1042,14 @@ trans_env <- R6Class(classname = "trans_env",
 				use_data$Taxa %<>% gsub(".*__", "", .)
 			}
 			if(pheatmap & length(unique(use_data$Type)) > 1){
-				use_data$Env <- paste0(use_data$Type, ": ", use_data$Env)
+				use_data[, xvalue] <- paste0(use_data$Type, ": ", use_data[, xvalue])
 			}
 			if(length(unique(use_data$Type)) == 1 | pheatmap){
-				clu_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Correlation") %>% 
+				clu_data <- reshape2::dcast(use_data, formula = reformulate(xvalue, "Taxa"), value.var = cell_value) %>% 
 					`row.names<-`(.[,1]) %>% 
 					.[, -1, drop = FALSE]
 				clu_data[is.na(clu_data)] <- 0
-				sig_data <- reshape2::dcast(use_data, Taxa~Env, value.var = "Significance") %>% 
+				sig_data <- reshape2::dcast(use_data, formula = reformulate(xvalue, "Taxa"), value.var = "Significance") %>% 
 					`row.names<-`(.[,1]) %>% 
 					.[, -1, drop = FALSE]
 				sig_data[is.na(sig_data)] <- ""
@@ -1034,7 +1078,7 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 			}
 			# check whether the cor values all larger or smaller than 0
-			if(all(use_data$Correlation >= 0) | all(use_data$Correlation <= 0)){
+			if(all(use_data[, cell_value] >= 0) | all(use_data[, cell_value] <= 0)){
 				color_palette <- color_vector
 			}
 			if(pheatmap == T){
@@ -1071,7 +1115,7 @@ trans_env <- R6Class(classname = "trans_env",
 				p <- pheatmap(
 					clu_data, 
 					clustering_distance_row = "correlation", 
-					clustering_distance_cols= "correlation",
+					clustering_distance_cols = "correlation",
 					border_color = NA, 
 					scale = "none",
 					labels_row = mylabels_y, 
@@ -1084,7 +1128,7 @@ trans_env <- R6Class(classname = "trans_env",
 					)
 				p$gtable
 			}else{
-				p <- ggplot(aes(x = Env, y = Taxa, fill = Correlation), data = use_data) +
+				p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value), data = use_data) +
 					theme_bw() + 
 					geom_tile(...)
 				if(is.null(color_palette)){
@@ -1092,8 +1136,9 @@ trans_env <- R6Class(classname = "trans_env",
 				}else{
 					p <- p + scale_fill_gradientn(colours = color_palette)
 				}
+				legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
 				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
-					labs(y = NULL, x = "Measure", fill = self$cor_method) +
+					labs(y = NULL, x = "Measure", fill = legend_fill) +
 					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
 					theme(strip.text=element_text(size=11), panel.border = element_blank(), panel.grid = element_blank())
