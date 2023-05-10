@@ -124,6 +124,7 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
 				env_data <- self$data_env
+				env_data <- private$check_numeric(env_data)
 			}
 			tem_data <- clone(self$dataset)
 			# use test method in trans_alpha
@@ -168,6 +169,7 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
 				env_data <- self$data_env
+				env_data <- private$check_numeric(env_data)
 			}
 			if(is.null(group)){
 				g <- GGally::ggpairs(env_data, ...)
@@ -713,8 +715,6 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @description
 		#' Mantel test between beta diversity matrix and environmental data.
 		#'
-		#' @param select_env_data default NULL; numeric or character vector to select columns in \code{data_env} of the object; 
-		#' 	 if not provided, automatically select the columns with numeric attributes.
 		#' @param partial_mantel default FALSE; whether use partial mantel test; If TRUE, use other all measurements as the zdis in each calculation.
 		#' @param add_matrix default NULL; additional distance matrix provided when the beta diversity matrix in the dataset is not used.
 		#' @param use_measure default NULL; a name of beta diversity matrix. If necessary and not provided, use the first beta diversity matrix.
@@ -729,7 +729,6 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 		#' }
 		cal_mantel = function(
-			select_env_data = NULL, 
 			partial_mantel = FALSE, 
 			add_matrix = NULL, 
 			use_measure = NULL, 
@@ -760,12 +759,7 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
 				env_data <- self$data_env
-			}
-			# if no selection, automatically select the numeric columns
-			if(is.null(select_env_data)){
-				env_data <- env_data[, unlist(lapply(env_data, is.numeric))]
-			}else{
-				env_data <- env_data[, select_env_data]
+				env_data <- private$check_numeric(env_data)
 			}
 			if(is.null(by_group)){
 				veg_dist <- as.dist(use_matrix[rownames(env_data), rownames(env_data)])
@@ -792,7 +786,6 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
 		#'    "all": use all merged taxonomic abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
-		#' @param select_env_data default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.
 		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
@@ -827,7 +820,6 @@ trans_env <- R6Class(classname = "trans_env",
 		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
-			select_env_data = NULL,
 			cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
 			p_adjust_method = "fdr",
 			p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
@@ -849,9 +841,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			cor_method <- match.arg(cor_method, c("pearson", "spearman", "kendall", "maaslin2"))
 			if(cor_method != "maaslin2"){
-				if(is.null(select_env_data)){
-					env_data <- env_data[, unlist(lapply(env_data, is.numeric)), drop = FALSE]
-				}
+				env_data <- private$check_numeric(env_data)
 			}
 			if(!is.null(add_abund_table)){
 				abund_table <- add_abund_table
@@ -1402,6 +1392,19 @@ trans_env <- R6Class(classname = "trans_env",
 		}
 	),
 	private = list(
+		# check numeric vectors
+		check_numeric = function(input_table){
+			check_cols <- unlist(lapply(input_table, function(x){!is.numeric(x)}))
+			if(any(check_cols)){
+				message("Find non-numeric columns in the object$data_env: ", paste0(colnames(input_table)[check_cols], collapse = " "), " ...")
+				message("Remove non-numeric columns ...")
+				if(all(check_cols)){
+					stop("No variables remained after filtering! Please check the input data when creating the object!")
+				}
+				input_table <- input_table[, !check_cols, drop = FALSE]
+			}
+			input_table
+		},
 		# transformation function
 		stand_fun = function(arr, ref, min_perc = NULL, max_perc = NULL) {
 			# arr and ref must be a two column data.frame or matrix

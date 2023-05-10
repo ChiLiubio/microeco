@@ -612,7 +612,6 @@ t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 
 Mantel test between beta diversity matrix and environmental data.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_mantel(
-  select_env_data = NULL,
   partial_mantel = FALSE,
   add_matrix = NULL,
   use_measure = NULL,
@@ -626,9 +625,6 @@ Mantel test between beta diversity matrix and environmental data.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in \code{data_env} of the object; 
-if not provided, automatically select the columns with numeric attributes.}
-
 \item{\code{partial_mantel}}{default FALSE; whether use partial mantel test; If TRUE, use other all measurements as the zdis in each calculation.}
 
 \item{\code{add_matrix}}{default NULL; additional distance matrix provided when the beta diversity matrix in the dataset is not used.}
@@ -669,7 +665,6 @@ Actually, it can also be applied to other correlation between any two variables 
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
-  select_env_data = NULL,
   cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
   p_adjust_method = "fdr",
   p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
@@ -691,8 +686,6 @@ Actually, it can also be applied to other correlation between any two variables 
 \describe{
 \item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
 "all": use all merged taxonomic abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.}
-
-\item{\code{select_env_data}}{default NULL; numeric or character vector to select columns in data_env; if not provided, automatically select the columns with numeric attributes.}
 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
