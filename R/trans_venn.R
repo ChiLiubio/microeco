@@ -103,7 +103,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param alpha default .3; alpha for transparency.
 		#' @param linesize default 1.1; cycle line size.
 		#' @param petal_plot default FALSE; whether use petal plot.
-		#' @param petal_color default "#BEAED4"; color of the petals.
+		#' @param petal_color default "#BEAED4"; color of the petals; If petal_color only has one color value, all the petals will be assigned with this color value.
+		#'    If petal_color has multiple colors, and the number of color values is smaller than the petal number, 
+		#'    the function can append more colors automatically with the color interpolation.
 		#' @param petal_color_center default "#BEBADA"; color of the center in the petal plot.
 		#' @param petal_a default 4; the length of the ellipse.
 		#' @param petal_r default 1; scaling up the size of the ellipse.
@@ -280,13 +282,17 @@ trans_venn <- R6Class(classname = "trans_venn",
 			if(colnumber > 4 & petal_plot == T) {
 				nPetals <- colnumber
 				plot_data <- summary_table[c(1:nPetals, nrow(summary_table)), ]
-				petal_color_use <- rep(petal_color, nPetals)
+				if(length(petal_color) == 1){
+					petal_color_use <- rep(petal_color, nPetals)
+				}else{
+					petal_color_use <- expand_colors(petal_color, nPetals)
+				}
 				
 				p <- ggplot(data.frame(), aes(x=c(0, 0), y = 0)) +
 					  xlim(petal_use_lim[1], petal_use_lim[2]) +
 					  ylim(petal_use_lim[1], petal_use_lim[2]) +
 					  private$main_theme
-				
+					  
 				for(i in 1:nPetals){
 					rotate <- 90 - (i - 1) * 360/nPetals
 					rotate2 <- rotate * pi/180
@@ -296,7 +302,6 @@ trans_venn <- R6Class(classname = "trans_venn",
 					mx <- petal_move_xy * cos(rotate2)
 					my <- petal_move_xy * sin(rotate2)
 					petal_data <- private$petal(mx = mx, my = my, rotate = rotate, a = petal_a, r = petal_r)
-
 					p <- p + geom_polygon(data = petal_data, aes(x = x, y = y), fill = petal_color_use[i], alpha = alpha)
 					p <- p + annotate("text", x = petal_move_k * mx, y = petal_move_k * my, label = rownames(plot_data)[i], size = text_name_size)
 					p <- p + annotate("text", x = petal_move_k_count * mx, y = petal_move_k_count * my, label = plot_data[i, 1], size = text_size)
@@ -314,7 +319,6 @@ trans_venn <- R6Class(classname = "trans_venn",
 					y = 0 + sum(abs(petal_use_lim))/(petal_text_move * 2), 
 					label = plot_data[nrow(plot_data), 1], 
 					size = text_size)
-				
 				if(!is.null(ratio)){
 					p <- p + annotate("text", 
 						x = 0, 

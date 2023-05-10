@@ -151,7 +151,9 @@ Plot venn diagram.
 
 \item{\code{petal_plot}}{default FALSE; whether use petal plot.}
 
-\item{\code{petal_color}}{default "#BEAED4"; color of the petals.}
+\item{\code{petal_color}}{default "#BEAED4"; color of the petals; If petal_color only has one color value, all the petals will be assigned with this color value.
+If petal_color has multiple colors, and the number of color values is smaller than the petal number, 
+the function can append more colors automatically with the color interpolation.}
 
 \item{\code{petal_color_center}}{default "#BEBADA"; color of the center in the petal plot.}
 
