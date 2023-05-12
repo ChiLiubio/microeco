@@ -87,6 +87,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   filter_thres = 0,
   alpha = 0.05,
   p_adjust_method = "fdr",
+  transformation = NULL,
   lefse_subgroup = NULL,
   lefse_min_subsam = 10,
   lefse_norm = 1e+06,
@@ -105,7 +106,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
+\item{\code{dataset}}{default NULL; \code{\link{microtable}} object.}
 
 \item{\code{method}}{default "lefse"; see the following available options:
 \describe{
@@ -132,7 +133,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         require \code{ALDEx2} package to be installed 
         (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
   \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
-        see also the test parameter in \code{ALDEx2::aldex} function.}
+        see also the \code{test} parameter in \code{ALDEx2::aldex} function.}
   \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
   \item{\strong{'linda'}}{Linear Model for Differential Abundance Analysis of High-dimensional Compositional Data 
         based on the \code{linda} function of \code{MicrobiomeStat} package. 
@@ -159,6 +160,10 @@ the function will use the features in input \code{microtable$otu_table} automati
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.}
 
+\item{\code{transformation}}{default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
+such as 'AST' for the arc sine square root transformation. Please see the \code{trans_norm} class of mecodev package. 
+Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".}
+
 \item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
 
 \item{\code{lefse_min_subsam}}{default 10; sample numbers required in the subgroup test.}
@@ -178,7 +183,7 @@ the function will use the features in input \code{microtable$otu_table} automati
 \item{\code{ALDEx2_sig}}{default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
 applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
 for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
-and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
+and "we.eBH" (Expected BH corrected P value of Welch's t test); for "ALDEx2_kw"; for "ALDEx2_t",
 the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).}
 
 \item{\code{by_group}}{default NULL; a column of sample_table used to perform the differential test 
@@ -202,15 +207,16 @@ passed to \code{MicrobiomeStat::linda} function when method = "linda".}
 }
 \subsection{Returns}{
 res_diff and res_abund.\cr
-  \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
-  \strong{res_diff} is the detailed differential test result, containing:\cr
-    \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups used;\cr
+  \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
+  \strong{res_diff} is the detailed differential test result, may containing:\cr
+    \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups are used;\cr
     \strong{"Group"}: Which group has the maximum median or mean value across the test groups; 
        For non-parametric methods, median value; For t.test, mean value;\cr
     \strong{"Taxa"}: which taxa is used in this comparision;\cr
     \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
     \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
-    \strong{"P.unadj" and "P.adj"}: raw p value; P.adj: adjusted p value;\cr
+    \strong{"P.unadj"}: original p value;\cr
+    \strong{"P.adj"}: adjusted p value;\cr
     \strong{"qvalue"}: qvalue for metastat analysis.
 }
 \subsection{Examples}{

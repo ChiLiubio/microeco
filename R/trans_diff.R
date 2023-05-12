@@ -16,7 +16,7 @@
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param dataset default NULL; \code{\link{microtable}} object.
 		#' @param method default "lefse"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
@@ -42,7 +42,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  require \code{ALDEx2} package to be installed 
 		#'     	  (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
 		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
-		#'     	  see also the test parameter in \code{ALDEx2::aldex} function.}
+		#'     	  see also the \code{test} parameter in \code{ALDEx2::aldex} function.}
 		#'     \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
 		#'     \item{\strong{'linda'}}{Linear Model for Differential Abundance Analysis of High-dimensional Compositional Data 
 		#'     	  based on the \code{linda} function of \code{MicrobiomeStat} package. 
@@ -63,6 +63,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 		#'    "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.
+		#' @param transformation default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
+		#'    such as 'AST' for the arc sine square root transformation. Please see the \code{trans_norm} class of mecodev package. 
+		#'    Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
@@ -74,7 +77,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
 		#'   applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
 		#'   for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
-		#'   and "we.eBH" (Expected BH corrected P value of Welch’s t test); for "ALDEx2_kw"; for "ALDEx2_t",
+		#'   and "we.eBH" (Expected BH corrected P value of Welch's t test); for "ALDEx2_kw"; for "ALDEx2_t",
 		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
@@ -91,15 +94,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
 		#'   Same with the \code{by_ID} parameter in trans_alpha class.
 		#' @return res_diff and res_abund.\cr
-		#'   \strong{res_abund} includes mean abudance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
-		#'   \strong{res_diff} is the detailed differential test result, containing:\cr
-		#'     \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups used;\cr
+		#'   \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
+		#'   \strong{res_diff} is the detailed differential test result, may containing:\cr
+		#'     \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups are used;\cr
 		#'     \strong{"Group"}: Which group has the maximum median or mean value across the test groups; 
 		#'        For non-parametric methods, median value; For t.test, mean value;\cr
 		#'     \strong{"Taxa"}: which taxa is used in this comparision;\cr
 		#'     \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
 		#'     \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
-		#'     \strong{"P.unadj" and "P.adj"}: raw p value; P.adj: adjusted p value;\cr
+		#'     \strong{"P.unadj"}: original p value;\cr
+		#'     \strong{"P.adj"}: adjusted p value;\cr
 		#'     \strong{"qvalue"}: qvalue for metastat analysis.
 		#' @examples
 		#' \donttest{
@@ -118,6 +122,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			filter_thres = 0,
 			alpha = 0.05,
 			p_adjust_method = "fdr",
+			transformation = NULL,
 			lefse_subgroup = NULL,
 			lefse_min_subsam = 10,
 			lefse_norm = 1000000,
@@ -168,7 +173,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 				################################
-				# generate abudance table
+				# generate abundance table
 				if(is.null(tmp_dataset$taxa_abund)){
 					message("No taxa_abund found. First calculate it with cal_abund function ...")
 					tmp_dataset$cal_abund()
@@ -188,7 +193,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				if(filter_thres > 0){
 					if(filter_thres >= 1){
-						stop("Parameter filter_thres represents relative abudance. It should be smaller than 1 !")
+						stop("Parameter filter_thres represents relative abundance. It should be smaller than 1 !")
 					}else{
 						abund_table %<>% .[apply(., 1, mean) > filter_thres, ]
 					}
@@ -199,17 +204,23 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 				
-				if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme")){
+				if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme")){					
+					abund_table_foralpha <- abund_table
+					if(!is.null(transformation)){
+						message("Perform the transformation with method: ", transformation, " ...")
+						tmp <- mecodev::trans_norm$new(abund_table_foralpha)
+						abund_table_foralpha <- tmp$norm(method = transformation)
+					}
 					if(method == "KW_dunn"){
-						# filter taxa with equal abudance across all samples
-						abund_table %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
+						# filter taxa with equal abundance across all samples
+						abund_table_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
 					}
 					if(method == "betareg"){
-						abund_table %<>% {. + 0.000001}/1.000002
+						abund_table_foralpha %<>% {. + 0.000001}/1.000002
 					}
 					tem_data <- clone(tmp_dataset)
 					# use test method in trans_alpha
-					tem_data$alpha_diversity <- as.data.frame(t(abund_table))
+					tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
 					tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
 					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
 					output <- tem_data1$res_diff
@@ -757,10 +768,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						method <- paste0("linda formula: ", group)
 					}
 				}
+				self$res_abund <- res_abund
+				message('Taxa abundance table is stored in object$res_abund ...')
 				self$res_diff <- output
 				message(method , " analysis result is stored in object$res_diff ...")
-				self$res_abund <- res_abund
-				message('Taxa abundance data is stored in object$res_abund ...')
 				# save abund_table for the cladogram
 				self$abund_table <- abund_table
 				self$method <- method
@@ -876,7 +887,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			if(nrow(diff_data) == 0){
-				stop("No significant taxa can be used to plot the abudance!")
+				stop("No significant taxa can be used to plot the abundance!")
 			}
 			if(simplify_names == T){
 				diff_data$Taxa %<>% gsub(".*\\|", "", .)
@@ -897,7 +908,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				message('Use provided select_taxa to filter and reorder taxa ...')
 				diff_data %<>% .[.$Taxa %in% select_taxa, ]
 				if(nrow(diff_data) == 0){
-					stop("No significant taxa can be used to plot the abudance!")
+					stop("No significant taxa can be used to plot the abundance!")
 				}
 				diff_data$Taxa %<>% factor(., levels = rev(select_taxa))
 			}
