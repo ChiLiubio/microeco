@@ -293,17 +293,26 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				method <- paste0(method, "-formula")
 			}
 			if(method %in% "lme"){
-				if(length(measure) > 1){
-					stop("More than 1 measures are found! Please select a measure with measure parameter!")
+				compare_result <- data.frame()
+				for(k in measure){
+					div_table <- data_alpha[data_alpha$Measure == k, ]
+					tmp_res <- data.frame()
+					tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
+					tmp_summary <- summary(tmp)
+					tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
+					tmp_model_R2 <- performance::r2(tmp)
+					tmp_model_p <- anova(tmp)
+					tmp_random_p <- lmerTest::ranova(tmp)
+					tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+						Measure = k, 
+						Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
+						Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
+						Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
+						Estimate = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
+						P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
+						)
+					compare_result %<>% rbind(., tmp_res)
 				}
-				compare_result <- list()
-				div_table <- data_alpha[data_alpha$Measure == measure, ]
-				compare_result$model <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
-				compare_result$summary <- summary(compare_result$model)
-				compare_result$anova <- anova(compare_result$model)
-				compare_result$ranova <- lmerTest::ranova(compare_result$model)
-				compare_result$r2 <- performance::r2(compare_result$model)
-				compare_result$p_value <- parameters::p_value(compare_result$model)
 			}
 			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme")){
 				if("P.adj" %in% colnames(compare_result)){
