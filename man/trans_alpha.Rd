@@ -107,7 +107,7 @@ Differential test of alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
   method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme",
-    "betareg")[1],
+    "betareg", "glmm")[1],
   measure = NULL,
   p_adjust_method = "fdr",
   formula = NULL,
@@ -129,8 +129,9 @@ Differential test of alpha diversity.
         For multi-factor anova, see \code{\link{aov}}}
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
-  \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
+  \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
   \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
+  \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
 }}
 
 \item{\code{measure}}{default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
@@ -139,25 +140,26 @@ e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 \code{NULL} can disable the p value adjustment.}
 
-\item{\code{formula}}{default NULL; applied to two-way or multi-factor anova analysis when 
-method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"}; 
-specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
+\item{\code{formula}}{default NULL; applied to two-way or multi-factor anova when 
+method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"} or \code{"glmm"}; 
+specified set for independent variables, i.e. the latter part of a general formula, 
 such as \code{'block + N*P*K'}.}
 
 \item{\code{KW_dunn_letter}}{default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 \code{FALSE} means significances are shown by asterisk for paired comparison.}
 
-\item{\code{...}}{parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
-(\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or \code{lmerTest::lmer} (\code{method = "lme"}) or 
-\code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or
-\code{betareg::betareg} (\code{method = "betareg"}).}
+\item{\code{...}}{parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
+\code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
+\code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or 
+\code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or 
+\code{lmerTest::lmer} (\code{method = "lme"}) or 
+\code{betareg::betareg} (\code{method = "betareg"}) or 
+\code{glmmTMB::glmmTMB} (\code{method = "glmm"}).}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_diff} stored in object with the format \code{data.frame}.
-  In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
-  For non-parametric methods, maximum median value; For t.test, maximum mean value.
+\code{res_diff}, stored in object with the format \code{data.frame}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

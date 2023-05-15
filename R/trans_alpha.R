@@ -86,26 +86,28 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     	  For multi-factor anova, see \code{\link{aov}}}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
-		#'     \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
+		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'     \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
+		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
 		#'   }
 		#' @param measure default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
 		#'    \code{NULL} can disable the p value adjustment.
-		#' @param formula default NULL; applied to two-way or multi-factor anova analysis when 
-		#'   method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"}; 
-		#'   specified set for independent variables, i.e. the latter part of the formula in \code{\link{aov}}, 
+		#' @param formula default NULL; applied to two-way or multi-factor anova when 
+		#'   method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"} or \code{"glmm"}; 
+		#'   specified set for independent variables, i.e. the latter part of a general formula, 
 		#'   such as \code{'block + N*P*K'}.
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
-		#' @param ... parameters passed to \code{kruskal.test} or \code{wilcox.test} function (\code{method = "KW"}) or \code{dunnTest} function of \code{FSA} package 
-		#'   (\code{method = "KW_dunn"}) or \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or \code{lmerTest::lmer} (\code{method = "lme"}) or 
-		#'   \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or
-		#'   \code{betareg::betareg} (\code{method = "betareg"}).
-		#' @return \code{res_diff} stored in object with the format \code{data.frame}.
-		#'   In the data frame, 'Group' column means that the group has the maximum median or mean value across the test groups;
-		#'   For non-parametric methods, maximum median value; For t.test, maximum mean value.
+		#' @param ... parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
+		#'   \code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
+		#'   \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or 
+		#'   \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or 
+		#'   \code{lmerTest::lmer} (\code{method = "lme"}) or 
+		#'   \code{betareg::betareg} (\code{method = "betareg"}) or 
+		#'   \code{glmmTMB::glmmTMB} (\code{method = "glmm"}).
+		#' @return \code{res_diff}, stored in object with the format \code{data.frame}.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(method = "KW")
@@ -114,22 +116,22 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "anova")
 		#' }
 		cal_diff = function(
-			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg")[1], 
+			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm")[1], 
 			measure = NULL, 
 			p_adjust_method = "fdr", 
 			formula = NULL,
 			KW_dunn_letter = TRUE,
 			...
 			){
-			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg"))
+			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm"))
 			group <- self$group
 			
-			if(method %in% c("scheirerRayHare", "lme", "betareg") & is.null(formula)){
+			if(method %in% c("scheirerRayHare", "lme", "betareg", "glmm") & is.null(formula)){
 				if(is.null(formula)){
 					stop("formula is necessary! Please provide formula parameter!")
 				}
 			}
-			if(!method %in% c("anova", "scheirerRayHare", "lme", "betareg")){
+			if(!method %in% c("anova", "scheirerRayHare", "lme", "betareg", "glmm")){
 				if(is.null(group)){
 					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
 				}
@@ -292,29 +294,45 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result$Significance <- cut(compare_result$P.unadj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 				method <- paste0(method, "-formula")
 			}
-			if(method %in% "lme"){
+			if(method %in% c("lme", "glmm")){
 				compare_result <- data.frame()
 				for(k in measure){
 					div_table <- data_alpha[data_alpha$Measure == k, ]
 					tmp_res <- data.frame()
-					tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
-					tmp_summary <- summary(tmp)
-					tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
-					tmp_model_R2 <- performance::r2(tmp)
-					tmp_model_p <- anova(tmp)
-					tmp_random_p <- lmerTest::ranova(tmp)
-					tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
-						Measure = k, 
-						Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
-						Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
-						Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
-						Estimate = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
-						P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
+					if(method == "lme"){
+						tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
+						tmp_summary <- summary(tmp)
+						tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
+						tmp_model_R2 <- performance::r2(tmp)
+						tmp_model_p <- anova(tmp)
+						tmp_random_p <- lmerTest::ranova(tmp)
+						tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+							Measure = k, 
+							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
+							Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
+							Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
+							Estimate = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
+							P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
 						)
+					}else{
+						tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
+						tmp_summary <- summary(tmp)
+						tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
+						tmp_model_p <- car::Anova(tmp)
+						tmp_model_R2 <- performance::r2(tmp)
+						tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+							Measure = k, 
+							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
+							Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+							Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+							Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
+							P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
+						)
+					}
 					compare_result %<>% rbind(., tmp_res)
 				}
 			}
-			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme")){
+			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme", "glmm")){
 				if("P.adj" %in% colnames(compare_result)){
 					compare_result$Significance <- cut(compare_result$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", "ns"))
 					compare_result$Significance %<>% as.character
