@@ -224,13 +224,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 					tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
 					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
 					output <- tem_data1$res_diff
-					if(method != "lme"){
-						colnames(output)[colnames(output) == "Measure"] <- "Taxa"
-						# multi-way anova has formula in the final method; one-way is the original 'anova'
-						method <- tem_data1$cal_diff_method
-						if("Letter" %in% colnames(output)){
-							output <- cbind.data.frame(output, Significance = output$Letter)
-						}
+					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
+					# multi-way anova has formula in the final method; one-way is the original 'anova'
+					method <- tem_data1$cal_diff_method
+					if("Letter" %in% colnames(output)){
+						output <- cbind.data.frame(output, Significance = output$Letter)
 					}
 				}
 				if(method %in% c("lefse", "rf")){
