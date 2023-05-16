@@ -100,6 +100,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   such as \code{'block + N*P*K'}.
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
+		#' @param return_model default FALSE; whether return the original lmer or glmm model list in the object.
 		#' @param ... parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
 		#'   \code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
 		#'   \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or 
@@ -121,6 +122,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			p_adjust_method = "fdr", 
 			formula = NULL,
 			KW_dunn_letter = TRUE,
+			return_model = FALSE,
 			...
 			){
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm"))
@@ -296,11 +298,17 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			if(method %in% c("lme", "glmm")){
 				compare_result <- data.frame()
+				if(return_model){
+					res_model <- list()
+				}
 				for(k in measure){
 					div_table <- data_alpha[data_alpha$Measure == k, ]
 					tmp_res <- data.frame()
 					if(method == "lme"){
 						tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
+						if(return_model){
+							res_model[[k]] <- tmp
+						}
 						tmp_summary <- summary(tmp)
 						tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
 						tmp_model_R2 <- performance::r2(tmp)
@@ -316,6 +324,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						)
 					}else{
 						tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
+						if(return_model){
+							res_model[[k]] <- tmp
+						}
 						tmp_summary <- summary(tmp)
 						tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
 						tmp_model_p <- car::Anova(tmp)
@@ -330,6 +341,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						)
 					}
 					compare_result %<>% rbind(., tmp_res)
+				}
+				if(return_model){
+					self$res_model <- res_model
+					message("The original ", method, " models list is stored in object$res_model ...")
 				}
 			}
 			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme", "glmm")){
