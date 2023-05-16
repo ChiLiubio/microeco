@@ -81,7 +81,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
     "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2",
-    "linda", "betareg", "lme")[1],
+    "linda", "betareg", "lme", "glmm")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -139,9 +139,21 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         based on the \code{linda} function of \code{MicrobiomeStat} package. 
         Here the group parameter is passed to formula parameter in \code{linda} function with the prefix '~'.
         The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
-       Reference: <doi:10.1186/s13059-022-02655-5>}
+        Reference: <doi:10.1186/s13059-022-02655-5>}
   \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
-  \item{\strong{'lme'}}{lme: Linear Mixed Effect Model based on the \code{lmerTest} package}
+  \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
+        In the return table, the significance of fixed factors are tested by function \code{anova}.
+        The significance of 'Estimate' in each term of fixed factors comes from the model.
+        }
+  \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package.
+        If the relative abundance is applied, it is recommended to use beta family function, i.e. \code{family = glmmTMB::beta_family(link = "logit")}.
+        Note that beta family function limits 0 < response value < 1. 
+        If an error 'y values must be 0 < y < 1' occurs, please first transform input table like: \code{(dataset$taxa_abund$Phylum + 1e-10)/(1 + 2e-10)}.
+        For more parameters, please see \code{glmmTMB::glmmTMB} function.
+        In the return table, Conditional_R2 and Marginal_R2 represent total variance (explained by both fixed and random effects) and the variance explained by 
+        fixed effects, respectively. The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
+        The significance of 'Estimate' in each term of fixed factors comes from the model.
+        }
 }}
 
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
@@ -197,7 +209,7 @@ So \code{by_ID} in sample_table should be the smallest unit of sample collection
 Same with the \code{by_ID} parameter in trans_alpha class.}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
-"KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg" and "lme";
+"KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg", "lme" or "glmm";
 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
