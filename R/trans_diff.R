@@ -233,7 +233,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					tem_data <- clone(tmp_dataset)
 					# use test method in trans_alpha
 					tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
-					tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
+					tem_data1 <- trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID)
 					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
 					output <- tem_data1$res_diff
 					if(!is.null(tem_data1$res_model)){

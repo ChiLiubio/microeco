@@ -331,6 +331,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
 						tmp_model_p <- car::Anova(tmp)
 						tmp_model_R2 <- performance::r2(tmp)
+						test <- try(tmp_model_R2$R2_conditional, silent = TRUE)
+						if(inherits(test, "try-error")) {
+							message("R2 unavailable for ", k, " !")
+							tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
+						}
 						tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
 							Measure = k, 
 							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
