@@ -184,19 +184,22 @@ microtable <- R6Class(classname = "microtable",
 			self$tidy_dataset()
 		},
 		#' @description
-		#' Rarefy communities to make all samples have same feature number. See also \code{\link{rrarefy}} of \code{vegan} package for the alternative method.
+		#' Rarefy communities to make all samples have same feature number.
 		#'
-		#' @param sample.size default:NULL; feature number, If not provided, use minimum number of all samples.
-		#' @param rngseed random seed; default: 123.
-		#' @param replace default: TRUE; See \code{\link{sample}} for the random sampling.
+		#' @param method default c("rarefying", "SRS")[1]; "rarefying" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
+		#'    "SRS" is scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
+		#' @param sample.size default NULL; feature number, If not provided, use minimum number of all samples.
+		#' @param rngseed default 123; random seed.
+		#' @param replace default TRUE; see \code{\link{sample}} for the random sampling; Available when \code{method = "rarefying"}.
 		#' @return None; rarefied dataset.
 		#' @examples
 		#' \donttest{
 		#' m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
 		#' }
-		rarefy_samples = function(sample.size = NULL, rngseed = 123, replace = TRUE){
+		rarefy_samples = function(method = c("rarefying", "SRS")[1], sample.size = NULL, rngseed = 123, replace = TRUE){
 			set.seed(rngseed)
 			self$tidy_dataset()
+			method <- match.arg(method, c("rarefying", "SRS"))
 			if(is.null(sample.size)){
 				sample.size <- min(self$sample_sums())
 				message("Use the minimum number across samples: ", sample.size)
@@ -217,12 +220,16 @@ microtable <- R6Class(classname = "microtable",
 				self$tidy_dataset()
 			}
 			newotu <- self$otu_table
-			newotu <- as.data.frame(apply(newotu, 2, private$rarefaction_subsample, sample.size = sample.size, replace = replace))
-			rownames(newotu) <- self$taxa_names()
+			if(method == "rarefying"){
+				newotu <- as.data.frame(apply(newotu, 2, private$rarefaction_subsample, sample.size = sample.size, replace = replace))
+				rownames(newotu) <- self$taxa_names()
+			}else{
+				newotu <- SRS::SRS(newotu, Cmin = sample.size, set_seed = TRUE, seed = rngseed)
+			}
 			self$otu_table <- newotu
 			# remove OTUs with 0 sequence
 			rmtaxa <- self$taxa_names()[self$taxa_sums() == 0]
-			if (length(rmtaxa) > 0) {
+			if(length(rmtaxa) > 0){
 				message(length(rmtaxa), " OTUs were removed because they are no longer present in any sample after random subsampling ...")
 				self$tax_table <- base::subset(self$tax_table, ! self$taxa_names() %in% rmtaxa)
 				self$tidy_dataset()
