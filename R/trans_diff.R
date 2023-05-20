@@ -49,6 +49,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  Here the group parameter is passed to formula parameter in \code{linda} function with the prefix '~'.
 		#'     	  The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
 		#'     	  Reference: <doi:10.1186/s13059-022-02655-5>}
+		#'     \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data based on the Maaslin2 package.
+		#'     	  Using this option can invoke the \code{trans_env$cal_cor} function with \code{cor_method = "maaslin2"}.}
 		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
 		#'     	  In the return table, the significance of fixed factors are tested by function \code{anova}.
@@ -96,7 +98,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
-		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda".
+		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda";
+		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin2".
 		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
 		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
 		#'   Same with the \code{by_group} parameter in \code{trans_alpha} class. 
@@ -128,7 +131,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", 
-				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "betareg", "lme", "glmm")[1],
+				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -157,11 +160,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				message("Input dataset is NULL. Please run the functions with customized data ...")
 			}else{
 				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "betareg", "lme", "glmm"))
+					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm"))
 				# in case of dataset changes
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
-				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme", "glmm")){
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme", "glmm", "maaslin2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
 				}else{
 					if(!is.null(group)){
@@ -742,7 +745,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					colnames(output)[colnames(output) %in% c("pvalue", "padj")] <- c("P.unadj", "P.adj")
 				}
-				#######################################
+				if(method == "maaslin2"){
+					tmp_trans_env <- trans_env$new(dataset = tmp_dataset, env_cols = 1:ncol(tmp_dataset$sample_table))
+					tmp_trans_env$cal_cor(use_data = taxa_level, cor_method = method, 
+						plot_heatmap = FALSE, plot_scatter = FALSE, ...)
+					output <- tmp_trans_env$res_cor
+					self$res_trans_env <- tmp_trans_env
+					message('Raw trans_env object for maaslin2 is stored in object$res_trans_env ...')
+				}
+				##############################################################################
 				# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")

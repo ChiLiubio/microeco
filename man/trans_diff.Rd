@@ -81,7 +81,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
     "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2",
-    "linda", "betareg", "lme", "glmm")[1],
+    "linda", "maaslin2", "betareg", "lme", "glmm")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -140,6 +140,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         Here the group parameter is passed to formula parameter in \code{linda} function with the prefix '~'.
         The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
         Reference: <doi:10.1186/s13059-022-02655-5>}
+  \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data based on the Maaslin2 package.
+        Using this option can invoke the \code{trans_env$cal_cor} function with \code{cor_method = "maaslin2"}.}
   \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
   \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
         In the return table, the significance of fixed factors are tested by function \code{anova}.
@@ -213,7 +215,8 @@ Same with the \code{by_ID} parameter in trans_alpha class.}
 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
-passed to \code{MicrobiomeStat::linda} function when method = "linda".}
+passed to \code{MicrobiomeStat::linda} function when method = "linda";
+passed to \code{trans_env$cal_cor} function when method = "maaslin2".}
 }
 \if{html}{\out{</div>}}
 }
