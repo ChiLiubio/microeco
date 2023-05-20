@@ -222,16 +222,15 @@ microtable <- R6Class(classname = "microtable",
 			newotu <- self$otu_table
 			if(method == "rarefying"){
 				newotu <- as.data.frame(apply(newotu, 2, private$rarefaction_subsample, sample.size = sample.size, replace = replace))
-				rownames(newotu) <- self$taxa_names()
 			}else{
 				newotu <- SRS::SRS(newotu, Cmin = sample.size, set_seed = TRUE, seed = rngseed)
 			}
+			rownames(newotu) <- rownames(self$otu_table)
 			self$otu_table <- newotu
 			# remove OTUs with 0 sequence
-			rmtaxa <- self$taxa_names()[self$taxa_sums() == 0]
+			rmtaxa <- apply(newotu, 1, sum) %>% .[. == 0]
 			if(length(rmtaxa) > 0){
-				message(length(rmtaxa), " OTUs were removed because they are no longer present in any sample after random subsampling ...")
-				self$tax_table <- base::subset(self$tax_table, ! self$taxa_names() %in% rmtaxa)
+				message(length(rmtaxa), " features are removed because they are no longer present in any sample after random subsampling ...")
 				self$tidy_dataset()
 			}
 		},
@@ -246,7 +245,6 @@ microtable <- R6Class(classname = "microtable",
 		tidy_dataset = function(main_data = FALSE){
 			# check whether there is 0 abundance in otu_table
 			self$otu_table <- private$check_abund_table(self$otu_table)
-			
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
 			if(length(sample_names) == 0){
 				stop("No same sample name found between rownames of sample_table and colnames of otu_table! Please check whether the rownames of sample_table are sample names!")
