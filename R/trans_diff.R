@@ -184,6 +184,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 						if(is.factor(sampleinfo[, group])){
 							self$group_order <- levels(sampleinfo[, group])
 							sampleinfo[, group] %<>% as.character
+						}else{
+							self$group_order <- unique(as.character(sampleinfo[, group]))
 						}
 					}
 				}
@@ -1097,6 +1099,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' Bar plot for indicator index, such as LDA score and P value.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.
+		#' @param color_group_map default FALSE; whether match the colors to groups in order to fix the color in each group when part of groups are not shown in the plot.
+		#'    When \code{color_group_map = TRUE}, the group_order inside the object will be used as full groups set to guide the color extraction.
 		#' @param use_number default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.
 		#' @param threshold default NULL; threshold value of indicators for selecting taxa, such as 3 for LDA score of LEfSe.
 		#' @param select_group default NULL; this is used to select the paired group when multiple comparisions are generated;
@@ -1104,7 +1108,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
-		#' 	  If NULL, the function can first check whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
+		#' 	  If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.
 		#' @param axis_text_y default 12; the size for the y axis text.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
@@ -1118,6 +1122,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' }
 		plot_diff_bar = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			color_group_map = FALSE,
 			use_number = 1:10,
 			threshold = NULL,
 			select_group = NULL,
@@ -1221,8 +1226,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}else{
 					use_data$Group %<>% factor(., levels = group_order)
 				}
-				if(length(color_values) < length(levels(use_data$Group))){
-					stop("Please provide color_values parameter with more colors!")
+				if(color_group_map){
+					# fix colors for each group
+					all_groups <- self$group_order
+					# make sure colors length enough for selection
+					color_values <- expand_colors(color_values, length(all_groups))
+					use_groups <- levels(use_data$Group)
+					color_values %<>% .[match(use_groups, all_groups)]
+				}else{
+					color_values <- expand_colors(color_values, length(levels(use_data$Group)))
 				}
 				# rearrange orders
 				if(length(levels(use_data$Group)) == 2){

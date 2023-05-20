@@ -361,6 +361,7 @@ Bar plot for indicator index, such as LDA score and P value.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_bar(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  color_group_map = FALSE,
   use_number = 1:10,
   threshold = NULL,
   select_group = NULL,
@@ -379,6 +380,9 @@ Bar plot for indicator index, such as LDA score and P value.
 \describe{
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.}
 
+\item{\code{color_group_map}}{default FALSE; whether match the colors to groups in order to fix the color in each group when part of groups are not shown in the plot.
+When \code{color_group_map = TRUE}, the group_order inside the object will be used as full groups set to guide the color extraction.}
+
 \item{\code{use_number}}{default 1:10; numeric vector; the taxa numbers used in the plot, i.e. 1:n.}
 
 \item{\code{threshold}}{default NULL; threshold value of indicators for selecting taxa, such as 3 for LDA score of LEfSe.}
@@ -391,7 +395,7 @@ The input select_group must be one of \code{object$res_diff$Comparison}.}
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
 \item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
-If NULL, the function can first check whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
+If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.}
 
 \item{\code{axis_text_y}}{default 12; the size for the y axis text.}
