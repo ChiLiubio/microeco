@@ -525,13 +525,13 @@ trans_func <- R6Class(classname = "trans_func",
 				message("The intermediate files are saved in the temporary directory --- ", path_to_temp_folder)
 			}
 			if(!dir.exists(path_to_temp_folder)){
-				stop(paste0("Temporay folder--", path_to_temp_folder, " is not existed! Please first create it!"))
+				stop("Temporay folder--", path_to_temp_folder, " is not found! Please first create it!")
 			}
 			if(!dir.exists(path_to_reference_data)){
-				stop(paste0("Tax4Fun2 ReferenceData folder--", path_to_reference_data, " is not existed!"))
+				stop("Tax4Fun2 ReferenceData folder--", path_to_reference_data, " is not existed!")
 			}
 			if(is.null(self$rep_fasta)){
-				stop("The rep_fasta is missing in your dataset object! The fasta file is necessary in Tax4Fun2! Use help(microtable) to see the rep_fasta description!")
+				stop("The rep_fasta is missing in your microtable object! It is necessary for Tax4Fun2! Use help(microtable) to see the rep_fasta description!")
 			}
 			# first check whether blastn tool is available
 			if(is.null(blast_tool_path)){
@@ -549,23 +549,23 @@ trans_func <- R6Class(classname = "trans_func",
 				blast_bin <- "blastn"
 				res <- system(command = paste(blast_bin, "-help"), intern = T)
 				if(length(res) == 0){
-					stop(paste0(blast_bin, " not found! Please check the file path!"))
+					stop(blast_bin, " not found! Please check the file path!")
 				}
 			}
 			# Choose which refernence data set is used
 			if(! database_mode %in% c("Ref99NR", "Ref100NR")){
-				stop('Database mode unknown! valid choices are Ref99NR, Ref100NR')
+				stop('Please provide valid database_mode! Must be Ref99NR or Ref100NR!')
 			}else{
 				path_to_ref_db <- file.path(path_to_reference_data, paste0(database_mode, "/", database_mode,'.fasta'))
 				path_to_ref_dir <- file.path(path_to_reference_data, database_mode)
 			}
 			
 			self$res_tax4fun2_database_mode <- database_mode
-			message('database_mode is stored in object$res_tax4fun2_database_mode!')
+			message('database_mode is stored in object$res_tax4fun2_database_mode.')
 			self$res_tax4fun2_path_to_ref_dir <- path_to_ref_dir
 
 			if(!file.exists(path_to_ref_db)){
-				stop(paste("Reference database", path_to_ref_db, "not found!"))
+				stop("Reference database--", path_to_ref_db, " not found!")
 			}
 			# check whether the blastdb is available!
 			check_files <- paste0(database_mode, '.fasta.', c("ndb", "nhr", "nin", "not", "nsq", "ntf", "nto"))
@@ -587,7 +587,7 @@ trans_func <- R6Class(classname = "trans_func",
 					makeblastdb_bin <- "makeblastdb"
 					res <- system(command = paste(makeblastdb_bin, "-help"), intern = T)
 					if(length(res) == 0){
-						stop(paste0(makeblastdb_bin, " not found! Please check the file path!"))
+						stop(makeblastdb_bin, " not found! Please check the file path!")
 					}
 				}
 				# use refernence db
@@ -608,7 +608,7 @@ trans_func <- R6Class(classname = "trans_func",
 				if(inherits(self$rep_fasta, "DNAStringSet")){
 					Biostrings::writeXStringSet(x = self$rep_fasta, filepath = rep_fasta_path)
 				}else{
-					stop("Unknown fasta format! Must be either list (from read.fasta of seqinr package) or DNAStringSet (from readDNAStringSet of Biostrings package) !")
+					stop("Unknown fasta format! Must be either list (from read.fasta of seqinr package) or DNAStringSet (from readDNAStringSet of Biostrings package)!")
 				}
 			}
 			
@@ -620,7 +620,7 @@ trans_func <- R6Class(classname = "trans_func",
 			}else{
 				system(cmd, ignore.stdout = T, ignore.stderr = T)
 			}
-			message('Blast finished')
+			message('Blast finished.')
 
 			# Write to log file
 			path_to_log_file = file.path(path_to_temp_folder, 'logfile.txt')
@@ -631,14 +631,14 @@ trans_func <- R6Class(classname = "trans_func",
 
 			# filter redundant data
 			private$blastTableReducer(path_to_blast_file = res_blast_path)
-			message('Cleanup finished')
+			message('Cleanup finished.')
 
 			# parse file and make the prediction
 			write(x = "Functional prediction", file = path_to_log_file, append = T)
 			if(min_identity_to_reference < 90){
 				warning("Minimum identity of less than 90% will likly results in inaccurate predictions!")
 			}
-			message(paste0("Using minimum identity cutoff of ", min_identity_to_reference, "% to nearest neighbor"))
+			message(paste0("Using minimum identity cutoff of ", min_identity_to_reference, "% to nearest neighbor."))
 			ref_blast_result <- read.delim(res_blast_path, h = F)
 			ref_blast_result_reduced <- ref_blast_result[which(ref_blast_result$V3 >= min_identity_to_reference), 1:2]
 
@@ -674,7 +674,7 @@ trans_func <- R6Class(classname = "trans_func",
 			if(normalize_by_copy_number) n = n + 1
 
 			# Generate reference profile
-			message('Generating reference profile')
+			message('Generating reference profile.')
 			reference_profile = NULL
 			for(reference_id in otu_table_reduced_aggregated$Group.1){
 				reference_file_path <- file.path(path_to_ref_dir, paste0(reference_id, '.tbl.gz'))
@@ -691,10 +691,10 @@ trans_func <- R6Class(classname = "trans_func",
 			res_tax4fun2_reference_profile <- dplyr::left_join(raw_otu_table_reduced[, 1:2], map_reference_profile, by = c("V2" = "id"))
 			colnames(res_tax4fun2_reference_profile) <- c("Taxa", "id", ko_list$ko)
 			write.table(res_tax4fun2_reference_profile, file.path(path_to_temp_folder, 'res_tax4fun2_reference_profile.tsv'), sep = "\t")
-			message("Reference profile file is saved in ", file.path(path_to_temp_folder, "res_tax4fun2_reference_profile.tsv"), " ...")
+			message("Reference profile file is saved in ", file.path(path_to_temp_folder, "res_tax4fun2_reference_profile.tsv"), ".")
 			
 			# Calculate functional profiles sample-wise
-			message('Generating functional profile for samples ...')
+			message('Generating functional profile for samples.')
 			functional_prediction = NULL
 			for(sample_num in 2:ncol(otu_table_reduced_aggregated)){
 				functional_prediction_sample <- reference_profile * as.numeric(otu_table_reduced_aggregated[, sample_num])
@@ -717,10 +717,10 @@ trans_func <- R6Class(classname = "trans_func",
 			write.table(x = functional_prediction_final, file = file.path(path_to_temp_folder, 'functional_prediction.txt'), append = F, quote = F, 
 				sep = "\t", row.names = F, col.names = T)
 			self$res_tax4fun2_KO <- functional_prediction_final
-			message('Result KO abundance is stored in object$res_tax4fun2_KO ...')
+			message('Result KO abundance is stored in object$res_tax4fun2_KO.')
 
 			# Converting the KO profile to a profile of KEGG pathways
-			message('Converting functions to pathways')
+			message('Converting functions to pathways.')
 			ko2ptw <- Tax4Fun2_KEGG$ko2ptw
 			if(normalize_pathways){
 				functional_prediction_norm <- functional_prediction / ko_list$pathway_count
@@ -742,7 +742,7 @@ trans_func <- R6Class(classname = "trans_func",
 			pathway_prediction <- pathway_prediction[, -1, drop = FALSE]
 			
 			self$res_tax4fun2_pathway <- pathway_prediction
-			message('Pathway abundance table is stored in object$res_tax4fun2_pathway ...')			
+			message('Pathway abundance table is stored in object$res_tax4fun2_pathway.')			
 			ptw_desc <- Tax4Fun2_KEGG$ptw_desc
 			pathway_prediction_final <- data.frame(pathway_prediction, ptw_desc[rownames(pathway_prediction), ])
 			pathway_prediction_final <- data.frame(pathway = rownames(pathway_prediction_final), pathway_prediction_final)
