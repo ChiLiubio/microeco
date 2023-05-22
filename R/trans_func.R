@@ -525,10 +525,10 @@ trans_func <- R6Class(classname = "trans_func",
 				message("The intermediate files are saved in the temporary directory --- ", path_to_temp_folder)
 			}
 			if(!dir.exists(path_to_temp_folder)){
-				stop(paste0("Temporay folder--", path_to_temp_folder, " is not existed! Please check it!"))
+				stop(paste0("Temporay folder--", path_to_temp_folder, " is not existed! Please first create it!"))
 			}
 			if(!dir.exists(path_to_reference_data)){
-				stop(paste0("Tax4Fun2 ReferenceData folder--", path_to_temp_folder, " is not existed!"))
+				stop(paste0("Tax4Fun2 ReferenceData folder--", path_to_reference_data, " is not existed!"))
 			}
 			if(is.null(self$rep_fasta)){
 				stop("The rep_fasta is missing in your dataset object! The fasta file is necessary in Tax4Fun2! Use help(microtable) to see the rep_fasta description!")
