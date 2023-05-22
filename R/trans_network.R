@@ -21,7 +21,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   \describe{
 		#'     \item{\strong{NULL}}{NULL denotes non-correlation network, i.e. do not use correlation-based network. 
 		#'       If so, the return res_cor_p list will be NULL.}
-		#'     \item{\strong{'bray'}}{1-B, where B is Bray–Curtis dissimilarity; based on \code{vegan::vegdist} function}
+		#'     \item{\strong{'bray'}}{1-B, where B is Bray-Curtis dissimilarity; based on \code{vegan::vegdist} function}
 		#'     \item{\strong{'pearson'}}{Pearson correlation; If \code{use_WGCNA_pearson_spearman} and \code{use_NetCoMi_pearson_spearman} are both FALSE, 
 		#'       use the function \code{cor.test} in R; \code{use_WGCNA_pearson_spearman = TRUE} invoke \code{corAndPvalue} function of \code{WGCNA} package; 
 		#'       \code{use_NetCoMi_pearson_spearman = TRUE} invoke \code{netConstruct} function of \code{NetCoMi} package}
