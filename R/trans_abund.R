@@ -614,7 +614,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' Plot the line chart.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the points and lines.
-		#' @param plot_SE default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.
+		#' @param plot_SE default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.
 		#' @param position default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.
 		#' @param errorbar_size default 1; errorbar size.
 		#' @param errorbar_width default 0.1; errorbar width.
@@ -669,7 +669,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size)
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
 			p <- p + scale_color_manual(values = color_values)
-			
 			p
 		},
 		#' @description

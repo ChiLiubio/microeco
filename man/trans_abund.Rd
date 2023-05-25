@@ -490,7 +490,7 @@ Plot the line chart.
 \describe{
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the points and lines.}
 
-\item{\code{plot_SE}}{default TRUE; TRUE: plot the errorbar with mean±se; FALSE: plot the errorbar with mean±sd.}
+\item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.}
 
 \item{\code{position}}{default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.}
 
