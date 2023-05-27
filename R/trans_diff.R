@@ -10,8 +10,8 @@
 #'  Scheirer Ray Hare test, 
 #'  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
 #'  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7>, R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>, 
-#'  R package \code{MicrobiomeStat} <doi:10.1186/s13059-022-02655-5> and
-#'  beta regression <doi:10.18637/jss.v034.i02>.
+#'  R package \code{MicrobiomeStat} <doi:10.1186/s13059-022-02655-5>, beta regression <doi:10.18637/jss.v034.i02>, R package \code{maaslin2},
+#'  linear mixed-effects model and generalized linear mixed model.
 #' 
 #' @export
 trans_diff <- R6Class(classname = "trans_diff",
