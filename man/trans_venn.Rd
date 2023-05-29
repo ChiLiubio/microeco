@@ -78,8 +78,8 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
 \item{\code{ratio}}{default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
 "seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.}
 
-\item{\code{add_abund_table}}{default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
-Features must be rows.}
+\item{\code{add_abund_table}}{default NULL; data.frame or matrix format; additional data provided instead of \code{dataset} parameter.
+Features must be rows. If provided, the parameter \code{dataset} is disabled no matter whether it is \code{NULL}.}
 
 \item{\code{name_joint}}{default "&"; the joint mark for generating multi-sample names.}
 }

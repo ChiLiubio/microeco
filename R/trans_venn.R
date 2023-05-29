@@ -12,8 +12,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param sample_names default NULL; character vector of sample names; If provided, filter the samples not found in the vector.
 		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
 		#' 	 "seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.
-		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of dataset$otu_table;
-		#'   Features must be rows.
+		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of \code{dataset} parameter.
+		#'   Features must be rows. If provided, the parameter \code{dataset} is disabled no matter whether it is \code{NULL}.
 		#' @param name_joint default "&"; the joint mark for generating multi-sample names.
 		#' @return \code{data_details} and \code{data_summary} stored in the object.
 		#' @examples
@@ -24,23 +24,23 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' }
 		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_abund_table = NULL, name_joint = "&"
 			){
-			if(!is.null(dataset)){
-				use_dataset <- clone(dataset)
-				if(!is.null(sample_names)){
-					use_dataset$sample_table %<>% .[rownames(.) %in% sample_names, ]
+			if(!is.null(add_abund_table)){
+				if(!any(is.data.frame(add_abund_table), is.matrix(add_abund_table))){
+					stop("Input add_abund_table must be data.frame or matrix !")
 				}
-				use_dataset$tax_table %<>% base::subset(use_dataset$taxa_sums() != 0)
-				use_dataset$tidy_dataset()
-				abund <- use_dataset$otu_table
-				self$tax_table <- use_dataset$tax_table
+				abund <- add_abund_table
 			}else{
-				if(is.null(add_abund_table)){
+				if(is.null(dataset)){
 					stop("Either dataset or add_abund_table should be provided !")
 				}else{
-					if(! any(is.data.frame(add_abund_table), is.matrix(add_abund_table))){
-						stop("add_abund_table must be data.frame or matrix !")
+					use_dataset <- clone(dataset)
+					if(!is.null(sample_names)){
+						use_dataset$sample_table %<>% .[rownames(.) %in% sample_names, ]
 					}
-					abund <- add_abund_table
+					# filter the feature with abundance 0
+					use_dataset$tidy_dataset()
+					abund <- use_dataset$otu_table
+					self$tax_table <- use_dataset$tax_table
 				}
 			}
 			res_names <- colnames(abund)
@@ -54,14 +54,15 @@ trans_venn <- R6Class(classname = "trans_venn",
 			samplesum <- apply(setmatrix, 2, sum)
 			# Create all possible sample combinations within requested complexity levels
 			# modified from the method in systemPipeR package
-			allcombl <- lapply(1:colnumber, function(x) combn(colnames(setmatrix), m = x, simplify = FALSE)) %>% unlist(recursive = FALSE)
+			allcombl <- lapply(seq_len(colnumber), function(x) combn(colnames(setmatrix), m = x, simplify = FALSE)) %>% 
+				unlist(recursive = FALSE)
 			venn_list <- sapply(seq_along(allcombl), function(x) private$vennSets(setmatrix = setmatrix, allcombl = allcombl, index = x, setunion = setunion))
 			names(venn_list) <- sapply(allcombl, paste, collapse = name_joint)
 			venn_abund <- sapply(venn_list, function(x){
 				subset(abund2, OTU %in% x) %>% 
 				dplyr::summarise(Sum = sum(Abundance)) %>% 
-				unlist() %>% 
-				unname()
+				unlist %>% 
+				unname
 			})
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
 			if(!is.null(ratio)){
@@ -74,7 +75,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 					venn_count_abund[, 2] <- paste0(round(venn_count_abund[,1]/sum(venn_count_abund[, 1]), 3) * 100, "%")
 				}
 			}
-			# make sure the length of elements are same
+			# make the length of elements same
 			venn_maxlen <- max(sapply(venn_list, length))
 			venn_table <- lapply(venn_list, function(x) {
 				fill_length <- venn_maxlen - length(x)
