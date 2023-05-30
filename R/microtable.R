@@ -243,7 +243,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
-			# check whether there is 0 abundance in otu_table
+			# first check abundance in otu_table
 			self$otu_table <- private$check_abund_table(self$otu_table)
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
 			if(length(sample_names) == 0){
@@ -260,9 +260,9 @@ microtable <- R6Class(classname = "microtable",
 			taxa_names <- Reduce(intersect, taxa_list)
 			if(length(taxa_names) == 0){
 				if(is.null(self$phylo_tree)){
-					stop("No same feature names found between rownames of otu_table and rownames of tax_table! Please check rownames of those tables !")
+					stop("No same feature names found between rownames of otu_table and rownames of tax_table! Please check rownames of those tables!")
 				}else{
-					stop("No same feature name found among otu_table, tax_table and phylo_tree! Please check feature names in those objects !")
+					stop("No same feature name found among otu_table, tax_table and phylo_tree! Please check feature names in those objects!")
 				}
 			}
 			self$otu_table %<>% .[taxa_names, , drop = FALSE]
@@ -822,24 +822,23 @@ microtable <- R6Class(classname = "microtable",
 		}
 		),
 	private = list(
-		# check whether there is OTU or sample with 0 abundance
-		# input and return are both otu_table
+		# check and remove OTU or sample with 0 abundance
 		check_abund_table = function(otu_table){
 			if(any(apply(otu_table, 1, sum) == 0)){
 				remove_num <- sum(apply(otu_table, 1, sum) == 0)
-				message(remove_num, " taxa are removed from the otu_table, as the abundance is 0 ...")
+				message(remove_num, " taxa with 0 abundance are removed from the otu_table ...")
 				otu_table %<>% .[apply(., 1, sum) > 0, , drop = FALSE]
 			}
 			if(any(apply(otu_table, 2, sum) == 0)){
 				remove_num <- sum(apply(otu_table, 2, sum) == 0)
-				message(remove_num, " samples are removed from the otu_table, as the abundance is 0 ...")
+				message(remove_num, " samples with 0 abundance are removed from the otu_table ...")
 				otu_table %<>% .[, apply(., 2, sum) > 0, drop = FALSE]
 			}
 			if(ncol(otu_table) == 0){
-				stop("No sample have abundance! Please check you data!")
+				stop("No available sample! Please check the data!")
 			}
 			if(nrow(otu_table) == 0){
-				stop("No taxon have abundance! Please check you data!")
+				stop("No available taxon! Please check the data!")
 			}
 			otu_table
 		},
