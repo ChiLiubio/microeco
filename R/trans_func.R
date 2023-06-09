@@ -104,12 +104,12 @@ trans_func <- R6Class(classname = "trans_func",
 					}
 					res %<>% as.data.frame
 					# identify the inclusion part among groups
-					for(i in names(prok_func_FAPROTAX$func_groups)){
-						if(length(prok_func_FAPROTAX$func_groups[[i]]) == 0){
+					for(i in names(prok_func_FAPROTAX$func_add_groups)){
+						if(length(prok_func_FAPROTAX$func_add_groups[[i]]) == 0){
 							next
 						}else{
-							for(j in seq_along(prok_func_FAPROTAX$func_groups[[i]])){
-								res[, i] <- res[, i] + res[, prok_func_FAPROTAX$func_groups[[i]][j]]
+							for(j in seq_along(prok_func_FAPROTAX$func_add_groups[[i]])){
+								res[, i] <- res[, i] + res[, prok_func_FAPROTAX$func_add_groups[[i]][j]]
 							}
 						}
 					}
