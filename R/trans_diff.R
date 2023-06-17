@@ -445,6 +445,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 							}else{
 								# calculate effect size
 								w <- mod1$scaling[,1]
+								if(is.null(names(w))){
+									names(w) <- rownames(mod1$scaling)
+								}
 								w_unit <- w/sqrt(sum(w^2))
 								w_unit %<>% {.[!grepl("lefse_subgroup", names(.))]}
 								ss <- abund1[, !colnames(abund1) %in% c("Group", "lefse_subgroup")]
@@ -456,7 +459,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 								names(coeff) %<>% gsub("^`|`$", "", .)
 								rres <- mod1$means %>% as.data.frame
 								colnames(rres) %<>% gsub("^`|`$", "", .)
-								rres <- rres[, rownames(abund_table_sub_lda)]
+								rres <- rres[, rownames(abund_table_sub_lda), drop = FALSE]
 								rres1 <- apply(rres, 2, function(x) abs(x[1] - x[2]))
 								res_lda_pair[[i]] <- (rres1 + coeff[names(rres1)]) *0.5
 							}
