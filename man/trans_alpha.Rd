@@ -194,7 +194,7 @@ Plot the alpha diversity.
   use_boxplot = TRUE,
   boxplot_add = "jitter",
   order_x_mean = FALSE,
-  y_start = 1.01,
+  y_start = 0.1,
   y_increase = 0.05,
   xtext_angle = NULL,
   xtext_size = 15,
@@ -228,10 +228,11 @@ such as 'P.adj' or 'Significance'.}
 
 \item{\code{order_x_mean}}{default FALSE; whether order x axis by the means of groups from large to small.}
 
-\item{\code{y_start}}{default 1.01; the y axis value from which to add the label; the default 1.01 means \code{1.01 * max(values)}.}
+\item{\code{y_start}}{default 0.1; the y axis value from which to add the significance asterisk label; 
+the default 0.1 means \code{max(values) + 0.1 * (max(values) - min(values))}.}
 
-\item{\code{y_increase}}{default 0.05; the increasing y axia space to add label; the default 0.05 means \code{0.05 * y_start}; 
-this parameter is also used to label the letters of anova result with the fixed \code{(1 + y_increase) * y_start space}.}
+\item{\code{y_increase}}{default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
+this parameter is also used to label the letters of anova result with the fixed space.}
 
 \item{\code{xtext_angle}}{default NULL; number (e.g. 30) used to make x axis text generate angle.}
 

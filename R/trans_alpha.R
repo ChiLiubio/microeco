@@ -378,9 +378,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.
 		#' @param order_x_mean default FALSE; whether order x axis by the means of groups from large to small.
-		#' @param y_start default 1.01; the y axis value from which to add the label; the default 1.01 means \code{1.01 * max(values)}.
-		#' @param y_increase default 0.05; the increasing y axia space to add label; the default 0.05 means \code{0.05 * y_start}; 
-		#' 	  this parameter is also used to label the letters of anova result with the fixed \code{(1 + y_increase) * y_start space}.
+		#' @param y_start default 0.1; the y axis value from which to add the significance asterisk label; 
+		#' 	  the default 0.1 means \code{max(values) + 0.1 * (max(values) - min(values))}.
+		#' @param y_increase default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
+		#' 	  this parameter is also used to label the letters of anova result with the fixed space.
 		#' @param xtext_angle default NULL; number (e.g. 30) used to make x axis text generate angle.
 		#' @param xtext_size default 15; x axis text size.
 		#' @param ytitle_size default 17; y axis title size.
@@ -406,7 +407,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			use_boxplot = TRUE,
 			boxplot_add = "jitter",
 			order_x_mean = FALSE,
-			y_start = 1.01,
+			y_start = 0.1,
 			y_increase = 0.05,
 			xtext_angle = NULL,
 			xtext_size = 15,
@@ -518,7 +519,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							x_axis_order <- levels(use_data[, group])
 							add_letter_text <- tmp[x_axis_order, "Letter"]
 							group_position <- tapply(use_data$Value, use_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
-								{. + max(.) * y_increase}
+								{. + y_increase * (max(use_data$Value) - min(use_data$Value))}
 							textdata <- data.frame(
 								x = x_axis_order, 
 								y = group_position[x_axis_order], 
@@ -551,7 +552,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 									x_mid %<>% c(., mid_num + (start_bar_mid + (match(i, x_axis_order) - 1) * increase_bar_mid))
 								}
 								tmp_position <- tapply(select_tmp_data$Value, select_tmp_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
-									{. + max(.) * y_increase} %>% .[x_axis_order]
+									{. + y_increase * (max(select_tmp_data$Value) - min(select_tmp_data$Value))} %>% 
+									.[x_axis_order]
 								y_position %<>% c(., tmp_position)
 							}
 							textdata <- data.frame(
@@ -584,12 +586,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							x_max <- c()
 							if(is.null(by_group)){
 								x_axis_order <- levels(use_data[, group])
-								y_start <- max(use_data$Value) * y_start
+								y_range <- max(use_data$Value) - min(use_data$Value)
+								y_start <- max(use_data$Value) + y_start * y_range
 								for(i in seq_len(nrow(use_diff_data))){
 									annotations %<>% c(., use_diff_data[i, add_sig_label])
 									x_min %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\1", use_diff_data[i, "Comparison"]), x_axis_order))
 									x_max %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\2", use_diff_data[i, "Comparison"]), x_axis_order))
-									y_position %<>% c(., y_start * (1 + i * y_increase))
+									y_position %<>% c(., y_start + i * y_increase * y_range)
 								}
 							}else{
 								all_by_groups <- levels(use_data[, by_group])
@@ -600,7 +603,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								for(j in diff_by_groups){
 									select_tmp_data <- tmp_use_data %>% .[.[, by_group] == j, ]
 									# y axix starting position
-									y_start_use <- max(select_tmp_data$Value) * y_start
+									y_range_use <- max(select_tmp_data$Value) - min(select_tmp_data$Value)
+									y_start_use <- max(select_tmp_data$Value) + y_start * y_range_use
 									x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
 									# identify the start x position for each by_group
 									start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
@@ -615,7 +619,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 											(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\1", tmp_diff_res[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
 										x_max %<>% c(., mid_num + 
 											(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\2", tmp_diff_res[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
-										y_position %<>% c(., y_start_use * (1 + i * y_increase))
+										y_position %<>% c(., y_start_use + i * y_increase * y_range_use)
 									}
 								}
 							}
@@ -629,7 +633,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						}else{
 							if(is.null(by_group)){
 								comp_group_num <- sapply(use_diff_data$Comparison, function(x){length(unlist(gregexpr(" - ", x)))})
-								y_position <- max(use_data$Value) * y_start
+								y_position <- max(use_data$Value) + y_start * (max(use_data$Value) - min(use_data$Value))
 								annotations <- use_diff_data[, add_sig_label]
 								textdata <- data.frame(
 									x = comp_group_num/2, 
@@ -649,7 +653,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								}
 								textdata <- data.frame(
 									x = x_mid, 
-									y = max(use_data$Value) * y_start, 
+									y = max(use_data$Value) + y_start * (max(use_data$Value) - min(use_data$Value)), 
 									add = annotations, 
 									stringsAsFactors = FALSE
 								)
