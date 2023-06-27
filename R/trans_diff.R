@@ -454,7 +454,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 								xy_matrix <- as.matrix(ss)
 								LD <- xy_matrix %*% w_unit
 								effect_size <- tapply(LD, group_vec_lda, mean) %>% as.vector %>% {.[1] - .[2]} %>% abs
-								coeff <- w_unit * effect_size %>% abs
+								coeff <- abs(w_unit * effect_size)
 								coeff[is.nan(coeff)] <- 0
 								names(coeff) %<>% gsub("^`|`$", "", .)
 								rres <- mod1$means %>% as.data.frame
