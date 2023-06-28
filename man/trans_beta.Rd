@@ -40,6 +40,12 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 t1$cal_manova(manova_all = TRUE)
 
 ## ------------------------------------------------
+## Method `trans_beta$cal_anosim`
+## ------------------------------------------------
+
+t1$cal_anosim()
+
+## ------------------------------------------------
 ## Method `trans_beta$cal_betadisper`
 ## ------------------------------------------------
 
@@ -82,6 +88,7 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \item \href{#method-trans_beta-cal_ordination}{\code{trans_beta$cal_ordination()}}
 \item \href{#method-trans_beta-plot_ordination}{\code{trans_beta$plot_ordination()}}
 \item \href{#method-trans_beta-cal_manova}{\code{trans_beta$cal_manova()}}
+\item \href{#method-trans_beta-cal_anosim}{\code{trans_beta$cal_anosim()}}
 \item \href{#method-trans_beta-cal_betadisper}{\code{trans_beta$cal_betadisper()}}
 \item \href{#method-trans_beta-cal_group_distance}{\code{trans_beta$cal_group_distance()}}
 \item \href{#method-trans_beta-cal_group_distance_diff}{\code{trans_beta$cal_group_distance_diff()}}
@@ -287,6 +294,45 @@ manova_set has higher priority than manova_all parameter. If manova_set is provi
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{t1$cal_manova(manova_all = TRUE)
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_beta-cal_anosim"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_beta-cal_anosim}{}}}
+\subsection{Method \code{cal_anosim()}}{
+Analysis of similarities (ANOSIM) based on R vegan \code{anosim} function.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_anosim(
+  group = NULL,
+  paired = FALSE,
+  p_adjust_method = "fdr",
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{group}}{default NULL; a column name of \code{sample_table}. If NULL, search \code{group} variable stored in the object.}
+
+\item{\code{paired}}{default FALSE; whether perform paired test between any two combined groups from all the input groups.}
+
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{paired = TRUE}; see method parameter of \code{p.adjust} function for available options.}
+
+\item{\code{...}}{parameters passed to \code{\link{anosim}} function of \code{vegan} package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_anosim} stored in object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{t1$cal_anosim()
 }
 \if{html}{\out{</div>}}
 
