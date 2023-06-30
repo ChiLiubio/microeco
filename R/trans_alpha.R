@@ -771,6 +771,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		},
 		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, KW_dunn_letter = TRUE, ...){
 			use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
+			raw_groups <- input_table[, group]
+			if(any(grepl("-", raw_groups))){
+				input_table[, group] %<>% gsub("-", "sub&&&sub", ., fixed = TRUE)
+			}
 			orderd_groups <- tapply(input_table[, "Value"], input_table[, group], median) %>% sort(decreasing = TRUE) %>% names
 			input_table[, group] %<>% factor(., levels = orderd_groups)
 			formu <- reformulate(group, "Value")
@@ -782,8 +786,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}) %>% unlist
 			if(KW_dunn_letter){
 				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_raw$res, threshold = 0.05)
+				if(any(grepl("-", raw_groups))){
+					dunnTest_final$Group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
+				}
 				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, dunnTest_final)
 			}else{
+				if(any(grepl("-", raw_groups))){
+					dunnTest_raw$res$Comparison %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
+					max_group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
+				}
 				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_raw$res)
 			}
 			dunnTest_res
