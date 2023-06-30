@@ -138,8 +138,9 @@ Differential test of alpha diversity.
 \item{\code{measure}}{default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
-\code{NULL} can disable the p value adjustment.}
+\item{\code{p_adjust_method}}{default "fdr" (for "KW", "wilcox", "t.test") or "holm" (for "KW_dunn"); P value adjustment method; 
+For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
+For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.}
 
 \item{\code{formula}}{default NULL; applied to two-way or multi-factor anova when 
 method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"} or \code{"glmm"}; 

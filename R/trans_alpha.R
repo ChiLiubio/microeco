@@ -92,8 +92,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   }
 		#' @param measure default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.
-		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options; 
-		#'    \code{NULL} can disable the p value adjustment.
+		#' @param p_adjust_method default "fdr" (for "KW", "wilcox", "t.test") or "holm" (for "KW_dunn"); P value adjustment method; 
+		#' 	  For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
+		#' 	  For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.
 		#' @param formula default NULL; applied to two-way or multi-factor anova when 
 		#'   method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"} or \code{"glmm"}; 
 		#'   specified set for independent variables, i.e. the latter part of a general formula, 
@@ -215,11 +216,26 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						stop("There are only 2 groups. Please select other method instead of KW_dunn !")
 					}
 				}
+				if(is.null(p_adjust_method)){
+					p_adjust_method <- "none"
+				}else{
+					if(p_adjust_method == "fdr"){
+						p_adjust_method <- "holm"
+					}else{
+						if(!p_adjust_method %in% c('none', 'bonferroni', 'sidak', 'holm', 'hs', 'hochberg', 'bh', 'by')){
+							stop("For KW_dunn method, p_adjust_method must be one of 'none', 'bonferroni', 'sidak', 'holm', 'hs', 'hochberg', 'bh' and 'by'!")
+						}
+					}
+				}
+				if(p_adjust_method != "none"){
+					message("P value adjustment method: ", p_adjust_method, " ...")
+				}
 				compare_result <- data.frame()
 				for(k in measure){
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
-						tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, ...)
+						tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, 
+							p_adjust_method = p_adjust_method, ...)
 						compare_result %<>% rbind(., tmp_res)
 					}else{
 						for(each_group in unique_bygroups){
@@ -228,7 +244,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								message("Skip the by_group: ", each_group, " as groups number < 3!")
 								next
 							}
-							tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, ...)
+							tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, 
+								p_adjust_method = p_adjust_method, ...)
 							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
 							compare_result %<>% rbind(., tmp_res)
 						}
@@ -769,7 +786,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			res_list
 		},
-		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, KW_dunn_letter = TRUE, ...){
+		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, KW_dunn_letter = TRUE, p_adjust_method = NULL, ...){
 			use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
 			raw_groups <- input_table[, group]
 			if(any(grepl("-", raw_groups))){
@@ -778,7 +795,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			orderd_groups <- tapply(input_table[, "Value"], input_table[, group], median) %>% sort(decreasing = TRUE) %>% names
 			input_table[, group] %<>% factor(., levels = orderd_groups)
 			formu <- reformulate(group, "Value")
-			dunnTest_raw <- FSA::dunnTest(formu, data = input_table, ...)
+			dunnTest_raw <- FSA::dunnTest(formu, data = input_table, method = p_adjust_method, ...)
 			max_group <- lapply(dunnTest_raw$res$Comparison, function(x){
 				group_select <- unlist(strsplit(x, split = " - "))
 				table_compare_select <- input_table[as.character(input_table[, group]) %in% group_select, ]
