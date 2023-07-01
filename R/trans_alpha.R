@@ -101,6 +101,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   such as \code{'block + N*P*K'}.
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
+		#' @param alpha default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.
 		#' @param return_model default FALSE; whether return the original lmer or glmm model list in the object.
 		#' @param ... parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
 		#'   \code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
@@ -123,6 +124,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			p_adjust_method = "fdr", 
 			formula = NULL,
 			KW_dunn_letter = TRUE,
+			alpha = 0.05,
 			return_model = FALSE,
 			...
 			){
@@ -235,7 +237,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
 						tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, 
-							p_adjust_method = p_adjust_method, ...)
+							p_adjust_method = p_adjust_method, alpha = alpha, ...)
 						compare_result %<>% rbind(., tmp_res)
 					}else{
 						for(each_group in unique_bygroups){
@@ -245,7 +247,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								next
 							}
 							tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, 
-								p_adjust_method = p_adjust_method, ...)
+								p_adjust_method = p_adjust_method, alpha = alpha, ...)
 							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
 							compare_result %<>% rbind(., tmp_res)
 						}
@@ -257,7 +259,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				for(k in measure){
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, ]
-						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, ...)
+						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, alpha = alpha, ...)
 						compare_result %<>% rbind(., tmp_res)
 					}else{
 						for(each_group in unique_bygroups){
@@ -267,7 +269,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								next
 							}
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
-							tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, ...)
+							tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, alpha = alpha, ...)
 							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
 							compare_result %<>% rbind.data.frame(., tmp_res)
 						}
@@ -786,7 +788,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			res_list
 		},
-		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, KW_dunn_letter = TRUE, p_adjust_method = NULL, ...){
+		kdunn_test = function(input_table = NULL, group = NULL, measure = NULL, KW_dunn_letter = TRUE, p_adjust_method = NULL, alpha = 0.05, ...){
 			use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
 			raw_groups <- input_table[, group]
 			if(any(grepl("-", raw_groups))){
@@ -802,7 +804,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
 			}) %>% unlist
 			if(KW_dunn_letter){
-				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_raw$res, threshold = 0.05)
+				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_raw$res, threshold = alpha)
 				if(any(grepl("-", raw_groups))){
 					dunnTest_final$Group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
 				}
@@ -816,9 +818,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			dunnTest_res
 		},
-		anova_test = function(input_table = NULL, group = NULL, measure = NULL, ...){
+		anova_test = function(input_table = NULL, group = NULL, measure = NULL, alpha = 0.05, ...){
 			model <- aov(reformulate(group, "Value"), input_table)
-			out <- agricolae::duncan.test(model, group, main = measure, ...)
+			out <- agricolae::duncan.test(model, group, main = measure, alpha = alpha, ...)
 			res1 <- out$groups[, "groups", drop = FALSE]
 			res1$groups <- as.character(res1$groups)
 			res1 <- data.frame(rownames(res1), res1, stringsAsFactors = FALSE, check.names = FALSE)

@@ -112,6 +112,7 @@ Differential test of alpha diversity.
   p_adjust_method = "fdr",
   formula = NULL,
   KW_dunn_letter = TRUE,
+  alpha = 0.05,
   return_model = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -149,6 +150,8 @@ such as \code{'block + N*P*K'}.}
 
 \item{\code{KW_dunn_letter}}{default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 \code{FALSE} means significances are shown by asterisk for paired comparison.}
+
+\item{\code{alpha}}{default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.}
 
 \item{\code{return_model}}{default FALSE; whether return the original lmer or glmm model list in the object.}
 
