@@ -74,7 +74,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
 		#' 	  the function will use the features in input \code{microtable$otu_table} automatically.
 		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only available when method != "metastat".
-		#' @param alpha default 0.05; differential significance threshold for method = "lefse" or "rf"; used to select taxa with significance across groups.
+		#' @param alpha default 0.05; significance threshold to select taxa when method is "lefse" or "rf"; 
+		#'    or used to generate significance letters when method is 'anova' or 'KW_dunn' like the alpha parameter in \code{cal_diff} of \code{trans_alpha} class.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 		#'    "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.
 		#' @param transformation default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
@@ -239,7 +240,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# use test method in trans_alpha
 					tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
 					tem_data1 <- trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID)
-					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, ...)
+					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, alpha = alpha, ...)
 					output <- tem_data1$res_diff
 					if(!is.null(tem_data1$res_model)){
 						self$res_model <- tem_data1$res_model
