@@ -28,11 +28,11 @@ expand_colors <- function(color_values, output_length){
 	total_colors
 }
 
-#' Copy an R6 class object completely
+#' Copy an R6 class object
 #'
 #' @param x R6 class object
-#' @param deep default TRUE; deep copy
-#' @return identical but unrelated R6 object.
+#' @param deep default TRUE; TRUE means deep copy, i.e. copied object is unlinked with the original one.
+#' @return identical but unlinked R6 object
 #' @examples
 #' data("dataset")
 #' clone(dataset)
@@ -45,7 +45,7 @@ clone <- function(x, deep = TRUE){
 #' Remove all factors in a data frame
 #'
 #' @param x data frame
-#' @param unfac2num default FALSE; whether try to convert all character to numeric; if FALSE, only try to convert column with factor attribute.
+#' @param unfac2num default FALSE; whether try to convert all character columns to numeric; if FALSE, only try to convert column with factor attribute.
 #'   Note that this can only transform the columns that may be transformed to numeric without using factor.
 #' @param char2num default FALSE; whether force all the character to be numeric class by using factor as an intermediate.
 #' @return data frame without factor
@@ -141,8 +141,8 @@ summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm 
 	if(more){
 	datac %<>% dplyr::summarise(N = length2(!!sym(measurevar), na.rm = na.rm), Mean = mean(!!sym(measurevar), na.rm = na.rm), SD = stats::sd(!!sym(measurevar), na.rm = na.rm), 
 				Median = stats::median(!!sym(measurevar), na.rm = na.rm), Min = min(!!sym(measurevar), na.rm = na.rm), Max = max(!!sym(measurevar), na.rm = na.rm),
-				quantile25 = unname(stats::quantile(!!sym(measurevar),  probs = 0.25)),
-				quantile75 = unname(stats::quantile(!!sym(measurevar),  probs = 0.75))
+				quantile25 = unname(stats::quantile(!!sym(measurevar), probs = 0.25)),
+				quantile75 = unname(stats::quantile(!!sym(measurevar), probs = 0.75))
 				)
 	}else{
 		datac %<>% dplyr::summarise(N = length2(!!sym(measurevar), na.rm = na.rm), Mean = mean(!!sym(measurevar), na.rm = na.rm), 
@@ -242,7 +242,7 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 	data.frame(label = as.character(as.expression(res)))
 }
 
-aes_meco <- function (x, y, ...){
+aes_meco <- function(x, y, ...){
     mapping <- list(...)
     if (!missing(x)) 
         mapping["x"] <- list(x)
@@ -273,17 +273,15 @@ new_aesthetic <- function (x, env = globalenv()){
 }
 
 ##################################################################################
-##################################################################################
-
 # metastat code from White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
 #************************************************************************
 # ************************** SUBROUTINES ********************************
 #************************************************************************
 
-#*****************************************************************************************************
+#*********************************************************************************
 #  calc two sample two statistics
 #  g is the first column in the matrix representing the second condition
-#*****************************************************************************************************
+#*********************************************************************************
 calc_twosample_ts <- function(Pmatrix, g, nrows, ncols)
 {
 	C1 <- array(0, dim=c(nrows,3));  # statistic profiles
