@@ -3,11 +3,11 @@
 \docType{data}
 \name{prok_func_NJC19_list}
 \alias{prok_func_NJC19_list}
-\title{The modified NJC19 database in the microeco package}
+\title{The modified NJC19 database}
 \usage{
 data(prok_func_NJC19_list)
 }
 \description{
-The modified NJC19 database in the microeco package
+The modified NJC19 database
 }
 \keyword{data.frame}

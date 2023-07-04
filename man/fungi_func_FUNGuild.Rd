@@ -3,11 +3,11 @@
 \docType{data}
 \name{fungi_func_FUNGuild}
 \alias{fungi_func_FUNGuild}
-\title{The FUNGuild database for fungi trait identification in the microeco package}
+\title{The FUNGuild database for fungi trait prediction}
 \usage{
 data(fungi_func_FUNGuild)
 }
 \description{
-The FUNGuild database for fungi trait identification in the microeco package
+The FUNGuild database for fungi trait prediction
 }
 \keyword{data.frame}

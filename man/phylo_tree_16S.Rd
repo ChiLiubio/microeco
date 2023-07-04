@@ -3,11 +3,11 @@
 \docType{data}
 \name{phylo_tree_16S}
 \alias{phylo_tree_16S}
-\title{The phylogenetic tree of 16S dataset in the microeco package}
+\title{The phylogenetic tree of 16S example data}
 \usage{
 data(phylo_tree_16S)
 }
 \description{
-The phylogenetic tree of 16S dataset in the microeco package
+The phylogenetic tree of 16S example data
 }
 \keyword{data.frame}

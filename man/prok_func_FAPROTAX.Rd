@@ -3,11 +3,11 @@
 \docType{data}
 \name{prok_func_FAPROTAX}
 \alias{prok_func_FAPROTAX}
-\title{The modified FAPROTAX trait database in the microeco package}
+\title{The modified FAPROTAX trait database}
 \usage{
 data(prok_func_FAPROTAX)
 }
 \description{
-The modified FAPROTAX trait database in the microeco package
+The modified FAPROTAX trait database
 }
 \keyword{data.frame}

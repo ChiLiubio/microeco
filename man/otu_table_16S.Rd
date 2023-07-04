@@ -3,11 +3,11 @@
 \docType{data}
 \name{otu_table_16S}
 \alias{otu_table_16S}
-\title{The OTU table of the 16S dataset in the microeco package}
+\title{The OTU table of the 16S example data}
 \usage{
 data(otu_table_16S)
 }
 \description{
-The OTU table of the 16S dataset in the microeco package
+The OTU table of the 16S example data
 }
 \keyword{data.frame}

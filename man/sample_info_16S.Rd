@@ -3,11 +3,11 @@
 \docType{data}
 \name{sample_info_16S}
 \alias{sample_info_16S}
-\title{The sample information of 16S dataset in the microeco package}
+\title{The sample information of 16S example data}
 \usage{
 data(sample_info_16S)
 }
 \description{
-The sample information of 16S dataset in the microeco package
+The sample information of 16S example data
 }
 \keyword{data.frame}

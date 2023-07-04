@@ -3,7 +3,7 @@
 \docType{data}
 \name{dataset}
 \alias{dataset}
-\title{The dataset in the microeco package}
+\title{The dataset structured with microtable class for the demonstration of examples}
 \format{
 An R6 class object
 }
@@ -11,7 +11,11 @@ An R6 class object
 data(dataset)
 }
 \description{
-The dataset is structured with microtable class for the demonstration of examples and tutorials.
+The dataset arose from 16S rRNA gene amplicon sequencing of wetland soils in China <doi:10.1016/j.geoderma.2018.09.035>. 
+In \code{dataset$sample_table}, the 'Group' column means Chinese inland wetlands (IW), coastal wetland (CW) and Tibet plateau wetlands (TW).
+The column 'Type' denotes the sampling region: northeastern region (NE), northwest region (NW), North China area (NC), 
+middle-lower reaches of the Yangtze River (YML), southern coastal area (SC), upper reaches of the Yangtze River (YU) and Qinghai-Tibet Plateau (QTP). 
+The column 'Saline' represents the saline soils and non-saline soils.
 }
 \details{
 \itemize{

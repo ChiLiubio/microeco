@@ -1,6 +1,10 @@
-#' The dataset in the microeco package
+#' The dataset structured with microtable class for the demonstration of examples
 #'
-#' The dataset is structured with microtable class for the demonstration of examples and tutorials.
+#' The dataset arose from 16S rRNA gene amplicon sequencing of wetland soils in China <doi:10.1016/j.geoderma.2018.09.035>. 
+#' In \code{dataset$sample_table}, the 'Group' column means Chinese inland wetlands (IW), coastal wetland (CW) and Tibet plateau wetlands (TW).
+#' The column 'Type' denotes the sampling region: northeastern region (NE), northwest region (NW), North China area (NC), 
+#' middle-lower reaches of the Yangtze River (YML), southern coastal area (SC), upper reaches of the Yangtze River (YU) and Qinghai-Tibet Plateau (QTP). 
+#' The column 'Saline' represents the saline soils and non-saline soils.
 #'
 #' \itemize{
 #'   \item sample_table: sample information table
@@ -19,7 +23,7 @@
 #' @format An R6 class object
 NULL
 
-#' The environmental factors for the 16S dataset in the microeco package
+#' The environmental factors for the 16S example data
 #'
 #'
 #' @docType data
@@ -29,7 +33,7 @@ NULL
 NULL
 
 
-#' The OTU table of the 16S dataset in the microeco package
+#' The OTU table of the 16S example data
 #'
 #'
 #' @docType data
@@ -39,7 +43,7 @@ NULL
 NULL
 
 
-#' The OTU table of the ITS dataset in the microeco package
+#' The OTU table of the ITS example data
 #'
 #'
 #' @docType data
@@ -49,7 +53,7 @@ NULL
 NULL
 
 
-#' The phylogenetic tree of 16S dataset in the microeco package
+#' The phylogenetic tree of 16S example data
 #'
 #'
 #' @docType data
@@ -59,7 +63,7 @@ NULL
 NULL
 
 
-#' The modified FAPROTAX trait database in the microeco package
+#' The modified FAPROTAX trait database
 #'
 #'
 #' @docType data
@@ -69,7 +73,7 @@ NULL
 NULL
 
 
-#' The modified NJC19 database in the microeco package
+#' The modified NJC19 database
 #'
 #'
 #' @docType data
@@ -79,7 +83,7 @@ NULL
 NULL
 
 
-#' The FUNGuild database for fungi trait identification in the microeco package
+#' The FUNGuild database for fungi trait prediction
 #'
 #'
 #' @docType data
@@ -89,7 +93,7 @@ NULL
 NULL
 
 
-#' The FungalTraits database for fungi trait identification in the microeco package
+#' The FungalTraits database for fungi trait prediction
 #'
 #'
 #' @docType data
@@ -99,7 +103,7 @@ NULL
 NULL
 
 
-#' The KEGG data files used in the cal_tax4fun2 function of trans_func class.
+#' The KEGG data files used in the trans_func class
 #'
 #'
 #' @docType data
@@ -109,7 +113,7 @@ NULL
 NULL
 
 
-#' The sample information of 16S dataset in the microeco package
+#' The sample information of 16S example data
 #'
 #'
 #' @docType data
@@ -119,7 +123,7 @@ NULL
 NULL
 
 
-#' The sample information of ITS dataset in the microeco package
+#' The sample information of ITS example data
 #'
 #'
 #' @docType data
@@ -129,7 +133,7 @@ NULL
 NULL
 
 
-#' The taxonomic information of 16S dataset in the microeco package
+#' The taxonomic information of 16S example data
 #'
 #'
 #' @docType data
@@ -139,7 +143,7 @@ NULL
 NULL
 
 
-#' The taxonomic information of ITS dataset in the microeco package
+#' The taxonomic information of ITS example data
 #'
 #'
 #' @docType data

@@ -3,11 +3,11 @@
 \docType{data}
 \name{taxonomy_table_16S}
 \alias{taxonomy_table_16S}
-\title{The taxonomic information of 16S dataset in the microeco package}
+\title{The taxonomic information of 16S example data}
 \usage{
 data(taxonomy_table_16S)
 }
 \description{
-The taxonomic information of 16S dataset in the microeco package
+The taxonomic information of 16S example data
 }
 \keyword{data.frame}

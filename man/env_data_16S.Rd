@@ -3,11 +3,11 @@
 \docType{data}
 \name{env_data_16S}
 \alias{env_data_16S}
-\title{The environmental factors for the 16S dataset in the microeco package}
+\title{The environmental factors for the 16S example data}
 \usage{
 data(env_data_16S)
 }
 \description{
-The environmental factors for the 16S dataset in the microeco package
+The environmental factors for the 16S example data
 }
 \keyword{data.frame}
