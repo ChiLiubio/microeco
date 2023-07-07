@@ -272,10 +272,11 @@ Please see \code{plot_alpha} function of \code{\link{trans_alpha}} for all the a
 \if{html}{\out{<a id="method-trans_env-cal_autocor"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-cal_autocor}{}}}
 \subsection{Method \code{cal_autocor()}}{
-Calculate the autocorrelations among environmental variables and plot the result.
+Calculate the autocorrelations among environmental variables.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_autocor(
   group = NULL,
+  ggpairs = TRUE,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   alpha = 0.8,
   ...
@@ -287,16 +288,19 @@ Calculate the autocorrelations among environmental variables and plot the result
 \describe{
 \item{\code{group}}{default NULL; a colname of sample_table; used to perform calculations for different groups.}
 
+\item{\code{ggpairs}}{default TRUE; whether use \code{GGally::ggpairs} function to plot the correlation results.}
+
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.}
 
 \item{\code{alpha}}{default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.}
 
-\item{\code{...}}{parameters passed to \code{GGally::ggpairs}.}
+\item{\code{...}}{parameters passed to \code{GGally::ggpairs} when \code{ggpairs = TRUE} or 
+passed to \code{cal_cor} of \code{trans_env} class when \code{ggpairs = FALSE}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{ggmatrix}.
+\code{ggmatrix} when \code{ggpairs = TRUE} or data.frame object when \code{ggpairs = FALSE}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

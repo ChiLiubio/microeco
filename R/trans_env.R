@@ -149,47 +149,56 @@ trans_env <- R6Class(classname = "trans_env",
 			res_diff_tmp$plot_alpha(...)
 		},
 		#' @description
-		#' Calculate the autocorrelations among environmental variables and plot the result.
+		#' Calculate the autocorrelations among environmental variables.
 		#'
 		#' @param group default NULL; a colname of sample_table; used to perform calculations for different groups.
+		#' @param ggpairs default TRUE; whether use \code{GGally::ggpairs} function to plot the correlation results.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.
 		#' @param alpha default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.
-		#' @param ... parameters passed to \code{GGally::ggpairs}.
-		#' @return \code{ggmatrix}.
+		#' @param ... parameters passed to \code{GGally::ggpairs} when \code{ggpairs = TRUE} or 
+		#' 	  passed to \code{cal_cor} of \code{trans_env} class when \code{ggpairs = FALSE}.
+		#' @return \code{ggmatrix} when \code{ggpairs = TRUE} or data.frame object when \code{ggpairs = FALSE}.
 		#' @examples
 		#' \dontrun{
 		#' # Spearman correlation
 		#' t1$cal_autocor(upper = list(continuous = GGally::wrap("cor", method= "spearman")))
 		#' }
-		cal_autocor = function(group = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.8, ...){
+		cal_autocor = function(group = NULL, ggpairs = TRUE, color_values = RColorBrewer::brewer.pal(8, "Dark2"), alpha = 0.8, ...){
 			if(!requireNamespace("GGally", quietly = TRUE)){
 				stop("Please first install GGally with the command: install.packages('GGally') !")
 			}
 			if(is.null(self$data_env)){
 				stop("The data_env is NULL! Please check the data input when creating the object !")
 			}else{
-				env_data <- self$data_env
-				env_data <- private$check_numeric(env_data)
+				env_data <- private$check_numeric(self$data_env)
 			}
-			if(is.null(group)){
-				g <- GGally::ggpairs(env_data, ...)
-			}else{
-				sample_table <- self$dataset$sample_table
-				if(! group %in% colnames(sample_table)){
-					stop("Please provide a correct group name!")
-				}
-				merge_data <- cbind.data.frame(sample_table[, group, drop = FALSE], env_data[rownames(sample_table), ])
-				g <- GGally::ggpairs(merge_data, aes_meco(colour = group, alpha = alpha),  ...)
-				# Loop through each plot changing relevant scales 
-				for(i in 1:g$nrow){
-					for(j in 1:g$ncol){
-						g[i, j] <- g[i, j] + 
-							scale_fill_manual(values = color_values) +
-							scale_color_manual(values = color_values)
+			if(ggpairs){
+				if(is.null(group)){
+					g <- GGally::ggpairs(env_data, ...)
+				}else{
+					sample_table <- self$dataset$sample_table
+					if(! group %in% colnames(sample_table)){
+						stop("Please provide a correct group name!")
+					}
+					merge_data <- cbind.data.frame(sample_table[, group, drop = FALSE], env_data[rownames(sample_table), ])
+					g <- GGally::ggpairs(merge_data, aes_meco(colour = group, alpha = alpha),  ...)
+					# Loop through each plot changing relevant scales 
+					for(i in 1:g$nrow){
+						for(j in 1:g$ncol){
+							g[i, j] <- g[i, j] + 
+								scale_fill_manual(values = color_values) +
+								scale_color_manual(values = color_values)
+						}
 					}
 				}
+				g
+			}else{
+				tmp <- suppressMessages(trans_env$new(dataset = self$dataset, add_data = env_data))
+				suppressMessages(tmp$cal_cor(add_abund_table = env_data, by_group = group, ...))
+				res <- tmp$res_cor
+				colnames(res)[1:3] <- c("group", "Env1", "Env2")
+				res
 			}
-			g
 		},
 		#' @description
 		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{vegan} package.
