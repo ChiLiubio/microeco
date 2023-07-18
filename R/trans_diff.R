@@ -1570,8 +1570,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				{.[!grepl("Incertae_sedis|unculture", rownames(.), ignore.case = TRUE), ]}
 			
 			if(!is.null(use_taxa_num)){
-				message("Select ", use_taxa_num, " most abundant taxa as the background cladogram ...")
-				abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
+				if(use_taxa_num < nrow(abund_table)){
+					message("Select ", use_taxa_num, " most abundant taxa as the background cladogram ...")
+					abund_table %<>% .[names(sort(apply(., 1, mean), decreasing = TRUE)[1:use_taxa_num]), ]
+				}else{
+					message("Provided use_taxa_num: ", use_taxa_num, " >= ", " total effective taxa number. Skip the selection ...")
+				}
 			}
 			if(!is.null(filter_taxa)){
 				abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
