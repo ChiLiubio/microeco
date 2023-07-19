@@ -407,11 +407,11 @@ trans_env <- R6Class(classname = "trans_env",
 			scrs <- scores(res_ordination)
 			scrs$biplot <- scores(res_ordination, choices = c(1, 2), "bp", scaling = "sites")
 			df_sites <- cbind.data.frame(scrs$sites, self$dataset$sample_table[rownames(scrs$sites), ])
-			colnames(df_sites)[1:2] <- c("x","y")
+			colnames(df_sites)[1:2] <- c("x", "y")
 			
 			multiplier <- vegan:::ordiArrowMul(scrs$biplot)
 			df_arrows<- scrs$biplot * multiplier
-			colnames(df_arrows)<-c("x","y")
+			colnames(df_arrows) <- c("x", "y")
 			df_arrows <- as.data.frame(df_arrows)
 			eigval <- res_ordination$CCA$eig/sum(res_ordination$CCA$eig)
 			eigval <- round(100 * eigval, 1)
@@ -419,24 +419,27 @@ trans_env <- R6Class(classname = "trans_env",
 			eigval[2] <- paste0("RDA2", " [", eigval[2], "%]")
 
 			if(self$ordination_method != "dbRDA"){
-				scrs$biplot_spe <- scores(res_ordination, choices=c(1, 2), "sp", scaling="species")
+				scrs$biplot_spe <- scores(res_ordination, choices = c(1, 2), "sp", scaling = "species")
 				df_species <- scrs$species
-				colnames(df_species)[1:2] <- c("x","y")
+				colnames(df_species)[1:2] <- c("x", "y")
 				multiplier_spe <- vegan:::ordiArrowMul(scrs$biplot_spe)
 				df_arrows_spe <- scrs$biplot_spe * multiplier_spe
-				colnames(df_arrows_spe) <- c("x","y")
+				colnames(df_arrows_spe) <- c("x", "y")
 				df_arrows_spe <- dropallfactors(cbind.data.frame(
 					df_arrows_spe, 
 					self$dataset$tax_table[rownames(df_arrows_spe), self$taxa_level, drop = FALSE]
 					))
 				df_arrows_spe %<>% .[!grepl("__$|__uncultured|sp$", .[, 3]), ]
-				df_arrows_spe <- df_arrows_spe %>% 
+				sorted_names <- df_arrows_spe %>% 
 					{.[,1]^2 + .[,2]^2} %>% 
 					`names<-`(rownames(df_arrows_spe)) %>% 
-					sort(., decreasing = TRUE) %>% 
-					.[1:show_taxa] %>% 
-					names %>% 
-					df_arrows_spe[., ]
+					sort(., decreasing = TRUE)
+				
+				if(!is.null(show_taxa)){
+					if(show_taxa < nrow(df_arrows_spe)){
+						df_arrows_spe %<>% .[names(sorted_names[1:show_taxa]), ]
+					}
+				}
 			}else{
 				df_species <- NULL
 				df_arrows_spe <- NULL
