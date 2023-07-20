@@ -798,23 +798,39 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			input_table[, group] %<>% factor(., levels = orderd_groups)
 			formu <- reformulate(group, "Value")
 			dunnTest_raw <- FSA::dunnTest(formu, data = input_table, method = p_adjust_method, ...)
-			max_group <- lapply(dunnTest_raw$res$Comparison, function(x){
-				group_select <- unlist(strsplit(x, split = " - "))
-				table_compare_select <- input_table[as.character(input_table[, group]) %in% group_select, ]
-				tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
-			}) %>% unlist
+			dunnTest_table <- dunnTest_raw$res
+			# adjust the orders in each comparison
+			tmp <- strsplit(dunnTest_table$Comparison, split = " - ")
+			tmp <- lapply(tmp, function(x){
+				matchord <- match(x, orderd_groups)
+				if(matchord[1] > matchord[2]){
+					rev(x)
+				}else{
+					x
+				}
+			})
+			orderd_groups %<>% .[. %in% unique(unlist(tmp))]
+			dunnTest_table$Comparison <- lapply(tmp, function(x){paste0(x, collapse = " - ")}) %>% unlist
+			# generate ordered combined paired groups
+			tmp <- combn(orderd_groups, 2) %>% t %>% as.data.frame %>% apply(., 1, function(x){paste0(x, collapse = " - ")})
+			dunnTest_table <- dunnTest_table[match(tmp, dunnTest_table$Comparison), ]
 			if(KW_dunn_letter){
-				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_raw$res, threshold = alpha)
+				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_table, threshold = alpha)
 				if(any(grepl("-", raw_groups))){
 					dunnTest_final$Group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
 				}
 				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, dunnTest_final)
 			}else{
+				max_group <- lapply(dunnTest_table$Comparison, function(x){
+					group_select <- unlist(strsplit(x, split = " - "))
+					table_compare_select <- input_table[as.character(input_table[, group]) %in% group_select, ]
+					tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
+				}) %>% unlist
 				if(any(grepl("-", raw_groups))){
-					dunnTest_raw$res$Comparison %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
+					dunnTest_table$Comparison %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
 					max_group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
 				}
-				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_raw$res)
+				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_table)
 			}
 			dunnTest_res
 		},
