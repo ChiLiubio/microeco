@@ -59,27 +59,17 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
 \if{latex}{\out{\hypertarget{method-trans_venn-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_venn$new(
-  dataset = NULL,
-  sample_names = NULL,
-  ratio = NULL,
-  add_abund_table = NULL,
-  name_joint = "&"
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_venn$new(dataset, ratio = NULL, name_joint = "&")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} class.}
-
-\item{\code{sample_names}}{default NULL; character vector of sample names; If provided, filter the samples not found in the vector.}
+\item{\code{dataset}}{the object of \code{\link{microtable}} class or a matrix-like table (data.frame or matrix object).
+If dataset is a matrix-like table, features must be rows.}
 
 \item{\code{ratio}}{default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
 "seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.}
-
-\item{\code{add_abund_table}}{default NULL; data.frame or matrix format; additional data provided instead of \code{dataset} parameter.
-Features must be rows. If provided, the parameter \code{dataset} is disabled no matter whether it is \code{NULL}.}
 
 \item{\code{name_joint}}{default "&"; the joint mark for generating multi-sample names.}
 }

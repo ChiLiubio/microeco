@@ -8,12 +8,10 @@
 #' @export
 trans_venn <- R6Class(classname = "trans_venn",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} class.
-		#' @param sample_names default NULL; character vector of sample names; If provided, filter the samples not found in the vector.
+		#' @param dataset the object of \code{\link{microtable}} class or a matrix-like table (data.frame or matrix object).
+		#' 	 If dataset is a matrix-like table, features must be rows.
 		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
 		#' 	 "seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.
-		#' @param add_abund_table default NULL; data.frame or matrix format; additional data provided instead of \code{dataset} parameter.
-		#'   Features must be rows. If provided, the parameter \code{dataset} is disabled no matter whether it is \code{NULL}.
 		#' @param name_joint default "&"; the joint mark for generating multi-sample names.
 		#' @return \code{data_details} and \code{data_summary} stored in the object.
 		#' @examples
@@ -22,25 +20,22 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' t1 <- dataset$merge_samples(use_group = "Group")
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		#' }
-		initialize = function(dataset = NULL, sample_names = NULL, ratio = NULL, add_abund_table = NULL, name_joint = "&"
+		initialize = function(dataset, ratio = NULL, name_joint = "&"
 			){
-			if(!is.null(add_abund_table)){
-				if(!any(is.data.frame(add_abund_table), is.matrix(add_abund_table))){
-					stop("Input add_abund_table must be data.frame or matrix !")
-				}
-				abund <- add_abund_table
+			if(is.null(dataset)){
+				stop("The input dataset must be provided!")
 			}else{
-				if(is.null(dataset)){
-					stop("Either dataset or add_abund_table should be provided !")
-				}else{
+				if(inherits(dataset, "R6")){
 					use_dataset <- clone(dataset)
-					if(!is.null(sample_names)){
-						use_dataset$sample_table %<>% .[rownames(.) %in% sample_names, ]
-					}
 					# filter the feature with abundance 0
 					use_dataset$tidy_dataset()
 					abund <- use_dataset$otu_table
-					self$tax_table <- use_dataset$tax_table
+					self$tax_table <- use_dataset$tax_table				
+				}else{
+					if(!any(is.data.frame(dataset), is.matrix(dataset))){
+						stop("Input table must be data.frame or matrix class!")
+					}
+					abund <- dataset
 				}
 			}
 			res_names <- colnames(abund)
