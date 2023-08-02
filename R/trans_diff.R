@@ -73,7 +73,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
 		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
 		#' 	  the function will use the features in input \code{microtable$otu_table} automatically.
-		#' @param filter_thres default 0; the relative abundance threshold, such as 0.0005; only available when method != "metastat".
+		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance; only available when method != "metastat".
+		#' 	  The features with abundances lower than filter_thres will be filtered.
 		#' @param alpha default 0.05; significance threshold to select taxa when method is "lefse" or "rf"; 
 		#'    or used to generate significance letters when method is 'anova' or 'KW_dunn' like the alpha parameter in \code{cal_diff} of \code{trans_alpha} class.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
@@ -210,10 +211,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					abund_table <- tmp_dataset$taxa_abund[[taxa_level]]
 				}
 				if(filter_thres > 0){
-					if(filter_thres >= 1){
-						stop("Parameter filter_thres represents relative abundance. It should be smaller than 1 !")
+					mean_abund <- apply(abund_table, 1, mean)
+					if(filter_thres > max(mean_abund)){
+						stop("Parameter filter_thres is larger than the maximum of mean abundances of features!")
 					}else{
-						abund_table %<>% .[apply(., 1, mean) > filter_thres, ]
+						abund_table %<>% .[mean_abund >= filter_thres, ]
+						filter_features <- mean_abund[mean_abund < filter_thres]
+						message("Filter out ", length(filter_features), " features with low abundance ...")
 					}
 				}
 				if(grepl("lefse", method, ignore.case = TRUE)){
@@ -239,7 +243,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					tem_data <- clone(tmp_dataset)
 					# use test method in trans_alpha
 					tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
-					tem_data1 <- trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID)
+					tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
 					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, alpha = alpha, ...)
 					output <- tem_data1$res_diff
 					if(!is.null(tem_data1$res_model)){
