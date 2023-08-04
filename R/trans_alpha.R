@@ -747,7 +747,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							}else{
 								res1 <- t.test(x = x_value, y = y_value, paired = TRUE, ...)
 							}
-							max_group_select <- tapply(table_compare$Value, table_compare[, group], mean) %>% {.[which.max(.)]} %>% names
+							max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], mean)
 						}else{
 							if(method == "wilcox"){
 								if(is.null(by_ID)){
@@ -755,11 +755,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								}else{
 									res1 <- suppressWarnings(wilcox.test(x = x_value, y = y_value, paired = TRUE, ...))
 								}
-								max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
+								max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], median)
 							}else{
 								if(method == "KW" & length(use_comp_group_num) == 1){
 									res1 <- kruskal.test(formu, data = table_compare, ...)
-									max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
+									max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], median)
 								}else{
 									next
 								}
@@ -768,7 +768,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}else{
 						if(method == "KW"){
 							res1 <- kruskal.test(formu, data = table_compare, ...)
-							max_group_select <- tapply(table_compare$Value, table_compare[, group], median) %>% {.[which.max(.)]} %>% names
+							max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], median)
 						}else{
 							next
 						}
@@ -824,7 +824,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				max_group <- lapply(dunnTest_table$Comparison, function(x){
 					group_select <- unlist(strsplit(x, split = " - "))
 					table_compare_select <- input_table[as.character(input_table[, group]) %in% group_select, ]
-					tapply(table_compare_select$Value, table_compare_select[, group], median) %>% {.[which.max(.)]} %>% names
+					private$group_value_compare(table_compare_select$Value, table_compare_select[, group], median)
 				}) %>% unlist
 				if(any(grepl("-", raw_groups))){
 					dunnTest_table$Comparison %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
@@ -844,6 +844,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			rownames(res1) <- NULL
 			res2 <- data.frame(Measure = measure, Test_method = "anova", res1)
 			res2
+		},
+		group_value_compare = function(value, group, ...){
+			group %<>% as.character
+			group_values <- tapply(value, group, ...)
+			if(any(is.na(group_values))){
+				"NA"
+			}else{
+				group_values %>% {.[which.max(.)]} %>% names
+			}
 		}
 	),
 	lock_objects = FALSE,
