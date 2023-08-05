@@ -16,6 +16,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'   This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 		#'   Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.
 		#' @param character2numeric default FALSE; whether convert the characters or factors to numeric values.
+		#' @param standardize default FALSE; whether scale environmental variables to zero mean and unit variance.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
 		#'   If TRUE, the function can run the interpolation with the \code{mice} package.
 		#' @return \code{data_env} stored in the object.
@@ -28,6 +29,7 @@ trans_env <- R6Class(classname = "trans_env",
 			env_cols = NULL, 
 			add_data = NULL, 
 			character2numeric = FALSE, 
+			standardize = FALSE, 
 			complete_na = FALSE
 			){
 			# support all the dataset, env_cols and add_data = NULL from v0.7.0
@@ -80,6 +82,9 @@ trans_env <- R6Class(classname = "trans_env",
 				if(character2numeric){
 					env_data %<>% dropallfactors(., unfac2num = TRUE, char2num = TRUE)
 				}
+			}
+			if(standardize){
+				env_data %<>% decostand(., method = "standardize", MARGIN = 2)
 			}
 			self$data_env <- env_data
 			message("Env data is stored in object$data_env ...")
