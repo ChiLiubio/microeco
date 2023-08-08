@@ -549,11 +549,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
 						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
-						use_dataset$tidy_dataset()
-						suppressMessages(use_dataset$cal_abund(rel = FALSE))
-						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], 
-							sample_table = use_dataset$sample_table)
-						newdata$tidy_dataset()
+						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						obj <- newMRexperiment(
 							newdata$otu_table, 
 							phenoData= AnnotatedDataFrame(newdata$sample_table)
@@ -597,16 +593,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("DESeq2 package not installed !")
 					}
 					use_dataset <- clone(tmp_dataset)
-					use_dataset$tidy_dataset()
-					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 					if(length(group) > 1){
 						stop("Multiple factors are not supported currently!")
 					}
-					if(!is.factor(use_dataset$sample_table[, group])){
-						use_dataset$sample_table[, group] %<>% as.factor
+					if(!is.factor(newdata$sample_table[, group])){
+						newdata$sample_table[, group] %<>% as.factor
 					}
-					deseq_obj <- DESeqDataSetFromMatrix(countData = use_dataset$taxa_abund[[taxa_level]],
-												  colData = use_dataset$sample_table,
+					deseq_obj <- DESeqDataSetFromMatrix(countData = newdata$otu_table,
+												  colData = newdata$sample_table,
 												  design = reformulate(group))
 					res_deseq <- DESeq(deseq_obj, ...)
 					for(i in seq_len(ncol(all_name))){
@@ -628,21 +623,21 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(!require("file2meco")){
 						stop("Please install file2meco package! The function meco2phyloseq is required!")
 					}
+					res_diff_raw <- list()
 					if(ncol(all_name) > 1){
 						message("First run the global test for multiple groups ...")
 						use_dataset <- clone(tmp_dataset)
-						suppressMessages(use_dataset$cal_abund(rel = FALSE))
-						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
-						newdata$tidy_dataset()
+						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						newdata <- file2meco::meco2phyloseq(newdata)
 						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
-						res <- res_raw$res_global
+						res <- res_raw$res_global[, 1:5]
 						colnames(res) <- c("feature", "W", "P.unadj", "P.adj", "diff_abn")
 						rownames(res) <- NULL
 						group_vec <- use_dataset$sample_table[, group] %>% as.character %>% unique
 						comparisions <- paste0(group_vec, collapse = " - ")
 						res <- cbind.data.frame(compare = comparisions, res)
 						output <- rbind.data.frame(output, res)
+						res_diff_raw[[comparisions]] <- res_raw
 					}
 					# for paired test
 					message("Total ", ncol(all_name), " paired groups for test ...")
@@ -650,12 +645,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
 						use_dataset <- clone(tmp_dataset)
 						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
-						use_dataset$tidy_dataset()
-						suppressMessages(use_dataset$cal_abund(rel = FALSE))
-						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
-						newdata$tidy_dataset()
+						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						newdata <- file2meco::meco2phyloseq(newdata)
 						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
+						comparisions <- paste0(as.character(all_name[, i]), collapse = " - ")
+						res_diff_raw[[comparisions]] <- res_raw
 						res_raw2 <- res_raw$res
 						res <- data.frame(feature = res_raw2$taxon, 
 							W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
@@ -663,10 +657,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 							P.adj = res_raw2[, which(grepl("^q_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
 							diff_abn = res_raw2[, which(grepl("^diff_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))])
 						rownames(res) <- NULL
-						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
+						add_name <- comparisions %>% rep(., nrow(res))
 						res <- cbind.data.frame(compare = add_name, res)
 						output <- rbind.data.frame(output, res)
 					}
+					self$res_diff_raw <- res_diff_raw
+					message("Original ancombc2 test results are stored in object$res_diff_raw list ...")
 				}
 				if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
 					if(!require("ALDEx2")){
@@ -679,10 +675,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
 						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
-						use_dataset$tidy_dataset()
-						suppressMessages(use_dataset$cal_abund(rel = FALSE))
-						newdata <- microtable$new(otu_table = use_dataset$taxa_abund[[taxa_level]], sample_table = use_dataset$sample_table)
-						newdata$tidy_dataset()
+						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
 						res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
 						rownames(res) <- NULL
@@ -697,9 +690,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
 					}
 					use_dataset <- clone(tmp_dataset)
-					use_dataset$tidy_dataset()
-					suppressMessages(use_dataset$cal_abund(rel = FALSE))
-					res_raw <- ALDEx2::aldex(use_dataset$taxa_abund[[taxa_level]], use_dataset$sample_table[, group], test = "kw", ...)
+					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
+					res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "kw", ...)
 					res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
 					comparisions <- paste0(unique(as.character(use_dataset$sample_table[, group])), collapse = " - ")
 					output <- cbind.data.frame(compare = comparisions, res)
@@ -717,8 +709,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					private$check_taxa_level_all(taxa_level)
 					use_dataset <- clone(tmp_dataset)
-					use_dataset$tidy_dataset()
-					suppressMessages(use_dataset$cal_abund(rel = FALSE))
+					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 					if(!grepl("^~", group)){
 						use_formula <- paste0("~", group)
 					}else{
@@ -726,16 +717,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 						group %<>% gsub("^~", "", .)
 					}
 					message("Perform linda with formula: ", use_formula, " ...")
-					res <- MicrobiomeStat::linda(as.matrix(use_dataset$taxa_abund[[taxa_level]]), use_dataset$sample_table, formula = use_formula, 
+					res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, formula = use_formula, 
 						feature.dat.type = 'count', ...)
 					self$res_diff_raw <- res
 					message('Original result is stored in object$res_diff_raw ...')
 					group_filter <- gsub(" ", "", group)
 					group_split <- strsplit(group, split = "+", fixed = TRUE) %>% unlist
-					group_split %<>% .[. %in% colnames(use_dataset$sample_table)]
+					group_split %<>% .[. %in% colnames(newdata$sample_table)]
 					list_groups <- list()
 					for(j in group_split){
-						list_groups[[j]] <- use_dataset$sample_table[, j] %>% as.character %>% unique
+						list_groups[[j]] <- newdata$sample_table[, j] %>% as.character %>% unique
 					}
 					output <- data.frame()
 					for(i in names(res$output)){
@@ -1564,6 +1555,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 				colnames(med) <- taxaname
 				list(p_value = res1$p.value, med = med)
 			}
+		},
+		generate_microtable_unrel = function(use_dataset, taxa_level, filter_thres, filter_features){
+			use_dataset$tidy_dataset()
+			suppressMessages(use_dataset$cal_abund(rel = FALSE))
+			use_feature_table <- use_dataset$taxa_abund[[taxa_level]]
+			if(filter_thres > 0){
+				use_feature_table %<>% .[! rownames(.) %in% names(filter_features), ]
+			}
+			message("Input features number: ", nrow(use_feature_table))
+			newdata <- microtable$new(otu_table = use_feature_table, sample_table = use_dataset$sample_table)
+			newdata$tidy_dataset()
+			newdata
 		},
 		# plot the background tree according to raw abundance table
 		plot_backgroud_tree = function(abund_table, use_taxa_num = NULL, filter_taxa = NULL, sep = "|"){

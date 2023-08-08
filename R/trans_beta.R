@@ -72,6 +72,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ncomp default 3; dimensions needed in the result.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
+		#' @param ... parameters passed to \code{vegan::rda} function when ordination = "PCA", or \code{ape::pcoa} function when ordination = "PCoA", 
+		#' 	  or \code{vegan::metaMDS} function when when ordination = "NMDS".
 		#' @return \code{res_ordination} stored in the object.
 		#' @examples
 		#' t1$cal_ordination(ordination = "PCoA")		
@@ -79,7 +81,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 			ordination = "PCoA",
 			ncomp = 3,
 			trans_otu = FALSE, 
-			scale_species = FALSE		
+			scale_species = FALSE,
+			...
 			){
 			if(is.null(ordination)){
 				stop("Input ordination should not be NULL !")
@@ -96,25 +99,22 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}else{
 					abund1 <- dataset$otu_table
 				}
-				model <- rda(t(abund1))
-				expla <- round(model$CA$eig/model$CA$tot.chi*100,1)
+				model <- rda(t(abund1), ...)
+				expla <- round(model$CA$eig/model$CA$tot.chi*100, 1)
 				scores <- scores(model, choices = 1:ncomp)$sites
 				combined <- cbind.data.frame(scores, dataset$sample_table)
-
 				if(is.null(dataset$tax_table)){
 					loading <- scores(model, choices = 1:ncomp)$species
 				}else{
 					loading <- cbind.data.frame(scores(model, choices = 1:ncomp)$species, dataset$tax_table)
 				}
 				loading <- cbind.data.frame(loading, rownames(loading))
-
 				if(scale_species == T){
 					maxx <- max(abs(scores[,plot.x]))/max(abs(loading[,plot.x]))
 					loading[, plot.x] <- loading[, plot.x] * maxx * 0.8
 					maxy <- max(abs(scores[,plot.y]))/max(abs(loading[,plot.y]))
 					loading[, plot.y] <- loading[, plot.y] * maxy * 0.8
 				}
-
 				species <- cbind(loading, loading[,plot.x]^2 + loading[,plot.y]^2)
 				colnames(species)[ncol(species)] <- "dist"
 				species <- species[with(species, order(-dist)), ]
@@ -126,7 +126,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 			}
 			if(ordination == "PCoA"){
-				model <- ape::pcoa(as.dist(self$use_matrix))
+				model <- ape::pcoa(as.dist(self$use_matrix), ...)
 				combined <- cbind.data.frame(model$vectors[,1:ncomp], dataset$sample_table)
 				pco_names <- paste0("PCo", 1:10)
 				colnames(combined)[1:ncomp] <- pco_names[1:ncomp]
@@ -136,7 +136,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				outlist <- list(model = model, scores = combined, eig = expla)
 			}
 			if(ordination == "NMDS"){
-				model <- vegan::metaMDS(as.dist(self$use_matrix))
+				model <- vegan::metaMDS(as.dist(self$use_matrix), ...)
 				combined <- cbind.data.frame(model$points, dataset$sample_table)
 				outlist <- list(model = model, scores = combined)
 			}

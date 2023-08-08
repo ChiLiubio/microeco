@@ -141,7 +141,8 @@ Unconstrained ordination.
   ordination = "PCoA",
   ncomp = 3,
   trans_otu = FALSE,
-  scale_species = FALSE
+  scale_species = FALSE,
+  ...
 )}\if{html}{\out{</div>}}
 }
 
@@ -156,6 +157,9 @@ PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 \item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA will be scaled.}
+
+\item{\code{...}}{parameters passed to \code{vegan::rda} function when ordination = "PCA", or \code{ape::pcoa} function when ordination = "PCoA", 
+or \code{vegan::metaMDS} function when when ordination = "NMDS".}
 }
 \if{html}{\out{</div>}}
 }
