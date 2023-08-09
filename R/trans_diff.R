@@ -210,16 +210,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					abund_table <- tmp_dataset$taxa_abund[[taxa_level]]
 				}
-				if(filter_thres > 0){
-					mean_abund <- apply(abund_table, 1, mean)
-					if(filter_thres > max(mean_abund)){
-						stop("Parameter filter_thres is larger than the maximum of mean abundances of features!")
-					}else{
-						abund_table %<>% .[mean_abund >= filter_thres, ]
-						filter_features <- mean_abund[mean_abund < filter_thres]
-						message("Filter out ", length(filter_features), " features with low abundance ...")
-					}
-				}
+				filter_output <- filter_lowabund_feature(abund_table = abund_table, filter_thres = filter_thres)
+				abund_table <- filter_output$abund_table
+				filter_features <- filter_output$filter_features
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					abund_table %<>% {. * lefse_norm}
 					self$lefse_norm <- lefse_norm
@@ -748,7 +741,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				if(method == "maaslin2"){
 					tmp_trans_env <- trans_env$new(dataset = tmp_dataset, env_cols = 1:ncol(tmp_dataset$sample_table))
-					tmp_trans_env$cal_cor(use_data = taxa_level, cor_method = method, 
+					tmp_trans_env$cal_cor(use_data = taxa_level, cor_method = method, filter_thres = filter_thres,
 						plot_heatmap = FALSE, plot_scatter = FALSE, ...)
 					output <- tmp_trans_env$res_cor
 					self$res_trans_env <- tmp_trans_env

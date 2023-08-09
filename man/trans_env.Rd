@@ -673,12 +673,13 @@ Actually, it can also be applied to other correlation between any two variables 
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
   cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
-  p_adjust_method = "fdr",
-  p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
   add_abund_table = NULL,
-  by_group = NULL,
+  filter_thres = 0,
   use_taxa_num = NULL,
   other_taxa = NULL,
+  p_adjust_method = "fdr",
+  p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
+  by_group = NULL,
   group_use = NULL,
   group_select = NULL,
   taxa_name_full = TRUE,
@@ -698,6 +699,17 @@ Actually, it can also be applied to other correlation between any two variables 
 "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.}
 
+\item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
+
+\item{\code{filter_thres}}{default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
+The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.}
+
+\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".}
+
+\item{\code{other_taxa}}{default NULL; character vector containing a series of feature names; used when use_data = "other"; 
+provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
+please see the example.}
+
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 \code{p_adjust_method = "none"} can disable the p value adjustment.}
 
@@ -709,15 +721,7 @@ If \code{by_group} is provided, for each group in it separately.
 These three options are the first three colnames of return table \code{res_cor}.
 "All": adjustment for all the data together no matter whether \code{by_group} is provided. If \code{by_group} is NULL, it is same with the "Type" option.}
 
-\item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
-
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate correlations for different groups separately.}
-
-\item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".}
-
-\item{\code{other_taxa}}{default NULL; character vector containing a series of taxa names; used when use_data = "other"; 
-the provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
-please see the example.}
 
 \item{\code{group_use}}{default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.}
 

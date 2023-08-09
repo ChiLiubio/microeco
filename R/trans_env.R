@@ -806,6 +806,13 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
+		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
+		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
+		#' 	  The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.
+		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
+		#' @param other_taxa default NULL; character vector containing a series of feature names; used when use_data = "other"; 
+		#' 	  provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
+		#' 	  please see the example.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' 	  \code{p_adjust_method = "none"} can disable the p value adjustment.
 		#' @param p_adjust_type default "All"; "All", "Type", "Taxa" or "Env"; P value adjustment type.
@@ -815,12 +822,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' 	  If \code{by_group} is provided, for each group in it separately.
 		#' 	  These three options are the first three colnames of return table \code{res_cor}.
 		#' 	  "All": adjustment for all the data together no matter whether \code{by_group} is provided. If \code{by_group} is NULL, it is same with the "Type" option.
-		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
 		#' @param by_group default NULL; one column name or number in sample_table; calculate correlations for different groups separately.
-		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
-		#' @param other_taxa default NULL; character vector containing a series of taxa names; used when use_data = "other"; 
-		#' 	  the provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
-		#' 	  please see the example.
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
@@ -838,12 +840,13 @@ trans_env <- R6Class(classname = "trans_env",
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
 			cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
-			p_adjust_method = "fdr",
-			p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
 			add_abund_table = NULL,
-			by_group = NULL,
+			filter_thres = 0,
 			use_taxa_num = NULL,
 			other_taxa = NULL,
+			p_adjust_method = "fdr",
+			p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
+			by_group = NULL,
 			group_use = NULL,
 			group_select = NULL,
 			taxa_name_full = TRUE,
@@ -886,6 +889,8 @@ trans_env <- R6Class(classname = "trans_env",
 				if(nrow(abund_table) == 0){
 					stop("No available feature! Please check the input data!")
 				}
+				filter_output <- filter_lowabund_feature(abund_table = abund_table, filter_thres = filter_thres)
+				abund_table <- filter_output$abund_table
 				if(use_data %in% names(self$dataset$taxa_abund) & !is.null(use_taxa_num)){
 					if(nrow(abund_table) > use_taxa_num){
 						abund_table %<>% .[1:use_taxa_num, ] 
