@@ -541,13 +541,14 @@ plot ordination result.
 
 \item{\code{taxa_text_italic}}{default TRUE; "italic"; whether use "italic" style for the taxa text.}
 
-\item{\code{plot_type}}{default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
-\describe{
-  \item{\strong{'point'}}{add point}
-  \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
-  \item{\strong{'chull'}}{add convex hull for points of each group}
-  \item{\strong{'centroid'}}{add centroid line of each group}
-}}
+\item{\code{plot_type}}{default "point"; plotting type of samples;
+one or more elements of "point", "ellipse", "chull", "centroid" and "none"; "none" denotes nothing.
+  \describe{
+    \item{\strong{'point'}}{add point}
+    \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
+    \item{\strong{'chull'}}{add convex hull for points of each group}
+    \item{\strong{'centroid'}}{add centroid line of each group}
+  }}
 
 \item{\code{point_size}}{default 3; point size in plot when "point" is in \code{plot_type}.}
 

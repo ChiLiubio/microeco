@@ -478,7 +478,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param env_text_size default 3.7; environmental variable text size.
 		#' @param taxa_text_size default 3; taxa text size.
 		#' @param taxa_text_italic default TRUE; "italic"; whether use "italic" style for the taxa text.
-		#' @param plot_type default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
+		#' @param plot_type default "point"; plotting type of samples;
+		#' one or more elements of "point", "ellipse", "chull", "centroid" and "none"; "none" denotes nothing.
 		#'   \describe{
 		#'     \item{\strong{'point'}}{add point}
 		#'     \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
@@ -559,11 +560,10 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("Plot ellipse or chull or centroid need groups! Please provide plot_color parameter!")
 				}
 			}
-			if(! all(plot_type %in% c("point", "ellipse", "chull", "centroid"))){
-				message("There maybe a typo in your plot_type input! plot_type should be one or more from 'point', 'ellipse', 'chull' and 'centroid'!")
+			if(! all(plot_type %in% c("point", "ellipse", "chull", "centroid", "none"))){
+				message("There maybe a typo in plot_type input! It must be one or more from 'point', 'ellipse', 'chull', 'centroid' and 'none'!")
 			}
 			df_sites <- self$res_ordination_trans$df_sites
-			
 			p <- ggplot()
 			p <- p + theme_bw()
 			p <- p + theme(panel.grid=element_blank())
