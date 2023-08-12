@@ -771,6 +771,8 @@ Plot correlation heatmap.
   keep_prefix = TRUE,
   text_y_order = NULL,
   text_x_order = NULL,
+  xtext_angle = 30,
+  xtext_size = 10,
   font_family = NULL,
   cluster_ggplot = "none",
   cluster_height_rows = 0.2,
@@ -802,6 +804,10 @@ For example, \code{filter_feature = ""} can be used to remove features that only
 \item{\code{text_y_order}}{default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.}
 
 \item{\code{text_x_order}}{default NULL; character vector; provide customized text order for x axis.}
+
+\item{\code{xtext_angle}}{default 30; number ranging from 0 to 90; used to adjust x axis text angle.}
+
+\item{\code{xtext_size}}{default 10; x axis text size.}
 
 \item{\code{font_family}}{default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.}
 

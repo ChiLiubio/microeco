@@ -986,6 +986,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.
 		#' @param text_x_order default NULL; character vector; provide customized text order for x axis.
+		#' @param xtext_angle default 30; number ranging from 0 to 90; used to adjust x axis text angle. 
+		#' @param xtext_size default 10; x axis text size.
 		#' @param font_family default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.
 		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
 		#'   "none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
@@ -1010,6 +1012,8 @@ trans_env <- R6Class(classname = "trans_env",
 			keep_prefix = TRUE,
 			text_y_order = NULL,
 			text_x_order = NULL,
+			xtext_angle = 30,
+			xtext_size = 10,
 			font_family = NULL,
 			cluster_ggplot = "none",
 			cluster_height_rows = 0.2,
@@ -1155,9 +1159,10 @@ trans_env <- R6Class(classname = "trans_env",
 				legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
 				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = legend_fill) +
-					theme(axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = 10)) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
-					theme(strip.text=element_text(size=11), panel.border = element_blank(), panel.grid = element_blank())
+					theme(strip.text = element_text(size = 11), panel.border = element_blank(), panel.grid = element_blank())
+				p <- p + ggplot_xtext_anglesize(xtext_angle, xtext_size)
+				
 				if(length(unique(use_data$Type)) == 1){
 					if(cluster_ggplot == "none"){
 						p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)

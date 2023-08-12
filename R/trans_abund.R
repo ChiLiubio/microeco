@@ -890,11 +890,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 			}else{
 				if(xtext_keep){
-					if(xtext_angle == 0){
-						theme(axis.text.x = element_text(colour = "black", size = xtext_size))
-					}else{
-						theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
-					}
+					ggplot_xtext_anglesize(xtext_angle, xtext_size)
 				}else{
 					theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
 				}
