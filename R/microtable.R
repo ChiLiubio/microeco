@@ -52,12 +52,8 @@ microtable <- R6Class(classname = "microtable",
 			if(!inherits(otu_table, "data.frame")){
 				stop("The input otu_table must be data.frame format!")
 			}
-			if(!all(sapply(otu_table, is.numeric))){
-				stop("Some columns in otu_table are not numeric vector! Please check the otu_table!")
-			}else{
-				otu_table <- private$check_abund_table(otu_table)
-				self$otu_table <- otu_table
-			}
+			otu_table <- private$check_abund_table(otu_table)
+			self$otu_table <- otu_table
 			if(is.null(sample_table)){
 				message("No sample_table provided, automatically use colnames in otu_table to create one ...")
 				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% 
@@ -102,15 +98,14 @@ microtable <- R6Class(classname = "microtable",
 		filter_pollution = function(taxa = c("mitochondria", "chloroplast")){
 			if(is.null(self$tax_table)){
 				stop("The tax_table in the microtable object is NULL ! Please check it!")
-			}else{
-				tax_table_use <- self$tax_table
 			}
+			tax_table_use <- self$tax_table
 			if(length(taxa) > 1){
 				taxa <- paste0(taxa, collapse = "|")
 			}
 			tax_table_use %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case = TRUE)))))
 			filter_num <- nrow(self$tax_table) - nrow(tax_table_use)
-			message(paste("Total", filter_num, "taxa are removed from tax_table ..."))
+			message(paste("Total", filter_num, "features are removed from tax_table ..."))
 			self$tax_table <- tax_table_use
 			if(self$auto_tidy) self$tidy_dataset()
 		},
@@ -144,9 +139,8 @@ microtable <- R6Class(classname = "microtable",
 				}
 				if(length(abund_names) == nrow(raw_otu_table)){
 					stop("No feature remained! Please check the rel_abund parameter!")
-				}else{
-					message(length(abund_names), " features filtered based on the abundance ...")
 				}
+				message(length(abund_names), " features filtered based on the abundance ...")
 			}else{
 				abund_names <- c()
 			}
@@ -164,9 +158,8 @@ microtable <- R6Class(classname = "microtable",
 				}
 				if(length(freq_names) == nrow(raw_otu_table)){
 					stop("No feature remained! Please check the freq parameter!")
-				}else{
-					message(length(freq_names), " features filtered based on the occurrence...")
 				}
+				message(length(freq_names), " features filtered based on the occurrence...")
 			}else{
 				freq_names <- c()
 			}
@@ -176,9 +169,8 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				if(length(filter_names) == nrow(raw_otu_table)){
 					stop("All features are filtered! Please adjust the parameters")
-				}else{
-					new_table <- raw_otu_table[! rownames(raw_otu_table) %in% filter_names, ]
 				}
+				new_table <- raw_otu_table[! rownames(raw_otu_table) %in% filter_names, ]
 			}
 			self$otu_table <- new_table
 			self$tidy_dataset()
@@ -204,18 +196,18 @@ microtable <- R6Class(classname = "microtable",
 				sample.size <- min(self$sample_sums())
 				message("Use the minimum number across samples: ", sample.size)
 			}
-			if (length(sample.size) > 1) {
-				stop("`sample.size` had more than one value !")
+			if(length(sample.size) > 1){
+				stop("Input sample.size had more than one value!")
 			}
-			if (sample.size <= 0) {
-				stop("sample.size less than or equal to zero. ", "Need positive sample size to work !")
+			if(sample.size <= 0){
+				stop("sample.size less than or equal to zero. Need positive sample size to work!")
 			}
 			if (max(self$sample_sums()) < sample.size){
-				stop("sample.size is larger than the maximum of sample sums, pleasure check input sample.size !")
+				stop("sample.size is larger than the maximum of sample sums, pleasure check input sample.size!")
 			}
 			if (min(self$sample_sums()) < sample.size) {
 				rmsamples <- self$sample_names()[self$sample_sums() < sample.size]
-				message(length(rmsamples), " samples removed, ", "because they contained fewer reads than `sample.size`.")
+				message(length(rmsamples), " samples removed, ", "because of fewer reads than input sample.size.")
 				self$sample_table <- base::subset(self$sample_table, ! self$sample_names() %in% rmsamples)
 				self$tidy_dataset()
 			}
@@ -243,7 +235,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
-			# first check abundance in otu_table
+			# must first check otu_table
 			self$otu_table <- private$check_abund_table(self$otu_table)
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
 			if(length(sample_names) == 0){
@@ -279,8 +271,7 @@ microtable <- R6Class(classname = "microtable",
 				}
 				self$rep_fasta %<>% .[taxa_names]
 			}
-			# other files will also be changed if main_data FALSE
-			if(main_data == F){
+			if(!main_data){
 				if(!is.null(self$taxa_abund)){
 					self$taxa_abund %<>% lapply(., function(x) x[, sample_names, drop = FALSE])
 				}
@@ -572,10 +563,8 @@ microtable <- R6Class(classname = "microtable",
 				self$tidy_dataset()
 				print(self)
 			}
-			
-			# check whether no row in tax_table
 			if(nrow(self$tax_table) == 0){
-				stop("0 rows in tax_table! Please check your data!")
+				stop("0 row in tax_table! Please check your data!")
 			}
 			if(is.null(select_cols)){
 				select_cols <- seq_len(ncol(self$tax_table))
@@ -824,6 +813,9 @@ microtable <- R6Class(classname = "microtable",
 	private = list(
 		# check and remove OTU or sample with 0 abundance
 		check_abund_table = function(otu_table){
+			if(!all(sapply(otu_table, is.numeric))){
+				stop("Some columns in otu_table are not numeric class! Please check the input data!")
+			}
 			if(any(apply(otu_table, 1, sum) == 0)){
 				remove_num <- sum(apply(otu_table, 1, sum) == 0)
 				message(remove_num, " taxa with 0 abundance are removed from the otu_table ...")
@@ -855,7 +847,7 @@ microtable <- R6Class(classname = "microtable",
 			sampleinfo <- input$sample_table
 			abund <- input$otu_table
 			tax <- input$tax_table
-			tax <- tax[, columns, drop=FALSE]
+			tax <- tax[, columns, drop = FALSE]
 			# split rows to multiple rows if multiple correspondence
 			if(split_group){
 				merge_abund <- cbind.data.frame(tax, abund)
