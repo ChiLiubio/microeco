@@ -10,9 +10,10 @@
 tidy_taxonomy(
   taxonomy_table,
   column = "all",
-  pattern = c(".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*",
-    ".*No blast hit.*", ".*sp\\\\.$", ".*metagenome.*", ".*cultivar.*", ".*archaeon$",
-    "__synthetic.*", ".*\\\\sbacterium$", ".*bacterium\\\\s.*", ".*Incertae.sedis.*"),
+  pattern = c(".*Unassigned.*", ".*uncultur.*", ".*unknown.*", ".*unidentif.*",
+    ".*unclassified.*", ".*No blast hit.*", ".*sp\\\\.$", ".*metagenome.*",
+    ".*cultivar.*", ".*archaeon$", "__synthetic.*", ".*\\\\sbacterium$",
+    ".*bacterium\\\\s.*", ".*Incertae.sedis.*"),
   replacement = "",
   ignore.case = TRUE,
   na_fill = ""
@@ -24,7 +25,7 @@ tidy_taxonomy(
 \item{column}{default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.}
 
 \item{pattern}{default see the function parameter; the characters (regular expression) to be cleaned up or replaced; cleaned up when parameter replacement = "", 
-replaced when parameter replacement has something; Note that the capital and small letters are not distinguished.}
+replaced when parameter replacement has something; Note that the capital and small letters are not distinguished when \code{ignore.case = TRUE}.}
 
 \item{replacement}{default ""; the characters used to replace the character in pattern parameter.}
 
