@@ -863,10 +863,7 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!is.null(add_abund_table)){
 				abund_table <- add_abund_table
 			}else{
-				if(is.null(self$dataset$taxa_abund)){
-					message('Invoke cal_abund function to calculate taxonomic abundance automatically ...')
-					self$dataset$cal_abund()
-				}
+				check_taxa_abund(self$dataset)
 				if(use_data %in% names(self$dataset$taxa_abund)){
 					abund_table <- self$dataset$taxa_abund[[use_data]]
 				}else{

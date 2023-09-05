@@ -1,5 +1,12 @@
 
 
+# check taxa_abund in microtable object
+check_taxa_abund <- function(obj, ...){
+	if(is.null(obj$taxa_abund)){
+		message("No taxa_abund list found. Calculate it with cal_abund function ...")
+		obj$cal_abund(...)
+	}
+}
 
 # check microtable object in class
 check_microtable <- function(obj){

@@ -193,10 +193,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				################################
 				# generate abundance table
-				if(is.null(tmp_dataset$taxa_abund)){
-					message("No taxa_abund found. First calculate it with cal_abund function ...")
-					tmp_dataset$cal_abund()
-				}
+				check_taxa_abund(tmp_dataset)
 				# make sure the taxa_level can be found from tax_table
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))

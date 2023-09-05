@@ -55,10 +55,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			high_level_fix_nsub = NULL
 			){
 			check_microtable(dataset)
-			if(is.null(dataset$taxa_abund)){
-				message('The taxa_abund in dataset is NULL. Calculate it now ...')
-				dataset$cal_abund()
-			}
+			check_taxa_abund(dataset)
 			sample_table <- dataset$sample_table
 			if("Sample" %in% colnames(sample_table)){
 				colnames(sample_table)[colnames(sample_table) == "Sample"] <- "Sample_replace"
