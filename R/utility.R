@@ -1,5 +1,16 @@
 
 
+
+# check microtable object in class
+check_microtable <- function(obj){
+	if(is.null(obj)){
+		stop("The dataset must be provided!")
+	}
+	if(! inherits(obj, "microtable")){
+		stop("The input dataset must be microtable object! Please check it!")
+	}
+}
+
 # check provided taxonomic levels: obj either microtable object or taxonomic table
 check_tax_level <- function(tax_level, obj){
 	if(inherits(obj, "microtable")){

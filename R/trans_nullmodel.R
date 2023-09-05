@@ -33,6 +33,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			add_data = NULL,
 			complete_na = FALSE
 			){
+			check_microtable(dataset)
 			use_set <- clone(dataset)
 			if(!is.null(group)){
 				if(!group %in% colnames(use_set$sample_table)){
@@ -48,7 +49,6 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				}
 			}
 			use_set$tidy_dataset()
-
 			if(!is.null(taxa_number)){
 				use_set$otu_table %<>% {.[names(sort(apply(., 1, sum), decreasing = TRUE)[1:taxa_number]), ]}
 			}else{

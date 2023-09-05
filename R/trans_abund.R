@@ -54,9 +54,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			high_level = NULL,
 			high_level_fix_nsub = NULL
 			){
-			if(is.null(dataset)){
-				stop("No dataset provided!")
-			}
+			check_microtable(dataset)
 			if(is.null(dataset$taxa_abund)){
 				message('The taxa_abund in dataset is NULL. Calculate it now ...')
 				dataset$cal_abund()

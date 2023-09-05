@@ -22,9 +22,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			measure = NULL, 
 			group = NULL
 			){
-			if(is.null(dataset)){
-				stop("dataset is necessary !")
-			}
+			check_microtable(dataset)
 			if(!is.null(measure)){
 				if(is.null(dataset$beta_diversity)){
 					stop("No beta_diversity list found in the input dataset! Please first use cal_betadiv function in microtable class to calculate it!")

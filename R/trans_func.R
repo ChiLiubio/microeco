@@ -22,6 +22,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' t1 <- trans_func$new(dataset = dataset)
 		initialize = function(dataset = NULL
 			){
+			check_microtable(dataset)
 			self$tax_table <- dataset$tax_table
 			self$otu_table <- dataset$otu_table
 			self$sample_table <- dataset$sample_table

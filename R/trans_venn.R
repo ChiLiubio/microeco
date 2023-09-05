@@ -24,19 +24,18 @@ trans_venn <- R6Class(classname = "trans_venn",
 			){
 			if(is.null(dataset)){
 				stop("The input dataset must be provided!")
+			}
+			if(inherits(dataset, "R6")){
+				use_dataset <- clone(dataset)
+				# filter the feature with abundance 0
+				use_dataset$tidy_dataset()
+				abund <- use_dataset$otu_table
+				self$tax_table <- use_dataset$tax_table				
 			}else{
-				if(inherits(dataset, "R6")){
-					use_dataset <- clone(dataset)
-					# filter the feature with abundance 0
-					use_dataset$tidy_dataset()
-					abund <- use_dataset$otu_table
-					self$tax_table <- use_dataset$tax_table				
-				}else{
-					if(!any(is.data.frame(dataset), is.matrix(dataset))){
-						stop("Input table must be data.frame or matrix class!")
-					}
-					abund <- dataset
+				if(!any(is.data.frame(dataset), is.matrix(dataset))){
+					stop("Input table must be data.frame or matrix class!")
 				}
+				abund <- dataset
 			}
 			res_names <- colnames(abund)
 			colnumber <- ncol(abund)

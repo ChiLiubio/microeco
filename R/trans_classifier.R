@@ -38,9 +38,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				y.response = NULL,
 				n.cores = 1
 			){
-			if (is.null(dataset)) {
-				stop("No dataset provided!")
-			}
+			check_microtable(dataset)
 			sampleinfo <- dataset$sample_table
 			if(is.null(y.response)){
 				stop("No y.response provided!")
