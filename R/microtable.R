@@ -430,6 +430,7 @@ microtable <- R6Class(classname = "microtable",
 		#' }
 		merge_taxa = function(taxa = "Genus"){
 			# Agglomerate all OTUs by given taxonomic level
+			check_tax_level(taxa, self)
 			ranknumber <- which(colnames(self$tax_table) %in% taxa)
 			sampleinfo <- self$sample_table
 			abund <- self$otu_table

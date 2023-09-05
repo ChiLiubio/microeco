@@ -296,12 +296,9 @@ trans_env <- R6Class(classname = "trans_env",
 						self$dataset$add_rownames2taxonomy(use_name = "OTU")
 					}
 				}else{
-					if(! taxa_level %in% colnames(self$dataset$tax_table)){
-						stop("The taxa_level provided is neither OTU nor one of the column names of dataset$tax_table!")
-					}else{
-						newdat <- self$dataset$merge_taxa(taxa_level)
-						use_abund <- newdat$otu_table
-					}
+					check_tax_level(taxa_level, self$dataset)
+					newdat <- self$dataset$merge_taxa(taxa_level)
+					use_abund <- newdat$otu_table
 				}
 				if(!is.null(taxa_filter_thres)){
 					use_abund <- use_abund[apply(use_abund, 1, sum)/sum(use_abund) > taxa_filter_thres, ]

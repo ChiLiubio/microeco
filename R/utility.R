@@ -1,4 +1,20 @@
 
+
+# check provided taxonomic levels: obj either microtable object or taxonomic table
+check_tax_level <- function(tax_level, obj){
+	if(inherits(obj, "microtable")){
+		if(is.null(obj$tax_table)){
+			stop("No tax_table found in the microtable object!")
+		}
+		check_table <- obj$tax_table
+	}else{
+		check_table <- obj
+	}
+	if(! tax_level %in% colnames(check_table)){
+		stop("Provided taxonomic level is not found in the tax_table of microtable object!")
+	}
+}
+
 ggplot_xtext_anglesize <- function(xtext_angle, xtext_size){
 	if(xtext_angle == 0){
 		theme(axis.text.x = element_text(colour = "black", size = xtext_size))
