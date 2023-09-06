@@ -191,7 +191,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 				}
-				################################
 				# generate abundance table
 				check_taxa_abund(tmp_dataset)
 				# make sure the taxa_level can be found from tax_table
@@ -251,7 +250,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					# differential test
 					group_vec <- sampleinfo[, group] %>% as.factor
 					comparisions <- paste0(levels(group_vec), collapse = " - ")
-
 					message("Start Kruskal-Wallis rank sum test for ", group, " ...")
 					res_class <- suppressWarnings(lapply(seq_len(nrow(abund_table)), function(x) private$test_mark(abund_table[x, ], group_vec, method = "kruskal.test")))
 					

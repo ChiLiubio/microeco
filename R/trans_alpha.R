@@ -33,7 +33,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				data_alpha <- dataset$alpha_diversity %>% 
 					cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE) %>%
 					.[, !grepl("^se", colnames(.))] %>%
-					# to long format
 					reshape2::melt(id.vars = "Sample") %>%
 					`colnames<-`(c("Sample", "Measure", "Value")) %>%
 					dplyr::left_join(., rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))

@@ -47,11 +47,10 @@ filter_lowabund_feature <- function(abund_table, filter_thres){
 		mean_abund <- apply(abund_table, 1, mean)
 		if(filter_thres > max(mean_abund)){
 			stop("Parameter filter_thres is larger than the maximum of mean abundances of features!")
-		}else{
-			abund_table %<>% .[mean_abund >= filter_thres, ]
-			filter_features <- mean_abund[mean_abund < filter_thres]
-			message("Filter out ", length(filter_features), " features with low abundance ...")
 		}
+		abund_table <- abund_table[mean_abund >= filter_thres, ]
+		filter_features <- mean_abund[mean_abund < filter_thres]
+		message("Filter out ", length(filter_features), " features with low abundance ...")
 		output[["filter_features"]] <- filter_features
 	}
 	output[["abund_table"]] <- abund_table
