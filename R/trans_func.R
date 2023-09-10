@@ -49,14 +49,16 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @description
 		#' Identify traits of each feature by matching taxonomic assignments to functional database.
 		#'
-		#' @param prok_database default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic trait database; see the details:
+		#' @param prok_database default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic trait database:
 		#'   \describe{
 		#'     \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4; Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
 		#'     	  Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
 		#'     \item{\strong{'NJC19'}}{NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. 
-		#'     	  Scientific Data, 7(1). <10.1038/s41597-020-0516-5>}
+		#'     	  Scientific Data, 7(1). <10.1038/s41597-020-0516-5>. 
+		#'     	  Note that the matching in this database is performed at the species level, 
+		#'     	  hence utilizing it demands a higher level of precision in regards to the assignments of species in the taxonomic information table.}
 		#'   }
-		#' @param fungi_database default "FUNGuild"; \code{"FUNGuild"} or \code{"FungalTraits"}; select a fungal trait database; see the details:
+		#' @param fungi_database default "FUNGuild"; \code{"FUNGuild"} or \code{"FungalTraits"}; select a fungal trait database:
 		#'   \describe{
 		#'     \item{\strong{'FUNGuild'}}{Nguyen et al. (2016) FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild.
 		#'     	  Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>}
