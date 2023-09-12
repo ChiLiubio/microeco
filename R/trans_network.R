@@ -1313,8 +1313,8 @@ trans_network <- R6Class(classname = "trans_network",
 			if(any(is.nan(z$z))){
 				message('The nodes (', sum(is.nan(z$z)),') with NaN in z will be filtered ...')
 			}
-			amd <- private$among_module_connectivity(comm_graph)
-			pc <- private$participation_coeffiecient(amd, td)
+			amc <- private$among_module_connectivity(comm_graph)
+			pc <- private$participation_coeffiecient(amc, td)
 			zp <- data.frame(z, pc)
 			nod_roles <- private$assign_module_roles(zp)
 			nod_roles
@@ -1326,23 +1326,15 @@ trans_network <- R6Class(classname = "trans_network",
 				stop("No modules found! Please first calculate network modules using function cal_module !")
 			}
 			modvs <- data.frame("taxon" = V(comm_graph)$name, "mod" = mods, stringsAsFactors = FALSE)
-			sg1 <- decompose.graph(comm_graph, mode="strong")
 			res <- data.frame()
 			for(mod in unique(modvs$mod)){
 				mod_nodes <- subset(modvs$taxon, modvs$mod == mod)
-				neighverts <- unique(unlist(sapply(sg1, FUN = function(s){
-					if(any(V(s)$name %in% mod_nodes)){
-						V(s)$name
-						}else{
-						NULL
-						}
-					})))
-				g3 <- induced.subgraph(graph = comm_graph, vids = neighverts)
-				mod_degree <- igraph::degree(g3)
+				mod_subgraph <- induced.subgraph(graph = comm_graph, vids = mod_nodes)
+				mod_degree <- igraph::degree(mod_subgraph)
 				for(i in mod_nodes){
-					ki <- mod_degree[which(names(mod_degree) == i)]
+					ki <- mod_degree[names(mod_degree) == i]
 					tmp <- data.frame(module = mod, taxa = names(ki), mod_links = ki)
-					res <- rbind(res,tmp)
+					res <- rbind(res, tmp)
 				}
 			}
 			res
@@ -1358,7 +1350,7 @@ trans_network <- R6Class(classname = "trans_network",
 				mod_sig <- ksi_sigma$mod_links[which(ksi_bar$module == mod.degree$module[i])]
 				z[i] <- (mod.degree$mod_links[i] - mod_mean)/mod_sig
 			}
-			z <- data.frame(row.names=rownames(mod.degree), z, module=mod.degree$module)
+			z <- data.frame(row.names = rownames(mod.degree), z, module = mod.degree$module)
 			z
 		},
 		#calculate the degree (links) of each node to nodes in other modules
