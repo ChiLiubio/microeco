@@ -1315,7 +1315,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			amc <- private$among_module_connectivity(comm_graph)
 			pc <- private$participation_coeffiecient(amc, td)
-			zp <- data.frame(z, pc)
+			zp <- data.frame(z, pc[rownames(z), , drop = FALSE])
 			nod_roles <- private$assign_module_roles(zp)
 			nod_roles
 		},
@@ -1341,16 +1341,16 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		#compute within-module degree z-score which
 		#measures how well-connected a node is to other nodes in the module.
-		zscore = function(mod.degree){
-			ksi_bar <- aggregate(mod_links ~ module, data = mod.degree, FUN = mean)
-			ksi_sigma <- aggregate(mod_links ~ module, data = mod.degree, FUN = sd)
+		zscore = function(within_md){
+			ksi_bar <- aggregate(mod_links ~ module, data = within_md, FUN = mean)
+			ksi_sigma <- aggregate(mod_links ~ module, data = within_md, FUN = sd)
 			z <- NULL
-			for(i in 1:dim(mod.degree)[1]){
-				mod_mean <- ksi_bar$mod_links[which(ksi_bar$module == mod.degree$module[i])]
-				mod_sig <- ksi_sigma$mod_links[which(ksi_bar$module == mod.degree$module[i])]
-				z[i] <- (mod.degree$mod_links[i] - mod_mean)/mod_sig
+			for(i in 1:dim(within_md)[1]){
+				mod_mean <- ksi_bar$mod_links[which(ksi_bar$module == within_md$module[i])]
+				mod_sig <- ksi_sigma$mod_links[which(ksi_bar$module == within_md$module[i])]
+				z[i] <- (within_md$mod_links[i] - mod_mean)/mod_sig
 			}
-			z <- data.frame(row.names = rownames(mod.degree), z, module = mod.degree$module)
+			z <- data.frame(row.names = rownames(within_md), z, module = within_md$module)
 			z
 		},
 		#calculate the degree (links) of each node to nodes in other modules
@@ -1374,42 +1374,38 @@ trans_network <- R6Class(classname = "trans_network",
 		#The participation coefficient of a node measures how well a node is distributed
 		# in the entire network. It is close to 1 if its links are uniformly
 		#distributed among all the modules and 0 if all its links are within its own module.
-		participation_coeffiecient = function(mod.degree, total.degree){
-			p <- NULL
-			for(i in total.degree$taxa){
-				ki <- subset(total.degree$total_links, total.degree$taxa == i)
-				taxa.mod.degree <- subset(mod.degree$mod_links, mod.degree$taxa == i)
-				p[i] <- 1 - (sum((taxa.mod.degree)**2)/ki**2)
+		participation_coeffiecient = function(among_mc, total_degree){
+			p <- c()
+			for(i in total_degree$taxa){
+				ki <- subset(total_degree$total_links, total_degree$taxa == i)
+				taxa_each_mod_degree <- subset(among_mc$mod_links, among_mc$taxa == i)
+				p[i] <- 1 - (sum((taxa_each_mod_degree)**2)/ki**2)
 			}
-			p <- as.data.frame(p)
-			p
+			as.data.frame(p)
 		},
 		assign_module_roles = function(zp){
 			zp <- na.omit(zp)
 			if(nrow(zp) == 0){
 				stop("No valid result obtained for this network!")
 			}
-			zp$taxa_roles <- rep(0, dim(zp)[1])
-			outdf <- NULL
-			for(i in 1:dim(zp)[1]){
-				df <- zp[i, ]
-				if(df$z <= 2.5){
-					if(df$p <= 0.62){
-						df$taxa_roles <- "Peripheral nodes"
+			zp$taxa_roles <- rep("", nrow(zp))
+			for(i in 1:nrow(zp)){
+				if(zp[i, "z"] <= 2.5){
+					if(zp[i, "p"] <= 0.62){
+						zp[i, "taxa_roles"] <- "Peripheral nodes"
 					}else{
-						df$taxa_roles <- "Connectors"
+						zp[i, "taxa_roles"] <- "Connectors"
 					}
 				}
 				else{
-					if(df$p <= 0.62){
-						df$taxa_roles <- "Module hubs"
-					} else {
-						df$taxa_roles <- "Network hubs"
+					if(zp[i, "p"] <= 0.62){
+						zp[i, "taxa_roles"] <- "Module hubs"
+					}else{
+						zp[i, "taxa_roles"] <- "Network hubs"
 					}
 				}
-				outdf <- rbind(outdf, df)
 			}
-			outdf
+			zp
 		},
 		plot_roles_1 = function(node_roles, roles_color_background, add_label = FALSE, add_label_group = "Network hubs", add_label_text = "name", 
 			label_text_size = 4, label_text_color = "grey50", label_text_italic = FALSE,
