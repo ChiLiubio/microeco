@@ -521,8 +521,6 @@ t1$cal_network_attr()
 \subsection{Method \code{get_node_table()}}{
 Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
   taxonomy, within-module connectivity and among-module connectivity <doi:10.1016/j.geoderma.2022.115866>.
-
-Authors: Chi Liu, Umer Zeeshan Ijaz
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$get_node_table(node_roles = TRUE)}\if{html}{\out{</div>}}
 }
@@ -535,8 +533,9 @@ Authors: Chi Liu, Umer Zeeshan Ijaz
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_node_table} in object; Abundance expressed as a percentage; z denotes within-module connectivity;
-  p denotes among-module connectivity.
+\code{res_node_table} in object; Abundance expressed as a percentage; 
+  betweenness_centrality: betweenness centrality; betweenness_centrality: closeness centrality; eigenvector_centrality: eigenvector centrality; 
+ z: within-module connectivity; p: among-module connectivity.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

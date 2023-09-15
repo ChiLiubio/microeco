@@ -569,11 +569,10 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
 		#'   taxonomy, within-module connectivity and among-module connectivity <doi:10.1016/j.geoderma.2022.115866>.
 		#'
-		#' Authors: Chi Liu, Umer Zeeshan Ijaz
-		#'
 		#' @param node_roles default TRUE; whether calculate node roles, i.e. Module hubs, Network hubs, Connectors and Peripherals <doi:10.1016/j.geoderma.2022.115866>.
-		#' @return \code{res_node_table} in object; Abundance expressed as a percentage; z denotes within-module connectivity;
-		#'   p denotes among-module connectivity.
+		#' @return \code{res_node_table} in object; Abundance expressed as a percentage; 
+		#'   betweenness_centrality: betweenness centrality; betweenness_centrality: closeness centrality; eigenvector_centrality: eigenvector centrality; 
+		#'  z: within-module connectivity; p: among-module connectivity.
 		#' @examples
 		#' \donttest{
 		#' t1$get_node_table(node_roles = TRUE)
@@ -586,7 +585,10 @@ trans_network <- R6Class(classname = "trans_network",
 			sum_abund <- self$data_relabund
 			node_table <- data.frame(name = V(network)$name) %>% `rownames<-`(.[, 1])
 			node_table$degree <- igraph::degree(network)[rownames(node_table)]
-			node_table$betweenness <- betweenness(network)[rownames(node_table)]
+			node_table$betweenness_centrality <- igraph::betweenness(network)[rownames(node_table)]
+			node_table$closeness_centrality <- igraph::closeness(network)[rownames(node_table)]
+			eigenvec_centralraw <- igraph::eigen_centrality(network)
+			node_table$eigenvector_centrality <- eigenvec_centralraw$vector[rownames(node_table)]
 			# Same with the above operation to make the names corresponded
 			if(self$taxa_level != "OTU"){
 				# create a replace_table to match the taxa name and marker name when taxa_level is not "OTU"
