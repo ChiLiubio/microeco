@@ -1,6 +1,5 @@
 
 
-# check taxa_abund in microtable object
 check_taxa_abund <- function(obj, ...){
 	if(is.null(obj$taxa_abund)){
 		message("No taxa_abund list found. Calculate it with cal_abund function ...")
@@ -8,7 +7,6 @@ check_taxa_abund <- function(obj, ...){
 	}
 }
 
-# check microtable object in class
 check_microtable <- function(obj){
 	if(is.null(obj)){
 		stop("The dataset must be provided!")
@@ -18,7 +16,7 @@ check_microtable <- function(obj){
 	}
 }
 
-# check provided taxonomic levels: obj either microtable object or taxonomic table
+# check taxonomic level: obj either microtable object or taxonomic table
 check_tax_level <- function(tax_level, obj){
 	if(inherits(obj, "microtable")){
 		if(is.null(obj$tax_table)){
@@ -57,17 +55,14 @@ filter_lowabund_feature <- function(abund_table, filter_thres){
 	output
 }
 
-# inner function to add colors when not enough to use
 expand_colors <- function(color_values, output_length){
 	if(output_length <= length(color_values)){
 		total_colors <- color_values[1:output_length]
 	}else{
 		message("Input colors are not enough to use. Add more colors automatically via color interpolation ...")
-		# generate a color list
 		ceiling_cycle_times <- ceiling(output_length/length(color_values))
 		total_cycle_times <- lapply(seq_along(color_values), function(x){
 			if((ceiling_cycle_times - 1) * length(color_values) + x <= output_length){
-				# not enough
 				ceiling_cycle_times
 			}else{
 				ceiling_cycle_times - 1
@@ -130,7 +125,6 @@ dropallfactors <- function(x, unfac2num = FALSE, char2num = FALSE){
 	x
 }
 
-# inner function
 trycharnum <- function(x){
 	if(suppressWarnings(sum(is.na(as.numeric(as.character(x)))) != sum(is.na(x)))) {
 		x <- as.character(x)
@@ -176,24 +170,18 @@ tidy_taxonomy <- function(taxonomy_table,
 	taxonomy_table
 }
 
-# inner function
 tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore.case, na_fill){
 	taxonomy_table[, i] <- gsub(paste0(pattern, collapse = "|"), replacement, taxonomy_table[, i], ignore.case = ignore.case)
-	# delete the blank space in beginning and end
 	taxonomy_table[, i] <- gsub("^\\s+|\\s+$", "", taxonomy_table[, i])
-	# delete any " in the text
 	taxonomy_table[, i] <- gsub('"', "", taxonomy_table[, i], fixed = TRUE)
-	# some data have single underline, so first double, then single
+	# first double, then single
 	taxonomy_table[, i] <- gsub("^.*__", "", taxonomy_table[, i])
 	taxonomy_table[, i] <- gsub("^._", "", taxonomy_table[, i])
-	# check the missing data
 	taxonomy_table[, i][is.na(taxonomy_table[, i])] <- na_fill
-	# paste the final result with double underlines
 	taxonomy_table[, i] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[, i])
 	taxonomy_table[, i]
 }
 
-# inner function
 summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm = TRUE, more = FALSE) {
 	length2 <- function(x, na.rm = TRUE) ifelse(na.rm, sum(!is.na(x)), length(x))
 	datac <- usedata %>% dplyr::grouped_df(groupvars)
@@ -212,10 +200,7 @@ summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm 
 	datac
 }
 
-
-# inner function
-# Add correlation or regression statictics to a scatter plot
-# developed based on the stat_cor of ggpubr package
+# based on the stat_cor of ggpubr package
 stat_corlm <- function(mapping = NULL, data = NULL, 
 	type = c("cor", "lm")[1], cor_method = "pearson", label_sep = ";",
 	pvalue_trim = 4, lm_equation = TRUE, cor_coef_trim = 3, lm_fir_trim = 2, lm_sec_trim = 2, lm_squ_trim = 2,
@@ -243,7 +228,6 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 		if(length(unique(data$x)) < 2){
 			return(data.frame())
 		}
-		# Returns a data frame with estimate, p.value, label, method
 		.test <- .corlm_test(
 			data$x, data$y, type = type, cor_method = cor_method, label_sep = label_sep,
 			pvalue_trim = pvalue_trim,
@@ -253,7 +237,6 @@ StatCorLm <- ggproto("StatCorLm", Stat,
 			lm_sec_trim = lm_sec_trim, 
 			lm_squ_trim = lm_squ_trim
 		)
-		# Returns a data frame with label: x, y, hjust, vjust
 		.label.pms <- ggpubr:::.label_params(data = data, scales = scales,
 			label.x.npc = label.x.npc, label.y.npc = label.y.npc,
 			label.x = label.x, label.y = label.y ) %>%
@@ -333,9 +316,7 @@ new_aesthetic <- function (x, env = globalenv()){
 
 ##################################################################################
 # metastat code from White et al. (2009) <doi:10.1371/journal.pcbi.1000352>.
-#************************************************************************
 # ************************** SUBROUTINES ********************************
-#************************************************************************
 
 #*********************************************************************************
 #  calc two sample two statistics
@@ -428,12 +409,6 @@ calc_qvalues <- function(pvalues)
 		qvalues[ordered_ps[i]] = ordered_qs[i];
 	}
 
-	################################
-	# plotting pi_hat vs. lambda
-	################################
-	# plot(lambdas,pi0_hat,xlab=expression(lambda),ylab=expression(hat(pi)[0](lambda)),type="p");
-	# lines(f);
-
 	return (qvalues);
 }
 
@@ -490,7 +465,6 @@ permuted_pvalues <- function(Imatrix, tstats, B, g, Fmatrix)
 			ps[i] = (1/(B+1))*(sum(permuted_ttests[i,] > abs(tstats[i]))+1);
 		}
 	}
-
 	return (ps);
 }
 
@@ -747,7 +721,6 @@ detect_differentially_abundant_features <- function(jobj, g, pflag = NULL, thres
 #*****************************************************************************************************
 #  load up the frequency matrix from a file
 #*****************************************************************************************************
-# Note sep
 load_frequency_matrix <- function(input){
 	# load names 
 	subjects <- array(0,dim=c(ncol(input)));
@@ -771,7 +744,6 @@ load_frequency_matrix <- function(input){
 	return(jobj)
 }
 
-# metastat input
 calculate_metastat <- function(inputdata, g, pflag = FALSE, threshold = NULL, B = NULL){
 	trans_data <- load_frequency_matrix(input = inputdata)
 	res <- detect_differentially_abundant_features(jobj = trans_data, g = g, pflag = pflag, threshold = threshold, B = B)

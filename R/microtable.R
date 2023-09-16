@@ -69,7 +69,6 @@ microtable <- R6Class(classname = "microtable",
 					stop("The input tax_table must be data.frame format!")
 				}
 			}
-			# check whether phylogenetic tree is rooted
 			if(!is.null(phylo_tree)){
 				if(!inherits(phylo_tree, "phylo")){
 					stop("The input phylo_tree must be phylo format! Please use read.tree function in ape package to read the phylogenetic tree!")
@@ -219,7 +218,6 @@ microtable <- R6Class(classname = "microtable",
 			}
 			rownames(newotu) <- rownames(self$otu_table)
 			self$otu_table <- newotu
-			# remove OTUs with 0 sequence
 			rmtaxa <- apply(newotu, 1, sum) %>% .[. == 0]
 			if(length(rmtaxa) > 0){
 				message(length(rmtaxa), " features are removed because they are no longer present in any sample after random subsampling ...")
@@ -235,7 +233,6 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
-			# must first check otu_table
 			self$otu_table <- private$check_abund_table(self$otu_table)
 			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
 			if(length(sample_names) == 0){
@@ -245,7 +242,6 @@ microtable <- R6Class(classname = "microtable",
 			sample_names <- rownames(self$sample_table) %>% .[. %in% sample_names]
 			self$sample_table %<>% .[sample_names, , drop = FALSE]
 			self$otu_table %<>% .[ , sample_names, drop = FALSE]
-			# trim taxa
 			self$otu_table %<>% {.[apply(., 1, sum) > 0, , drop = FALSE]}
 			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
 				.[!unlist(lapply(., is.null))]
@@ -265,7 +261,6 @@ microtable <- R6Class(classname = "microtable",
 				self$phylo_tree %<>% ape::drop.tip(., base::setdiff(.$tip.label, taxa_names))
 			}
 			if(!is.null(self$rep_fasta)){
-				# first check the relationship among names
 				if(!all(taxa_names %in% names(self$rep_fasta))){
 					stop("Some feature names are not found in the names of rep_fasta! Please provide a complete fasta file or manually check the names!")
 				}
@@ -366,7 +361,6 @@ microtable <- R6Class(classname = "microtable",
 		#' }
 		rename_taxa = function(newname_prefix = "ASV_"){
 			self$tidy_dataset()
-			# extract old names for futher matching
 			old_names <- rownames(self$otu_table)
 			new_names <- paste0(newname_prefix, seq_len(nrow(self$otu_table)))
 			rownames(self$otu_table) <- new_names
@@ -409,7 +403,6 @@ microtable <- R6Class(classname = "microtable",
 			}
 			otu_table_new <- rowsum(t(otu_table), as.factor(as.character(sample_table[, use_group]))) %>% t %>% as.data.frame
 			sample_table_new <- data.frame(SampleID = unique(as.character(sample_table[, use_group]))) %>% `row.names<-`(.[,1])
-			# return a new microtable object
 			microtable$new(
 				sample_table = sample_table_new, 
 				otu_table = otu_table_new, 
@@ -429,7 +422,6 @@ microtable <- R6Class(classname = "microtable",
 		#' m1$merge_taxa(taxa = "Genus")
 		#' }
 		merge_taxa = function(taxa = "Genus"){
-			# Agglomerate all OTUs by given taxonomic level
 			check_tax_level(taxa, self)
 			ranknumber <- which(colnames(self$tax_table) %in% taxa)
 			sampleinfo <- self$sample_table
@@ -437,7 +429,7 @@ microtable <- R6Class(classname = "microtable",
 			tax <- self$tax_table
 			tax <- tax[, 1:ranknumber, drop=FALSE]
 			# concatenate taxonomy in case of duplicated taxa names
-			merged_taxonomy <- apply(tax, 1, paste, collapse="|")
+			merged_taxonomy <- apply(tax, 1, paste, collapse = "|")
 			abund1 <- cbind.data.frame(Display = merged_taxonomy, abund) %>% 
 				reshape2::melt(id.var = "Display", value.name= "Abundance", variable.name = "Sample")
 			abund1 <- data.table(abund1)[, sum_abund:=sum(Abundance), by=list(Display, Sample)] %>% 
@@ -445,7 +437,6 @@ microtable <- R6Class(classname = "microtable",
 				setkey(Display, Sample) %>% 
 				unique() %>% 
 				as.data.frame()
-			# use dcast to generate table
 			new_abund <- as.data.frame(data.table::dcast(data.table(abund1), Display~Sample, value.var= list("sum_abund"))) %>% 
 				`row.names<-`(.[,1]) %>% 
 				.[,-1, drop = FALSE]
@@ -504,7 +495,6 @@ microtable <- R6Class(classname = "microtable",
 				message('Save phylogenetic tree to ', save_path, ' ...')
 			}
 			if(!is.null(self$rep_fasta)){
-				# check sequence types
 				tmp <- self$rep_fasta
 				save_path <- file.path(dirpath, "rep_fasta.fasta")
 				if(inherits(tmp, "list")){
@@ -551,7 +541,6 @@ microtable <- R6Class(classname = "microtable",
 			if(is.null(self$tax_table)){
 				stop("No tax_table found! Please check your data!")
 			}
-			# check data corresponding
 			if(nrow(self$tax_table) != nrow(self$otu_table)){
 				message("The row number of tax_table is not equal to that of otu_table ...")
 				message("Automatically applying tidy_dataset() function to trim the data ...")
@@ -732,7 +721,6 @@ microtable <- R6Class(classname = "microtable",
 		save_alphadiv = function(dirpath = "alpha_diversity"){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
-				# stop("The directory is not found, please first create it!")
 			}
 			write.csv(self$alpha_diversity, file = paste0(dirpath, "/", "alpha_diversity.csv"), row.names = TRUE)
 		},
@@ -772,7 +760,6 @@ microtable <- R6Class(classname = "microtable",
 					stop("No phylogenetic tree provided, please change the parameter unifrac to FALSE")
 				}
 				phylo_tree <- self$phylo_tree
-				# require GUniFrac package; do not consider too much about alpha parameter
 				unifrac1 <- GUniFrac::GUniFrac(eco_table, phylo_tree, alpha = c(0, 0.5, 1))
 				unifrac2 <- unifrac1$unifracs
 				wei_unifrac <- unifrac2[,, "d_1"]
@@ -790,7 +777,6 @@ microtable <- R6Class(classname = "microtable",
 		save_betadiv = function(dirpath = "beta_diversity"){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
-				# stop("The directory is not found, please first create it!")
 			}
 			for(i in names(self$beta_diversity)){
 				write.csv(self$beta_diversity[[i]], file = paste0(dirpath, "/", i, ".csv"), row.names = TRUE)
@@ -835,7 +821,6 @@ microtable <- R6Class(classname = "microtable",
 			}
 			otu_table
 		},
-		# taxa abundance calculation
 		transform_data_proportion = function(
 			input,
 			columns,
@@ -860,7 +845,6 @@ microtable <- R6Class(classname = "microtable",
 				abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse = merge_by), abund)
 			}
 			# first convert table to long format
-			# then sum abundance by sample and taxonomy
 			abund1 <- abund1 %>% 
 				data.table() %>% 
 				data.table::melt(id.vars = "Display", value.name= "Abundance", variable.name = "Sample") %>%
@@ -874,7 +858,6 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				colnames(abund1)[colnames(abund1) == "sum_abund"] <- "res_abund"
 			}
-			# dcast the table
 			abund2 <- as.data.frame(data.table::dcast(abund1, Display ~ Sample, value.var = list("res_abund"))) %>%
 				`row.names<-`(.[,1]) %>% 
 				.[,-1, drop = FALSE]
@@ -882,14 +865,11 @@ microtable <- R6Class(classname = "microtable",
 			abund2
 		},
 		rarefaction_subsample = function(x, sample.size, replace=FALSE){
-			# Adapted from the rarefy_even_depth() in phyloseq package, see Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
+			# Adapted from the rarefy_even_depth() in phyloseq package
 			# All rights reserved.
-			# Create replacement species vector
 			rarvec <- numeric(length(x))
-			# Perform the sub-sampling. Suppress warnings due to old R compat issue.
 			if(sum(x) <= 0){
 				# Protect against, and quickly return an empty vector, 
-				# if x is already an empty count vector
 				return(rarvec)
 			}
 			if(replace){
@@ -907,13 +887,12 @@ microtable <- R6Class(classname = "microtable",
 			rarvec[as(names(sstab), "integer")] <- sstab
 			return(rarvec)
 		},
-		# define coverage function
 		goods = function(com){
 			no.seqs <- rowSums(com)
 			sing <- com==1
 			no.sing <- apply(sing, 1, sum)
-			goods <- 1-no.sing/no.seqs
-			return(goods)
+			goods <- 1 - no.sing/no.seqs
+			goods
 		}
 	),
 	lock_objects = FALSE,
