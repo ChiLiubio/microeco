@@ -18,11 +18,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param group_morestats default FALSE; only available when \code{groupmean} parameter is provided; 
 		#'   Whether output more statistics for each group, including min, max, median and quantile;
 		#'   Thereinto, quantile25 and quantile75 denote 25\% and 75\% quantiles, respectively.
-		#' @param delete_full_prefix default TRUE; whether delete both the prefix of taxonomy and the character in front of them.
-		#' @param delete_part_prefix default FALSE; whether only delete the prefix of taxonomy.
-		#' @param prefix default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
+		#' @param delete_taxonomy_lineage default TRUE; whether delete the taxonomy lineage in front of the target level.
+		#' @param delete_taxonomy_prefix default TRUE; whether delete the prefix of taxonomy, such as "g__".
+		#' @param prefix default NULL; character string; available when \code{delete_taxonomy_prefix = T}; 
 		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
-		#'   Please alter this parameter when the prefix is not standard.
+		#'   Please provide the customized prefix when it is not standard, otherwise the program can not correctly recognize it.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; input taxa names for selecting some taxa.
 		#' @param high_level default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
@@ -46,8 +46,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 			ntaxa = 10, 
 			groupmean = NULL,
 			group_morestats = FALSE,
-			delete_full_prefix = TRUE,
-			delete_part_prefix = FALSE,
+			delete_taxonomy_lineage = TRUE,
+			delete_taxonomy_prefix = TRUE,
 			prefix = NULL,
 			use_percentage = TRUE, 
 			input_taxaname = NULL,
@@ -61,7 +61,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				colnames(sample_table)[colnames(sample_table) == "Sample"] <- "Sample_replace"
 			}
 			if(! taxrank %in% names(dataset$taxa_abund)){
-				stop("The input parameter taxrank: ", taxrank, " is not found! Please check whether it is correct!")
+				stop("The input taxrank: ", taxrank, " is not found! Please check it!")
 			}
 			abund_data <- dataset$taxa_abund[[taxrank]] %>% 
 				rownames_to_column(var = "Taxonomy") %>% 
@@ -71,30 +71,26 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(any(check_nd)){
 				abund_data$Taxonomy[check_nd] %<>% paste0(., "unidentified")
 			}
-			if(delete_full_prefix == T | delete_part_prefix == T){
-				if(is.null(prefix)){
-					prefix <- ".__"
-				}
-				if(delete_part_prefix == T){
-					delete_full_prefix <- FALSE
-				}
-				if(delete_full_prefix == T){
-					abund_data$Taxonomy %<>% gsub(paste0(".*", prefix, "(.*)"), "\\1", .)
-				}else{
+			if(delete_taxonomy_lineage | delete_taxonomy_prefix){
+				if(delete_taxonomy_prefix){
+					if(is.null(prefix)){
+						prefix <- ".__"
+					}
 					abund_data$Taxonomy %<>% gsub(prefix, "", .)
+				}
+				if(delete_taxonomy_lineage){
+					abund_data$Taxonomy %<>% gsub(".*\\|", "", .)
 				}
 			}
 			abund_data %<>% dplyr::group_by(!!! syms(c("Taxonomy", "Sample"))) %>% 
 				dplyr::summarise(Abundance = sum(Abundance)) %>%
 				as.data.frame(stringsAsFactors = FALSE)
-			# sort according to the abundance
 			abund_data$Taxonomy %<>% as.character
 			mean_abund <- tapply(abund_data$Abundance, abund_data$Taxonomy, FUN = mean)
-			# add the mean abundance of all samples
+			# add mean abundance for all samples
 			all_mean_abund <- data.frame(Taxonomy = names(mean_abund), all_mean_abund = mean_abund)
 			rownames(all_mean_abund) <- NULL
 			abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))}
-			# calculate mean vlaues for each group
 			if(!is.null(groupmean)){
 				message(paste0(groupmean, " column is used to calculate mean abundance ..."))
 				abund_data <- microeco:::summarySE_inter(abund_data, measurevar = "Abundance", groupvars = c("Taxonomy", groupmean), more = group_morestats)
@@ -114,16 +110,16 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(! high_level %in% colnames(dataset$tax_table)){
 					stop("Provided high_level must be a colname of input dataset$tax_table!")
 				}else{
-					# delete the prefix to make two tables consistent
-					if(is.null(prefix)){
-						prefix <- ".__"
-					}
 					extract_tax_table <- dataset$tax_table[, c(high_level, taxrank)] %>% unique
-					extract_tax_table[, taxrank] %<>% gsub(prefix, "", .)
+					if(!delete_taxonomy_lineage){
+						stop("The delete_taxonomy_lineage should be FALSE when high_level is provided!")
+					}
+					if(delete_taxonomy_prefix){
+						extract_tax_table[, taxrank] %<>% gsub(prefix, "", .)
+					}
 					abund_data <- dplyr::left_join(abund_data, extract_tax_table, by = c("Taxonomy" = taxrank))
 				}
 			}
-			# get ordered taxa
 			use_taxanames <- as.character(rev(names(sort(mean_abund))))
 			if(!is.null(ntaxa)){
 				ntaxa_theshold <- ntaxa_use <- ntaxa
@@ -134,7 +130,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 				ntaxa_use <- sum(mean_abund > show)
 			}
 			use_taxanames %<>% .[!grepl("unidentified|unculture|Incertae.sedis", .)]
-			# determine used taxa
 			if(is.null(input_taxaname)){
 				if(is.null(high_level_fix_nsub)){
 					if(length(use_taxanames) > ntaxa_use){
@@ -150,7 +145,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 					}) %>% unlist
 				}
 			}else{
-				# make sure input_taxaname are in use_taxanames
 				if(!any(input_taxaname %in% use_taxanames)){
 					stop("The input_taxaname does not match to taxa names! Please check the input!")
 				}else{
@@ -158,13 +152,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 			}
 			if(!is.null(high_level)){
-				# sort the taxa in high levels according to the sum of abundances
+				# sort the taxa in high levels according to abundance sum
 				tmp <- abund_data[abund_data$Taxonomy %in% use_taxanames, c(high_level, "Abundance")]
 				tmp <- tapply(tmp$Abundance, tmp[, high_level], FUN = sum)
 				data_taxanames_highlevel <- as.character(names(sort(tmp, decreasing = TRUE)))
 				self$data_taxanames_highlevel <- data_taxanames_highlevel
 			}
-			# ylab title for different cases
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
 				if(use_percentage == T){
 					abund_data$Abundance %<>% {. * 100}

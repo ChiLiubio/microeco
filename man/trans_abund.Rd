@@ -119,8 +119,8 @@ t1$plot_tern()
   ntaxa = 10,
   groupmean = NULL,
   group_morestats = FALSE,
-  delete_full_prefix = TRUE,
-  delete_part_prefix = FALSE,
+  delete_taxonomy_lineage = TRUE,
+  delete_taxonomy_prefix = TRUE,
   prefix = NULL,
   use_percentage = TRUE,
   input_taxaname = NULL,
@@ -147,13 +147,13 @@ This parameter does not conflict with the parameter \code{show}. Both can be use
 Whether output more statistics for each group, including min, max, median and quantile;
 Thereinto, quantile25 and quantile75 denote 25\% and 75\% quantiles, respectively.}
 
-\item{\code{delete_full_prefix}}{default TRUE; whether delete both the prefix of taxonomy and the character in front of them.}
+\item{\code{delete_taxonomy_lineage}}{default TRUE; whether delete the taxonomy lineage in front of the target level.}
 
-\item{\code{delete_part_prefix}}{default FALSE; whether only delete the prefix of taxonomy.}
+\item{\code{delete_taxonomy_prefix}}{default TRUE; whether delete the prefix of taxonomy, such as "g__".}
 
-\item{\code{prefix}}{default NULL; character string; can be used when \code{delete_full_prefix = T} or \code{delete_part_prefix = T}; 
+\item{\code{prefix}}{default NULL; character string; available when \code{delete_taxonomy_prefix = T}; 
 default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
-Please alter this parameter when the prefix is not standard.}
+Please provide the customized prefix when it is not standard, otherwise the program can not correctly recognize it.}
 
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
 
