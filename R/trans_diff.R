@@ -191,6 +191,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 				}
+				
 				# generate abundance table
 				check_taxa_abund(tmp_dataset)
 				# make sure the taxa_level can be found from tax_table

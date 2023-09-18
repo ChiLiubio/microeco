@@ -814,7 +814,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			tmp <- combn(orderd_groups, 2) %>% t %>% as.data.frame %>% apply(., 1, function(x){paste0(x, collapse = " - ")})
 			dunnTest_table <- dunnTest_table[match(tmp, dunnTest_table$Comparison), ]
 			if(KW_dunn_letter){
-				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_table, threshold = alpha)
+				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_table, threshold = alpha,
+					remove.space = TRUE, remove.equal = FALSE, remove.zero = FALSE)
 				if(any(grepl("-", raw_groups))){
 					dunnTest_final$Group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
 				}
@@ -841,8 +842,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			res1 <- data.frame(rownames(res1), res1, stringsAsFactors = FALSE, check.names = FALSE)
 			colnames(res1) <- c("Group", "Letter")
 			rownames(res1) <- NULL
-			res2 <- data.frame(Measure = measure, Test_method = "anova", res1)
-			res2
+			res <- data.frame(Measure = measure, Test_method = "anova", res1)
+			res
 		},
 		group_value_compare = function(value, group, ...){
 			group %<>% as.character
