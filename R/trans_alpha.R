@@ -14,7 +14,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param by_ID default NULL; a column of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
-		#' @param order_x default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.
+		#' @param order_x default NULL; a \code{sample_table} column name or a vector with sample names; if provided, order samples by using \code{factor}.
 		#' @return \code{data_alpha} and \code{data_stat} stored in the object.
 		#' @examples
 		#' \donttest{
@@ -46,23 +46,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				self$data_alpha <- data_alpha
 				message('The transformed diversity data is stored in object$data_alpha ...')
 			}
-			if(! is.null(by_group)){
-				if(! by_group %in% colnames(data_alpha)){
-					stop("Provided by_group: ", by_group, " is not found in dataset$sample_table!")
-				}
-			}
-			if(! is.null(by_ID)){
-				if(! by_ID %in% colnames(data_alpha)){
-					stop("Provided by_ID: ", by_ID, " is not found in dataset$sample_table!")
-				}
-			}
+			check_table_variable(data_alpha, by_group, "by_group", "dataset$sample_table")
+			check_table_variable(data_alpha, by_ID, "by_ID", "dataset$sample_table")
+			
 			if(! is.null(group)){
 				if(is.null(dataset)){
 					stop("Parameter dataset not provided, but group is provided!")
 				}
-				if(! group %in% colnames(data_alpha)){
-					stop("Provided group: ", group, " is not found in dataset$sample_table!")
-				}
+				check_table_variable(data_alpha, group, "group", "dataset$sample_table")
 				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(group, "Measure"))
 				message('The group statistics are stored in object$data_stat ...')
 			}else{
@@ -73,12 +64,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			self$by_ID <- by_ID
 		},
 		#' @description
-		#' Differential test of alpha diversity.
+		#' Differential test on alpha diversity.
 		#'
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
-		#'     \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
+		#'     \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons; see \code{dunnTest} function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
@@ -89,8 +80,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
 		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
 		#'   }
-		#' @param measure default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
-		#' 	 e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.
+		#' @param measure default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+		#' 	 e.g. c("Observed", "Chao1", "Shannon").
 		#' @param p_adjust_method default "fdr" (for "KW", "wilcox", "t.test") or "holm" (for "KW_dunn"); P value adjustment method; 
 		#' 	  For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
 		#' 	  For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.
@@ -385,8 +376,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' Plot the alpha diversity.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
-		#' @param measure default Shannon; one alpha diversity measurement; see names of alpha_diversity of dataset, 
-		#'   e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.
+		#' @param measure default "Shannon"; one alpha diversity index in the object.
 		#' @param group default NULL; group name used for the plot.
 		#' @param add_sig default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
 		#'   This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.

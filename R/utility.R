@@ -1,5 +1,15 @@
 
 
+
+
+check_table_variable <- function(input_table, variable, var_char, table_char){
+	if(!is.null(variable)){
+		if(! variable %in% colnames(input_table)){
+			stop("Provided ", var_char, ": ", variable, " is not found in ", table_char, "!")
+		}	
+	}
+}
+
 check_taxa_abund <- function(obj, ...){
 	if(is.null(obj$taxa_abund)){
 		message("No taxa_abund list found. Calculate it with cal_abund function ...")

@@ -80,7 +80,7 @@ among groups (\code{group} parameter) for each group (\code{by_group} parameter)
 such as the data of plant compartments for different plant species (ID). 
 So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.}
 
-\item{\code{order_x}}{default NULL; a \code{sample_table} column name or a vector containg sample names; if provided, order samples by using \code{factor}.}
+\item{\code{order_x}}{default NULL; a \code{sample_table} column name or a vector with sample names; if provided, order samples by using \code{factor}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -103,7 +103,7 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 \if{html}{\out{<a id="method-trans_alpha-cal_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_alpha-cal_diff}{}}}
 \subsection{Method \code{cal_diff()}}{
-Differential test of alpha diversity.
+Differential test on alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
   method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme",
@@ -123,8 +123,8 @@ Differential test of alpha diversity.
 \describe{
 \item{\code{method}}{default "KW"; see the following available options:
 \describe{
-  \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons, see \code{dunnTest} function in \code{FSA} package}
+  \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
+  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons; see \code{dunnTest} function in \code{FSA} package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
   \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
@@ -136,8 +136,8 @@ Differential test of alpha diversity.
   \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
 }}
 
-\item{\code{measure}}{default NULL; a vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
-e.g. Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage and PD.}
+\item{\code{measure}}{default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+e.g. c("Observed", "Chao1", "Shannon").}
 
 \item{\code{p_adjust_method}}{default "fdr" (for "KW", "wilcox", "t.test") or "holm" (for "KW_dunn"); P value adjustment method; 
 For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
@@ -213,8 +213,7 @@ Plot the alpha diversity.
 \describe{
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.}
 
-\item{\code{measure}}{default Shannon; one alpha diversity measurement; see names of alpha_diversity of dataset, 
-e.g., Observed, Chao1, ACE, Shannon, Simpson, InvSimpson, Fisher, Coverage, PD.}
+\item{\code{measure}}{default "Shannon"; one alpha diversity index in the object.}
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
