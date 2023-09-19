@@ -234,7 +234,7 @@ res_diff and res_abund.\cr
     \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
     \strong{"P.unadj"}: original p value;\cr
     \strong{"P.adj"}: adjusted p value;\cr
-    \strong{"qvalue"}: qvalue for metastat analysis.
+    \strong{Others}: qvalue: qvalue in metastat analysis.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
