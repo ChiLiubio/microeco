@@ -1,5 +1,5 @@
 #' @title 
-#' Create \code{trans_env} object to analyze the effects of environmental factors on communities.
+#' Create \code{trans_env} object to analyze the association between environmental factor and microbial community.
 #'
 #' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
@@ -32,7 +32,6 @@ trans_env <- R6Class(classname = "trans_env",
 			standardize = FALSE, 
 			complete_na = FALSE
 			){
-			# support all the dataset, env_cols and add_data = NULL from v0.7.0
 			if(is.null(dataset)){
 				message("The dataset not provided. Remember to provide additional data in the correponding function ...")
 			}
@@ -47,7 +46,6 @@ trans_env <- R6Class(classname = "trans_env",
 				if(is.null(dataset)){
 					env_data <- add_data
 				}else{
-					# first check rownames of add_data
 					if(!any(rownames(add_data) %in% rownames(dataset$sample_table))){
 						stop("No valid rowname in add_data! Rownames must be sample names in the input add_data!")
 					}
@@ -132,7 +130,7 @@ trans_env <- R6Class(classname = "trans_env",
 				env_data <- private$check_numeric(env_data)
 			}
 			tem_data <- clone(self$dataset)
-			# use test method in trans_alpha
+			
 			tem_data$alpha_diversity <- env_data
 			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group))
 			suppressMessages(tem_data1$cal_diff(method = method, ...))
@@ -325,7 +323,7 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("Non variables obtained after selection according to model. Check method and data!")
 				}
 				res_sign <- res_sign[1:(length(res_sign) - 1)]
-				env_data <- env_data[, c(res_sign), drop=FALSE]
+				env_data <- env_data[, c(res_sign), drop = FALSE]
 			}
 			self$ordination_method <- method
 			self$taxa_level <- taxa_level
@@ -356,7 +354,6 @@ trans_env <- R6Class(classname = "trans_env",
 			if(is.null(self$res_ordination)){
 				stop("Please first run cal_ordination function to obtain the ordination result!")
 			}else{
-				# test for sig.environ.variables
 				self$res_ordination_terms <- anova(self$res_ordination, by = "terms", permu = 1000, ...)
 				message('The terms anova result is stored in object$res_ordination_terms ...')
 				self$res_ordination_axis <- anova(self$res_ordination, by = "axis", perm.max = 1000, ...)
@@ -575,7 +572,7 @@ trans_env <- R6Class(classname = "trans_env",
 					...
 					)
 			}
-			# plot arrows
+			
 			env_text_data <- self$res_ordination_trans$df_arrows %>% dplyr::mutate(label = gsub("`", "", rownames(.)))
 			p <- p + geom_segment(
 				data = env_text_data, 
@@ -957,7 +954,7 @@ trans_env <- R6Class(classname = "trans_env",
 					}
 				}
 			}
-			res$Significance <- cut(res$AdjPvalue, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", ""))
+			res$Significance <- generate_p_siglabel(res$AdjPvalue)
 			res <- res[complete.cases(res), ]
 			res$Env %<>% factor(., levels = unique(as.character(.)))
 			if(taxa_name_full == F){
@@ -1039,7 +1036,6 @@ trans_env <- R6Class(classname = "trans_env",
 			if(! xvalue %in% colnames(use_data)){
 				stop(xvalue, " is not found in the columns of object$res_cor! Please check the data!")
 			}
-			# filter features
 			if(!is.null(filter_feature)){
 				use_feature <- unlist(lapply(unique(use_data$Taxa), function(x){
 					tmp <- use_data %>% .[.$Taxa == x, "Significance"] %>% {all(. %in% filter_feature)}
@@ -1112,7 +1108,6 @@ trans_env <- R6Class(classname = "trans_env",
 				}else{
 					mylabels_y <- rownames(clu_data)
 				}
-				# create the palette
 				if(is.null(color_palette)){
 					minpiece <- max(abs(min(clu_data)), max(clu_data))/100
 					pos <- seq(from = 0, to = max(clu_data), by = minpiece)[-1]
@@ -1271,12 +1266,9 @@ trans_env <- R6Class(classname = "trans_env",
 			lm_squ_trim = 2,
 			...
 			){
-			if(!(is.vector(x) | is.matrix(x))){
-				stop("The input x is neither a vector nor a matrix !")
-			}
-			if(!(is.vector(y) | is.matrix(y))){
-				stop("The input y is neither a vector nor a matrix !")
-			}
+			private$check_scatterfit_input(x, "x")
+			private$check_scatterfit_input(y, "y")
+
 			type <- match.arg(type, c("cor", "lm"))
 
 			if(length(x) == 1){
@@ -1293,17 +1285,16 @@ trans_env <- R6Class(classname = "trans_env",
 				if(length(group) == 1){
 					if(is.null(self$dataset)){
 						stop("No dataset$sample_table found! Please check the dataset input when creading the object!")
-					}else{
-						if(! group %in% colnames(self$dataset$sample_table)){
-							stop("The group must be one of colnames of dataset$sample_table!")
-						}
-						# the sample_table names have been same with data_env when creading the object
-						group_vector <- self$dataset$sample_table[, group] %>% as.character
 					}
+					if(! group %in% colnames(self$dataset$sample_table)){
+						stop("The group must be one of colnames of dataset$sample_table!")
+					}
+					# the sample_table names have been same with data_env when creading the object
+					group_vector <- self$dataset$sample_table[, group] %>% as.character
 				}
 			}
 			if(length(group_vector) != x_raw_length){
-				stop("The group length is not same with x data length! Please check the input!")
+				stop("The group length is not same with x length! Please check the input!")
 			}
 			if(is.vector(x) & is.vector(y)){
 				if(length(x) != length(y)){
@@ -1311,11 +1302,11 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 				use_data <- data.frame(x = x, y = y, Group = group_vector)
 			}
-			# Matrix is transformed to be a vector
+			# transform matrix to vector
 			if(is.matrix(x) | is.matrix(y)){
 				if(is.vector(x)){
-					x1 <- as.data.frame(as.numeric(as.character(x)))
-					x <- as.matrix(vegdist(x1, "euclidean"))
+					tmp <- as.data.frame(as.numeric(as.character(x)))
+					x <- as.matrix(vegdist(tmp, "euclidean"))
 				}
 				# has make sure x is a matrix
 				x <- lapply(unique(group_vector), function(i){
@@ -1323,8 +1314,8 @@ trans_env <- R6Class(classname = "trans_env",
 					}) %>% 
 					do.call(rbind, .)
 				if(is.vector(y)){
-					y1 <- as.data.frame(as.numeric(as.character(y)))
-					y <- as.matrix(vegdist(y1, "euclidean"))
+					tmp <- as.data.frame(as.numeric(as.character(y)))
+					y <- as.matrix(vegdist(tmp, "euclidean"))
 				}
 				y <- lapply(unique(group_vector), function(i){
 						data.frame("y" = as.vector(as.dist(y[group_vector == i, group_vector == i])), "Group" = i)
@@ -1413,7 +1404,6 @@ trans_env <- R6Class(classname = "trans_env",
 		}
 	),
 	private = list(
-		# check numeric vectors
 		check_numeric = function(input_table){
 			check_cols <- unlist(lapply(input_table, function(x){!is.numeric(x)}))
 			if(any(check_cols)){
@@ -1426,9 +1416,8 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			input_table
 		},
-		# transformation function
 		stand_fun = function(arr, ref, min_perc = NULL, max_perc = NULL) {
-			# arr and ref must be a two column data.frame or matrix
+			# arr and ref must be a two columns data.frame or matrix
 			if(is.null(min_perc)){
 				min_perc <- 0.1
 			}
@@ -1475,13 +1464,18 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			cor_method <- rep(method, length(p_res))
 			p_adjusted <- p.adjust(p_res, method = p_adjust_method)
-			significance <- cut(p_adjusted, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", ""))
+			significance <- generate_p_siglabel(p_adjusted)
 			if(is.null(by_group)){
 				by_group <- "All"
 			}
 			res_mantel <- data.frame(by_group, variable_name, mantel_type, cor_method, corr_res, p_res, p_adjusted, significance)
 			colnames(res_mantel) <- c("by_group", "Variables", "mantel type", "Correlation method", "Correlation coefficient", "p.value", "p.adjusted", "Significance")
 			res_mantel
+		},
+		check_scatterfit_input = function(input, char_name){
+			if(!(is.vector(input) | is.matrix(input))){
+				stop("The input ", char_name, " is neither a vector nor a matrix !")
+			}
 		}
 	),
 	lock_class = FALSE,

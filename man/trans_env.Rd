@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_env.R
 \name{trans_env}
 \alias{trans_env}
-\title{Create \code{trans_env} object to analyze the effects of environmental factors on communities.}
+\title{Create \code{trans_env} object to analyze the association between environmental factor and microbial community.}
 \description{
 This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
 mantel test, correlation analysis and linear fitting.

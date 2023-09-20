@@ -308,7 +308,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					rownames(output) <- output$Taxa
 					output$P.unadj <- pvalue_raw[as.character(output$Taxa)]
 					output$P.adj <- pvalue_sub[as.character(output$Taxa)]
-					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 				}
 				if(method == "lefse"){
 					all_class_pairs <- combn(unique(as.character(group_vec)), 2)
@@ -450,7 +450,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output %<>% .[order(.$LDA, decreasing = TRUE), ]
 					output <- cbind.data.frame(Comparison = comparisions, Taxa = rownames(output), Method = "LEfSe", output)
 					message("Minimum LDA score: ", range(output$LDA)[1], " maximum LDA score: ", range(output$LDA)[2])
-					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 				}
 				
 				if(method %in% c("metastat", "metagenomeSeq", "ancombc2", "ALDEx2_t", "DESeq2")){
@@ -497,7 +497,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						group_select <- unlist(strsplit(output[x, "Comparison"], split = " - "))
 						ifelse(output[x, "mean(group1)"] > output[x, "mean(group2)"], group_select[1], group_select[2])
 					}) %>% unlist
-					output$Significance <- cut(output$qvalue, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+					output$Significance <- generate_p_siglabel(output$qvalue, nonsig = "ns")
 					output <- data.frame(output, Group = max_group)
 				}
 				if(method == "metagenomeSeq"){
@@ -735,7 +735,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda")){
 					output %<>% dropallfactors(unfac2num = TRUE)
 					colnames(output)[1:2] <- c("Comparison", "Taxa")
-					output$Significance <- cut(output$P.adj, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label=c("***", "**", "*", "ns"))
+					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 					if(group %in% colnames(sampleinfo)){
 						# filter the unknown taxa in output
 						output %<>% .[.$Taxa %in% res_abund$Taxa, ]

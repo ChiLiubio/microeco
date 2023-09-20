@@ -1,6 +1,8 @@
 
 
-
+generate_p_siglabel <- function(x, nonsig = ""){
+	cut(x, breaks = c(-Inf, 0.001, 0.01, 0.05, Inf), label = c("***", "**", "*", nonsig))
+}
 
 check_table_variable <- function(input_table, variable, var_char, table_char){
 	if(!is.null(variable)){
