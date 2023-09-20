@@ -1276,17 +1276,18 @@ trans_network <- R6Class(classname = "trans_network",
 			require("rgexf")
 			nodes <- data.frame(cbind(V(network), V(network)$name))
 			edges <- get.edges(network, 1:ecount(network))
-			vAttrNames <- setdiff(list.vertex.attributes(network), "name")
-			nodesAtt <- data.frame(sapply(vAttrNames, function(attr) sub("&", "&", get.vertex.attribute(network, attr))))
-			eAttrNames <- setdiff(list.edge.attributes(network), "weight")
-			edgesAtt <- data.frame(sapply(eAttrNames, function(attr) sub("&", "&", get.edge.attribute(network, attr))))
+			node_attr_name <- setdiff(list.vertex.attributes(network), "name")
+			node_attr <- data.frame(sapply(node_attr_name, function(attr) sub("&", "&", get.vertex.attribute(network, attr))))
+			node_attr$RelativeAbundance %<>% as.numeric
+			edge_attr_name <- setdiff(list.edge.attributes(network), "weight")
+			edge_attr <- data.frame(sapply(edge_attr_name, function(attr) sub("&", "&", get.edge.attribute(network, attr))))
 			# combine all graph attributes into a meta-data
 			graphAtt <- sapply(list.graph.attributes(network), function(attr) sub("&", "&",get.graph.attribute(network, attr)))
 			output_gexf <- write.gexf(nodes, edges,
 				edgesLabel = as.data.frame(E(network)$label),
 				edgesWeight = E(network)$weight,
-				nodesAtt = nodesAtt,
-				edgesAtt = edgesAtt,
+				nodesAtt = node_attr,
+				edgesAtt = edge_attr,
 				meta=c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt))
 			cat(output_gexf$graph, file = filepath)
 		},
