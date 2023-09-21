@@ -104,17 +104,9 @@ trans_network <- R6Class(classname = "trans_network",
 				use_abund <- use_dataset$otu_table %>% {.[rel_abund > filter_thres, ]}
 				rel_abund %<>% {. * 100} %>% .[rownames(use_abund)]
 				
-				# check filtered data
-				if(nrow(use_abund) == 0){
-					stop("After filtering, no feature is remained! Please try to lower filter_thres!")
-				}else{
-					if(nrow(use_abund) == 1){
-						stop("After filtering, only one feature is remained! Please try to lower filter_thres!")
-					}else{
-						message("After filtering, ", nrow(use_abund), " features are remained ...")
-						use_abund %<>% t %>% as.data.frame
-					}
-				}
+				private$check_filter_number(use_abund, param = "filter_thres")
+				use_abund %<>% t %>% as.data.frame
+				
 				if((!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
 					use_abund <- cbind.data.frame(use_abund, env_data)
 				}
@@ -151,7 +143,6 @@ trans_network <- R6Class(classname = "trans_network",
 							}
 							bootres <- SpiecEasi::sparccboot(use_abund, ncpus = nThreads, R = SparCC_simu_num)
 							cor_result <- SpiecEasi::pval.sparccboot(bootres)
-							# reshape the results
 							use_names <- colnames(bootres$data)
 							com_res <- t(combn(use_names, 2))
 							res <- cbind.data.frame(com_res, cor = cor_result$cors, p = cor_result$pvals, stringsAsFactors = FALSE)
@@ -280,7 +271,6 @@ trans_network <- R6Class(classname = "trans_network",
 						stop("The res_cor_p list in the object is NULL! Please check the created object!")
 					}
 					cortable <- self$res_cor_p$cor
-					# p adjustment for the converted vector
 					raw_p <- self$res_cor_p$p
 					if(ncol(cortable) != ncol(raw_p)){
 						stop("Correlation table and p value table have different column numbers !")
@@ -288,17 +278,14 @@ trans_network <- R6Class(classname = "trans_network",
 					raw_vector_p <- raw_p %>% as.dist %>% as.numeric
 					message("Perform p value adjustment with ", COR_p_adjust, " method ...")
 					adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
-					# to matrix
 					use_names <- colnames(raw_p)
 					names_combn <- t(combn(use_names, 2))
 					table_convert <- cbind.data.frame(names_combn, adjust.p = adp_raw, stringsAsFactors = FALSE)
 					adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
-					# make sure same names between cortable and adp
 					if(! identical(colnames(cortable), colnames(adp))){
 						adp <- adp[colnames(cortable), colnames(cortable)]
 					}
 					if(COR_optimization == T){
-						#find out threshold of correlation 
 						message("Start COR optimizing ...")
 						tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2], seq_by = COR_optimization_seq)
 						message("The optimized COR threshold: ", tc1, "...\n")
@@ -327,9 +314,7 @@ trans_network <- R6Class(classname = "trans_network",
 					}
 					SpiecEasi_method <- match.arg(SpiecEasi_method, c("glasso", "mb"))
 					use_abund <- self$data_abund %>% as.matrix
-					# calculate SpiecEasi network, reference https://github.com/zdk123/SpiecEasi
 					spieceasi_fit <- SpiecEasi::spiec.easi(use_abund, method = SpiecEasi_method, ...)
-					# use the way from NetCoMi package
 					if(SpiecEasi_method == "glasso"){
 						assoMat <- stats::cov2cor(as.matrix(getOptCov(spieceasi_fit))) * SpiecEasi::getRefit(spieceasi_fit)
 					}else{
@@ -353,13 +338,12 @@ trans_network <- R6Class(classname = "trans_network",
 				if(network_method == "FlashWeave"){
 					use_abund <- self$data_abund
 					oldwd <- getwd()
-					# make sure working directory can not be changed by the function when quit.
+					# working directory is not changed when quit
 					on.exit(setwd(oldwd))
 
 					if(is.null(FlashWeave_tempdir)){
 						tem_dir <- tempdir()
 					}else{
-						# check the directory
 						tem_dir <- FlashWeave_tempdir
 						if(!dir.exists(tem_dir)){
 							stop("The input temporary directory: ", tem_dir, " does not exist!")
@@ -369,9 +353,9 @@ trans_network <- R6Class(classname = "trans_network",
 					write.table(use_abund, "taxa_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
 					L1 <- "using FlashWeave\n"
 					L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
-					if(FlashWeave_meta_data == T){
+					if(FlashWeave_meta_data){
 						if(is.null(self$data_env)){
-							stop("FlashWeave_meta_data is TRUE, but object$env_data not found! 
+							stop("FlashWeave_meta_data is TRUE, but object$data_env not found! 
 								Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
 						}
 						meta_data <- self$data_env
@@ -380,7 +364,7 @@ trans_network <- R6Class(classname = "trans_network",
 					}else{
 						L3 <- "\n"
 					}
-					if(FlashWeave_meta_data == T){
+					if(FlashWeave_meta_data){
 						L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", FlashWeave_other_para)), ")\n")
 					}else{
 						L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", FlashWeave_other_para)), ")\n")
@@ -413,14 +397,14 @@ trans_network <- R6Class(classname = "trans_network",
 					beem.out <- func.EM(use_abund, ...)
 					self$res_beemStatic_raw <- beem.out
 					message('beemStatic result is stored in object$res_beemStatic_raw ...')
-					# modified based on the showInteraction function
+					# based on the showInteraction function
 					b <- t(beem2param(beem.out)$b.est)
 					diag(b) <- 0
 					if(!is.null(beem.out$resample)){
 						b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
 					}
 					b[abs(b) < beemStatic_t_strength] <- 0
-					network <- graph.adjacency(b, mode='directed', weighted='weight')
+					network <- graph.adjacency(b, mode = 'directed', weighted = 'weight')
 					V(network)$name <- rownames(use_abund)
 				}
 				if(ecount(network) == 0){
@@ -433,7 +417,6 @@ trans_network <- R6Class(classname = "trans_network",
 				message("---------------- ", Sys.time()," : Finish ----------------")
 				
 				nodes_raw <- data.frame(cbind(V(network), V(network)$name))
-				# delete uncultured taxa when the taxa level is not OTU
 				if(taxa_level != "OTU"){
 					delete_nodes <- taxa_table %>% 
 						.[grepl("__$|uncultured", .[, taxa_level]), ] %>% 
@@ -475,7 +458,6 @@ trans_network <- R6Class(classname = "trans_network",
 							gsub("^.__", "", .))
 					}
 				}
-				# add abundance to the node property
 				V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
 				
 				self$res_network <- network
@@ -1185,6 +1167,15 @@ trans_network <- R6Class(classname = "trans_network",
 		}
 		),
 	private = list(
+		check_filter_number = function(input, param = "filter_thres"){
+			if(nrow(input) == 0){
+				stop("After filtering, no feature is remained! Please try to lower ", param, "!")
+			}
+			if(nrow(input) == 1){
+				stop("After filtering, only one feature is remained! Please try to lower ", param, "!")
+			}
+			message("After filtering, ", nrow(input), " features are remained ...")
+		},
 		check_NetCoMi = function(){
 			if(!require("NetCoMi")){
 				stop("NetCoMi package is not installed! Please see https://github.com/stefpeschel/NetCoMi ")
