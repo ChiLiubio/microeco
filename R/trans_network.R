@@ -447,6 +447,8 @@ trans_network <- R6Class(classname = "trans_network",
 						message('Skip adding taxonomy to node as tax_table is not found ...')
 					}
 				}
+				V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
+
 				if(taxa_level != "OTU"){
 					if(usename_rawtaxa_when_taxalevel_notOTU == T){
 						network <- set_vertex_attr(network, taxa_level, value = V(network)$name %>% 
@@ -458,7 +460,6 @@ trans_network <- R6Class(classname = "trans_network",
 							gsub("^.__", "", .))
 					}
 				}
-				V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
 				
 				self$res_network <- network
 				message('The result network is stored in object$res_network ...')
