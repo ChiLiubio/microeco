@@ -154,7 +154,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			...
 			){
 			if(is.null(p_adjust_method)){
-				message('Redefine p_adjust_method = "fdr" instead of NULL. To disable p value adjustment, please use p_adjust_method = "none" ...')
+				message("Redefine p_adjust_method = ", sQuote("fdr"), " instead of NULL. To disable p value adjustment, please set p_adjust_method = ", sQuote("none"), " ...")
 				p_adjust_method <- "fdr"
 			}
 			if(is.null(dataset)){

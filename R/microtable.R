@@ -104,7 +104,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			tax_table_use %<>% base::subset(unlist(lapply(data.frame(t(.)), function(x) !any(grepl(taxa, x, ignore.case = TRUE)))))
 			filter_num <- nrow(self$tax_table) - nrow(tax_table_use)
-			message(paste("Total", filter_num, "features are removed from tax_table ..."))
+			message("Total ", filter_num, " features are removed from tax_table ...")
 			self$tax_table <- tax_table_use
 			if(self$auto_tidy) self$tidy_dataset()
 		},

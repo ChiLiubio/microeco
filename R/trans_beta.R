@@ -202,7 +202,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 			}
 			if(! all(plot_type %in% c("point", "ellipse", "chull", "centroid"))){
-				message("There maybe a typo in your plot_type input! plot_type should be one or more from 'point', 'ellipse', 'chull' and 'centroid'!")
+				message("There maybe a typo in the input plot_type! plot_type should be one or more of 'point', 'ellipse', 'chull' and 'centroid'!")
 			}
 			combined <- self$res_ordination$scores
 			eig <- self$res_ordination$eig

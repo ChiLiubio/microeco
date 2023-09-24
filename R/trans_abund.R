@@ -92,7 +92,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			rownames(all_mean_abund) <- NULL
 			abund_data %<>% {suppressWarnings(dplyr::left_join(., rownames_to_column(sample_table), by = c("Sample" = "rowname")))}
 			if(!is.null(groupmean)){
-				message(paste0(groupmean, " column is used to calculate mean abundance ..."))
+				message(groupmean, " column is used to calculate mean abundance ...")
 				abund_data <- microeco:::summarySE_inter(abund_data, measurevar = "Abundance", groupvars = c("Taxonomy", groupmean), more = group_morestats)
 				colnames(abund_data)[colnames(abund_data) == "Mean"] <- "Abundance"
 				colnames(abund_data)[colnames(abund_data) == groupmean] <- "Sample"
