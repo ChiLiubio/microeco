@@ -1071,12 +1071,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 		#' 	  only available when coord_flip = FALSE.
 		#' @param xtext_size default 10; the text size of x axis.
-		#' @param heatmap_cell default "P.unadj"; the column of data for the cell of heatmap.
+		#' @param heatmap_cell default "P.unadj"; the column of data for the cell of heatmap when formula with multiple factors is found in the method.
 		#' @param heatmap_sig default "Significance"; the column of data for the significance label of heatmap.
 		#' @param heatmap_x default "Factors"; the column of data for the x axis of heatmap.
 		#' @param heatmap_y default "Taxa"; the column of data for the y axis of heatmap.
 		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
-		#' @param ... parameters pass to \code{\link{geom_bar}}
+		#' @param ... parameters passing to \code{\link{geom_bar}} for the bar plot or 
+		#' 	  the \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{

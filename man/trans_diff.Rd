@@ -415,7 +415,7 @@ only available when coord_flip = FALSE.}
 
 \item{\code{xtext_size}}{default 10; the text size of x axis.}
 
-\item{\code{heatmap_cell}}{default "P.unadj"; the column of data for the cell of heatmap.}
+\item{\code{heatmap_cell}}{default "P.unadj"; the column of data for the cell of heatmap when formula with multiple factors is found in the method.}
 
 \item{\code{heatmap_sig}}{default "Significance"; the column of data for the significance label of heatmap.}
 
@@ -425,7 +425,8 @@ only available when coord_flip = FALSE.}
 
 \item{\code{heatmap_lab_fill}}{default "P value"; legend title of heatmap.}
 
-\item{\code{...}}{parameters pass to \code{\link{geom_bar}}}
+\item{\code{...}}{parameters passing to \code{\link{geom_bar}} for the bar plot or 
+the \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.}
 }
 \if{html}{\out{</div>}}
 }
