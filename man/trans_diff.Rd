@@ -367,7 +367,7 @@ Bar plot for indicator index, such as LDA score and P value.
   use_number = 1:10,
   threshold = NULL,
   select_group = NULL,
-  simplify_names = TRUE,
+  keep_full_name = FALSE,
   keep_prefix = TRUE,
   group_order = NULL,
   axis_text_y = 12,
@@ -398,9 +398,9 @@ When \code{color_group_map = TRUE}, the group_order inside the object will be us
 \item{\code{select_group}}{default NULL; this is used to select the paired group when multiple comparisions are generated;
 The input select_group must be one of \code{object$res_diff$Comparison}.}
 
-\item{\code{simplify_names}}{default TRUE; whether use the simplified taxonomic name.}
+\item{\code{keep_full_name}}{default FALSE; whether keep the taxonomic full lineage names.}
 
-\item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
+\item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix, such as "g__".}
 
 \item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
 If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.

@@ -1061,8 +1061,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param threshold default NULL; threshold value of indicators for selecting taxa, such as 3 for LDA score of LEfSe.
 		#' @param select_group default NULL; this is used to select the paired group when multiple comparisions are generated;
 		#'   The input select_group must be one of \code{object$res_diff$Comparison}.
-		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
-		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
+		#' @param keep_full_name default FALSE; whether keep the taxonomic full lineage names.
+		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix, such as "g__".
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
 		#' 	  If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.
@@ -1089,7 +1089,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			use_number = 1:10,
 			threshold = NULL,
 			select_group = NULL,
-			simplify_names = TRUE,
+			keep_full_name = FALSE,
 			keep_prefix = TRUE,
 			group_order = NULL,
 			axis_text_y = 12,
@@ -1114,7 +1114,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 			}
-			if(simplify_names == T){
+			if(keep_full_name == F){
 				if(any(grepl("\\..__", use_data$Taxa))){
 					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
 				}else{
