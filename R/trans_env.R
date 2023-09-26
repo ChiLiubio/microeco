@@ -1087,10 +1087,6 @@ trans_env <- R6Class(classname = "trans_env",
 					}
 				}
 			}
-			# check whether the cor values all larger or smaller than 0
-			if(all(use_data[, cell_value] >= 0) | all(use_data[, cell_value] <= 0)){
-				color_palette <- color_vector
-			}
 			if(pheatmap == T){
 				if(!require("pheatmap")){
 					stop("pheatmap package not installed")
@@ -1107,6 +1103,11 @@ trans_env <- R6Class(classname = "trans_env",
 						collapse = "")))
 				}else{
 					mylabels_y <- rownames(clu_data)
+				}
+				if(all(use_data[, cell_value] >= 0) | all(use_data[, cell_value] <= 0)){
+					if(is.null(color_palette)){
+						color_palette <- color_vector
+					}
 				}
 				if(is.null(color_palette)){
 					minpiece <- max(abs(min(clu_data)), max(clu_data))/100

@@ -753,6 +753,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				self$res_abund <- res_abund
 				message('Taxa abundance table is stored in object$res_abund ...')
+				if("Factors" %in% colnames(output)){
+					output[, "Factors"] %<>% gsub("\\s+$", "", .)
+				}
 				self$res_diff <- output
 				message(method , " analysis result is stored in object$res_diff ...")
 				# save abund_table for the cladogram
@@ -1067,6 +1070,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
 		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 		#' 	  only available when coord_flip = FALSE.
+		#' @param xtext_size default 10; the text size of x axis.
+		#' @param heatmap_cell default "P.unadj"; the column of data for the cell of heatmap.
+		#' @param heatmap_sig default "Significance"; the column of data for the significance label of heatmap.
+		#' @param heatmap_x default "Factors"; the column of data for the x axis of heatmap.
+		#' @param heatmap_y default "Taxa"; the column of data for the y axis of heatmap.
+		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
 		#' @param ... parameters pass to \code{\link{geom_bar}}
 		#' @return ggplot.
 		#' @examples
@@ -1085,14 +1094,34 @@ trans_diff <- R6Class(classname = "trans_diff",
 			axis_text_y = 12,
 			coord_flip = TRUE,
 			xtext_angle = 45,
+			xtext_size = 10,
+			heatmap_cell = "P.unadj",
+			heatmap_sig = "Significance",
+			heatmap_x = "Factors",
+			heatmap_y = "Taxa",
+			heatmap_lab_fill = "P value",
+#			heatmap_color_values = RColorBrewer::brewer.pal(n = 11, name = "RdYlBu"),
 			...
 			){
 			use_data <- self$res_diff
 			method <- self$method
-			if(!is.null(method)){
-				if(grepl("formula", method)){
-					stop("The function can not be applied to multi-factor analysis!")
+			if(is.null(method)){
+				if(is.null(use_data)){
+					stop("The res_diff should be provided when method is NULL!")
+				}else{
+					if(!"Value" %in% colnames(use_data)){
+						stop("No Value column found in the object$res_diff!")
+					}
 				}
+			}
+			if(simplify_names == T){
+				use_data$Taxa %<>% gsub(".*\\|", "", .)
+			}
+			if(keep_prefix == F){
+				use_data$Taxa %<>% gsub(".__", "", .)
+			}
+
+			if(! grepl("formula", method)){
 				if(method == "lefse"){
 					colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
 					ylab_title <- "LDA score"
@@ -1133,115 +1162,130 @@ trans_diff <- R6Class(classname = "trans_diff",
 						use_data %<>% .[.$Comparison %in% select_group, ]
 					}
 				}
-			}else{
-				if(is.null(use_data)){
-					stop("The res_diff should be provided when method is NULL!")
+				use_data %<>% .[!duplicated(.$Taxa), ]
+				if(nrow(use_data) == 0){
+					stop("No available data can be used to show!")
+				}
+				if(is.null(threshold)){
+					sel_num <- use_number
 				}else{
-					if(!"Value" %in% colnames(use_data)){
-						stop("No Value column found in the object$res_diff!")
+					sel_num <- sum(use_data$Value > threshold)
+					if(sel_num == 0){
+						stop("Too large threshold provided, no data selected!")
 					}
+					sel_num <- 1:sel_num
 				}
-			}
-			if(nrow(use_data) == 0){
-				stop("No significant taxa can be used to show!")
-			}
-			if(simplify_names == T){
-				use_data$Taxa %<>% gsub(".*\\|", "", .)
-			}
-			if(keep_prefix == F){
-				use_data$Taxa %<>% gsub(".__", "", .)
-			}
-			use_data %<>% .[!duplicated(.$Taxa), ]
-			if(nrow(use_data) == 0){
-				stop("No available data can be used to show!")
-			}
-			if(is.null(threshold)){
-				sel_num <- use_number
-			}else{
-				sel_num <- sum(use_data$Value > threshold)
-				if(sel_num == 0){
-					stop("Too large threshold provided, no data selected!")
+				if(length(sel_num) > nrow(use_data)){
+					sel_num <- 1:nrow(use_data)
 				}
-				sel_num <- 1:sel_num
-			}
-			if(length(sel_num) > nrow(use_data)){
-				sel_num <- 1:nrow(use_data)
-			}
-			use_data %<>% .[sel_num, ]
-			if("Group" %in% colnames(use_data)){
-				if(is.null(group_order)){
-					if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
-						use_data$Group %<>% factor(., levels = self$group_order)
-					}else{
-						use_data$Group %<>% as.character %>% as.factor
-					}
-				}else{
-					use_data$Group %<>% factor(., levels = group_order)
-				}
-				if(color_group_map){
-					# fix colors for each group
-					all_groups <- self$group_order
-					# make sure colors length enough for selection
-					color_values <- expand_colors(color_values, length(all_groups))
-					use_groups <- levels(use_data$Group)
-					color_values %<>% .[match(use_groups, all_groups)]
-				}else{
-					color_values <- expand_colors(color_values, length(levels(use_data$Group)))
-				}
-				# rearrange orders
-				if(length(levels(use_data$Group)) == 2){
-					use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
-						if(x == levels(use_data$Group)[1]){
-							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
+				use_data %<>% .[sel_num, ]
+				if("Group" %in% colnames(use_data)){
+					if(is.null(group_order)){
+						if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
+							use_data$Group %<>% factor(., levels = self$group_order)
 						}else{
-							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = FALSE), "Taxa"]
+							use_data$Group %<>% as.character %>% as.factor
 						}
-					})))))
-					use_data[use_data$Group == levels(use_data$Group)[2], "Value"] %<>% {. * -1}
+					}else{
+						use_data$Group %<>% factor(., levels = group_order)
+					}
+					if(color_group_map){
+						# fix colors for each group
+						all_groups <- self$group_order
+						# make sure colors length enough for selection
+						color_values <- expand_colors(color_values, length(all_groups))
+						use_groups <- levels(use_data$Group)
+						color_values %<>% .[match(use_groups, all_groups)]
+					}else{
+						color_values <- expand_colors(color_values, length(levels(use_data$Group)))
+					}
+					# rearrange orders
+					if(length(levels(use_data$Group)) == 2){
+						use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
+							if(x == levels(use_data$Group)[1]){
+								use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
+							}else{
+								use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = FALSE), "Taxa"]
+							}
+						})))))
+						use_data[use_data$Group == levels(use_data$Group)[2], "Value"] %<>% {. * -1}
+					}else{
+						use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
+							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
+						})))))
+					}
 				}else{
-					use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
-						use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
-					})))))
+					use_data %<>% .[order(.$Value, decreasing = TRUE), ]
+					if(coord_flip){
+						use_data$Taxa %<>% factor(., levels = rev(.))
+					}else{
+						use_data$Taxa %<>% factor(., levels = .)
+					}
+					ylab_title <- "Value"
 				}
-			}else{
-				use_data %<>% .[order(.$Value, decreasing = TRUE), ]
+				self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
+				
+				if("Group" %in% colnames(use_data)){
+					p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
+						scale_color_manual(values = color_values) +
+						scale_fill_manual(values = color_values)
+				}else{
+					p <- ggplot(use_data, aes(x = Taxa, y = Value))
+				}
+				p <- p +
+					geom_bar(stat = "identity", position = position_dodge(), ...) +
+					theme_bw() +
+					ylab(ylab_title) +
+					xlab("") +
+					theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
+					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.grid.minor.x = element_blank()) +
+					theme(panel.border = element_blank()) +
+					theme(axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"))
+				
 				if(coord_flip){
-					use_data$Taxa %<>% factor(., levels = rev(.))
+					p <- p + coord_flip()
 				}else{
-					use_data$Taxa %<>% factor(., levels = .)
+					p <- p + ggplot_xtext_anglesize(xtext_angle = xtext_angle, xtext_size = xtext_size)
 				}
-				ylab_title <- "Value"
-			}
-			self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
-			
-			if("Group" %in% colnames(use_data)){
-				p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
-					scale_color_manual(values = color_values) +
-					scale_fill_manual(values = color_values)
+				p
 			}else{
-				p <- ggplot(use_data, aes(x = Taxa, y = Value))
-			}
-			p <- p +
-				geom_bar(stat = "identity", position = position_dodge(), ...) +
-				theme_bw() +
-				ylab(ylab_title) +
-				xlab("") +
-				theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
-				theme(axis.text.x = element_text(size = 10)) +
-				theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.grid.minor.x = element_blank()) +
-				theme(panel.border = element_blank()) +
-				theme(axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"))
-			
-			if(coord_flip){
-				p <- p + coord_flip()
-			}else{
-				if(xtext_angle != 0){
-					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1))
-				}else{
-					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black"))
+				# heatmap for multi-factor
+				message("Perform heatmap instead of bar plot as formula is found ...")
+				tmp <- use_data
+				check_table_variable(tmp, heatmap_x, "heatmap_x", "object$res_diff")
+				check_table_variable(tmp, heatmap_y, "heatmap_y", "object$res_diff")
+				check_table_variable(tmp, heatmap_cell, "heatmap_cell", "object$res_diff")
+				check_table_variable(tmp, heatmap_sig, "heatmap_sig", "object$res_diff")
+				tmp %<>% .[!is.na(.[, heatmap_cell]), ]
+				if("ns" %in% tmp[, heatmap_sig]){
+					tmp[, heatmap_sig] %<>% gsub("ns", "", .)
 				}
+				colnames(tmp)[colnames(tmp) == heatmap_x] <- "Env"
+				colnames(tmp)[colnames(tmp) == heatmap_y] <- "Taxa"
+				colnames(tmp)[colnames(tmp) == heatmap_cell] <- "Correlation"
+				colnames(tmp)[colnames(tmp) == heatmap_sig] <- "Significance"
+				tmp$Type = "All"
+
+				suppressMessages(tmp_trans_env <- trans_env$new(dataset = NULL))
+				tmp_trans_env$cor_method <- heatmap_lab_fill
+				tmp_trans_env$res_cor <- tmp
+							
+				tmp_trans_env$plot_cor(...)
+								
+				
+				# if(!is.factor(tmp[, heatmap_x])){
+					# tmp[, heatmap_x] %<>% factor(., levels = unique(tmp[, heatmap_x]))
+				# }
+				
+				# p <- ggplot(tmp, aes_meco(x = heatmap_x, y = heatmap_y, fill = heatmap_cell, label = heatmap_sig)) +
+					# geom_tile(colour = "white", linewidth = heatmap_tile_linewidth) +
+					# geom_text(color = "black", size = heatmap_text_size) + 
+					# scale_fill_gradientn(colours = heatmap_color_values, trans = "log10", na.value = "white") +
+					# labs(x = "", y = "", fill = heatmap_lab_fill)
+				
+				# p <- p + ggplot_xtext_anglesize(xtext_angle = xtext_angle, xtext_size = xtext_size)
+				# p
 			}
-			p
 		},
 		#' @description
 		#' Plot the cladogram using taxa with significant difference.

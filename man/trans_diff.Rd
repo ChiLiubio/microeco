@@ -373,6 +373,12 @@ Bar plot for indicator index, such as LDA score and P value.
   axis_text_y = 12,
   coord_flip = TRUE,
   xtext_angle = 45,
+  xtext_size = 10,
+  heatmap_cell = "P.unadj",
+  heatmap_sig = "Significance",
+  heatmap_x = "Factors",
+  heatmap_y = "Taxa",
+  heatmap_lab_fill = "P value",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -406,6 +412,18 @@ If provided, this parameter can overwrite the levels in the group of \code{micro
 
 \item{\code{xtext_angle}}{default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 only available when coord_flip = FALSE.}
+
+\item{\code{xtext_size}}{default 10; the text size of x axis.}
+
+\item{\code{heatmap_cell}}{default "P.unadj"; the column of data for the cell of heatmap.}
+
+\item{\code{heatmap_sig}}{default "Significance"; the column of data for the significance label of heatmap.}
+
+\item{\code{heatmap_x}}{default "Factors"; the column of data for the x axis of heatmap.}
+
+\item{\code{heatmap_y}}{default "Taxa"; the column of data for the y axis of heatmap.}
+
+\item{\code{heatmap_lab_fill}}{default "P value"; legend title of heatmap.}
 
 \item{\code{...}}{parameters pass to \code{\link{geom_bar}}}
 }
