@@ -779,6 +779,8 @@ Plot correlation heatmap.
   cluster_height_cols = 0.2,
   text_y_position = "right",
   mylabels_x = NULL,
+  na.value = "grey50",
+  trans = "identity",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -822,6 +824,11 @@ Only available when \code{pheatmap = FALSE}.}
 \item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.}
 
 \item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when \code{pheatmap = TRUE}.}
+
+\item{\code{na.value}}{default "grey50"; the color for the missing values when \code{pheatmap = FALSE}.}
+
+\item{\code{trans}}{default "identity"; the transformation for continuous scales in the legend when \code{pheatmap = FALSE}; 
+see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.}
 
 \item{\code{...}}{paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.}
 }

@@ -1100,7 +1100,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 			heatmap_x = "Factors",
 			heatmap_y = "Taxa",
 			heatmap_lab_fill = "P value",
-#			heatmap_color_values = RColorBrewer::brewer.pal(n = 11, name = "RdYlBu"),
 			...
 			){
 			use_data <- self$res_diff
@@ -1269,22 +1268,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				suppressMessages(tmp_trans_env <- trans_env$new(dataset = NULL))
 				tmp_trans_env$cor_method <- heatmap_lab_fill
 				tmp_trans_env$res_cor <- tmp
-							
 				tmp_trans_env$plot_cor(...)
-								
-				
-				# if(!is.factor(tmp[, heatmap_x])){
-					# tmp[, heatmap_x] %<>% factor(., levels = unique(tmp[, heatmap_x]))
-				# }
-				
-				# p <- ggplot(tmp, aes_meco(x = heatmap_x, y = heatmap_y, fill = heatmap_cell, label = heatmap_sig)) +
-					# geom_tile(colour = "white", linewidth = heatmap_tile_linewidth) +
-					# geom_text(color = "black", size = heatmap_text_size) + 
-					# scale_fill_gradientn(colours = heatmap_color_values, trans = "log10", na.value = "white") +
-					# labs(x = "", y = "", fill = heatmap_lab_fill)
-				
-				# p <- p + ggplot_xtext_anglesize(xtext_angle = xtext_angle, xtext_size = xtext_size)
-				# p
 			}
 		},
 		#' @description

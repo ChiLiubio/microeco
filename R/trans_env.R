@@ -987,6 +987,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available when \code{cluster_ggplot} is not "none".
 		#' @param text_y_position default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.
 		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when \code{pheatmap = TRUE}.
+		#' @param na.value default "grey50"; the color for the missing values when \code{pheatmap = FALSE}.
+		#' @param trans default "identity"; the transformation for continuous scales in the legend when \code{pheatmap = FALSE}; 
+		#' 	 see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.
 		#' @param ... paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.
 		#' @return plot.
 		#' @examples
@@ -1011,6 +1014,8 @@ trans_env <- R6Class(classname = "trans_env",
 			cluster_height_cols = 0.2,
 			text_y_position = "right",
 			mylabels_x = NULL,
+			na.value = "grey50",
+			trans = "identity",
 			...
 			){
 			if(is.null(self$res_cor)){
@@ -1138,15 +1143,16 @@ trans_env <- R6Class(classname = "trans_env",
 					)
 				p$gtable
 			}else{
-				p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value), data = use_data) +
+				p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value, label = formatC("P.unadj", format = "f", digits = 4)), data = use_data) +
 					theme_bw() + 
 					geom_tile(...)
 				if(is.null(color_palette)){
-					p <- p + scale_fill_gradient2(low = color_vector[1], high = color_vector[3], mid = color_vector[2])
+					p <- p + scale_fill_gradient2(low = color_vector[1], high = color_vector[3], mid = color_vector[2], na.value = na.value, trans = trans)
 				}else{
-					p <- p + scale_fill_gradientn(colours = color_palette)
+					p <- p + scale_fill_gradientn(colours = color_palette, na.value = na.value, trans = trans)
 				}
 				legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
+				
 				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
 					labs(y = NULL, x = "Measure", fill = legend_fill) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
