@@ -1115,13 +1115,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			if(simplify_names == T){
-				use_data$Taxa %<>% gsub(".*\\|", "", .)
+				if(any(grepl("\\..__", use_data$Taxa))){
+					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
+				}else{
+					use_data$Taxa %<>% gsub(".*\\|", "", .)
+				}
 			}
 			if(keep_prefix == F){
 				use_data$Taxa %<>% gsub(".__", "", .)
 			}
 
-			if(! grepl("formula", method)){
+			if((! grepl("formula", method)) & (! method %in% c("maaslin2"))){
 				if(method == "lefse"){
 					colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
 					ylab_title <- "LDA score"

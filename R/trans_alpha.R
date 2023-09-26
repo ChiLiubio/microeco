@@ -360,6 +360,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					self$res_model <- res_model
 					message("The original ", method, " models list is stored in object$res_model ...")
 				}
+				method <- paste0(method, "-formula")
 			}
 			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme", "glmm")){
 				if("P.adj" %in% colnames(compare_result)){

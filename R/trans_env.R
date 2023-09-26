@@ -1051,7 +1051,13 @@ trans_env <- R6Class(classname = "trans_env",
 				use_data %<>% .[.$Taxa %in% use_feature, ]
 			}
 			if(keep_full_name == F){
-				use_data$Taxa %<>% gsub(".*\\|", "", .)
+				if(any(grepl("\\..__", use_data$Taxa))){
+					# solve maaslin2 |
+					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
+				}else{
+					# actually | may be more general as some data does not have __
+					use_data$Taxa %<>% gsub(".*\\|", "", .)
+				}
 			}
 			if(keep_prefix == F){
 				use_data$Taxa %<>% gsub(".*__", "", .)
@@ -1143,7 +1149,7 @@ trans_env <- R6Class(classname = "trans_env",
 					)
 				p$gtable
 			}else{
-				p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value, label = formatC("P.unadj", format = "f", digits = 4)), data = use_data) +
+				p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value), data = use_data) +
 					theme_bw() + 
 					geom_tile(...)
 				if(is.null(color_palette)){
@@ -1153,7 +1159,7 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 				legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
 				
-				p <- p + geom_text(aes(label = Significance), color="black", size=4) + 
+				p <- p + geom_text(aes(label = Significance), color = "black", size = 4) + 
 					labs(y = NULL, x = "Measure", fill = legend_fill) +
 					theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
 					theme(strip.text = element_text(size = 11), panel.border = element_blank(), panel.grid = element_blank())
