@@ -1374,7 +1374,7 @@ trans_network <- R6Class(classname = "trans_network",
 			for(i in total_degree$taxa){
 				ki <- subset(total_degree$total_links, total_degree$taxa == i)
 				taxa_each_mod_degree <- subset(among_mc$mod_links, among_mc$taxa == i)
-				p[i] <- 1 - (sum((taxa_each_mod_degree)**2)/ki**2)
+				p[i] <- 1 - (sum((taxa_each_mod_degree)^2)/ki^2)
 			}
 			as.data.frame(p)
 		},

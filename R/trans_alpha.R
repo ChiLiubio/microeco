@@ -92,10 +92,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
 		#' @param alpha default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.
+		#' @param anova_post_test default "duncan.test". Other available options include "LSD.test" and "HSD.test". 
+		#'   All those are the function names in \code{agricolae} package.
 		#' @param return_model default FALSE; whether return the original lmer or glmm model list in the object.
 		#' @param ... parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
 		#'   \code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
-		#'   \code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or 
+		#'   \code{agricolae::duncan.test}/\code{agricolae::LSD.test}/\code{agricolae::HSD.test} (\code{method = "anova"}, one-way) or 
 		#'   \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or 
 		#'   \code{lmerTest::lmer} (\code{method = "lme"}) or 
 		#'   \code{betareg::betareg} (\code{method = "betareg"}) or 
@@ -115,6 +117,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			formula = NULL,
 			KW_dunn_letter = TRUE,
 			alpha = 0.05,
+			anova_post_test = "duncan.test",
 			return_model = FALSE,
 			...
 			){
@@ -245,11 +248,16 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 			}
 			if(method == "anova" & is.null(formula)){
+				if(!require("agricolae")){
+					stop("Please first install the agricolae package!")
+				}
+				anova_post_test <- match.arg(anova_post_test, c("duncan.test", "LSD.test", "HSD.test"))
+				message("Perform post hoc test with the method: ", anova_post_test, " ...")
 				compare_result <- data.frame()
 				for(k in measure){
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, ]
-						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, alpha = alpha, ...)
+						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, alpha = alpha, ...)
 						compare_result %<>% rbind(., tmp_res)
 					}else{
 						for(each_group in unique_bygroups){
@@ -259,7 +267,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								next
 							}
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
-							tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, alpha = alpha, ...)
+							tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, alpha = alpha, ...)
 							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
 							compare_result %<>% rbind.data.frame(., tmp_res)
 						}
@@ -825,9 +833,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			dunnTest_res
 		},
-		anova_test = function(input_table = NULL, group = NULL, measure = NULL, alpha = 0.05, ...){
+		anova_test = function(input_table, group, measure, post_test, alpha, ...){
 			model <- aov(reformulate(group, "Value"), input_table)
-			out <- agricolae::duncan.test(model, group, main = measure, alpha = alpha, ...)
+			post_test_function <- get(post_test)
+			out <- post_test_function(model, group, main = measure, alpha = alpha, ...)
 			res1 <- out$groups[, "groups", drop = FALSE]
 			res1$groups <- as.character(res1$groups)
 			res1 <- data.frame(rownames(res1), res1, stringsAsFactors = FALSE, check.names = FALSE)

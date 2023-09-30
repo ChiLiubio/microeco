@@ -113,6 +113,7 @@ Differential test on alpha diversity.
   formula = NULL,
   KW_dunn_letter = TRUE,
   alpha = 0.05,
+  anova_post_test = "duncan.test",
   return_model = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -153,11 +154,14 @@ such as \code{'block + N*P*K'}.}
 
 \item{\code{alpha}}{default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.}
 
+\item{\code{anova_post_test}}{default "duncan.test". Other available options include "LSD.test" and "HSD.test". 
+All those are the function names in \code{agricolae} package.}
+
 \item{\code{return_model}}{default FALSE; whether return the original lmer or glmm model list in the object.}
 
 \item{\code{...}}{parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
 \code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
-\code{agricolae::duncan.test} (\code{method = "anova"}, one-way) or 
+\code{agricolae::duncan.test}/\code{agricolae::LSD.test}/\code{agricolae::HSD.test} (\code{method = "anova"}, one-way) or 
 \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or 
 \code{lmerTest::lmer} (\code{method = "lme"}) or 
 \code{betareg::betareg} (\code{method = "betareg"}) or 
