@@ -95,13 +95,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param anova_post_test default "duncan.test". Other available options include "LSD.test" and "HSD.test". 
 		#'   All those are the function names in \code{agricolae} package.
 		#' @param return_model default FALSE; whether return the original lmer or glmm model list in the object.
-		#' @param ... parameters passed to \code{kruskal.test} (\code{method = "KW"}) or \code{wilcox.test} function (\code{method = "wilcox"}) or 
-		#'   \code{dunnTest} function of \code{FSA} package (\code{method = "KW_dunn"}) or 
-		#'   \code{agricolae::duncan.test}/\code{agricolae::LSD.test}/\code{agricolae::HSD.test} (\code{method = "anova"}, one-way) or 
-		#'   \code{rcompanion::scheirerRayHare} (\code{method = "scheirerRayHare"}) or 
-		#'   \code{lmerTest::lmer} (\code{method = "lme"}) or 
-		#'   \code{betareg::betareg} (\code{method = "betareg"}) or 
-		#'   \code{glmmTMB::glmmTMB} (\code{method = "glmm"}).
+		#' @param ... parameters passed to \code{kruskal.test} (when \code{method = "KW"}) or \code{wilcox.test} function (when \code{method = "wilcox"}) or 
+		#'   \code{dunnTest} function of \code{FSA} package (when \code{method = "KW_dunn"}) or 
+		#'   \code{agricolae::duncan.test}/\code{agricolae::LSD.test}/\code{agricolae::HSD.test} (when \code{method = "anova"}, one-way anova) or 
+		#'   \code{rcompanion::scheirerRayHare} (when \code{method = "scheirerRayHare"}) or 
+		#'   \code{lmerTest::lmer} (when \code{method = "lme"}) or 
+		#'   \code{betareg::betareg} (when \code{method = "betareg"}) or 
+		#'   \code{glmmTMB::glmmTMB} (when \code{method = "glmm"}).
 		#' @return \code{res_diff}, stored in object with the format \code{data.frame}.
 		#' @examples
 		#' \donttest{
