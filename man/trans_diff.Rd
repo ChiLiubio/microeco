@@ -88,6 +88,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   alpha = 0.05,
   p_adjust_method = "fdr",
   transformation = NULL,
+  remove_unknown = TRUE,
   lefse_subgroup = NULL,
   lefse_min_subsam = 10,
   lefse_norm = 1e+06,
@@ -179,6 +180,8 @@ or used to generate significance letters when method is 'anova' or 'KW_dunn' lik
 \item{\code{transformation}}{default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
 such as 'AST' for the arc sine square root transformation. Please see the \code{trans_norm} class of mecodev package. 
 Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".}
+
+\item{\code{remove_unknown}}{default TRUE; whether remove unknown features that donot have clear classification information.}
 
 \item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
 

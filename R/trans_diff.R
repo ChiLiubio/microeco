@@ -82,6 +82,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param transformation default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
 		#'    such as 'AST' for the arc sine square root transformation. Please see the \code{trans_norm} class of mecodev package. 
 		#'    Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".
+		#' @param remove_unknown default TRUE; whether remove unknown features that donot have clear classification information.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
 		#' @param lefse_norm default 1000000; scale value in lefse.
@@ -140,6 +141,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			alpha = 0.05,
 			p_adjust_method = "fdr",
 			transformation = NULL,
+			remove_unknown = TRUE,
 			lefse_subgroup = NULL,
 			lefse_min_subsam = 10,
 			lefse_norm = 1000000,
@@ -163,26 +165,20 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}else{
 				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
 					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm"))
-				# in case of dataset changes
+
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
 				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme", "glmm", "maaslin2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
-				}else{
-					if(!is.null(group)){
-						if(! method %in% c("linda")){
-							if(length(group) > 1){
-								stop("Please provide only one colname of sample_table for group parameter!")
-							}else{
-								if(! group %in% colnames(sampleinfo)){
-									stop("Please provide a correct colname of sample_table for group parameter!")
-								}
-							}
-						}
-					}
 				}
 				if(!is.null(group)){
-					if(group %in% colnames(sampleinfo)){
+					if(! method %in% c("linda")){
+						if(length(group) > 1){
+							stop("Please provide only one colname of sample_table for group parameter!")
+						}
+						if(! group %in% colnames(sampleinfo)){
+							stop("Please provide a correct colname of sample_table for group parameter!")
+						}
 						if(is.factor(sampleinfo[, group])){
 							self$group_order <- levels(sampleinfo[, group])
 							sampleinfo[, group] %<>% as.character
@@ -191,7 +187,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 				}
-				
+
 				check_taxa_abund(tmp_dataset)
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
@@ -203,45 +199,56 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					abund_table <- tmp_dataset$taxa_abund[[taxa_level]]
 				}
+				
+				message(nrow(abund_table), " input features ...")
 				filter_output <- filter_lowabund_feature(abund_table = abund_table, filter_thres = filter_thres)
 				abund_table <- filter_output$abund_table
 				filter_features <- filter_output$filter_features
 				
-				if(grepl("lefse", method, ignore.case = TRUE)){
-					abund_table %<>% {. * lefse_norm}
-					self$lefse_norm <- lefse_norm
+				if(method %in% c("lefse", "rf", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm")){
+					if(remove_unknown){
+						abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
+						message(nrow(abund_table), " features are remained after removing unknown features ...")
+						if(nrow(abund_table) == 0){
+							stop("No available feature! Please set the parameter: remove_unknown = FALSE")
+						}
+					}
+					if(method == "lefse"){
+						abund_table %<>% {. * lefse_norm}
+						self$lefse_norm <- lefse_norm
+					}
+					
+					if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm")){
+						abund_table_foralpha <- abund_table
+						if(!is.null(transformation)){
+							message("Perform the transformation with method: ", transformation, " ...")
+							tmp <- mecodev::trans_norm$new(abund_table_foralpha)
+							abund_table_foralpha <- tmp$norm(method = transformation)
+						}
+						if(method == "KW_dunn"){
+							# filter taxa with 1 across all samples
+							abund_table_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
+						}
+						if(method == "betareg"){
+							abund_table_foralpha %<>% {. + 1e-10} %>% {./(1 + 2e-10)}
+						}
+						tem_data <- clone(tmp_dataset)
+						tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
+						tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
+						tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, alpha = alpha, ...)
+						output <- tem_data1$res_diff
+						if(!is.null(tem_data1$res_model)){
+							self$res_model <- tem_data1$res_model
+							message("The original ", method, " models list is stored in object$res_model ...")
+						}
+						colnames(output)[colnames(output) == "Measure"] <- "Taxa"
+						method <- tem_data1$cal_diff_method
+						if("Letter" %in% colnames(output)){
+							output <- cbind.data.frame(output, Significance = output$Letter)
+						}
+					}
 				}
-				abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 				
-				if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm")){
-					abund_table_foralpha <- abund_table
-					if(!is.null(transformation)){
-						message("Perform the transformation with method: ", transformation, " ...")
-						tmp <- mecodev::trans_norm$new(abund_table_foralpha)
-						abund_table_foralpha <- tmp$norm(method = transformation)
-					}
-					if(method == "KW_dunn"){
-						# filter taxa with 1 in all samples
-						abund_table_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
-					}
-					if(method == "betareg"){
-						abund_table_foralpha %<>% {. + 1e-10} %>% {./(1 + 2e-10)}
-					}
-					tem_data <- clone(tmp_dataset)
-					tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
-					tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
-					tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, alpha = alpha, ...)
-					output <- tem_data1$res_diff
-					if(!is.null(tem_data1$res_model)){
-						self$res_model <- tem_data1$res_model
-						message("The original ", method, " models list is stored in object$res_model ...")
-					}
-					colnames(output)[colnames(output) == "Measure"] <- "Taxa"
-					method <- tem_data1$cal_diff_method
-					if("Letter" %in% colnames(output)){
-						output <- cbind.data.frame(output, Significance = output$Letter)
-					}
-				}
 				if(method %in% c("lefse", "rf")){
 					group_vec <- sampleinfo[, group] %>% as.factor
 					comparisions <- paste0(levels(group_vec), collapse = " - ")
@@ -758,10 +765,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				self$res_diff <- output
 				message(method , " analysis result is stored in object$res_diff ...")
-				# save abund_table for the cladogram
-				self$abund_table <- abund_table
 				self$method <- method
 				self$taxa_level <- taxa_level
+				# save abund_table for the cladogram
+				self$abund_table <- abund_table
 			}
 		},
 		#' @description
@@ -1563,7 +1570,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(filter_thres > 0){
 				use_feature_table %<>% .[! rownames(.) %in% names(filter_features), ]
 			}
-			message("Input features number: ", nrow(use_feature_table))
+			message("Available feature number: ", nrow(use_feature_table))
 			newdata <- microtable$new(otu_table = use_feature_table, sample_table = use_dataset$sample_table)
 			newdata$tidy_dataset()
 			newdata
