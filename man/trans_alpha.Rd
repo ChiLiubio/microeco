@@ -199,6 +199,7 @@ Plot the alpha diversity.
   add_sig = TRUE,
   add_sig_label = "Significance",
   add_sig_text_size = 3.88,
+  add_sig_label_num_dec = 4,
   use_boxplot = TRUE,
   boxplot_add = "jitter",
   order_x_mean = FALSE,
@@ -228,6 +229,8 @@ This is manily designed to add post hoc test of anova or other significances to 
 such as 'P.adj' or 'Significance'.}
 
 \item{\code{add_sig_text_size}}{default 3.88; the size of text in added label.}
+
+\item{\code{add_sig_label_num_dec}}{default 4; reserved decimal places when the parameter \code{add_sig_label} use numeric column, like 'P.adj'.}
 
 \item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
 

@@ -392,6 +392,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param add_sig_label default "Significance"; select a colname of \code{object$res_diff} for the label text when 'Letter' is not in the table, 
 		#'   such as 'P.adj' or 'Significance'.
 		#' @param add_sig_text_size default 3.88; the size of text in added label.
+		#' @param add_sig_label_num_dec default 4; reserved decimal places when the parameter \code{add_sig_label} use numeric column, like 'P.adj'.
 		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.
 		#' @param order_x_mean default FALSE; whether order x axis by the means of groups from large to small.
@@ -421,6 +422,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			add_sig = TRUE,
 			add_sig_label = "Significance",
 			add_sig_text_size = 3.88,
+			add_sig_label_num_dec = 4,
 			use_boxplot = TRUE,
 			boxplot_add = "jitter",
 			order_x_mean = FALSE,
@@ -595,7 +597,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								stop("Please provide a correct add_sig_label parameter! Must be a colname of object$res_diff !")
 							}
 							if(is.numeric(use_diff_data[, add_sig_label])){
-								use_diff_data[, add_sig_label] %<>% round(., 4)
+								use_diff_data[, add_sig_label] %<>% round(., add_sig_label_num_dec) %>% as.character
 							}
 							annotations <- c()
 							y_position <- c()

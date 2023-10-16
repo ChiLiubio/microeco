@@ -1280,7 +1280,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				suppressMessages(tmp_trans_env <- trans_env$new(dataset = NULL))
 				tmp_trans_env$cor_method <- heatmap_lab_fill
 				tmp_trans_env$res_cor <- tmp
-				tmp_trans_env$plot_cor(...)
+				tmp_trans_env$plot_cor(keep_full_name = keep_full_name, keep_prefix = keep_prefix, ...)
 			}
 		},
 		#' @description
