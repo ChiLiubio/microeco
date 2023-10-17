@@ -716,6 +716,7 @@ Plot the classification and importance of nodes, see object$res_node_table for t
   label_text_size = 4,
   label_text_color = "grey50",
   label_text_italic = FALSE,
+  label_text_parse = FALSE,
   plot_module = FALSE,
   x_lim = c(0, 1),
   use_level = "Phylum",
@@ -750,6 +751,8 @@ Plot the classification and importance of nodes, see object$res_node_table for t
 \item{\code{label_text_color}}{default "grey50"; The text color of the label.}
 
 \item{\code{label_text_italic}}{default FALSE; whether use italic style for the label text.}
+
+\item{\code{label_text_parse}}{default FALSE; whether parse the label text. See the parse parameter in \code{ggrepel::geom_text_repel} function.}
 
 \item{\code{plot_module}}{default FALSE; for use_type=1; whether plot the modules information.}
 

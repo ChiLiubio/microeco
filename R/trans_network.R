@@ -815,6 +815,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param label_text_size default 4; The text size of the label.
 		#' @param label_text_color default "grey50"; The text color of the label.
 		#' @param label_text_italic default FALSE; whether use italic style for the label text.
+		#' @param label_text_parse default FALSE; whether parse the label text. See the parse parameter in \code{ggrepel::geom_text_repel} function.
 		#' @param plot_module default FALSE; for use_type=1; whether plot the modules information.
 		#' @param x_lim default c(0, 1); for use_type=1; x axis range when roles_color_background = FALSE.
 		#' @param use_level default "Phylum"; for use_type=2; used taxonomic level in x axis.
@@ -841,6 +842,7 @@ trans_network <- R6Class(classname = "trans_network",
 			label_text_size = 4, 
 			label_text_color = "grey50", 
 			label_text_italic = FALSE,
+			label_text_parse = FALSE,
 			plot_module = FALSE,
 			x_lim = c(0, 1),
 			use_level = "Phylum",
@@ -866,7 +868,8 @@ trans_network <- R6Class(classname = "trans_network",
 					add_label_text = add_label_text, 
 					label_text_size = label_text_size, 
 					label_text_color = label_text_color, 
-					label_text_italic = label_text_italic,				
+					label_text_italic = label_text_italic,
+					label_text_parse = label_text_parse,
 					module = plot_module,
 					x_lim = x_lim,
 					...
@@ -983,24 +986,31 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
-			link_table <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), label = E(network)$label, stringsAsFactors = FALSE)
-			# check the edge label
-			if(! any(c("+", "-") %in% link_table[, 3])){
-				stop("Please check the edge labels! The labels should be + or - !")
-			}
-			if("+" %in% link_table[, 3]){
-				link_table_1 <- link_table[link_table[, 3] %in% "+", ]
-				self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table_1, taxa_level = taxa_level)
-				message('The positive results are stored in object$res_sum_links_pos ...')
+			if(is.null(E(network)$label)){
+				message('No edge label found. All edges are viewed as positive links ...')
+				link_table_use <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), stringsAsFactors = FALSE)
+				self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table_use, taxa_level = taxa_level)
+				message('Results are stored in object$res_sum_links_pos ...')
 			}else{
-				message('No positive edges found ...')
-			}
-			if("-" %in% link_table[, 3]){
-				link_table_1 <- link_table[link_table[, 3] %in% "-", ]
-				self$res_sum_links_neg <- private$sum_link(taxa_table = taxa_table, link_table = link_table_1, taxa_level = taxa_level)
-				message('The negative results are stored in object$res_sum_links_neg ...')
-			}else{
-				message('No negative edges found ...')
+				link_table <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), label = E(network)$label, stringsAsFactors = FALSE)
+				# check the edge label
+				if(! any(c("+", "-") %in% link_table[, 3])){
+					stop("Please check the edge labels! The labels should be + or - !")
+				}
+				if("+" %in% link_table[, 3]){
+					link_table_use <- link_table[link_table[, 3] %in% "+", ]
+					self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table_use, taxa_level = taxa_level)
+					message('The positive results are stored in object$res_sum_links_pos ...')
+				}else{
+					message('No positive edges found ...')
+				}
+				if("-" %in% link_table[, 3]){
+					link_table_use <- link_table[link_table[, 3] %in% "-", ]
+					self$res_sum_links_neg <- private$sum_link(taxa_table = taxa_table, link_table = link_table_use, taxa_level = taxa_level)
+					message('The negative results are stored in object$res_sum_links_neg ...')
+				}else{
+					message('No negative edges found ...')
+				}
 			}
 		},
 		#' @description
@@ -1402,9 +1412,9 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			zp
 		},
-		plot_roles_1 = function(node_roles, roles_color_background, add_label = FALSE, add_label_group = "Network hubs", add_label_text = "name", 
-			label_text_size = 4, label_text_color = "grey50", label_text_italic = FALSE,
-			roles_color_values = NULL, module = FALSE, x_lim = c(0, 1), ...
+		plot_roles_1 = function(node_roles, roles_color_background, add_label, add_label_group, add_label_text, 
+			label_text_size, label_text_color, label_text_italic, label_text_parse,
+			roles_color_values, module, x_lim, ...
 			){
 			if(module == T){
 				all_modules <- unique(as.character(node_roles$module))
@@ -1461,7 +1471,7 @@ trans_network <- R6Class(classname = "trans_network",
 							size = label_text_size, 
 							color = label_text_color, 
 							segment.alpha = .01, 
-							parse = TRUE
+							parse = label_text_parse
 						)
 					}
 				}
