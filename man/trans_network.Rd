@@ -385,7 +385,8 @@ the threshold used to limit the number of interactions (stability); same with th
 
 \item{\code{delete_unlinked_nodes}}{default TRUE; whether delete the nodes without any link.}
 
-\item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether replace the name of nodes using the taxonomic information.}
+\item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether use OTU name as representatives of taxa when \code{taxa_level != "OTU"}.
+Default \code{FALSE} means using taxonomic information of \code{taxa_level} instead of OTU name.}
 
 \item{\code{...}}{parameters pass to \code{SpiecEasi::spiec.easi} when \code{network_method = "SpiecEasi"};
 pass to \code{NetCoMi::netConstruct} when \code{network_method = "gcoda"}; 

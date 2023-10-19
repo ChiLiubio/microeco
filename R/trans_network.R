@@ -219,7 +219,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
 		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param delete_unlinked_nodes default TRUE; whether delete the nodes without any link.
-		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether replace the name of nodes using the taxonomic information.
+		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether use OTU name as representatives of taxa when \code{taxa_level != "OTU"}.
+		#'   Default \code{FALSE} means using taxonomic information of \code{taxa_level} instead of OTU name.
 		#' @param ... parameters pass to \code{SpiecEasi::spiec.easi} when \code{network_method = "SpiecEasi"};
 		#'   pass to \code{NetCoMi::netConstruct} when \code{network_method = "gcoda"}; 
 		#'   pass to \code{beemStatic::func.EM} when \code{network_method = "beemStatic"}.
@@ -450,7 +451,7 @@ trans_network <- R6Class(classname = "trans_network",
 				V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
 
 				if(taxa_level != "OTU"){
-					if(usename_rawtaxa_when_taxalevel_notOTU == T){
+					if(usename_rawtaxa_when_taxalevel_notOTU){
 						network <- set_vertex_attr(network, taxa_level, value = V(network)$name %>% 
 							taxa_table[., taxa_level] %>% 
 							gsub("^.__", "", .))
@@ -986,6 +987,12 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
+			
+			if(self$taxa_level != "OTU"){
+				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[, 2])
+				taxa_table %<>% .[rownames(.) %in% replace_table[, 2], ]
+				rownames(taxa_table) <- replace_table[rownames(taxa_table), 1]
+			}
 			if(is.null(E(network)$label)){
 				message('No edge label found. All edges are viewed as positive links ...')
 				link_table_use <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), stringsAsFactors = FALSE)
