@@ -614,17 +614,11 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
-			# another way:
-			# res_edge_table <- as_data_frame(network, what = "edges")
-			edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-			edge_label <- E(network)$label
-			if(!is.null(E(network)$weight)){
-				edge_weight <- E(network)$weight
-			}else{
-				edge_weight <- rep(NA, times = length(edge_label))
+			res_edge_table <- igraph::as_data_frame(network, what = "edges")
+			colnames(res_edge_table)[1:2] <- c("node1", "node2")
+			if(! "weight" %in% colnames(res_edge_table)){
+				res_edge_table$weight <- NA
 			}
-			res_edge_table <- data.frame(edges, edge_label, edge_weight)
-			colnames(res_edge_table) <- c("node1", "node2", "label", "weight")
 			self$res_edge_table <- res_edge_table
 			message('Result is stored in object$res_edge_table ...')
 		},
@@ -993,14 +987,16 @@ trans_network <- R6Class(classname = "trans_network",
 				taxa_table %<>% .[rownames(.) %in% replace_table[, 2], ]
 				rownames(taxa_table) <- replace_table[rownames(taxa_table), 1]
 			}
+			if(is.null(self$res_edge_table)){
+				self$get_edge_table()
+			}
+			link_table <- self$res_edge_table
+			
 			if(is.null(E(network)$label)){
 				message('No edge label found. All edges are viewed as positive links ...')
-				link_table_use <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), stringsAsFactors = FALSE)
-				self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table_use, taxa_level = taxa_level)
+				self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table, taxa_level = taxa_level)
 				message('Results are stored in object$res_sum_links_pos ...')
-			}else{
-				link_table <- data.frame(t(sapply(1:ecount(network), function(x) ends(network, x))), label = E(network)$label, stringsAsFactors = FALSE)
-				# check the edge label
+			}else{				
 				if(! any(c("+", "-") %in% link_table[, 3])){
 					stop("Please check the edge labels! The labels should be + or - !")
 				}
