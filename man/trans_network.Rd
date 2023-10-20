@@ -809,7 +809,8 @@ Subset of the network.
 
 \item{\code{edge}}{default NULL; provide the edge name needed; must be one of "+" or "-".}
 
-\item{\code{rm_single}}{default TRUE; whether remove the nodes without any edge in the sub-network.}
+\item{\code{rm_single}}{default TRUE; whether remove the nodes without any edge in the sub-network.
+So this function can also be used to remove the nodes withou any edge when node and edge are both NULL.}
 }
 \if{html}{\out{</div>}}
 }

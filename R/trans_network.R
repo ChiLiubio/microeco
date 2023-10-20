@@ -417,20 +417,15 @@ trans_network <- R6Class(classname = "trans_network",
 				E(network)$weight <- abs(E(network)$weight)
 				message("---------------- ", Sys.time()," : Finish ----------------")
 				
-				nodes_raw <- data.frame(cbind(V(network), V(network)$name))
 				if(taxa_level != "OTU"){
 					delete_nodes <- taxa_table %>% 
 						.[grepl("__$|uncultured", .[, taxa_level]), ] %>% 
 						rownames %>% 
-						.[. %in% rownames(nodes_raw)]
+						.[. %in% V(network)$name]
 					network %<>% delete_vertices(delete_nodes)
-					nodes_raw <- data.frame(cbind(V(network), V(network)$name))
 				}
 				if(delete_unlinked_nodes){
-					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-					delete_nodes <- rownames(nodes_raw) %>% 
-						.[! . %in% as.character(c(edges[,1], edges[,2]))]
-					network %<>% delete_vertices(delete_nodes)	
+					network <- private$rm_unlinked_node(network)	
 				}
 				V(network)$taxa <- V(network)$name
 				if(!is.null(add_taxa_name)){
@@ -891,6 +886,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param node default NULL; provide the node names that you want to use in the sub-network.
 		#' @param edge default NULL; provide the edge name needed; must be one of "+" or "-".
 		#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
+		#'   So this function can also be used to remove the nodes withou any edge when node and edge are both NULL.
 		#' @return a new network
 		#' @examples
 		#' \donttest{
@@ -912,16 +908,11 @@ trans_network <- R6Class(classname = "trans_network",
 				sub_network <- delete_edges(network, which(label_raw != edge))
 			}
 			if(is.null(node) & is.null(edge)){
-				stop("Please provide the retained nodes name using node parameter!")
+				sub_network <- network
 			}
 			# whether remove the single node without edges
 			if(rm_single == T){
-				nodes_raw <- V(sub_network)$name
-				edges <- t(sapply(1:ecount(sub_network), function(x) ends(sub_network, x)))
-				delete_nodes <- nodes_raw %>% .[! . %in% as.character(c(edges[,1], edges[,2]))]
-				if(length(delete_nodes) > 0){
-					sub_network %<>% delete_vertices(delete_nodes)
-				}
+				sub_network <- private$rm_unlinked_node(sub_network)
 			}
 			sub_network
 		},
@@ -1571,6 +1562,15 @@ trans_network <- R6Class(classname = "trans_network",
 				as.matrix
 			res[is.na(res)] <- 0			
 			res
+		},
+		rm_unlinked_node = function(input_network){
+			nodes_raw <- V(input_network)$name
+			edges <- t(sapply(1:ecount(input_network), function(x) ends(input_network, x)))
+			delete_nodes <- nodes_raw %>% .[! . %in% as.character(c(edges[,1], edges[,2]))]
+			if(length(input_network) > 0){
+				input_network %<>% delete_vertices(delete_nodes)
+			}
+			input_network
 		}
 	),
 	lock_class = FALSE,
