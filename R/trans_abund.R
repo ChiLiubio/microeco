@@ -642,10 +642,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 			
 			p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Abundance"]], color = .data[["Taxonomy"]], group = .data[["Taxonomy"]]))
 			if(("SE" %in% colnames(plot_data)) & plot_SE){
-				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), width = errorbar_width, position = position, size = errorbar_size)
+				p <- p + geom_errorbar(aes(ymin = Abundance - SE, ymax = Abundance + SE), linewidth = errorbar_width, position = position, size = errorbar_size)
 			}else{
 				if(("SD" %in% colnames(plot_data)) & plot_SE){
-					p <- p + geom_errorbar(aes(ymin = Abundance - SD, ymax = Abundance + SD), width = errorbar_width, position = position, size = errorbar_size)
+					p <- p + geom_errorbar(aes(ymin = Abundance - SD, ymax = Abundance + SD), linewidth = errorbar_width, position = position, size = errorbar_size)
 				}
 			}
 			p <- p + geom_point(size = point_size, alpha = point_alpha, position = position)
