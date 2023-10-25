@@ -1567,7 +1567,7 @@ trans_network <- R6Class(classname = "trans_network",
 			nodes_raw <- V(input_network)$name
 			edges <- t(sapply(1:ecount(input_network), function(x) ends(input_network, x)))
 			delete_nodes <- nodes_raw %>% .[! . %in% as.character(c(edges[,1], edges[,2]))]
-			if(length(input_network) > 0){
+			if(length(delete_nodes) > 0){
 				input_network %<>% delete_vertices(delete_nodes)
 			}
 			input_network
