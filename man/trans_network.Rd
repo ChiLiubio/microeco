@@ -148,7 +148,9 @@ t1$cal_sum_links(taxa_level = "Phylum")
 ## ------------------------------------------------
 
 \dontrun{
-test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+test1$plot_sum_links(method = "chorddiag", plot_pos = TRUE, plot_num = 10)
+test1$plot_sum_links(method = "circlize", transparency = 0.2, 
+	  annotationTrackHeight = circlize::mm_h(c(5, 5)))
 }
 
 ## ------------------------------------------------
@@ -897,12 +899,13 @@ t1$cal_sum_links(taxa_level = "Phylum")
 \if{html}{\out{<a id="method-trans_network-plot_sum_links"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-plot_sum_links}{}}}
 \subsection{Method \code{plot_sum_links()}}{
-Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
+Plot the summed linkages among taxa.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_sum_links(
   plot_pos = TRUE,
   plot_num = NULL,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  method = c("chorddiag", "circlize")[1],
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -916,17 +919,23 @@ Plot the summed linkages among taxa using chorddiag package <https://github.com/
 
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for taxa.}
 
-\item{\code{...}}{parameters pass to \code{chorddiag::chorddiag} function.}
+\item{\code{method}}{default c("chorddiag", "circlize")[1]; chorddiag package <https://github.com/mattflor/chorddiag> or circlize package.}
+
+\item{\code{...}}{pass to \code{chorddiag::chorddiag} function when \code{method = "chorddiag"} or 
+\code{circlize::chordDiagram} function when \code{method = "circlize"}.
+Note that for \code{circlize::chordDiagram} function, \code{keep.diagonal}, \code{symmetric} and \code{self.link} parameters have been fixed to fit the input data.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-chorddiag plot
+please see the invoked function.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+test1$plot_sum_links(method = "chorddiag", plot_pos = TRUE, plot_num = 10)
+test1$plot_sum_links(method = "circlize", transparency = 0.2, 
+	  annotationTrackHeight = circlize::mm_h(c(5, 5)))
 }
 }
 \if{html}{\out{</div>}}

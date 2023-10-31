@@ -1008,18 +1008,27 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 		},
 		#' @description
-		#' Plot the summed linkages among taxa using chorddiag package <https://github.com/mattflor/chorddiag>.
+		#' Plot the summed linkages among taxa.
 		#'
 		#' @param plot_pos default TRUE; If TRUE, plot the summed positive linkages; If FALSE, plot the summed negative linkages.
 		#' @param plot_num default NULL; number of taxa presented in the plot.
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors palette for taxa.
-		#' @param ... parameters pass to \code{chorddiag::chorddiag} function.
-		#' @return chorddiag plot
+		#' @param method default c("chorddiag", "circlize")[1]; chorddiag package <https://github.com/mattflor/chorddiag> or circlize package.
+		#' @param ... pass to \code{chorddiag::chorddiag} function when \code{method = "chorddiag"} or 
+		#'	 \code{circlize::chordDiagram} function when \code{method = "circlize"}.
+		#'	 Note that for \code{circlize::chordDiagram} function, \code{keep.diagonal}, \code{symmetric} and \code{self.link} parameters have been fixed to fit the input data.
+		#' @return please see the invoked function.
 		#' @examples
 		#' \dontrun{
-		#' test1$plot_sum_links(plot_pos = TRUE, plot_num = 10)
+		#' test1$plot_sum_links(method = "chorddiag", plot_pos = TRUE, plot_num = 10)
+		#' test1$plot_sum_links(method = "circlize", transparency = 0.2, 
+		#' 	  annotationTrackHeight = circlize::mm_h(c(5, 5)))
 		#' }
-		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
+		plot_sum_links = function(plot_pos = TRUE, plot_num = NULL, color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+			method = c("chorddiag", "circlize")[1],
+			...){
+			method <- match.arg(method, c("chorddiag", "circlize"))
+			
 			if(is.null(self$res_sum_links_pos) & is.null(self$res_sum_links_neg)){
 				stop("Please first run cal_sum_links function!")
 			}
@@ -1054,7 +1063,12 @@ trans_network <- R6Class(classname = "trans_network",
 					use_data %<>% .[1:length(color_values), 1:length(color_values)]
 				}
 			}
-			chorddiag::chorddiag(use_data, groupColors = color_values, ...)
+			if(method == "chorddiag"){
+				chorddiag::chorddiag(use_data, groupColors = color_values, ...)
+			}else{
+				circlize::chordDiagram(use_data, grid.col = color_values, keep.diagonal = TRUE, symmetric = TRUE, 
+					self.link = 1, ...)
+			}
 		},
 		#' @description
 		#' Generate random networks, compare them with the empirical network and get the p value of topological properties.
