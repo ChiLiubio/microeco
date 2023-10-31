@@ -970,8 +970,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.
 		#' @param color_palette default NULL; a customized palette with more color values to be used instead of the parameter \code{color_vector}.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
-		#' @param filter_feature default NULL; character vector; used to filter features that only have significance labels in the \code{filter_feature} vector. 
+		#' @param filter_feature default NULL; character vector; used to filter features that only have labels in the \code{filter_feature} vector. 
 		#'   For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".
+		#' @param filter_env default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
+		#'   For example, \code{filter_env = ""} can be used to remove features that only have "", no any "*".
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
@@ -1001,6 +1003,7 @@ trans_env <- R6Class(classname = "trans_env",
 			color_palette = NULL,
 			pheatmap = FALSE,
 			filter_feature = NULL,
+			filter_env = NULL,
 			ylab_type_italic = FALSE,
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
@@ -1042,13 +1045,18 @@ trans_env <- R6Class(classname = "trans_env",
 				stop(xvalue, " is not found in the columns of object$res_cor! Please check the data!")
 			}
 			if(!is.null(filter_feature)){
-				use_feature <- unlist(lapply(unique(use_data$Taxa), function(x){
+				use_feature <- lapply(as.character(unique(use_data$Taxa)), function(x){
 					tmp <- use_data %>% .[.$Taxa == x, "Significance"] %>% {all(. %in% filter_feature)}
-					if(tmp == F){
-						x
-					}
-				}))
+					if(tmp == F){ x }
+				}) %>% unlist
 				use_data %<>% .[.$Taxa %in% use_feature, ]
+			}
+			if(!is.null(filter_env)){
+				use_envvars <- lapply(as.character(unique(use_data$Env)), function(x){
+					tmp <- use_data %>% .[.$Env == x, "Significance"] %>% {all(. %in% filter_env)}
+					if(tmp == F){ x }
+				}) %>% unlist
+				use_data %<>% .[.$Env %in% use_envvars, ]
 			}
 			if(keep_full_name == F){
 				if(any(grepl("\\..__", use_data$Taxa))){

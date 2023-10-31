@@ -766,6 +766,7 @@ Plot correlation heatmap.
   color_palette = NULL,
   pheatmap = FALSE,
   filter_feature = NULL,
+  filter_env = NULL,
   ylab_type_italic = FALSE,
   keep_full_name = FALSE,
   keep_prefix = TRUE,
@@ -794,8 +795,11 @@ Plot correlation heatmap.
 
 \item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 
-\item{\code{filter_feature}}{default NULL; character vector; used to filter features that only have significance labels in the \code{filter_feature} vector. 
+\item{\code{filter_feature}}{default NULL; character vector; used to filter features that only have labels in the \code{filter_feature} vector. 
 For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".}
+
+\item{\code{filter_env}}{default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
+For example, \code{filter_env = ""} can be used to remove features that only have "", no any "*".}
 
 \item{\code{ylab_type_italic}}{default FALSE; whether use italic type for y lab text.}
 
