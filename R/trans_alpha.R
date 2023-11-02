@@ -54,7 +54,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					stop("Parameter dataset not provided, but group is provided!")
 				}
 				check_table_variable(data_alpha, group, "group", "dataset$sample_table")
-				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(group, "Measure"))
+				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(group, by_group, "Measure"))
 				message('The group statistics are stored in object$data_stat ...')
 			}else{
 				self$data_stat <- NULL
@@ -393,7 +393,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   such as 'P.adj' or 'Significance'.
 		#' @param add_sig_text_size default 3.88; the size of text in added label.
 		#' @param add_sig_label_num_dec default 4; reserved decimal places when the parameter \code{add_sig_label} use numeric column, like 'P.adj'.
-		#' @param use_boxplot default TRUE; TRUE: boxplot; FALSE: mean-se plot.
 		#' @param boxplot_add default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.
 		#' @param order_x_mean default FALSE; whether order x axis by the means of groups from large to small.
 		#' @param y_start default 0.1; the y axis value from which to add the significance asterisk label; 
@@ -404,6 +403,18 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param xtext_size default 15; x axis text size.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param barwidth default 0.9; the bar width in plot; applied when by_group is not NULL.
+		#' @param use_boxplot default TRUE; TRUE denotes boxplot by using the data_alpha table in the object. 
+		#' 	  FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the object.
+		#' @param plot_SE default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.
+		#' @param errorbar_size default 1; errorbar size. Available when \code{use_boxplot = FALSE}.
+		#' @param errorbar_width default 0.2; errorbar width. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.
+		#' @param point_size default 3; point size for taxa. Available when \code{use_boxplot = FALSE}.
+		#' @param point_alpha default 0.8; point transparency. Available when \code{use_boxplot = FALSE}.
+		#' @param add_line default FALSE; whether add line. Available when \code{use_boxplot = FALSE}.
+		#' @param line_size default 0.8; line size when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
+		#' @param line_type default 1; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
+		#' @param line_color default "grey50"; line color when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.
+		#' @param line_alpha default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
 		#' @param ... parameters pass to \code{ggpubr::ggboxplot} function.
 		#' @return ggplot.
 		#' @examples
@@ -423,7 +434,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			add_sig_label = "Significance",
 			add_sig_text_size = 3.88,
 			add_sig_label_num_dec = 4,
-			use_boxplot = TRUE,
 			boxplot_add = "jitter",
 			order_x_mean = FALSE,
 			y_start = 0.1,
@@ -432,6 +442,17 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			xtext_size = 15,
 			ytitle_size = 17,
 			barwidth = 0.9,
+			use_boxplot = TRUE,
+			plot_SE = TRUE,
+			errorbar_size = 1,
+			errorbar_width = 0.2,
+			point_size = 3,
+			point_alpha = 0.8,
+			add_line = FALSE,
+			line_size = 0.8, 
+			line_type = 1,
+			line_color = "grey50",
+			line_alpha = 0.5, 
 			...
 			){
 			cal_diff_method <- self$cal_diff_method
@@ -473,7 +494,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}	
 				}
 			}
+			
 			use_data <- self$data_alpha[self$data_alpha$Measure == measure, ]
+			if(!use_boxplot){
+				use_data_plot <- self$data_stat[self$data_stat$Measure == measure, ]
+			}
+			
 			if(order_x_mean){
 				if(is.null(by_group)){
 					mean_orders <- names(sort(tapply(use_data$Value, use_data[, group], mean), decreasing = TRUE))
@@ -488,9 +514,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}) %>% unlist
 				}
 				use_data[, group] %<>% factor(., levels = mean_orders)
+				if(!use_boxplot){
+					use_data_plot[, group] %<>% factor(., levels = mean_orders)
+				}
 			}else{
 				if(!is.factor(use_data[, group])){
 					use_data[, group] %<>% as.factor
+					if(!use_boxplot){
+						use_data_plot[, group] %<>% as.factor
+					}
 				}
 				if(!is.null(by_group)){
 					if(!is.factor(use_data[, by_group])){
@@ -514,20 +546,36 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						)
 				}
 			}else{
-				p <- ggplot(use_data, aes_meco(x = group, y = "Value")) + 
-					theme_minimal() +
-					stat_summary(fun.data = mean_se, fun.args = list(mult = 1), geom = "errorbar", width = 0.2) +
-					stat_summary(fun = mean, geom = "point", size = rel(3)) + 
-					theme(
-						axis.title = element_text(face = "bold",size = rel(1.8)),
-						axis.line.x = element_line(colour="black"),
-						axis.line.y = element_line(colour="black"),
-						axis.ticks = element_line(),
-						panel.grid.major = element_line(colour="#f0f0f0"),
-						panel.grid.minor = element_blank(),
-						plot.margin=unit(c(10,5,5,5),"mm")
-						)
+				colnames(use_data_plot)[colnames(use_data_plot) == "Mean"] <- "Value"
+				if(is.null(by_group)){
+					p <- ggplot(use_data_plot, aes(x = .data[[group]], y = .data[["Value"]], color = .data[[group]], group = 1))
+					if(plot_SE){
+						p <- p + geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), linewidth = errorbar_size, width = errorbar_width)
+					}else{
+						p <- p + geom_errorbar(aes(ymin = Value - SD, ymax = Value + SD), linewidth = errorbar_size, width = errorbar_width)
+					}
+					p <- p + geom_point(size = point_size, alpha = point_alpha)
+				}else{
+					p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], group = .data[[group]]))
+					if(plot_SE){
+						p <- p + geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), position = position_dodge2(width = barwidth), linewidth = errorbar_size)
+					}else{
+						p <- p + geom_errorbar(aes(ymin = Value - SD, ymax = Value + SD), position = position_dodge2(width = barwidth), linewidth = errorbar_size)
+					}
+					p <- p + geom_point(size = point_size, alpha = point_alpha, position = position_dodge2(width = barwidth))						
+				}
+				if(add_line){
+					if(is.null(by_group)){
+						p <- p + geom_line(colour = line_color, linewidth = line_size, alpha = line_alpha, 
+							linetype = line_type)
+					}else{
+						p <- p + geom_line(linewidth = line_size, alpha = line_alpha, 
+							linetype = line_type, position = position_dodge2(width = barwidth))
+					}
+				}
+				p <- p + scale_color_manual(values = color_values) + theme_bw()
 			}
+			
 			if(add_sig){
 				diff_res <- self$res_diff
 				if(cal_diff_method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova")){
@@ -582,7 +630,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								stringsAsFactors = FALSE
 							)
 						}
-						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
+						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size, inherit.aes = FALSE)
 					}else{
 						use_diff_data <- diff_res %>% .[.$Measure == measure, ]
 						# check group numbers
@@ -647,7 +695,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								y_position = y_position, 
 								xmin = x_min, 
 								xmax = x_max,
-								textsize = add_sig_text_size
+								textsize = add_sig_text_size,
+								color = "black"
 							)
 						}else{
 							if(is.null(by_group)){
@@ -682,18 +731,18 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}
 			}
-			if(is.null(by_group)){
-				p <- p + theme(legend.position="none")
-			}
 			p <- p + ylab(measure) + xlab("")
 			p <- p + theme(
 					axis.text.x = element_text(colour = "black", size = xtext_size),
-					axis.title.y= element_text(size = ytitle_size),
+					axis.title.y = element_text(size = ytitle_size),
 					axis.text.y = element_text(size = rel(1.1)),
 					axis.title.x = element_blank()
 					)
 			if(!is.null(xtext_angle)){
-				p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
+				p <- p + theme(axis.text.x = element_text(angle = xtext_angle, vjust = 1, hjust = 1))
+			}
+			if(is.null(by_group)){
+				p <- p + theme(legend.position = "none")
 			}
 			p
 		},

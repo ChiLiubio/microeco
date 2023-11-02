@@ -200,7 +200,6 @@ Plot the alpha diversity.
   add_sig_label = "Significance",
   add_sig_text_size = 3.88,
   add_sig_label_num_dec = 4,
-  use_boxplot = TRUE,
   boxplot_add = "jitter",
   order_x_mean = FALSE,
   y_start = 0.1,
@@ -209,6 +208,17 @@ Plot the alpha diversity.
   xtext_size = 15,
   ytitle_size = 17,
   barwidth = 0.9,
+  use_boxplot = TRUE,
+  plot_SE = TRUE,
+  errorbar_size = 1,
+  errorbar_width = 0.2,
+  point_size = 3,
+  point_alpha = 0.8,
+  add_line = FALSE,
+  line_size = 0.8,
+  line_type = 1,
+  line_color = "grey50",
+  line_alpha = 0.5,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -232,8 +242,6 @@ such as 'P.adj' or 'Significance'.}
 
 \item{\code{add_sig_label_num_dec}}{default 4; reserved decimal places when the parameter \code{add_sig_label} use numeric column, like 'P.adj'.}
 
-\item{\code{use_boxplot}}{default TRUE; TRUE: boxplot; FALSE: mean-se plot.}
-
 \item{\code{boxplot_add}}{default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.}
 
 \item{\code{order_x_mean}}{default FALSE; whether order x axis by the means of groups from large to small.}
@@ -251,6 +259,29 @@ this parameter is also used to label the letters of anova result with the fixed 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
 \item{\code{barwidth}}{default 0.9; the bar width in plot; applied when by_group is not NULL.}
+
+\item{\code{use_boxplot}}{default TRUE; TRUE denotes boxplot by using the data_alpha table in the object. 
+FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the object.}
+
+\item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.}
+
+\item{\code{errorbar_size}}{default 1; errorbar size. Available when \code{use_boxplot = FALSE}.}
+
+\item{\code{errorbar_width}}{default 0.2; errorbar width. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.}
+
+\item{\code{point_size}}{default 3; point size for taxa. Available when \code{use_boxplot = FALSE}.}
+
+\item{\code{point_alpha}}{default 0.8; point transparency. Available when \code{use_boxplot = FALSE}.}
+
+\item{\code{add_line}}{default FALSE; whether add line. Available when \code{use_boxplot = FALSE}.}
+
+\item{\code{line_size}}{default 0.8; line size when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
+
+\item{\code{line_type}}{default 1; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
+
+\item{\code{line_color}}{default "grey50"; line color when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.}
+
+\item{\code{line_alpha}}{default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
 
 \item{\code{...}}{parameters pass to \code{ggpubr::ggboxplot} function.}
 }
