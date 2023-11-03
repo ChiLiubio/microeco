@@ -1472,10 +1472,11 @@ trans_network <- R6Class(classname = "trans_network",
 					}else{
 						if(label_text_italic == T){
 							label_data[, add_label_text] %<>% paste0("italic('", .,"')")
+							label_text_parse <- TRUE
 						}
 						p <- p + ggrepel::geom_text_repel(
 							data = label_data, 
-							aes_meco("p", "z", label = add_label_text), 
+							aes(.data[["p"]], .data[["z"]], label = .data[[add_label_text]]), 
 							size = label_text_size, 
 							color = label_text_color, 
 							segment.alpha = .01, 
