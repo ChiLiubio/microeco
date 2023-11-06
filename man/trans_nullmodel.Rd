@@ -186,7 +186,7 @@ t1$cal_NST_convert(column = 10)
 
 \item{\code{group}}{default NULL; which column name in sample_table is selected as the group for the following selection.}
 
-\item{\code{select_group}}{default NULL; the full name in \code{group}, which is used to select samples.}
+\item{\code{select_group}}{default NULL; one or more elements in \code{group}, used to select samples.}
 
 \item{\code{env_cols}}{default NULL; number or name vector to select the environmental data in dataset$sample_table.}
 

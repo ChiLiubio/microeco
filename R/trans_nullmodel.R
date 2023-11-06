@@ -14,7 +14,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param filter_thres default 0; the relative abundance threshold. 
 		#' @param taxa_number default NULL; how many taxa the user want to keep, if provided, filter_thres parameter will be forcible invalid.
 		#' @param group default NULL; which column name in sample_table is selected as the group for the following selection.
-		#' @param select_group default NULL; the full name in \code{group}, which is used to select samples.
+		#' @param select_group default NULL; one or more elements in \code{group}, used to select samples.
 		#' @param env_cols default NULL; number or name vector to select the environmental data in dataset$sample_table. 
 		#' @param add_data default NULL; provide environmental data table additionally.
 		#' @param complete_na default FALSE; whether fill the NA in environmental data based on the method in mice package.
@@ -42,7 +42,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				if(is.null(select_group)){
 					stop("Parameter group is provided, but select_group is not provided!")
 				}else{
-					use_set$sample_table %<>% base::subset(.[, group] %in% select_group)
+					use_set$sample_table %<>% .[.[, group] %in% select_group, , drop = FALSE]
 					if(nrow(use_set$sample_table) == 0){
 						stop("Please check the input parameter select_group! After selection, no row is remained!")
 					}
