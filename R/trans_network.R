@@ -1062,6 +1062,7 @@ trans_network <- R6Class(classname = "trans_network",
 						". Only select ", length(color_values), " taxa ...")
 					use_data %<>% .[1:length(color_values), 1:length(color_values)]
 				}
+				color_values %<>% .[1:nrow(use_data)]
 			}
 			if(method == "chorddiag"){
 				chorddiag::chorddiag(use_data, groupColors = color_values, ...)
