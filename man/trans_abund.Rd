@@ -494,7 +494,7 @@ Plot the line chart.
 
 \item{\code{position}}{default position_dodge(0.1); Position adjustment, either as a string (such as "identity"), or the result of a call to a position adjustment function.}
 
-\item{\code{errorbar_size}}{default 1; errorbar size.}
+\item{\code{errorbar_size}}{default 1; errorbar line size.}
 
 \item{\code{errorbar_width}}{default 0.1; errorbar width.}
 
