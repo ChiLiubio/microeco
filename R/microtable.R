@@ -233,15 +233,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
-			self$otu_table <- private$check_abund_table(self$otu_table)
-			sample_names <- intersect(rownames(self$sample_table), colnames(self$otu_table))
-			if(length(sample_names) == 0){
-				stop("No same sample name found between rownames of sample_table and colnames of otu_table! Please check whether the rownames of sample_table are sample names!")
-			}
-			# keep the sample order same with raw sample table
-			sample_names <- rownames(self$sample_table) %>% .[. %in% sample_names]
-			self$sample_table %<>% .[sample_names, , drop = FALSE]
-			self$otu_table %<>% .[ , sample_names, drop = FALSE]
+			self <- private$tidy_samples(self)
 			self$otu_table %<>% {.[apply(., 1, sum) > 0, , drop = FALSE]}
 			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
 				.[!unlist(lapply(., is.null))]
@@ -266,7 +258,10 @@ microtable <- R6Class(classname = "microtable",
 				}
 				self$rep_fasta %<>% .[taxa_names]
 			}
+			# check again whether a sample has 0 abundance after feature filtering
+			self <- private$tidy_samples(self)
 			if(!main_data){
+				sample_names <- rownames(self$sample_table)
 				if(!is.null(self$taxa_abund)){
 					self$taxa_abund %<>% lapply(., function(x) x[, sample_names, drop = FALSE])
 				}
@@ -820,6 +815,19 @@ microtable <- R6Class(classname = "microtable",
 				stop("No available taxon! Please check the data!")
 			}
 			otu_table
+		},
+		tidy_samples = function(microtable_obj){
+			microtable_obj$otu_table <- private$check_abund_table(microtable_obj$otu_table)
+			sample_names <- intersect(rownames(microtable_obj$sample_table), colnames(microtable_obj$otu_table))
+			if(length(sample_names) == 0){
+				stop("No same sample name found between rownames of sample_table and colnames of otu_table! ",
+					"Please first check whether the rownames of sample_table are sample names! Then check through the sample names of each table!")
+			}
+			# keep the sample order same with original sample table
+			sample_names <- rownames(microtable_obj$sample_table) %>% .[. %in% sample_names]
+			microtable_obj$sample_table %<>% .[sample_names, , drop = FALSE]
+			microtable_obj$otu_table %<>% .[ , sample_names, drop = FALSE]
+			microtable_obj
 		},
 		transform_data_proportion = function(
 			input,
