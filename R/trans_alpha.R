@@ -1,8 +1,7 @@
 #' @title Create \code{trans_alpha} object for alpha diversity statistics and plot.
 #'
 #' @description
-#' This class is a wrapper for a series of alpha diversity related analysis, including the statistics and visualization based on 
-#' An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Paul et al. (2013) <doi:10.1371/journal.pone.0061217>.
+#' This class is a wrapper for a series of alpha diversity analysis, including the statistics and visualization.
 #'
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
@@ -69,11 +68,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons; see \code{dunnTest} function in \code{FSA} package}
+		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons <10.1080/00401706.1964.10490181> based on \code{dunnTest} function in \code{FSA} package}
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-		#'     \item{\strong{'anova'}}{Duncan's new multiple range test for one-way anova; see \code{duncan.test} function of \code{agricolae} package.
-		#'     	  For multi-factor anova, see \code{\link{aov}}}
+		#'     \item{\strong{'anova'}}{Variance analysis. For one-way anova, the post hoc test is Duncan's new multiple range test 
+		#'     	  based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to select other post hoc method.
+		#'     	  For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
@@ -92,7 +92,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
 		#' @param alpha default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.
-		#' @param anova_post_test default "duncan.test". Other available options include "LSD.test" and "HSD.test". 
+		#' @param anova_post_test default "duncan.test". The post hoc test method for one-way anova. Other available options include "LSD.test" and "HSD.test". 
 		#'   All those are the function names in \code{agricolae} package.
 		#' @param return_model default FALSE; whether return the original lmer or glmm model list in the object.
 		#' @param ... parameters passed to \code{kruskal.test} (when \code{method = "KW"}) or \code{wilcox.test} function (when \code{method = "wilcox"}) or 
