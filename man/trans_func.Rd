@@ -44,6 +44,14 @@ t1$show_prok_func(use_func = "methanotrophy")
 }
 
 ## ------------------------------------------------
+## Method `trans_func$trans_spe_func_perc`
+## ------------------------------------------------
+
+\donttest{
+t1$trans_spe_func_perc()
+}
+
+## ------------------------------------------------
 ## Method `trans_func$plot_spe_func_perc`
 ## ------------------------------------------------
 
@@ -82,6 +90,7 @@ t1$cal_tax4fun2_FRI()
 \item \href{#method-trans_func-cal_spe_func}{\code{trans_func$cal_spe_func()}}
 \item \href{#method-trans_func-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
 \item \href{#method-trans_func-show_prok_func}{\code{trans_func$show_prok_func()}}
+\item \href{#method-trans_func-trans_spe_func_perc}{\code{trans_func$trans_spe_func_perc()}}
 \item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
 \item \href{#method-trans_func-cal_tax4fun}{\code{trans_func$cal_tax4fun()}}
 \item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
@@ -241,14 +250,36 @@ t1$show_prok_func(use_func = "methanotrophy")
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-trans_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-trans_spe_func_perc}{}}}
+\subsection{Method \code{trans_spe_func_perc()}}{
+Transform the \code{res_spe_func_perc} table to the long table format for the following visualization.
+Also add the group information if the database has hierarchical groups.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$trans_spe_func_perc()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+\code{res_spe_func_perc_trans} stored in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$trans_spe_func_perc()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_func-plot_spe_func_perc"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_func-plot_spe_func_perc}{}}}
 \subsection{Method \code{plot_spe_func_perc()}}{
 Plot the percentages of species with specific trait in communities.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(
-  filter_func = NULL,
-  use_group_list = TRUE,
   add_facet = TRUE,
   order_x = NULL,
   color_gradient_low = "#00008B",
@@ -259,11 +290,6 @@ Plot the percentages of species with specific trait in communities.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{filter_func}}{default NULL; a vector of function names used to show in the plot.}
-
-\item{\code{use_group_list}}{default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
-please first set \code{trans_func$func_group_list} object with a list of group names and functions.}
-
 \item{\code{add_facet}}{default TRUE; whether use group names as the facets in the plot, see \code{trans_func$func_group_list} object.}
 
 \item{\code{order_x}}{default NULL; character vector; to sort the x axis text; can be also used to select partial samples to show.}

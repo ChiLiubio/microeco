@@ -166,6 +166,7 @@ trans_func <- R6Class(classname = "trans_func",
 					otu_func_table <- otu_func_table[, -c(1:which(colnames(otu_func_table) == "Species"))]
 					otu_func_table[is.na(otu_func_table)] <- 0
 				}
+				self$database <- prok_database
 			}
 			if(for_what == "fungi"){
 				if(grepl("FUNGuild", fungi_database, ignore.case = TRUE)){
@@ -285,7 +286,7 @@ trans_func <- R6Class(classname = "trans_func",
 					}
 				}
 				otu_func_table %<>% .[, -1]
-				self$fungi_database <- fungi_database
+				self$database <- fungi_database
 			}
 			if(any(is.na(otu_func_table))){
 				warning("NA found in the final table! Convert NA to 0 ...")
@@ -358,11 +359,65 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 		},
 		#' @description
+		#' Transform the \code{res_spe_func_perc} table to the long table format for the following visualization.
+		#' Also add the group information if the database has hierarchical groups.
+		#' 
+		#' @return \code{res_spe_func_perc_trans} stored in the object.
+		#' @examples
+		#' \donttest{
+		#' t1$trans_spe_func_perc()
+		#' }
+		trans_spe_func_perc = function(){
+			if(is.null(self$res_spe_func_perc)){
+				stop("Please first run cal_spe_func and cal_spe_func_perc function !")
+			}
+			res_spe_func_perc <- self$res_spe_func_perc
+
+			trans_perc <- reshape2::melt(cbind.data.frame(sampname = rownames(res_spe_func_perc), res_spe_func_perc), id.vars = "sampname") %>% dropallfactors
+			# add group and factor
+			if(self$for_what == "fungi"){
+				if(grepl("FUNGuild", self$database, ignore.case = TRUE)){
+					func_group_list_use <- self$func_group_list[["FUNGuild"]]
+				}else{
+					func_group_list_use_raw <- self$func_group_list[["FungalTraits"]]
+					func_group_list_use <- lapply(names(func_group_list_use_raw), function(x){
+						paste0(x, "|", func_group_list_use_raw[[x]])
+					})
+					names(func_group_list_use) <- names(func_group_list_use_raw)
+				}
+			}else{
+				if(grepl("FAPROTAX", self$database, ignore.case = TRUE)){
+					func_group_list_use <- self$func_group_list[["FAPROTAX"]]
+				}else{
+					func_group_list_use <- NULL
+				}
+			}
+			if(!is.null(func_group_list_use)){
+				group_table <- reshape2::melt(func_group_list_use) %>% dropallfactors
+				colnames(group_table) <- c("func", "group")
+				trans_perc <- dplyr::left_join(trans_perc, group_table, by = c("variable" = "func"))
+				if(grepl("FAPROTAX", self$database, ignore.case = TRUE)){
+					trans_perc %<>% .[.$variable != "chemoheterotrophy", ]
+					if(any(is.na(trans_perc$group))){
+						trans_perc$group[is.na(trans_perc$group)] <- "Other"
+						trans_perc$group %<>% factor(., levels = c(names(func_group_list_use), "Other"))
+					}else{
+						trans_perc$group %<>% factor(., levels = names(func_group_list_use))
+					}
+				}else{
+					trans_perc$group %<>% factor(., levels = names(func_group_list_use))
+				}
+			}
+			if(self$for_what == "fungi"){
+				if(grepl("FungalTraits", self$database, ignore.case = TRUE)){
+					trans_perc$variable %<>% gsub(".*\\|", "", .)
+				}
+			}
+			self$res_spe_func_perc_trans <- trans_perc
+		},
+		#' @description
 		#' Plot the percentages of species with specific trait in communities.
 		#'
-		#' @param filter_func default NULL; a vector of function names used to show in the plot.
-		#' @param use_group_list default TRUE; If TRUE, use default group list; If user want to use personalized group list, 
-		#'    please first set \code{trans_func$func_group_list} object with a list of group names and functions.
 		#' @param add_facet default TRUE; whether use group names as the facets in the plot, see \code{trans_func$func_group_list} object.
 		#' @param order_x default NULL; character vector; to sort the x axis text; can be also used to select partial samples to show.
 		#' @param color_gradient_low default "#00008B"; the color used as the low end in the color gradient.
@@ -373,57 +428,22 @@ trans_func <- R6Class(classname = "trans_func",
 		#' t1$plot_spe_func_perc(use_group_list = TRUE)
 		#' }
 		plot_spe_func_perc = function(
-			filter_func = NULL, 
-			use_group_list = TRUE, 
 			add_facet = TRUE, 
 			order_x = NULL,
 			color_gradient_low = "#00008B",
 			color_gradient_high = "#9E0142"
 			){
-			if(is.null(self$res_spe_func_perc)){
-				stop("Please first run cal_spe_func and cal_spe_func_perc function !")
+			if(is.null(self$res_spe_func_perc_trans)){
+				message("The res_spe_func_perc_trans object is not found! First run the trans_spe_func_perc function to get it ...")
+				self$trans_spe_func_perc()
 			}
-			plot_data <- self$res_spe_func_perc
-			if(!is.null(filter_func)){
-				plot_data <- plot_data[, colnames(plot_data) %in% filter_func]
-			}
-			plot_data <- reshape2::melt(cbind.data.frame(sampname = rownames(plot_data), plot_data), id.vars = "sampname") %>% dropallfactors
-			# add group and factor
-			if(use_group_list){
-				if(self$for_what == "fungi"){
-					if(grepl("FUNGuild", self$fungi_database, ignore.case = TRUE)){
-						func_group_list_use <- self$func_group_list[["FUNGuild"]]
-					}else{
-						func_group_list_use_raw <- self$func_group_list[["FungalTraits"]]
-						func_group_list_use <- lapply(names(func_group_list_use_raw), function(x){
-							paste0(x, "|", func_group_list_use_raw[[x]])
-						})
-						names(func_group_list_use) <- names(func_group_list_use_raw)
-					}
-				}else{
-					func_group_list_use <- self$func_group_list
-				}
-				
-				group_table <- reshape2::melt(func_group_list_use) %>% dropallfactors
-				colnames(group_table) <- c("func", "group")
-				filter_func <- group_table$func
-				plot_data <- plot_data[plot_data$variable %in% group_table$func, ]
-				plot_data <- dplyr::left_join(plot_data, group_table, by = c("variable" = "func"))
-				plot_data$group %<>% factor(., levels = names(func_group_list_use))
-			}
-			# make func order better
-			if(!is.null(filter_func)){
-				plot_data$variable %<>% gsub("_", " ", .) %>% factor(., levels = gsub("_", " ", filter_func))			
-			}
+			plot_data <- self$res_spe_func_perc_trans
+			
 			if(!is.null(order_x)){
 				plot_data %<>% .[.$sampname %in% order_x, , drop = FALSE]
 				plot_data$sampname %<>% factor(., levels = order_x)
 			}
-			if(self$for_what == "fungi"){
-				if(grepl("FungalTraits", self$fungi_database, ignore.case = TRUE)){
-					plot_data$variable %<>% gsub(".*\\|", "", .)
-				}
-			}
+			
 			g1 <- ggplot(aes(x = sampname, y = variable, fill = value), data = plot_data) + 
 				theme_bw() + 
 				geom_tile() + 
@@ -435,9 +455,11 @@ trans_func <- R6Class(classname = "trans_func",
 				theme(panel.spacing = unit(.1, "lines")) + 
 				theme(plot.margin=unit(c(1, 0, 0, 1), "cm"))
 				
-			if(use_group_list & add_facet){
-				g1 <- g1 + facet_grid(group ~ ., drop=TRUE, scale="free",space="free", switch = "y") +
-					theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y.left = element_text(angle=360), strip.text=element_text(size=14))
+			if(add_facet){
+				if("group" %in% colnames(plot_data)){
+					g1 <- g1 + facet_grid(group ~ ., drop=TRUE, scale="free",space="free", switch = "y") +
+						theme(strip.background = element_rect(fill = "grey95", colour = "white"), strip.text.y.left = element_text(angle = 360), strip.text = element_text(size = 14))
+				}
 			}
 			g1
 		},
@@ -865,12 +887,16 @@ trans_func <- R6Class(classname = "trans_func",
 	),
 	private = list(
 		default_prok_func_group = list(
-			"Energy source" = c("aerobic_chemoheterotrophy", "anaerobic_chemoheterotrophy", "photoautotrophy", "photoheterotrophy"),
-			"C-cycle" = c("chitinolysis", "cellulolysis", "fermentation",  "methanogenesis", "methanotrophy", "methylotrophy"),
-			"N-cycle" = c("nitrogen_fixation", "aerobic_ammonia_oxidation","nitrification","aerobic_nitrite_oxidation", 
-				"nitrate_reduction","nitrate_respiration","nitrite_respiration"),
-			"S-cycle" = c("sulfate_respiration", "sulfur_respiration", "sulfite_respiration","dark_sulfide_oxidation", "respiration_of_sulfur_compounds"),
-			"Others" = c("dark_hydrogen_oxidation", "iron_respiration", "manganese_oxidation", "fumarate_respiration")
+			FAPROTAX = list(
+				"Energy source" = c("aerobic_chemoheterotrophy", "anaerobic_chemoheterotrophy", "photoautotrophy", "photoheterotrophy"),
+				"C-cycle" = c("cellulolysis", "xylanolysis", "chitinolysis", "ligninolysis", "fermentation",  "methanogenesis", "methanotrophy", "methylotrophy", 
+					"hydrocarbon_degradation", "oil_bioremediation"),
+				"N-cycle" = c("nitrogen_fixation", "nitrification", "aerobic_ammonia_oxidation", "aerobic_nitrite_oxidation", 
+					"nitrate_reduction", "nitrate_respiration","nitrite_respiration", "nitrogen_respiration",
+					"denitrification", "nitrite_denitrification", "nitrate_denitrification", "nitrous_oxide_denitrification", "ureolysis"),
+				"S-cycle" = c("sulfate_respiration", "sulfur_respiration", "sulfite_respiration","dark_sulfide_oxidation", "respiration_of_sulfur_compounds",
+					"thiosulfate_respiration", "dark_oxidation_of_sulfur_compounds")
+			)
 		),
 		default_fungi_func_group = list(
 			FUNGuild = list(
