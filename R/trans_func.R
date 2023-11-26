@@ -425,7 +425,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @return ggplot2.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_spe_func_perc(use_group_list = TRUE)
+		#' t1$plot_spe_func_perc()
 		#' }
 		plot_spe_func_perc = function(
 			add_facet = TRUE, 

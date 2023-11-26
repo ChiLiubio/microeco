@@ -56,7 +56,7 @@ t1$trans_spe_func_perc()
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_spe_func_perc(use_group_list = TRUE)
+t1$plot_spe_func_perc()
 }
 
 ## ------------------------------------------------
@@ -306,7 +306,7 @@ ggplot2.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_spe_func_perc(use_group_list = TRUE)
+t1$plot_spe_func_perc()
 }
 }
 \if{html}{\out{</div>}}
