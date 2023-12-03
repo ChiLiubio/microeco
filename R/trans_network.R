@@ -1303,6 +1303,11 @@ trans_network <- R6Class(classname = "trans_network",
 			cat(output_gexf$graph, file = filepath)
 		},
 		network_attribute = function(x){
+			if(is_directed(x)){
+				ms <- cluster_walktrap(x)
+			}else{
+				ms <- cluster_fast_greedy(x)
+			}
 			res <- data.frame(
 				Vertex = round(vcount(x), 0), 
 				Edge = round(ecount(x), 0), 
@@ -1312,7 +1317,8 @@ trans_network <- R6Class(classname = "trans_network",
 				Clustering_coefficient = transitivity(x), 
 				Density = graph.density(x), 
 				Heterogeneity = sd(igraph::degree(x))/mean(igraph::degree(x)), 
-				Centralization = centr_degree(x)$centralization
+				Centralization = centr_degree(x)$centralization,
+				Modularity = modularity(ms)
 				)
 			res <- base::as.data.frame(t(res))
 			colnames(res) <- NULL
