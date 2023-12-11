@@ -167,6 +167,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in \code{plot_type} parameter.
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in \code{plot_type} parameter.
 		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{\link{stat_ellipse}}.
+		#' @param NMDS_stress_pos default c(1, 1); a numerical vector with two values used to represent the insertion position of the stress text. 
+		#'   The first one denotes the x-axis, while the second one corresponds to the y-axis. 
+		#'   The assigned position is determined by multiplying the respective value with the maximum point on the corresponding coordinate axis. 
+		#'   Thus, the x-axis position is equal to \code{max(points of x axis) * NMDS_stress_pos[1]}, 
+		#'   and the y-axis position is equal to \code{max(points of y axis) * NMDS_stress_pos[2]}. Negative values can also be utilized for the negative part of the axis.
+		#'   \code{NMDS_stress_pos = NULL} denotes no stress text to show.
 		#' @return \code{ggplot}.
 		#' @examples
 		#' t1$plot_ordination(plot_type = "point")
@@ -190,7 +196,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 			ellipse_chull_fill = TRUE,
 			ellipse_chull_alpha = 0.1,
 			ellipse_level = 0.9,
-			ellipse_type = "t"
+			ellipse_type = "t",
+			NMDS_stress_pos = c(1, 1)
 			){
 			ordination <- self$ordination
 			if(is.null(ordination)){
@@ -224,8 +231,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 				p <- p + xlab(paste(plot_x, " [", eig[plot_x],"%]", sep = "")) + 
 					ylab(paste(plot_y, " [", eig[plot_y],"%]", sep = ""))
 			}
-			if(ordination == "NMDS"){
-				p <- p + annotate("text", x = max(combined[,1]), y = max(combined[,2]) + 0.05, label = round(model$stress, 2), parse=TRUE)
+			if(!is.null(NMDS_stress_pos)){
+				if(ordination == "NMDS"){
+					p <- p + annotate("text", x = max(combined[, 1]) * NMDS_stress_pos[1], y = max(combined[, 2]) * NMDS_stress_pos[2], label = round(model$stress, 2), parse = TRUE)
+				}
 			}
 			if("centroid" %in% plot_type){
 				centroid_xy <- data.frame(group = combined[, plot_color], x = combined[, plot_x], y = combined[, plot_y]) %>%
