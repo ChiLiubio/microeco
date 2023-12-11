@@ -409,7 +409,7 @@ trans_env <- R6Class(classname = "trans_env",
 			colnames(df_sites)[1:2] <- c("x", "y")
 			
 			multiplier <- vegan:::ordiArrowMul(scrs$biplot)
-			df_arrows<- scrs$biplot * multiplier
+			df_arrows <- scrs$biplot * multiplier
 			colnames(df_arrows) <- c("x", "y")
 			df_arrows <- as.data.frame(df_arrows)
 			eigval <- res_ordination$CCA$eig/sum(res_ordination$CCA$eig)
@@ -1451,9 +1451,9 @@ trans_env <- R6Class(classname = "trans_env",
 			mindis <- min(arr_dis)
 			k <- (b-a)/(maxdis - mindis) 
 			norDis <- a + k * (arr_dis - mindis)
-			per <- abs(arr[,1]/arr[,2])
+			per <- abs(arr[, 1]/arr[, 2])
 			newx <- (((norDis*per^2) / (per^2 + 1)) ^ (1/2)) * sapply(arr[, 1], function(y) ifelse(y > 0, 1, -1))
-			newy <- (newx/per) * sapply(arr[, 2], function(y) ifelse(y > 0, 1, -1))
+			newy <- (abs(newx)/per) * sapply(arr[, 2], function(y) ifelse(y > 0, 1, -1))
 			res <- data.frame(newx, newy)
 			colnames(res) <- colnames(arr)
 			res
