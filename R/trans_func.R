@@ -414,6 +414,7 @@ trans_func <- R6Class(classname = "trans_func",
 				}
 			}
 			self$res_spe_func_perc_trans <- trans_perc
+			message('Transformed long format table is stored in object$res_spe_func_perc_trans ...')
 		},
 		#' @description
 		#' Plot the percentages of species with specific trait in communities.
@@ -434,7 +435,7 @@ trans_func <- R6Class(classname = "trans_func",
 			color_gradient_high = "#9E0142"
 			){
 			if(is.null(self$res_spe_func_perc_trans)){
-				message("The res_spe_func_perc_trans object is not found! First run the trans_spe_func_perc function to get it ...")
+				message("The res_spe_func_perc_trans object is not found. Run the trans_spe_func_perc function to get it ...")
 				self$trans_spe_func_perc()
 			}
 			plot_data <- self$res_spe_func_perc_trans
