@@ -2,7 +2,7 @@
 #'
 #' @description
 #' This class is a wrapper for a series of beta-diversity related analysis, 
-#' including ordination calculation and plot based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
+#' including ordination analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 #' clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>, ANOSIM and PERMDISP.
 #'
 #' @export
@@ -70,11 +70,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ncomp default 3; dimensions needed in the result.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.
 		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
-		#' @param ... parameters passed to \code{vegan::rda} function when ordination = "PCA", or \code{ape::pcoa} function when ordination = "PCoA", 
-		#' 	  or \code{vegan::metaMDS} function when when ordination = "NMDS".
+		#' @param ... parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
+		#' 	  or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.
 		#' @return \code{res_ordination} stored in the object.
 		#' @examples
-		#' t1$cal_ordination(ordination = "PCoA")		
+		#' t1$cal_ordination(ordination = "PCoA")
 		cal_ordination = function(
 			ordination = "PCoA",
 			ncomp = 3,
@@ -295,7 +295,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Calculate perMANOVA based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
+		#' Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
 		#'
 		#' @param manova_all default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 		#'    FALSE represents test for all the paired groups.
@@ -405,7 +405,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The original result is stored in object$res_anosim ...')
 		},
 		#' @description
-		#' A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions.
+		#' A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions (PERMDISP).
 		#'
 		#' @param ... parameters passed to \code{\link{betadisper}} function.
 		#' @return \code{res_betadisper} stored in object.

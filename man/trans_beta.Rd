@@ -5,7 +5,7 @@
 \title{Create \code{trans_beta} object for beta-diversity analysis based on the distance matrix}
 \description{
 This class is a wrapper for a series of beta-diversity related analysis, 
-including ordination calculation and plot based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
+including ordination analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>, ANOSIM and PERMDISP.
 }
 \examples{
@@ -21,7 +21,7 @@ t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
 ## Method `trans_beta$cal_ordination`
 ## ------------------------------------------------
 
-t1$cal_ordination(ordination = "PCoA")		
+t1$cal_ordination(ordination = "PCoA")
 
 ## ------------------------------------------------
 ## Method `trans_beta$plot_ordination`
@@ -158,8 +158,8 @@ PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA will be scaled.}
 
-\item{\code{...}}{parameters passed to \code{vegan::rda} function when ordination = "PCA", or \code{ape::pcoa} function when ordination = "PCoA", 
-or \code{vegan::metaMDS} function when when ordination = "NMDS".}
+\item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
+or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -168,7 +168,7 @@ or \code{vegan::metaMDS} function when when ordination = "NMDS".}
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_ordination(ordination = "PCoA")		
+\preformatted{t1$cal_ordination(ordination = "PCoA")
 }
 \if{html}{\out{</div>}}
 
@@ -275,7 +275,7 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 \if{html}{\out{<a id="method-trans_beta-cal_manova"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
-Calculate perMANOVA based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
+Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
   manova_all = TRUE,
@@ -358,7 +358,7 @@ Analysis of similarities (ANOSIM) based on R vegan \code{anosim} function.
 \if{html}{\out{<a id="method-trans_beta-cal_betadisper"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_betadisper}{}}}
 \subsection{Method \code{cal_betadisper()}}{
-A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions.
+A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions (PERMDISP).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_betadisper(...)}\if{html}{\out{</div>}}
 }
