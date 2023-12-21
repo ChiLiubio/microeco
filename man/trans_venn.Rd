@@ -193,7 +193,7 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_venn$plot_bar(
   left_plot = TRUE,
-  sort_samples = TRUE,
+  sort_samples = FALSE,
   up_y_title = "Intersection size",
   up_y_title_size = 15,
   up_y_text_size = 8,
@@ -215,8 +215,8 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
 \describe{
 \item{\code{left_plot}}{default TRUE; whether add the left bar plot to show the feature number of each sample.}
 
-\item{\code{sort_samples}}{default TRUE; whether sort samples according to the number of features in each sample.
-If FALSE, use the sample orders in sample_table of the raw dataset.}
+\item{\code{sort_samples}}{default FALSE; \code{TRUE} is used to sort samples according to the number of features in each sample.
+\code{FALSE} means the sample order is same with that in sample_table of the raw dataset.}
 
 \item{\code{up_y_title}}{default "Intersection set"; y axis title of upper plot.}
 

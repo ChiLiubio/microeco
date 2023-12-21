@@ -335,8 +335,8 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' Plot the intersections using histogram, i.e. UpSet plot. Especially useful when samples > 5.
 		#'
 		#' @param left_plot default TRUE; whether add the left bar plot to show the feature number of each sample.
-		#' @param sort_samples default TRUE; whether sort samples according to the number of features in each sample.
-		#'   If FALSE, use the sample orders in sample_table of the raw dataset.
+		#' @param sort_samples default FALSE; \code{TRUE} is used to sort samples according to the number of features in each sample.
+		#'   \code{FALSE} means the sample order is same with that in sample_table of the raw dataset.
 		#' @param up_y_title default "Intersection set"; y axis title of upper plot.
 		#' @param up_y_title_size default 15; y axis title size of upper plot.
 		#' @param up_y_text_size default 4; y axis text size of upper plot.
@@ -357,7 +357,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' }
 		plot_bar = function(
 			left_plot = TRUE,
-			sort_samples = TRUE,
+			sort_samples = FALSE,
 			up_y_title = "Intersection size",
 			up_y_title_size = 15,
 			up_y_text_size = 8,
