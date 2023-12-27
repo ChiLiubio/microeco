@@ -429,7 +429,7 @@ only available when coord_flip = FALSE.}
 \item{\code{heatmap_lab_fill}}{default "P value"; legend title of heatmap.}
 
 \item{\code{...}}{parameters passing to \code{\link{geom_bar}} for the bar plot or 
-the \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.}
+\code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.}
 }
 \if{html}{\out{</div>}}
 }

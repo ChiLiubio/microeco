@@ -1084,7 +1084,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param heatmap_y default "Taxa"; the column of data for the y axis of heatmap.
 		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
 		#' @param ... parameters passing to \code{\link{geom_bar}} for the bar plot or 
-		#' 	  the \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.
+		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -1263,23 +1263,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				# heatmap for multi-factor
 				message("Perform heatmap instead of bar plot as formula is found ...")
 				tmp <- use_data
-				check_table_variable(tmp, heatmap_x, "heatmap_x", "object$res_diff")
-				check_table_variable(tmp, heatmap_y, "heatmap_y", "object$res_diff")
-				check_table_variable(tmp, heatmap_cell, "heatmap_cell", "object$res_diff")
-				check_table_variable(tmp, heatmap_sig, "heatmap_sig", "object$res_diff")
-				tmp %<>% .[!is.na(.[, heatmap_cell]), ]
-				if("ns" %in% tmp[, heatmap_sig]){
-					tmp[, heatmap_sig] %<>% gsub("ns", "", .)
-				}
-				colnames(tmp)[colnames(tmp) == heatmap_x] <- "Env"
-				colnames(tmp)[colnames(tmp) == heatmap_y] <- "Taxa"
-				colnames(tmp)[colnames(tmp) == heatmap_cell] <- "Correlation"
-				colnames(tmp)[colnames(tmp) == heatmap_sig] <- "Significance"
-				tmp$Type = "All"
-
-				suppressMessages(tmp_trans_env <- trans_env$new(dataset = NULL))
-				tmp_trans_env$cor_method <- heatmap_lab_fill
-				tmp_trans_env$res_cor <- tmp
+				tmp_trans_env <- convert_diff2transenv(tmp, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill)
 				tmp_trans_env$plot_cor(keep_full_name = keep_full_name, keep_prefix = keep_prefix, ...)
 			}
 		},
