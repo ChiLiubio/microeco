@@ -219,21 +219,21 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					
 					if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm")){
-						abund_table_foralpha <- abund_table
+						abund_foralpha <- abund_table
 						if(!is.null(transformation)){
 							message("Perform the transformation with method: ", transformation, " ...")
-							tmp <- mecodev::trans_norm$new(abund_table_foralpha)
-							abund_table_foralpha <- tmp$norm(method = transformation)
+							tmp <- mecodev::trans_norm$new(abund_foralpha)
+							abund_foralpha <- tmp$norm(method = transformation)
 						}
 						if(method == "KW_dunn"){
 							# filter taxa with 1 across all samples
-							abund_table_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
+							abund_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
 						}
 						if(method == "betareg"){
-							abund_table_foralpha %<>% {. + 1e-10} %>% {./(1 + 2e-10)}
+							abund_foralpha %<>% {. + .Machine$double.eps} %>% {./(1 + 2*.Machine$double.eps)}
 						}
 						tem_data <- clone(tmp_dataset)
-						tem_data$alpha_diversity <- as.data.frame(t(abund_table_foralpha))
+						tem_data$alpha_diversity <- as.data.frame(t(abund_foralpha))
 						tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group, by_ID = by_ID))
 						tem_data1$cal_diff(method = method, p_adjust_method = p_adjust_method, alpha = alpha, ...)
 						output <- tem_data1$res_diff
