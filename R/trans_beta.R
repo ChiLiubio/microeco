@@ -65,12 +65,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Unconstrained ordination.
 		#'
-		#' @param ordination default "PCoA"; "PCA", "PCoA" or "NMDS". PCA: principal component analysis; 
+		#' @param ordination default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
 		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
-		#' @param ncomp default 3; dimensions needed in the result.
-		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.
-		#' @param scale_species default FALSE; whether species loading in PCA will be scaled.
-		#' @param ... parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
+		#' @param ncomp default 3; dimensions shown in the results.
+		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".
+		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
+		#' @param ... parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, 
+		#' 	  or \code{vegan::decorana} function when \code{ordination = "DCA"}, 
+		#' 	  or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
 		#' 	  or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.
 		#' @return \code{res_ordination} stored in the object.
 		#' @examples
@@ -85,35 +87,39 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(is.null(ordination)){
 				stop("Input ordination should not be NULL !")
 			}
-			if(!ordination %in% c("PCA", "PCoA", "NMDS")){
-				stop("Input ordination should be one of 'PCA', 'PCoA' and 'NMDS' !")
+			if(!ordination %in% c("PCA", "PCoA", "NMDS", "DCA")){
+				stop("Input ordination should be one of 'PCA', 'PCoA', 'NMDS' and 'DCA'!")
 			}
 			dataset <- self$dataset
-			if(ordination == "PCA"){
-				plot.x <- "PC1"
-				plot.y <- "PC2"
+			if(ordination %in% c("PCA", "DCA")){
+				plot.x <- switch(ordination, PCA = "PC1", DCA = "DCA1")
+				plot.y <- switch(ordination, PCA = "PC2", DCA = "DCA2")
 				if(trans_otu == T){
-					abund1 <- sqrt(dataset$otu_table)
+					abund <- sqrt(dataset$otu_table)
 				}else{
-					abund1 <- dataset$otu_table
+					abund <- dataset$otu_table
 				}
-				model <- rda(t(abund1), ...)
-				expla <- round(model$CA$eig/model$CA$tot.chi*100, 1)
-				scores <- scores(model, choices = 1:ncomp)$sites
-				combined <- cbind.data.frame(scores, dataset$sample_table)
-				if(is.null(dataset$tax_table)){
-					loading <- scores(model, choices = 1:ncomp)$species
+				abund %<>% t
+				if(ordination == "PCA"){
+					model <- rda(abund, ...)
+					expla <- round(model$CA$eig/model$CA$tot.chi*100, 1)
 				}else{
-					loading <- cbind.data.frame(scores(model, choices = 1:ncomp)$species, dataset$tax_table)
+					model <- decorana(abund, ...)
+					expla <- round(eigenvals(model)/model$totchi * 100, 1)
 				}
-				loading <- cbind.data.frame(loading, rownames(loading))
+				scores_sites <- scores(model, choices = 1:ncomp, display = "sites")
+				combined <- cbind.data.frame(scores_sites, dataset$sample_table)
+				loading <- scores(model, choices = 1:ncomp, display = "species")
+				if(!is.null(dataset$tax_table)){
+					loading <- cbind.data.frame(loading, dataset$tax_table[rownames(loading), ])
+				}
 				if(scale_species == T){
-					maxx <- max(abs(scores[,plot.x]))/max(abs(loading[,plot.x]))
-					loading[, plot.x] <- loading[, plot.x] * maxx * 0.8
-					maxy <- max(abs(scores[,plot.y]))/max(abs(loading[,plot.y]))
-					loading[, plot.y] <- loading[, plot.y] * maxy * 0.8
+					maxx <- max(abs(scores_sites[, plot.x]))/max(abs(loading[, plot.x]))
+					loading[, plot.x] %<>% {. * maxx * 0.8}
+					maxy <- max(abs(scores_sites[,plot.y]))/max(abs(loading[,plot.y]))
+					loading[, plot.y] %<>% {. * maxy * 0.8}
 				}
-				species <- cbind(loading, loading[,plot.x]^2 + loading[,plot.y]^2)
+				species <- cbind(loading, loading[, plot.x]^2 + loading[, plot.y]^2)
 				colnames(species)[ncol(species)] <- "dist"
 				species <- species[with(species, order(-dist)), ]
 				outlist <- list(model = model, scores = combined, loading = species, eig = expla)

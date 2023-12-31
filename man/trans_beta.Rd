@@ -149,16 +149,18 @@ Unconstrained ordination.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ordination}}{default "PCoA"; "PCA", "PCoA" or "NMDS". PCA: principal component analysis; 
+\item{\code{ordination}}{default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
 PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.}
 
-\item{\code{ncomp}}{default 3; dimensions needed in the result.}
+\item{\code{ncomp}}{default 3; dimensions shown in the results.}
 
-\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination = PCA}.}
+\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".}
 
-\item{\code{scale_species}}{default FALSE; whether species loading in PCA will be scaled.}
+\item{\code{scale_species}}{default FALSE; whether species loading in PCA or DCA is scaled.}
 
-\item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
+\item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, 
+or \code{vegan::decorana} function when \code{ordination = "DCA"}, 
+or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
 or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.}
 }
 \if{html}{\out{</div>}}
