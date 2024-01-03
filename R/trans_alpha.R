@@ -79,6 +79,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'     \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
 		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
+		#'     \item{\strong{'glmm_beta'}}{Generalized linear mixed model (GLMM) with a family function of beta distribution. 
+		#'     	  This is an extension of the GLMM model in \code{'glmm'} option. 
+		#'     	  The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
+		#'     	  facilitating the fitting for proportional data (ranging from 0 to 1). The link function is fixed with \code{"logit"}.}
 		#'   }
 		#' @param measure default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
 		#' 	 e.g. c("Observed", "Chao1", "Shannon").
@@ -111,7 +115,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "anova")
 		#' }
 		cal_diff = function(
-			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm")[1], 
+			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta")[1], 
 			measure = NULL, 
 			p_adjust_method = "fdr", 
 			formula = NULL,
@@ -121,15 +125,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			return_model = FALSE,
 			...
 			){
-			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm"))
+			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta"))
 			group <- self$group
 			
-			if(method %in% c("scheirerRayHare", "lme", "betareg", "glmm") & is.null(formula)){
+			if(method %in% c("scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta") & is.null(formula)){
 				if(is.null(formula)){
 					stop("formula is necessary! Please provide formula parameter!")
 				}
 			}
-			if(!method %in% c("anova", "scheirerRayHare", "lme", "betareg", "glmm")){
+			if(!method %in% c("anova", "scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta")){
 				if(is.null(group)){
 					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
 				}
@@ -313,7 +317,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result$Significance <- generate_p_siglabel(compare_result$P.unadj, nonsig = "ns")
 				method <- paste0(method, "-formula")
 			}
-			if(method %in% c("lme", "glmm")){
+			if(method %in% c("lme", "glmm", "glmm_beta")){
 				compare_result <- data.frame()
 				if(return_model){
 					res_model <- list()
@@ -340,7 +344,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
 						)
 					}else{
-						tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
+						if(method == "glmm"){
+							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
+						}else{
+							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, family = glmmTMB::beta_family(link = "logit"), ...)
+						}
 						if(return_model){
 							res_model[[k]] <- tmp
 						}
@@ -370,7 +378,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				method <- paste0(method, "-formula")
 			}
-			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme", "glmm")){
+			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme", "glmm", "glmm_beta")){
 				if("P.adj" %in% colnames(compare_result)){
 					compare_result$Significance <- generate_p_siglabel(compare_result$P.adj, nonsig = "ns")
 					compare_result$Significance %<>% as.character

@@ -51,20 +51,22 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  Reference: <doi:10.1186/s13059-022-02655-5>}
 		#'     \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data based on the Maaslin2 package.
 		#'     	  Using this option can invoke the \code{trans_env$cal_cor} function with \code{cor_method = "maaslin2"}.}
-		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package}
+		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package. 
+		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
 		#'     	  In the return table, the significance of fixed factors are tested by function \code{anova}.
-		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.
-		#'     	  }
+		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.}
 		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package.
-		#'     	  If the relative abundance is applied, it is recommended to use beta family function, i.e. \code{family = glmmTMB::beta_family(link = "logit")}.
-		#'     	  Note that beta family function limits 0 < response value < 1. 
-		#'     	  If an error 'y values must be 0 < y < 1' occurs, please first transform input table like: \code{(dataset$taxa_abund$Phylum + 1e-10)/(1 + 2e-10)}.
-		#'     	  For more parameters, please see \code{glmmTMB::glmmTMB} function.
+		#'     	  For more available parameters, please see \code{glmmTMB::glmmTMB} function and use parameter passing.
 		#'     	  In the return table, Conditional_R2 and Marginal_R2 represent total variance (explained by both fixed and random effects) and the variance explained by 
 		#'     	  fixed effects, respectively. The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
-		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.
-		#'     	  }
+		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.}
+		#'     \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution, 
+		#'     	  developed for the relative abundance (ranging from 0 to 1) of taxa specifically. 
+		#'     	  This is an extension of the GLMM model in \code{'glmm'} option.
+		#'     	  The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
+		#'     	  i.e. \code{family = glmmTMB::beta_family(link = "logit")}.
+		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
 		#' 	  It is necessary when method is not "anova" or method is "anova" but formula is not provided.
@@ -96,13 +98,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
 		#'   and "we.eBH" (Expected BH corrected P value of Welch's t test); for "ALDEx2_kw"; for "ALDEx2_t",
 		#'   the available choice is "kw.eBH" (Expected BH corrected P value of Kruskal-Wallace test) and "glm.eBH" (Expected BH corrected P value of glm test).
-		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
-		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg", "lme" or "glmm";
-		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
-		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
-		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
-		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda";
-		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin2".
 		#' @param by_group default NULL; a column of sample_table used to perform the differential test 
 		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
 		#'   Same with the \code{by_group} parameter in \code{trans_alpha} class. 
@@ -111,6 +106,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
 		#'   Same with the \code{by_ID} parameter in trans_alpha class.
+		#' @param beta_pseudo default .Machine$double.eps; the pseudo value used when the parameter \code{method} is \code{'betareg'} or \code{'glmm_beta'}.
+		#'   As the beta distribution function limits 0 < response value < 1, a pseudo value will be added for the data that equal to 0.
+		#'   The data that equal to 1 will be replaced by \code{1/(1 + beta_pseudo)}.
+		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
+		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg", "lme", "glmm" or "glmm_beta";
+		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
+		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
+		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
+		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda";
+		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin2".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result, may containing:\cr
@@ -134,7 +139,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", 
-				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm")[1],
+				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -153,6 +158,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			ALDEx2_sig = c("wi.eBH", "kw.eBH"),
 			by_group = NULL,
 			by_ID = NULL,
+			beta_pseudo = .Machine$double.eps,
 			...
 			){
 			if(is.null(p_adjust_method)){
@@ -164,11 +170,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				message("Input dataset is NULL. Please run the functions with customized data ...")
 			}else{
 				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm"))
+					"anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta"))
 
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
-				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme", "glmm", "maaslin2")){
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "betareg", "lme", "glmm", "glmm_beta", "maaslin2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
 				}
 				if(!is.null(group)){
@@ -205,7 +211,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				abund_table <- filter_output$abund_table
 				filter_features <- filter_output$filter_features
 				
-				if(method %in% c("lefse", "rf", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm")){
+				if(method %in% c("lefse", "rf", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm", "glmm_beta")){
 					if(remove_unknown){
 						abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 						message(nrow(abund_table), " features are remained after removing unknown features ...")
@@ -218,7 +224,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						self$lefse_norm <- lefse_norm
 					}
 					
-					if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm")){
+					if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg", "lme", "glmm", "glmm_beta")){
 						abund_foralpha <- abund_table
 						if(!is.null(transformation)){
 							message("Perform the transformation with method: ", transformation, " ...")
@@ -229,8 +235,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 							# filter taxa with 1 across all samples
 							abund_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
 						}
-						if(method == "betareg"){
-							abund_foralpha %<>% {. + .Machine$double.eps} %>% {./(1 + 2*.Machine$double.eps)}
+						if(method %in% c("betareg", "glmm_beta")){
+							if(any(abund_foralpha) > 1){
+								abund_foralpha %<>% {./(max(.) + beta_pseudo)}
+							}
+							if(any(abund_foralpha == 0)){
+								abund_foralpha[abund_foralpha == 0] <- beta_pseudo
+							}
+							if(any(abund_foralpha == 1)){
+								abund_foralpha[abund_foralpha == 1] <- 1/(1 + beta_pseudo)
+							}
 						}
 						tem_data <- clone(tmp_dataset)
 						tem_data$alpha_diversity <- as.data.frame(t(abund_foralpha))
