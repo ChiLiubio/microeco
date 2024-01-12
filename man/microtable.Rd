@@ -755,11 +755,20 @@ Calculate alpha diversity.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{measures}}{default NULL; one or more indexes of \code{c("Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "PD")}; 
-If null, use all those measures. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on \code{vegan::diversity} function;
-'Chao1' and 'ACE' depend on the function \code{vegan::estimateR}; 'PD' depends on the function \code{picante::pd}.}
+\item{\code{measures}}{default NULL; one or more indexes in \code{c("Observed", "Coverage", "Chao1", "ACE", "Shannon", "Simpson", "InvSimpson", "Fisher", "Pielou")}; 
+The default NULL represents that all the measures are calculated. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on \code{vegan::diversity} function;
+'Chao1' and 'ACE' depend on the function \code{vegan::estimateR}.
+'Fisher' index relies on the function \code{vegan::fisher.alpha}.
+"Observed" means the observed species number in the community.
+"Coverage" represents good's coverage. It is defined:
+              \deqn{Coverage = 1 - \frac{f1}{n}} 
+ where \emph{n} is the total abundance of a sample, and \emph{f1} is the number of singleton (species with abundance 1) in the sample.
+"Pielou" denotes the Pielou evenness index. It is defined:
+              \deqn{J = \frac{H'}{\ln(S)}}
+ where \emph{H'} is Shannon index, and \emph{S} is the species number.}
 
-\item{\code{PD}}{default FALSE; whether Faith's phylogenetic diversity should be calculated.}
+\item{\code{PD}}{default FALSE; whether Faith's phylogenetic diversity is calculated. The calculation depends on the function \code{picante::pd}.
+Note that the phylogenetic tree (\code{phylo_tree} object in the data) is required for PD.}
 }
 \if{html}{\out{</div>}}
 }
