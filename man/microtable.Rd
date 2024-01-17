@@ -808,7 +808,7 @@ Save alpha diversity table to the computer.
 \if{html}{\out{<a id="method-microtable-cal_betadiv"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-cal_betadiv}{}}}
 \subsection{Method \code{cal_betadiv()}}{
-Calculate beta diversity, including Bray-Curtis, Jaccard, and UniFrac.
+Calculate beta diversity dissimilarity matrix, such as Bray-Curtis, Jaccard, and UniFrac.
 See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(method = NULL, unifrac = FALSE, binary = FALSE, ...)}\if{html}{\out{</div>}}
@@ -817,19 +817,20 @@ See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
-see \code{\link{vegdist}} function and \code{method} parameter in \code{vegan} package.}
+\item{\code{method}}{default NULL; a character vector with one or more elements; "bray" and "jaccard" are used when \code{method = NULL}; 
+see the \code{method} parameter in \code{\link{vegdist}} function for more available options.}
 
-\item{\code{unifrac}}{default FALSE; whether UniFrac index should be calculated.}
+\item{\code{unifrac}}{default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.}
 
-\item{\code{binary}}{default FALSE; TRUE is used for jaccard and unweighted unifrac; optional for other indexes.}
+\item{\code{binary}}{default FALSE; Whether convert abundance to binary data (presence/absence) when \code{method} is not "jaccard". 
+TRUE is used for "jaccard" automatically.}
 
 \item{\code{...}}{parameters passed to \code{\link{vegdist}} function.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-beta_diversity list stored in object.
+beta_diversity list stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

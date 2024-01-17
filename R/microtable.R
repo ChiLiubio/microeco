@@ -732,15 +732,16 @@ microtable <- R6Class(classname = "microtable",
 			write.csv(self$alpha_diversity, file = paste0(dirpath, "/", "alpha_diversity.csv"), row.names = TRUE)
 		},
 		#' @description
-		#' Calculate beta diversity, including Bray-Curtis, Jaccard, and UniFrac.
+		#' Calculate beta diversity dissimilarity matrix, such as Bray-Curtis, Jaccard, and UniFrac.
 		#' See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 		#'
-		#' @param method default NULL; a character vector with one or more elements; If default, "bray" and "jaccard" will be used; 
-		#'   see \code{\link{vegdist}} function and \code{method} parameter in \code{vegan} package. 
-		#' @param unifrac default FALSE; whether UniFrac index should be calculated.
-		#' @param binary default FALSE; TRUE is used for jaccard and unweighted unifrac; optional for other indexes.
+		#' @param method default NULL; a character vector with one or more elements; "bray" and "jaccard" are used when \code{method = NULL}; 
+		#'   see the \code{method} parameter in \code{\link{vegdist}} function for more available options. 
+		#' @param unifrac default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.
+		#' @param binary default FALSE; Whether convert abundance to binary data (presence/absence) when \code{method} is not "jaccard". 
+		#'   TRUE is used for "jaccard" automatically.
 		#' @param ... parameters passed to \code{\link{vegdist}} function.
-		#' @return beta_diversity list stored in object.
+		#' @return beta_diversity list stored in the object.
 		#' @examples
 		#' \donttest{
 		#' m1$cal_betadiv(unifrac = FALSE)
