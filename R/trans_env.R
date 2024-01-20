@@ -414,8 +414,8 @@ trans_env <- R6Class(classname = "trans_env",
 			df_arrows <- as.data.frame(df_arrows)
 			eigval <- res_ordination$CCA$eig/sum(res_ordination$CCA$eig)
 			eigval <- round(100 * eigval, 1)
-			eigval[1] <- paste0("RDA1", " [", eigval[1], "%]")
-			eigval[2] <- paste0("RDA2", " [", eigval[2], "%]")
+			eigval[1] <- paste0(self$ordination_method, "1", " [", eigval[1], "%]")
+			eigval[2] <- paste0(self$ordination_method, "2", " [", eigval[2], "%]")
 
 			if(self$ordination_method != "dbRDA"){
 				scrs$biplot_spe <- scores(res_ordination, choices = c(1, 2), "sp", scaling = "species")
