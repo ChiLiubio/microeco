@@ -1,15 +1,14 @@
 
 
-
 convert_diff2transenv <- function(diff_table, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill){
 	# heatmap for multi-factor
 	check_table_variable(diff_table, heatmap_x, "heatmap_x", "object$res_diff")
 	check_table_variable(diff_table, heatmap_y, "heatmap_y", "object$res_diff")
 	check_table_variable(diff_table, heatmap_cell, "heatmap_cell", "object$res_diff")
 	check_table_variable(diff_table, heatmap_sig, "heatmap_sig", "object$res_diff")
-	diff_table %<>% .[!is.na(.[, heatmap_cell]), ]
+	diff_table <- diff_table[!is.na(diff_table[, heatmap_cell]), ]
 	if("ns" %in% diff_table[, heatmap_sig]){
-		diff_table[, heatmap_sig] %<>% gsub("ns", "", .)
+		diff_table[, heatmap_sig] <- gsub("ns", "", diff_table[, heatmap_sig])
 	}
 	colnames(diff_table)[colnames(diff_table) == heatmap_x] <- "Env"
 	colnames(diff_table)[colnames(diff_table) == heatmap_y] <- "Taxa"

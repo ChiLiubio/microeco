@@ -370,8 +370,8 @@ if blast_tool_path is NULL, search the tools in the environmental path variable.
 
 \item{\code{path_to_reference_data}}{default "Tax4Fun2_ReferenceData_v2"; the path that points to files used in the prediction; 
 The directory must contain the Ref99NR or Ref100NR folder; 
-download Ref99NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download}{https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download} or 
-Ref100NR.zip from \href{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}{https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download}.}
+download Ref99NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/DkoZIyZpMNbrzSw/download" or 
+Ref100NR.zip from "https://cloudstor.aarnet.edu.au/plus/s/jIByczak9ZAFUB4/download".}
 
 \item{\code{path_to_temp_folder}}{default NULL; The temporary folder to store the logfile, intermediate file and result files; if NULL, 
 use the default temporary in the computer system.}
