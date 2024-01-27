@@ -271,7 +271,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								next
 							}
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
-							tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, alpha = alpha, ...)
+							check_res <- tryCatch(tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, alpha = alpha, ...),
+								error = function(e) {skip_to_next <- TRUE})
+							if(rlang::is_true(check_res)){
+								next
+							}
 							tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
 							compare_result %<>% rbind.data.frame(., tmp_res)
 						}

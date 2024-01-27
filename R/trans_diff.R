@@ -425,7 +425,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 								abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda)
 							}else{
 								subgroup_vec <- sampleinfo_resample[sel_samples, lefse_subgroup] %>% as.character %>% as.factor
-								# consider subgroup as a independent variable
+								# consider subgroup as an independent variable
 								abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
 							}
 							check_res <- tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <- TRUE})
