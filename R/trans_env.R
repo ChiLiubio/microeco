@@ -1464,6 +1464,9 @@ trans_env <- R6Class(classname = "trans_env",
 			p_res <- c()
 			# with Scaling and Centering normalization
 			for(i in 1:ncol(env)){
+				if(length(unique(env[, i])) == 1){
+					next
+				}
 				env_dist <- vegdist(scale(env[, i, drop = FALSE]), "euclid")
 				if(partial_mantel == T){
 					zdis <- vegdist(scale(env[, -i, drop = FALSE]), "euclid")
