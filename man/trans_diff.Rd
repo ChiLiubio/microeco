@@ -80,8 +80,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$new(
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
-    "t.test", "anova", "scheirerRayHare", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2",
-    "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta")[1],
+    "t.test", "anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw",
+    "DESeq2", "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -123,6 +123,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'anova'}}{ANOVA for one-way or multi-factor analysis; see \code{cal_diff} function of \code{trans_alpha} class}
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
+  \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
   \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
      based on the \code{ancombc2} function from \code{ANCOMBC} package; 
      only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;

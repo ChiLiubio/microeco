@@ -76,6 +76,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     	  For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
+		#'     \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'     \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
 		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
@@ -115,7 +116,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "anova")
 		#' }
 		cal_diff = function(
-			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta")[1], 
+			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta")[1], 
 			measure = NULL, 
 			p_adjust_method = "fdr", 
 			formula = NULL,
@@ -125,15 +126,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			return_model = FALSE,
 			...
 			){
-			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta"))
+			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta"))
 			group <- self$group
 			
-			if(method %in% c("scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta") & is.null(formula)){
+			if(method %in% c("scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta") & is.null(formula)){
 				if(is.null(formula)){
 					stop("formula is necessary! Please provide formula parameter!")
 				}
 			}
-			if(!method %in% c("anova", "scheirerRayHare", "lme", "betareg", "glmm", "glmm_beta")){
+			if(!method %in% c("anova", "scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta")){
 				if(is.null(group)){
 					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
 				}
@@ -321,7 +322,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				compare_result$Significance <- generate_p_siglabel(compare_result$P.unadj, nonsig = "ns")
 				method <- paste0(method, "-formula")
 			}
-			if(method %in% c("lme", "glmm", "glmm_beta")){
+			if(method %in% c("lm", "lme", "glmm", "glmm_beta")){
 				compare_result <- data.frame()
 				if(return_model){
 					res_model <- list()
@@ -329,8 +330,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				for(k in measure){
 					div_table <- data_alpha[data_alpha$Measure == k, ]
 					tmp_res <- data.frame()
-					if(method == "lme"){
-						tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
+					if(method == "lm"){
+						tmp <- stats::lm(reformulate(formula, "Value"), data = div_table, ...)
 						if(return_model){
 							res_model[[k]] <- tmp
 						}
@@ -338,41 +339,60 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
 						tmp_model_R2 <- performance::r2(tmp)
 						tmp_model_p <- anova(tmp)
-						tmp_random_p <- lmerTest::ranova(tmp)
-						tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
-							Measure = k, 
-							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
-							Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
-							Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
-							Estimate = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
-							P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
-						)
-					}else{
-						if(method == "glmm"){
-							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
-						}else{
-							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, family = glmmTMB::beta_family(link = "logit"), ...)
-						}
-						if(return_model){
-							res_model[[k]] <- tmp
-						}
-						tmp_summary <- summary(tmp)
-						tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
-						tmp_model_p <- car::Anova(tmp)
-						tmp_model_R2 <- performance::r2(tmp)
-						test <- try(tmp_model_R2$R2_conditional, silent = TRUE)
-						if(inherits(test, "try-error")) {
-							message("R2 unavailable for ", k, " !")
-							tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
-						}
 						tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
 							Measure = k, 
 							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
-							Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
-							Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+							R2 = c(tmp_model_R2$R2, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+							R2_adjusted = c(tmp_model_R2$R2_adjusted, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
 							Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
-							P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
+							P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_coefficients$`Pr(>|t|)`)
 						)
+					}else{
+						if(method == "lme"){
+							tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
+							if(return_model){
+								res_model[[k]] <- tmp
+							}
+							tmp_summary <- summary(tmp)
+							tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
+							tmp_model_R2 <- performance::r2(tmp)
+							tmp_model_p <- anova(tmp)
+							tmp_random_p <- lmerTest::ranova(tmp)
+							tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+								Measure = k, 
+								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
+								Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
+								Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
+								Estimate = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
+								P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
+							)
+						}else{
+							if(method == "glmm"){
+								tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
+							}else{
+								tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, family = glmmTMB::beta_family(link = "logit"), ...)
+							}
+							if(return_model){
+								res_model[[k]] <- tmp
+							}
+							tmp_summary <- summary(tmp)
+							tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
+							tmp_model_p <- car::Anova(tmp)
+							tmp_model_R2 <- performance::r2(tmp)
+							test <- try(tmp_model_R2$R2_conditional, silent = TRUE)
+							if(inherits(test, "try-error")) {
+								message("R2 unavailable for ", k, " !")
+								tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
+							}
+							tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+								Measure = k, 
+								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
+								Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+								Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+								Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
+								P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
+							)
+						}
 					}
 					compare_result %<>% rbind(., tmp_res)
 				}

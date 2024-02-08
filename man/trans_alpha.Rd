@@ -105,8 +105,8 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 Differential test on alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
-  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme",
-    "betareg", "glmm", "glmm_beta")[1],
+  method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm",
+    "lme", "betareg", "glmm", "glmm_beta")[1],
   measure = NULL,
   p_adjust_method = "fdr",
   formula = NULL,
@@ -132,6 +132,7 @@ Differential test on alpha diversity.
         For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
   \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
+  \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
   \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
   \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
   \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
