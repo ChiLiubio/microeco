@@ -116,7 +116,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				if(scale_species == T){
 					maxx <- max(abs(scores_sites[, plot.x]))/max(abs(loading[, plot.x]))
 					loading[, plot.x] %<>% {. * maxx * 0.8}
-					maxy <- max(abs(scores_sites[,plot.y]))/max(abs(loading[,plot.y]))
+					maxy <- max(abs(scores_sites[, plot.y]))/max(abs(loading[, plot.y]))
 					loading[, plot.y] %<>% {. * maxy * 0.8}
 				}
 				species <- cbind(loading, loading[, plot.x]^2 + loading[, plot.y]^2)
@@ -180,6 +180,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   and the y-axis position is equal to \code{max(points of y axis) * NMDS_stress_pos[2]}. Negative values can also be utilized for the negative part of the axis.
 		#'   \code{NMDS_stress_pos = NULL} denotes no stress text to show.
 		#' @param NMDS_stress_text_prefix default ""; If NMDS_stress_pos is not NULL, this parameter can be used to add text in front of the stress value.
+		#' @param loading_arrow default FALSE; whether show the loading using arrow.
+		#' @param loading_taxa_num default 10; the number of taxa used for the loading. Only available when \code{loading_arrow = TRUE}.
+		#' @param loading_text_color default "black"; the color of taxa text. Only available when \code{loading_arrow = TRUE}.
+		#' @param loading_arrow_color default "grey30"; the color of taxa arrow. Only available when \code{loading_arrow = TRUE}.
+		#' @param loading_text_size default 3; the size of taxa text. Only available when \code{loading_arrow = TRUE}.
+		#' @param loading_text_italic default FALSE; whether using italic for the taxa text. Only available when \code{loading_arrow = TRUE}.
 		#' @return \code{ggplot}.
 		#' @examples
 		#' t1$plot_ordination(plot_type = "point")
@@ -205,7 +211,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 			ellipse_level = 0.9,
 			ellipse_type = "t",
 			NMDS_stress_pos = c(1, 1),
-			NMDS_stress_text_prefix = ""
+			NMDS_stress_text_prefix = "",
+			loading_arrow = FALSE,
+			loading_taxa_num = 10, 
+			loading_text_color = "black",
+			loading_arrow_color = "grey30",
+			loading_text_size = 3,
+			loading_text_italic = FALSE
 			){
 			ordination <- self$ordination
 			if(is.null(ordination)){
@@ -297,6 +309,33 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			if(!is.null(plot_shape)){
 				p <- p + scale_shape_manual(values = shape_values)
+			}
+			if(loading_arrow & ordination %in% c("PCA", "DCA")){
+				df_arrows <- self$res_ordination$loading[1:loading_taxa_num, ]
+				colnames(df_arrows)[1:2] <- c("x", "y")
+				p <- p + geom_segment(
+					data = df_arrows, 
+					aes(x = 0, y = 0, xend = x, yend = y), 
+					arrow = arrow(length = unit(0.2, "cm")), 
+					color = loading_arrow_color, 
+					alpha = .6
+					)
+				df_arrows$label <- rownames(df_arrows)
+				df_arrows$label %<>% gsub(".*__", "", .)
+				if(loading_text_italic){
+					df_arrows$label %<>% paste0("italic('", .,"')")
+					loading_text_parse <- TRUE
+				}else{
+					loading_text_parse <- FALSE
+				}
+				p <- p + ggrepel::geom_text_repel(
+					data = df_arrows, 
+					aes_meco("x", "y", label = "label"), 
+					size = loading_text_size, 
+					color = loading_text_color, 
+					segment.alpha = .01, 
+					parse = loading_text_parse
+				)
 			}
 			p
 		},

@@ -201,7 +201,13 @@ Plot the ordination result.
   ellipse_level = 0.9,
   ellipse_type = "t",
   NMDS_stress_pos = c(1, 1),
-  NMDS_stress_text_prefix = ""
+  NMDS_stress_text_prefix = "",
+  loading_arrow = FALSE,
+  loading_taxa_num = 10,
+  loading_text_color = "black",
+  loading_arrow_color = "grey30",
+  loading_text_size = 3,
+  loading_text_italic = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -254,6 +260,18 @@ and the y-axis position is equal to \code{max(points of y axis) * NMDS_stress_po
 \code{NMDS_stress_pos = NULL} denotes no stress text to show.}
 
 \item{\code{NMDS_stress_text_prefix}}{default ""; If NMDS_stress_pos is not NULL, this parameter can be used to add text in front of the stress value.}
+
+\item{\code{loading_arrow}}{default FALSE; whether show the loading using arrow.}
+
+\item{\code{loading_taxa_num}}{default 10; the number of taxa used for the loading. Only available when \code{loading_arrow = TRUE}.}
+
+\item{\code{loading_text_color}}{default "black"; the color of taxa text. Only available when \code{loading_arrow = TRUE}.}
+
+\item{\code{loading_arrow_color}}{default "grey30"; the color of taxa arrow. Only available when \code{loading_arrow = TRUE}.}
+
+\item{\code{loading_text_size}}{default 3; the size of taxa text. Only available when \code{loading_arrow = TRUE}.}
+
+\item{\code{loading_text_italic}}{default FALSE; whether using italic for the taxa text. Only available when \code{loading_arrow = TRUE}.}
 }
 \if{html}{\out{</div>}}
 }
