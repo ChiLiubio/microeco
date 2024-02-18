@@ -70,6 +70,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ncomp default 3; dimensions shown in the results.
 		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".
 		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
+		#' @param scale_species_ratio default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
+		#' 	  Only available when \code{scale_species = TURE}.
 		#' @param ... parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, 
 		#' 	  or \code{vegan::decorana} function when \code{ordination = "DCA"}, 
 		#' 	  or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
@@ -82,6 +84,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			ncomp = 3,
 			trans_otu = FALSE, 
 			scale_species = FALSE,
+			scale_species_ratio = 0.8,
 			...
 			){
 			if(is.null(ordination)){
@@ -110,19 +113,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 				scores_sites <- scores(model, choices = 1:ncomp, display = "sites")
 				combined <- cbind.data.frame(scores_sites, dataset$sample_table)
 				loading <- scores(model, choices = 1:ncomp, display = "species")
-				if(!is.null(dataset$tax_table)){
-					loading <- cbind.data.frame(loading, dataset$tax_table[rownames(loading), ])
-				}
-				if(scale_species == T){
+				loading %<>% as.data.frame
+				loading[, "dist"] <- loading[, plot.x]^2 + loading[, plot.y]^2
+				loading <- loading[order(loading[, "dist"], decreasing = TRUE), ]
+				if(scale_species){
 					maxx <- max(abs(scores_sites[, plot.x]))/max(abs(loading[, plot.x]))
-					loading[, plot.x] %<>% {. * maxx * 0.8}
+					loading[, plot.x] %<>% {. * maxx * scale_species_ratio}
 					maxy <- max(abs(scores_sites[, plot.y]))/max(abs(loading[, plot.y]))
-					loading[, plot.y] %<>% {. * maxy * 0.8}
+					loading[, plot.y] %<>% {. * maxy * scale_species_ratio}
 				}
-				species <- cbind(loading, loading[, plot.x]^2 + loading[, plot.y]^2)
-				colnames(species)[ncol(species)] <- "dist"
-				species <- species[with(species, order(-dist)), ]
-				outlist <- list(model = model, scores = combined, loading = species, eig = expla)
+				outlist <- list(model = model, scores = combined, loading = loading, eig = expla)
 			}
 			if(ordination %in% c("PCoA", "NMDS")){
 				if(is.null(self$use_matrix)){
@@ -321,7 +321,6 @@ trans_beta <- R6Class(classname = "trans_beta",
 					alpha = .6
 					)
 				df_arrows$label <- rownames(df_arrows)
-				df_arrows$label %<>% gsub(".*__", "", .)
 				if(loading_text_italic){
 					df_arrows$label %<>% paste0("italic('", .,"')")
 					loading_text_parse <- TRUE

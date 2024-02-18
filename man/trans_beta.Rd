@@ -142,6 +142,7 @@ Unconstrained ordination.
   ncomp = 3,
   trans_otu = FALSE,
   scale_species = FALSE,
+  scale_species_ratio = 0.8,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -157,6 +158,9 @@ PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 \item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA or DCA is scaled.}
+
+\item{\code{scale_species_ratio}}{default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
+Only available when \code{scale_species = TURE}.}
 
 \item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, 
 or \code{vegan::decorana} function when \code{ordination = "DCA"}, 
