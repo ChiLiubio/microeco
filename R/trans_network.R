@@ -296,10 +296,15 @@ trans_network <- R6Class(classname = "trans_network",
 					}
 					diag(cortable) <- 0
 					cor_matrix <- as.matrix(cortable)
+					if(!any(abs(cortable) >= tc1)){
+						stop("All the correlation coefficients are smaller than the threshold! Please lower the COR_cut parameter!")
+					}
 					cor_matrix[abs(cortable) >= tc1] <- 1
 					cor_matrix[adp > COR_p_thres] <- 0
+					if(!any(cor_matrix == 1)){
+						stop("All the correlation coefficients larger than COR_cut parameter are not significant under current COR_p_thres parameter!")
+					}
 					cor_matrix[cor_matrix != 1] <- 0
-					diag(cor_matrix) <- 0
 					network <- graph.adjacency(cor_matrix, mode = "undirected")
 					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 					E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
