@@ -701,9 +701,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						feature.dat.type = 'count', ...)
 					self$res_diff_raw <- res
 					message('Original result is stored in object$res_diff_raw ...')
-					group_filter <- gsub(" ", "", group)
-					group_split <- strsplit(group, split = "+", fixed = TRUE) %>% unlist
-					group_split %<>% .[. %in% colnames(newdata$sample_table)]
+					group_split <- strsplit(group, split = "+", fixed = TRUE) %>% 
+						unlist %>% 
+						gsub("^\\s+", "", .) %>% 
+						gsub("\\s+$", "", .)
 					list_groups <- list()
 					for(j in group_split){
 						list_groups[[j]] <- newdata$sample_table[, j] %>% as.character %>% unique
@@ -713,14 +714,19 @@ trans_diff <- R6Class(classname = "trans_diff",
 						message('Tidy and merge the table: ', i,' ...')
 						tmp <- res$output[[i]]
 						# identify group name and elements
-						for(j in names(list_groups)){
-							if(i %in% paste0(j, list_groups[[j]])){
-								tmp_group_element1 <- gsub(j, "", i)
-								tmp_group_element2 <- paste0(j, list_groups[[j]]) %>% .[!. %in% names(res$output)] %>% gsub(j, "", .)
-								tmp <- data.frame(compare = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
-								output %<>% rbind(., tmp)
-							}else{
-								next
+						if(i %in% colnames(newdata$sample_table)){
+							tmp <- data.frame(compare = i, Taxa = rownames(tmp), tmp)
+							output %<>% rbind(., tmp)
+						}else{
+							for(j in names(list_groups)){
+								if(i %in% paste0(j, list_groups[[j]])){
+									tmp_group_element1 <- gsub(j, "", i, fixed = TRUE)
+									tmp_group_element2 <- paste0(j, list_groups[[j]]) %>% .[!. %in% names(res$output)] %>% gsub(j, "", .)
+									tmp <- data.frame(compare = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
+									output %<>% rbind(., tmp)
+								}else{
+									next
+								}
 							}
 						}
 					}
