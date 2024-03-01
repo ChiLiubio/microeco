@@ -444,7 +444,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' \dontrun{
 		#' t1$cal_process(use_betamntd = TRUE)
 		#' }
-		cal_process = function(use_betamntd = TRUE){
+		cal_process = function(use_betamntd = TRUE, group = NULL){
 			if(use_betamntd == T){
 				ses_phylo_beta <- self$res_ses_betamntd
 				if(is.null(ses_phylo_beta)){
@@ -460,7 +460,23 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			if(is.null(ses_comm)){
 				stop("RCbray not calculated! Please first run cal_rcbray function!")
 			}
-			self$res_process <- private$percen_proc(ses_phylo_beta = ses_phylo_beta, ses_comm = ses_comm)
+			if(is.null(group)){
+				res <- private$percen_proc(ses_phylo_beta = ses_phylo_beta, ses_comm = ses_comm)
+			}else{
+				check_table_variable(self$sample_table, group, "group", "sample_table of microtable object!")
+				all_groups <- self$sample_table[, group] %>% unique
+				tmp <- list()
+				for(i in all_groups){
+					sample_names <- self$sample_table %>% .[.[, group] == i, , drop = FALSE] %>% rownames
+					sub_ses_phylo_beta <- ses_phylo_beta[sample_names, sample_names]
+					sub_ses_comm <- ses_comm[sample_names, sample_names]
+					tmp_res <- private$percen_proc(ses_phylo_beta = sub_ses_phylo_beta, ses_comm = sub_ses_comm)
+					tmp_res[, group] <- i
+					tmp[[i]] <- tmp_res
+				}
+				res <- do.call(rbind, tmp)
+			}
+			self$res_process <- res
 			message('The result is stored in object$res_process ...')
 		},
 		#' @description

@@ -511,7 +511,7 @@ t1$cal_rcbray(runs = 50)
 \subsection{Method \code{cal_process()}}{
 Infer the ecological processes according to ses.betaMNTD ses.betaMPD and rcbray.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_process(use_betamntd = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_process(use_betamntd = TRUE, group = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
