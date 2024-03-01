@@ -509,7 +509,7 @@ t1$cal_rcbray(runs = 50)
 \if{html}{\out{<a id="method-trans_nullmodel-cal_process"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_process}{}}}
 \subsection{Method \code{cal_process()}}{
-Infer the ecological processes according to ses.betaMNTD ses.betaMPD and rcbray.
+Infer the ecological processes according to ses.betaMNTD/ses.betaMPD and rcbray.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_process(use_betamntd = TRUE, group = NULL)}\if{html}{\out{</div>}}
 }
@@ -518,11 +518,14 @@ Infer the ecological processes according to ses.betaMNTD ses.betaMPD and rcbray.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{use_betamntd}}{default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.}
+
+\item{\code{group}}{default NULL; a column name in sample_table of microtable object. 
+If provided, the analysis will be performed for each group instead of the whole.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rcbray in object.
+res_process in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
