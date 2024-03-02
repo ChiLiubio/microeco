@@ -31,12 +31,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
-		#'     \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
-		#'        based on the \code{ancombc2} function from \code{ANCOMBC} package; 
-		#'        Please provide \code{fix_formula} parameter, which is passed to the \code{ancombc2} function;
-		#'        If the \code{group} parameter is provided, it will be also directly passed to the group parameter of \code{ancombc2} function;
-		#'        Reference: <doi:10.1038/s41467-020-17041-7><10.1038/s41592-023-02092-7>; Require \code{ANCOMBC} package to be installed 
-		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
 		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
 		#'     	  ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
 		#'     	  drawn from the Dirichlet distribution; Reference: <doi:10.1371/journal.pone.0067019> and <doi:10.1186/2049-2618-2-15>; 
@@ -45,9 +39,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
 		#'     	  see also the \code{test} parameter in \code{ALDEx2::aldex} function.}
 		#'     \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
+		#'     \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
+		#'        based on the \code{ancombc2} function from \code{ANCOMBC} package.
+		#'        If the \code{fix_formula} parameter is not provided, the function can automatically assign it by using group parameter.
+		#'        For this method, the \code{group} parameter is directly passed to the group parameter of \code{ancombc2} function.
+		#'        Reference: <doi:10.1038/s41467-020-17041-7><10.1038/s41592-023-02092-7>; Require \code{ANCOMBC} package to be installed 
+		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
 		#'     \item{\strong{'linda'}}{Linear Model for Differential Abundance Analysis of High-dimensional Compositional Data 
 		#'     	  based on the \code{linda} function of \code{MicrobiomeStat} package. 
-		#'     	  Here the group parameter is passed to formula parameter in \code{linda} function with the prefix '~'.
+		#'     	  For linda method, please provide either the group parameter or the formula parameter.
+		#'     	  When the formula parameter is provided, it should start with '~' as it is directly used by the linda function.
+		#'     	  If the group parameter is used, the prefix '~' is not necessary as the function can automatically add it.
 		#'     	  The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
 		#'     	  Reference: <doi:10.1186/s13059-022-02655-5>}
 		#'     \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data based on the Maaslin2 package.
@@ -690,6 +692,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 							stop("Either group or formula parameter should be provided!")
 						}
 						group <- all_parameters[["formula"]]
+						if(!grepl("^~", group)){
+							stop("The input formula parameter should start with ~! Please read the document of formula parameter of MicrobiomeStat::linda function!")
+						}
 						res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, feature.dat.type = 'count', ...)
 					}else{
 						if(!grepl("^~", group)){
