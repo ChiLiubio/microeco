@@ -175,7 +175,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
-				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2", "ancombc2")){
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2", "ancombc2", "linda")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
 				}
 				if(!is.null(group)){
@@ -684,18 +684,23 @@ trans_diff <- R6Class(classname = "trans_diff",
 					private$check_taxa_level_all(taxa_level)
 					use_dataset <- clone(tmp_dataset)
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
-					if(!grepl("^~", group)){
-						use_formula <- paste0("~", group)
+					if(is.null(group)){
+						all_parameters <- c(as.list(environment()), list(...))
+						if(! "formula" %in% names(all_parameters)){
+							stop("Either group or formula parameter should be provided!")
+						}
+						group <- all_parameters[["formula"]]
+						res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, feature.dat.type = 'count', ...)
 					}else{
-						use_formula <- group
-						group %<>% gsub("^~", "", .)
+						if(!grepl("^~", group)){
+							group <- paste0("~", group)
+						}
+						res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, formula = group, feature.dat.type = 'count', ...)
 					}
-					message("Perform linda with formula: ", use_formula, " ...")
-					res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, formula = use_formula, 
-						feature.dat.type = 'count', ...)
 					self$res_diff_raw <- res
 					message('Original result is stored in object$res_diff_raw ...')
 					message('Merge the output tables ...')
+					group %<>% gsub("^~", "", .)
 					# different cases
 					output <- data.frame()
 					if(grepl("+", group, fixed = TRUE)){
