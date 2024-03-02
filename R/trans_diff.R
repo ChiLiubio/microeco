@@ -33,9 +33,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
 		#'     \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
 		#'        based on the \code{ancombc2} function from \code{ANCOMBC} package; 
-		#'        only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;
-		#'        For more flexible usages, please see and use \code{ancombc2} function directly;
-		#'        Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
+		#'        Please provide \code{fix_formula} parameter, which is passed to the \code{ancombc2} function;
+		#'        If the \code{group} parameter is provided, it will be also directly passed to the group parameter of \code{ancombc2} function;
+		#'        Reference: <doi:10.1038/s41467-020-17041-7><10.1038/s41592-023-02092-7>; Require \code{ANCOMBC} package to be installed 
 		#'        (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
 		#'     \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
 		#'     	  ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
@@ -175,7 +175,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
-				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2")){
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2", "ancombc2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
 				}
 				if(!is.null(group)){
@@ -475,7 +475,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 				}
 				
-				if(method %in% c("metastat", "metagenomeSeq", "ancombc2", "ALDEx2_t", "DESeq2")){
+				if(method %in% c("metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2")){
 					private$check_taxa_level_all(taxa_level)
 					if(is.null(group_choose_paired)){
 						all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
@@ -596,54 +596,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					colnames(output)[colnames(output) == "padj"] <- "P.adj"
 					colnames(output)[colnames(output) == "pvalue"] <- "P.unadj"
 				}
-				if(method == "ancombc2"){
-					if(!require("ANCOMBC")){
-						stop("ANCOMBC package is not installed !")
-					}
-					if(!require("file2meco")){
-						stop("Please install file2meco package! The function meco2phyloseq is required!")
-					}
-					res_diff_raw <- list()
-					if(ncol(all_name) > 1){
-						message("First run the global test for multiple groups ...")
-						use_dataset <- clone(tmp_dataset)
-						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
-						newdata <- file2meco::meco2phyloseq(newdata)
-						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = "Species", group = group, global = TRUE, fix_formula = group, ...)
-						res <- res_raw$res_global[, 1:5]
-						colnames(res) <- c("feature", "W", "P.unadj", "P.adj", "diff_abn")
-						rownames(res) <- NULL
-						group_vec <- use_dataset$sample_table[, group] %>% as.character %>% unique
-						comparisions <- paste0(group_vec, collapse = " - ")
-						res <- cbind.data.frame(compare = comparisions, res)
-						output <- rbind.data.frame(output, res)
-						res_diff_raw[[comparisions]] <- res_raw
-					}
-
-					message("Total ", ncol(all_name), " paired groups for test ...")
-					for(i in 1:ncol(all_name)) {
-						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ..."))
-						use_dataset <- clone(tmp_dataset)
-						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
-						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
-						newdata <- file2meco::meco2phyloseq(newdata)
-						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = "Species", group = group, fix_formula = group, ...)
-						comparisions <- paste0(as.character(all_name[, i]), collapse = " - ")
-						res_diff_raw[[comparisions]] <- res_raw
-						res_raw2 <- res_raw$res
-						res <- data.frame(feature = res_raw2$taxon, 
-							W = res_raw2[, which(grepl("^W_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
-							P.unadj = res_raw2[, which(grepl("^p_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
-							P.adj = res_raw2[, which(grepl("^q_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))], 
-							diff_abn = res_raw2[, which(grepl("^diff_", colnames(res_raw2)) & !grepl("Intercept", colnames(res_raw2)))])
-						rownames(res) <- NULL
-						add_name <- comparisions %>% rep(., nrow(res))
-						res <- cbind.data.frame(compare = add_name, res)
-						output <- rbind.data.frame(output, res)
-					}
-					self$res_diff_raw <- res_diff_raw
-					message("Original ancombc2 test results are stored in object$res_diff_raw list ...")
-				}
 				if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
 					if(!require("ALDEx2")){
 						stop("ALDEx2 package is not installed !")
@@ -681,6 +633,44 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("ALDEx2_sig is not found in the result! Please check the input!")
 					}else{
 						output$P.adj <- output[, ALDEx2_sig %>% .[. %in% colnames(output)] %>% .[1]]
+					}
+				}
+				if(method == "ancombc2"){
+					if(!require("ANCOMBC")){
+						stop("ANCOMBC package is not installed !")
+					}
+					if(!require("file2meco")){
+						stop("Please install file2meco package! The function meco2phyloseq is required!")
+					}
+					use_dataset <- clone(tmp_dataset)
+					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
+					newdata <- file2meco::meco2phyloseq(newdata)
+					res_raw <- ANCOMBC::ancombc2(newdata, tax_level = NULL, assay_name = "counts", group = group, ...)
+					self$res_diff_raw <- res_raw
+					tmp <- res_raw$res
+					if(!is.null(tmp)){
+						message('Converting res to long format ...')
+						res_convert <- data.frame()
+						for(i in seq_len(nrow(tmp))){
+							taxon_data <- tmp[i, ]
+							raw_colnames <- colnames(taxon_data)
+							all_factors <- raw_colnames %>% .[grepl("lfc_", .)] %>% gsub("lfc_", "", .)
+							res_convert <- rbind(res_convert, data.frame(Taxa = tmp[i, "taxon"], 
+								Factors = all_factors, 
+								lfc = taxon_data %>% .[, grepl("^lfc_", raw_colnames)] %>% unlist,
+								se = taxon_data %>% .[, grepl("^se_", raw_colnames)] %>% unlist,
+								W = taxon_data %>% .[, grepl("^W_", raw_colnames)] %>% unlist,
+								p = taxon_data %>% .[, grepl("^p_", raw_colnames)] %>% unlist,
+								q = taxon_data %>% .[, grepl("^q_", raw_colnames)] %>% unlist,
+								diff = taxon_data %>% .[, grepl("^diff_", raw_colnames)] %>% unlist,
+								passed_ss = taxon_data %>% .[, grepl("^passed_ss_", raw_colnames)] %>% unlist
+								)
+							)
+						}
+						res_convert$Significance <- generate_p_siglabel(res_convert$q, nonsig = "")
+						output <- res_convert
+					}else{
+						output <- NULL
 					}
 				}
 				if(method == "linda"){
@@ -760,7 +750,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 					}
 				}
-				if(method %in% c("metagenomeSeq", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda")){
+				if(method %in% c("metagenomeSeq", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda")){
 					output %<>% dropallfactors(unfac2num = TRUE)
 					colnames(output)[1:2] <- c("Comparison", "Taxa")
 					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
@@ -785,7 +775,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output[, "Factors"] %<>% gsub("\\s+$", "", .)
 				}
 				self$res_diff <- output
-				message(method , " analysis result is stored in object$res_diff ...")
+				if(method == "ancombc2"){
+					message("Original ancombc2 results are stored in object$res_diff_raw ...")
+					if(!is.null(output)){
+						message("Converted test result is stored in object$res_diff ...")
+					}
+					method <- "ancombc2_formula"
+				}else{
+					message(method , " analysis result is stored in object$res_diff ...")
+				}
 				self$method <- method
 				self$taxa_level <- taxa_level
 				# save abund_table for the cladogram
@@ -861,20 +859,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 			abund_data <- self$res_abund
 			method <- self$method
 			diff_data <- self$res_diff
+			if(grepl("ancombc2", method)){
+				stop("The function can not be applied to ancombc2!")
+			}
 			if(grepl("formula", method)){
 				stop("The function can not be applied to multi-factor analysis!")
 			}
 			# first determine how to select compared groups
-			if(is.null(select_group)){
-				if(method == "ancombc2"){
-					if(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1){
-						if(any(sapply(gregexpr(" - ", diff_data$Comparison), length) == 1)){
-							message("For ancombc2, both global and paired test are found. No select_group provided, use the global test result ...")
-							diff_data %<>% .[.$Comparison == diff_data$Comparison[1], ]
-						}
-					}
-				}
-			}else{
+			if(!is.null(select_group)){
 				if(length(select_group) > 1){
 					stop("The select_group parameter should only have one element! Please check the input!")
 				}

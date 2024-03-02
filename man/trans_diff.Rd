@@ -126,9 +126,9 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
   \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
      based on the \code{ancombc2} function from \code{ANCOMBC} package; 
-     only support the case that \code{group} is same with \code{fix_formula} parameter in order to get well-organized output table;
-     For more flexible usages, please see and use \code{ancombc2} function directly;
-     Reference: <doi:10.1038/s41467-020-17041-7>; Require \code{ANCOMBC} package to be installed 
+     Please provide \code{fix_formula} parameter, which is passed to the \code{ancombc2} function;
+     If the \code{group} parameter is provided, it will be also directly passed to the group parameter of \code{ancombc2} function;
+     Reference: <doi:10.1038/s41467-020-17041-7><10.1038/s41592-023-02092-7>; Require \code{ANCOMBC} package to be installed 
      (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
   \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
         ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
