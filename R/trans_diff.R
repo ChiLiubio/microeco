@@ -645,32 +645,37 @@ trans_diff <- R6Class(classname = "trans_diff",
 					use_dataset <- clone(tmp_dataset)
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 					newdata <- file2meco::meco2phyloseq(newdata)
-					res_raw <- ANCOMBC::ancombc2(newdata, tax_level = NULL, assay_name = "counts", group = group, ...)
+					# check fix_formula parameter
+					all_parameters <- c(as.list(environment()), list(...))
+					if("fix_formula" %in% names(all_parameters)){
+						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = NULL, assay_name = "counts", group = group, ...)
+					}else{
+						res_raw <- ANCOMBC::ancombc2(newdata, tax_level = NULL, assay_name = "counts", group = group, fix_formula = group, ...)
+					}
 					self$res_diff_raw <- res_raw
 					tmp <- res_raw$res
-					if(!is.null(tmp)){
-						message('Converting res to long format ...')
-						res_convert <- data.frame()
-						for(i in seq_len(nrow(tmp))){
-							taxon_data <- tmp[i, ]
-							raw_colnames <- colnames(taxon_data)
-							all_factors <- raw_colnames %>% .[grepl("lfc_", .)] %>% gsub("lfc_", "", .)
-							res_convert <- rbind(res_convert, data.frame(Taxa = tmp[i, "taxon"], 
-								Factors = all_factors, 
-								lfc = taxon_data %>% .[, grepl("^lfc_", raw_colnames)] %>% unlist,
-								se = taxon_data %>% .[, grepl("^se_", raw_colnames)] %>% unlist,
-								W = taxon_data %>% .[, grepl("^W_", raw_colnames)] %>% unlist,
-								p = taxon_data %>% .[, grepl("^p_", raw_colnames)] %>% unlist,
-								P.adj = taxon_data %>% .[, grepl("^q_", raw_colnames)] %>% unlist,
-								diff = taxon_data %>% .[, grepl("^diff_", raw_colnames)] %>% unlist,
-								passed_ss = taxon_data %>% .[, grepl("^passed_ss_", raw_colnames)] %>% unlist
-								)
-							)
-						}
-						output <- res_convert
-					}else{
-						output <- NULL
+					if(is.null(tmp)){
+						stop("The res in the ancombc2 results is NULL!")
 					}
+					message('Converting res to long format ...')
+					res_convert <- data.frame()
+					for(i in seq_len(nrow(tmp))){
+						taxon_data <- tmp[i, ]
+						raw_colnames <- colnames(taxon_data)
+						all_factors <- raw_colnames %>% .[grepl("lfc_", .)] %>% gsub("lfc_", "", .)
+						res_convert <- rbind(res_convert, data.frame(Taxa = tmp[i, "taxon"], 
+							Factors = all_factors, 
+							lfc = taxon_data %>% .[, grepl("^lfc_", raw_colnames)] %>% unlist,
+							se = taxon_data %>% .[, grepl("^se_", raw_colnames)] %>% unlist,
+							W = taxon_data %>% .[, grepl("^W_", raw_colnames)] %>% unlist,
+							p = taxon_data %>% .[, grepl("^p_", raw_colnames)] %>% unlist,
+							P.adj = taxon_data %>% .[, grepl("^q_", raw_colnames)] %>% unlist,
+							diff = taxon_data %>% .[, grepl("^diff_", raw_colnames)] %>% unlist,
+							passed_ss = taxon_data %>% .[, grepl("^passed_ss_", raw_colnames)] %>% unlist
+							)
+						)
+					}
+					output <- res_convert
 				}
 				if(method == "linda"){
 					if(!require("MicrobiomeStat")){
