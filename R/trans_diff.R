@@ -661,13 +661,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 								se = taxon_data %>% .[, grepl("^se_", raw_colnames)] %>% unlist,
 								W = taxon_data %>% .[, grepl("^W_", raw_colnames)] %>% unlist,
 								p = taxon_data %>% .[, grepl("^p_", raw_colnames)] %>% unlist,
-								q = taxon_data %>% .[, grepl("^q_", raw_colnames)] %>% unlist,
+								P.adj = taxon_data %>% .[, grepl("^q_", raw_colnames)] %>% unlist,
 								diff = taxon_data %>% .[, grepl("^diff_", raw_colnames)] %>% unlist,
 								passed_ss = taxon_data %>% .[, grepl("^passed_ss_", raw_colnames)] %>% unlist
 								)
 							)
 						}
-						res_convert$Significance <- generate_p_siglabel(res_convert$q, nonsig = "")
 						output <- res_convert
 					}else{
 						output <- NULL
@@ -691,33 +690,30 @@ trans_diff <- R6Class(classname = "trans_diff",
 						feature.dat.type = 'count', ...)
 					self$res_diff_raw <- res
 					message('Original result is stored in object$res_diff_raw ...')
-					group_split <- strsplit(group, split = "+", fixed = TRUE) %>% 
-						unlist %>% 
-						gsub("^\\s+", "", .) %>% 
-						gsub("\\s+$", "", .)
-					list_groups <- list()
-					for(j in group_split){
-						list_groups[[j]] <- newdata$sample_table[, j] %>% as.character %>% unique
-					}
+					message('Merge the output tables ...')
+					# different cases
 					output <- data.frame()
-					for(i in names(res$output)){
-						message('Tidy and merge the table: ', i,' ...')
-						tmp <- res$output[[i]]
-						# identify group name and elements
-						if(i %in% colnames(newdata$sample_table)){
-							tmp <- data.frame(compare = i, Taxa = rownames(tmp), tmp)
+					if(grepl("+", group, fixed = TRUE)){
+						# multi-factor
+						for(i in names(res$output)){
+							tmp <- res$output[[i]]
+							tmp <- data.frame(Taxa = rownames(tmp), Factors = i, tmp)
 							output %<>% rbind(., tmp)
-						}else{
-							for(j in names(list_groups)){
-								if(i %in% paste0(j, list_groups[[j]])){
-									tmp_group_element1 <- gsub(j, "", i, fixed = TRUE)
-									tmp_group_element2 <- paste0(j, list_groups[[j]]) %>% .[!. %in% names(res$output)] %>% gsub(j, "", .)
-									tmp <- data.frame(compare = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
-									output %<>% rbind(., tmp)
-								}else{
-									next
-								}
+						}
+						method <- paste0("linda formula: ", group)
+					}else{
+						# normal case
+						if(group %in% colnames(newdata$sample_table)){
+							all_groups <- newdata$sample_table[, group] %>% as.character %>% unique
+							for(i in names(res$output)){
+								tmp <- res$output[[i]]
+								tmp_group_element1 <- gsub(group, "", i, fixed = TRUE)
+								tmp_group_element2 <- paste0(group, all_groups) %>% .[!. %in% names(res$output)] %>% gsub(group, "", .)
+								tmp <- data.frame(compare = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
+								output %<>% rbind(., tmp)
 							}
+						}else{
+							stop('The group is not found in the column names of sample_table! Skip the merging step!')
 						}
 					}
 					colnames(output)[colnames(output) %in% c("pvalue", "padj")] <- c("P.unadj", "P.adj")
@@ -753,7 +749,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(method %in% c("metagenomeSeq", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "linda")){
 					output %<>% dropallfactors(unfac2num = TRUE)
 					colnames(output)[1:2] <- c("Comparison", "Taxa")
-					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 					if(group %in% colnames(sampleinfo)){
 						# filter the unknown taxa in output
 						output %<>% .[.$Taxa %in% res_abund$Taxa, ]
@@ -764,15 +759,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}) %>% unlist
 					}
 				}
-				if(method == "linda"){
-					if(! group %in% colnames(sampleinfo)){
-						method <- paste0("linda formula: ", group)
-					}
-				}
 				self$res_abund <- res_abund
 				message('Taxa abundance table is stored in object$res_abund ...')
 				if("Factors" %in% colnames(output)){
 					output[, "Factors"] %<>% gsub("\\s+$", "", .)
+				}
+				if(!is.null(output)){
+					if("P.adj" %in% colnames(output)){
+						if(!"Significance" %in% colnames(output)){
+							output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "")
+						}
+					}
 				}
 				self$res_diff <- output
 				if(method == "ancombc2"){
