@@ -68,7 +68,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ordination default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
 		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 		#' @param ncomp default 3; dimensions shown in the results.
-		#' @param trans_otu default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".
+		#' @param trans default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".
 		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
 		#' @param scale_species_ratio default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 		#' 	  Only available when \code{scale_species = TURE}.
@@ -82,7 +82,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		cal_ordination = function(
 			ordination = "PCoA",
 			ncomp = 3,
-			trans_otu = FALSE, 
+			trans = FALSE, 
 			scale_species = FALSE,
 			scale_species_ratio = 0.8,
 			...
@@ -97,7 +97,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(ordination %in% c("PCA", "DCA")){
 				plot.x <- switch(ordination, PCA = "PC1", DCA = "DCA1")
 				plot.y <- switch(ordination, PCA = "PC2", DCA = "DCA2")
-				if(trans_otu == T){
+				if(trans == T){
 					abund <- sqrt(dataset$otu_table)
 				}else{
 					abund <- dataset$otu_table

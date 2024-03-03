@@ -140,7 +140,7 @@ Unconstrained ordination.
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
   ordination = "PCoA",
   ncomp = 3,
-  trans_otu = FALSE,
+  trans = FALSE,
   scale_species = FALSE,
   scale_species_ratio = 0.8,
   ...
@@ -155,7 +155,7 @@ PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
 
 \item{\code{ncomp}}{default 3; dimensions shown in the results.}
 
-\item{\code{trans_otu}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".}
+\item{\code{trans}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA or DCA is scaled.}
 
