@@ -337,6 +337,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			
 			suppressMessages(trans_diff_tmp <- trans_diff$new(dataset = NULL))
 			trans_diff_tmp$res_diff <- tmp
+			trans_diff_tmp$method <- "rf"
 			trans_diff_tmp$plot_diff_bar(coord_flip = FALSE, ...)
 		},
 		#' @description
