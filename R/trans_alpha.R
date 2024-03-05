@@ -29,9 +29,18 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					message("The alpha_diversity in dataset not found! Calculate it automatically ...")
 					dataset$cal_alphadiv()
 				}
-				data_alpha <- dataset$alpha_diversity %>% 
-					cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE) %>%
-					.[, !grepl("^se", colnames(.))] %>%
+				data_alpha <- dataset$alpha_diversity %>% .[, !grepl("^se", colnames(.)), drop = FALSE]
+				tmp_filter <- c()
+				for(i in colnames(data_alpha)){
+					if(any(is.nan(data_alpha[, i]))){
+						tmp_filter %<>% c(., i)
+					}
+				}
+				if(length(tmp_filter) > 0){
+					message("NaN is found for index ", paste(tmp_filter, collapse = " "), "! Filtering ...")
+					data_alpha %<>% .[, ! colnames(.) %in% tmp_filter, drop = FALSE]
+				}
+				data_alpha %<>% cbind.data.frame(Sample = rownames(.), ., stringsAsFactors = FALSE) %>%
 					reshape2::melt(id.vars = "Sample") %>%
 					`colnames<-`(c("Sample", "Measure", "Value")) %>%
 					dplyr::left_join(., rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
