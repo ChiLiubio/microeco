@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 1.5.1
+Version: 1.6.0
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
               person("Felipe", "R. P. Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
 			  person("Umer Zeeshan", "Ijaz", role = "ctb", email = "Umer.Ijaz@glasgow.ac.uk"),
@@ -15,7 +15,7 @@ Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of statistical and plotting approaches in microbial community ecology based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity analysis, beta diversity analysis, differential abundance test, null model analysis, network analysis, machine learning, environmental data analysis and functional analysis.
 URL: https://github.com/ChiLiubio/microeco
 Depends: R (>= 3.5.0)
-Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2 (>= 3.4.0), RColorBrewer, reshape2, igraph
+Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2 (>= 3.5.0), RColorBrewer, reshape2, igraph
 Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, rgexf, mice, GGally
 License: GPL-3
 LazyData: true
@@ -23,5 +23,5 @@ Encoding: UTF-8
 NeedsCompilation: no
 Packaged: 2024-03-04
 Repository: CRAN
-Date/Publication: 2024-03-04
+Date/Publication: 2024-03-06
 RoxygenNote: 7.2.3
