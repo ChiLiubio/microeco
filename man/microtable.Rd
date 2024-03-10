@@ -817,8 +817,8 @@ See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default NULL; a character vector with one or more elements; "bray" and "jaccard" are used when \code{method = NULL}; 
-see the \code{method} parameter in \code{\link{vegdist}} function for more available options.}
+\item{\code{method}}{default NULL; a character vector with one or more elements; \code{c("bray", "jaccard")} is used when \code{method = NULL}; 
+See the \code{method} parameter in \code{\link{vegdist}} function for more available options, such as 'aitchison' and 'robust.aitchison'.}
 
 \item{\code{unifrac}}{default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.}
 

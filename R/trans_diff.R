@@ -84,8 +84,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'    or used to generate significance letters when method is 'anova' or 'KW_dunn' like the alpha parameter in \code{cal_diff} of \code{trans_alpha} class.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 		#'    "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.
-		#' @param transformation default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
-		#'    such as 'AST' for the arc sine square root transformation. Please see the \code{trans_norm} class of mecodev package. 
+		#' @param transformation default NULL; feature abundance transformation method in the class \code{\link{trans_norm}},
+		#'    such as 'AST' for the arc sine square root transformation.
 		#'    Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".
 		#' @param remove_unknown default TRUE; whether remove unknown features that donot have clear classification information.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
@@ -230,9 +230,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta")){
 						abund_foralpha <- abund_table
 						if(!is.null(transformation)){
-							message("Perform the transformation with method: ", transformation, " ...")
-							tmp <- mecodev::trans_norm$new(abund_foralpha)
-							abund_foralpha <- tmp$norm(method = transformation)
+							message("Perform data transformation with method: ", transformation, " ...")
+							tmp <- suppressMessages(trans_norm$new(as.data.frame(t(abund_foralpha))))
+							abund_foralpha <- tmp$norm(method = transformation) %>% t %>% as.data.frame
 						}
 						if(method == "KW_dunn"){
 							# filter taxa with 1 across all samples

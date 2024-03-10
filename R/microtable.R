@@ -735,8 +735,8 @@ microtable <- R6Class(classname = "microtable",
 		#' Calculate beta diversity dissimilarity matrix, such as Bray-Curtis, Jaccard, and UniFrac.
 		#' See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 		#'
-		#' @param method default NULL; a character vector with one or more elements; "bray" and "jaccard" are used when \code{method = NULL}; 
-		#'   see the \code{method} parameter in \code{\link{vegdist}} function for more available options. 
+		#' @param method default NULL; a character vector with one or more elements; \code{c("bray", "jaccard")} is used when \code{method = NULL}; 
+		#'   See the \code{method} parameter in \code{\link{vegdist}} function for more available options, such as 'aitchison' and 'robust.aitchison'. 
 		#' @param unifrac default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.
 		#' @param binary default FALSE; Whether convert abundance to binary data (presence/absence) when \code{method} is not "jaccard". 
 		#'   TRUE is used for "jaccard" automatically.
@@ -762,8 +762,7 @@ microtable <- R6Class(classname = "microtable",
 				}
 				res[[i]] <- as.matrix(vegan::vegdist(eco_table, method = i, binary = binary_use, ...))
 			}
-			
-			if(unifrac == T){
+			if(unifrac){
 				if(is.null(self$phylo_tree)){
 					stop("No phylogenetic tree provided, please change the parameter unifrac to FALSE")
 				}

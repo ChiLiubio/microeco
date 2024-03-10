@@ -183,8 +183,8 @@ or used to generate significance letters when method is 'anova' or 'KW_dunn' lik
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.}
 
-\item{\code{transformation}}{default NULL; feature abundance transformation method based on the mecodev package (https://github.com/ChiLiubio/mecodev),
-such as 'AST' for the arc sine square root transformation. Please see the \code{trans_norm} class of mecodev package. 
+\item{\code{transformation}}{default NULL; feature abundance transformation method in the class \code{\link{trans_norm}},
+such as 'AST' for the arc sine square root transformation.
 Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".}
 
 \item{\code{remove_unknown}}{default TRUE; whether remove unknown features that donot have clear classification information.}
