@@ -20,6 +20,7 @@
 #' \code{\link{trans_classifier}}\cr
 #' \code{\link{trans_env}}\cr
 #' \code{\link{trans_func}}\cr
+#' \code{\link{trans_norm}}\cr
 #' 
 #' To report bugs or discuss questions, please use Github Issues (\href{https://github.com/ChiLiubio/microeco/issues}{https://github.com/ChiLiubio/microeco/issues}).
 #' Before creating a new issue, 
