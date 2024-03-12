@@ -75,6 +75,8 @@ Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those b
   logbase = exp(1),
   Cmin = NULL,
   pseudocount = 1,
+  intersect.no = 10,
+  ct.min = 1,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -86,6 +88,7 @@ Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those b
 \cr 
 Methods for normalization:
 \itemize{
+  \item \code{GMPR}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
   \item \code{CLR}: Centered log-ratio normalization. 
   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package.
   \item \code{TSS}: Total sum scaling, dividing counts by the sequencing depth.
@@ -117,8 +120,12 @@ If not provided, use the minimum number across all the samples.}
 
 \item{\code{pseudocount}}{default 1; add pseudocount for those features with 0 abundance when \code{method = "CLR"}.}
 
+\item{\code{intersect.no}}{default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.}
+
+\item{\code{ct.min}}{default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.}
+
 \item{\code{...}}{parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
-\code{edgeR::normLibSizes} when method = "TMM".}
+\code{edgeR::normLibSizes} when method = "TMM" or GMPR function (intersect.no and ct.min parameters) when method = "GMPR" (https://github.com/jchen1981/GMPR).}
 }
 \if{html}{\out{</div>}}
 }

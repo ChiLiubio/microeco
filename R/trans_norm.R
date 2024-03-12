@@ -24,6 +24,9 @@ trans_norm <- R6Class(classname = "trans_norm",
 				abund_table <- t(abund_table)
 			}else{
 				abund_table <- dataset
+				if(!inherits(abund_table, "matrix")){
+					abund_table <- as.matrix(abund_table)
+				}
 				if(ncol(abund_table) < nrow(abund_table)){
 					message("Please make sure that the rows in input data.frame object are samples ...")
 				}
@@ -39,6 +42,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' \cr 
 		#' Methods for normalization:
 		#' \itemize{
+		#'   \item \code{GMPR}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
 		#'   \item \code{CLR}: Centered log-ratio normalization. 
 		#'   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package.
 		#'   \item \code{TSS}: Total sum scaling, dividing counts by the sequencing depth.
@@ -65,17 +69,19 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @param Cmin default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
 		#'    If not provided, use the minimum number across all the samples.
 		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "CLR"}.
+		#' @param intersect.no default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.
+		#' @param ct.min default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.
 		#' @param ... parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
-		#'    \code{edgeR::normLibSizes} when method = "TMM".
+		#'    \code{edgeR::normLibSizes} when method = "TMM" or GMPR function (intersect.no and ct.min parameters) when method = "GMPR" (https://github.com/jchen1981/GMPR).
 		#' 
 		#' @return new microtable object or data.frame object.
 		#' @examples
 		#' newdataset <- t1$norm(method = "log")
 		#' newdataset <- t1$norm(method = "CLR")
-		norm = function(method = NULL, MARGIN = NULL, logbase = exp(1), Cmin = NULL, pseudocount = 1, ...)
+		norm = function(method = NULL, MARGIN = NULL, logbase = exp(1), Cmin = NULL, pseudocount = 1, intersect.no = 10, ct.min = 1, ...)
 			{
 			abund_table <- self$data_table
-			method <- match.arg(method, c("CLR", "CCS", "TSS", "TMM", "SRS", "AST", 
+			method <- match.arg(method, c("GMPR", "CLR", "CCS", "TSS", "TMM", "SRS", "AST", 
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
@@ -83,6 +89,13 @@ trans_norm <- R6Class(classname = "trans_norm",
 					MARGIN <- switch(method, total = 1, max = 2, frequency = 2, normalize = 1, range = 2, rank = 1, standardize = 2, chi.square = 1, NULL)
 				}
 				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
+			}
+			if(method == "GMPR"){
+				transposed_table <- t(abund_table)
+				size_factor <- private$GMPR(transposed_table, intersect.no = intersect.no, ct.min = ct.min)
+				message("Sample size factor is stored in object$size_factor ...")
+				self$size_factor <- size_factor
+				res_table <- t(transposed_table) / size_factor
 			}
 			if(method == "CLR"){
 				if(any(abund_table == 0)){
@@ -131,6 +144,44 @@ trans_norm <- R6Class(classname = "trans_norm",
 	private = list(
 		AST = function(x){
 			sign(x) * asin(sqrt(abs(x)))
+		},
+		# modified based on https://github.com/jchen1981/GMPR
+		GMPR = function(comm, intersect.no, ct.min) {
+			comm[comm < ct.min] <- 0	
+			comm.no <- numeric(ncol(comm))
+			output <- sapply(1:ncol(comm),  function(i) {
+						if (i %% 100 == 0) {
+							cat(i, '\n')
+						}
+						x <- comm[, i]
+						# Compute the pairwise ratio
+						pr <- x / comm
+						# Handling of the NA, NaN, Inf
+						pr[is.nan(pr) | !is.finite(pr) | pr == 0] <- NA
+						# Counting the number of non-NA, NaN, Inf
+						incl.no <- colSums(!is.na(pr))		
+						# Calculate the median of PR
+						pr.median <- matrixStats::colMedians(pr, na.rm=TRUE)
+						# Record the number of samples used for calculating the GMPR
+						comm.no[i] <- sum(incl.no >= intersect.no)
+						# Geometric mean of PR median
+						if (comm.no[i] > 1) {
+							exp(mean(log(pr.median[incl.no >= intersect.no])))
+						} else {
+							NA
+						}
+					}
+			)
+			if (sum(is.na(output))) {
+				warning(paste0('The following samples\n ', paste(colnames(comm)[is.na(output)], collapse='\n'), 
+						'\ndo not share at least ', intersect.no, ' common taxa with other samples! ',
+						'For these samples, their size factors are set to be NA! \n', 
+						'You may consider removing these samples since they are potentially outliers or negative controls!\n',
+						'You may also consider decreasing the minimum number of intersecting taxa (intersect.no parameter) and rerun the procedure!\n'))
+			}
+			names(output) <- names(comm.no) <- colnames(comm)
+			attr(output, 'NSS') <- comm.no
+			output
 		}
 	),
 	lock_objects = FALSE,
