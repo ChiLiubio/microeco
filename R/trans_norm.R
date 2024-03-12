@@ -39,7 +39,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' \cr 
 		#' Methods for normalization:
 		#' \itemize{
-		#'   \item \code{CLR}: Centered log-ratio normalization.
+		#'   \item \code{CLR}: Centered log-ratio normalization. 
 		#'   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package.
 		#'   \item \code{TSS}: Total sum scaling, dividing counts by the sequencing depth.
 		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
@@ -64,6 +64,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @param logbase default exp(1); The logarithm base used in method = "log" or "CLR".
 		#' @param Cmin default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
 		#'    If not provided, use the minimum number across all the samples.
+		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "CLR"}.
 		#' @param ... parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
 		#'    \code{edgeR::normLibSizes} when method = "TMM".
 		#' 
@@ -71,7 +72,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @examples
 		#' newdataset <- t1$norm(method = "log")
 		#' newdataset <- t1$norm(method = "CLR")
-		norm = function(method = NULL, MARGIN = NULL, logbase = exp(1), Cmin = NULL, ...)
+		norm = function(method = NULL, MARGIN = NULL, logbase = exp(1), Cmin = NULL, pseudocount = 1, ...)
 			{
 			abund_table <- self$data_table
 			method <- match.arg(method, c("CLR", "CCS", "TSS", "TMM", "SRS", "AST", 
@@ -84,9 +85,13 @@ trans_norm <- R6Class(classname = "trans_norm",
 				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
 			}
 			if(method == "CLR"){
-				res_table <- apply(abund_table, MARGIN = 2, function(x){
-					private$clr_vec(vec = x, base = logbase, ...)
-				})
+				if(any(abund_table == 0)){
+					abund_table <- abund_table + pseudocount
+				}
+				if(is.null(MARGIN)){
+					MARGIN <- 1
+				}
+				res_table <- vegan::decostand(x = abund_table, method = "clr", MARGIN = MARGIN, logbase = logbase)
 			}
 			if(method == "CCS"){
 				obj <- metagenomeSeq::newMRexperiment(t(abund_table))
@@ -124,13 +129,6 @@ trans_norm <- R6Class(classname = "trans_norm",
 		}
 	),
 	private = list(
-		# modified from SpiecEasi package
-		# tol tolerance for a numerical zero
-		clr_vec = function(vec, base = exp(1), tol = .Machine$double.eps){
-			nzero <- (vec >= tol)
-			LOG <- log(ifelse(nzero, vec, 1), base)
-			ifelse(nzero, LOG - mean(LOG)/mean(nzero), 0.0)
-		},
 		AST = function(x){
 			sign(x) * asin(sqrt(abs(x)))
 		}

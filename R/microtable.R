@@ -754,11 +754,20 @@ microtable <- R6Class(classname = "microtable",
 			if(is.null(method)){
 				method <- c("bray", "jaccard")
 			}
+			vegdist_methods <- c("manhattan", "euclidean", "canberra", "bray", "kulczynski", "gower", "morisita", "horn", "mountford", 
+				"jaccard", "raup", "binomial", "chao", "altGower", "cao", "mahalanobis", "clark", "chisq", "chord", "hellinger", 
+				"aitchison", "robust.aitchison")
 			for(i in method){
+				i <- match.arg(i, vegdist_methods)
 				if(i == "jaccard"){
 					binary_use <- TRUE
 				}else{
 					binary_use <- binary
+				}
+				if(i == "aitchison"){
+					if(any(eco_table == 0)){
+						eco_table <- eco_table + 1
+					}
 				}
 				res[[i]] <- as.matrix(vegan::vegdist(eco_table, method = i, binary = binary_use, ...))
 			}

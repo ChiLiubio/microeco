@@ -74,6 +74,7 @@ Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those b
   MARGIN = NULL,
   logbase = exp(1),
   Cmin = NULL,
+  pseudocount = 1,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -85,7 +86,7 @@ Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those b
 \cr 
 Methods for normalization:
 \itemize{
-  \item \code{CLR}: Centered log-ratio normalization.
+  \item \code{CLR}: Centered log-ratio normalization. 
   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package.
   \item \code{TSS}: Total sum scaling, dividing counts by the sequencing depth.
   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
@@ -113,6 +114,8 @@ If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{Cmin}}{default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
 If not provided, use the minimum number across all the samples.}
+
+\item{\code{pseudocount}}{default 1; add pseudocount for those features with 0 abundance when \code{method = "CLR"}.}
 
 \item{\code{...}}{parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
 \code{edgeR::normLibSizes} when method = "TMM".}
