@@ -243,6 +243,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				for(k in measure){
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, c(group, "Value")]
+						if(private$check_skip_comp(div_table, k, by_group)){
+							next
+						}
 						tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, 
 							p_adjust_method = p_adjust_method, alpha = alpha, ...)
 						compare_result %<>% rbind(., tmp_res)
@@ -251,6 +254,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, c(by_group, group, "Value")]
 							if(length(unique(as.character(div_table[, group]))) < 3){
 								message("Skip the by_group: ", each_group, " as groups number < 3!")
+								next
+							}
+							if(private$check_skip_comp(div_table, k, by_group, each_group)){
 								next
 							}
 							tmp_res <- private$kdunn_test(input_table = div_table, group = group, measure = k, KW_dunn_letter = KW_dunn_letter, 
@@ -973,6 +979,18 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				"NA"
 			}else{
 				group_values %>% {.[which.max(.)]} %>% names
+			}
+		},
+		check_skip_comp = function(longdata, variable, by_group, by_group_var = NULL){
+			if(length(unique(longdata$Value)) == 1){
+				if(is.null(by_group)){
+					message("Only one value is found! Skip ", variable, " ...")
+				}else{
+					message("Only one value is found! Skip ", variable, " for ", by_group, ": ", by_group_var," ...")
+				}
+				TRUE
+			}else{
+				FALSE
 			}
 		}
 	),
