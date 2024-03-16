@@ -1591,7 +1591,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				{.[!grepl("\\s", rownames(.)), ]} %>%
 				# also filter uncleared classification to make it in line with the lefse above
 				{.[!grepl("Incertae_sedis|unculture", rownames(.), ignore.case = TRUE), ]}
-			
+			if(nrow(abund_table) <= 2){
+				stop("After filtering out non-standard taxonomy information, the abundance table only has ", nrow(abund_table), " feature(s)! ", 
+					"Is there an issue with the taxonomy table? ", 
+					"Please first use the tidy_taxonomy function to process the taxonomy information table before constructing the microtable object.")
+			}
 			if(!is.null(use_taxa_num)){
 				if(use_taxa_num < nrow(abund_table)){
 					message("Select ", use_taxa_num, " most abundant taxa as the background cladogram ...")
