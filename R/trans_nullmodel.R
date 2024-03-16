@@ -408,7 +408,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_ses_betamntd ...')
 		},
 		#' @description
-		#' Calculate Bray–Curtis-based Raup–Crick (RCbray).
+		#' Calculate Bray–Curtis-based Raup–Crick (RCbray) <doi: 10.1890/ES10-00117.1>.
 		#'
 		#' @param runs default 1000; simulation runs.
 		#' @param verbose default TRUE; whether show the calculation process message.

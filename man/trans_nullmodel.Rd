@@ -470,7 +470,7 @@ t1$cal_ses_betamntd(runs = 50, abundance.weighted = TRUE, exclude.conspecifics =
 \if{html}{\out{<a id="method-trans_nullmodel-cal_rcbray"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_rcbray}{}}}
 \subsection{Method \code{cal_rcbray()}}{
-Calculate Bray–Curtis-based Raup–Crick (RCbray).
+Calculate Bray–Curtis-based Raup–Crick (RCbray) <doi: 10.1890/ES10-00117.1>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_rcbray(
   runs = 1000,
