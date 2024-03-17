@@ -868,7 +868,14 @@ trans_env <- R6Class(classname = "trans_env",
 						abund_table <- do.call(rbind, unname(self$dataset$taxa_abund))
 						if(use_data == "other"){
 							if(is.null(other_taxa)){
-								stop("You select other, but no other_taxa provided!")
+								stop("You select other, but other_taxa parameter is not provided!")
+							}
+							if(any(is.na(other_taxa))){
+								other_taxa %<>% .[!is.na(.)]
+								message("NA is found in provided other_taxa. Filter out NA ...")
+							}
+							if(!any(other_taxa %in% rownames(abund_table))){
+								stop("Provided other_taxa is unavailable! Please check the taxonomic information in other_taxa parameter!")
 							}
 							abund_table <- abund_table[other_taxa, ]
 						}
