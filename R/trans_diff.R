@@ -177,11 +177,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
-				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2", "ancombc2", "linda")){
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2", "ancombc2", "linda", "DESeq2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
 				}
 				if(!is.null(group)){
-					if(! method %in% c("linda")){
+					if(! method %in% c("linda", "DESeq2")){
 						if(length(group) > 1){
 							stop("Please provide only one colname of sample_table for group parameter!")
 						}
@@ -477,7 +477,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 				}
 				
-				if(method %in% c("metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2")){
+				if(method %in% c("metastat", "metagenomeSeq", "ALDEx2_t")){
 					private$check_taxa_level_all(taxa_level)
 					if(is.null(group_choose_paired)){
 						all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
@@ -576,27 +576,50 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					use_dataset <- clone(tmp_dataset)
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
-					if(length(group) > 1){
-						stop("Multiple factors are not supported currently!")
+					if(is.null(group)){
+						all_parameters <- c(as.list(environment()), list(...))
+						if(! "formula" %in% names(all_parameters)){
+							stop("Either group or formula parameter should be provided!")
+						}
+						group <- all_parameters[["formula"]]
 					}
-					if(!is.factor(newdata$sample_table[, group])){
-						newdata$sample_table[, group] %<>% as.factor
+					if(!grepl("^~", group)){
+						group <- paste0("~", group)
 					}
-					deseq_obj <- DESeqDataSetFromMatrix(countData = newdata$otu_table,
-												  colData = newdata$sample_table,
-												  design = reformulate(group))
+					use_formula <- stats::as.formula(group)
+					deseq_obj <- DESeqDataSetFromMatrix(
+						countData = newdata$otu_table,
+						colData = newdata$sample_table,
+						design = use_formula
+						)
 					res_deseq <- DESeq(deseq_obj, ...)
-					for(i in seq_len(ncol(all_name))){
-						res <- results(res_deseq, contrast = c(group, all_name[, i]))
+					self$res_diff_raw <- res_deseq
+					message('Original result is stored in object$res_diff_raw ...')
+					message('Merge the output tables ...')
+					group %<>% gsub("^~", "", .)
+					if(grepl("+", group, fixed = TRUE)){
+						method <- paste0("DESeq formula: ", group)
+					}
+					all_groups <- strsplit(group, split = "+", fixed = TRUE) %>% unlist %>% gsub("^\\s+|\\s+$", "", .)
+					output <- data.frame()
+					res_names <- resultsNames(res_deseq) %>% .[. != "Intercept"]
+					for(i in res_names){
+						res <- results(res_deseq, name = i)
 						res <- data.frame(res)
-						res$compare <- paste0(as.character(all_name[, i]), collapse = " - ")
+						if(grepl("_vs_", i, fixed = TRUE)){
+							num <- lapply(all_groups, function(j){pmatch(j, i)}) %>% unlist %>% {!is.na(.)} %>% which
+							i <- gsub(paste0(all_groups[num], "_"), "", i, fixed = TRUE)
+							res$Comparison <- gsub("_vs_", " - ", i, fixed = TRUE)
+						}else{
+							res$Comparison <- i
+						}
 						res$Taxa <- rownames(res)
 						rownames(res) <- NULL
 						output <- rbind.data.frame(output, res)
 					}
-					output <- output[, c("compare", "Taxa", colnames(output)[1:(ncol(output) - 2)])]
 					colnames(output)[colnames(output) == "padj"] <- "P.adj"
-					colnames(output)[colnames(output) == "pvalue"] <- "P.unadj"
+					colnames(output)[colnames(output) == "pvalue"] <- "P.unadj"					
+					output <- output[, c("Comparison", "Taxa", colnames(output)[1:(ncol(output) - 2)])]
 				}
 				if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
 					if(!require("ALDEx2")){
