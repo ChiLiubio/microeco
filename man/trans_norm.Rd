@@ -21,7 +21,7 @@ t1 <- trans_norm$new(dataset = dataset)
 ## ------------------------------------------------
 
 newdataset <- t1$norm(method = "log")
-newdataset <- t1$norm(method = "CLR")
+newdataset <- t1$norm(method = "clr")
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -67,12 +67,12 @@ t1 <- trans_norm$new(dataset = dataset)
 \if{html}{\out{<a id="method-trans_norm-norm"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_norm-norm}{}}}
 \subsection{Method \code{norm()}}{
-Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those based on the \code{\link{decostand}} function in vegan package.
+Normalization/transformation methods.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_norm$norm(
   method = NULL,
   MARGIN = NULL,
-  logbase = exp(1),
+  logbase = 2,
   Cmin = NULL,
   pseudocount = 1,
   intersect.no = 10,
@@ -89,9 +89,10 @@ Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those b
 Methods for normalization:
 \itemize{
   \item \code{GMPR}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
-  \item \code{CLR}: Centered log-ratio normalization. 
-  \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package.
-  \item \code{TSS}: Total sum scaling, dividing counts by the sequencing depth.
+  \item \code{clr}: Centered log-ratio normalization <doi: 10.3389/fmicb.2017.02224>. 
+  \item \code{rclr}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
+  \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
+  \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
 }
@@ -113,12 +114,12 @@ Other methods for transformation:
 \item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
 If MARGIN is NULL, use the default value in decostand function.}
 
-\item{\code{logbase}}{default exp(1); The logarithm base used in method = "log" or "CLR".}
+\item{\code{logbase}}{default exp(1); The logarithm base.}
 
 \item{\code{Cmin}}{default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
 If not provided, use the minimum number across all the samples.}
 
-\item{\code{pseudocount}}{default 1; add pseudocount for those features with 0 abundance when \code{method = "CLR"}.}
+\item{\code{pseudocount}}{default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.}
 
 \item{\code{intersect.no}}{default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.}
 
@@ -135,7 +136,7 @@ new microtable object or data.frame object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{newdataset <- t1$norm(method = "log")
-newdataset <- t1$norm(method = "CLR")
+newdataset <- t1$norm(method = "clr")
 }
 \if{html}{\out{</div>}}
 

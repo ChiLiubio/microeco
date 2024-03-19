@@ -37,15 +37,16 @@ trans_norm <- R6Class(classname = "trans_norm",
 			self$dataset <- dataset
 		},
 		#' @description
-		#' Normalization/transformation methods include CLR, CCS, TSS, TMM, AST and those based on the \code{\link{decostand}} function in vegan package.
+		#' Normalization/transformation methods.
 		#' @param method default NULL; See the following details and available options. \cr 
 		#' \cr 
 		#' Methods for normalization:
 		#' \itemize{
 		#'   \item \code{GMPR}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
-		#'   \item \code{CLR}: Centered log-ratio normalization. 
-		#'   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package.
-		#'   \item \code{TSS}: Total sum scaling, dividing counts by the sequencing depth.
+		#'   \item \code{clr}: Centered log-ratio normalization <doi: 10.3389/fmicb.2017.02224>. 
+		#'   \item \code{rclr}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
+		#'   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
+		#'   \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
 		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
 		#'   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
 		#' }
@@ -65,10 +66,10 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' }
 		#' @param MARGIN default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
 		#'    If MARGIN is NULL, use the default value in decostand function.
-		#' @param logbase default exp(1); The logarithm base used in method = "log" or "CLR".
+		#' @param logbase default exp(1); The logarithm base.
 		#' @param Cmin default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
 		#'    If not provided, use the minimum number across all the samples.
-		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "CLR"}.
+		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.
 		#' @param intersect.no default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.
 		#' @param ct.min default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.
 		#' @param ... parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
@@ -77,11 +78,15 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @return new microtable object or data.frame object.
 		#' @examples
 		#' newdataset <- t1$norm(method = "log")
-		#' newdataset <- t1$norm(method = "CLR")
-		norm = function(method = NULL, MARGIN = NULL, logbase = exp(1), Cmin = NULL, pseudocount = 1, intersect.no = 10, ct.min = 1, ...)
+		#' newdataset <- t1$norm(method = "clr")
+		norm = function(method = NULL, MARGIN = NULL, logbase = 2, Cmin = NULL, pseudocount = 1, intersect.no = 10, ct.min = 1, ...)
 			{
 			abund_table <- self$data_table
-			method <- match.arg(method, c("GMPR", "CLR", "CCS", "TSS", "TMM", "SRS", "AST", 
+			if(is.null(method)){
+				stop("Please select a method!")
+			}
+			method <- tolower(method)
+			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "tmm", "srs", "ast", 
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
@@ -90,31 +95,33 @@ trans_norm <- R6Class(classname = "trans_norm",
 				}
 				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
 			}
-			if(method == "GMPR"){
+			if(method == "gmpr"){
 				transposed_table <- t(abund_table)
 				size_factor <- private$GMPR(transposed_table, intersect.no = intersect.no, ct.min = ct.min)
 				message("Sample size factor is stored in object$size_factor ...")
 				self$size_factor <- size_factor
 				res_table <- t(transposed_table) / size_factor
 			}
-			if(method == "CLR"){
-				if(any(abund_table == 0)){
-					abund_table <- abund_table + pseudocount
-				}
+			if(method %in% c("clr", "rclr")){
 				if(is.null(MARGIN)){
 					MARGIN <- 1
 				}
-				res_table <- vegan::decostand(x = abund_table, method = "clr", MARGIN = MARGIN, logbase = logbase)
+				if(method == "clr"){
+					if(any(abund_table == 0)){
+						abund_table <- abund_table + pseudocount
+					}
+				}
+				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
 			}
-			if(method == "CCS"){
+			if(method == "ccs"){
 				obj <- metagenomeSeq::newMRexperiment(t(abund_table))
 				obj_1 <- metagenomeSeq::cumNorm(obj, ...)
 				res_table <- t(metagenomeSeq::MRcounts(obj_1, norm = TRUE))
 			}
-			if(method == "TSS"){
+			if(method == "tss"){
 				res_table <- apply(abund_table, 1, function(x){x/sum(x)}) %>% t
 			}
-			if(method == "SRS"){
+			if(method == "srs"){
 				newotu <- as.data.frame(t(abund_table))
 				if(is.null(Cmin)){
 					Cmin <- min(colSums(newotu))
@@ -123,13 +130,13 @@ trans_norm <- R6Class(classname = "trans_norm",
 				res_table <- t(res_table)
 				colnames(res_table) <- colnames(abund_table)
 			}
-			if(method == "TMM"){
+			if(method == "tmm"){
 				libsize <- edgeR::normLibSizes(abund_table, method = "TMM", ...)
 				effec_libsize <- colSums(abund_table) * libsize
 				ref_libsize <- mean(effec_libsize)
 				res_table <- sweep(abund_table, MARGIN = 2, effec_libsize, "/") * ref_libsize
 			}
-			if(method == "AST"){
+			if(method == "ast"){
 				res_table <- private$AST(abund_table)
 			}
 			if(inherits(self$dataset, "microtable")){
