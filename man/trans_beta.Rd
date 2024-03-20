@@ -351,8 +351,9 @@ Only available when \code{manova_all = FALSE} and \code{manova_set} is not provi
 Analysis of similarities (ANOSIM) based on R vegan \code{anosim} function.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_anosim(
-  group = NULL,
   paired = FALSE,
+  group = NULL,
+  by_group = NULL,
   p_adjust_method = "fdr",
   ...
 )}\if{html}{\out{</div>}}
@@ -361,9 +362,12 @@ Analysis of similarities (ANOSIM) based on R vegan \code{anosim} function.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{paired}}{default FALSE; whether perform paired test between any two combined groups from all the input groups.}
+
 \item{\code{group}}{default NULL; a column name of \code{sample_table}. If NULL, search \code{group} variable stored in the object.}
 
-\item{\code{paired}}{default FALSE; whether perform paired test between any two combined groups from all the input groups.}
+\item{\code{by_group}}{default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
+Only available when \code{paired = TRUE}.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{paired = TRUE}; see method parameter of \code{p.adjust} function for available options.}
 
