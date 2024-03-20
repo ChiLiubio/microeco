@@ -305,6 +305,7 @@ Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on <
   manova_all = TRUE,
   manova_set = NULL,
   group = NULL,
+  by_group = NULL,
   p_adjust_method = "fdr",
   ...
 )}\if{html}{\out{</div>}}
@@ -319,7 +320,11 @@ FALSE represents test for all the paired groups.}
 \item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
 manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.}
 
-\item{\code{group}}{default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.}
+\item{\code{group}}{default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
+Available when \code{manova_set} is not provided.}
+
+\item{\code{by_group}}{default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
+Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.}
 

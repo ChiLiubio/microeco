@@ -346,6 +346,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
 		#'    manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.
 		#' @param group default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
+		#'    Available when \code{manova_set} is not provided.
+		#' @param by_group default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
+		#'    Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
 		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object.
@@ -355,6 +358,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			manova_all = TRUE,
 			manova_set = NULL,
 			group = NULL,
+			by_group = NULL,
 			p_adjust_method = "fdr",
 			...
 			){
@@ -382,15 +386,41 @@ trans_beta <- R6Class(classname = "trans_beta",
 					use_formula <- reformulate(group, substitute(as.dist(use_matrix)))
 					self$res_manova <- adonis2(use_formula, data = metadata, ...)
 				}else{
-					self$res_manova <- private$paired_group_manova_anosim(
-						test = "permanova",
-						sample_info_use = metadata, 
-						use_matrix = use_matrix, 
-						group = group, 
-						measure = self$measure, 
-						p_adjust_method = p_adjust_method,
-						...
-					)
+					if(is.null(by_group)){
+						self$res_manova <- private$paired_group_manova_anosim(
+							test = "permanova",
+							sample_info_use = metadata, 
+							use_matrix = use_matrix, 
+							group = group, 
+							measure = self$measure, 
+							p_adjust_method = p_adjust_method,
+							...
+						)
+					}else{
+						res <- data.frame()
+						check_table_variable(metadata, by_group, "by_group", "sample_table")
+						all_bygroups <- unique(metadata[, by_group])
+						for(i in all_bygroups){
+							message("For by_group: ", i, " ...")
+							sub_meta <- metadata[metadata[, by_group] == i, ]
+							if(length(unique(sub_meta[, group])) < 2){
+								message("Skip by_group: ", i, ", because groups number < 2 ...")
+								next
+							}
+							tmp <- private$paired_group_manova_anosim(
+								test = "permanova",
+								sample_info_use = sub_meta, 
+								use_matrix = use_matrix, 
+								group = group, 
+								measure = self$measure, 
+								p_adjust_method = p_adjust_method,
+								...
+							)
+							tmp <- data.frame(by_group = i, tmp)
+							res <- rbind(res, tmp)
+						}
+						self$res_manova <- res
+					}
 				}
 			}
 			message('The result is stored in object$res_manova ...')
@@ -767,7 +797,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			res
 		},
-		paired_group_manova_anosim = function(test = c("permanova", "anosim")[1], sample_info_use, use_matrix, group, measure, p_adjust_method, ...){
+		paired_group_manova_anosim = function(test, sample_info_use, use_matrix, group, measure, p_adjust_method, ...){
 			comnames <- c()
 			test <- match.arg(test, choices = c("permanova", "anosim"))
 			if(test == "permanova"){
