@@ -43,8 +43,19 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' Methods for normalization:
 		#' \itemize{
 		#'   \item \code{GMPR}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
-		#'   \item \code{clr}: Centered log-ratio normalization <doi: 10.3389/fmicb.2017.02224>. 
+		#' 	   	 For a given sample \eqn{i}, the size factor \eqn{s_i} is defined:
+		#' 	   	     \deqn{s_i = \lgroup {\displaystyle\prod_{j=1}^{n} r_{ij}} \rgroup ^{1/n}}
+		#' 	   	 where \eqn{r_{ij} = Median_{k|c_{ki}c_{kj} \ne 0} \lbrace \dfrac{c_{ki}}{c_{kj}} \rbrace}. 
+		#' 	   	 \eqn{r_{ij}} is the median count ratio of nonzero counts between sample \eqn{i} and \eqn{j}.
+		#' 	   	 \eqn{k} denotes all the features. For sample \eqn{i}, \eqn{GMPR = \frac{x_{i}}{s_i}}, where \eqn{x_i} is the feature abundances of sample \eqn{i}.
+		#'   \item \code{clr}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
+		#' 	   	 It is defined:  \deqn{clr = \log\frac{x_{ki}}{g(x_i)}}
+		#' 	   	 where \eqn{x_{ki}} is the \eqn{k}th feature abundance in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
+		#' 	   	 A pseudocount need to be added to deal with the zero. For more information, please see the 'clr' method in \code{decostand} function of vegan package.
 		#'   \item \code{rclr}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
+		#' 	   	 It is defined:  \deqn{rclr = \log\frac{x_{ki}}{g(x_i > 0)}}
+		#' 	   	 where \eqn{x_{ki}} is the \eqn{k}th feature abundance in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
+		#' 	   	 In rclr, zero values are kept as zeroes, and not taken into account.
 		#'   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
 		#'   \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
 		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
