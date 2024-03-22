@@ -49,16 +49,23 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' 	   	 \eqn{r_{ij}} is the median count ratio of nonzero counts between sample \eqn{i} and \eqn{j}.
 		#' 	   	 \eqn{k} denotes all the features. For sample \eqn{i}, \eqn{GMPR = \frac{x_{i}}{s_i}}, where \eqn{x_i} is the feature abundances of sample \eqn{i}.
 		#'   \item \code{clr}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
-		#' 	   	 It is defined:  \deqn{clr = \log\frac{x_{ki}}{g(x_i)}}
-		#' 	   	 where \eqn{x_{ki}} is the \eqn{k}th feature abundance in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
+		#' 	   	 It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
+		#' 	   	 where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
 		#' 	   	 A pseudocount need to be added to deal with the zero. For more information, please see the 'clr' method in \code{decostand} function of vegan package.
 		#'   \item \code{rclr}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
-		#' 	   	 It is defined:  \deqn{rclr = \log\frac{x_{ki}}{g(x_i > 0)}}
-		#' 	   	 where \eqn{x_{ki}} is the \eqn{k}th feature abundance in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
+		#' 	   	 It is defined:  \deqn{rclr_{ki} = \log\frac{x_{ki}}{g(x_i > 0)}}
+		#' 	   	 where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
 		#' 	   	 In rclr, zero values are kept as zeroes, and not taken into account.
 		#'   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
+		#' 	   	 For a given sample \eqn{j}, the scaling factor \eqn{s_{j}^{l}} is defined:
+		#' 	   	     \deqn{s_{j}^{l} = {\displaystyle\sum_{i|c_{ij} \leqslant q_{j}^{l}} c_{ij}}}
+		#' 	   	 where \eqn{q_{j}^{l}} is the \eqn{l}th quantile of sample \eqn{j}, that is, in sample \eqn{j} there are \eqn{l} features with counts smaller than \eqn{q_{j}^{l}}.
+		#' 	   	 \eqn{c_{ij}} denotes the count (abundance) of feature i in sample \eqn{j}.
+		#' 	   	 For \eqn{l} = 0.95\eqn{m} (feature number), \eqn{q_{j}^{l}} corresponds to the 95th percentile of the count distribution for sample \eqn{j}.
+		#' 	   	 Normalized counts \eqn{\tilde{c_{ij}} = (\frac{c_{ij}}{s_{j}^{l}})(N)}, where \eqn{N} is an appropriately chosen normalization constant.
 		#'   \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
-		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
+		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
+		#'   \item \code{RLE}: Relative log expression. 
 		#'   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
 		#' }
 		#' Methods based on \code{\link{decostand}} function:
@@ -83,8 +90,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.
 		#' @param intersect.no default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.
 		#' @param ct.min default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.
-		#' @param ... parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
-		#'    \code{edgeR::normLibSizes} when method = "TMM" or GMPR function (intersect.no and ct.min parameters) when method = "GMPR" (https://github.com/jchen1981/GMPR).
+		#' @param ... parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CCS", or 
+		#'    \code{edgeR::normLibSizes} when method = "TMM" or "RLE".
 		#' 
 		#' @return new microtable object or data.frame object.
 		#' @examples
@@ -97,7 +104,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 				stop("Please select a method!")
 			}
 			method <- tolower(method)
-			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "tmm", "srs", "ast", 
+			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "tmm", "rle", "srs", "ast", 
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
@@ -141,11 +148,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 				res_table <- t(res_table)
 				colnames(res_table) <- colnames(abund_table)
 			}
-			if(method == "tmm"){
-				libsize <- edgeR::normLibSizes(abund_table, method = "TMM", ...)
+			if(method %in% c("tmm", "rle")){
+				abund_table %<>% t
+				upmethod <- toupper(method)
+				libsize <- edgeR::normLibSizes(abund_table, method = upmethod, ...)
 				effec_libsize <- colSums(abund_table) * libsize
 				ref_libsize <- mean(effec_libsize)
 				res_table <- sweep(abund_table, MARGIN = 2, effec_libsize, "/") * ref_libsize
+				res_table %<>% t
 			}
 			if(method == "ast"){
 				res_table <- private$AST(abund_table)

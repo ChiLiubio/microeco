@@ -95,16 +95,23 @@ Methods for normalization:
             \eqn{r_{ij}} is the median count ratio of nonzero counts between sample \eqn{i} and \eqn{j}.
             \eqn{k} denotes all the features. For sample \eqn{i}, \eqn{GMPR = \frac{x_{i}}{s_i}}, where \eqn{x_i} is the feature abundances of sample \eqn{i}.
   \item \code{clr}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
-            It is defined:  \deqn{clr = \log\frac{x_{ki}}{g(x_i)}}
-            where \eqn{x_{ki}} is the \eqn{k}th feature abundance in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
+            It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
+            where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
             A pseudocount need to be added to deal with the zero. For more information, please see the 'clr' method in \code{decostand} function of vegan package.
   \item \code{rclr}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
-            It is defined:  \deqn{rclr = \log\frac{x_{ki}}{g(x_i > 0)}}
-            where \eqn{x_{ki}} is the \eqn{k}th feature abundance in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
+            It is defined:  \deqn{rclr_{ki} = \log\frac{x_{ki}}{g(x_i > 0)}}
+            where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
             In rclr, zero values are kept as zeroes, and not taken into account.
   \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
+            For a given sample \eqn{j}, the scaling factor \eqn{s_{j}^{l}} is defined:
+                \deqn{s_{j}^{l} = {\displaystyle\sum_{i|c_{ij} \leqslant q_{j}^{l}} c_{ij}}}
+            where \eqn{q_{j}^{l}} is the \eqn{l}th quantile of sample \eqn{j}, that is, in sample \eqn{j} there are \eqn{l} features with counts smaller than \eqn{q_{j}^{l}}.
+            \eqn{c_{ij}} denotes the count (abundance) of feature i in sample \eqn{j}.
+            For \eqn{l} = 0.95\eqn{m} (feature number), \eqn{q_{j}^{l}} corresponds to the 95th percentile of the count distribution for sample \eqn{j}.
+            Normalized counts \eqn{\tilde{c_{ij}} = (\frac{c_{ij}}{s_{j}^{l}})(N)}, where \eqn{N} is an appropriately chosen normalization constant.
   \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
-  \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package.
+  \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
+  \item \code{RLE}: Relative log expression. 
   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
 }
 Methods based on \code{\link{decostand}} function:
@@ -136,8 +143,8 @@ If not provided, use the minimum number across all the samples.}
 
 \item{\code{ct.min}}{default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.}
 
-\item{\code{...}}{parameters pass to \code{\link{decostand}} or \code{metagenomeSeq::cumNorm} when method = "CCS" or 
-\code{edgeR::normLibSizes} when method = "TMM" or GMPR function (intersect.no and ct.min parameters) when method = "GMPR" (https://github.com/jchen1981/GMPR).}
+\item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CCS", or 
+\code{edgeR::normLibSizes} when method = "TMM" or "RLE".}
 }
 \if{html}{\out{</div>}}
 }
