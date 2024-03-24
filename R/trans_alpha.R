@@ -941,7 +941,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			dunnTest_table <- dunnTest_table[match(tmp, dunnTest_table$Comparison), ]
 			if(KW_dunn_letter){
 				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_table, threshold = alpha,
-					remove.space = TRUE, remove.equal = FALSE, remove.zero = FALSE)
+					remove.space = FALSE, remove.equal = FALSE, remove.zero = FALSE)
 				if(any(grepl("-", raw_groups))){
 					dunnTest_final$Group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
 				}
