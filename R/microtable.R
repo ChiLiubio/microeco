@@ -641,7 +641,7 @@ microtable <- R6Class(classname = "microtable",
 		#'   The default NULL represents that all the measures are calculated. 'Shannon', 'Simpson' and 'InvSimpson' are calculated based on \code{vegan::diversity} function;
 		#'   'Chao1' and 'ACE' depend on the function \code{vegan::estimateR}.
 		#'   'Fisher' index relies on the function \code{vegan::fisher.alpha}.
-		#'   "Observed" means the observed species number in the community.
+		#'   "Observed" means the observed species number in a community, i.e. richness.
 		#'   "Coverage" represents good's coverage. It is defined:
 		#' 	   	     \deqn{Coverage = 1 - \frac{f1}{n}} 
 		#'    where \emph{n} is the total abundance of a sample, and \emph{f1} is the number of singleton (species with abundance 1) in the sample.
