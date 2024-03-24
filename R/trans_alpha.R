@@ -917,7 +917,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			use_method <- "Dunn's Kruskal-Wallis Multiple Comparisons"
 			raw_groups <- input_table[, group]
 			if(any(grepl("-", raw_groups))){
-				input_table[, group] %<>% gsub("-", "sub&&&sub", ., fixed = TRUE)
+				input_table[, group] %<>% gsub("-", "sub&hyphen&sub", ., fixed = TRUE)
+			}
+			if(KW_dunn_letter){
+				if(any(grepl("\\s", raw_groups))){
+					input_table[, group] %<>% gsub(" ", "&space&", ., fixed = TRUE)
+				}
 			}
 			orderd_groups <- tapply(input_table[, "Value"], input_table[, group], median) %>% sort(decreasing = TRUE) %>% names
 			input_table[, group] %<>% factor(., levels = orderd_groups)
@@ -940,12 +945,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			tmp <- combn(orderd_groups, 2) %>% t %>% as.data.frame %>% apply(., 1, function(x){paste0(x, collapse = " - ")})
 			dunnTest_table <- dunnTest_table[match(tmp, dunnTest_table$Comparison), ]
 			if(KW_dunn_letter){
-				dunnTest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_table, threshold = alpha,
-					remove.space = FALSE, remove.equal = FALSE, remove.zero = FALSE)
+				dunntest_final <- rcompanion::cldList(P.adj ~ Comparison, data = dunnTest_table, threshold = alpha,
+					remove.space = TRUE, remove.equal = FALSE, remove.zero = FALSE, swap.colon = FALSE, swap.vs = FALSE)
 				if(any(grepl("-", raw_groups))){
-					dunnTest_final$Group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
+					dunntest_final$Group %<>% gsub("sub&hyphen&sub", "-", ., fixed = TRUE)
 				}
-				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, dunnTest_final)
+				if(any(grepl("\\s", raw_groups))){
+					dunntest_final$Group %<>% gsub("&space&", " ", .)
+				}
+				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, dunntest_final)
 			}else{
 				max_group <- lapply(dunnTest_table$Comparison, function(x){
 					group_select <- unlist(strsplit(x, split = " - "))
@@ -953,8 +961,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					private$group_value_compare(table_compare_select$Value, table_compare_select[, group], median)
 				}) %>% unlist
 				if(any(grepl("-", raw_groups))){
-					dunnTest_table$Comparison %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
-					max_group %<>% gsub("sub&&&sub", "-", ., fixed = TRUE)
+					dunnTest_table$Comparison %<>% gsub("sub&hyphen&sub", "-", ., fixed = TRUE)
+					max_group %<>% gsub("sub&hyphen&sub", "-", ., fixed = TRUE)
 				}
 				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_table)
 			}
