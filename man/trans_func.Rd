@@ -187,7 +187,13 @@ t1$cal_spe_func(fungi_database = "FungalTraits")
 \subsection{Method \code{cal_spe_func_perc()}}{
 Calculating the percentages of species with specific trait in communities.
 The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
-So this method is one representation of functional redundancy without the consideration of phylogenetic distance among taxa.
+So this method is one representation of functional redundancy (FR) without the consideration of phylogenetic distance among taxa.
+The FR is defined:
+     \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}}}
+     \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}}}
+where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
+\eqn{N_{j}} is the number of species with function j in sample k.
+\eqn{A_{i}} is the abundance (counts) of species i in sample k.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(abundance_weighted = FALSE, perc = TRUE, dec = 2)}\if{html}{\out{</div>}}
 }

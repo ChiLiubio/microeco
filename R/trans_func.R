@@ -298,8 +298,14 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities.
 		#' The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
-		#' So this method is one representation of functional redundancy without the consideration of phylogenetic distance among taxa.
-		#'
+		#' So this method is one representation of functional redundancy (FR) without the consideration of phylogenetic distance among taxa.
+		#' The FR is defined:
+		#'      \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}}}
+		#'      \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}}}
+		#' where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
+		#' \eqn{N_{j}} is the number of species with function j in sample k.
+		#' \eqn{A_{i}} is the abundance (counts) of species i in sample k.
+		#' 
 		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
 		#' 	  If TRUE, calculate the functional individual percentage.
 		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, value is bounded between 0 and 100.
