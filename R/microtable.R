@@ -675,7 +675,12 @@ microtable <- R6Class(classname = "microtable",
 			outlist <- vector("list")
 			estimRmeas <- c("Chao1", "Observed", "ACE")
 			if(any(estimRmeas %in% use_measures)){
-				outlist <- c(outlist, list(t(data.frame(vegan::estimateR(OTU), check.names = FALSE))))
+				est <- tryCatch(vegan::estimateR(OTU), error = function(e){c("Skip 'Chao1', 'ACE' and 'Observed' ...")})
+				if(is.numeric(est)){
+					outlist <- c(outlist, list(t(data.frame(est, check.names = FALSE))))
+				}else{
+					message(est)
+				}
 			}
 			if("Shannon" %in% use_measures){
 				outlist <- c(outlist, list(shannon = vegan::diversity(OTU, index = "shannon")))
