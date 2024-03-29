@@ -993,18 +993,18 @@ trans_network <- R6Class(classname = "trans_network",
 				self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table, taxa_level = taxa_level)
 				message('Results are stored in object$res_sum_links_pos ...')
 			}else{				
-				if(! any(c("+", "-") %in% link_table[, 3])){
+				if(! any(c("+", "-") %in% link_table[, "label"])){
 					stop("Please check the edge labels! The labels should be + or - !")
 				}
-				if("+" %in% link_table[, 3]){
-					link_table_use <- link_table[link_table[, 3] %in% "+", ]
+				if("+" %in% link_table[, "label"]){
+					link_table_use <- link_table[link_table[, "label"] %in% "+", ]
 					self$res_sum_links_pos <- private$sum_link(taxa_table = taxa_table, link_table = link_table_use, taxa_level = taxa_level)
 					message('The positive results are stored in object$res_sum_links_pos ...')
 				}else{
 					message('No positive edges found ...')
 				}
-				if("-" %in% link_table[, 3]){
-					link_table_use <- link_table[link_table[, 3] %in% "-", ]
+				if("-" %in% link_table[, "label"]){
+					link_table_use <- link_table[link_table[, "label"] %in% "-", ]
 					self$res_sum_links_neg <- private$sum_link(taxa_table = taxa_table, link_table = link_table_use, taxa_level = taxa_level)
 					message('The negative results are stored in object$res_sum_links_neg ...')
 				}else{
