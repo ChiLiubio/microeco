@@ -23,7 +23,6 @@ t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 
 \donttest{
 t1$cal_diff(group = "Group", method = "KW")
-t1$cal_diff(group = "Group", method = "KW_dunn")
 t1$cal_diff(group = "Group", method = "anova")
 }
 
@@ -244,7 +243,6 @@ Differential test of environmental variables across groups.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_diff(group = "Group", method = "KW")
-t1$cal_diff(group = "Group", method = "KW_dunn")
 t1$cal_diff(group = "Group", method = "anova")
 }
 }
