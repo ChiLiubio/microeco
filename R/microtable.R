@@ -177,19 +177,21 @@ microtable <- R6Class(classname = "microtable",
 		#' @description
 		#' Rarefy communities to make all samples have same feature number.
 		#'
-		#' @param method default c("rarefying", "SRS")[1]; "rarefying" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
+		#' @param method default c("rarefy", "SRS")[1]; "rarefy" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
 		#'    "SRS" is scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
-		#' @param sample.size default NULL; feature number, If not provided, use minimum number of all samples.
-		#' @param rngseed default 123; random seed.
-		#' @param replace default TRUE; see \code{\link{sample}} for the random sampling; Available when \code{method = "rarefying"}.
+		#' @param sample.size default NULL; libray size. If not provided, use the minimum number across all samples. 
+		#'    For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.
+		#' @param rngseed default 123; random seed. For "SRS" method, this parameter is passed to \code{seed} parameter of \code{SRS} function.
+		#' @param replace default TRUE; see \code{\link{sample}} for the random sampling; Only available when \code{method = "rarefy"}.
 		#' @return None; rarefied dataset.
 		#' @examples
 		#' \donttest{
 		#' m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
 		#' }
-		rarefy_samples = function(method = c("rarefying", "SRS")[1], sample.size = NULL, rngseed = 123, replace = TRUE){
+		rarefy_samples = function(method = c("rarefy", "SRS")[1], sample.size = NULL, rngseed = 123, replace = TRUE){
 			set.seed(rngseed)
 			self$tidy_dataset()
+			# compatible with previous "rarefying"
 			method <- match.arg(method, c("rarefying", "SRS"))
 			if(is.null(sample.size)){
 				sample.size <- min(self$sample_sums())

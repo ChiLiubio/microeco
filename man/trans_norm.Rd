@@ -73,7 +73,6 @@ Normalization/transformation methods.
   method = NULL,
   MARGIN = NULL,
   logbase = 2,
-  Cmin = NULL,
   pseudocount = 1,
   intersect.no = 10,
   ct.min = 1,
@@ -113,6 +112,7 @@ Methods for normalization:
   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
   \item \code{RLE}: Relative log expression. 
   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
+  \item \code{rarefy}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
 }
 Methods based on \code{\link{decostand}} function:
 \itemize{
@@ -134,9 +134,6 @@ If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{logbase}}{default exp(1); The logarithm base.}
 
-\item{\code{Cmin}}{default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
-If not provided, use the minimum number across all the samples.}
-
 \item{\code{pseudocount}}{default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.}
 
 \item{\code{intersect.no}}{default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.}
@@ -144,7 +141,7 @@ If not provided, use the minimum number across all the samples.}
 \item{\code{ct.min}}{default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.}
 
 \item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CCS", or 
-\code{edgeR::normLibSizes} when method = "TMM" or "RLE".}
+\code{edgeR::normLibSizes} when method = "TMM" or "RLE", or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS".}
 }
 \if{html}{\out{</div>}}
 }

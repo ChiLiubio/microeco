@@ -333,7 +333,7 @@ d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 Rarefy communities to make all samples have same feature number.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(
-  method = c("rarefying", "SRS")[1],
+  method = c("rarefy", "SRS")[1],
   sample.size = NULL,
   rngseed = 123,
   replace = TRUE
@@ -343,14 +343,15 @@ Rarefy communities to make all samples have same feature number.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default c("rarefying", "SRS")[1]; "rarefying" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
+\item{\code{method}}{default c("rarefy", "SRS")[1]; "rarefy" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
 "SRS" is scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.}
 
-\item{\code{sample.size}}{default NULL; feature number, If not provided, use minimum number of all samples.}
+\item{\code{sample.size}}{default NULL; libray size. If not provided, use the minimum number across all samples. 
+For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.}
 
-\item{\code{rngseed}}{default 123; random seed.}
+\item{\code{rngseed}}{default 123; random seed. For "SRS" method, this parameter is passed to \code{seed} parameter of \code{SRS} function.}
 
-\item{\code{replace}}{default TRUE; see \code{\link{sample}} for the random sampling; Available when \code{method = "rarefying"}.}
+\item{\code{replace}}{default TRUE; see \code{\link{sample}} for the random sampling; Only available when \code{method = "rarefy"}.}
 }
 \if{html}{\out{</div>}}
 }

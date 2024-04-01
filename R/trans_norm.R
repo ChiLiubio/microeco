@@ -67,6 +67,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
 		#'   \item \code{RLE}: Relative log expression. 
 		#'   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
+		#'   \item \code{rarefy}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
 		#' }
 		#' Methods based on \code{\link{decostand}} function:
 		#' \itemize{
@@ -85,26 +86,24 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @param MARGIN default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
 		#'    If MARGIN is NULL, use the default value in decostand function.
 		#' @param logbase default exp(1); The logarithm base.
-		#' @param Cmin default NULL; see Cmin parameter in \code{SRS::SRS} function; Only available when \code{method = "SRS"}.
-		#'    If not provided, use the minimum number across all the samples.
 		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.
 		#' @param intersect.no default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.
 		#' @param ct.min default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.
 		#' @param ... parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CCS", or 
-		#'    \code{edgeR::normLibSizes} when method = "TMM" or "RLE".
+		#'    \code{edgeR::normLibSizes} when method = "TMM" or "RLE", or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS".
 		#' 
 		#' @return new microtable object or data.frame object.
 		#' @examples
 		#' newdataset <- t1$norm(method = "log")
 		#' newdataset <- t1$norm(method = "clr")
-		norm = function(method = NULL, MARGIN = NULL, logbase = 2, Cmin = NULL, pseudocount = 1, intersect.no = 10, ct.min = 1, ...)
+		norm = function(method = NULL, MARGIN = NULL, logbase = 2, pseudocount = 1, intersect.no = 10, ct.min = 1, ...)
 			{
 			abund_table <- self$data_table
 			if(is.null(method)){
 				stop("Please select a method!")
 			}
 			method <- tolower(method)
-			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "tmm", "rle", "srs", "ast", 
+			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "tmm", "rle", "srs", "rarefy", "ast", 
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
@@ -139,14 +138,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 			if(method == "tss"){
 				res_table <- apply(abund_table, 1, function(x){x/sum(x)}) %>% t
 			}
-			if(method == "srs"){
+			if(method %in% c("srs", "rarefy")){
 				newotu <- as.data.frame(t(abund_table))
-				if(is.null(Cmin)){
-					Cmin <- min(colSums(newotu))
+				suppressMessages(m1 <- microtable$new(newotu))
+				if(method == "srs"){
+					method <- "SRS"
 				}
-				res_table <- SRS::SRS(newotu, Cmin = Cmin, set_seed = TRUE, seed = 123)
-				res_table <- t(res_table)
-				colnames(res_table) <- colnames(abund_table)
+				m1$rarefy_samples(method = method, ...)
+				res_table <- t(m1$otu_table)
 			}
 			if(method %in% c("tmm", "rle")){
 				abund_table %<>% t
