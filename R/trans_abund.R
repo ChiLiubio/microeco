@@ -182,8 +182,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' Bar plot.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the bars.
-		#' @param bar_type default "full"; "full" or "notfull"; if \code{"full"}, total abundance are summed to 1 or 100 percentage.
-		#' @param others_color default "grey90"; the color for "others" taxa.
+		#' @param bar_full default TRUE; Whether the bar shows all the features (including 'Others'). 
+		#'    Default \code{TRUE} means total abundance are summed to 1 or 100 (percentage). \code{FALSE} means 'Others' will not be shown.
+		#' @param others_color default "grey90"; the color for "Others" taxa.
 		#' @param facet default NULL; a character vector for the facet; group column name of \code{sample_table}, such as, \code{"Group"};
 		#'    If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
 		#'    The latter should have a finer scale than the former one;
@@ -211,6 +212,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   To make it available, please assign \code{high_level} parameter when creating the object.
 		#' @param high_level_add_other default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
 		#'   Only available when \code{ggnested = TRUE}.
+		#' @param ... Capture unknown parameters.
 		#' @return ggplot2 object. 
 		#' @examples
 		#' \donttest{
@@ -218,7 +220,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' }
 		plot_bar = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-			bar_type = "full",
+			bar_full = TRUE,
 			others_color = "grey90",
 			facet = NULL,
 			order_x = NULL,
@@ -238,8 +240,18 @@ trans_abund <- R6Class(classname = "trans_abund",
 			ytitle_size = 17,
 			coord_flip = FALSE,
 			ggnested = FALSE,
-			high_level_add_other = FALSE
+			high_level_add_other = FALSE,
+			...
 			){
+			all_parameters <- c(as.list(environment()), list(...))
+			if("bar_type" %in% names(all_parameters)){
+				warning("Parameter bar_type is deprecated! Please use bar_full instead of it!")
+				if(all_parameters["bar_type"] == "full"){
+					bar_full <- TRUE
+				}else{
+					bar_full <- FALSE
+				}
+			}
 			plot_data <- self$data_abund
 			# try to filter useless columns
 			plot_data %<>% .[, ! colnames(.) %in% c("N", "SD", "SE", "Median", "Min", "Max", "quantile25", "quantile75", "all_mean_abund")]
@@ -257,9 +269,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 					plot_data_merge <- plot_data[, ! colnames(plot_data) %in% c(self$high_level, "Taxonomy", "Abundance"), drop = FALSE] %>% unique
 					plot_data <- dplyr::left_join(new_data, plot_data_merge, by = c("Sample" = "Sample"))
 				}
-				bar_type <- "notfull"
+				bar_full <- FALSE
 			}
-			if(bar_type == "full"){
+			if(bar_full){
 				# make sure that taxonomy info are all in selected use_taxanames in case of special data
 				if(!all(plot_data$Taxonomy %in% use_taxanames)){
 					plot_data$Taxonomy[!plot_data$Taxonomy %in% use_taxanames] <- "Others"
@@ -327,7 +339,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}else{
 					p <- ggplot(plot_data, aes_meco(x = "Sample", y = "Abundance", fill = "Taxonomy"))
 				}
-				if(bar_type == "full"){
+				if(bar_full){
 					if(self$use_percentage == T){
 						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
 					}else{
@@ -355,7 +367,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
 			}else{
-				if(bar_type == "full" & self$use_percentage == FALSE){
+				if(bar_full & self$use_percentage == FALSE){
 					p <- p + scale_y_continuous(limits = c(0, 1), expand = c(0, 0))
 				}else{
 					p <- p + scale_y_continuous(expand = c(0, 0))
@@ -483,7 +495,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if (is.null(plot_breaks)){
 					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, na.value = "#00008B", limits = c(min_abundance, max_abundance))
 				}else{
-					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, breaks=plot_breaks, na.value = "#00008B",
+					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, breaks = plot_breaks, na.value = "#00008B",
 						limits = c(min_abundance, max_abundance))
 				}
 				if(!is.null(facet)){
