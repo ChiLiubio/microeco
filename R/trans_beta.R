@@ -132,11 +132,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(ordination == "PCoA"){
 				model <- ape::pcoa(as.dist(self$use_matrix), ...)
 				combined <- cbind.data.frame(model$vectors[,1:ncomp], dataset$sample_table)
-				pco_names <- paste0("PCo", 1:10)
-				colnames(combined)[1:ncomp] <- pco_names[1:ncomp]
+				colnames(combined)[1:ncomp] <- paste0("PCo", 1:ncomp)
 				expla <- round(model$values[,1]/sum(model$values[,1])*100, 1)
-				expla <- expla[1:ncomp]
-				names(expla) <- pco_names[1:ncomp]
+				names(expla) <- paste0("PCo", 1:length(expla))
 				outlist <- list(model = model, scores = combined, eig = expla)
 			}
 			if(ordination == "NMDS"){
