@@ -114,7 +114,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' t1$cal_diff(group = "Group", method = "anova")
 		#' }
 		cal_diff = function(group = NULL, by_group = NULL, method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lme")[1], ...){
-			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare")){
+			if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lme")){
 				stop("The group parameter is necessary for the method: ", method, "!")
 			}
 			if(!is.null(group)){
