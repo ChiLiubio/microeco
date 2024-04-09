@@ -110,62 +110,6 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \describe{
 \item{\code{dataset}}{default NULL; \code{\link{microtable}} object.}
 
-\item{\code{method}}{default "lefse"; see the following available options:
-\describe{
-  \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
-  \item{\strong{'rf'}}{random forest and non-parametric test method based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
-  \item{\strong{'metastat'}}{Metastat method for all paired groups based on White et al. (2009) <doi:10.1371/journal.pcbi.1000352>}
-  \item{\strong{'metagenomeSeq'}}{zero-inflated log-normal model-based differential test method from \code{metagenomeSeq} package.}
-  \item{\strong{'KW'}}{KW: Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
-  \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons when group number > 2; see dunnTest function in \code{FSA} package}
-  \item{\strong{'wilcox'}}{Wilcoxon Rank Sum and Signed Rank Tests for all paired groups }
-  \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-  \item{\strong{'anova'}}{ANOVA for one-way or multi-factor analysis; see \code{cal_diff} function of \code{trans_alpha} class}
-  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test for nonparametric test used for a two-way factorial experiment; 
-        see \code{scheirerRayHare} function of \code{rcompanion} package}
-  \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
-  \item{\strong{'ALDEx2_t'}}{runs Welch's t and Wilcoxon tests with \code{ALDEx2} package; see also the test parameter in \code{ALDEx2::aldex} function;
-        ALDEx2 uses the centred log-ratio (clr) transformation and estimates per-feature technical variation within each sample using Monte-Carlo instances 
-        drawn from the Dirichlet distribution; Reference: <doi:10.1371/journal.pone.0067019> and <doi:10.1186/2049-2618-2-15>; 
-        require \code{ALDEx2} package to be installed 
-        (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
-  \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
-        see also the \code{test} parameter in \code{ALDEx2::aldex} function.}
-  \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
-  \item{\strong{'edgeR'}}{The \code{exactTest} method of \code{edgeR} package is implemented.}
-  \item{\strong{'ancombc2'}}{Analysis of Compositions of Microbiomes with Bias Correction (ANCOM-BC) 
-     based on the \code{ancombc2} function from \code{ANCOMBC} package.
-     If the \code{fix_formula} parameter is not provided, the function can automatically assign it by using group parameter.
-     For this method, the \code{group} parameter is directly passed to the group parameter of \code{ancombc2} function.
-     Reference: <doi:10.1038/s41467-020-17041-7><10.1038/s41592-023-02092-7>; Require \code{ANCOMBC} package to be installed 
-     (\href{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html}{https://bioconductor.org/packages/release/bioc/html/ANCOMBC.html})}
-  \item{\strong{'linda'}}{Linear Model for Differential Abundance Analysis of High-dimensional Compositional Data 
-        based on the \code{linda} function of \code{MicrobiomeStat} package. 
-        For linda method, please provide either the group parameter or the formula parameter.
-        When the formula parameter is provided, it should start with '~' as it is directly used by the linda function.
-        If the group parameter is used, the prefix '~' is not necessary as the function can automatically add it.
-        The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
-        Reference: <doi:10.1186/s13059-022-02655-5>}
-  \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data based on the Maaslin2 package.
-        Using this option can invoke the \code{trans_env$cal_cor} function with \code{cor_method = "maaslin2"}.}
-  \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package. 
-        Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
-  \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
-        In the return table, the significance of fixed factors are tested by function \code{anova}.
-        The significance of 'Estimate' in each term of fixed factors comes from the model.}
-  \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package.
-        For more available parameters, please see \code{glmmTMB::glmmTMB} function and use parameter passing.
-        In the return table, Conditional_R2 and Marginal_R2 represent total variance (explained by both fixed and random effects) and the variance explained by 
-        fixed effects, respectively. The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
-        The significance of 'Estimate' in each term of fixed factors comes from the model.}
-  \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution, 
-        developed for the relative abundance (ranging from 0 to 1) of taxa specifically. 
-        This is an extension of the GLMM model in \code{'glmm'} option.
-        The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
-        i.e. \code{family = glmmTMB::beta_family(link = "logit")}.
-        Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
-}}
-
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
 It is necessary when method is not "anova" or method is "anova" but formula is not provided.
 Once group is provided, the return res_abund will have mean and sd values for group.}
