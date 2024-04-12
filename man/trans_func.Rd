@@ -147,7 +147,7 @@ Identify traits of each feature by matching taxonomic assignments to functional 
 \describe{
 \item{\code{prok_database}}{default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic trait database:
 \describe{
-  \item{\strong{'FAPROTAX'}}{FAPROTAX v1.2.4; Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
+  \item{\strong{'FAPROTAX'}}{FAPROTAX; Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
         Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
   \item{\strong{'NJC19'}}{NJC19: Lim et al. (2020). Large-scale metabolic interaction network of the mouse and human gut microbiota. 
         Scientific Data, 7(1). <10.1038/s41597-020-0516-5>. 

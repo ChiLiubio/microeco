@@ -63,7 +63,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package.
 		#'     	  The \code{formula} and \code{family} parameters are needed. 
 		#'     	  Please refer to glmmTMB package to select the family function, e.g. \code{family = glmmTMB::lognormal(link = "log")}.
-		#'     	  The usage of formula is similar with that in 'lme' method.}
+		#'     	  The usage of formula is similar with that in 'lme' method.
 		#'     	  For more available parameters, please see \code{glmmTMB::glmmTMB} function and use parameter passing.
 		#'     	  In the return table, Conditional_R2 and Marginal_R2 represent total variance (explained by both fixed and random effects) and the variance explained by 
 		#'     	  fixed effects, respectively. The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
