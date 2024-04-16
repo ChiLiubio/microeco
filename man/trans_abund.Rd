@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_abund.R
 \name{trans_abund}
 \alias{trans_abund}
-\title{Create \code{trans_abund} object for plotting taxonomic abundance.}
+\title{Create \code{trans_abund} object for taxonomic abundance visualization.}
 \description{
 This class is a wrapper for the taxonomic abundance transformations and visualization.
 The converted data style is the long-format for \code{ggplot2} plot.

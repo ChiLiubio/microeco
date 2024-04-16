@@ -1,5 +1,5 @@
 #' @title
-#' Create \code{trans_abund} object for plotting taxonomic abundance.
+#' Create \code{trans_abund} object for taxonomic abundance visualization.
 #'
 #' @description
 #' This class is a wrapper for the taxonomic abundance transformations and visualization.
@@ -112,7 +112,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}else{
 					extract_tax_table <- dataset$tax_table[, c(high_level, taxrank)] %>% unique
 					if(!delete_taxonomy_lineage){
-						stop("The delete_taxonomy_lineage should be FALSE when high_level is provided!")
+						stop("The delete_taxonomy_lineage should be TRUE when high_level is provided!")
 					}
 					if(delete_taxonomy_prefix){
 						extract_tax_table[, taxrank] %<>% gsub(prefix, "", .)
