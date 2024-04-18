@@ -334,7 +334,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 					compare_result %<>% rbind(., tmp1)
 				}
-				compare_result$Significance <- generate_p_siglabel(compare_result$P.unadj, nonsig = "ns")
 				method <- paste0(method, "-formula")
 			}
 			if(method %in% c("lm", "lme", "glmm", "glmm_beta")){
@@ -417,10 +416,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				method <- paste0(method, "-formula")
 			}
-			if(! method %in% c("anova", paste0(c("anova", "scheirerRayHare", "betareg"), "-formula"), "lme", "glmm", "glmm_beta")){
-				if("P.adj" %in% colnames(compare_result)){
-					compare_result$Significance <- generate_p_siglabel(compare_result$P.adj, nonsig = "ns")
-					compare_result$Significance %<>% as.character
+			if("P.adj" %in% colnames(compare_result)){
+				compare_result$Significance <- generate_p_siglabel(compare_result$P.adj, nonsig = "ns") %>% as.character
+			}else{
+				if("P.unadj" %in% colnames(compare_result)){
+					compare_result$Significance <- generate_p_siglabel(compare_result$P.unadj, nonsig = "ns") %>% as.character
 				}
 			}
 			self$res_diff <- compare_result
