@@ -109,6 +109,8 @@ Methods for normalization:
             For \eqn{l} = 0.95\eqn{m} (feature number), \eqn{q_{j}^{l}} corresponds to the 95th percentile of the count distribution for sample \eqn{j}.
             Normalized counts \eqn{\tilde{c_{ij}} = (\frac{c_{ij}}{s_{j}^{l}})(N)}, where \eqn{N} is an appropriately chosen normalization constant.
   \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
+  \item \code{eBay}: Empirical Bayes approach to normalization <10.1186/s12859-020-03552-z>. 
+            The implemented method is not tree-related. In the output, the sum of each sample is 1.
   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
   \item \code{RLE}: Relative log expression. 
   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.

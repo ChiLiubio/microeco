@@ -64,6 +64,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' 	   	 For \eqn{l} = 0.95\eqn{m} (feature number), \eqn{q_{j}^{l}} corresponds to the 95th percentile of the count distribution for sample \eqn{j}.
 		#' 	   	 Normalized counts \eqn{\tilde{c_{ij}} = (\frac{c_{ij}}{s_{j}^{l}})(N)}, where \eqn{N} is an appropriately chosen normalization constant.
 		#'   \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
+		#'   \item \code{eBay}: Empirical Bayes approach to normalization <10.1186/s12859-020-03552-z>. 
+		#' 	   	 The implemented method is not tree-related. In the output, the sum of each sample is 1.
 		#'   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
 		#'   \item \code{RLE}: Relative log expression. 
 		#'   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
@@ -103,7 +105,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 				stop("Please select a method!")
 			}
 			method <- tolower(method)
-			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "tmm", "rle", "srs", "rarefy", "ast", 
+			method <- match.arg(method, c("gmpr", "clr", "rclr", "ccs", "tss", "ebay", "tmm", "rle", "srs", "rarefy", "ast", 
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
@@ -137,6 +139,9 @@ trans_norm <- R6Class(classname = "trans_norm",
 			}
 			if(method == "tss"){
 				res_table <- apply(abund_table, 1, function(x){x/sum(x)}) %>% t
+			}
+			if(method == "ebay"){
+				res_table <- private$ebay(abund_table)
 			}
 			if(method %in% c("srs", "rarefy")){
 				newotu <- as.data.frame(t(abund_table))
@@ -209,6 +214,21 @@ trans_norm <- R6Class(classname = "trans_norm",
 			names(output) <- names(comm.no) <- colnames(comm)
 			attr(output, 'NSS') <- comm.no
 			output
+		},
+		ebay = function(comm) {
+			sample_n <- nrow(comm)
+
+			B_e <- try(MGLM::MGLMreg(comm~1, dist="DM")@coefficients, silent=TRUE)
+
+			gr <- matrix(rep(1, sample_n))
+			alpha_e <- exp(gr%*%B_e)
+
+			exp_norm <- comm
+
+			for (n in 1:sample_n) {
+				exp_norm[n, ] <- unlist(comm[n, ] + alpha_e[n, ]) / (sum(comm[n, ]) + sum(alpha_e[n, ]))
+			}
+			exp_norm
 		}
 	),
 	lock_objects = FALSE,
