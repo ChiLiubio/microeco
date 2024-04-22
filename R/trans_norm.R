@@ -177,7 +177,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		AST = function(x){
 			sign(x) * asin(sqrt(abs(x)))
 		},
-		# modified based on https://github.com/jchen1981/GMPR
+		# modified from https://github.com/jchen1981/GMPR
 		GMPR = function(comm, intersect.no, ct.min) {
 			comm[comm < ct.min] <- 0	
 			comm.no <- numeric(ncol(comm))
@@ -215,6 +215,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 			attr(output, 'NSS') <- comm.no
 			output
 		},
+		# modified from https://github.com/liudoubletian/eBay
 		ebay = function(comm) {
 			sample_n <- nrow(comm)
 

@@ -551,9 +551,16 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		#' @description
 		#' Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
-		#'   taxonomy, within-module connectivity and among-module connectivity <doi:10.1016/j.geoderma.2022.115866>.
+		#'   taxonomy, within-module connectivity (zi) and among-module connectivity (Pi) <doi:10.1186/1471-2105-13-113; 10.1016/j.geoderma.2022.115866>.
 		#'
-		#' @param node_roles default TRUE; whether calculate node roles, i.e. Module hubs, Network hubs, Connectors and Peripherals <doi:10.1016/j.geoderma.2022.115866>.
+		#' @param node_roles default TRUE; whether calculate the node roles <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>.
+		#'   The role of node i is characterized by its within-module connectivity (zi) and among-module connectivity (Pi) as follows
+		#'   \deqn{z_i = \dfrac{k_{ib} - \bar{k_b}}{\sigma_{k_b}}}
+		#'   \deqn{P_i = 1 - \displaystyle\sum_{c=1}^{N_M} \biggl(\frac{k_{ic}}{k_i}\biggr)^2}
+		#'   where \eqn{k_{ib}} is the number of links of node \eqn{i} to other nodes in its module \eqn{b}, 
+		#'   \eqn{\bar{k_b}} and \eqn{\sigma_{k_b}} are the average and standard deviation of within-module connectivity, respectively
+		#'   over all the nodes in module \eqn{b}, \eqn{k_i} is the number of links of node \eqn{i} in the whole network, 
+		#'   \eqn{k_{ic}} is the number of links from node \eqn{i} to nodes in module \eqn{c}, and \eqn{N_M} is the number of modules in the network.
 		#' @return \code{res_node_table} in object; Abundance expressed as a percentage; 
 		#'   betweenness_centrality: betweenness centrality; betweenness_centrality: closeness centrality; eigenvector_centrality: eigenvector centrality; 
 		#'  z: within-module connectivity; p: among-module connectivity.
@@ -800,8 +807,9 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		#' @description
 		#' Plot the classification and importance of nodes, see object$res_node_table for the variable names used in the parameters.
-		#'
-		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot; 2 represents the layered plot with taxa as x axis.
+		#' 
+		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot (node roles include Module hubs, Network hubs, 
+		#'   Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 2 represents the layered plot with taxa as x axis.
 		#' @param roles_color_background default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.
 		#' @param roles_color_values default NULL; for use_type=1; color palette for background or points.
 		#' @param add_label default FALSE; for use_type = 1; whether add labels for the points.
