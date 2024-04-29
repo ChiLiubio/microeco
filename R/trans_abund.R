@@ -24,7 +24,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
 		#'   Please provide the customized prefix when it is not standard, otherwise the program can not correctly recognize it.
 		#' @param use_percentage default TRUE; show the abundance percentage.
-		#' @param input_taxaname default NULL; character vector; input taxa names for selecting some taxa.
+		#' @param input_taxaname default NULL; character vector; input taxa names to select some taxa.
 		#' @param high_level default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
 		#'   It is necessary for the legend with nested taxonomic levels in the bar plot.
 		#' @param high_level_fix_nsub default NULL; an integer, used to fix the number of selected abundant taxa in each taxon from higher taxonomic level.

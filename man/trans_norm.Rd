@@ -101,17 +101,26 @@ Methods for normalization:
             It is defined:  \deqn{rclr_{ki} = \log\frac{x_{ki}}{g(x_i > 0)}}
             where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
             In rclr, zero values are kept as zeroes, and not taken into account.
-  \item \code{CCS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
+  \item \code{CSS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
             For a given sample \eqn{j}, the scaling factor \eqn{s_{j}^{l}} is defined:
                 \deqn{s_{j}^{l} = {\displaystyle\sum_{i|c_{ij} \leqslant q_{j}^{l}} c_{ij}}}
             where \eqn{q_{j}^{l}} is the \eqn{l}th quantile of sample \eqn{j}, that is, in sample \eqn{j} there are \eqn{l} features with counts smaller than \eqn{q_{j}^{l}}.
             \eqn{c_{ij}} denotes the count (abundance) of feature i in sample \eqn{j}.
             For \eqn{l} = 0.95\eqn{m} (feature number), \eqn{q_{j}^{l}} corresponds to the 95th percentile of the count distribution for sample \eqn{j}.
             Normalized counts \eqn{\tilde{c_{ij}} = (\frac{c_{ij}}{s_{j}^{l}})(N)}, where \eqn{N} is an appropriately chosen normalization constant.
-  \item \code{TSS}: Total sum scaling, divided by the sequencing depth.
+  \item \code{TSS}: Total sum scaling. Abundance is divided by the sequencing depth.
+            For a given sample \eqn{j}, normalized counts is defined:
+                \deqn{\tilde{c_{ij}} = \frac{c_{ij}}{\sum_{i=1}^{N_{j}} c_{ij}}}
+            where \eqn{c_{ij}} is the counts of feature \eqn{i} in sample \eqn{j}, \eqn{N_{j}} is the feature number of sample \eqn{j}.
   \item \code{eBay}: Empirical Bayes approach to normalization <10.1186/s12859-020-03552-z>. 
             The implemented method is not tree-related. In the output, the sum of each sample is 1.
   \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
+  \item \code{DESeq2}: DESeq method of \code{DESeq2} package <doi: 10.1186/s13059-014-0550-8>.
+            This option can invoke the \code{trans_diff} class and extract the normalized data from the original result.
+            Note that either \code{group} or \code{formula} should be provided.
+            The scaling factor is defined:
+                    \deqn{s_{j} = Median_{i} \frac{c_{ij}}{\bigl( {\prod_{j=1}^{n} c_{ij}} \bigr) ^{1/n}}}
+            where \eqn{c_{ij}} is the counts of feature \eqn{i} in sample \eqn{j}, \eqn{n} is the total sample number.
   \item \code{RLE}: Relative log expression. 
   \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
   \item \code{rarefy}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
@@ -124,7 +133,7 @@ Methods based on \code{\link{decostand}} function:
   \item \code{range}: standardize values into range 0...1 (default MARGIN = 2). If all values are constant, they will be transformed to 0.
   \item \code{standardize}: scale x to zero mean and unit variance (default MARGIN = 2).
   \item \code{pa}: scale x to presence/absence scale (0/1).
-  \item \code{log}: logarithmic transformation as suggested by Anderson et al. (2006): log_b (x) + 1 for x > 0, where b is the base of the logarithm; zeros are left as zeros. Higher bases give less weight to quantities and more to presences, and logbase = Inf gives the presence/absence scaling. Please note this is not log(x+1). Anderson et al. (2006) suggested this for their (strongly) modified Gower distance (implemented as method = "altGower" in vegdist), but the standardization can be used independently of distance indices.
+  \item \code{log}: logarithmic transformation.
 }
 Other methods for transformation:
 \itemize{
@@ -142,8 +151,10 @@ If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{ct.min}}{default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.}
 
-\item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CCS", or 
-\code{edgeR::normLibSizes} when method = "TMM" or "RLE", or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS".}
+\item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
+or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
+or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS",
+or \code{trans_diff} class when method = "DESeq2".}
 }
 \if{html}{\out{</div>}}
 }

@@ -157,7 +157,7 @@ Please provide the customized prefix when it is not standard, otherwise the prog
 
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
 
-\item{\code{input_taxaname}}{default NULL; character vector; input taxa names for selecting some taxa.}
+\item{\code{input_taxaname}}{default NULL; character vector; input taxa names to select some taxa.}
 
 \item{\code{high_level}}{default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
 It is necessary for the legend with nested taxonomic levels in the bar plot.}
