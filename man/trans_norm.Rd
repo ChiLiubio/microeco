@@ -20,8 +20,8 @@ t1 <- trans_norm$new(dataset = dataset)
 ## Method `trans_norm$norm`
 ## ------------------------------------------------
 
-newdataset <- t1$norm(method = "log")
 newdataset <- t1$norm(method = "clr")
+newdataset <- t1$norm(method = "log")
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -70,12 +70,13 @@ t1 <- trans_norm$new(dataset = dataset)
 Normalization/transformation methods.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_norm$norm(
-  method = NULL,
+  method = "clr",
   MARGIN = NULL,
   logbase = 2,
   pseudocount = 1,
   intersect.no = 10,
   ct.min = 1,
+  condition = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -83,61 +84,68 @@ Normalization/transformation methods.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default NULL; See the following details and available options. \cr 
+\item{\code{method}}{default "clr"; See the following details and available options. \cr 
 \cr 
 Methods for normalization:
 \itemize{
-  \item \code{GMPR}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
-            For a given sample \eqn{i}, the size factor \eqn{s_i} is defined:
-                \deqn{s_i = \lgroup {\displaystyle\prod_{j=1}^{n} r_{ij}} \rgroup ^{1/n}}
-            where \eqn{r_{ij} = Median_{k|c_{ki}c_{kj} \ne 0} \lbrace \dfrac{c_{ki}}{c_{kj}} \rbrace}. 
-            \eqn{r_{ij}} is the median count ratio of nonzero counts between sample \eqn{i} and \eqn{j}.
-            \eqn{k} denotes all the features. For sample \eqn{i}, \eqn{GMPR = \frac{x_{i}}{s_i}}, where \eqn{x_i} is the feature abundances of sample \eqn{i}.
-  \item \code{clr}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
+  \item \code{"clr"}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
             It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
             where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
             A pseudocount need to be added to deal with the zero. For more information, please see the 'clr' method in \code{decostand} function of vegan package.
-  \item \code{rclr}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
+  \item \code{"rclr"}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
             It is defined:  \deqn{rclr_{ki} = \log\frac{x_{ki}}{g(x_i > 0)}}
             where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
             In rclr, zero values are kept as zeroes, and not taken into account.
-  \item \code{CSS}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
+  \item \code{"GMPR"}: Geometric mean of pairwise ratios <doi: 10.7717/peerj.4600>. 
+            For a given sample \eqn{i}, the size factor \eqn{s_i} is defined:
+                \deqn{s_i =  \biggl( {\displaystyle\prod_{j=1}^{n} Median_{k|c_{ki}c_{kj} \ne 0} \lbrace \dfrac{c_{ki}}{c_{kj}} \rbrace} \biggr) ^{1/n}}
+            where \eqn{k} denotes all the features, and \eqn{n} denotes all the samples. 
+            For sample \eqn{i}, \eqn{GMPR = \frac{x_{i}}{s_i}}, where \eqn{x_i} is the feature abundances of sample \eqn{i}.
+  \item \code{"CSS"}: Cumulative sum scaling normalization based on the \code{metagenomeSeq} package <doi:10.1038/nmeth.2658>.
             For a given sample \eqn{j}, the scaling factor \eqn{s_{j}^{l}} is defined:
                 \deqn{s_{j}^{l} = {\displaystyle\sum_{i|c_{ij} \leqslant q_{j}^{l}} c_{ij}}}
             where \eqn{q_{j}^{l}} is the \eqn{l}th quantile of sample \eqn{j}, that is, in sample \eqn{j} there are \eqn{l} features with counts smaller than \eqn{q_{j}^{l}}.
             \eqn{c_{ij}} denotes the count (abundance) of feature i in sample \eqn{j}.
             For \eqn{l} = 0.95\eqn{m} (feature number), \eqn{q_{j}^{l}} corresponds to the 95th percentile of the count distribution for sample \eqn{j}.
             Normalized counts \eqn{\tilde{c_{ij}} = (\frac{c_{ij}}{s_{j}^{l}})(N)}, where \eqn{N} is an appropriately chosen normalization constant.
-  \item \code{TSS}: Total sum scaling. Abundance is divided by the sequencing depth.
+  \item \code{"TSS"}: Total sum scaling. Abundance is divided by the sequencing depth.
             For a given sample \eqn{j}, normalized counts is defined:
                 \deqn{\tilde{c_{ij}} = \frac{c_{ij}}{\sum_{i=1}^{N_{j}} c_{ij}}}
-            where \eqn{c_{ij}} is the counts of feature \eqn{i} in sample \eqn{j}, \eqn{N_{j}} is the feature number of sample \eqn{j}.
-  \item \code{eBay}: Empirical Bayes approach to normalization <10.1186/s12859-020-03552-z>. 
+            where \eqn{c_{ij}} is the counts of feature \eqn{i} in sample \eqn{j}, and \eqn{N_{j}} is the feature number of sample \eqn{j}.
+  \item \code{"eBay"}: Empirical Bayes approach to normalization <10.1186/s12859-020-03552-z>. 
             The implemented method is not tree-related. In the output, the sum of each sample is 1.
-  \item \code{TMM}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
-  \item \code{DESeq2}: DESeq method of \code{DESeq2} package <doi: 10.1186/s13059-014-0550-8>.
+  \item \code{"TMM"}: Trimmed mean of M-values method based on the \code{normLibSizes} function of \code{edgeR} package <doi: 10.1186/gb-2010-11-3-r25>.
+  \item \code{"DESeq2"}: Median ratio of gene counts relative to geometric mean per gene based on the DESeq function of \code{DESeq2} package <doi: 10.1186/s13059-014-0550-8>.
             This option can invoke the \code{trans_diff} class and extract the normalized data from the original result.
             Note that either \code{group} or \code{formula} should be provided.
             The scaling factor is defined:
-                    \deqn{s_{j} = Median_{i} \frac{c_{ij}}{\bigl( {\prod_{j=1}^{n} c_{ij}} \bigr) ^{1/n}}}
-            where \eqn{c_{ij}} is the counts of feature \eqn{i} in sample \eqn{j}, \eqn{n} is the total sample number.
-  \item \code{RLE}: Relative log expression. 
-  \item \code{SRS}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
-  \item \code{rarefy}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
+                \deqn{s_{j} = Median_{i} \frac{c_{ij}}{\bigl( {\prod_{j=1}^{n} c_{ij}} \bigr) ^{1/n}}}
+            where \eqn{c_{ij}} is the counts of feature \eqn{i} in sample \eqn{j}, and \eqn{n} is the total sample number.
+  \item \code{"Wrench"}: Group-wise and sample-wise compositional bias factor <doi: 10.1186/s12864-018-5160-5>.
+            Note that condition parameter is necesary to be passed to \code{condition} parameter in \code{wrench} function of Wrench package.
+            As the input data must be microtable object, so the input condition parameter can be a column name of \code{sample_table}.
+            The scaling factor is defined:
+                \deqn{s_{j} = \frac{1}{p} \sum_{ij} W_{ij} \frac{X_{ij}}{\overline{X_{i}}}}
+            where \eqn{X_{ij}} represents the relative abundance (proportion) for feature \eqn{i} in sample \eqn{j},
+            \eqn{\overline{X_{i}}} is the average proportion of feature \eqn{i} across the dataset,
+            \eqn{W_{ij}} represents a weight specific to each technique, and \eqn{p} is the feature number in sample.
+  \item \code{"RLE"}: Relative log expression. 
+  \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
+  \item \code{"rarefy"}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
 }
 Methods based on \code{\link{decostand}} function:
 \itemize{
-  \item \code{total}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
-  \item \code{max}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
-  \item \code{normalize}:  make margin sum of squares equal to one (default MARGIN = 1).
-  \item \code{range}: standardize values into range 0...1 (default MARGIN = 2). If all values are constant, they will be transformed to 0.
-  \item \code{standardize}: scale x to zero mean and unit variance (default MARGIN = 2).
-  \item \code{pa}: scale x to presence/absence scale (0/1).
-  \item \code{log}: logarithmic transformation.
+  \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
+  \item \code{"max"}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
+  \item \code{"normalize"}:  make margin sum of squares equal to one (default MARGIN = 1).
+  \item \code{"range"}: standardize values into range 0...1 (default MARGIN = 2). If all values are constant, they will be transformed to 0.
+  \item \code{"standardize"}: scale x to zero mean and unit variance (default MARGIN = 2).
+  \item \code{"pa"}: scale x to presence/absence scale (0/1).
+  \item \code{"log"}: logarithmic transformation.
 }
 Other methods for transformation:
 \itemize{
-  \item \code{AST}: Arc sine square root transformation.
+  \item \code{"AST"}: Arc sine square root transformation.
 }}
 
 \item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
@@ -151,10 +159,15 @@ If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{ct.min}}{default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.}
 
+\item{\code{condition}}{default NULL; Only available when \code{method = "Wrench"}. 
+This parameter is passed to the \code{condition} parameter of \code{wrench} function in Wrench package
+It must be a column name of \code{sample_table} or a vector with same length of samples.}
+
 \item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
 or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
 or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS",
-or \code{trans_diff} class when method = "DESeq2".}
+or \code{trans_diff} class when method = "DESeq2",
+or \code{wrench} function of Wrench package when method = "Wrench".}
 }
 \if{html}{\out{</div>}}
 }
@@ -163,8 +176,8 @@ new microtable object or data.frame object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{newdataset <- t1$norm(method = "log")
-newdataset <- t1$norm(method = "clr")
+\preformatted{newdataset <- t1$norm(method = "clr")
+newdataset <- t1$norm(method = "log")
 }
 \if{html}{\out{</div>}}
 
