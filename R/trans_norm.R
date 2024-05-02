@@ -38,10 +38,12 @@ trans_norm <- R6Class(classname = "trans_norm",
 		},
 		#' @description
 		#' Normalization/transformation methods.
-		#' @param method default "clr"; See the following details and available options. \cr 
+		#' @param method default "rarefy"; See the following available options. \cr 
 		#' \cr 
 		#' Methods for normalization:
 		#' \itemize{
+		#'   \item \code{"rarefy"}: classic rarefaction based on R sample function.
+		#'   \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <doi:10.7717/peerj.9593>.
 		#'   \item \code{"clr"}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
 		#' 	   	 It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
 		#' 	   	 where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
@@ -84,8 +86,6 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' 	   	 \eqn{\overline{X_{i}}} is the average proportion of feature \eqn{i} across the dataset,
 		#' 	   	 \eqn{W_{ij}} represents a weight specific to each technique, and \eqn{p} is the feature number in sample.
 		#'   \item \code{"RLE"}: Relative log expression. 
-		#'   \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
-		#'   \item \code{"rarefy"}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
 		#' }
 		#' Methods based on \code{\link{decostand}} function:
 		#' \itemize{
@@ -101,18 +101,21 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' \itemize{
 		#'   \item \code{"AST"}: Arc sine square root transformation.
 		#' }
-		#' @param MARGIN default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
-		#'    If MARGIN is NULL, use the default value in decostand function.
-		#' @param logbase default exp(1); The logarithm base.
+		#' @param sample.size default NULL; libray size for rarefaction when method = "rarefy" or "SRS". If not provided, use the minimum number across all samples. 
+		#'    For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.
+		#' @param rngseed default 123; random seed. Available when method = "rarefy" or "SRS".
+		#' @param replace default TRUE; see \code{\link{sample}} for the random sampling; Available when \code{method = "rarefy"}.
 		#' @param pseudocount default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.
 		#' @param intersect.no default 10; the intersecting taxa number between paired sample for \code{method = "GMPR"}.
 		#' @param ct.min default 1; the minimum number of counts required to calculate ratios for \code{method = "GMPR"}.
 		#' @param condition default NULL; Only available when \code{method = "Wrench"}. 
 		#'    This parameter is passed to the \code{condition} parameter of \code{wrench} function in Wrench package
 		#'    It must be a column name of \code{sample_table} or a vector with same length of samples.
+		#' @param MARGIN default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
+		#'    If MARGIN is NULL, use the default value in decostand function.
+		#' @param logbase default 2; The logarithm base.
 		#' @param ... parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
 		#'    or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
-		#'    or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS",
 		#'    or \code{trans_diff} class when method = "DESeq2",
 		#'    or \code{wrench} function of Wrench package when method = "Wrench".
 		#' 
@@ -120,14 +123,15 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @examples
 		#' newdataset <- t1$norm(method = "clr")
 		#' newdataset <- t1$norm(method = "log")
-		norm = function(method = "clr", MARGIN = NULL, logbase = 2, pseudocount = 1, intersect.no = 10, ct.min = 1, condition = NULL, ...)
+		norm = function(method = "rarefy", sample.size = NULL, rngseed = 123, replace = TRUE, pseudocount = 1, intersect.no = 10, 
+			ct.min = 1, condition = NULL, MARGIN = NULL, logbase = 2, ...)
 			{
 			abund_table <- self$data_table
 			if(is.null(method)){
 				stop("Please select a method!")
 			}
 			method <- tolower(method)
-			method <- match.arg(method, c("gmpr", "clr", "rclr", "css", "tss", "ebay", "tmm", "deseq2", "rle", "wrench", "srs", "rarefy", "ast", 
+			method <- match.arg(method, c("rarefy", "srs", "gmpr", "clr", "rclr", "css", "tss", "ebay", "tmm", "deseq2", "rle", "wrench", "ast", 
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
@@ -135,6 +139,45 @@ trans_norm <- R6Class(classname = "trans_norm",
 					MARGIN <- switch(method, total = 1, max = 2, frequency = 2, normalize = 1, range = 2, rank = 1, standardize = 2, chi.square = 1, NULL)
 				}
 				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
+			}
+			if(method %in% c("rarefy", "srs")){
+				newotu <- as.data.frame(t(abund_table))
+				suppressMessages(tmpobj <- microtable$new(newotu))
+				set.seed(rngseed)
+
+				if(is.null(sample.size)){
+					sample.size <- min(tmpobj$sample_sums())
+					message("Use the minimum number across samples: ", sample.size)
+				}
+				if(length(sample.size) > 1){
+					stop("Input sample.size had more than one value!")
+				}
+				if(sample.size <= 0){
+					stop("sample.size less than or equal to zero. Need positive sample size to work!")
+				}
+				if (max(tmpobj$sample_sums()) < sample.size){
+					stop("sample.size is larger than the maximum of sample sums, pleasure check input sample.size!")
+				}
+				if (min(tmpobj$sample_sums()) < sample.size) {
+					rmsamples <- tmpobj$sample_names()[tmpobj$sample_sums() < sample.size]
+					message(length(rmsamples), " samples removed, ", "because of fewer reads than input sample.size.")
+					tmpobj$sample_table <- base::subset(tmpobj$sample_table, ! tmpobj$sample_names() %in% rmsamples)
+					tmpobj$tidy_dataset()
+				}
+				newotu <- tmpobj$otu_table
+				if(method == "rarefy"){
+					newotu <- as.data.frame(apply(newotu, 2, private$rarefaction_subsample, sample.size = sample.size, replace = replace))
+				}else{
+					newotu <- SRS::SRS(newotu, Cmin = sample.size, set_seed = TRUE, seed = rngseed)
+				}
+				rownames(newotu) <- rownames(tmpobj$otu_table)
+				tmpobj$otu_table <- newotu
+				rmtaxa <- apply(newotu, 1, sum) %>% .[. == 0]
+				if(length(rmtaxa) > 0){
+					message(length(rmtaxa), " features are removed because they are no longer present in any sample after random subsampling ...")
+					tmpobj$tidy_dataset()
+				}
+				res_table <- t(tmpobj$otu_table)
 			}
 			if(method == "deseq2"){
 				if(!inherits(self$dataset, "microtable")){
@@ -201,15 +244,6 @@ trans_norm <- R6Class(classname = "trans_norm",
 				size_factor <- res_raw$nf
 				res_table <- t(transposed_table) / size_factor
 			}
-			if(method %in% c("srs", "rarefy")){
-				newotu <- as.data.frame(t(abund_table))
-				suppressMessages(m1 <- microtable$new(newotu))
-				if(method == "srs"){
-					method <- "SRS"
-				}
-				m1$rarefy_samples(method = method, ...)
-				res_table <- t(m1$otu_table)
-			}
 			if(method %in% c("tmm", "rle")){
 				abund_table %<>% t
 				upmethod <- toupper(method)
@@ -225,6 +259,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 			if(inherits(self$dataset, "microtable")){
 				res_dataset <- clone(self$dataset)
 				res_dataset$otu_table <- as.data.frame(t(res_table))
+				res_dataset$tidy_dataset()
 				res_dataset
 			}else{
 				res_table
@@ -232,6 +267,28 @@ trans_norm <- R6Class(classname = "trans_norm",
 		}
 	),
 	private = list(
+		rarefaction_subsample = function(x, sample.size, replace=FALSE){
+			# Adapted from the rarefy_even_depth in phyloseq package.
+			rarvec <- numeric(length(x))
+			if(sum(x) <= 0){
+				# Protect against, and quickly return an empty vector, 
+				return(rarvec)
+			}
+			if(replace){
+				suppressWarnings(subsample <- sample(1:length(x), sample.size, replace = TRUE, prob = x))
+			} else {
+				# resample without replacement
+				obsvec <- apply(data.frame(OTUi = 1:length(x), times = x), 1, function(x){
+					rep_len(x["OTUi"], x["times"])
+				})
+				obsvec <- unlist(obsvec, use.names=FALSE)
+				suppressWarnings(subsample <- sample(obsvec, sample.size, replace = FALSE))
+			}
+			sstab <- table(subsample)
+			# Assign the tabulated random subsample values to the species vector
+			rarvec[as(names(sstab), "integer")] <- sstab
+			return(rarvec)
+		},
 		AST = function(x){
 			sign(x) * asin(sqrt(abs(x)))
 		},

@@ -70,13 +70,16 @@ t1 <- trans_norm$new(dataset = dataset)
 Normalization/transformation methods.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_norm$norm(
-  method = "clr",
-  MARGIN = NULL,
-  logbase = 2,
+  method = "rarefy",
+  sample.size = NULL,
+  rngseed = 123,
+  replace = TRUE,
   pseudocount = 1,
   intersect.no = 10,
   ct.min = 1,
   condition = NULL,
+  MARGIN = NULL,
+  logbase = 2,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -84,10 +87,12 @@ Normalization/transformation methods.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "clr"; See the following details and available options. \cr 
+\item{\code{method}}{default "rarefy"; See the following details and available options. \cr 
 \cr 
 Methods for normalization:
 \itemize{
+  \item \code{"rarefy"}: classic rarefaction based on R sample function.
+  \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <doi:10.7717/peerj.9593>.
   \item \code{"clr"}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
             It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
             where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
@@ -130,8 +135,6 @@ Methods for normalization:
             \eqn{\overline{X_{i}}} is the average proportion of feature \eqn{i} across the dataset,
             \eqn{W_{ij}} represents a weight specific to each technique, and \eqn{p} is the feature number in sample.
   \item \code{"RLE"}: Relative log expression. 
-  \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
-  \item \code{"rarefy"}: same with the \code{"rarefy"} option in \code{rarefy_samples} function of microtable class.
 }
 Methods based on \code{\link{decostand}} function:
 \itemize{
@@ -148,10 +151,12 @@ Other methods for transformation:
   \item \code{"AST"}: Arc sine square root transformation.
 }}
 
-\item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
-If MARGIN is NULL, use the default value in decostand function.}
+\item{\code{sample.size}}{default NULL; libray size for rarefaction when method = "rarefy" or "SRS". If not provided, use the minimum number across all samples. 
+For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.}
 
-\item{\code{logbase}}{default exp(1); The logarithm base.}
+\item{\code{rngseed}}{default 123; random seed. Available when method = "rarefy" or "SRS".}
+
+\item{\code{replace}}{default TRUE; see \code{\link{sample}} for the random sampling; Available when \code{method = "rarefy"}.}
 
 \item{\code{pseudocount}}{default 1; add pseudocount for those features with 0 abundance when \code{method = "clr"}.}
 
@@ -162,6 +167,11 @@ If MARGIN is NULL, use the default value in decostand function.}
 \item{\code{condition}}{default NULL; Only available when \code{method = "Wrench"}. 
 This parameter is passed to the \code{condition} parameter of \code{wrench} function in Wrench package
 It must be a column name of \code{sample_table} or a vector with same length of samples.}
+
+\item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
+If MARGIN is NULL, use the default value in decostand function.}
+
+\item{\code{logbase}}{default 2; The logarithm base.}
 
 \item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
 or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 

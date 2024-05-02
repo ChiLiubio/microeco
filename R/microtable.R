@@ -175,56 +175,28 @@ microtable <- R6Class(classname = "microtable",
 			self$tidy_dataset()
 		},
 		#' @description
-		#' Rarefy communities to make all samples have same feature number.
+		#' Rarefy communities to make all samples have same count number.
 		#'
 		#' @param method default c("rarefy", "SRS")[1]; "rarefy" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
 		#'    "SRS" is scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.
 		#' @param sample.size default NULL; libray size. If not provided, use the minimum number across all samples. 
 		#'    For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.
-		#' @param rngseed default 123; random seed. For "SRS" method, this parameter is passed to \code{seed} parameter of \code{SRS} function.
-		#' @param replace default TRUE; see \code{\link{sample}} for the random sampling; Only available when \code{method = "rarefy"}.
+		#' @param ... parameters pass to \code{norm} function of \code{\link{trans_norm}} class.
 		#' @return None; rarefied dataset.
 		#' @examples
 		#' \donttest{
-		#' m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
+		#' m1$rarefy_samples(sample.size = min(m1$sample_sums()))
 		#' }
-		rarefy_samples = function(method = c("rarefy", "SRS")[1], sample.size = NULL, rngseed = 123, replace = TRUE){
-			set.seed(rngseed)
+		rarefy_samples = function(method = c("rarefy", "SRS")[1], sample.size, ...){
 			self$tidy_dataset()
-			# compatible with previous "rarefying"
-			method <- match.arg(method, c("rarefying", "SRS"))
-			if(is.null(sample.size)){
-				sample.size <- min(self$sample_sums())
-				message("Use the minimum number across samples: ", sample.size)
-			}
-			if(length(sample.size) > 1){
-				stop("Input sample.size had more than one value!")
-			}
-			if(sample.size <= 0){
-				stop("sample.size less than or equal to zero. Need positive sample size to work!")
-			}
-			if (max(self$sample_sums()) < sample.size){
-				stop("sample.size is larger than the maximum of sample sums, pleasure check input sample.size!")
-			}
-			if (min(self$sample_sums()) < sample.size) {
-				rmsamples <- self$sample_names()[self$sample_sums() < sample.size]
-				message(length(rmsamples), " samples removed, ", "because of fewer reads than input sample.size.")
-				self$sample_table <- base::subset(self$sample_table, ! self$sample_names() %in% rmsamples)
-				self$tidy_dataset()
-			}
-			newotu <- self$otu_table
 			if(method == "rarefying"){
-				newotu <- as.data.frame(apply(newotu, 2, private$rarefaction_subsample, sample.size = sample.size, replace = replace))
-			}else{
-				newotu <- SRS::SRS(newotu, Cmin = sample.size, set_seed = TRUE, seed = rngseed)
+				method <- "rarefy"
 			}
-			rownames(newotu) <- rownames(self$otu_table)
-			self$otu_table <- newotu
-			rmtaxa <- apply(newotu, 1, sum) %>% .[. == 0]
-			if(length(rmtaxa) > 0){
-				message(length(rmtaxa), " features are removed because they are no longer present in any sample after random subsampling ...")
-				self$tidy_dataset()
-			}
+			method <- match.arg(method, c("rarefy", "SRS"))
+			tmp <- suppressMessages(trans_norm$new(self))
+			tmp_new <- tmp$norm(method = method, sample.size = sample.size, ...)
+			self$otu_table <- tmp_new$otu_table
+			suppressMessages(self$tidy_dataset())
 		},
 		#' @description
 		#' Trim all the data in the \code{microtable} object to make taxa and samples consistent. So the results are intersections.
@@ -899,29 +871,6 @@ microtable <- R6Class(classname = "microtable",
 				.[,-1, drop = FALSE]
 			abund2 <- abund2[order(apply(abund2, 1, mean), decreasing = TRUE), rownames(sampleinfo), drop = FALSE]
 			abund2
-		},
-		rarefaction_subsample = function(x, sample.size, replace=FALSE){
-			# Adapted from the rarefy_even_depth() in phyloseq package
-			# All rights reserved.
-			rarvec <- numeric(length(x))
-			if(sum(x) <= 0){
-				# Protect against, and quickly return an empty vector, 
-				return(rarvec)
-			}
-			if(replace){
-				suppressWarnings(subsample <- sample(1:length(x), sample.size, replace = TRUE, prob=x))
-			} else {
-				# resample without replacement
-				obsvec <- apply(data.frame(OTUi=1:length(x), times=x), 1, function(x){
-					rep_len(x["OTUi"], x["times"])
-				})
-				obsvec <- unlist(obsvec, use.names=FALSE)
-				suppressWarnings(subsample <- sample(obsvec, sample.size, replace = FALSE))
-			}
-			sstab <- table(subsample)
-			# Assign the tabulated random subsample values to the species vector
-			rarvec[as(names(sstab), "integer")] <- sstab
-			return(rarvec)
 		},
 		goods = function(com){
 			no.seqs <- rowSums(com)

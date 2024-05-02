@@ -51,7 +51,7 @@ d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 ## ------------------------------------------------
 
 \donttest{
-m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
+m1$rarefy_samples(sample.size = min(m1$sample_sums()))
 }
 
 ## ------------------------------------------------
@@ -330,14 +330,9 @@ d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 \if{html}{\out{<a id="method-microtable-rarefy_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-rarefy_samples}{}}}
 \subsection{Method \code{rarefy_samples()}}{
-Rarefy communities to make all samples have same feature number.
+Rarefy communities to make all samples have same count number.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(
-  method = c("rarefy", "SRS")[1],
-  sample.size = NULL,
-  rngseed = 123,
-  replace = TRUE
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(method = c("rarefy", "SRS")[1], sample.size, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -349,9 +344,7 @@ Rarefy communities to make all samples have same feature number.
 \item{\code{sample.size}}{default NULL; libray size. If not provided, use the minimum number across all samples. 
 For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.}
 
-\item{\code{rngseed}}{default 123; random seed. For "SRS" method, this parameter is passed to \code{seed} parameter of \code{SRS} function.}
-
-\item{\code{replace}}{default TRUE; see \code{\link{sample}} for the random sampling; Only available when \code{method = "rarefy"}.}
+\item{\code{...}}{parameters pass to \code{norm} function of \code{\link{trans_norm}} class.}
 }
 \if{html}{\out{</div>}}
 }
@@ -361,7 +354,7 @@ None; rarefied dataset.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-m1$rarefy_samples(sample.size = min(m1$sample_sums()), replace = TRUE)
+m1$rarefy_samples(sample.size = min(m1$sample_sums()))
 }
 }
 \if{html}{\out{</div>}}
