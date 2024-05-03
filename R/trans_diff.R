@@ -545,7 +545,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 						## Normalization and Statistical testing
 						obj_1 <- cumNorm(obj)
 						pd <- pData(obj)
-						colnames(pd)[which(colnames(pd) == group)] <- "Group"
+						if(group != "Group"){
+							if("Group" %in% colnames(pd)){
+								pd <- pd[, colnames(pd) != "Group"]
+							}
+							colnames(pd)[which(colnames(pd) == group)] <- "Group"
+						}
 						mod <- model.matrix(~1 + Group, data = pd)
 						objres1 <- fitFeatureModel(obj_1, mod)
 						tb <- data.frame(logFC = objres1@fitZeroLogNormal$logFC, se = objres1@fitZeroLogNormal$se)
