@@ -535,7 +535,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					for(i in 1:ncol(all_name)) {
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
-						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), , drop = FALSE]
 						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						obj <- newMRexperiment(
 							newdata$otu_table, 
@@ -547,7 +547,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						pd <- pData(obj)
 						if(group != "Group"){
 							if("Group" %in% colnames(pd)){
-								pd <- pd[, colnames(pd) != "Group"]
+								pd <- pd[, colnames(pd) != "Group", drop = FALSE]
 							}
 							colnames(pd)[which(colnames(pd) == group)] <- "Group"
 						}
@@ -636,7 +636,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					for(i in 1:ncol(all_name)) {
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
-						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), , drop = FALSE]
 						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						y <- DGEList(counts = newdata$otu_table, group = newdata$sample_table[, group])
 						z <- calcNormFactors(y)
@@ -662,7 +662,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					for(i in 1:ncol(all_name)) {
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
-						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), ]
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), , drop = FALSE]
 						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
 						res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
