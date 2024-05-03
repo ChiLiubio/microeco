@@ -1,9 +1,10 @@
-#' @title Create \code{trans_beta} object for beta-diversity analysis based on the distance matrix
+#' @title Create \code{trans_beta} object for beta-diversity analysis
 #'
 #' @description
 #' This class is a wrapper for a series of beta-diversity related analysis, 
 #' including ordination analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 #' clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>, ANOSIM and PERMDISP.
+#' Note that the beta diversity analysis methods related with environmental variables are encapsulated within trans_env class.
 #'
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",

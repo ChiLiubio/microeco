@@ -21,7 +21,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param delete_taxonomy_lineage default TRUE; whether delete the taxonomy lineage in front of the target level.
 		#' @param delete_taxonomy_prefix default TRUE; whether delete the prefix of taxonomy, such as "g__".
 		#' @param prefix default NULL; character string; available when \code{delete_taxonomy_prefix = T}; 
-		#'   default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
+		#'   default NULL represents using the "letter+__", e.g. "k__" for Phylum level;
 		#'   Please provide the customized prefix when it is not standard, otherwise the program can not correctly recognize it.
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; input taxa names to select some taxa.
@@ -31,7 +31,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   If the total number under one taxon of higher level is less than the high_level_fix_nsub, the total number will be used.
 		#'   When \code{high_level_fix_nsub} is provided, the taxa number of higher level is calculated as: \code{ceiling(ntaxa/high_level_fix_nsub)}.
 		#'   Note that \code{ntaxa} means either the parameter \code{ntaxa} or the taxonomic number obtained by filtering according to the \code{show} parameter.
-		#' @return \code{data_abund} stored in the object. The column 'all_mean_abund' reprensents mean relative abundance across all the samples.
+		#' @return \code{data_abund} stored in the object. The column 'all_mean_abund' represents mean relative abundance across all the samples.
 		#'   So the values in one taxon are all same across all the samples.
 		#'   If the sum of column 'Abundance' in one sample is larger than 1, the 'Abundance', 'SD' and 'SE' has been multiplied by 100.
 		#' @examples

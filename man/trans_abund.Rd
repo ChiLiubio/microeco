@@ -152,7 +152,7 @@ Thereinto, quantile25 and quantile75 denote 25\% and 75\% quantiles, respectivel
 \item{\code{delete_taxonomy_prefix}}{default TRUE; whether delete the prefix of taxonomy, such as "g__".}
 
 \item{\code{prefix}}{default NULL; character string; available when \code{delete_taxonomy_prefix = T}; 
-default NULL reprensents using the "letter+__", e.g. "k__" for Phylum level;
+default NULL represents using the "letter+__", e.g. "k__" for Phylum level;
 Please provide the customized prefix when it is not standard, otherwise the program can not correctly recognize it.}
 
 \item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
@@ -170,7 +170,7 @@ Note that \code{ntaxa} means either the parameter \code{ntaxa} or the taxonomic 
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{data_abund} stored in the object. The column 'all_mean_abund' reprensents mean relative abundance across all the samples.
+\code{data_abund} stored in the object. The column 'all_mean_abund' represents mean relative abundance across all the samples.
   So the values in one taxon are all same across all the samples.
   If the sum of column 'Abundance' in one sample is larger than 1, the 'Abundance', 'SD' and 'SE' has been multiplied by 100.
 }

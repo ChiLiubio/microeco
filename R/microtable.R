@@ -214,7 +214,7 @@ microtable <- R6Class(classname = "microtable",
 			taxa_names <- Reduce(intersect, taxa_list)
 			if(length(taxa_names) == 0){
 				if(is.null(self$phylo_tree)){
-					stop("No same feature names found between rownames of otu_table and rownames of tax_table! Please check rownames of those tables!")
+					stop("No same feature name found between rownames of otu_table and rownames of tax_table! Please check rownames of those tables!")
 				}else{
 					stop("No same feature name found among otu_table, tax_table and phylo_tree! Please check feature names in those objects!")
 				}
@@ -227,7 +227,12 @@ microtable <- R6Class(classname = "microtable",
 				self$phylo_tree %<>% ape::drop.tip(., base::setdiff(.$tip.label, taxa_names))
 			}
 			if(!is.null(self$rep_fasta)){
-				if(!all(taxa_names %in% names(self$rep_fasta))){
+				invisible(test$rep_fasta[1])
+				fasta_names <- names(self$rep_fasta)
+				if(is.null(fasta_names)){
+					stop("The name of rep_fasta is NULL! Please provide a correct fasta file!")
+				}
+				if(!all(taxa_names %in% fasta_names)){
 					stop("Some feature names are not found in the names of rep_fasta! Please provide a complete fasta file or manually check the names!")
 				}
 				self$rep_fasta %<>% .[taxa_names]

@@ -87,7 +87,7 @@ Normalization/transformation methods.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "rarefy"; See the following details and available options. \cr 
+\item{\code{method}}{default "rarefy"; See the following available options. \cr 
 \cr 
 Methods for normalization:
 \itemize{
@@ -175,7 +175,6 @@ If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
 or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
-or \code{rarefy_samples} function of microtable class when method = "rarefy" or "SRS",
 or \code{trans_diff} class when method = "DESeq2",
 or \code{wrench} function of Wrench package when method = "Wrench".}
 }
