@@ -227,7 +227,7 @@ microtable <- R6Class(classname = "microtable",
 				self$phylo_tree %<>% ape::drop.tip(., base::setdiff(.$tip.label, taxa_names))
 			}
 			if(!is.null(self$rep_fasta)){
-				invisible(test$rep_fasta[1])
+				invisible(self$rep_fasta[1])
 				fasta_names <- names(self$rep_fasta)
 				if(is.null(fasta_names)){
 					stop("The name of rep_fasta is NULL! Please provide a correct fasta file!")
