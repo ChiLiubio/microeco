@@ -102,7 +102,6 @@ t1$cal_mantel(partial_mantel = TRUE, use_measure = "bray")
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
-t1$cal_cor(use_data = "other", p_adjust_type = "Env", other_taxa = t2$res_diff$Taxa[1:40])
 }
 
 ## ------------------------------------------------
@@ -684,7 +683,7 @@ Actually, it can also be applied to other correlation between any two variables 
   use_taxa_num = NULL,
   other_taxa = NULL,
   p_adjust_method = "fdr",
-  p_adjust_type = c("All", "Type", "Taxa", "Env")[1],
+  p_adjust_type = c("All", "Taxa", "Env")[1],
   by_group = NULL,
   group_use = NULL,
   group_select = NULL,
@@ -719,13 +718,10 @@ please see the example.}
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 \code{p_adjust_method = "none"} can disable the p value adjustment.}
 
-\item{\code{p_adjust_type}}{default "All"; "All", "Type", "Taxa" or "Env"; P value adjustment type.
+\item{\code{p_adjust_type}}{default "All"; "All", "Taxa" or "Env"; P value adjustment type.
 "Env": adjustment for each environmental variable separately; 
 "Taxa": adjustment for each taxon separately; 
-"Type": adjustment according to the groups provided. If \code{by_group} is NULL, adjustment is performed for all the data together.
-If \code{by_group} is provided, for each group in it separately.
-These three options are the first three colnames of return table \code{res_cor}.
-"All": adjustment for all the data together no matter whether \code{by_group} is provided. If \code{by_group} is NULL, it is same with the "Type" option.}
+"All": adjustment for all the data together no matter whether \code{by_group} is provided.}
 
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate correlations for different groups separately.}
 
@@ -752,7 +748,6 @@ These three options are the first three colnames of return table \code{res_cor}.
 t2 <- trans_diff$new(dataset = dataset, method = "rf", group = "Group", rf_taxa_level = "Genus")
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
 t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff$Taxa[1:40])
-t1$cal_cor(use_data = "other", p_adjust_type = "Env", other_taxa = t2$res_diff$Taxa[1:40])
 }
 }
 \if{html}{\out{</div>}}

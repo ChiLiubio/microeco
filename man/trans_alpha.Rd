@@ -306,7 +306,7 @@ FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the 
 \item{\code{heatmap_lab_fill}}{default "P value"; legend title of heatmap.}
 
 \item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
-\code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the res_diff of the object.}
+\code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.}
 }
 \if{html}{\out{</div>}}
 }

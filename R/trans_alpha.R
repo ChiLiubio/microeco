@@ -311,37 +311,26 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				# to make multi-factor distinct from one-way anova
 				compare_result <- data.frame()
 				for(k in measure){
-					div_table <- data_alpha[data_alpha$Measure == k, ]
-					if(method == "anova"){
-						model <- aov(reformulate(formula, "Value"), div_table, ...)
-						tmp <- summary(model)[[1]]
-						tmp1 <- data.frame(method = paste0(method, " formula for ", formula), Measure = k, Factors = rownames(tmp), 
-							Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
-					}
-					if(method == "scheirerRayHare"){
-						invisible(capture.output(tmp <- rcompanion::scheirerRayHare(reformulate(formula, "Value"), div_table, ...)))
-						tmp1 <- data.frame(method = paste0(method, " formula for ", formula), Measure = k, Factors = rownames(tmp), 
-							Df = tmp$Df, Fvalue = tmp$H, P.unadj = tmp$p.value)
-					}
-					if(method == "betareg"){
-						check_res <- tryCatch(tmp <- betareg::betareg(reformulate(formula, "Value"), data = div_table, ...), error = function(e) { skip_to_next <- TRUE})
-						if(rlang::is_true(check_res)) {
-							message("Model fitting failed for ", k, " ! Skip ...")
+					if(is.null(by_group)){
+						div_table <- data_alpha[data_alpha$Measure == k, ]
+						tmp_res <- private$formula_anova_sche_betareg_test(method = method, input_table = div_table, formula = formula, measure = k, ...)
+						if(is.null(tmp_res)){
 							next
 						}else{
-							tmp <- betareg::betareg(reformulate(formula, "Value"), data = div_table, ...)
-							# extract the first element: coefficients
-							tmp_coefficients <- summary(tmp)[[1]]
-							tmp_mean <- tmp_coefficients$mean %>% as.data.frame
-							tmp_precision <- tmp_coefficients$precision %>% as.data.frame
-							tmp1 <- data.frame(method = paste0(method, " formula for ", formula), Measure = k, 
-								Factors = c(rownames(tmp_mean), rownames(tmp_precision)), 
-								Estimate = c(tmp_mean$Estimate, tmp_precision$Estimate), 
-								Zvalue = c(tmp_mean$`z value`, tmp_precision$`z value`), 
-								P.unadj = c(tmp_mean$`Pr(>|z|)`, tmp_precision$`Pr(>|z|)`))
+							compare_result %<>% rbind(., tmp_res)
+						}
+					}else{
+						for(each_group in unique_bygroups){
+							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
+							tmp_res <- private$formula_anova_sche_betareg_test(method = method, input_table = div_table, formula = formula, measure = k, ...)
+							if(is.null(tmp_res)){
+								next
+							}else{
+								tmp_res <- cbind.data.frame(by_group = each_group, tmp_res)
+								compare_result %<>% rbind(., tmp_res)
+							}
 						}
 					}
-					compare_result %<>% rbind(., tmp1)
 				}
 				method <- paste0(method, "-formula")
 			}
@@ -352,7 +341,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				for(k in measure){
 					div_table <- data_alpha[data_alpha$Measure == k, ]
-					tmp_res <- data.frame()
 					if(method == "lm"){
 						tmp <- stats::lm(reformulate(formula, "Value"), data = div_table, ...)
 						if(return_model){
@@ -479,7 +467,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param heatmap_y default "Taxa"; the column of \code{res_diff} for the y axis of heatmap.
 		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
 		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
-		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the res_diff of the object.
+		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -535,6 +523,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			if(use_heatmap){
 				tmp <- self$res_diff
+				if("by_group" %in% colnames(tmp)){
+					if(!is.factor(tmp[, "by_group"])){
+						if(is.factor(self$data_alpha[, self$by_group])){
+							tmp[, "by_group"] %<>% factor(., levels = levels(self$data_alpha[, self$by_group]))
+						}else{
+							tmp[, "by_group"] %<>% as.factor
+						}
+					}
+				}
 				tmp_trans_env <- convert_diff2transenv(tmp, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill)
 				p <- tmp_trans_env$plot_cor(keep_full_name = TRUE, keep_prefix = TRUE, ...)
 			}else{
@@ -1013,6 +1010,38 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}else{
 				FALSE
 			}
+		},
+		formula_anova_sche_betareg_test = function(method, input_table, formula, measure, ...){
+			if(method == "anova"){
+				model <- aov(reformulate(formula, "Value"), input_table, ...)
+				tmp <- summary(model)[[1]]
+				tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, Factors = rownames(tmp), 
+					Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
+			}
+			if(method == "scheirerRayHare"){
+				invisible(capture.output(tmp <- rcompanion::scheirerRayHare(reformulate(formula, "Value"), input_table, ...)))
+				tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, Factors = rownames(tmp), 
+					Df = tmp$Df, Fvalue = tmp$H, P.unadj = tmp$p.value)
+			}
+			if(method == "betareg"){
+				check_res <- tryCatch(tmp <- betareg::betareg(reformulate(formula, "Value"), data = input_table, ...), error = function(e) { skip_to_next <- TRUE})
+				if(rlang::is_true(check_res)) {
+					message("Model fitting failed for ", measure, " ! Skip ...")
+					tmp_res <- NULL
+				}else{
+					tmp <- betareg::betareg(reformulate(formula, "Value"), data = input_table, ...)
+					# extract the first element: coefficients
+					tmp_coefficients <- summary(tmp)[[1]]
+					tmp_mean <- tmp_coefficients$mean %>% as.data.frame
+					tmp_precision <- tmp_coefficients$precision %>% as.data.frame
+					tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, 
+						Factors = c(rownames(tmp_mean), rownames(tmp_precision)), 
+						Estimate = c(tmp_mean$Estimate, tmp_precision$Estimate), 
+						Zvalue = c(tmp_mean$`z value`, tmp_precision$`z value`), 
+						P.unadj = c(tmp_mean$`Pr(>|z|)`, tmp_precision$`Pr(>|z|)`))
+				}
+			}
+			tmp_res
 		}
 	),
 	lock_objects = FALSE,

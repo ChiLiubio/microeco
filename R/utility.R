@@ -10,14 +10,16 @@ convert_diff2transenv <- function(diff_table, heatmap_x, heatmap_y, heatmap_cell
 	if("ns" %in% diff_table[, heatmap_sig]){
 		diff_table[, heatmap_sig] <- gsub("ns", "", diff_table[, heatmap_sig])
 	}
+	if(! "by_group" %in% colnames(diff_table)){
+		diff_table$by_group <- "All"
+	}
 	# avoid duplicate column name
-	diff_table <- diff_table[, unique(c(heatmap_x, heatmap_y, heatmap_cell, heatmap_sig))]
+	diff_table <- diff_table[, unique(c("by_group", heatmap_x, heatmap_y, heatmap_cell, heatmap_sig))]
 	colnames(diff_table)[colnames(diff_table) == heatmap_x] <- "Env"
 	colnames(diff_table)[colnames(diff_table) == heatmap_y] <- "Taxa"
 	colnames(diff_table)[colnames(diff_table) == heatmap_cell] <- "Correlation"
 	colnames(diff_table)[colnames(diff_table) == heatmap_sig] <- "Significance"
 	
-	diff_table$Type <- "All"
 	suppressMessages(tmp_trans_env <- trans_env$new(dataset = NULL))
 	tmp_trans_env$cor_method <- heatmap_lab_fill
 	tmp_trans_env$res_cor <- diff_table
