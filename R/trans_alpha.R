@@ -24,6 +24,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(is.null(dataset)){
 				message("Parameter dataset not provided. Please run the functions with your other customized data!")
 				self$data_alpha <- NULL
+				self$data_stat <- NULL
+				if(! is.null(group)){
+					stop("Parameter dataset is not provided, but group is provided!")
+				}
 			}else{
 				if(is.null(dataset$alpha_diversity)){
 					message("The alpha_diversity in dataset not found! Calculate it automatically ...")
@@ -44,6 +48,23 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					reshape2::melt(id.vars = "Sample") %>%
 					`colnames<-`(c("Sample", "Measure", "Value")) %>%
 					dplyr::left_join(., rownames_to_column(dataset$sample_table), by = c("Sample" = "rowname"))
+				if(!is.null(by_group)){
+					check_table_variable(data_alpha, by_group, "by_group", "dataset$sample_table")
+					if(is.factor(dataset$sample_table[, by_group])){
+						data_alpha[, by_group] %<>% factor(., levels = levels(dataset$sample_table[, by_group]))
+					}
+				}
+				if(! is.null(group)){
+					check_table_variable(data_alpha, group, "group", "dataset$sample_table")
+					self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(group, by_group, "Measure"))
+					message('The group statistics are stored in object$data_stat ...')
+					if(is.factor(dataset$sample_table[, group])){
+						data_alpha[, group] %<>% factor(., levels = levels(dataset$sample_table[, group]))
+					}
+				}else{
+					self$data_stat <- NULL
+				}
+				check_table_variable(data_alpha, by_ID, "by_ID", "dataset$sample_table")
 				if(!is.null(order_x)){
 					if(length(order_x == 1)){
 						data_alpha$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
@@ -54,19 +75,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				self$data_alpha <- data_alpha
 				message('The transformed diversity data is stored in object$data_alpha ...')
 			}
-			check_table_variable(data_alpha, by_group, "by_group", "dataset$sample_table")
-			check_table_variable(data_alpha, by_ID, "by_ID", "dataset$sample_table")
 			
-			if(! is.null(group)){
-				if(is.null(dataset)){
-					stop("Parameter dataset not provided, but group is provided!")
-				}
-				check_table_variable(data_alpha, group, "group", "dataset$sample_table")
-				self$data_stat <- microeco:::summarySE_inter(data_alpha, measurevar = "Value", groupvars = c(group, by_group, "Measure"))
-				message('The group statistics are stored in object$data_stat ...')
-			}else{
-				self$data_stat <- NULL
-			}
 			self$group <- group
 			self$by_group <- by_group
 			self$by_ID <- by_ID
@@ -155,7 +164,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			# 'by_group' for test inside each by_group instead of all groups in 'group'
 			by_group <- self$by_group
-			data_alpha <- self$data_alpha
+			data_alpha <- self$data_alpha %>% dropallfactors
 			by_ID <- self$by_ID
 
 			if(is.null(measure)){
