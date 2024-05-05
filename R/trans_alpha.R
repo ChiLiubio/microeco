@@ -685,6 +685,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								all_by_groups <- levels(use_data[, by_group])
 								all_groups <- levels(use_data[, group])
 								tmp_use_data <- dropallfactors(use_data)
+								y_range_use <- max(tmp_use_data$Value) - min(tmp_use_data$Value)
+								
 								for(j in all_by_groups){
 									select_tmp_data <- tmp_use_data %>% .[.[, by_group] == j, ]
 									x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
@@ -703,7 +705,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 										x_mid %<>% c(., mid_num + (start_bar_mid + (match(i, x_axis_order) - 1) * increase_bar_mid))
 									}
 									tmp_position <- tapply(select_tmp_data$Value, select_tmp_data[, group], function(x) {res <- max(x); ifelse(is.na(res), x, res)}) %>% 
-										{. + y_increase * (max(select_tmp_data$Value) - min(select_tmp_data$Value))} %>% 
+										{. + y_increase * y_range_use} %>% 
 										.[x_axis_order]
 									y_position %<>% c(., tmp_position)
 								}
@@ -751,10 +753,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 									tmp_use_data <- dropallfactors(use_data)
 									
 									diff_by_groups <- use_diff_data$by_group %>% unique
+									# same y_range_use for all elements in by_group instead of each one
+									y_range_use <- max(tmp_use_data$Value) - min(tmp_use_data$Value)
+
 									for(j in diff_by_groups){
 										select_tmp_data <- tmp_use_data %>% .[.[, by_group] == j, ]
 										# y axix starting position
-										y_range_use <- max(select_tmp_data$Value) - min(select_tmp_data$Value)
 										y_start_use <- max(select_tmp_data$Value) + y_start * y_range_use
 										x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
 										# identify the start x position for each by_group
