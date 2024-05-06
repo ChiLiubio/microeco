@@ -200,8 +200,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 				}
-
 				check_taxa_abund(tmp_dataset)
+				
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
 				}else{
@@ -482,6 +482,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				
 				if(method %in% c("metastat", "metagenomeSeq", "ALDEx2_t", "edgeR")){
+					tmp_dataset$sample_table %<>% dropallfactors
 					private$check_taxa_level_all(taxa_level)
 					if(is.null(group_choose_paired)){
 						all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
@@ -533,9 +534,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("metagenomeSeq package not installed !")
 					}
 					for(i in 1:ncol(all_name)) {
-						message(paste0("Run ", i, " : ", paste0(as.character(all_name[,i]), collapse = " - "), " ...\n"))
+						message(paste0("Run ", i, " : ", paste0(as.character(all_name[, i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
-						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), , drop = FALSE]
+						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[, i]), , drop = FALSE]
 						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						obj <- newMRexperiment(
 							newdata$otu_table, 
@@ -678,6 +679,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
 					}
 					use_dataset <- clone(tmp_dataset)
+					use_dataset$sample_table %<>% dropallfactors
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 					res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "kw", ...)
 					res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
