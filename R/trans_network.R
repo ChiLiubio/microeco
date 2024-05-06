@@ -276,6 +276,11 @@ trans_network <- R6Class(classname = "trans_network",
 					if(ncol(cortable) != ncol(raw_p)){
 						stop("Correlation table and p value table have different column numbers !")
 					}
+					if(any(is.na(cortable[, 1]))){
+						sel <- !is.na(cortable[, 1])
+						cortable %<>% .[sel, sel]
+						raw_p %<>% .[sel, sel]
+					}
 					raw_vector_p <- raw_p %>% as.dist %>% as.numeric
 					message("Perform p value adjustment with ", COR_p_adjust, " method ...")
 					adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
