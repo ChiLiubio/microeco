@@ -20,6 +20,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		initialize = function(dataset = NULL)
 			{
 			if(inherits(dataset, "microtable")){
+				dataset$tidy_dataset()
 				abund_table <- dataset$otu_table
 				abund_table <- t(abund_table)
 			}else{
@@ -160,9 +161,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 				}
 				if (min(tmpobj$sample_sums()) < sample.size) {
 					rmsamples <- tmpobj$sample_names()[tmpobj$sample_sums() < sample.size]
-					message(length(rmsamples), " samples removed, ", "because of fewer reads than input sample.size.")
+					message(length(rmsamples), " samples are removed because of fewer reads than input sample.size ...")
+					feature_num_raw <- length(tmpobj$taxa_names())
 					tmpobj$sample_table <- base::subset(tmpobj$sample_table, ! tmpobj$sample_names() %in% rmsamples)
 					tmpobj$tidy_dataset()
+					feature_num_filter <- length(tmpobj$taxa_names())
+					if(feature_num_filter < feature_num_raw){
+						message((feature_num_raw - feature_num_filter), " features with 0 abundance are removed after filtering samples ...")
+					}
 				}
 				newotu <- tmpobj$otu_table
 				if(method == "rarefy"){

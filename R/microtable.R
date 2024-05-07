@@ -322,7 +322,7 @@ microtable <- R6Class(classname = "microtable",
 		#' m1$taxa_names()
 		#' }
 		taxa_names = function(){
-			rownames(self$tax_table)
+			rownames(self$otu_table)
 		},
 		#' @description
 		#' Rename the features, including the rownames of \code{otu_table}, rownames of \code{tax_table}, tip labels of \code{phylo_tree} and \code{rep_fasta}.
