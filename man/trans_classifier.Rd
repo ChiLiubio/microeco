@@ -113,6 +113,14 @@ t1$cal_ROC()
 \dontrun{
 t1$plot_ROC(size = 1, alpha = 0.7)
 }
+
+## ------------------------------------------------
+## Method `trans_classifier$cal_caretList`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_caretList(methodList = c('rf', 'svmRadial'))
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -129,6 +137,7 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 \item \href{#method-trans_classifier-plot_confusionMatrix}{\code{trans_classifier$plot_confusionMatrix()}}
 \item \href{#method-trans_classifier-cal_ROC}{\code{trans_classifier$cal_ROC()}}
 \item \href{#method-trans_classifier-plot_ROC}{\code{trans_classifier$plot_ROC()}}
+\item \href{#method-trans_classifier-cal_caretList}{\code{trans_classifier$cal_caretList()}}
 \item \href{#method-trans_classifier-clone}{\code{trans_classifier$clone()}}
 }
 }
@@ -571,6 +580,36 @@ ggplot2 object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$plot_ROC(size = 1, alpha = 0.7)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_classifier-cal_caretList"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_caretList}{}}}
+\subsection{Method \code{cal_caretList()}}{
+Use caretList function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_caretList(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{parameters pass to caretList function of caretEnsemble package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+res_caretList_models object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_caretList(methodList = c('rf', 'svmRadial'))
 }
 }
 \if{html}{\out{</div>}}

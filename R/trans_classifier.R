@@ -569,6 +569,31 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
 				theme(legend.title = element_blank())
 			p
+		},
+		#' @description
+		#' Use caretList function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
+		#' 
+		#' @param ... parameters pass to caretList function of caretEnsemble package.
+		#' @return res_caretList_models object.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_caretList(methodList = c('rf', 'svmRadial'))
+		#' }
+		cal_caretList = function(
+			...
+			){
+			if(!require(caretEnsemble)){
+				stop("Please first install caretEnsemble package from CRAN!")
+			}
+			if(is.null(self$trainControl)){
+				stop("Please first run set_trainControl function!")
+			}
+			use_trainControl <- self$trainControl
+			train_data <- self$data_train
+			
+			models <- caretList(Response ~ ., data = train_data, trControl = use_trainControl, ...)
+			self$res_caretList_models <- models
+			message('Models are stored in object$res_caretList_models ...')
 		}
 	),
 	lock_class = FALSE,
