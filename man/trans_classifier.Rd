@@ -139,8 +139,8 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 Create the trans_classifier object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$new(
-  dataset = NULL,
-  x.predictors = "all",
+  dataset,
+  x.predictors = "Genus",
   y.response = NULL,
   n.cores = 1
 )}\if{html}{\out{</div>}}
@@ -151,16 +151,16 @@ Create the trans_classifier object.
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{x.predictors}}{default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
+\item{\code{x.predictors}}{default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
 data.frame represents other customized input. See the following available options:
 \describe{
-  \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
   \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
+  \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
   \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
     cols are samples with same names in sample_table}
 }}
 
-\item{\code{y.response}}{default NULL; the response variable in sample_table.}
+\item{\code{y.response}}{default NULL; the response variable in \code{sample_table} of input \code{microtable} object.}
 
 \item{\code{n.cores}}{default 1; the CPU thread used.}
 }

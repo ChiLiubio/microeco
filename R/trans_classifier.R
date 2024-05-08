@@ -14,15 +14,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Create the trans_classifier object.
 		#' 
 		#' @param dataset the object of \code{\link{microtable}} Class.
-		#' @param x.predictors default "all"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
+		#' @param x.predictors default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
 		#'   data.frame represents other customized input. See the following available options:
 		#'   \describe{
-		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
 		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
+		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
 		#'     \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
 		#'       cols are samples with same names in sample_table}
 		#'   }
-		#' @param y.response default NULL; the response variable in sample_table.
+		#' @param y.response default NULL; the response variable in \code{sample_table} of input \code{microtable} object.
 		#' @param n.cores default 1; the CPU thread used.
 		#' @return data_feature and data_response in the object.
 		#' @examples
@@ -33,8 +33,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 		x.predictors = "Genus",
 		#' 		y.response = "Group")
 		#' }
-		initialize = function(dataset = NULL,
-				x.predictors = "all",
+		initialize = function(dataset,
+				x.predictors = "Genus",
 				y.response = NULL,
 				n.cores = 1
 			){
@@ -44,9 +44,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				stop("No y.response provided!")
 			}
 			if(!y.response %in% colnames(sampleinfo)){
-				stop("Input y.response must be dataset$sample_table!")
+				stop("Input y.response must be a column name of dataset$sample_table!")
 			}
-			# parse y.response
+			
 			response_data <- sampleinfo[, y.response]
 			if(is.numeric(response_data)){
 				self$type <- "Regression"
@@ -73,12 +73,20 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				self$data_MapNames <- MapNames
 				self$data_response <- ClassNames
 			}
-			
 			# x.predictors must be character or data.frame
 			if(is.character(x.predictors)){
+				if(is.null(dataset$taxa_abund)){
+					message("No taxa_abund found in the dataset. Calculate the relative abundance ...")
+					dataset$cal_abund()
+				}
 				if (grepl("all", x.predictors, ignore.case = TRUE)) {
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
+					if(! x.predictors %in% names(dataset$taxa_abund)){
+						message("x.predictors is not found in the taxa_abund list. Use the features in otu_table ...")
+						dataset$add_rownames2taxonomy(use_name = x.predictors)
+						suppressMessages(dataset$cal_abund())
+					}
 					abund_table <- dataset$taxa_abund[[x.predictors]]
 				}
 			}else{

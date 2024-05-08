@@ -52,6 +52,7 @@ check_microtable <- function(obj){
 	if(! inherits(obj, "microtable")){
 		stop("The input dataset must be microtable object! Please check it!")
 	}
+	obj$tidy_dataset()
 }
 
 # check taxonomic level: obj either microtable object or taxonomic table
