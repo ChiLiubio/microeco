@@ -211,7 +211,7 @@ Heatmap is employed automatically to show the significances of differential test
   order_x_mean = FALSE,
   y_start = 0.1,
   y_increase = 0.05,
-  xtext_angle = NULL,
+  xtext_angle = 30,
   xtext_size = 15,
   ytitle_size = 17,
   barwidth = 0.9,
@@ -264,7 +264,7 @@ the default 0.1 means \code{max(values) + 0.1 * (max(values) - min(values))}.}
 \item{\code{y_increase}}{default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
 this parameter is also used to label the letters of anova result with the fixed space.}
 
-\item{\code{xtext_angle}}{default NULL; number (e.g. 30) used to make x axis text generate angle.}
+\item{\code{xtext_angle}}{default 30; number (e.g. 30) used to make x axis text generate angle.}
 
 \item{\code{xtext_size}}{default 15; x axis text size.}
 

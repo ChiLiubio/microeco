@@ -70,11 +70,11 @@ check_tax_level <- function(tax_level, obj){
 	}
 }
 
-ggplot_xtext_anglesize <- function(xtext_angle, xtext_size){
+ggplot_xtext_anglesize <- function(xtext_angle, xtext_size, text_color = "black"){
 	if(xtext_angle == 0){
-		theme(axis.text.x = element_text(colour = "black", size = xtext_size))
+		theme(axis.text.x = element_text(colour = text_color, size = xtext_size))
 	}else{
-		theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = xtext_size))
+		theme(axis.text.x = element_text(angle = xtext_angle, colour = text_color, vjust = 1, hjust = 1, size = xtext_size))
 	}
 }
 

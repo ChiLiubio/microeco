@@ -775,6 +775,10 @@ Plot correlation heatmap.
   text_x_order = NULL,
   xtext_angle = 30,
   xtext_size = 10,
+  xtext_color = "black",
+  ytext_size = NULL,
+  ytext_color = "black",
+  sig_label_size = 4,
   font_family = NULL,
   cluster_ggplot = "none",
   cluster_height_rows = 0.2,
@@ -815,6 +819,14 @@ For example, \code{filter_env = ""} can be used to remove features that only hav
 \item{\code{xtext_angle}}{default 30; number ranging from 0 to 90; used to adjust x axis text angle.}
 
 \item{\code{xtext_size}}{default 10; x axis text size.}
+
+\item{\code{xtext_color}}{default "black"; x axis text color.}
+
+\item{\code{ytext_size}}{default NULL; y axis text size. NULL means default ggplot2 value.}
+
+\item{\code{ytext_color}}{default "black"; y axis text color.}
+
+\item{\code{sig_label_size}}{default 4; the size of significance label shown in the cell.}
 
 \item{\code{font_family}}{default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.}
 

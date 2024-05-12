@@ -445,7 +445,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' 	  the default 0.1 means \code{max(values) + 0.1 * (max(values) - min(values))}.
 		#' @param y_increase default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
 		#' 	  this parameter is also used to label the letters of anova result with the fixed space.
-		#' @param xtext_angle default NULL; number (e.g. 30) used to make x axis text generate angle.
+		#' @param xtext_angle default 30; number (e.g. 30) used to make x axis text generate angle.
 		#' @param xtext_size default 15; x axis text size.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param barwidth default 0.9; the bar width in plot; applied when by_group is not NULL.
@@ -490,7 +490,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			order_x_mean = FALSE,
 			y_start = 0.1,
 			y_increase = 0.05,
-			xtext_angle = NULL,
+			xtext_angle = 30,
 			xtext_size = 15,
 			ytitle_size = 17,
 			barwidth = 0.9,
@@ -533,7 +533,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}
 				tmp_trans_env <- convert_diff2transenv(tmp, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill)
-				p <- tmp_trans_env$plot_cor(keep_full_name = TRUE, keep_prefix = TRUE, ...)
+				p <- tmp_trans_env$plot_cor(keep_full_name = TRUE, keep_prefix = TRUE, xtext_angle = xtext_angle, xtext_size = xtext_size, ...)
 			}else{
 				
 				cal_diff_method <- self$cal_diff_method
@@ -818,14 +818,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				p <- p + ylab(measure) + xlab("")
 				p <- p + theme(
-						axis.text.x = element_text(colour = "black", size = xtext_size),
 						axis.title.y = element_text(size = ytitle_size),
 						axis.text.y = element_text(size = rel(1.1)),
 						axis.title.x = element_blank()
 						)
-				if(!is.null(xtext_angle)){
-					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, vjust = 1, hjust = 1))
-				}
+				p <- p + ggplot_xtext_anglesize(xtext_angle, xtext_size)
 				if(is.null(by_group)){
 					p <- p + theme(legend.position = "none")
 				}
