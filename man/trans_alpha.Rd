@@ -130,7 +130,7 @@ Differential test on alpha diversity.
   \item{\strong{'anova'}}{Variance analysis. For one-way anova, the post hoc test is Duncan's new multiple range test 
         based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to select other post hoc method.
         For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
-  \item{\strong{'scheirerRayHare'}}{Scheirer Ray Hare test (nonparametric test) for a two-way factorial experiment; 
+  \item{\strong{'scheirerRayHare'}}{Scheirer-Ray-Hare test (nonparametric test) for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
   \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
   \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}

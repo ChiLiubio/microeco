@@ -206,7 +206,7 @@ Pre-process (centering, scaling etc.) of the feature data based on the caret::pr
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to preProcess function of caret package.}
+\item{\code{...}}{parameters pass to \code{preProcess} function of caret package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -248,7 +248,7 @@ Perform feature selection.
 
 \item{\code{boruta.repetitions}}{default 4; repetition runs for the feature selection.}
 
-\item{\code{...}}{parameters pass to Boruta function of Boruta package.}
+\item{\code{...}}{parameters pass to \code{Boruta} function of Boruta package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -278,7 +278,7 @@ Split data for training and testing.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{prop.train}}{default 3/4; the ratio of the dataset used for the training.}
+\item{\code{prop.train}}{default 3/4; the ratio of the data used for the training.}
 }
 \if{html}{\out{</div>}}
 }
@@ -599,7 +599,7 @@ Use caretList function of caretEnsemble package to run multiple models. For the 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to caretList function of caretEnsemble package.}
+\item{\code{...}}{parameters pass to \code{caretList} function of caretEnsemble package.}
 }
 \if{html}{\out{</div>}}
 }

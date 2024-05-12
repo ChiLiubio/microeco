@@ -117,7 +117,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Pre-process (centering, scaling etc.) of the feature data based on the caret::preProcess function. 
 		#' 	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
 		#' 
-		#' @param ... parameters pass to preProcess function of caret package.
+		#' @param ... parameters pass to \code{preProcess} function of caret package.
 		#' @return converted data_feature in the object.
 		#' @examples
 		#' \dontrun{
@@ -137,7 +137,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the maxRuns parameter in Boruta function of Boruta package.
 		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in Boruta function of Boruta package.
 		#' @param boruta.repetitions default 4; repetition runs for the feature selection.
-		#' @param ... parameters pass to Boruta function of Boruta package.
+		#' @param ... parameters pass to \code{Boruta} function of Boruta package.
 		#' @return optimized data_feature in the object.
 		#' @examples
 		#' \dontrun{
@@ -181,16 +181,14 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Split data for training and testing.
 		#' 
-		#' @param prop.train default 3/4; the ratio of the dataset used for the training.
+		#' @param prop.train default 3/4; the ratio of the data used for the training.
 		#' @return data_train and data_test in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_split(prop.train = 3/4)
 		#' }
 		cal_split = function(prop.train = 3/4){
-			###################### ----------------
 			######################    DATA SPLIT: TRAIN and TEST
-			######################
 			message("Creating training set and testing set ...")
 			data_response <- self$data_response
 			if(self$type == "Classification"){
@@ -204,9 +202,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			test_data <- rsample::testing(SplitData)
 			message("Stratified sampling with the proportion of ", prop.train*100 ,"% for the training set ...")
 
-			###################### 
 			######################    DATA SPLIT end
-			###################### ----------------
 			self$data_train <- train_data
 			self$data_test <- test_data
 			message("Training and testing data are stored in object$data_train and object$data_test respectively ...")
@@ -573,7 +569,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Use caretList function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
 		#' 
-		#' @param ... parameters pass to caretList function of caretEnsemble package.
+		#' @param ... parameters pass to \code{caretList} function of caretEnsemble package.
 		#' @return res_caretList_models object.
 		#' @examples
 		#' \dontrun{
