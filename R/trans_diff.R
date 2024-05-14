@@ -1694,7 +1694,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 
 			edges <- cbind(parent = index[match(nodes_parent, nodes)], child = index)
 			edges <- edges[!is.na(edges[, 1]), ]
-			# not label the tips
+			if(! inherits(edges, "matrix")){
+				stop("The parent and child nodes are not correctly recognized! ",
+					"Please try to use tidy_taxonomy function to tidy taxonomic table in your microtable object! Then rerun cal_abund function and trans_diff class!")
+			}
+			# donot label tips
 			node_label <- nodes[!is_tip]
 			phylo <- structure(list(
 				edge = edges, 

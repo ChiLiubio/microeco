@@ -446,7 +446,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param y_increase default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
 		#' 	  this parameter is also used to label the letters of anova result with the fixed space.
 		#' @param xtext_angle default 30; number (e.g. 30) used to make x axis text generate angle.
-		#' @param xtext_size default 15; x axis text size.
+		#' @param xtext_size default 13; x axis text size. NULL means the default size in ggplot2.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param barwidth default 0.9; the bar width in plot; applied when by_group is not NULL.
 		#' @param use_boxplot default TRUE; TRUE denotes boxplot by using the data_alpha table in the object. 
@@ -491,7 +491,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			y_start = 0.1,
 			y_increase = 0.05,
 			xtext_angle = 30,
-			xtext_size = 15,
+			xtext_size = 13,
 			ytitle_size = 17,
 			barwidth = 0.9,
 			use_boxplot = TRUE,

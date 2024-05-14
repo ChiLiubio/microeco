@@ -212,7 +212,7 @@ Heatmap is employed automatically to show the significances of differential test
   y_start = 0.1,
   y_increase = 0.05,
   xtext_angle = 30,
-  xtext_size = 15,
+  xtext_size = 13,
   ytitle_size = 17,
   barwidth = 0.9,
   use_boxplot = TRUE,
@@ -266,7 +266,7 @@ this parameter is also used to label the letters of anova result with the fixed 
 
 \item{\code{xtext_angle}}{default 30; number (e.g. 30) used to make x axis text generate angle.}
 
-\item{\code{xtext_size}}{default 15; x axis text size.}
+\item{\code{xtext_size}}{default 13; x axis text size. NULL means the default size in ggplot2.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
