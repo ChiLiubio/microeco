@@ -1401,7 +1401,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			annotation_shape = 22,
 			annotation_shape_size = 5
 			){
-			# developed based on microbiomeMarker 
+			# developed based on microbiomeMarker
 			abund_table <- self$abund_table
 			marker_table <- self$res_diff %>% dropallfactors
 			method <- self$method

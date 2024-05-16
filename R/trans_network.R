@@ -1342,7 +1342,7 @@ trans_network <- R6Class(classname = "trans_network",
 			colnames(res) <- NULL
 			res
 		},
-		# modified based on microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
+		# modified from microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
 		module_roles = function(comm_graph){
 			td <- igraph::degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)

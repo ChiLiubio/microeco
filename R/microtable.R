@@ -629,7 +629,7 @@ microtable <- R6Class(classname = "microtable",
 		#'    where \emph{H'} is Shannon index, and \emph{S} is the species number.
 		#' @param PD default FALSE; whether Faith's phylogenetic diversity is calculated. The calculation depends on the function \code{picante::pd}.
 		#'   Note that the phylogenetic tree (\code{phylo_tree} object in the data) is required for PD.
-		#' @return alpha_diversity stored in object.
+		#' @return alpha_diversity stored in the object. The se.chao1 and se.ACE are the standard erros of Chao1 and ACE, respectively.
 		#' @examples
 		#' \donttest{
 		#' m1$cal_alphadiv(measures = NULL, PD = FALSE)

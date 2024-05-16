@@ -767,7 +767,7 @@ Note that the phylogenetic tree (\code{phylo_tree} object in the data) is requir
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-alpha_diversity stored in object.
+alpha_diversity stored in the object. The se.chao1 and se.ACE are the standard erros of Chao1 and ACE, respectively.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
