@@ -29,6 +29,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					stop("Parameter dataset is not provided, but group is provided!")
 				}
 			}else{
+				dataset$tidy_dataset()
 				if(is.null(dataset$alpha_diversity)){
 					message("The alpha_diversity in dataset not found! Calculate it automatically ...")
 					dataset$cal_alphadiv()
@@ -164,9 +165,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			# 'by_group' for test inside each by_group instead of all groups in 'group'
 			by_group <- self$by_group
-			data_alpha <- self$data_alpha %>% dropallfactors
+			data_alpha <- self$data_alpha
 			by_ID <- self$by_ID
-
+			
+			if(! method %in% c("lm", "lme", "betareg", "glmm", "glmm_beta")){
+				data_alpha %<>% dropallfactors
+			}
 			if(is.null(measure)){
 				measure <- unique(as.character(data_alpha$Measure))
 			}else{
