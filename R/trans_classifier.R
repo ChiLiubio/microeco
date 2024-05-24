@@ -350,6 +350,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package;
 		#' If positive_class is NULL, use the first group in data as the positive class automatically.
 		#' @return res_predict, res_confusion_fit and res_confusion_stats stored in the object.
+		#' 	  The Accuracy in res_confusion_fit is defined: 
+		#' 	  	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
+		#' 	  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_predict()
@@ -442,7 +445,12 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param input default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
 		#'   'train' represents using training results.
-		#' @return a list res_ROC stored in the object.
+		#' @return a list res_ROC stored in the object. It has two tables: res_roc and res_pr. AUC: Area Under the ROC Curve.
+		#'   \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
+		#'   \deqn{Specificity = 1 - FPR = \frac{TN}{TN + FP}}
+		#'   \deqn{Precision = \frac{TP}{TP + FP}}
+		#'   where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
+		#'   FPR is False Positive Rate. TPR is True Positive Rate.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_ROC()

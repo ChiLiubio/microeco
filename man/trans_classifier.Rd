@@ -458,6 +458,9 @@ If positive_class is NULL, use the first group in data as the positive class aut
 }
 \subsection{Returns}{
 res_predict, res_confusion_fit and res_confusion_stats stored in the object.
+	  The Accuracy in res_confusion_fit is defined: 
+	  	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
+	  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -523,7 +526,12 @@ Get ROC (Receiver Operator Characteristic) curve data and the performance data.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a list res_ROC stored in the object.
+a list res_ROC stored in the object. It has two tables: res_roc and res_pr. AUC: Area Under the ROC Curve.
+  \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
+  \deqn{Specificity = 1 - FPR = \frac{TN}{TN + FP}}
+  \deqn{Precision = \frac{TP}{TP + FP}}
+  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
+  FPR is False Positive Rate. TPR is True Positive Rate.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
