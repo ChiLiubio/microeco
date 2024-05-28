@@ -11,11 +11,11 @@
 trans_classifier <- R6::R6Class(classname = "trans_classifier",
 	public = list(
 		#' @description
-		#' Create the trans_classifier object.
+		#' Create a trans_classifier object.
 		#' 
-		#' @param dataset the object of \code{\link{microtable}} Class.
+		#' @param dataset an object of \code{\link{microtable}} class.
 		#' @param x.predictors default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
-		#'   data.frame represents other customized input. See the following available options:
+		#'   data.frame denotes other customized input. See the following available options:
 		#'   \describe{
 		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
 		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
@@ -194,9 +194,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(self$type == "Classification"){
 				data_response %<>% factor
 			}
-			DataX <- self$data_feature
+			data_feature <- self$data_feature
 
-			data_all <- data.frame(Response = data_response, DataX)
+			data_all <- data.frame(Response = data_response, data_feature, check.names = FALSE)
 			SplitData <- rsample::initial_split(data_all, prop = prop.train, strata = "Response")
 			train_data <- rsample::training(SplitData)
 			test_data <- rsample::testing(SplitData)

@@ -145,7 +145,7 @@ t1$cal_caretList(methodList = c('rf', 'svmRadial'))
 \if{html}{\out{<a id="method-trans_classifier-new"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_classifier-new}{}}}
 \subsection{Method \code{new()}}{
-Create the trans_classifier object.
+Create a trans_classifier object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$new(
   dataset,
@@ -158,10 +158,10 @@ Create the trans_classifier object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
+\item{\code{dataset}}{an object of \code{\link{microtable}} class.}
 
 \item{\code{x.predictors}}{default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
-data.frame represents other customized input. See the following available options:
+data.frame denotes other customized input. See the following available options:
 \describe{
   \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
   \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
