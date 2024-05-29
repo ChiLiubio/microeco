@@ -407,6 +407,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
 								Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
 								Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
+								Std.Error = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$`Std. Error`), 
 								P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
 							)
 						}
@@ -1040,6 +1041,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, 
 						Factors = c(rownames(tmp_mean), rownames(tmp_precision)), 
 						Estimate = c(tmp_mean$Estimate, tmp_precision$Estimate), 
+						Std.Error = c(tmp_mean$`Std. Error`, tmp_precision$`Std. Error`), 
 						Zvalue = c(tmp_mean$`z value`, tmp_precision$`z value`), 
 						P.unadj = c(tmp_mean$`Pr(>|z|)`, tmp_precision$`Pr(>|z|)`))
 				}
