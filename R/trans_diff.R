@@ -125,7 +125,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin2".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
-		#'   \strong{res_diff} is the detailed differential test result, may containing:\cr
+		#'   \strong{res_diff} is the detailed differential test result depending on the method choice, may containing:\cr
 		#'     \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups are used;\cr
 		#'     \strong{"Group"}: Which group has the maximum median or mean value across the test groups; 
 		#'        For non-parametric methods, median value; For t.test, mean value;\cr
@@ -134,6 +134,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
 		#'     \strong{"P.unadj"}: original p value;\cr
 		#'     \strong{"P.adj"}: adjusted p value;\cr
+		#'     \strong{"Estimate" and "Std.Error"}: When method is "betareg", "lm", "lme" or "glmm", 
+		#'        "Estimate" and "Std.Error" represent fitted coefficient and its standard error, respectively;\cr
 		#'     \strong{Others}: qvalue: qvalue in metastat analysis.
 		#' @examples
 		#' \donttest{

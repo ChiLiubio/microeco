@@ -126,7 +126,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   \code{lmerTest::lmer} (when \code{method = "lme"}) or 
 		#'   \code{betareg::betareg} (when \code{method = "betareg"}) or 
 		#'   \code{glmmTMB::glmmTMB} (when \code{method = "glmm"}).
-		#' @return \code{res_diff}, stored in object with the format \code{data.frame}.
+		#' @return \code{res_diff}, stored in object with the format \code{data.frame}.\cr
+		#'     When method is "betareg", "lm", "lme" or "glmm", 
+		#'     "Estimate" and "Std.Error" columns represent the fitted coefficient and its standard error, respectively.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_diff(method = "KW")

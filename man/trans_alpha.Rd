@@ -175,7 +175,9 @@ All those are the function names in \code{agricolae} package.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_diff}, stored in object with the format \code{data.frame}.
+\code{res_diff}, stored in object with the format \code{data.frame}.\cr
+    When method is "betareg", "lm", "lme" or "glmm", 
+    "Estimate" and "Std.Error" columns represent the fitted coefficient and its standard error, respectively.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
