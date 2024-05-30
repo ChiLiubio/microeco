@@ -1021,7 +1021,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(method == "anova"){
 				model <- aov(reformulate(formula, "Value"), input_table, ...)
 				tmp <- summary(model)[[1]]
-				tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, Factors = rownames(tmp), 
+				tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, Factors = gsub("\\s+$", "", rownames(tmp)), 
 					Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
 			}
 			if(method == "scheirerRayHare"){
