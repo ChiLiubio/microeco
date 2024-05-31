@@ -233,6 +233,10 @@ Heatmap is employed automatically to show the significances of differential test
   heatmap_x = "Factors",
   heatmap_y = "Measure",
   heatmap_lab_fill = "P value",
+  coefplot_point_size = 6,
+  coefplot_sig_pos = 2,
+  coefplot_vline_size = 1,
+  coefplot_vline_color = "grey70",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -306,6 +310,18 @@ FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the 
 \item{\code{heatmap_y}}{default "Taxa"; the column of \code{res_diff} for the y axis of heatmap.}
 
 \item{\code{heatmap_lab_fill}}{default "P value"; legend title of heatmap.}
+
+\item{\code{coefplot_point_size}}{default 6; the point size in the coefficient point plot. 
+Available when there is only one measure found in the table and 'Estimate' and 'Std.Error' are both in the column names.
+Errorbar size and width in the coefficient point plot can be adjusted with the parameters \code{errorbar_size} and \code{errorbar_width}. 
+The significance label size can be adjusted with parameter \code{add_sig_text_size}.}
+
+\item{\code{coefplot_sig_pos}}{default 2; Significance label position; the formula is \code{Estimate + coefplot_sig_pos * Std.Error};
+When it is a negative value, the label is in the left of the errorbar.}
+
+\item{\code{coefplot_vline_size}}{default 1; Vertical line size in the coefficient point plot.}
+
+\item{\code{coefplot_vline_color}}{default "grey70"; Vertical line color.}
 
 \item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
 \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.}

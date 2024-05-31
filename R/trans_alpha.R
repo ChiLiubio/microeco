@@ -475,6 +475,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param heatmap_x default "Factors"; the column of \code{res_diff} for the x axis of heatmap.
 		#' @param heatmap_y default "Taxa"; the column of \code{res_diff} for the y axis of heatmap.
 		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
+		#' @param coefplot_point_size default 6; the point size in the coefficient point plot. 
+		#' 	  Available when there is only one measure found in the table and 'Estimate' and 'Std.Error' are both in the column names.
+		#' 	  Errorbar size and width in the coefficient point plot can be adjusted with the parameters \code{errorbar_size} and \code{errorbar_width}. 
+		#' 	  The significance label size can be adjusted with parameter \code{add_sig_text_size}.
+		#' @param coefplot_sig_pos default 2; Significance label position; the formula is \code{Estimate + coefplot_sig_pos * Std.Error};
+		#' 	  When it is a negative value, the label is in the left of the errorbar.
+		#' @param coefplot_vline_size default 1; Vertical line size in the coefficient point plot.
+		#' @param coefplot_vline_color default "grey70"; Vertical line color.
 		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
 		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.
 		#' @return ggplot.
@@ -519,8 +527,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			heatmap_x = "Factors",
 			heatmap_y = "Measure",
 			heatmap_lab_fill = "P value",
+			coefplot_point_size = 6,
+			coefplot_sig_pos = 2,
+			coefplot_vline_size = 1,
+			coefplot_vline_color = "grey70",
 			...
 			){
+			# first determine visualization way
 			if(is.null(self$res_diff)){
 				use_heatmap <- FALSE
 			}else{
@@ -531,18 +544,49 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 			}
 			if(use_heatmap){
-				tmp <- self$res_diff
-				if("by_group" %in% colnames(tmp)){
-					if(!is.factor(tmp[, "by_group"])){
-						if(is.factor(self$data_alpha[, self$by_group])){
-							tmp[, "by_group"] %<>% factor(., levels = levels(self$data_alpha[, self$by_group]))
-						}else{
-							tmp[, "by_group"] %<>% as.factor
+				# For only one measure case, use errorplot
+				if(all(c("Estimate", "Std.Error") %in% colnames(self$res_diff))){
+					if(length(unique(self$res_diff$Measure)) == 1){
+						message("For one measure, employ coefficient point and errorbar instead of heatmap ...")
+						use_errorplot <- TRUE
+					}else{
+						use_errorplot <- FALSE
+					}
+				}else{
+					use_errorplot <- FALSE
+				}
+				if(use_errorplot){
+					tmp_data <- self$res_diff
+					tmp_data %<>% .[!is.na(.$Estimate), ]
+					
+					tmp_data$sig_pos <- tmp_data$Estimate + coefplot_sig_pos * tmp_data$Std.Error
+					use_color_values <- expand_colors(color_values, length(unique(tmp_data$Factors)))
+					
+					p <- ggplot(tmp_data, aes(x = Estimate, y = Factors, color = Factors)) +
+						theme_bw() +
+						geom_point(size = coefplot_point_size) + 
+						geom_errorbar(aes(xmin = Estimate - Std.Error, xmax = Estimate + Std.Error), width = errorbar_width, size = errorbar_size) +
+						scale_color_manual(values = use_color_values) + 
+						geom_text(aes(x = sig_pos, y = Factors, label = Significance), data = tmp_data, inherit.aes = FALSE, size = add_sig_text_size) +
+						geom_vline(xintercept = 0, linetype = 2, size = coefplot_vline_size, color = coefplot_vline_color) + 
+						theme(panel.grid = element_blank(), legend.position = "none") +
+						ylab("") +
+						xlab("Coefficient")
+					
+				}else{
+					tmp <- self$res_diff
+					if("by_group" %in% colnames(tmp)){
+						if(!is.factor(tmp[, "by_group"])){
+							if(is.factor(self$data_alpha[, self$by_group])){
+								tmp[, "by_group"] %<>% factor(., levels = levels(self$data_alpha[, self$by_group]))
+							}else{
+								tmp[, "by_group"] %<>% as.factor
+							}
 						}
 					}
+					tmp_trans_env <- convert_diff2transenv(tmp, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill)
+					p <- tmp_trans_env$plot_cor(keep_full_name = TRUE, keep_prefix = TRUE, xtext_angle = xtext_angle, xtext_size = xtext_size, ...)
 				}
-				tmp_trans_env <- convert_diff2transenv(tmp, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill)
-				p <- tmp_trans_env$plot_cor(keep_full_name = TRUE, keep_prefix = TRUE, xtext_angle = xtext_angle, xtext_size = xtext_size, ...)
 			}else{
 				
 				cal_diff_method <- self$cal_diff_method
