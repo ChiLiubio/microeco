@@ -225,7 +225,7 @@ Heatmap is employed automatically to show the significances of differential test
   point_alpha = 0.8,
   add_line = FALSE,
   line_size = 0.8,
-  line_type = 1,
+  line_type = 2,
   line_color = "grey50",
   line_alpha = 0.5,
   heatmap_cell = "P.unadj",
@@ -233,10 +233,7 @@ Heatmap is employed automatically to show the significances of differential test
   heatmap_x = "Factors",
   heatmap_y = "Measure",
   heatmap_lab_fill = "P value",
-  coefplot_point_size = 6,
   coefplot_sig_pos = 2,
-  coefplot_vline_size = 1,
-  coefplot_vline_color = "grey70",
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -295,7 +292,7 @@ FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the 
 
 \item{\code{line_size}}{default 0.8; line size when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
 
-\item{\code{line_type}}{default 1; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
+\item{\code{line_type}}{default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
 
 \item{\code{line_color}}{default "grey50"; line color when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.}
 
@@ -311,17 +308,16 @@ FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the 
 
 \item{\code{heatmap_lab_fill}}{default "P value"; legend title of heatmap.}
 
-\item{\code{coefplot_point_size}}{default 6; the point size in the coefficient point plot. 
-Available when there is only one measure found in the table and 'Estimate' and 'Std.Error' are both in the column names.
+\item{\code{coefplot_sig_pos}}{default 2; Significance label position in the coefficient point and errorbar plot. 
+The formula is \code{Estimate + coefplot_sig_pos * Std.Error}.
+This plot is used when there is only one measure found in the table, 
+and 'Estimate' and 'Std.Error' are both in the column names (such as for \code{lm} and \code{lme methods}).
+The x axis is 'Estimate', and y axis denotes 'Factors'.
+When coefplot_sig_pos is a negative value, the label is in the left of the errorbar.
 Errorbar size and width in the coefficient point plot can be adjusted with the parameters \code{errorbar_size} and \code{errorbar_width}. 
-The significance label size can be adjusted with parameter \code{add_sig_text_size}.}
-
-\item{\code{coefplot_sig_pos}}{default 2; Significance label position; the formula is \code{Estimate + coefplot_sig_pos * Std.Error};
-When it is a negative value, the label is in the left of the errorbar.}
-
-\item{\code{coefplot_vline_size}}{default 1; Vertical line size in the coefficient point plot.}
-
-\item{\code{coefplot_vline_color}}{default "grey70"; Vertical line color.}
+Point size and alpha can be adjusted with parameters \code{point_size} and \code{point_alpha}. 
+The significance label size can be adjusted with parameter \code{add_sig_text_size}.
+Furthermore, the vertical line around 0 can be adjusted with parameters \code{line_size}, \code{line_type}, \code{line_color} and \code{line_alpha}.}
 
 \item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
 \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.}

@@ -467,7 +467,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param point_alpha default 0.8; point transparency. Available when \code{use_boxplot = FALSE}.
 		#' @param add_line default FALSE; whether add line. Available when \code{use_boxplot = FALSE}.
 		#' @param line_size default 0.8; line size when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
-		#' @param line_type default 1; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
+		#' @param line_type default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
 		#' @param line_color default "grey50"; line color when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.
 		#' @param line_alpha default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
 		#' @param heatmap_cell default "P.unadj"; the column of \code{res_diff} table for the cell of heatmap when formula with multiple factors is found in the method.
@@ -475,14 +475,16 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param heatmap_x default "Factors"; the column of \code{res_diff} for the x axis of heatmap.
 		#' @param heatmap_y default "Taxa"; the column of \code{res_diff} for the y axis of heatmap.
 		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
-		#' @param coefplot_point_size default 6; the point size in the coefficient point plot. 
-		#' 	  Available when there is only one measure found in the table and 'Estimate' and 'Std.Error' are both in the column names.
+		#' @param coefplot_sig_pos default 2; Significance label position in the coefficient point and errorbar plot. 
+		#' 	  The formula is \code{Estimate + coefplot_sig_pos * Std.Error}.
+		#' 	  This plot is used when there is only one measure found in the table, 
+		#' 	  and 'Estimate' and 'Std.Error' are both in the column names (such as for \code{lm} and \code{lme methods}).
+		#' 	  The x axis is 'Estimate', and y axis denotes 'Factors'.
+		#' 	  When coefplot_sig_pos is a negative value, the label is in the left of the errorbar.
 		#' 	  Errorbar size and width in the coefficient point plot can be adjusted with the parameters \code{errorbar_size} and \code{errorbar_width}. 
+		#' 	  Point size and alpha can be adjusted with parameters \code{point_size} and \code{point_alpha}. 
 		#' 	  The significance label size can be adjusted with parameter \code{add_sig_text_size}.
-		#' @param coefplot_sig_pos default 2; Significance label position; the formula is \code{Estimate + coefplot_sig_pos * Std.Error};
-		#' 	  When it is a negative value, the label is in the left of the errorbar.
-		#' @param coefplot_vline_size default 1; Vertical line size in the coefficient point plot.
-		#' @param coefplot_vline_color default "grey70"; Vertical line color.
+		#' 	  Furthermore, the vertical line around 0 can be adjusted with parameters \code{line_size}, \code{line_type}, \code{line_color} and \code{line_alpha}. 
 		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
 		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.
 		#' @return ggplot.
@@ -519,7 +521,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			point_alpha = 0.8,
 			add_line = FALSE,
 			line_size = 0.8, 
-			line_type = 1,
+			line_type = 2,
 			line_color = "grey50",
 			line_alpha = 0.5, 
 			heatmap_cell = "P.unadj",
@@ -527,10 +529,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			heatmap_x = "Factors",
 			heatmap_y = "Measure",
 			heatmap_lab_fill = "P value",
-			coefplot_point_size = 6,
 			coefplot_sig_pos = 2,
-			coefplot_vline_size = 1,
-			coefplot_vline_color = "grey70",
 			...
 			){
 			# first determine visualization way
@@ -564,11 +563,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					
 					p <- ggplot(tmp_data, aes(x = Estimate, y = Factors, color = Factors)) +
 						theme_bw() +
-						geom_point(size = coefplot_point_size) + 
+						geom_point(size = point_size, alpha = point_alpha) + 
 						geom_errorbar(aes(xmin = Estimate - Std.Error, xmax = Estimate + Std.Error), width = errorbar_width, size = errorbar_size) +
 						scale_color_manual(values = use_color_values) + 
 						geom_text(aes(x = sig_pos, y = Factors, label = Significance), data = tmp_data, inherit.aes = FALSE, size = add_sig_text_size) +
-						geom_vline(xintercept = 0, linetype = 2, size = coefplot_vline_size, color = coefplot_vline_color) + 
+						geom_vline(xintercept = 0, linetype = line_type, size = line_size, color = line_color, alpha = line_alpha) + 
 						theme(panel.grid = element_blank(), legend.position = "none") +
 						ylab("") +
 						xlab("Coefficient")
