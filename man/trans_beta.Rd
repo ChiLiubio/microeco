@@ -334,7 +334,7 @@ Only available when \code{manova_all = FALSE} and \code{manova_set} is not provi
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_manova} stored in object.
+\code{res_manova} stored in object with \code{data.frame} class.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -377,7 +377,7 @@ Only available when \code{paired = TRUE}.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_anosim} stored in object.
+\code{res_anosim} stored in object with \code{data.frame} class.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

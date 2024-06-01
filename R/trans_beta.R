@@ -350,7 +350,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'    Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
 		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
-		#' @return \code{res_manova} stored in object.
+		#' @return \code{res_manova} stored in object with \code{data.frame} class.
 		#' @examples
 		#' t1$cal_manova(manova_all = TRUE)
 		cal_manova = function(
@@ -411,7 +411,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'    Only available when \code{paired = TRUE}.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{paired = TRUE}; see method parameter of \code{p.adjust} function for available options.
 		#' @param ... parameters passed to \code{\link{anosim}} function of \code{vegan} package.
-		#' @return \code{res_anosim} stored in object.
+		#' @return \code{res_anosim} stored in object with \code{data.frame} class.
 		#' @examples
 		#' t1$cal_anosim()
 		cal_anosim = function(
@@ -448,11 +448,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 					...
 				)
 			}else{
-				res <- anosim(
+				tmp <- anosim(
 					x = use_matrix, 
 					grouping = metadata[, group], 
 					...
 				)
+				res <- data.frame(Test = "ANOSIM for all groups", permutations = tmp$permutations, statistic.R = tmp$statistic, p.value = tmp$signif)
+				res$Significance <- generate_p_siglabel(res$p.value)
 			}
 			self$res_anosim <- res
 			message('The original result is stored in object$res_anosim ...')
