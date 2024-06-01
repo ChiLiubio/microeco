@@ -395,6 +395,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 					)
 				}
 			}
+			if(inherits(res, "anova")){
+				res %<>% as.data.frame
+				res$Significance <- generate_p_siglabel(res$`Pr(>F)`)
+			}
 			self$res_manova <- res
 			message('The result is stored in object$res_manova ...')
 		},
