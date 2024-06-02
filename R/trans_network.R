@@ -811,7 +811,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_eigen and object$res_eigen_expla ...')
 		},
 		#' @description
-		#' Plot the classification and importance of nodes, see object$res_node_table for the variable names used in the parameters.
+		#' Plot the importance of nodes based on the \code{res_node_table} data stored in the object.
 		#' 
 		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot (node roles include Module hubs, Network hubs, 
 		#'   Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 2 represents the layered plot with taxa as x axis.

@@ -227,11 +227,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				if(is.null(by_group)){
 					compare_result <- data.frame(res_list$comnames, res_list$measure_use, res_list$test_method, res_list$max_group, res_list$p_value, p_value_adjust)
-					colnames(compare_result) <- c("Comparison", "Measure", "Test_method", "Group", "P.unadj", "P.adj")
+					colnames(compare_result) <- c("Comparison", "Measure", "Method", "Group", "P.unadj", "P.adj")
 				}else{
 					compare_result <- data.frame(res_list$comnames, res_list$group_by, res_list$measure_use, res_list$test_method, 
 						res_list$max_group, res_list$p_value, p_value_adjust)
-					colnames(compare_result) <- c("Comparison", "by_group", "Measure", "Test_method", "Group", "P.unadj", "P.adj")
+					colnames(compare_result) <- c("Comparison", "by_group", "Measure", "Method", "Group", "P.unadj", "P.adj")
 				}
 			}
 			if(method == "KW_dunn"){
@@ -356,7 +356,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
 						tmp_model_R2 <- performance::r2(tmp)
 						tmp_model_p <- anova(tmp)
-						tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+						tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 							Measure = k, 
 							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
 							R2 = c(tmp_model_R2$R2, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
@@ -376,7 +376,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							tmp_model_R2 <- performance::r2(tmp)
 							tmp_model_p <- anova(tmp)
 							tmp_random_p <- lmerTest::ranova(tmp)
-							tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 								Measure = k, 
 								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
 								Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p) + length(rownames(tmp_coefficients)))),
@@ -403,7 +403,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								message("R2 unavailable for ", k, " !")
 								tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
 							}
-							tmp_res <- data.frame(method = paste0(method, " formula for ", formula), 
+							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 								Measure = k, 
 								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
 								Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
@@ -1012,7 +1012,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				if(any(grepl("\\s", raw_groups))){
 					dunntest_final$Group %<>% gsub("&space&", " ", .)
 				}
-				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, dunntest_final)
+				dunnTest_res <- data.frame(Measure = measure, Method = use_method, dunntest_final)
 			}else{
 				max_group <- lapply(dunnTest_table$Comparison, function(x){
 					group_select <- unlist(strsplit(x, split = " - "))
@@ -1023,7 +1023,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					dunnTest_table$Comparison %<>% gsub("sub&hyphen&sub", "-", ., fixed = TRUE)
 					max_group %<>% gsub("sub&hyphen&sub", "-", ., fixed = TRUE)
 				}
-				dunnTest_res <- data.frame(Measure = measure, Test_method = use_method, Group = max_group, dunnTest_table)
+				dunnTest_res <- data.frame(Measure = measure, Method = use_method, Group = max_group, dunnTest_table)
 			}
 			dunnTest_res
 		},
@@ -1036,7 +1036,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			res1 <- data.frame(rownames(res1), res1, stringsAsFactors = FALSE, check.names = FALSE)
 			colnames(res1) <- c("Group", "Letter")
 			rownames(res1) <- NULL
-			res <- data.frame(Measure = measure, Test_method = "anova", res1)
+			res <- data.frame(Measure = measure, Method = "anova", res1)
 			res
 		},
 		group_value_compare = function(value, group, ...){
@@ -1064,12 +1064,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(method == "anova"){
 				model <- aov(reformulate(formula, "Value"), input_table, ...)
 				tmp <- summary(model)[[1]]
-				tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, Factors = gsub("\\s+$", "", rownames(tmp)), 
+				tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), Measure = measure, Factors = gsub("\\s+$", "", rownames(tmp)), 
 					Df = tmp$Df, Fvalue = tmp$`F value`, P.unadj = tmp$`Pr(>F)`)
 			}
 			if(method == "scheirerRayHare"){
 				invisible(capture.output(tmp <- rcompanion::scheirerRayHare(reformulate(formula, "Value"), input_table, ...)))
-				tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, Factors = rownames(tmp), 
+				tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), Measure = measure, Factors = rownames(tmp), 
 					Df = tmp$Df, Fvalue = tmp$H, P.unadj = tmp$p.value)
 			}
 			if(method == "betareg"){
@@ -1083,7 +1083,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					tmp_coefficients <- summary(tmp)[[1]]
 					tmp_mean <- tmp_coefficients$mean %>% as.data.frame
 					tmp_precision <- tmp_coefficients$precision %>% as.data.frame
-					tmp_res <- data.frame(method = paste0(method, " formula for ", formula), Measure = measure, 
+					tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), Measure = measure, 
 						Factors = c(rownames(tmp_mean), rownames(tmp_precision)), 
 						Estimate = c(tmp_mean$Estimate, tmp_precision$Estimate), 
 						Std.Error = c(tmp_mean$`Std. Error`, tmp_precision$`Std. Error`), 

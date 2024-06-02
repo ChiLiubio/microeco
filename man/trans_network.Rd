@@ -714,7 +714,7 @@ t1$cal_eigen()
 \if{html}{\out{<a id="method-trans_network-plot_taxa_roles"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-plot_taxa_roles}{}}}
 \subsection{Method \code{plot_taxa_roles()}}{
-Plot the classification and importance of nodes, see object$res_node_table for the variable names used in the parameters.
+Plot the importance of nodes based on the \code{res_node_table} data stored in the object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_taxa_roles(
   use_type = c(1, 2)[1],
