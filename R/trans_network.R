@@ -555,7 +555,7 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_network_attr ...')
 		},
 		#' @description
-		#' Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
+		#' Get the node property table. The properties include the node names, modules allocation, degree, betweenness, abundance, 
 		#'   taxonomy, within-module connectivity (zi) and among-module connectivity (Pi) <doi:10.1186/1471-2105-13-113; 10.1016/j.geoderma.2022.115866>.
 		#'
 		#' @param node_roles default TRUE; whether calculate the node roles <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>.
@@ -811,10 +811,12 @@ trans_network <- R6Class(classname = "trans_network",
 			message('Result is stored in object$res_eigen and object$res_eigen_expla ...')
 		},
 		#' @description
-		#' Plot the importance of nodes based on the \code{res_node_table} data stored in the object.
+		#' Plot the roles or metrics of nodes based on the \code{res_node_table} data (coming from function \code{get_node_table}) stored in the object.
 		#' 
-		#' @param use_type default 1; 1 or 2; 1 represents taxa roles area plot (node roles include Module hubs, Network hubs, 
-		#'   Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 2 represents the layered plot with taxa as x axis.
+		#' @param use_type default 1; 1 or 2; 1 represents taxa roles plot (node roles include Module hubs, Network hubs, 
+		#'   Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 
+		#'   2 represents the layered plot with taxa as x axis and the index (e.g., Zi and Pi) as y axis.
+		#'   Please refer to \code{res_node_table} data stored in the object for the detailed information.
 		#' @param roles_color_background default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.
 		#' @param roles_color_values default NULL; for use_type=1; color palette for background or points.
 		#' @param add_label default FALSE; for use_type = 1; whether add labels for the points.
@@ -827,14 +829,14 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param plot_module default FALSE; for use_type=1; whether plot the modules information.
 		#' @param x_lim default c(0, 1); for use_type=1; x axis range when roles_color_background = FALSE.
 		#' @param use_level default "Phylum"; for use_type=2; used taxonomic level in x axis.
-		#' @param show_value default c("z", "p"); for use_type=2; used variable in y axis.
+		#' @param show_value default c("z", "p"); for use_type=2; indexes used in y axis. Please see \code{res_node_table} in the object for other available indexes.
 		#' @param show_number default 1:10; for use_type=2; showed number in x axis, sorting according to the nodes number.
-		#' @param plot_color default "Phylum"; for use_type=2; used variable for color.
-		#' @param plot_shape default "taxa_roles"; for use_type=2; used variable for shape.
-		#' @param plot_size default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also available.
-		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector
+		#' @param plot_color default "Phylum"; for use_type=2; variable for color.
+		#' @param plot_shape default "taxa_roles"; for use_type=2; variable for shape.
+		#' @param plot_size default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also acceptable.
+		#' @param color_values default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type=2; shape vector, see ggplot2 tutorial for the shape meaning.
-		#' @param ... parameters pass to geom_point.
+		#' @param ... parameters pass to \code{geom_point} function of ggplot2 package.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{

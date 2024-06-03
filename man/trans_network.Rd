@@ -522,7 +522,7 @@ t1$cal_network_attr()
 \if{html}{\out{<a id="method-trans_network-get_node_table"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-get_node_table}{}}}
 \subsection{Method \code{get_node_table()}}{
-Get the node property table. The properties may include the node names, modules allocation, degree, betweenness, abundance, 
+Get the node property table. The properties include the node names, modules allocation, degree, betweenness, abundance, 
   taxonomy, within-module connectivity (zi) and among-module connectivity (Pi) <doi:10.1186/1471-2105-13-113; 10.1016/j.geoderma.2022.115866>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$get_node_table(node_roles = TRUE)}\if{html}{\out{</div>}}
@@ -714,7 +714,7 @@ t1$cal_eigen()
 \if{html}{\out{<a id="method-trans_network-plot_taxa_roles"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-plot_taxa_roles}{}}}
 \subsection{Method \code{plot_taxa_roles()}}{
-Plot the importance of nodes based on the \code{res_node_table} data stored in the object.
+Plot the roles or metrics of nodes based on the \code{res_node_table} data (coming from function \code{get_node_table}) stored in the object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$plot_taxa_roles(
   use_type = c(1, 2)[1],
@@ -744,8 +744,10 @@ Plot the importance of nodes based on the \code{res_node_table} data stored in t
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_type}}{default 1; 1 or 2; 1 represents taxa roles area plot (node roles include Module hubs, Network hubs, 
-Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 2 represents the layered plot with taxa as x axis.}
+\item{\code{use_type}}{default 1; 1 or 2; 1 represents taxa roles plot (node roles include Module hubs, Network hubs, 
+Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 
+2 represents the layered plot with taxa as x axis and the index (e.g., Zi and Pi) as y axis.
+Please refer to \code{res_node_table} data stored in the object for the detailed information.}
 
 \item{\code{roles_color_background}}{default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.}
 
@@ -771,21 +773,21 @@ Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>);
 
 \item{\code{use_level}}{default "Phylum"; for use_type=2; used taxonomic level in x axis.}
 
-\item{\code{show_value}}{default c("z", "p"); for use_type=2; used variable in y axis.}
+\item{\code{show_value}}{default c("z", "p"); for use_type=2; indexes used in y axis. Please see \code{res_node_table} in the object for other available indexes.}
 
 \item{\code{show_number}}{default 1:10; for use_type=2; showed number in x axis, sorting according to the nodes number.}
 
-\item{\code{plot_color}}{default "Phylum"; for use_type=2; used variable for color.}
+\item{\code{plot_color}}{default "Phylum"; for use_type=2; variable for color.}
 
-\item{\code{plot_shape}}{default "taxa_roles"; for use_type=2; used variable for shape.}
+\item{\code{plot_shape}}{default "taxa_roles"; for use_type=2; variable for shape.}
 
-\item{\code{plot_size}}{default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also available.}
+\item{\code{plot_size}}{default "Abundance"; for use_type=2; used for point size; a fixed number (e.g. 5) is also acceptable.}
 
-\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector}
+\item{\code{color_values}}{default RColorBrewer::brewer.pal(12, "Paired"); for use_type=2; color vector.}
 
 \item{\code{shape_values}}{default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); for use_type=2; shape vector, see ggplot2 tutorial for the shape meaning.}
 
-\item{\code{...}}{parameters pass to geom_point.}
+\item{\code{...}}{parameters pass to \code{geom_point} function of ggplot2 package.}
 }
 \if{html}{\out{</div>}}
 }
