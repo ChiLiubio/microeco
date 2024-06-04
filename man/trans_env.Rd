@@ -705,7 +705,7 @@ Actually, it can also be applied to other correlation between any two variables 
 "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.}
 
-\item{\code{add_abund_table}}{default NULL; additional data table to be used. Samples must be rows.}
+\item{\code{add_abund_table}}{default NULL; additional data table to be used. Row names must be sample names.}
 
 \item{\code{filter_thres}}{default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.}

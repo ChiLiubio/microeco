@@ -806,7 +806,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
-		#' @param add_abund_table default NULL; additional data table to be used. Samples must be rows.
+		#' @param add_abund_table default NULL; additional data table to be used. Row names must be sample names.
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 		#' 	  The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.
 		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
@@ -860,6 +860,9 @@ trans_env <- R6Class(classname = "trans_env",
 				env_data <- private$check_numeric(env_data)
 			}
 			if(!is.null(add_abund_table)){
+				if(!any(rownames(add_abund_table) %in% rownames(env_data))){
+					stop("Please check provided add_abund_table! Row names of add_abund_table must be sample names!")
+				}
 				abund_table <- add_abund_table
 			}else{
 				check_taxa_abund(self$dataset)
