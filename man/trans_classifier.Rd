@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_classifier.R
 \name{trans_classifier}
 \alias{trans_classifier}
-\title{Create trans_classifier object for machine-learning-based model prediction.}
+\title{Create \code{trans_classifier} object for machine-learning-based model prediction.}
 \description{
 This class is a wrapper for methods of machine-learning-based classification or regression models, including data pre-processing, feature selection, 
 data split, model training, prediction, confusionMatrix and ROC (Receiver Operator Characteristic) or PR (Precision-Recall) curve.
@@ -28,6 +28,7 @@ t1 <- trans_classifier$new(
 ## ------------------------------------------------
 
 \dontrun{
+# "nzv" removes near zero variance predictors
 t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 
@@ -176,7 +177,7 @@ data.frame denotes other customized input. See the following available options:
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_feature and data_response in the object.
+\code{data_feature} and \code{data_response} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -211,11 +212,12 @@ Pre-process (centering, scaling etc.) of the feature data based on the caret::pr
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-converted data_feature in the object.
+preprocessed \code{data_feature} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
+# "nzv" removes near zero variance predictors
 t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 }
@@ -242,9 +244,9 @@ Perform feature selection.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{boruta.maxRuns}}{default 300; maximal number of importance source runs; passed to the maxRuns parameter in Boruta function of Boruta package.}
+\item{\code{boruta.maxRuns}}{default 300; maximal number of importance source runs; passed to the \code{maxRuns} parameter in \code{Boruta} function of Boruta package.}
 
-\item{\code{boruta.pValue}}{default 0.01; p value passed to the pValue parameter in Boruta function of Boruta package.}
+\item{\code{boruta.pValue}}{default 0.01; p value passed to the pValue parameter in \code{Boruta} function of Boruta package.}
 
 \item{\code{boruta.repetitions}}{default 4; repetition runs for the feature selection.}
 
@@ -253,7 +255,7 @@ Perform feature selection.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-optimized data_feature in the object.
+optimized \code{data_feature} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -283,7 +285,7 @@ Split data for training and testing.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_train and data_test in the object.
+\code{data_train} and \code{data_test} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -300,7 +302,7 @@ t1$cal_split(prop.train = 3/4)
 \if{html}{\out{<a id="method-trans_classifier-set_trainControl"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_classifier-set_trainControl}{}}}
 \subsection{Method \code{set_trainControl()}}{
-Control parameters for the following training. See trainControl function of caret package for details.
+Control parameters for the following training. Please see \code{trainControl} function of caret package for details.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$set_trainControl(
   method = "repeatedcv",
@@ -321,12 +323,12 @@ see classProbs parameter in \code{caret::trainControl} function.}
 
 \item{\code{savePredictions}}{default TRUE; see \code{savePredictions} parameter in \code{caret::trainControl} function.}
 
-\item{\code{...}}{parameters pass to trainControl function of caret package.}
+\item{\code{...}}{parameters pass to \code{trainControl} function of caret package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-trainControl in the object.
+\code{trainControl} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -351,7 +353,7 @@ Run the model training.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "rf"; "rf": random forest; see method in caret::train function for other options.}
+\item{\code{method}}{default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.}
 
 \item{\code{max.mtry}}{default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.}
 
@@ -362,7 +364,7 @@ Run the model training.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_train in the object.
+\code{res_train} in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -390,12 +392,12 @@ Get feature importance from the training model.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to varImp function of caret package.}
+\item{\code{...}}{parameters pass to \code{varImp} function of caret package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
+\code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
 }
 \subsection{Examples}{
@@ -426,7 +428,7 @@ Bar plot for feature importance.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot2 object.
+\code{ggplot2} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -451,13 +453,13 @@ Run the prediction.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{positive_class}}{default NULL; see positive parameter in confusionMatrix function of caret package;
+\item{\code{positive_class}}{default NULL; see positive parameter in \code{confusionMatrix} function of caret package;
 If positive_class is NULL, use the first group in data as the positive class automatically.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_predict, res_confusion_fit and res_confusion_stats stored in the object.
+\code{res_predict}, \code{res_confusion_fit} and \code{res_confusion_stats} stored in the object.
 	  The Accuracy in res_confusion_fit is defined: 
 	  	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
 	  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
@@ -495,7 +497,7 @@ Plot the cross-tabulation of observed and predicted classes with associated stat
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot object.
+\code{ggplot} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -526,7 +528,7 @@ Get ROC (Receiver Operator Characteristic) curve data and the performance data.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a list res_ROC stored in the object. It has two tables: res_roc and res_pr. AUC: Area Under the ROC Curve.
+a list \code{res_ROC} stored in the object. It has two tables: \code{res_roc} and \code{res_pr}. AUC: Area Under the ROC Curve.
   \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
   \deqn{Specificity = 1 - FPR = \frac{TN}{TN + FP}}
   \deqn{Precision = \frac{TP}{TP + FP}}
@@ -577,12 +579,12 @@ other options should be one or more class names, same with the names in Group co
 
 \item{\code{plot_method}}{default FALSE; If TRUE, show the method in the legend though only one method is found.}
 
-\item{\code{...}}{parameters pass to geom_path function of ggplot2 package.}
+\item{\code{...}}{parameters pass to \code{geom_path} function of ggplot2 package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot2 object.
+\code{ggplot2} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -599,7 +601,7 @@ t1$plot_ROC(size = 1, alpha = 0.7)
 \if{html}{\out{<a id="method-trans_classifier-cal_caretList"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_classifier-cal_caretList}{}}}
 \subsection{Method \code{cal_caretList()}}{
-Use caretList function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
+Use \code{caretList} function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_caretList(...)}\if{html}{\out{</div>}}
 }
@@ -607,12 +609,12 @@ Use caretList function of caretEnsemble package to run multiple models. For the 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to \code{caretList} function of caretEnsemble package.}
+\item{\code{...}}{parameters pass to \code{caretList} function of \code{caretEnsemble} package.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_caretList_models object.
+\code{res_caretList_models} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

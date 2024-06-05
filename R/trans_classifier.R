@@ -1,5 +1,5 @@
 #' @title 
-#' Create trans_classifier object for machine-learning-based model prediction.
+#' Create \code{trans_classifier} object for machine-learning-based model prediction.
 #'
 #' @description
 #' This class is a wrapper for methods of machine-learning-based classification or regression models, including data pre-processing, feature selection, 
@@ -24,7 +24,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#'   }
 		#' @param y.response default NULL; the response variable in \code{sample_table} of input \code{microtable} object.
 		#' @param n.cores default 1; the CPU thread used.
-		#' @return data_feature and data_response in the object.
+		#' @return \code{data_feature} and \code{data_response} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
@@ -118,9 +118,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
 		#' 
 		#' @param ... parameters pass to \code{preProcess} function of caret package.
-		#' @return converted data_feature in the object.
+		#' @return preprocessed \code{data_feature} in the object.
 		#' @examples
 		#' \dontrun{
+		#' # "nzv" removes near zero variance predictors
 		#' t1$cal_preProcess(method = c("center", "scale", "nzv"))
 		#' }
 		cal_preProcess = function(...){
@@ -134,11 +135,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Perform feature selection.
 		#' 	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
 		#' 
-		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the maxRuns parameter in Boruta function of Boruta package.
-		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in Boruta function of Boruta package.
+		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the \code{maxRuns} parameter in \code{Boruta} function of Boruta package.
+		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in \code{Boruta} function of Boruta package.
 		#' @param boruta.repetitions default 4; repetition runs for the feature selection.
 		#' @param ... parameters pass to \code{Boruta} function of Boruta package.
-		#' @return optimized data_feature in the object.
+		#' @return optimized \code{data_feature} in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
@@ -182,7 +183,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Split data for training and testing.
 		#' 
 		#' @param prop.train default 3/4; the ratio of the data used for the training.
-		#' @return data_train and data_test in the object.
+		#' @return \code{data_train} and \code{data_test} in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_split(prop.train = 3/4)
@@ -208,15 +209,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			message("Training and testing data are stored in object$data_train and object$data_test respectively ...")
 		},
 		#' @description
-		#' Control parameters for the following training. See trainControl function of caret package for details.
+		#' Control parameters for the following training. Please see \code{trainControl} function of caret package for details.
 		#' 
 		#' @param method default 'repeatedcv'; 'repeatedcv': Repeated k-Fold cross validation; 
 		#' 	 see method parameter in \code{trainControl} function of \code{caret} package for available options.
 		#' @param classProbs default TRUE; should class probabilities be computed for classification models?;
 		#' 	 see classProbs parameter in \code{caret::trainControl} function.
 		#' @param savePredictions default TRUE; see \code{savePredictions} parameter in \code{caret::trainControl} function.
-		#' @param ... parameters pass to trainControl function of caret package.
-		#' @return trainControl in the object.
+		#' @param ... parameters pass to \code{trainControl} function of caret package.
+		#' @return \code{trainControl} in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$set_trainControl(method = 'repeatedcv')
@@ -242,11 +243,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Run the model training.
 		#' 
-		#' @param method default "rf"; "rf": random forest; see method in caret::train function for other options.
+		#' @param method default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.
 		#' @param max.mtry default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.
 		#' @param max.ntree default 200; for method = "rf"; maximum number of trees used to optimize the model.
 		#' @param ... parameters pass to \code{caret::train} function.
-		#' @return res_train in the object.
+		#' @return \code{res_train} in the object.
 		#' @examples
 		#' \dontrun{
 		#' # random forest
@@ -308,8 +309,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Get feature importance from the training model.
-		#' @param ... parameters pass to varImp function of caret package.
-		#' @return res_feature_imp in the object. One row for each predictor variable. The column(s) are different importance measures.
+		#' @param ... parameters pass to \code{varImp} function of caret package.
+		#' @return \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
 		#'   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
 		#' @examples
 		#' \dontrun{
@@ -327,7 +328,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Bar plot for feature importance.
 		#' @param ... parameters pass to \code{plot_diff_bar} function of \code{trans_diff} package.
-		#' @return ggplot2 object.
+		#' @return \code{ggplot2} object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_feature_imp(use_number = 1:20, coord_flip = FALSE)
@@ -347,9 +348,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Run the prediction.
 		#' 
-		#' @param positive_class default NULL; see positive parameter in confusionMatrix function of caret package;
+		#' @param positive_class default NULL; see positive parameter in \code{confusionMatrix} function of caret package;
 		#' If positive_class is NULL, use the first group in data as the positive class automatically.
-		#' @return res_predict, res_confusion_fit and res_confusion_stats stored in the object.
+		#' @return \code{res_predict}, \code{res_confusion_fit} and \code{res_confusion_stats} stored in the object.
 		#' 	  The Accuracy in res_confusion_fit is defined: 
 		#' 	  	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
 		#' 	  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
@@ -400,7 +401,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param plot_confusion default TRUE; whether plot the confusion matrix.
 		#' @param plot_statistics default TRUE; whether plot the statistics.
-		#' @return ggplot object.
+		#' @return \code{ggplot} object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_confusionMatrix()
@@ -445,7 +446,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param input default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
 		#'   'train' represents using training results.
-		#' @return a list res_ROC stored in the object. It has two tables: res_roc and res_pr. AUC: Area Under the ROC Curve.
+		#' @return a list \code{res_ROC} stored in the object. It has two tables: \code{res_roc} and \code{res_pr}. AUC: Area Under the ROC Curve.
 		#'   \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
 		#'   \deqn{Specificity = 1 - FPR = \frac{TN}{TN + FP}}
 		#'   \deqn{Precision = \frac{TP}{TP + FP}}
@@ -511,8 +512,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); colors used in the plot.
 		#' @param add_AUC default TRUE; whether add AUC in the legend.
 		#' @param plot_method default FALSE; If TRUE, show the method in the legend though only one method is found.
-		#' @param ... parameters pass to geom_path function of ggplot2 package.
-		#' @return ggplot2 object.
+		#' @param ... parameters pass to \code{geom_path} function of ggplot2 package.
+		#' @return \code{ggplot2} object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_ROC(size = 1, alpha = 0.7)
@@ -575,10 +576,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			p
 		},
 		#' @description
-		#' Use caretList function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
+		#' Use \code{caretList} function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
 		#' 
-		#' @param ... parameters pass to \code{caretList} function of caretEnsemble package.
-		#' @return res_caretList_models object.
+		#' @param ... parameters pass to \code{caretList} function of \code{caretEnsemble} package.
+		#' @return \code{res_caretList_models} object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_caretList(methodList = c('rf', 'svmRadial'))
@@ -603,5 +604,4 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 	lock_class = FALSE,
 	lock_objects = FALSE
 )
-
 
