@@ -347,17 +347,20 @@ t1$set_trainControl(method = 'repeatedcv')
 \subsection{Method \code{cal_train()}}{
 Run the model training.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_train(method = "rf", max.mtry = 2, max.ntree = 200, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_train(method = "rf", max.mtry = 2, ntree = 500, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.}
+\item{\code{method}}{default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.
+For method = "rf", the \code{tuneGrid} is set: \code{expand.grid(mtry = seq(from = 1, to = max.mtry))}}
 
-\item{\code{max.mtry}}{default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.}
+\item{\code{max.mtry}}{default 2; for method = "rf"; maximum mtry used in the \code{tuneGrid} to do hyperparameter tuning to optimize the model.}
 
-\item{\code{max.ntree}}{default 200; for method = "rf"; maximum number of trees used to optimize the model.}
+\item{\code{ntree}}{default 500; for method = "rf"; Number of trees to grow. 
+The default 500 is same with the \code{ntree} parameter in \code{randomForest} function in randomForest package.
+When it is a vector with more than one element, the function will try to optimize the model to select a best one, such as \code{c(100, 500, 1000)}.}
 
 \item{\code{...}}{parameters pass to \code{caret::train} function.}
 }

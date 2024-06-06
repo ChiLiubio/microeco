@@ -244,8 +244,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Run the model training.
 		#' 
 		#' @param method default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.
-		#' @param max.mtry default 2; for method = "rf"; maximum mtry used for the tunegrid to do hyperparameter tuning to optimize the model.
-		#' @param max.ntree default 200; for method = "rf"; maximum number of trees used to optimize the model.
+		#' 	  For method = "rf", the \code{tuneGrid} is set: \code{expand.grid(mtry = seq(from = 1, to = max.mtry))}
+		#' @param max.mtry default 2; for method = "rf"; maximum mtry used in the \code{tuneGrid} to do hyperparameter tuning to optimize the model.
+		#' @param ntree default 500; for method = "rf"; Number of trees to grow. 
+		#' 	  The default 500 is same with the \code{ntree} parameter in \code{randomForest} function in randomForest package.
+		#' 	  When it is a vector with more than one element, the function will try to optimize the model to select a best one, such as \code{c(100, 500, 1000)}.
 		#' @param ... parameters pass to \code{caret::train} function.
 		#' @return \code{res_train} in the object.
 		#' @examples
@@ -258,7 +261,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		cal_train = function(
 			method = "rf",
 			max.mtry = 2,
-			max.ntree = 200,
+			ntree = 500,
 			...
 			){
 			train_data <- self$data_train
@@ -268,38 +271,35 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(method == "rf" & self$type == "Classification"){
 				# Optimization of RF parameters
 				message("Optimization of Random Forest parameters ...")
-
-				tunegrid <- expand.grid(.mtry=seq(from =1, to = max.mtry) )
-				modellist<- list()
-				
-				for (ntree in c(100, max.ntree)) {
-					fit <- caret::train(Response ~ ., data = train_data, method = method,
-									  tuneGrid = tunegrid, trControl = trControl, ntree = ntree, ...)
-					key <- toString(ntree)
-					modellist[[key]] <- fit
-				}
-				# compare results
-				results.tune1 <- caret::resamples(modellist)
-				res.tune1 <- summary(results.tune1)
-				res.tune1 <- as.data.frame(res.tune1$statistics$Accuracy)
-				#summary(results)
-
-				ntree <- as.numeric(rownames(res.tune1)[which(res.tune1$Mean == max(res.tune1$Mean))])[1]
-				#tunegrid <- expand.grid(.mtry=seq(from = 1, to=4, by = 0.5))
 				modellist <- list()
-
-				fit <- caret::train(Response ~ ., data = train_data, method = method, 
-					tuneGrid = tunegrid, 
-					trControl = trControl, ntree = ntree)
-
-				message("ntree used:", ntree)
+				# capture the parameters
+				all_parameters <- c(as.list(environment()), list(...))
+				
+				tuneGrid <- expand.grid(mtry = seq(from = 1, to = max.mtry))
+				
+				if(length(ntree) > 1){
+					for (test_ntree in ntree){
+						fit <- caret::train(Response ~ ., data = train_data, method = method, tuneGrid = tuneGrid, trControl = trControl, ntree = test_ntree, ...)
+						key <- toString(test_ntree)
+						modellist[[key]] <- fit
+					}
+					# compare results
+					results.tune1 <- caret::resamples(modellist)
+					res.tune1 <- summary(results.tune1)
+					res.tune1 <- as.data.frame(res.tune1$statistics$Accuracy)
+					ntree <- as.numeric(rownames(res.tune1)[which(res.tune1$Mean == max(res.tune1$Mean))])[1]
+					fit <- caret::train(Response ~ ., data = train_data, method = method, tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
+					message("ntree used:", ntree)
+				}else{
+					fit <- caret::train(Response ~ ., data = train_data, method = method, tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
+				}
 				message("best mtry:", fit$bestTune$mtry)
-
-				tunegrid <- expand.grid(.mtry=fit$bestTune$mtry)
-				res_train <- caret::train(x=train_data[,2:ncol(train_data)], y = train_data[,1], method = method, 
-										 tuneGrid = tunegrid, trControl = trControl, ntree = ntree, ...)
-
 				######################Optimization of RF parameters end				
+
+				tuneGrid <- expand.grid(.mtry=fit$bestTune$mtry)
+				res_train <- caret::train(x = train_data[, 2:ncol(train_data)], y = train_data[, 1], method = method, 
+										 tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
+
 			}else{
 				res_train <- caret::train(Response ~ ., data = train_data, method = method, trControl = trControl, ...)
 			}
