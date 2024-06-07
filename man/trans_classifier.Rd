@@ -463,9 +463,24 @@ If positive_class is NULL, use the first group in data as the positive class aut
 }
 \subsection{Returns}{
 \code{res_predict}, \code{res_confusion_fit} and \code{res_confusion_stats} stored in the object.
-	  The Accuracy in res_confusion_fit is defined: 
-	  	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
-	  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
+	  The \code{res_predict} is the predicted result for \code{data_test}.
+	  Several evaluation metrics in \code{res_confusion_fit} are defined as follows:
+	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
+  \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
+  \deqn{Specificity = TNR = 1 - FPR = \frac{TN}{TN + FP}}
+  \deqn{Precision = \frac{TP}{TP + FP}}
+	 \deqn{Prevalence = \frac{TP + FN}{TP + TN + FP + FN}}
+	 \deqn{F1-Score = \frac{2 * Precision * Recall}{Precision + Recall}}
+	 \deqn{Kappa = \frac{Accuracy - Pe}{1 - Pe}}
+  where TP is true positive; TN is ture negative; FP is false positive; and FN is false negative;
+  FPR is False Positive Rate; TPR is True Positive Rate; TNR is True Negative Rate;
+  Pe is the hypothetical probability of chance agreement on the classes for reference and prediction in the confusion matrix.
+  Accuracy represents the ratio of correct predictions.
+  Precision identifies how the model accurately predicted the positive classes.
+  Recall (sensitivity) measures the ratio of actual positives that are correctly identified by the model.
+  F1-score is the weighted average score of recall and precision. The value at 1 is the best performance and at 0 is the worst.
+  Prevalence represents how often positive events occurred.
+  Kappa identifies how well the model is predicting.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -482,7 +497,7 @@ t1$cal_predict()
 \if{html}{\out{<a id="method-trans_classifier-plot_confusionMatrix"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_classifier-plot_confusionMatrix}{}}}
 \subsection{Method \code{plot_confusionMatrix()}}{
-Plot the cross-tabulation of observed and predicted classes with associated statistics.
+Plot the cross-tabulation of observed and predicted classes with associated statistics based on the results of function \code{cal_predict}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_confusionMatrix(
   plot_confusion = TRUE,
@@ -532,11 +547,7 @@ Get ROC (Receiver Operator Characteristic) curve data and the performance data.
 }
 \subsection{Returns}{
 a list \code{res_ROC} stored in the object. It has two tables: \code{res_roc} and \code{res_pr}. AUC: Area Under the ROC Curve.
-  \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
-  \deqn{Specificity = 1 - FPR = \frac{TN}{TN + FP}}
-  \deqn{Precision = \frac{TP}{TP + FP}}
-  where TP is true positive, TN is ture negative, FP is false positive, and FN is false negative.
-  FPR is False Positive Rate. TPR is True Positive Rate.
+  For the definition of metrics, please refer to the return part of function \code{cal_predict}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
