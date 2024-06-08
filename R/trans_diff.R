@@ -1156,11 +1156,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
 		#' 	  If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.
-		#' @param axis_text_y default 12; the size for the y axis text.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
+		#' @param add_sig default FALSE; whether add significance label (asterisk) above the bar.
+		#' @param add_sig_increase default 0.1; the axis position (\code{Value + add_sig_increase * max(Value)}) from which to add the significance label; 
+		#' 	  only available when \code{add_sig = TRUE}.
+		#' @param add_sig_text_size default 5; the size of added significance label; only available when \code{add_sig = TRUE}.
 		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 		#' 	  only available when coord_flip = FALSE.
 		#' @param xtext_size default 10; the text size of x axis.
+		#' @param axis_text_y default 12; the size for the y axis text.
 		#' @param heatmap_cell default "P.unadj"; the column of data for the cell of heatmap when formula with multiple factors is found in the method.
 		#' @param heatmap_sig default "Significance"; the column of data for the significance label of heatmap.
 		#' @param heatmap_x default "Factors"; the column of data for the x axis of heatmap.
@@ -1182,10 +1186,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
 			group_order = NULL,
-			axis_text_y = 12,
 			coord_flip = TRUE,
+			add_sig = FALSE,
+			add_sig_increase = 0.1,
+			add_sig_text_size = 5,
 			xtext_angle = 45,
 			xtext_size = 10,
+			axis_text_y = 12,
 			heatmap_cell = "P.unadj",
 			heatmap_sig = "Significance",
 			heatmap_x = "Factors",
@@ -1318,6 +1325,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					ylab_title <- "Value"
 				}
 				self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
+				if(add_sig){
+					added_value <- add_sig_increase * max(abs(use_data$Value))
+					use_data$add_sig_position <- ifelse(use_data$Value > 0, use_data$Value + added_value, use_data$Value - added_value)
+				}
 				
 				if("Group" %in% colnames(use_data)){
 					p <- ggplot(use_data, aes(x = Taxa, y = Value, color = Group, fill = Group, group = Group)) +
@@ -1335,6 +1346,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.grid.minor.x = element_blank()) +
 					theme(panel.border = element_blank()) +
 					theme(axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"))
+				
+				if(add_sig){
+					p <- p + geom_text(aes(x = Taxa, y = add_sig_position, label = Significance), data = use_data, size = add_sig_text_size)
+				}
 				
 				if(coord_flip){
 					p <- p + coord_flip()

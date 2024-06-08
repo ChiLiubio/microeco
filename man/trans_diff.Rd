@@ -389,10 +389,13 @@ Bar plot for indicator index, such as LDA score and P value.
   keep_full_name = FALSE,
   keep_prefix = TRUE,
   group_order = NULL,
-  axis_text_y = 12,
   coord_flip = TRUE,
+  add_sig = FALSE,
+  add_sig_increase = 0.1,
+  add_sig_text_size = 5,
   xtext_angle = 45,
   xtext_size = 10,
+  axis_text_y = 12,
   heatmap_cell = "P.unadj",
   heatmap_sig = "Significance",
   heatmap_x = "Factors",
@@ -425,14 +428,21 @@ The input select_group must be one of \code{object$res_diff$Comparison}.}
 If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.}
 
-\item{\code{axis_text_y}}{default 12; the size for the y axis text.}
-
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
+
+\item{\code{add_sig}}{default FALSE; whether add significance label (asterisk) above the bar.}
+
+\item{\code{add_sig_increase}}{default 0.1; the axis position (\code{Value + add_sig_increase * max(Value)}) from which to add the significance label; 
+only available when \code{add_sig = TRUE}.}
+
+\item{\code{add_sig_text_size}}{default 5; the size of added significance label; only available when \code{add_sig = TRUE}.}
 
 \item{\code{xtext_angle}}{default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 only available when coord_flip = FALSE.}
 
 \item{\code{xtext_size}}{default 10; the text size of x axis.}
+
+\item{\code{axis_text_y}}{default 12; the size for the y axis text.}
 
 \item{\code{heatmap_cell}}{default "P.unadj"; the column of data for the cell of heatmap when formula with multiple factors is found in the method.}
 
