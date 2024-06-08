@@ -297,9 +297,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				######################Optimization of RF parameters end				
 
 				tuneGrid <- expand.grid(.mtry=fit$bestTune$mtry)
-				res_train <- caret::train(x = train_data[, 2:ncol(train_data)], y = train_data[, 1], method = method, 
-										 tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
-
+				res_train <- caret::train(Response ~ ., data = train_data, method = method, tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
+				self$train_params <- list(mtry = fit$bestTune$mtry, ntree = ntree)
 			}else{
 				res_train <- caret::train(Response ~ ., data = train_data, method = method, trControl = trControl, ...)
 			}
@@ -309,19 +308,34 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Get feature importance from the training model.
-		#' @param ... parameters pass to \code{varImp} function of caret package.
+		#' @param rf_feature_sig default FALSE; whether calculate feature significance; only available for \code{method = "rf"} in \code{cal_train} function.
+		#' @param ... parameters pass to \code{varImp} function of caret package. 
+		#'    If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.
 		#' @return \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
 		#'   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_feature_imp()
 		#' }
-		cal_feature_imp = function(...){
+		cal_feature_imp = function(rf_feature_sig = FALSE, ...){
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")
 			}
-			res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)
-			
+			if(self$train_method == "rf"){
+				if(rf_feature_sig){
+					train_data <- self$data_train
+					# replace feature names with simplified character
+					match_table <- data.frame(rawname = colnames(train_data)[2:ncol(train_data)], replacename = paste0("r", 1:(ncol(train_data) - 1)))
+					colnames(train_data)[2:ncol(train_data)] <- match_table$replacename
+					rfp_res <- rfPermute::rfPermute(Response ~ ., data = train_data, ntree = self$train_params[["ntree"]], mtry = self$train_params[["mtry"]], ...)
+					res_feature_imp <- rfPermute::importance(rfp_res, scale = TRUE)
+					rownames(res_feature_imp) <- match_table[match(rownames(res_feature_imp), match_table[, 2]), 1]
+				}else{
+					res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)
+				}
+			}else{
+				res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)
+			}
 			self$res_feature_imp <- res_feature_imp
 			message('The feature importance is stored in object$res_feature_imp ...')
 		},
@@ -337,8 +351,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(is.null(self$res_feature_imp)){
 				stop("Please first run cal_feature_imp !")
 			}
-			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), Value = self$res_feature_imp[, 1])
-			tmp$Taxa %<>% gsub("\\.(.__)", "\\|\\1", .)
+			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), self$res_feature_imp)
+			if("Overall" %in% colnames(tmp)){
+				colnames(tmp)[colnames(tmp) == "Overall"] <- "Value"
+			}
+			tmp$Taxa %<>% gsub("`", "", ., fixed = TRUE) %>% gsub("\\.(.__)", "\\|\\1", .)
 			
 			suppressMessages(trans_diff_tmp <- trans_diff$new(dataset = NULL))
 			trans_diff_tmp$res_diff <- tmp

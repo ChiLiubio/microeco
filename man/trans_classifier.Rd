@@ -389,13 +389,16 @@ t1$cal_train(method = "svmRadial", tuneLength = 15)
 \subsection{Method \code{cal_feature_imp()}}{
 Get feature importance from the training model.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_feature_imp(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_feature_imp(rf_feature_sig = FALSE, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters pass to \code{varImp} function of caret package.}
+\item{\code{rf_feature_sig}}{default FALSE; whether calculate feature significance; only available for \code{method = "rf"} in \code{cal_train} function.}
+
+\item{\code{...}}{parameters pass to \code{varImp} function of caret package. 
+If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.}
 }
 \if{html}{\out{</div>}}
 }
