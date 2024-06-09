@@ -1305,19 +1305,25 @@ trans_diff <- R6Class(classname = "trans_diff",
 						color_values <- expand_colors(color_values, length(levels(use_data$Group)))
 					}
 					# rearrange orders
+					use_data$Taxa %<>% as.character
 					if(length(levels(use_data$Group)) == 2 & group_two_sep){
-						use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
+						feature_orders <- lapply(levels(use_data$Group), function(x){
 							if(x == levels(use_data$Group)[1]){
 								use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
 							}else{
 								use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = FALSE), "Taxa"]
 							}
-						})))))
+						}) %>% unlist %>% unique
 						use_data[use_data$Group == levels(use_data$Group)[2], "Value"] %<>% {. * -1}
 					}else{
-						use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
+						feature_orders <- lapply(levels(use_data$Group), function(x){
 							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
-						})))))
+						}) %>% unlist %>% unique
+					}
+					if(coord_flip){
+						use_data$Taxa %<>% factor(., levels = rev(feature_orders))
+					}else{
+						use_data$Taxa %<>% factor(., levels = feature_orders)
 					}
 				}else{
 					use_data %<>% .[order(.$Value, decreasing = TRUE), ]
@@ -1326,7 +1332,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}else{
 						use_data$Taxa %<>% factor(., levels = .)
 					}
-					ylab_title <- "Value"
 					if("Group" %in% colnames(use_data)){
 						use_data$Group %<>% as.character
 					}
