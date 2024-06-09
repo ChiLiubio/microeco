@@ -389,6 +389,8 @@ Bar plot for indicator index, such as LDA score and P value.
   keep_full_name = FALSE,
   keep_prefix = TRUE,
   group_order = NULL,
+  group_aggre = TRUE,
+  group_two_sep = TRUE,
   coord_flip = TRUE,
   add_sig = FALSE,
   add_sig_increase = 0.1,
@@ -427,6 +429,10 @@ The input select_group must be one of \code{object$res_diff$Comparison}.}
 \item{\code{group_order}}{default NULL; a vector to order the legend and colors in plot; 
 If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.}
+
+\item{\code{group_aggre}}{default TRUE; whether aggregate the features for each group.}
+
+\item{\code{group_two_sep}}{default TRUE; whether display the features of two groups on opposite sides of the coordinate axes when there are only two groups in total.}
 
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
 

@@ -328,7 +328,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 					match_table <- data.frame(rawname = colnames(train_data)[2:ncol(train_data)], replacename = paste0("r", 1:(ncol(train_data) - 1)))
 					colnames(train_data)[2:ncol(train_data)] <- match_table$replacename
 					rfp_res <- rfPermute::rfPermute(Response ~ ., data = train_data, ntree = self$train_params[["ntree"]], mtry = self$train_params[["mtry"]], ...)
-					res_feature_imp <- rfPermute::importance(rfp_res, scale = TRUE)
+					res_feature_imp <- rfPermute::importance(rfp_res, scale = TRUE) %>% as.data.frame(check.names = FALSE)
 					rownames(res_feature_imp) <- match_table[match(rownames(res_feature_imp), match_table[, 2]), 1]
 				}else{
 					res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)

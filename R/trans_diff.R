@@ -1156,6 +1156,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group_order default NULL; a vector to order the legend and colors in plot; 
 		#' 	  If NULL, the function can first determine whether the group column of \code{microtable$sample_table} is factor. If yes, use the levels in it.
 		#' 	  If provided, this parameter can overwrite the levels in the group of \code{microtable$sample_table}.
+		#' @param group_aggre default TRUE; whether aggregate the features for each group.
+		#' @param group_two_sep default TRUE; whether display the features of two groups on opposite sides of the coordinate axes when there are only two groups in total.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
 		#' @param add_sig default FALSE; whether add significance label (asterisk) above the bar.
 		#' @param add_sig_increase default 0.1; the axis position (\code{Value + add_sig_increase * max(Value)}) from which to add the significance label; 
@@ -1186,6 +1188,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
 			group_order = NULL,
+			group_aggre = TRUE,
+			group_two_sep = TRUE,
 			coord_flip = TRUE,
 			add_sig = FALSE,
 			add_sig_increase = 0.1,
@@ -1280,7 +1284,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					sel_num <- 1:nrow(use_data)
 				}
 				use_data %<>% .[sel_num, ]
-				if("Group" %in% colnames(use_data)){
+				if("Group" %in% colnames(use_data) & group_aggre){
 					if(is.null(group_order)){
 						if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
 							use_data$Group %<>% factor(., levels = self$group_order)
@@ -1301,7 +1305,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						color_values <- expand_colors(color_values, length(levels(use_data$Group)))
 					}
 					# rearrange orders
-					if(length(levels(use_data$Group)) == 2){
+					if(length(levels(use_data$Group)) == 2 & group_two_sep){
 						use_data$Taxa %<>% as.character %>% factor(., levels = rev(unique(unlist(lapply(levels(use_data$Group), function(x){
 							if(x == levels(use_data$Group)[1]){
 								use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
@@ -1323,6 +1327,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 						use_data$Taxa %<>% factor(., levels = .)
 					}
 					ylab_title <- "Value"
+					if("Group" %in% colnames(use_data)){
+						use_data$Group %<>% as.character
+					}
 				}
 				self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
 				if(add_sig){
