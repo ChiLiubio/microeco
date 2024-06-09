@@ -423,12 +423,24 @@ t1$cal_feature_imp()
 \subsection{Method \code{plot_feature_imp()}}{
 Bar plot for feature importance.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_feature_imp(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_feature_imp(
+  rf_sig_show = "MeanDecreaseGini",
+  show_sig_group = FALSE,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{rf_sig_show}}{default "MeanDecreaseGini"; "MeanDecreaseGini" or "MeanDecreaseAccuracy"; 
+Only available when \code{rf_feature_sig = TRUE} in function \code{cal_feature_imp}, 
+which generate "MeanDecreaseGini" and "MeanDecreaseAccuracy" in the column names of \code{res_feature_imp};
+Function can also generate "Significance" according to the p value.}
+
+\item{\code{show_sig_group}}{default FALSE; whether show the features with different significant groups;
+Only available when "Significance" is found in the data.}
+
 \item{\code{...}}{parameters pass to \code{plot_diff_bar} function of \code{trans_diff} package.}
 }
 \if{html}{\out{</div>}}

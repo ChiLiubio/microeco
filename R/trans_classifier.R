@@ -341,21 +341,46 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Bar plot for feature importance.
+		#' @param rf_sig_show default "MeanDecreaseGini"; "MeanDecreaseGini" or "MeanDecreaseAccuracy"; 
+		#' 	  Only available when \code{rf_feature_sig = TRUE} in function \code{cal_feature_imp}, 
+		#' 	  which generate "MeanDecreaseGini" and "MeanDecreaseAccuracy" in the column names of \code{res_feature_imp};
+		#' 	  Function can also generate "Significance" according to the p value.
+		#' @param show_sig_group default FALSE; whether show the features with different significant groups;
+		#' 	  Only available when "Significance" is found in the data.
 		#' @param ... parameters pass to \code{plot_diff_bar} function of \code{trans_diff} package.
 		#' @return \code{ggplot2} object.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_feature_imp(use_number = 1:20, coord_flip = FALSE)
 		#' }
-		plot_feature_imp = function(...){
+		plot_feature_imp = function(rf_sig_show = "MeanDecreaseGini", show_sig_group = FALSE, ...){
 			if(is.null(self$res_feature_imp)){
-				stop("Please first run cal_feature_imp !")
+				stop("Please first run function cal_feature_imp !")
 			}
 			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), self$res_feature_imp)
-			if("Overall" %in% colnames(tmp)){
-				colnames(tmp)[colnames(tmp) == "Overall"] <- "Value"
-			}
 			tmp$Taxa %<>% gsub("`", "", ., fixed = TRUE) %>% gsub("\\.(.__)", "\\|\\1", .)
+			if(! "Value" %in% colnames(tmp)){
+				if("Overall" %in% colnames(tmp)){
+					colnames(tmp)[colnames(tmp) == "Overall"] <- "Value"
+				}else{
+					if(any(c("MeanDecreaseAccuracy", "MeanDecreaseGini") %in% colnames(tmp))){
+						colnames(tmp)[colnames(tmp) == rf_sig_show] <- "Value"
+						colnames(tmp)[colnames(tmp) == paste0(rf_sig_show, ".pval")] <- "pvalue"
+						tmp$Significance <- generate_p_siglabel(tmp$pvalue, nonsig = "ns")
+					}else{
+						if(is.numeric(tmp[, 2])){
+							colnames(tmp)[2] <- "Value"
+						}else{
+							stop("The res_feature_imp format can not be correctly recognized!")
+						}
+					}
+				}
+			}
+			if(show_sig_group){
+				if("Significance" %in% colnames(tmp)){
+					tmp$Group <- tmp$Significance
+				}
+			}
 			
 			suppressMessages(trans_diff_tmp <- trans_diff$new(dataset = NULL))
 			trans_diff_tmp$res_diff <- tmp
