@@ -266,6 +266,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			){
 			train_data <- self$data_train
 			trControl <- self$trainControl
+			if(is.null(trControl)){
+				trControl <- caret::trainControl()
+			}
 			
 			###################### ----------------
 			if(method == "rf" & self$type == "Classification"){
@@ -644,9 +647,6 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			){
 			if(!require(caretEnsemble)){
 				stop("Please first install caretEnsemble package from CRAN!")
-			}
-			if(is.null(self$trainControl)){
-				stop("Please first run set_trainControl function!")
 			}
 			use_trainControl <- self$trainControl
 			train_data <- self$data_train
