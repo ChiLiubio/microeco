@@ -315,7 +315,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param ... parameters pass to \code{varImp} function of caret package. 
 		#'    If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.
 		#' @return \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
-		#'   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
+		#'   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression) when \code{rf_feature_sig = FALSE}.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_feature_imp()
@@ -330,7 +330,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 					# replace feature names with simplified character
 					match_table <- data.frame(rawname = colnames(train_data)[2:ncol(train_data)], replacename = paste0("r", 1:(ncol(train_data) - 1)))
 					colnames(train_data)[2:ncol(train_data)] <- match_table$replacename
-					rfp_res <- rfPermute::rfPermute(Response ~ ., data = train_data, ntree = self$train_params[["ntree"]], mtry = self$train_params[["mtry"]], ...)
+					if(is.null(self$train_params)){
+						rfp_res <- rfPermute::rfPermute(Response ~ ., data = train_data, ...)
+					}else{
+						rfp_res <- rfPermute::rfPermute(Response ~ ., data = train_data, ntree = self$train_params[["ntree"]], mtry = self$train_params[["mtry"]], ...)
+					}
 					res_feature_imp <- rfPermute::importance(rfp_res, scale = TRUE) %>% as.data.frame(check.names = FALSE)
 					rownames(res_feature_imp) <- match_table[match(rownames(res_feature_imp), match_table[, 2]), 1]
 				}else{
@@ -344,9 +348,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Bar plot for feature importance.
-		#' @param rf_sig_show default "MeanDecreaseGini"; "MeanDecreaseGini" or "MeanDecreaseAccuracy"; 
+		#' @param rf_sig_show default NULL; "MeanDecreaseAccuracy" (Default) or "MeanDecreaseGini" for random forest classification;
+		#' 	  "\%IncMSE" (Default) or "IncNodePurity" for random forest regression;
 		#' 	  Only available when \code{rf_feature_sig = TRUE} in function \code{cal_feature_imp}, 
-		#' 	  which generate "MeanDecreaseGini" and "MeanDecreaseAccuracy" in the column names of \code{res_feature_imp};
+		#' 	  which generate "MeanDecreaseGini" (and "MeanDecreaseAccuracy") or "\%IncMSE" (and "IncNodePurity") in the column names of \code{res_feature_imp};
 		#' 	  Function can also generate "Significance" according to the p value.
 		#' @param show_sig_group default FALSE; whether show the features with different significant groups;
 		#' 	  Only available when "Significance" is found in the data.
@@ -356,17 +361,34 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' \dontrun{
 		#' t1$plot_feature_imp(use_number = 1:20, coord_flip = FALSE)
 		#' }
-		plot_feature_imp = function(rf_sig_show = "MeanDecreaseGini", show_sig_group = FALSE, ...){
+		plot_feature_imp = function(rf_sig_show = NULL, show_sig_group = FALSE, ...){
 			if(is.null(self$res_feature_imp)){
 				stop("Please first run function cal_feature_imp !")
 			}
-			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), self$res_feature_imp)
+			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), self$res_feature_imp, check.names = FALSE)
 			tmp$Taxa %<>% gsub("`", "", ., fixed = TRUE) %>% gsub("\\.(.__)", "\\|\\1", .)
 			if(! "Value" %in% colnames(tmp)){
 				if("Overall" %in% colnames(tmp)){
 					colnames(tmp)[colnames(tmp) == "Overall"] <- "Value"
 				}else{
-					if(any(c("MeanDecreaseAccuracy", "MeanDecreaseGini") %in% colnames(tmp))){
+					if(any(c("MeanDecreaseAccuracy", "MeanDecreaseGini", "%IncMSE", "IncNodePurity") %in% colnames(tmp))){
+						if(is.null(rf_sig_show)){
+							if(self$type == "Classification"){
+								rf_sig_show = "MeanDecreaseAccuracy"
+							}else{
+								rf_sig_show = "%IncMSE"
+							}
+						}else{
+							if(self$type == "Classification"){
+								if(! rf_sig_show %in% c("MeanDecreaseAccuracy", "MeanDecreaseGini")){
+									stop("Provided rf_sig_show must be one of 'MeanDecreaseAccuracy' and 'MeanDecreaseGini'!")
+								}
+							}else{
+								if(! rf_sig_show %in% c("%IncMSE", "IncNodePurity")){
+									stop("Provided rf_sig_show must be one of '%IncMSE' and 'IncNodePurity'!")
+								}
+							}
+						}
 						colnames(tmp)[colnames(tmp) == rf_sig_show] <- "Value"
 						colnames(tmp)[colnames(tmp) == paste0(rf_sig_show, ".pval")] <- "pvalue"
 						tmp$Significance <- generate_p_siglabel(tmp$pvalue, nonsig = "ns")
@@ -389,7 +411,12 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			suppressMessages(trans_diff_tmp <- trans_diff$new(dataset = NULL))
 			trans_diff_tmp$res_diff <- tmp
 			trans_diff_tmp$method <- "rf"
-			g1 <- trans_diff_tmp$plot_diff_bar(...) + ylab("Value")
+			g1 <- trans_diff_tmp$plot_diff_bar(...)
+			if(is.null(rf_sig_show)){
+				g1 <- g1 + ylab("Value")
+			}else{
+				g1 <- g1 + ylab(rf_sig_show)
+			}
 			g1
 		},
 		#' @description

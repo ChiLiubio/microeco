@@ -404,7 +404,7 @@ If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters
 }
 \subsection{Returns}{
 \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
-  For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression).
+  For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression) when \code{rf_feature_sig = FALSE}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -424,7 +424,7 @@ t1$cal_feature_imp()
 Bar plot for feature importance.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_feature_imp(
-  rf_sig_show = "MeanDecreaseGini",
+  rf_sig_show = NULL,
   show_sig_group = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -433,9 +433,10 @@ Bar plot for feature importance.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{rf_sig_show}}{default "MeanDecreaseGini"; "MeanDecreaseGini" or "MeanDecreaseAccuracy"; 
+\item{\code{rf_sig_show}}{default NULL; "MeanDecreaseAccuracy" (Default) or "MeanDecreaseGini" for random forest classification;
+"\%IncMSE" (Default) or "IncNodePurity" for random forest regression;
 Only available when \code{rf_feature_sig = TRUE} in function \code{cal_feature_imp}, 
-which generate "MeanDecreaseGini" and "MeanDecreaseAccuracy" in the column names of \code{res_feature_imp};
+which generate "MeanDecreaseGini" (and "MeanDecreaseAccuracy") or "\%IncMSE" (and "IncNodePurity") in the column names of \code{res_feature_imp};
 Function can also generate "Significance" according to the p value.}
 
 \item{\code{show_sig_group}}{default FALSE; whether show the features with different significant groups;
