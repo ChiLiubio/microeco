@@ -1284,12 +1284,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 					sel_num <- 1:nrow(use_data)
 				}
 				use_data %<>% .[sel_num, ]
-				if("Group" %in% colnames(use_data) & group_aggre){
+				if("Group" %in% colnames(use_data)){
 					if(is.null(group_order)){
-						if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
-							use_data$Group %<>% factor(., levels = self$group_order)
-						}else{
-							use_data$Group %<>% as.character %>% as.factor
+						if(!is.factor(use_data$Group)){
+							if((!is.null(self$group_order)) & (length(unique(use_data$Group)) == length(self$group_order))){
+								use_data$Group %<>% factor(., levels = self$group_order)
+							}else{
+								use_data$Group %<>% as.character %>% as.factor
+							}
 						}
 					}else{
 						use_data$Group %<>% factor(., levels = group_order)
@@ -1304,6 +1306,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}else{
 						color_values <- expand_colors(color_values, length(levels(use_data$Group)))
 					}
+				}
+				
+				if(group_aggre & "Group" %in% colnames(use_data)){
 					# rearrange orders
 					use_data$Taxa %<>% as.character
 					if(length(levels(use_data$Group)) == 2 & group_two_sep){
@@ -1320,22 +1325,17 @@ trans_diff <- R6Class(classname = "trans_diff",
 							use_data[as.character(use_data$Group) %in% x, ] %>% .[order(.$Value, decreasing = TRUE), "Taxa"]
 						}) %>% unlist %>% unique
 					}
-					if(coord_flip){
-						use_data$Taxa %<>% factor(., levels = rev(feature_orders))
-					}else{
-						use_data$Taxa %<>% factor(., levels = feature_orders)
-					}
 				}else{
 					use_data %<>% .[order(.$Value, decreasing = TRUE), ]
-					if(coord_flip){
-						use_data$Taxa %<>% factor(., levels = rev(.))
-					}else{
-						use_data$Taxa %<>% factor(., levels = .)
-					}
-					if("Group" %in% colnames(use_data)){
-						use_data$Group %<>% as.character
-					}
+					feature_orders <- use_data$Taxa
 				}
+
+				if(coord_flip){
+					use_data$Taxa %<>% factor(., levels = rev(feature_orders))
+				}else{
+					use_data$Taxa %<>% factor(., levels = feature_orders)
+				}
+
 				self$plot_diff_bar_taxa <- levels(use_data$Taxa) %>% rev
 				if(add_sig){
 					added_value <- add_sig_increase * max(abs(use_data$Value))

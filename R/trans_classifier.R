@@ -367,6 +367,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 						colnames(tmp)[colnames(tmp) == rf_sig_show] <- "Value"
 						colnames(tmp)[colnames(tmp) == paste0(rf_sig_show, ".pval")] <- "pvalue"
 						tmp$Significance <- generate_p_siglabel(tmp$pvalue, nonsig = "ns")
+						tmp %<>% .[, c("Taxa", "Value", "pvalue", "Significance")]
 					}else{
 						if(is.numeric(tmp[, 2])){
 							colnames(tmp)[2] <- "Value"
@@ -378,14 +379,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			if(show_sig_group){
 				if("Significance" %in% colnames(tmp)){
-					tmp$Group <- tmp$Significance
+					tmp$Group <- tmp$Significance %>% factor(., levels = c("***", "**", "*", "ns"))
 				}
 			}
 			
 			suppressMessages(trans_diff_tmp <- trans_diff$new(dataset = NULL))
 			trans_diff_tmp$res_diff <- tmp
 			trans_diff_tmp$method <- "rf"
-			trans_diff_tmp$plot_diff_bar(...)
+			g1 <- trans_diff_tmp$plot_diff_bar(...) + ylab("Value")
+			g1
 		},
 		#' @description
 		#' Run the prediction.
