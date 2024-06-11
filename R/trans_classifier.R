@@ -664,14 +664,12 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Use \code{caretList} function of caretEnsemble package to run multiple models. For the available models, please run \code{names(getModelInfo())}.
 		#' 
 		#' @param ... parameters pass to \code{caretList} function of \code{caretEnsemble} package.
-		#' @return \code{res_caretList_models} object.
+		#' @return \code{res_caretList_models} in the object.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_caretList(methodList = c('rf', 'svmRadial'))
 		#' }
-		cal_caretList = function(
-			...
-			){
+		cal_caretList = function(...){
 			if(!require(caretEnsemble)){
 				stop("Please first install caretEnsemble package from CRAN!")
 			}
@@ -681,6 +679,35 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			models <- caretList(Response ~ ., data = train_data, trControl = use_trainControl, ...)
 			self$res_caretList_models <- models
 			message('Models are stored in object$res_caretList_models ...')
+		},
+		#' @description
+		#' Use \code{resamples} function of caret package to collect the metric values based on the \code{res_caretList_models} data.
+		#' 
+		#' @param ... parameters pass to \code{resamples} function of \code{caret} package.
+		#' @return \code{res_caretList_resamples} list and \code{res_caretList_resamples_reshaped} table in the object.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_caretList(methodList = c('rf', 'svmRadial'))
+		#' }
+		cal_caretList_resamples = function(...){
+			if(is.null(self$res_caretList_models)){
+				stop("Please first run cal_caretList function!")
+			}
+			res_caretList_models <- self$res_caretList_models
+			results <- caret::resamples(res_caretList_models, ...)
+			self$res_caretList_resamples <- results
+			message('Raw resamples results are stored in object$res_caretList_resamples ...')
+
+			all_data <- results$values
+			model_names <- colnames(all_data) %>% .[. != "Resample"] %>% gsub("~.*", "", .) %>% unique
+			metric_names <- colnames(all_data) %>% .[. != "Resample"] %>% gsub(".*~", "", .) %>% unique
+			reshaped_data <- lapply(model_names, function(x){
+				extract_value <- all_data[, paste0(x, "~", metric_names)]
+				colnames(extract_value) <- metric_names
+				data.frame(Resample = all_data$Resample, Model = x, extract_value)
+			}) %>% do.call(rbind, .) %>% as.data.frame(check.names = FALSE)
+			self$res_caretList_resamples_reshaped <- reshaped_data
+			message('Reshaped metric values are stored in object$res_caretList_resamples_reshaped ...')
 		}
 	),
 	lock_class = FALSE,
