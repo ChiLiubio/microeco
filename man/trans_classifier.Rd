@@ -128,7 +128,15 @@ t1$cal_caretList(methodList = c('rf', 'svmRadial'))
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_caretList(methodList = c('rf', 'svmRadial'))
+t1$cal_caretList_resamples()
+}
+
+## ------------------------------------------------
+## Method `trans_classifier$plot_caretList_resamples`
+## ------------------------------------------------
+
+\dontrun{
+t1$plot_caretList_resamples()
 }
 }
 \section{Methods}{
@@ -148,6 +156,7 @@ t1$cal_caretList(methodList = c('rf', 'svmRadial'))
 \item \href{#method-trans_classifier-plot_ROC}{\code{trans_classifier$plot_ROC()}}
 \item \href{#method-trans_classifier-cal_caretList}{\code{trans_classifier$cal_caretList()}}
 \item \href{#method-trans_classifier-cal_caretList_resamples}{\code{trans_classifier$cal_caretList_resamples()}}
+\item \href{#method-trans_classifier-plot_caretList_resamples}{\code{trans_classifier$plot_caretList_resamples()}}
 \item \href{#method-trans_classifier-clone}{\code{trans_classifier$clone()}}
 }
 }
@@ -688,7 +697,42 @@ Use \code{resamples} function of caret package to collect the metric values base
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_caretList(methodList = c('rf', 'svmRadial'))
+t1$cal_caretList_resamples()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_classifier-plot_caretList_resamples"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-plot_caretList_resamples}{}}}
+\subsection{Method \code{plot_caretList_resamples()}}{
+Visualize the metric values based on the \code{res_caretList_resamples_reshaped} data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$plot_caretList_resamples(
+  color_values = RColorBrewer::brewer.pal(8, "Dark2"),
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the box.}
+
+\item{\code{...}}{parameters pass to \code{geom_boxplot} function of \code{ggplot2} package.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$plot_caretList_resamples()
 }
 }
 \if{html}{\out{</div>}}

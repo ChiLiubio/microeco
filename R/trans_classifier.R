@@ -687,7 +687,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @return \code{res_caretList_resamples} list and \code{res_caretList_resamples_reshaped} table in the object.
 		#' @examples
 		#' \dontrun{
-		#' t1$cal_caretList(methodList = c('rf', 'svmRadial'))
+		#' t1$cal_caretList_resamples()
 		#' }
 		cal_caretList_resamples = function(...){
 			if(is.null(self$res_caretList_models)){
@@ -702,12 +702,36 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			model_names <- colnames(all_data) %>% .[. != "Resample"] %>% gsub("~.*", "", .) %>% unique
 			metric_names <- colnames(all_data) %>% .[. != "Resample"] %>% gsub(".*~", "", .) %>% unique
 			reshaped_data <- lapply(model_names, function(x){
-				extract_value <- all_data[, paste0(x, "~", metric_names)]
+				extract_value <- all_data[, paste0(x, "~", metric_names), drop = FALSE]
 				colnames(extract_value) <- metric_names
-				data.frame(Resample = all_data$Resample, Model = x, extract_value)
+				data.frame(Model = x, extract_value)
 			}) %>% do.call(rbind, .) %>% as.data.frame(check.names = FALSE)
+			reshaped_data <- reshape2::melt(reshaped_data, id.vars = "Model")
+			colnames(reshaped_data) <- c("Model", "Metric", "Value")
 			self$res_caretList_resamples_reshaped <- reshaped_data
 			message('Reshaped metric values are stored in object$res_caretList_resamples_reshaped ...')
+		},
+		#' @description
+		#' Visualize the metric values based on the \code{res_caretList_resamples_reshaped} data.
+		#' 
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the box.
+		#' @param ... parameters pass to \code{geom_boxplot} function of \code{ggplot2} package.
+		#' @return ggplot object.
+		#' @examples
+		#' \dontrun{
+		#' t1$plot_caretList_resamples()
+		#' }
+		plot_caretList_resamples = function(color_values = RColorBrewer::brewer.pal(8, "Dark2"), ...){
+			if(is.null(self$res_caretList_resamples_reshaped)){
+				stop("Please first run cal_caretList_resamples function!")
+			}
+			reshaped_data <- self$res_caretList_resamples_reshaped
+			
+			p <- ggplot(reshaped_data, aes(x = Model, y = Value, colour = Model)) + 
+				geom_boxplot(...) +
+				scale_color_manual(values = color_values) +
+				facet_grid(Metric ~ ., drop = TRUE, scale = "free", space = "fixed")
+			p
 		}
 	),
 	lock_class = FALSE,
