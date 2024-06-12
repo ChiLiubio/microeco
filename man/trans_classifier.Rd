@@ -185,7 +185,7 @@ data.frame denotes other customized input. See the following available options:
   \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
   \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
   \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
-    cols are samples with same names in sample_table}
+    columns are samples with same names in sample_table}
 }}
 
 \item{\code{y.response}}{default NULL; the response variable in \code{sample_table} of input \code{microtable} object.}

@@ -20,7 +20,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
 		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
 		#'     \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
-		#'       cols are samples with same names in sample_table}
+		#'       columns are samples with same names in sample_table}
 		#'   }
 		#' @param y.response default NULL; the response variable in \code{sample_table} of input \code{microtable} object.
 		#' @param n.cores default 1; the CPU thread used.
@@ -95,13 +95,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 					stop("Provided x.predictors is neither character nor data.frame !")
 				}
 				abund_table <- x.predictors
-				# maybe more checking later
+				if(! any(colnames(abund_table) %in% rownames(sampleinfo))){
+					stop("Please make sure the column names in provided x.predictors are sample names!")
+				}
 			}
 			# remove meaningless things
 			abund_table %<>% {
 				.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]
 			}
-			DataX <- abund_table %>% t() %>% as.data.frame()			
+			DataX <- abund_table %>% t() %>% as.data.frame(check.names = FALSE)
 			message("Total feature numbers: ", ncol(DataX))
 			
 			if(n.cores > 1){
@@ -265,6 +267,14 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			...
 			){
 			train_data <- self$data_train
+			if(is.null(train_data)){
+				message("No training data is found! The reason is function cal_split is not performed! Use all the samples for the training ...")
+				train_data <- data.frame(Response = self$data_response, self$data_feature, check.names = FALSE)
+				if(self$type == "Classification"){
+					train_data$Response %<>% as.factor
+				}
+				self$data_train <- train_data
+			}
 			trControl <- self$trainControl
 			if(is.null(trControl)){
 				trControl <- caret::trainControl()
@@ -456,6 +466,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			fit.best <- self$res_train
 			test_data <- self$data_test
+			if(is.null(test_data)){
+				stop("No testing data is found! Please first run cal_split function!")
+			}
 
 			fit.best.predict <- predict(fit.best, test_data[, 2:ncol(test_data)])
 			self$res_predict <- fit.best.predict
