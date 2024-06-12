@@ -241,7 +241,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$trainControl <- trainControl
 		},
 		#' @description
-		#' Run the model training.
+		#' Run the model training. Please see \href{https://topepo.github.io/caret/available-models.html}{https://topepo.github.io/caret/available-models.html} for available models.
 		#' 
 		#' @param method default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.
 		#' 	  For method = "rf", the \code{tuneGrid} is set: \code{expand.grid(mtry = seq(from = 1, to = max.mtry))}
@@ -311,7 +311,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Get feature importance from the training model.
-		#' @param rf_feature_sig default FALSE; whether calculate feature significance; only available for \code{method = "rf"} in \code{cal_train} function.
+		#' @param rf_feature_sig default FALSE; whether calculate feature significance in 'rf' model using \code{rfPermute} package; 
+		#'    only available for \code{method = "rf"} in \code{cal_train} function; 
 		#' @param ... parameters pass to \code{varImp} function of caret package. 
 		#'    If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.
 		#' @return \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
