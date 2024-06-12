@@ -453,7 +453,9 @@ trans_network <- R6Class(classname = "trans_network",
 						message('Skip adding taxonomy to node as tax_table is not found ...')
 					}
 				}
-				V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
+				if(!is.null(self$data_relabund)){
+					V(network)$RelativeAbundance <- self$data_relabund[V(network)$name]
+				}
 
 				if(taxa_level != "OTU"){
 					if(usename_rawtaxa_when_taxalevel_notOTU){

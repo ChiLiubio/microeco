@@ -363,7 +363,7 @@ t1$set_trainControl(method = 'repeatedcv')
 \if{html}{\out{<a id="method-trans_classifier-cal_train"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_classifier-cal_train}{}}}
 \subsection{Method \code{cal_train()}}{
-Run the model training.
+Run the model training. Please see \href{https://topepo.github.io/caret/available-models.html}{https://topepo.github.io/caret/available-models.html} for available models.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_train(method = "rf", max.mtry = 2, ntree = 500, ...)}\if{html}{\out{</div>}}
 }
@@ -413,7 +413,8 @@ Get feature importance from the training model.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{rf_feature_sig}}{default FALSE; whether calculate feature significance; only available for \code{method = "rf"} in \code{cal_train} function.}
+\item{\code{rf_feature_sig}}{default FALSE; whether calculate feature significance in 'rf' model using \code{rfPermute} package; 
+only available for \code{method = "rf"} in \code{cal_train} function;}
 
 \item{\code{...}}{parameters pass to \code{varImp} function of caret package. 
 If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.}
