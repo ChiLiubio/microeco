@@ -7,7 +7,7 @@
 This class is a wrapper for a series of beta-diversity related analysis, 
 including ordination analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>, ANOSIM and PERMDISP.
-Note that the beta diversity analysis methods related with environmental variables are encapsulated within trans_env class.
+Note that the beta diversity analysis methods related with environmental variables are encapsulated within the \code{trans_env} class.
 }
 \examples{
 
@@ -111,8 +111,8 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} class.}
 
-\item{\code{measure}}{default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix stored in \code{microtable$beta_diversity}; 
-used for ordination, manova, group distance comparision, etc. The measure must be one of names in \code{microtable$beta_diversity} list. 
+\item{\code{measure}}{default NULL; a matrix name stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", or a customized matrix; 
+used for ordination, manova, group distance comparision, etc.;
 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.}
 
 \item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance comparision.}

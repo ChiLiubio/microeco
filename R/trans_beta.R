@@ -4,14 +4,14 @@
 #' This class is a wrapper for a series of beta-diversity related analysis, 
 #' including ordination analysis based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>, group distance comparision, 
 #' clustering, perMANOVA based on Anderson al. (2008) <doi:10.1111/j.1442-9993.2001.01070.pp.x>, ANOSIM and PERMDISP.
-#' Note that the beta diversity analysis methods related with environmental variables are encapsulated within trans_env class.
+#' Note that the beta diversity analysis methods related with environmental variables are encapsulated within the \code{trans_env} class.
 #'
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} class.
-		#' @param measure default NULL; bray, jaccard, wei_unifrac or unwei_unifrac, or other name of matrix stored in \code{microtable$beta_diversity}; 
-		#' 	 used for ordination, manova, group distance comparision, etc. The measure must be one of names in \code{microtable$beta_diversity} list. 
+		#' @param measure default NULL; a matrix name stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", or a customized matrix; 
+		#' 	 used for ordination, manova, group distance comparision, etc.;
 		#' 	 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.
 		#' @param group default NULL; sample group used for manova, betadisper or group distance comparision.
 		#' @return parameters stored in the object.
@@ -25,11 +25,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 			){
 			check_microtable(dataset)
 			if(!is.null(measure)){
-				if(is.null(dataset$beta_diversity)){
-					stop("No beta_diversity list found in the input dataset! Please first use cal_betadiv function in microtable class to calculate it!")
-				}else{
+				if(is.vector(measure)){
 					if(length(measure) > 1){
 						stop("The input measure should only have one element! Please check it!")
+					}
+					if(is.null(dataset$beta_diversity)){
+						stop("No beta_diversity list found in the input dataset! Please first use cal_betadiv function in microtable class to calculate it!")
 					}
 					if(is.character(measure)){
 						if(!measure %in% names(dataset$beta_diversity)){
@@ -41,12 +42,26 @@ trans_beta <- R6Class(classname = "trans_beta",
 							if(measure > length(dataset$beta_diversity)){
 								stop("Input measure: ", measure, " is larger than total beta_diversity distance matrixes number! Please check it")
 							}
+							measure %<>% round
 						}else{
 							stop("Unknown format of input measure parameter!")
 						}
 					}
-					self$use_matrix <- dataset$beta_diversity[[measure]]
+					use_matrix <- dataset$beta_diversity[[measure]]
+				}else{
+					if(is.matrix(measure)){
+						if(!any(rownames(measure) %in% rownames(dataset$sample_table))){
+							stop("Provided measure is a matrix. The row names should be sample names!")
+						}
+						if(!any(colnames(measure) %in% rownames(dataset$sample_table))){
+							stop("Provided measure is a matrix. The column names should be sample names!")
+						}
+						use_matrix <- measure
+					}else{
+						stop("Input measure parameter should be either a vector or a matrix!")
+					}
 				}
+				self$use_matrix <- use_matrix
 			}
 			if(!is.null(group)){
 				if(! group %in% colnames(dataset$sample_table)){
