@@ -50,13 +50,16 @@ trans_beta <- R6Class(classname = "trans_beta",
 					use_matrix <- dataset$beta_diversity[[measure]]
 				}else{
 					if(is.matrix(measure)){
-						if(!any(rownames(measure) %in% rownames(dataset$sample_table))){
+						if(! any(rownames(measure) %in% rownames(dataset$sample_table))){
 							stop("Provided measure is a matrix. The row names should be sample names!")
 						}
-						if(!any(colnames(measure) %in% rownames(dataset$sample_table))){
+						if(! any(colnames(measure) %in% rownames(dataset$sample_table))){
 							stop("Provided measure is a matrix. The column names should be sample names!")
 						}
-						use_matrix <- measure
+						if(! all(dataset$sample_names() %in% rownames(measure))){
+							stop("Some sample names are not found in the matrix of provided measure!")
+						}
+						use_matrix <- measure[dataset$sample_names(), dataset$sample_names()]
 					}else{
 						stop("Input measure parameter should be either a vector or a matrix!")
 					}
