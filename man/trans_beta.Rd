@@ -22,7 +22,7 @@ t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
 ## Method `trans_beta$cal_ordination`
 ## ------------------------------------------------
 
-t1$cal_ordination(ordination = "PCoA")
+t1$cal_ordination(method = "PCoA")
 
 ## ------------------------------------------------
 ## Method `trans_beta$plot_ordination`
@@ -120,7 +120,7 @@ Please see \code{cal_betadiv} function of \code{\link{microtable}} class for mor
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-parameters stored in the object.
+measure, group and dataset stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -139,7 +139,7 @@ t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
 Unconstrained ordination.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
-  ordination = "PCoA",
+  method = "PCoA",
   ncomp = 3,
   trans = FALSE,
   scale_species = FALSE,
@@ -151,22 +151,23 @@ Unconstrained ordination.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ordination}}{default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
-PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.}
+\item{\code{method}}{default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
+PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling. 
+Please refer to the paper <doi:10.1111/j.1574-6941.2007.00375.x> for the details of the methods.}
 
-\item{\code{ncomp}}{default 3; dimensions shown in the results.}
+\item{\code{ncomp}}{default 3; dimensions shown in the results (except method "NMDS").}
 
-\item{\code{trans}}{default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".}
+\item{\code{trans}}{default FALSE; whether species abundance will be square transformed; only available when \code{method} is "PCA" or "DCA".}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA or DCA is scaled.}
 
 \item{\code{scale_species_ratio}}{default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 Only available when \code{scale_species = TURE}.}
 
-\item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, 
-or \code{vegan::decorana} function when \code{ordination = "DCA"}, 
-or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
-or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.}
+\item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
+or \code{vegan::decorana} function when \code{method = "DCA"}, 
+or \code{ape::pcoa} function when \code{method = "PCoA"}, 
+or \code{vegan::metaMDS} function when when \code{method = "NMDS"}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -175,7 +176,7 @@ or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.}
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{t1$cal_ordination(ordination = "PCoA")
+\preformatted{t1$cal_ordination(method = "PCoA")
 }
 \if{html}{\out{</div>}}
 

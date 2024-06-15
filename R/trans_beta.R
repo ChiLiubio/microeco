@@ -14,7 +14,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	 used for ordination, manova, group distance comparision, etc.;
 		#' 	 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.
 		#' @param group default NULL; sample group used for manova, betadisper or group distance comparision.
-		#' @return parameters stored in the object.
+		#' @return measure, group and dataset stored in the object.
 		#' @examples
 		#' data(dataset)
 		#' t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
@@ -84,45 +84,50 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Unconstrained ordination.
 		#'
-		#' @param ordination default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
-		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling.
-		#' @param ncomp default 3; dimensions shown in the results.
-		#' @param trans default FALSE; whether species abundance will be square transformed; only available when \code{ordination} is "PCA" or "DCA".
+		#' @param method default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
+		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling. 
+		#' 	  Please refer to the paper <doi:10.1111/j.1574-6941.2007.00375.x> for the details of the methods.
+		#' @param ncomp default 3; dimensions shown in the results (except method "NMDS").
+		#' @param trans default FALSE; whether species abundance will be square transformed; only available when \code{method} is "PCA" or "DCA".
 		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
 		#' @param scale_species_ratio default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 		#' 	  Only available when \code{scale_species = TURE}.
-		#' @param ... parameters passed to \code{vegan::rda} function when \code{ordination = "PCA"}, 
-		#' 	  or \code{vegan::decorana} function when \code{ordination = "DCA"}, 
-		#' 	  or \code{ape::pcoa} function when \code{ordination = "PCoA"}, 
-		#' 	  or \code{vegan::metaMDS} function when when \code{ordination = "NMDS"}.
+		#' @param ... parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
+		#' 	  or \code{vegan::decorana} function when \code{method = "DCA"}, 
+		#' 	  or \code{ape::pcoa} function when \code{method = "PCoA"}, 
+		#' 	  or \code{vegan::metaMDS} function when when \code{method = "NMDS"}.
 		#' @return \code{res_ordination} stored in the object.
 		#' @examples
-		#' t1$cal_ordination(ordination = "PCoA")
+		#' t1$cal_ordination(method = "PCoA")
 		cal_ordination = function(
-			ordination = "PCoA",
+			method = "PCoA",
 			ncomp = 3,
 			trans = FALSE, 
 			scale_species = FALSE,
 			scale_species_ratio = 0.8,
 			...
 			){
-			if(is.null(ordination)){
-				stop("Input ordination should not be NULL !")
+			all_parameters <- c(as.list(environment()), list(...))
+			if("ordination" %in% names(all_parameters)){
+				stop("Parameter ordination is deprecated! Please use method instead of it!")
 			}
-			if(!ordination %in% c("PCA", "PCoA", "NMDS", "DCA")){
-				stop("Input ordination should be one of 'PCA', 'PCoA', 'NMDS' and 'DCA'!")
+			if(is.null(method)){
+				stop("Input method should not be NULL !")
+			}
+			if(!method %in% c("PCA", "PCoA", "NMDS", "DCA")){
+				stop("Input method should be one of 'PCA', 'PCoA', 'NMDS' and 'DCA'!")
 			}
 			dataset <- self$dataset
-			if(ordination %in% c("PCA", "DCA")){
-				plot.x <- switch(ordination, PCA = "PC1", DCA = "DCA1")
-				plot.y <- switch(ordination, PCA = "PC2", DCA = "DCA2")
+			if(method %in% c("PCA", "DCA")){
+				plot.x <- switch(method, PCA = "PC1", DCA = "DCA1")
+				plot.y <- switch(method, PCA = "PC2", DCA = "DCA2")
 				if(trans == T){
 					abund <- sqrt(dataset$otu_table)
 				}else{
 					abund <- dataset$otu_table
 				}
 				abund %<>% t
-				if(ordination == "PCA"){
+				if(method == "PCA"){
 					model <- rda(abund, ...)
 					expla <- round(model$CA$eig/model$CA$tot.chi*100, 1)
 				}else{
@@ -143,12 +148,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 				outlist <- list(model = model, scores = combined, loading = loading, eig = expla)
 			}
-			if(ordination %in% c("PCoA", "NMDS")){
+			if(method %in% c("PCoA", "NMDS")){
 				if(is.null(self$use_matrix)){
 					stop("Please recreate the object and set the parameter measure !")
 				}
 			}
-			if(ordination == "PCoA"){
+			if(method == "PCoA"){
 				model <- ape::pcoa(as.dist(self$use_matrix), ...)
 				combined <- cbind.data.frame(model$vectors[,1:ncomp], dataset$sample_table)
 				colnames(combined)[1:ncomp] <- paste0("PCo", 1:ncomp)
@@ -156,14 +161,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 				names(expla) <- paste0("PCo", 1:length(expla))
 				outlist <- list(model = model, scores = combined, eig = expla)
 			}
-			if(ordination == "NMDS"){
+			if(method == "NMDS"){
 				model <- vegan::metaMDS(as.dist(self$use_matrix), ...)
 				combined <- cbind.data.frame(model$points, dataset$sample_table)
 				outlist <- list(model = model, scores = combined)
 			}
 			self$res_ordination <- outlist
-			message('The ordination result is stored in object$res_ordination ...')
-			self$ordination <- ordination
+			message('The result is stored in object$res_ordination ...')
+			self$ordination_method <- method
 		},
 		#' @description
 		#' Plot the ordination result.
@@ -236,8 +241,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 			loading_text_size = 3,
 			loading_text_italic = FALSE
 			){
-			ordination <- self$ordination
-			if(is.null(ordination)){
+			ordination_method <- self$ordination_method
+			if(is.null(ordination_method)){
 				stop("Please first run cal_ordination function !")
 			}
 			if(is.null(plot_color)){
@@ -264,12 +269,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if("point" %in% plot_type){
 				p <- p + geom_point(alpha = point_alpha, size = point_size)
 			}
-			if(ordination %in% c("PCA", "PCoA")){
+			if(ordination_method %in% c("PCA", "PCoA")){
 				p <- p + xlab(paste(plot_x, " [", eig[plot_x],"%]", sep = "")) + 
 					ylab(paste(plot_y, " [", eig[plot_y],"%]", sep = ""))
 			}
 			if(!is.null(NMDS_stress_pos)){
-				if(ordination == "NMDS"){
+				if(ordination_method == "NMDS"){
 					p <- p + annotate("text", x = max(combined[, 1]) * NMDS_stress_pos[1], y = max(combined[, 2]) * NMDS_stress_pos[2], 
 						label = paste0(NMDS_stress_text_prefix, round(model$stress, 2)), parse = TRUE)
 				}
@@ -327,7 +332,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(!is.null(plot_shape)){
 				p <- p + scale_shape_manual(values = shape_values)
 			}
-			if(loading_arrow & ordination %in% c("PCA", "DCA")){
+			if(loading_arrow & ordination_method %in% c("PCA", "DCA")){
 				df_arrows <- self$res_ordination$loading[1:loading_taxa_num, ]
 				colnames(df_arrows)[1:2] <- c("x", "y")
 				p <- p + geom_segment(
