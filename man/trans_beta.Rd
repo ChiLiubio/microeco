@@ -222,7 +222,7 @@ Plot the ordination result.
 \describe{
 \item{\code{plot_type}}{default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
 \describe{
-  \item{\strong{'point'}}{add point}
+  \item{\strong{'point'}}{add sample points}
   \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
   \item{\strong{'chull'}}{add convex hull for points of each group}
   \item{\strong{'centroid'}}{add centroid line of each group}
@@ -301,7 +301,7 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 \if{html}{\out{<a id="method-trans_beta-cal_manova"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
-Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
+Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on the code{adonis2} function of vegan package <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
   manova_all = TRUE,
@@ -328,7 +328,8 @@ Available when \code{manova_set} is not provided.}
 \item{\code{by_group}}{default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
 Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.}
 
-\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.}
+\item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; 
+see \code{method} parameter of \code{p.adjust} function for available options.}
 
 \item{\code{...}}{parameters passed to \code{\link{adonis2}} function of \code{vegan} package.}
 }
@@ -350,7 +351,7 @@ Only available when \code{manova_all = FALSE} and \code{manova_set} is not provi
 \if{html}{\out{<a id="method-trans_beta-cal_anosim"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_anosim}{}}}
 \subsection{Method \code{cal_anosim()}}{
-Analysis of similarities (ANOSIM) based on R vegan \code{anosim} function.
+Analysis of similarities (ANOSIM) based on the \code{anosim} function of vegan package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_anosim(
   paired = FALSE,
@@ -393,7 +394,7 @@ Only available when \code{paired = TRUE}.}
 \if{html}{\out{<a id="method-trans_beta-cal_betadisper"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_betadisper}{}}}
 \subsection{Method \code{cal_betadisper()}}{
-A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions (PERMDISP).
+Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{betadisper} function in vegan package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_betadisper(...)}\if{html}{\out{</div>}}
 }
@@ -421,7 +422,7 @@ A wrapper for \code{betadisper} function in vegan package for multivariate homog
 \if{html}{\out{<a id="method-trans_beta-cal_group_distance"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_group_distance}{}}}
 \subsection{Method \code{cal_group_distance()}}{
-Convert sample distances within groups or between groups.
+Convert symmetric distance matrix to distance table of paired samples that are within groups or between groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance(
   within_group = TRUE,
@@ -434,10 +435,10 @@ Convert sample distances within groups or between groups.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{within_group}}{default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.}
+\item{\code{within_group}}{default TRUE; whether obtain distance table of paired samples within groups; if FALSE, obtain distances of paired samples between any two groups.}
 
-\item{\code{by_group}}{default NULL; one colname name of sample_table in \code{microtable} object.
-If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
+\item{\code{by_group}}{default NULL; one colname name of \code{sample_table} in \code{microtable} object.
+If provided, transform distances by the provided \code{by_group} parameter. This is especially useful for ordering and filtering values further.
 When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
 When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.}
 
@@ -465,7 +466,7 @@ t1$cal_group_distance(within_group = TRUE)
 \if{html}{\out{<a id="method-trans_beta-cal_group_distance_diff"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_group_distance_diff}{}}}
 \subsection{Method \code{cal_group_distance_diff()}}{
-Differential test of distances among groups.
+Differential test of converted distances across groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_group_distance_diff(
   group = NULL,
@@ -510,7 +511,7 @@ t1$cal_group_distance_diff()
 \if{html}{\out{<a id="method-trans_beta-plot_group_distance"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-plot_group_distance}{}}}
 \subsection{Method \code{plot_group_distance()}}{
-Plotting the distance between samples within or between groups.
+Plot the distances of paired groups within or between groups.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_group_distance(plot_group_order = NULL, ...)}\if{html}{\out{</div>}}
 }
@@ -542,7 +543,7 @@ t1$plot_group_distance()
 \if{html}{\out{<a id="method-trans_beta-plot_clustering"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-plot_clustering}{}}}
 \subsection{Method \code{plot_clustering()}}{
-Plotting clustering result based on the \code{ggdendro} package.
+Plot clustering result based on the \code{ggdendro} package.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_clustering(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),

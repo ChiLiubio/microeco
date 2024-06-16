@@ -175,7 +175,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'
 		#' @param plot_type default "point"; one or more elements of "point", "ellipse", "chull" and "centroid".
 		#'   \describe{
-		#'     \item{\strong{'point'}}{add point}
+		#'     \item{\strong{'point'}}{add sample points}
 		#'     \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
 		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
 		#'     \item{\strong{'centroid'}}{add centroid line of each group}
@@ -361,7 +361,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on <doi:10.1111/j.1442-9993.2001.01070.pp.x> and R vegan \code{adonis2} function.
+		#' Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on the code{adonis2} function of vegan package <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
 		#'
 		#' @param manova_all default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 		#'    FALSE represents test for all the paired groups.
@@ -371,7 +371,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'    Available when \code{manova_set} is not provided.
 		#' @param by_group default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
 		#'    Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.
-		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; see method parameter of \code{p.adjust} function for available options.
+		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; 
+		#'    see \code{method} parameter of \code{p.adjust} function for available options.
 		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object with \code{data.frame} class.
 		#' @examples
@@ -426,7 +427,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The result is stored in object$res_manova ...')
 		},
 		#' @description
-		#' Analysis of similarities (ANOSIM) based on R vegan \code{anosim} function.
+		#' Analysis of similarities (ANOSIM) based on the \code{anosim} function of vegan package.
 		#'
 		#' @param paired default FALSE; whether perform paired test between any two combined groups from all the input groups.
 		#' @param group default NULL; a column name of \code{sample_table}. If NULL, search \code{group} variable stored in the object.
@@ -483,7 +484,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The original result is stored in object$res_anosim ...')
 		},
 		#' @description
-		#' A wrapper for \code{betadisper} function in vegan package for multivariate homogeneity test of groups dispersions (PERMDISP).
+		#' Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{betadisper} function in vegan package.
 		#'
 		#' @param ... parameters passed to \code{\link{betadisper}} function.
 		#' @return \code{res_betadisper} stored in object.
@@ -500,11 +501,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The result is stored in object$res_betadisper ...')
 		},
 		#' @description
-		#' Convert sample distances within groups or between groups.
-		#'
-		#' @param within_group default TRUE; whether transform sample distance within groups, if FALSE, transform sample distance between any two groups.
-		#' @param by_group default NULL; one colname name of sample_table in \code{microtable} object.
-		#'   If provided, transform distances by the provided by_group parameter. This is especially useful for ordering and filtering values further.
+		#' Convert symmetric distance matrix to distance table of paired samples that are within groups or between groups.
+		#' 
+		#' @param within_group default TRUE; whether obtain distance table of paired samples within groups; if FALSE, obtain distances of paired samples between any two groups.
+		#' @param by_group default NULL; one colname name of \code{sample_table} in \code{microtable} object.
+		#'   If provided, transform distances by the provided \code{by_group} parameter. This is especially useful for ordering and filtering values further.
 		#'   When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
 		#'   When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.
 		#' @param ordered_group default NULL; a vector representing the ordered elements of \code{group} parameter; only useful when within_group = FALSE.
@@ -535,7 +536,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The result is stored in object$res_group_distance ...')
 		},
 		#' @description
-		#' Differential test of distances among groups.
+		#' Differential test of converted distances across groups.
 		#'
 		#' @param group default NULL; a column name of \code{object$res_group_distance} used for the statistics; If NULL, use the \code{group} inside the object.
 		#' @param by_group default NULL; a column of \code{object$res_group_distance} used to perform the differential test 
@@ -552,6 +553,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' }
 		cal_group_distance_diff = function(group = NULL, by_group = NULL, by_ID = NULL, ...){
 			res_group_distance <- self$res_group_distance
+			if(is.null(res_group_distance)){
+				stop("Please first run cal_group_distance function!")
+			}
 			# use method in trans_alpha
 			temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
 			res_group_distance$Measure <- "group_distance"
@@ -582,7 +586,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			message('The result is stored in object$res_group_distance_diff ...')
 		},
 		#' @description
-		#' Plotting the distance between samples within or between groups.
+		#' Plot the distances of paired groups within or between groups.
 		#'
 		#' @param plot_group_order default NULL; a vector used to order the groups in the plot.
 		#' @param ... parameters (except measure) passed to \code{plot_alpha} function of \code{\link{trans_alpha}} class.
@@ -593,6 +597,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' }
 		plot_group_distance = function(plot_group_order = NULL, ...){
 			if(is.null(self$res_group_distance_diff)){
+				if(is.null(self$res_group_distance)){
+					stop("Please first run cal_group_distance function!")
+				}
 				group_distance <- self$res_group_distance
 				group <- self$group
 			}else{
@@ -634,7 +641,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Plotting clustering result based on the \code{ggdendro} package.
+		#' Plot clustering result based on the \code{ggdendro} package.
 		#'
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color palette for the text.
 		#' @param measure default NULL; beta diversity index; If NULL, using the measure when creating object
