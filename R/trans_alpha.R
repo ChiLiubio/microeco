@@ -1,4 +1,4 @@
-#' @title Create \code{trans_alpha} object for alpha diversity statistics and plot.
+#' @title Create \code{trans_alpha} object for alpha diversity statistics and visualization.
 #'
 #' @description
 #' This class is a wrapper for a series of alpha diversity analysis, including the statistics and visualization.
@@ -6,11 +6,11 @@
 #' @export
 trans_alpha <- R6Class(classname = "trans_alpha",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} class.
-		#' @param group default NULL; a column of \code{sample_table} used for the statistics; If provided, can return \code{data_stat}.
-		#' @param by_group default NULL; a column of \code{sample_table} used to perform the differential test 
-		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
-		#' @param by_ID default NULL; a column of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
+		#' @param dataset an object of \code{\link{microtable}} class.
+		#' @param group default NULL; a column name of \code{sample_table} used for the statistics.
+		#' @param by_group default NULL; a column name of \code{sample_table} used to perform the differential test 
+		#'   among groups (from \code{group} parameter) for each group (from \code{by_group} parameter) separately.
+		#' @param by_ID default NULL; a column name of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
 		#' @param order_x default NULL; a \code{sample_table} column name or a vector with sample names; if provided, order samples by using \code{factor}.
@@ -22,7 +22,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' }
 		initialize = function(dataset = NULL, group = NULL, by_group = NULL, by_ID = NULL, order_x = NULL) {
 			if(is.null(dataset)){
-				message("Parameter dataset not provided. Please run the functions with your other customized data!")
+				message("Parameter dataset not provided. Please run the functions with your other customized data ...")
 				self$data_alpha <- NULL
 				self$data_stat <- NULL
 				if(! is.null(group)){
@@ -84,6 +84,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @description
 		#' Differential test on alpha diversity.
 		#'
+		#' @param measure default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+		#' 	 e.g. \code{c("Observed", "Chao1", "Shannon")}.
 		#' @param method default "KW"; see the following available options:
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
@@ -91,22 +93,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
 		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
 		#'     \item{\strong{'anova'}}{Variance analysis. For one-way anova, the post hoc test is Duncan's new multiple range test 
-		#'     	  based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to select other post hoc method.
+		#'     	  based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to change post hoc method.
 		#'     	  For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
 		#'     \item{\strong{'scheirerRayHare'}}{Scheirer-Ray-Hare test (nonparametric test) for a two-way factorial experiment; 
 		#'     	  see \code{scheirerRayHare} function of \code{rcompanion} package}
 		#'     \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
 		#'     \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
-		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
+		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package.
+		#'     	  A family function can be provided using parameter passing, such as: \code{family = glmmTMB::lognormal(link = "log")}}
 		#'     \item{\strong{'glmm_beta'}}{Generalized linear mixed model (GLMM) with a family function of beta distribution. 
 		#'     	  This is an extension of the GLMM model in \code{'glmm'} option. 
 		#'     	  The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
 		#'     	  facilitating the fitting for proportional data (ranging from 0 to 1). The link function is fixed with \code{"logit"}.}
 		#'   }
-		#' @param measure default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
-		#' 	 e.g. c("Observed", "Chao1", "Shannon").
-		#' @param p_adjust_method default "fdr" (for "KW", "wilcox", "t.test") or "holm" (for "KW_dunn"); P value adjustment method; 
+		#' @param p_adjust_method default "fdr" (for "KW", "wilcox", "t.test" methods) or "holm" (for "KW_dunn"); P value adjustment method; 
 		#' 	  For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
 		#' 	  For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.
 		#' @param formula default NULL; applied to two-way or multi-factor anova when 
@@ -137,10 +138,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$cal_diff(method = "anova")
 		#' }
 		cal_diff = function(
+			measure = NULL,
 			method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta")[1], 
-			measure = NULL, 
-			p_adjust_method = "fdr", 
 			formula = NULL,
+			p_adjust_method = "fdr", 
 			KW_dunn_letter = TRUE,
 			alpha = 0.05,
 			anova_post_test = "duncan.test",
@@ -152,17 +153,17 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			
 			if(method %in% c("scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta") & is.null(formula)){
 				if(is.null(formula)){
-					stop("formula is necessary! Please provide formula parameter!")
+					stop("The formula parameter is NULL! It is necessary for the method: ", method, " !")
 				}
 			}
 			if(!method %in% c("anova", "scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta")){
 				if(is.null(group)){
-					stop("For the method: ", method, " , group is necessary! Please recreate the object!")
+					stop("For the method: ", method, " , group is necessary! Please recreate the object and set the group parameter!")
 				}
 			}
 			if(method == "anova"){
 				if(is.null(group) & is.null(formula)){
-					stop("Both formula and group is NULL! Please provide either formula or group in the object creation!")
+					stop("Please provide either formula parameter or group parameter (in the object creation) for ANOVA method!")
 				}
 			}
 			# 'by_group' for test inside each by_group instead of all groups in 'group'
@@ -436,8 +437,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		},
 		#' @description
 		#' Plot the alpha diversity. Box plot is used for the visualization of alpha diversity when the \code{group} is found in the object.
-		#' Heatmap is employed automatically to show the significances of differential test 
-		#' 		when the formula is found in the \code{res_diff} table of the object.
+		#'   Heatmap is employed automatically to show the significances of differential test 
+		#' 	 when the formula is found in the \code{res_diff} table in the object.
 		#'
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
 		#' @param measure default "Shannon"; one alpha diversity index in the object.

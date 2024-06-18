@@ -2,7 +2,7 @@
 % Please edit documentation in R/trans_alpha.R
 \name{trans_alpha}
 \alias{trans_alpha}
-\title{Create \code{trans_alpha} object for alpha diversity statistics and plot.}
+\title{Create \code{trans_alpha} object for alpha diversity statistics and visualization.}
 \description{
 This class is a wrapper for a series of alpha diversity analysis, including the statistics and visualization.
 }
@@ -68,14 +68,14 @@ t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} class.}
+\item{\code{dataset}}{an object of \code{\link{microtable}} class.}
 
-\item{\code{group}}{default NULL; a column of \code{sample_table} used for the statistics; If provided, can return \code{data_stat}.}
+\item{\code{group}}{default NULL; a column name of \code{sample_table} used for the statistics.}
 
-\item{\code{by_group}}{default NULL; a column of \code{sample_table} used to perform the differential test 
-among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.}
+\item{\code{by_group}}{default NULL; a column name of \code{sample_table} used to perform the differential test 
+among groups (from \code{group} parameter) for each group (from \code{by_group} parameter) separately.}
 
-\item{\code{by_ID}}{default NULL; a column of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
+\item{\code{by_ID}}{default NULL; a column name of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
 such as the data of plant compartments for different plant species (ID). 
 So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.}
 
@@ -105,11 +105,11 @@ t1 <- trans_alpha$new(dataset = dataset, group = "Group")
 Differential test on alpha diversity.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$cal_diff(
+  measure = NULL,
   method = c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm",
     "lme", "betareg", "glmm", "glmm_beta")[1],
-  measure = NULL,
-  p_adjust_method = "fdr",
   formula = NULL,
+  p_adjust_method = "fdr",
   KW_dunn_letter = TRUE,
   alpha = 0.05,
   anova_post_test = "duncan.test",
@@ -121,6 +121,9 @@ Differential test on alpha diversity.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{measure}}{default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+e.g. \code{c("Observed", "Chao1", "Shannon")}.}
+
 \item{\code{method}}{default "KW"; see the following available options:
 \describe{
   \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
@@ -128,31 +131,29 @@ Differential test on alpha diversity.
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
   \item{\strong{'anova'}}{Variance analysis. For one-way anova, the post hoc test is Duncan's new multiple range test 
-        based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to select other post hoc method.
+        based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to change post hoc method.
         For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
   \item{\strong{'scheirerRayHare'}}{Scheirer-Ray-Hare test (nonparametric test) for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
   \item{\strong{'lm'}}{Linear Model based on the \code{lm} function}
   \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package}
   \item{\strong{'betareg'}}{Beta Regression for Rates and Proportions based on the \code{betareg} package}
-  \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package}
+  \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package.
+        A family function can be provided using parameter passing, such as: \code{family = glmmTMB::lognormal(link = "log")}}
   \item{\strong{'glmm_beta'}}{Generalized linear mixed model (GLMM) with a family function of beta distribution. 
         This is an extension of the GLMM model in \code{'glmm'} option. 
         The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
         facilitating the fitting for proportional data (ranging from 0 to 1). The link function is fixed with \code{"logit"}.}
 }}
 
-\item{\code{measure}}{default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
-e.g. c("Observed", "Chao1", "Shannon").}
-
-\item{\code{p_adjust_method}}{default "fdr" (for "KW", "wilcox", "t.test") or "holm" (for "KW_dunn"); P value adjustment method; 
-For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
-For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.}
-
 \item{\code{formula}}{default NULL; applied to two-way or multi-factor anova when 
 method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"} or \code{"glmm"}; 
 specified set for independent variables, i.e. the latter part of a general formula, 
 such as \code{'block + N*P*K'}.}
+
+\item{\code{p_adjust_method}}{default "fdr" (for "KW", "wilcox", "t.test" methods) or "holm" (for "KW_dunn"); P value adjustment method; 
+For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
+For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.}
 
 \item{\code{KW_dunn_letter}}{default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
 \code{FALSE} means significances are shown by asterisk for paired comparison.}
@@ -198,8 +199,8 @@ t1$cal_diff(method = "anova")
 \if{latex}{\out{\hypertarget{method-trans_alpha-plot_alpha}{}}}
 \subsection{Method \code{plot_alpha()}}{
 Plot the alpha diversity. Box plot is used for the visualization of alpha diversity when the \code{group} is found in the object.
-Heatmap is employed automatically to show the significances of differential test 
-		when the formula is found in the \code{res_diff} table of the object.
+  Heatmap is employed automatically to show the significances of differential test 
+	 when the formula is found in the \code{res_diff} table in the object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
