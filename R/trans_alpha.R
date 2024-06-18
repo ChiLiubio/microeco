@@ -537,7 +537,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			if(is.null(self$res_diff)){
 				use_heatmap <- FALSE
 			}else{
-				if(any(grepl("formula", self$res_diff$method))){
+				if(any(grepl("formula", self$res_diff[, "Method"]))){
 					use_heatmap <- TRUE
 				}else{
 					use_heatmap <- FALSE
