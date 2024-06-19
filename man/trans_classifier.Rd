@@ -179,13 +179,14 @@ Create a trans_classifier object.
 \describe{
 \item{\code{dataset}}{an object of \code{\link{microtable}} class.}
 
-\item{\code{x.predictors}}{default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
+\item{\code{x.predictors}}{default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from \code{microtable$taxa_abund}; 
 data.frame denotes other customized input. See the following available options:
 \describe{
-  \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
-  \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
-  \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
-    columns are samples with same names in sample_table}
+  \item{\strong{'Genus'}}{use Genus level table in \code{microtable$taxa_abund}, or other specific taxonomic rank, e.g., 'Phylum'.
+     If an input level (e.g., ASV) is not found in the names of taxa_abund list, the function will use \code{otu_table} to calculate relative abundance of features.}
+  \item{\strong{'all'}}{use all the levels stored in \code{microtable$taxa_abund}.}
+  \item{\strong{other input}}{must be a data.frame object. It should have the same format with the tables in microtable$taxa_abund, i.e. rows are features; 
+    columns are samples with same names in sample_table.}
 }}
 
 \item{\code{y.response}}{default NULL; the response variable in \code{sample_table} of input \code{microtable} object.}

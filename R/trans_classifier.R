@@ -14,13 +14,14 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Create a trans_classifier object.
 		#' 
 		#' @param dataset an object of \code{\link{microtable}} class.
-		#' @param x.predictors default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from microtable$taxa_abund; 
+		#' @param x.predictors default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from \code{microtable$taxa_abund}; 
 		#'   data.frame denotes other customized input. See the following available options:
 		#'   \describe{
-		#'     \item{\strong{'Genus'}}{use Genus level table in microtable$taxa_abund, or other specific taxonomic rank, e.g. 'Phylum'}
-		#'     \item{\strong{'all'}}{use all the taxa stored in microtable$taxa_abund}
-		#'     \item{\strong{other input}}{must be a data.frame; It should have the same format with the data.frame in microtable$taxa_abund, i.e. rows are features; 
-		#'       columns are samples with same names in sample_table}
+		#'     \item{\strong{'Genus'}}{use Genus level table in \code{microtable$taxa_abund}, or other specific taxonomic rank, e.g., 'Phylum'.
+		#'        If an input level (e.g., ASV) is not found in the names of taxa_abund list, the function will use \code{otu_table} to calculate relative abundance of features.}
+		#'     \item{\strong{'all'}}{use all the levels stored in \code{microtable$taxa_abund}.}
+		#'     \item{\strong{other input}}{must be a data.frame object. It should have the same format with the tables in microtable$taxa_abund, i.e. rows are features; 
+		#'       columns are samples with same names in sample_table.}
 		#'   }
 		#' @param y.response default NULL; the response variable in \code{sample_table} of input \code{microtable} object.
 		#' @param n.cores default 1; the CPU thread used.
@@ -83,8 +84,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
 					if(! x.predictors %in% names(dataset$taxa_abund)){
-						message("x.predictors is not found in the taxa_abund list. Use the features in otu_table ...")
+						message("x.predictors: ", x.predictors, " is not found in the names of taxa_abund list. Use the features in otu_table ...")
 						dataset$add_rownames2taxonomy(use_name = x.predictors)
+						message("Calculate relative abundance of features ...")
 						suppressMessages(dataset$cal_abund())
 					}
 					abund_table <- dataset$taxa_abund[[x.predictors]]
