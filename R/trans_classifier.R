@@ -691,6 +691,14 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			use_trainControl <- self$trainControl
 			train_data <- self$data_train
+			if(is.null(train_data)){
+				message("No training data is found! The reason is function cal_split is not performed! Use all the samples for the training ...")
+				train_data <- data.frame(Response = self$data_response, self$data_feature, check.names = FALSE)
+				if(self$type == "Classification"){
+					train_data$Response %<>% as.factor
+				}
+				self$data_train <- train_data
+			}
 			
 			models <- caretList(Response ~ ., data = train_data, trControl = use_trainControl, ...)
 			self$res_caretList_models <- models
