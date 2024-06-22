@@ -1330,10 +1330,12 @@ trans_env <- R6Class(classname = "trans_env",
 					}
 					# the sample_table names have been same with data_env when creading the object
 					group_vector <- self$dataset$sample_table[, group] %>% as.character
+				}else{
+					group_vector <- group
 				}
 			}
 			if(length(group_vector) != x_raw_length){
-				stop("The group length is not same with x length! Please check the input!")
+				stop("The group length is not same with x length! Please check the input data!")
 			}
 			if(is.vector(x) & is.vector(y)){
 				if(length(x) != length(y)){
