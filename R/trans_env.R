@@ -1109,20 +1109,30 @@ trans_env <- R6Class(classname = "trans_env",
 					lim_x <- col_cluster %>% {.$labels[.$order]}
 				}
 			}else{
-				lim_y <- NULL
-				lim_x <- NULL
+				if(is.factor(use_data[, xvalue])){
+					lim_x <- levels(use_data[, xvalue])
+				}else{
+					lim_x <- NULL
+				}
+				if(is.factor(use_data[, "Taxa"])){
+					lim_y <- levels(use_data[, "Taxa"])
+				}else{
+					lim_y <- NULL
+				}				
 			}
 			# the input text_y_order or text_x_order has priority
-			if(!is.null(text_y_order) | !is.null(text_x_order)){
-				if(cluster_ggplot != "none"){
-					cluster_ggplot <- "none"
-					message("Change cluster_ggplot to none, as text_y_order and/or text_x_order provided!")
-				}
-				if(!is.null(text_y_order)){
-					lim_y <- rev(text_y_order)
-				}
-				if(!is.null(text_x_order)){
-					lim_x <- text_x_order
+			if(! pheatmap){
+				if(!is.null(text_y_order) | !is.null(text_x_order)){
+					if(cluster_ggplot != "none"){
+						cluster_ggplot <- "none"
+						message("Change cluster_ggplot to none, as text_y_order and/or text_x_order provided!")
+					}
+					if(!is.null(text_y_order)){
+						lim_y <- rev(text_y_order)
+					}
+					if(!is.null(text_x_order)){
+						lim_x <- text_x_order
+					}
 				}
 			}
 			if(pheatmap == T){
