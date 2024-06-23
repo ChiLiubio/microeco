@@ -340,7 +340,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 					aes(x = 0, y = 0, xend = x, yend = y), 
 					arrow = arrow(length = unit(0.2, "cm")), 
 					color = loading_arrow_color, 
-					alpha = .6
+					alpha = .6,
+					inherit.aes = FALSE
 					)
 				df_arrows$label <- rownames(df_arrows)
 				if(loading_text_italic){
@@ -355,7 +356,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 					size = loading_text_size, 
 					color = loading_text_color, 
 					segment.alpha = .01, 
-					parse = loading_text_parse
+					parse = loading_text_parse,
+					inherit.aes = FALSE
 				)
 			}
 			p
