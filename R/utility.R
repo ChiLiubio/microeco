@@ -214,7 +214,7 @@ tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore
 	taxonomy_table[, i] <- gsub("^\\s+|\\s+$", "", taxonomy_table[, i])
 	taxonomy_table[, i] <- gsub('"', "", taxonomy_table[, i], fixed = TRUE)
 	# first double, then single
-	taxonomy_table[, i] <- gsub("^.*__", "", taxonomy_table[, i])
+	taxonomy_table[, i] <- gsub("^.*?__", "", taxonomy_table[, i])
 	taxonomy_table[, i] <- gsub("^._", "", taxonomy_table[, i])
 	taxonomy_table[, i][is.na(taxonomy_table[, i])] <- na_fill
 	taxonomy_table[, i] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[, i])
