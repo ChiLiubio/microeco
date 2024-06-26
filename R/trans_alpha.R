@@ -398,9 +398,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							tmp_summary <- summary(tmp)
 							tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
 							tmp_model_p <- car::Anova(tmp)
-							tmp_model_R2 <- performance::r2(tmp)
-							test <- try(tmp_model_R2$R2_conditional, silent = TRUE)
-							if(inherits(test, "try-error")) {
+							tmp_model_R2 <- try(performance::r2(tmp), silent = TRUE)
+							if(inherits(tmp_model_R2, "try-error")) {
 								message("R2 unavailable for ", k, " !")
 								tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
 							}
