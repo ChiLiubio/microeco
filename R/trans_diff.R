@@ -245,7 +245,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 							abund_foralpha %<>% .[apply(., 1, function(x){length(unique(x)) != 1}), ]
 						}
 						if(method %in% c("betareg", "glmm_beta")){
-							if(any(abund_foralpha) > 1){
+							if(any(abund_foralpha > 1)){
 								abund_foralpha %<>% {./(max(.) + beta_pseudo)}
 							}
 							if(any(abund_foralpha == 0)){
