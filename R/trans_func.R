@@ -66,6 +66,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#'     	  FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
 		#'     	  Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>}
 		#'   }
+		#' @param FUNGuild_confidence default c("Highly Probable", "Probable", "Possible"). 
+		#'    Selected 'confidenceRanking' when \code{fungi_database = "FUNGuild"}.
 		#' @return \code{res_spe_func} stored in object.
 		#' @examples
 		#' \donttest{
@@ -74,7 +76,8 @@ trans_func <- R6Class(classname = "trans_func",
 		#' }
 		cal_spe_func = function(
 			prok_database = c("FAPROTAX", "NJC19")[1], 
-			fungi_database = c("FUNGuild", "FungalTraits")[1]
+			fungi_database = c("FUNGuild", "FungalTraits")[1],
+			FUNGuild_confidence = c("Highly Probable", "Probable", "Possible")
 			){
 			for_what <- self$for_what
 			if(is.na(for_what) | is.null(for_what)){
@@ -201,6 +204,18 @@ trans_func <- R6Class(classname = "trans_func",
 					# store the raw table similar with the FUNGuild results from python version
 					self$res_spe_func_raw_funguild <- res_table
 					message('Mapped raw FUNGuild result is stored in object$res_spe_func_raw_funguild ...')
+					
+					if(! any(FUNGuild_confidence %in% c("Highly Probable", "Probable", "Possible"))){
+						stop("FUNGuild_confidence parameter must comes from 'Highly Probable', 'Probable' and 'Possible' !")
+					}
+					res_table[! res_table$confidenceRanking %in% FUNGuild_confidence, ] <- ""
+					if(all(res_table$confidenceRanking == "")){
+						if(all(FUNGuild_confidence %in% c("Highly Probable", "Probable", "Possible"))){
+							message("No available results are predicted ...")
+						}else{
+							stop("No available result! Please change the FUNGuild_confidence parameter!")
+						}
+					}
 					# generate a data frame store the binary data
 					otu_func_table <- res_table[, c("taxon"), drop = FALSE]
 					# generate trophicMode binary information

@@ -138,7 +138,8 @@ Identify traits of each feature by matching taxonomic assignments to functional 
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(
   prok_database = c("FAPROTAX", "NJC19")[1],
-  fungi_database = c("FUNGuild", "FungalTraits")[1]
+  fungi_database = c("FUNGuild", "FungalTraits")[1],
+  FUNGuild_confidence = c("Highly Probable", "Probable", "Possible")
 )}\if{html}{\out{</div>}}
 }
 
@@ -163,6 +164,9 @@ Identify traits of each feature by matching taxonomic assignments to functional 
         FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles.  
         Fungal Diversity 105, 1-16 (2020). <doi:10.1007/s13225-020-00466-2>}
 }}
+
+\item{\code{FUNGuild_confidence}}{default c("Highly Probable", "Probable", "Possible"). 
+Selected 'confidenceRanking' when \code{fungi_database = "FUNGuild"}.}
 }
 \if{html}{\out{</div>}}
 }
