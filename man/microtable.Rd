@@ -338,7 +338,7 @@ Rarefy communities to make all samples have same count number.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default c("rarefy", "SRS")[1]; "rarefy" represents the classical resampling like \code{\link{rrarefy}} function of \code{vegan} package.
+\item{\code{method}}{default c("rarefy", "SRS")[1]; "rarefy" represents the classical resampling like \code{rrarefy} function of \code{vegan} package.
 "SRS" is scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <DOI:10.7717/peerj.9593>.}
 
 \item{\code{sample.size}}{default NULL; libray size. If not provided, use the minimum number across all samples. 
@@ -812,14 +812,14 @@ See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{method}}{default NULL; a character vector with one or more elements; \code{c("bray", "jaccard")} is used when \code{method = NULL}; 
-See the \code{method} parameter in \code{\link{vegdist}} function for more available options, such as 'aitchison' and 'robust.aitchison'.}
+See the \code{method} parameter in \code{vegdist} function for more available options, such as 'aitchison' and 'robust.aitchison'.}
 
 \item{\code{unifrac}}{default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.}
 
 \item{\code{binary}}{default FALSE; Whether convert abundance to binary data (presence/absence) when \code{method} is not "jaccard". 
 TRUE is used for "jaccard" automatically.}
 
-\item{\code{...}}{parameters passed to \code{\link{vegdist}} function.}
+\item{\code{...}}{parameters passed to \code{vegdist} function of vegan package.}
 }
 \if{html}{\out{</div>}}
 }

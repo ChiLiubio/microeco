@@ -494,7 +494,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
 		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in \code{plot_type}.
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in \code{plot_type}.
-		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type}; see type in \code{\link{stat_ellipse}}.
+		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type}; see type parameter in \code{stat_ellipse} function of ggplot2 package.
 		#' @param add_sample_label default NULL; the column name in sample table, if provided, show the point name in plot.
 		#' @param env_nudge_x default NULL; numeric vector to adjust the env text x axis position; passed to nudge_x parameter of \code{ggrepel::geom_text_repel} function;
 		#'   default NULL represents automatic adjustment; the length must be same with the row number of \code{object$res_ordination_trans$df_arrows}. For example, 
@@ -738,7 +738,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param method default "pearson"; one of "pearson", "spearman" and "kendall"; correlation method; see method parameter in \code{vegan::mantel} function.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' @param by_group default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.
-		#' @param ... paremeters passed to \code{\link{mantel}} of vegan package.
+		#' @param ... paremeters passed to \code{mantel} of vegan package.
 		#' @return \code{res_mantel} in object.
 		#' @examples
 		#' \donttest{

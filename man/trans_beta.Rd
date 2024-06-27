@@ -256,7 +256,7 @@ Plot the ordination result.
 
 \item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in \code{plot_type} parameter.}
 
-\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{\link{stat_ellipse}}.}
+\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{stat_ellipse}.}
 
 \item{\code{NMDS_stress_pos}}{default c(1, 1); a numerical vector with two values used to represent the insertion position of the stress text. 
 The first one denotes the x-axis, while the second one corresponds to the y-axis. 
@@ -301,7 +301,7 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 \if{html}{\out{<a id="method-trans_beta-cal_manova"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_beta-cal_manova}{}}}
 \subsection{Method \code{cal_manova()}}{
-Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on the code{adonis2} function of vegan package <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
+Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on the \code{adonis2} function of vegan package <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_manova(
   manova_all = TRUE,
@@ -319,8 +319,9 @@ Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on t
 \item{\code{manova_all}}{default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 FALSE represents test for all the paired groups.}
 
-\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
-manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.}
+\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}.
+Please also see the \code{formula} parameter (only right-hand side) in \code{adonis2} function of vegan package.
+The parameter manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.}
 
 \item{\code{group}}{default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
 Available when \code{manova_set} is not provided.}
@@ -331,7 +332,7 @@ Only available when \code{manova_all = FALSE} and \code{manova_set} is not provi
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; 
 see \code{method} parameter of \code{p.adjust} function for available options.}
 
-\item{\code{...}}{parameters passed to \code{\link{adonis2}} function of \code{vegan} package.}
+\item{\code{...}}{parameters passed to \code{adonis2} function of \code{vegan} package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -374,7 +375,7 @@ Only available when \code{paired = TRUE}.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; available when \code{paired = TRUE}; see method parameter of \code{p.adjust} function for available options.}
 
-\item{\code{...}}{parameters passed to \code{\link{anosim}} function of \code{vegan} package.}
+\item{\code{...}}{parameters passed to \code{anosim} function of \code{vegan} package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -402,7 +403,7 @@ Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{be
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{parameters passed to \code{\link{betadisper}} function.}
+\item{\code{...}}{parameters passed to \code{betadisper} function.}
 }
 \if{html}{\out{</div>}}
 }

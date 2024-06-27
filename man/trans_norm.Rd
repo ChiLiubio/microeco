@@ -136,7 +136,7 @@ Methods for normalization:
             \eqn{W_{ij}} represents a weight specific to each technique, and \eqn{p} is the feature number in sample.
   \item \code{"RLE"}: Relative log expression. 
 }
-Methods based on \code{\link{decostand}} function:
+Methods based on \code{decostand} function of vegan package:
 \itemize{
   \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
   \item \code{"max"}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
@@ -168,12 +168,12 @@ For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS
 This parameter is passed to the \code{condition} parameter of \code{wrench} function in Wrench package
 It must be a column name of \code{sample_table} or a vector with same length of samples.}
 
-\item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{\link{decostand}} function.
+\item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{decostand} function of vegan package.
 If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{logbase}}{default 2; The logarithm base.}
 
-\item{\code{...}}{parameters pass to \code{\link{decostand}}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
+\item{\code{...}}{parameters pass to \code{vegan::decostand}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
 or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
 or \code{trans_diff} class when method = "DESeq2",
 or \code{wrench} function of Wrench package when method = "Wrench".}

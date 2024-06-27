@@ -194,7 +194,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ellipse_chull_fill default TRUE; whether fill colors to the area of ellipse or chull.
 		#' @param ellipse_chull_alpha default 0.1; color transparency in the ellipse or convex hull depending on whether "ellipse" or "centroid" is in \code{plot_type} parameter.
 		#' @param ellipse_level default .9; confidence level of ellipse when "ellipse" is in \code{plot_type} parameter.
-		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{\link{stat_ellipse}}.
+		#' @param ellipse_type default "t"; ellipse type when "ellipse" is in \code{plot_type} parameter; see type in \code{stat_ellipse}.
 		#' @param NMDS_stress_pos default c(1, 1); a numerical vector with two values used to represent the insertion position of the stress text. 
 		#'   The first one denotes the x-axis, while the second one corresponds to the y-axis. 
 		#'   The assigned position is determined by multiplying the respective value with the maximum point on the corresponding coordinate axis. 
@@ -363,19 +363,20 @@ trans_beta <- R6Class(classname = "trans_beta",
 			p
 		},
 		#' @description
-		#' Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on the code{adonis2} function of vegan package <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
+		#' Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on the \code{adonis2} function of vegan package <doi:10.1111/j.1442-9993.2001.01070.pp.x>.
 		#'
 		#' @param manova_all default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 		#'    FALSE represents test for all the paired groups.
-		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}; see also \code{\link{adonis2}}.
-		#'    manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.
+		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}.
+		#'    Please also see the \code{formula} parameter (only right-hand side) in \code{adonis2} function of vegan package.
+		#'    The parameter manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.
 		#' @param group default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
 		#'    Available when \code{manova_set} is not provided.
 		#' @param by_group default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
 		#'    Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; 
 		#'    see \code{method} parameter of \code{p.adjust} function for available options.
-		#' @param ... parameters passed to \code{\link{adonis2}} function of \code{vegan} package.
+		#' @param ... parameters passed to \code{adonis2} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object with \code{data.frame} class.
 		#' @examples
 		#' t1$cal_manova(manova_all = TRUE)
@@ -436,7 +437,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param by_group default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
 		#'    Only available when \code{paired = TRUE}.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{paired = TRUE}; see method parameter of \code{p.adjust} function for available options.
-		#' @param ... parameters passed to \code{\link{anosim}} function of \code{vegan} package.
+		#' @param ... parameters passed to \code{anosim} function of \code{vegan} package.
 		#' @return \code{res_anosim} stored in object with \code{data.frame} class.
 		#' @examples
 		#' t1$cal_anosim()
@@ -488,7 +489,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{betadisper} function in vegan package.
 		#'
-		#' @param ... parameters passed to \code{\link{betadisper}} function.
+		#' @param ... parameters passed to \code{betadisper} function.
 		#' @return \code{res_betadisper} stored in object.
 		#' @examples
 		#' t1$cal_betadisper()

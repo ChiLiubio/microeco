@@ -1172,7 +1172,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param heatmap_x default "Factors"; the column of data for the x axis of heatmap.
 		#' @param heatmap_y default "Taxa"; the column of data for the y axis of heatmap.
 		#' @param heatmap_lab_fill default "P value"; legend title of heatmap.
-		#' @param ... parameters passing to \code{\link{geom_bar}} for the bar plot or 
+		#' @param ... parameters passing to \code{geom_bar} for the bar plot or 
 		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the method.
 		#' @return ggplot.
 		#' @examples

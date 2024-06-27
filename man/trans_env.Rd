@@ -571,7 +571,7 @@ one or more elements of "point", "ellipse", "chull", "centroid" and "none"; "non
 
 \item{\code{ellipse_level}}{default .9; confidence level of ellipse when "ellipse" is in \code{plot_type}.}
 
-\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in \code{plot_type}; see type in \code{\link{stat_ellipse}}.}
+\item{\code{ellipse_type}}{default "t"; ellipse type when "ellipse" is in \code{plot_type}; see type parameter in \code{stat_ellipse} function of ggplot2 package.}
 
 \item{\code{add_sample_label}}{default NULL; the column name in sample table, if provided, show the point name in plot.}
 
@@ -650,7 +650,7 @@ Mantel test between beta diversity matrix and environmental data.
 
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; used to perform mantel test for different groups separately.}
 
-\item{\code{...}}{paremeters passed to \code{\link{mantel}} of vegan package.}
+\item{\code{...}}{paremeters passed to \code{mantel} of vegan package.}
 }
 \if{html}{\out{</div>}}
 }
