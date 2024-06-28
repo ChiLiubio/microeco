@@ -340,7 +340,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		ebay = function(comm) {
 			sample_n <- nrow(comm)
 
-			B_e <- try(MGLM::MGLMreg(comm~1, dist="DM")@coefficients, silent=TRUE)
+			B_e <- MGLM::MGLMreg(comm~1, dist="DM")@coefficients
 
 			gr <- matrix(rep(1, sample_n))
 			alpha_e <- exp(gr%*%B_e)
