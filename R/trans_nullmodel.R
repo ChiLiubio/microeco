@@ -89,9 +89,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#'
 		#' @param use_env default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, 
 		#' 	 use PCA (principal component analysis) to reduce dimensionality.
-		#' @param break.pts default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of \code{vegan} package.
-		#' @param cutoff default FALSE; see cutoff parameter in \code{\link{mantel.correlog}}.
-		#' @param ... parameters pass to \code{\link{mantel.correlog}}
+		#' @param break.pts default seq(0, 1, 0.02); see break.pts parameter in \code{mantel.correlog} of \code{vegan} package.
+		#' @param cutoff default FALSE; see cutoff parameter in \code{mantel.correlog}.
+		#' @param ... parameters pass to \code{mantel.correlog}.
 		#' @return res_mantel_corr in object.
 		#' @examples
 		#' \dontrun{

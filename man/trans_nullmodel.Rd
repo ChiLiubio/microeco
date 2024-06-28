@@ -230,11 +230,11 @@ Calculate mantel correlogram.
 \item{\code{use_env}}{default NULL; numeric or character vector to select env_data; if provide multiple variables or NULL, 
 use PCA (principal component analysis) to reduce dimensionality.}
 
-\item{\code{break.pts}}{default seq(0, 1, 0.02); see break.pts parameter in \code{\link{mantel.correlog}} of \code{vegan} package.}
+\item{\code{break.pts}}{default seq(0, 1, 0.02); see break.pts parameter in \code{mantel.correlog} of \code{vegan} package.}
 
-\item{\code{cutoff}}{default FALSE; see cutoff parameter in \code{\link{mantel.correlog}}.}
+\item{\code{cutoff}}{default FALSE; see cutoff parameter in \code{mantel.correlog}.}
 
-\item{\code{...}}{parameters pass to \code{\link{mantel.correlog}}}
+\item{\code{...}}{parameters pass to \code{mantel.correlog}.}
 }
 \if{html}{\out{</div>}}
 }
