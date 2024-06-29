@@ -198,6 +198,7 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
   up_y_title_size = 15,
   up_y_text_size = 8,
   up_bar_fill = "grey70",
+  up_bar_width = 0.9,
   bottom_y_text_size = 12,
   bottom_height = 1,
   bottom_point_size = 3,
@@ -225,6 +226,8 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
 \item{\code{up_y_text_size}}{default 4; y axis text size of upper plot.}
 
 \item{\code{up_bar_fill}}{default "grey70"; bar fill color of upper plot.}
+
+\item{\code{up_bar_width}}{default 0.9; bar width of upper plot.}
 
 \item{\code{bottom_y_text_size}}{default 12; y axis text size, i.e. sample name size, of bottom sample plot.}
 

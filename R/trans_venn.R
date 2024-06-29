@@ -341,6 +341,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param up_y_title_size default 15; y axis title size of upper plot.
 		#' @param up_y_text_size default 4; y axis text size of upper plot.
 		#' @param up_bar_fill default "grey70"; bar fill color of upper plot.
+		#' @param up_bar_width default 0.9; bar width of upper plot.
 		#' @param bottom_y_text_size default 12; y axis text size, i.e. sample name size, of bottom sample plot.
 		#' @param bottom_height default 1; bottom plot height relative to the upper bar plot. 1 represents the height of bottom plot is same with the upper bar plot.
 		#' @param bottom_point_size default 3; point size of bottom plot.
@@ -362,6 +363,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			up_y_title_size = 15,
 			up_y_text_size = 8,
 			up_bar_fill = "grey70",
+			up_bar_width = 0.9,
 			bottom_y_text_size = 12,
 			bottom_height = 1,
 			bottom_point_size = 3,
@@ -375,7 +377,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			colnumber <- self$colnumber
 			ratio <- self$ratio
 			res_names <- self$res_names
-			switch_num <- colnumber-1
+			switch_num <- colnumber - 1
 			summary_table <- self$data_summary
 			name_joint <- self$name_joint
 			samplesum <- self$data_samplesum
@@ -396,7 +398,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			
 			g1 <- ggplot(plot_data, aes(x = rowname, y = Counts)) +
 				theme_classic() +
-				geom_col(color = up_bar_fill, fill = up_bar_fill) +
+				geom_col(color = up_bar_fill, fill = up_bar_fill, width = up_bar_width) +
 				ylab(up_y_title) +
 				theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
 				theme(axis.text = element_text(size = up_y_text_size), axis.title = element_text(size = up_y_title_size))
