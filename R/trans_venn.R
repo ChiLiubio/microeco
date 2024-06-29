@@ -349,6 +349,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param bottom_background_fill default "grey95"; fill color for the striped background in the bottom sample plot.
 		#' @param left_width default 0.3; left bar plot width relative to the right bottom plot.
 		#' @param left_bar_fill default "grey70"; fill color for the left bar plot presenting feature number.
+		#' @param left_bar_width default 0.9; bar width of left plot.
 		#' @param left_x_text_size default 10; x axis text size of the left bar plot.
 		#' @param left_background_fill default "grey95"; fill color for the striped background in the left plot.
 		#' @return a ggplot2 object.
@@ -371,6 +372,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			bottom_background_fill = "grey95",
 			left_width = 0.3,
 			left_bar_fill = "grey70",
+			left_bar_width = 0.9,
 			left_x_text_size = 10,
 			left_background_fill = "grey95"
 			){
@@ -460,7 +462,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 					}
 				}
 				g3 <- g3 + 
-					geom_col(color = left_bar_fill, fill = left_bar_fill) +
+					geom_col(color = left_bar_fill, fill = left_bar_fill, width = left_bar_width) +
 					theme_bw() +
 					theme(legend.position = "none") +
 					scale_x_reverse() +

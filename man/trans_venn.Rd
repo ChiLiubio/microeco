@@ -206,6 +206,7 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
   bottom_background_fill = "grey95",
   left_width = 0.3,
   left_bar_fill = "grey70",
+  left_bar_width = 0.9,
   left_x_text_size = 10,
   left_background_fill = "grey95"
 )}\if{html}{\out{</div>}}
@@ -242,6 +243,8 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
 \item{\code{left_width}}{default 0.3; left bar plot width relative to the right bottom plot.}
 
 \item{\code{left_bar_fill}}{default "grey70"; fill color for the left bar plot presenting feature number.}
+
+\item{\code{left_bar_width}}{default 0.9; bar width of left plot.}
 
 \item{\code{left_x_text_size}}{default 10; x axis text size of the left bar plot.}
 
