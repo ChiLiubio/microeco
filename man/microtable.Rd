@@ -113,7 +113,7 @@ m1$rename_taxa()
 ## ------------------------------------------------
 
 \donttest{
-m1$merge_samples(use_group = "Group")
+m1$merge_samples("Group")
 }
 
 ## ------------------------------------------------
@@ -551,13 +551,13 @@ m1$rename_taxa()
 \subsection{Method \code{merge_samples()}}{
 Merge samples according to specific group to generate a new \code{microtable}.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$merge_samples(use_group)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$merge_samples(group)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_group}}{the group column in \code{sample_table}.}
+\item{\code{group}}{a column name in \code{sample_table} of \code{microtable} object.}
 }
 \if{html}{\out{</div>}}
 }
@@ -567,7 +567,7 @@ a new merged microtable object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-m1$merge_samples(use_group = "Group")
+m1$merge_samples("Group")
 }
 }
 \if{html}{\out{</div>}}

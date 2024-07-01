@@ -324,7 +324,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Get feature importance from the training model.
 		#' @param rf_feature_sig default FALSE; whether calculate feature significance in 'rf' model using \code{rfPermute} package; 
-		#'    only available for \code{method = "rf"} in \code{cal_train} function; 
+		#'    only available for \code{method = "rf"} in \code{cal_train} function.
 		#' @param ... parameters pass to \code{varImp} function of caret package. 
 		#'    If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.
 		#' @return \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.

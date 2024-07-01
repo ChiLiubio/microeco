@@ -351,13 +351,13 @@ microtable <- R6Class(classname = "microtable",
 		#' @description
 		#' Merge samples according to specific group to generate a new \code{microtable}.
 		#'
-		#' @param use_group the group column in \code{sample_table}.
+		#' @param group a column name in \code{sample_table} of \code{microtable} object.
 		#' @return a new merged microtable object.
 		#' @examples
 		#' \donttest{
-		#' m1$merge_samples(use_group = "Group")
+		#' m1$merge_samples("Group")
 		#' }
-		merge_samples = function(use_group){
+		merge_samples = function(group){
 			otu_table <- self$otu_table
 			sample_table <- self$sample_table
 			if(!is.null(self$tax_table)){
@@ -375,8 +375,11 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				rep_fasta <- NULL
 			}
-			otu_table_new <- rowsum(t(otu_table), as.factor(as.character(sample_table[, use_group]))) %>% t %>% as.data.frame
-			sample_table_new <- data.frame(SampleID = unique(as.character(sample_table[, use_group]))) %>% `row.names<-`(.[,1])
+			if(! group %in% colnames(sample_table)){
+				stop("Provided parameter group must be a column name of sample_table !")
+			}
+			otu_table_new <- rowsum(t(otu_table), as.factor(as.character(sample_table[, group]))) %>% t %>% as.data.frame
+			sample_table_new <- data.frame(SampleID = unique(as.character(sample_table[, group]))) %>% `row.names<-`(.[,1])
 			microtable$new(
 				sample_table = sample_table_new, 
 				otu_table = otu_table_new, 

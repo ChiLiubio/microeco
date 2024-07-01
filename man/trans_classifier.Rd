@@ -415,7 +415,7 @@ Get feature importance from the training model.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{rf_feature_sig}}{default FALSE; whether calculate feature significance in 'rf' model using \code{rfPermute} package; 
-only available for \code{method = "rf"} in \code{cal_train} function;}
+only available for \code{method = "rf"} in \code{cal_train} function.}
 
 \item{\code{...}}{parameters pass to \code{varImp} function of caret package. 
 If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.}
