@@ -95,6 +95,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   nresam = 0.6667,
   boots = 30,
   rf_ntree = 1000,
+  rf_imp_type = 2,
   group_choose_paired = NULL,
   metagenomeSeq_count = 1,
   ALDEx2_sig = c("wi.eBH", "kw.eBH"),
@@ -205,6 +206,10 @@ Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test",
 
 \item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package when method = "rf".}
 
+\item{\code{rf_imp_type}}{default 2; the type of feature importance in random forest when \code{method = "rf"}. 
+Same with \code{type} parameter in \code{importance} function of \code{randomForest} package.
+1=mean decrease in accuracy (MeanDecreaseAccuracy), 2=mean decrease in node impurity (MeanDecreaseGini).}
+
 \item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".}
 
 \item{\code{metagenomeSeq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.}
@@ -248,7 +253,8 @@ res_diff and res_abund.\cr
        For non-parametric methods, median value; For t.test, mean value;\cr
     \strong{"Taxa"}: which taxa is used in this comparision;\cr
     \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
-    \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
+    \strong{"LDA" or others}: LDA: linear discriminant score in LEfSe; 
+    	  MeanDecreaseAccuracy and MeanDecreaseGini: mean decreasing in accuracy or in node impurity (gini index) in random forest;\cr
     \strong{"P.unadj"}: original p value;\cr
     \strong{"P.adj"}: adjusted p value;\cr
     \strong{"Estimate" and "Std.Error"}: When method is "betareg", "lm", "lme" or "glmm", 
@@ -522,7 +528,7 @@ If the number of provided group_order is less than the number of groups in \code
 \item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance.}
 
 \item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; 
-select the features according to the LDA score (method = "lefse") or MeanDecreaseGini (method = "rf") from high to low.}
+select the features according to the metric (method = "lefse" or "rf") from high to low.}
 
 \item{\code{clade_label_level}}{default 4; the taxonomic level for marking the label with letters, root is the largest.}
 

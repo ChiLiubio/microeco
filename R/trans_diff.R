@@ -98,6 +98,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param nresam default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".
 		#' @param boots default 30; bootstrap test number for method = "lefse" or "rf".
 		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package when method = "rf".
+		#' @param rf_imp_type default 2; the type of feature importance in random forest when \code{method = "rf"}. 
+		#'    Same with \code{type} parameter in \code{importance} function of \code{randomForest} package.
+		#'    1=mean decrease in accuracy (MeanDecreaseAccuracy), 2=mean decrease in node impurity (MeanDecreaseGini).
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".
 		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.
 		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
@@ -131,7 +134,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'        For non-parametric methods, median value; For t.test, mean value;\cr
 		#'     \strong{"Taxa"}: which taxa is used in this comparision;\cr
 		#'     \strong{"Method"}: Test method used in the analysis depending on the method input;\cr
-		#'     \strong{"LDA" or "MeanDecreaseGini"}: LDA: linear discriminant score in LEfSe; MeanDecreaseGini: mean decreasing gini index in random forest;\cr
+		#'     \strong{"LDA" or others}: LDA: linear discriminant score in LEfSe; 
+		#'     	  MeanDecreaseAccuracy and MeanDecreaseGini: mean decreasing in accuracy or in node impurity (gini index) in random forest;\cr
 		#'     \strong{"P.unadj"}: original p value;\cr
 		#'     \strong{"P.adj"}: adjusted p value;\cr
 		#'     \strong{"Estimate" and "Std.Error"}: When method is "betareg", "lm", "lme" or "glmm", 
@@ -162,6 +166,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			nresam = 0.6667,
 			boots = 30,
 			rf_ntree = 1000,
+			rf_imp_type = 2,
 			group_choose_paired = NULL,
 			metagenomeSeq_count = 1,
 			ALDEx2_sig = c("wi.eBH", "kw.eBH"),
@@ -314,9 +319,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 							next
 						}
 						rf_data <- data.frame(response = as.factor(sampleinfo_resample[, group]), predictors_sub, stringsAsFactors = FALSE)
-						tem_classify <- randomForest::randomForest(response~., data = rf_data, ntree = rf_ntree)
+						tem_classify <- randomForest::randomForest(response~., data = rf_data, ntree = rf_ntree, importance = TRUE)
 						# use importance to evaluate
-						imp <- randomForest::importance(tem_classify)
+						imp <- randomForest::importance(tem_classify, type = rf_imp_type)
 						colnames(imp)[1] <- num
 						if(is.null(res)){
 							res <- imp
@@ -332,9 +337,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 						Taxa = Taxa_name,
 						Group = apply(class_taxa_median_sub, 2, function(x) rownames(class_taxa_median_sub)[which.max(x)])[Taxa_name], 
 						Method = use_method,
-						MeanDecreaseGini = res[, 1], 
+						Metric = res[, 1], 
 						stringsAsFactors = FALSE)
-					output <- dplyr::arrange(res, dplyr::desc(MeanDecreaseGini))
+					output <- dplyr::arrange(res, dplyr::desc(Metric))
+					if(rf_imp_type == 1){
+						colnames(output)[colnames(output) == "Metric"] <- "MeanDecreaseAccuracy"
+					}else{
+						colnames(output)[colnames(output) == "Metric"] <- "MeanDecreaseGini"
+					}
 					rownames(output) <- output$Taxa
 					output$P.unadj <- pvalue_raw[as.character(output$Taxa)]
 					output$P.adj <- pvalue_sub[as.character(output$Taxa)]
@@ -1232,8 +1242,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 					ylab_title <- "LDA score"
 				}else{
 					if(method == "rf"){
-						colnames(use_data)[colnames(use_data) == "MeanDecreaseGini"] <- "Value"
-						ylab_title <- "MeanDecreaseGini"
+						if("MeanDecreaseAccuracy" %in% colnames(use_data)){
+							ylab_title <- "MeanDecreaseAccuracy"
+						}else{
+							ylab_title <- "MeanDecreaseGini"
+						}
+						colnames(use_data)[colnames(use_data) %in% c("MeanDecreaseAccuracy", "MeanDecreaseGini")] <- "Value"
 					}else{
 						if(method == "metastat"){
 							use_data %<>% .[.$qvalue < 0.05, ]
@@ -1388,7 +1402,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .
 		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance.
 		#' @param use_feature_num default NULL; integer; The feature number used in the plot; 
-		#'	  select the features according to the LDA score (method = "lefse") or MeanDecreaseGini (method = "rf") from high to low.
+		#'	  select the features according to the metric (method = "lefse" or "rf") from high to low.
 		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest.
 		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters.
 		#' @param only_select_show default FALSE; whether only use the the select features in the parameter \code{select_show_labels}.
