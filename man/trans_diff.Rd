@@ -94,7 +94,6 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   lefse_norm = 1e+06,
   nresam = 0.6667,
   boots = 30,
-  rf_ntree = 1000,
   rf_imp_type = 2,
   group_choose_paired = NULL,
   metagenomeSeq_count = 1,
@@ -204,13 +203,12 @@ Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test",
 
 \item{\code{boots}}{default 30; bootstrap test number for method = "lefse" or "rf".}
 
-\item{\code{rf_ntree}}{default 1000; see ntree in randomForest function of randomForest package when method = "rf".}
-
 \item{\code{rf_imp_type}}{default 2; the type of feature importance in random forest when \code{method = "rf"}. 
 Same with \code{type} parameter in \code{importance} function of \code{randomForest} package.
 1=mean decrease in accuracy (MeanDecreaseAccuracy), 2=mean decrease in node impurity (MeanDecreaseGini).}
 
-\item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".}
+\item{\code{group_choose_paired}}{default NULL; a vector used for selecting the required groups for paired testing instead of all paired combinations across groups;
+Available when method is "metastat", "metagenomeSeq", "ALDEx2_t" or "edgeR".}
 
 \item{\code{metagenomeSeq_count}}{default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.}
 
@@ -236,6 +234,7 @@ The data that equal to 1 will be replaced by \code{1/(1 + beta_pseudo)}.}
 
 \item{\code{...}}{parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg", "lme", "glmm" or "glmm_beta";
+passed to \code{randomForest::randomForest} function when method = "rf";
 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 passed to \code{DESeq2::DESeq} function when method = "DESeq2";

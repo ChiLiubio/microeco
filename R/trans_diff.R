@@ -97,11 +97,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param lefse_norm default 1000000; scale value in lefse.
 		#' @param nresam default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".
 		#' @param boots default 30; bootstrap test number for method = "lefse" or "rf".
-		#' @param rf_ntree default 1000; see ntree in randomForest function of randomForest package when method = "rf".
 		#' @param rf_imp_type default 2; the type of feature importance in random forest when \code{method = "rf"}. 
 		#'    Same with \code{type} parameter in \code{importance} function of \code{randomForest} package.
 		#'    1=mean decrease in accuracy (MeanDecreaseAccuracy), 2=mean decrease in node impurity (MeanDecreaseGini).
-		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing, only used for method = "metastat" or "metagenomeSeq".
+		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing instead of all paired combinations across groups;
+		#'    Available when method is "metastat", "metagenomeSeq", "ALDEx2_t" or "edgeR".
 		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.
 		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
 		#'   applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
@@ -121,6 +121,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   The data that equal to 1 will be replaced by \code{1/(1 + beta_pseudo)}.
 		#' @param ... parameters passed to \code{cal_diff} function of \code{trans_alpha} class when method is one of 
 		#' 	 "KW", "KW_dunn", "wilcox", "t.test", "anova", "betareg", "lme", "glmm" or "glmm_beta";
+		#' 	 passed to \code{randomForest::randomForest} function when method = "rf";
 		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
@@ -165,7 +166,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 			lefse_norm = 1000000,
 			nresam = 0.6667,
 			boots = 30,
-			rf_ntree = 1000,
 			rf_imp_type = 2,
 			group_choose_paired = NULL,
 			metagenomeSeq_count = 1,
@@ -319,7 +319,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 							next
 						}
 						rf_data <- data.frame(response = as.factor(sampleinfo_resample[, group]), predictors_sub, stringsAsFactors = FALSE)
-						tem_classify <- randomForest::randomForest(response~., data = rf_data, ntree = rf_ntree, importance = TRUE)
+						tem_classify <- randomForest::randomForest(response~., data = rf_data, importance = TRUE, ...)
 						# use importance to evaluate
 						imp <- randomForest::importance(tem_classify, type = rf_imp_type)
 						colnames(imp)[1] <- num
