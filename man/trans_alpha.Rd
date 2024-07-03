@@ -68,9 +68,9 @@ t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{an object of \code{\link{microtable}} class.}
+\item{\code{dataset}}{\code{\link{microtable}} object.}
 
-\item{\code{group}}{default NULL; a column name of \code{sample_table} used for the statistics.}
+\item{\code{group}}{default NULL; a column name of \code{sample_table} in the input microtable object used for the statistics across groups.}
 
 \item{\code{by_group}}{default NULL; a column name of \code{sample_table} used to perform the differential test 
 among groups (from \code{group} parameter) for each group (from \code{by_group} parameter) separately.}
@@ -79,7 +79,7 @@ among groups (from \code{group} parameter) for each group (from \code{by_group} 
 such as the data of plant compartments for different plant species (ID). 
 So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.}
 
-\item{\code{order_x}}{default NULL; a \code{sample_table} column name or a vector with sample names; if provided, order samples by using \code{factor}.}
+\item{\code{order_x}}{default NULL; a column name of \code{sample_table} or a vector with sample names. If provided, sort samples using \code{factor}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -121,7 +121,7 @@ Differential test on alpha diversity.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{measure}}{default NULL; character vector; If NULL, all indexes will be calculated; see names of \code{microtable$alpha_diversity}, 
+\item{\code{measure}}{default NULL; character vector; If NULL, all indexes will be used; see names of \code{microtable$alpha_diversity}, 
 e.g. \code{c("Observed", "Chao1", "Shannon")}.}
 
 \item{\code{method}}{default "KW"; see the following available options:
@@ -130,8 +130,8 @@ e.g. \code{c("Observed", "Chao1", "Shannon")}.}
   \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons <10.1080/00401706.1964.10490181> based on \code{dunnTest} function in \code{FSA} package}
   \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
   \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
-  \item{\strong{'anova'}}{Variance analysis. For one-way anova, the post hoc test is Duncan's new multiple range test 
-        based on \code{duncan.test} function of \code{agricolae} package. Please use \code{anova_post_test} parameter to change post hoc method.
+  \item{\strong{'anova'}}{Variance analysis. For one-way anova, the default post hoc test is Duncan's new multiple range test.
+        Please use \code{anova_post_test} parameter to change the post hoc method.
         For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
   \item{\strong{'scheirerRayHare'}}{Scheirer-Ray-Hare test (nonparametric test) for a two-way factorial experiment; 
         see \code{scheirerRayHare} function of \code{rcompanion} package}
@@ -146,16 +146,16 @@ e.g. \code{c("Observed", "Chao1", "Shannon")}.}
         facilitating the fitting for proportional data (ranging from 0 to 1). The link function is fixed with \code{"logit"}.}
 }}
 
-\item{\code{formula}}{default NULL; applied to two-way or multi-factor anova when 
-method = \code{"anova"} or \code{"scheirerRayHare"} or \code{"lme"} or \code{"betareg"} or \code{"glmm"}; 
+\item{\code{formula}}{default NULL; applied to two-way or multi-factor analysis when 
+method is \code{"anova"}, \code{"scheirerRayHare"}, \code{"lm"}, \code{"lme"}, \code{"betareg"} or \code{"glmm"}; 
 specified set for independent variables, i.e. the latter part of a general formula, 
 such as \code{'block + N*P*K'}.}
 
 \item{\code{p_adjust_method}}{default "fdr" (for "KW", "wilcox", "t.test" methods) or "holm" (for "KW_dunn"); P value adjustment method; 
-For \code{method = 'KW', 'wilcox' or 't.test'}, please see method parameter of \code{p.adjust} function for available options;
+For \code{method = 'KW', 'wilcox' or 't.test'}, please see \code{method} parameter of \code{p.adjust} function for available options;
 For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods} for available options.}
 
-\item{\code{KW_dunn_letter}}{default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes paired significances are presented by letters;
+\item{\code{KW_dunn_letter}}{default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes significances are presented by letters;
 \code{FALSE} means significances are shown by asterisk for paired comparison.}
 
 \item{\code{alpha}}{default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.}
@@ -163,12 +163,13 @@ For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods}
 \item{\code{anova_post_test}}{default "duncan.test". The post hoc test method for one-way anova. Other available options include "LSD.test" and "HSD.test". 
 All those are the function names in \code{agricolae} package.}
 
-\item{\code{return_model}}{default FALSE; whether return the original lmer or glmm model list in the object.}
+\item{\code{return_model}}{default FALSE; whether return the original "lm", "lmer" or "glmm" model list in the object.}
 
 \item{\code{...}}{parameters passed to \code{kruskal.test} (when \code{method = "KW"}) or \code{wilcox.test} function (when \code{method = "wilcox"}) or 
 \code{dunnTest} function of \code{FSA} package (when \code{method = "KW_dunn"}) or 
 \code{agricolae::duncan.test}/\code{agricolae::LSD.test}/\code{agricolae::HSD.test} (when \code{method = "anova"}, one-way anova) or 
 \code{rcompanion::scheirerRayHare} (when \code{method = "scheirerRayHare"}) or 
+\code{stats::lm} (when \code{method = "lm"}) or 
 \code{lmerTest::lmer} (when \code{method = "lme"}) or 
 \code{betareg::betareg} (when \code{method = "betareg"}) or 
 \code{glmmTMB::glmmTMB} (when \code{method = "glmm"}).}
