@@ -204,11 +204,16 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
   bottom_point_size = 3,
   bottom_point_color = "black",
   bottom_background_fill = "grey95",
+  bottom_background_alpha = 1,
+  bottom_line_width = 0.5,
+  bottom_line_colour = "black",
   left_width = 0.3,
   left_bar_fill = "grey70",
+  left_bar_alpha = 1,
   left_bar_width = 0.9,
   left_x_text_size = 10,
-  left_background_fill = "grey95"
+  left_background_fill = "white",
+  left_background_alpha = 1
 )}\if{html}{\out{</div>}}
 }
 
@@ -238,17 +243,31 @@ Plot the intersections using histogram, i.e. UpSet plot. Especially useful when 
 
 \item{\code{bottom_point_color}}{default "black"; point color of bottom plot.}
 
-\item{\code{bottom_background_fill}}{default "grey95"; fill color for the striped background in the bottom sample plot.}
+\item{\code{bottom_background_fill}}{default "grey95"; fill color for the striped background in the bottom sample plot.
+If the parameter length is 1, use "white" to distinguish the color stripes.
+If the parameter length is greater than 1, use all provided colors.}
+
+\item{\code{bottom_background_alpha}}{default 1; the color transparency for the parameter \code{bottom_background_fill}.}
+
+\item{\code{bottom_line_width}}{default 0.5; the line width in the bottom plot.}
+
+\item{\code{bottom_line_colour}}{default "black"; the line color in the bottom plot.}
 
 \item{\code{left_width}}{default 0.3; left bar plot width relative to the right bottom plot.}
 
 \item{\code{left_bar_fill}}{default "grey70"; fill color for the left bar plot presenting feature number.}
 
+\item{\code{left_bar_alpha}}{default 1; the color transparency for the parameter \code{left_bar_fill}.}
+
 \item{\code{left_bar_width}}{default 0.9; bar width of left plot.}
 
 \item{\code{left_x_text_size}}{default 10; x axis text size of the left bar plot.}
 
-\item{\code{left_background_fill}}{default "grey95"; fill color for the striped background in the left plot.}
+\item{\code{left_background_fill}}{default "white"; fill color for the striped background in the left plot.
+If the parameter length is 1, use "white" to distinguish the color stripes.
+If the parameter length is greater than 1, use all provided colors.}
+
+\item{\code{left_background_alpha}}{default 1; the color transparency for the parameter \code{left_background_fill}.}
 }
 \if{html}{\out{</div>}}
 }

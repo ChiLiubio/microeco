@@ -347,11 +347,20 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @param bottom_point_size default 3; point size of bottom plot.
 		#' @param bottom_point_color default "black"; point color of bottom plot.
 		#' @param bottom_background_fill default "grey95"; fill color for the striped background in the bottom sample plot.
+		#'    If the parameter length is 1, use "white" to distinguish the color stripes.
+		#'    If the parameter length is greater than 1, use all provided colors.
+		#' @param bottom_background_alpha default 1; the color transparency for the parameter \code{bottom_background_fill}.
+		#' @param bottom_line_width default 0.5; the line width in the bottom plot.
+		#' @param bottom_line_colour default "black"; the line color in the bottom plot.
 		#' @param left_width default 0.3; left bar plot width relative to the right bottom plot.
 		#' @param left_bar_fill default "grey70"; fill color for the left bar plot presenting feature number.
+		#' @param left_bar_alpha default 1; the color transparency for the parameter \code{left_bar_fill}.
 		#' @param left_bar_width default 0.9; bar width of left plot.
 		#' @param left_x_text_size default 10; x axis text size of the left bar plot.
-		#' @param left_background_fill default "grey95"; fill color for the striped background in the left plot.
+		#' @param left_background_fill default "white"; fill color for the striped background in the left plot.
+		#'    If the parameter length is 1, use "white" to distinguish the color stripes.
+		#'    If the parameter length is greater than 1, use all provided colors.
+		#' @param left_background_alpha default 1; the color transparency for the parameter \code{left_background_fill}.
 		#' @return a ggplot2 object.
 		#' @examples
 		#' \donttest{
@@ -370,11 +379,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 			bottom_point_size = 3,
 			bottom_point_color = "black",
 			bottom_background_fill = "grey95",
+			bottom_background_alpha = 1,
+			bottom_line_width = 0.5,
+			bottom_line_colour = "black",
 			left_width = 0.3,
 			left_bar_fill = "grey70",
+			left_bar_alpha = 1,
 			left_bar_width = 0.9,
 			left_x_text_size = 10,
-			left_background_fill = "grey95"
+			left_background_fill = "white",
+			left_background_alpha = 1
 			){
 			colnumber <- self$colnumber
 			ratio <- self$ratio
@@ -425,12 +439,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 
 			g2 <- ggplot(sample_long, aes(x = variable, y = rowname))
 				#theme(plot.background = element_rect(fill = "white", colour = "white", size = 0.1))
-			for(i in seq_len(length(unique(sample_ture$rowname)))){
-				if(i %% 2 == 1){
-					g2 <- g2 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = bottom_background_fill, colour = bottom_background_fill)
-				}else{
-					g2 <- g2 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = "white", colour = "white")
-				}
+			number_sample <- length(unique(sample_ture$rowname))
+			if(length(bottom_background_fill) == 1){
+				# color strip type
+				use_bottom_background_fill <- rep(c(bottom_background_fill, "white"), ceiling(number_sample / 2))
+			}else{
+				use_bottom_background_fill <- expand_colors(bottom_background_fill, number_sample)
+			}
+			for(i in seq_len(number_sample)){
+				g2 <- g2 + annotate("rect", ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = use_bottom_background_fill[i], 
+					alpha = bottom_background_alpha)
 			}
 			g2 <- g2 + 
 				geom_point(aes(x = variable, y = rowname), data = sample_all, size = bottom_point_size, color = "grey92", inherit.aes = FALSE) +
@@ -447,22 +465,31 @@ trans_venn <- R6Class(classname = "trans_venn",
 			line_data[is.na(matrix_data)] <- NA
 
 			line_data2 <- data.frame(y = apply(line_data, 2, min, na.rm = TRUE), yend = apply(line_data, 2, max, na.rm = TRUE), x = 1:ncol(line_data), xend = 1:ncol(line_data))
-			g2 <- g2 + geom_segment(aes(x = x, y = y, xend = xend, yend = yend), data = line_data2)
+			g2 <- g2 + geom_segment(aes(x = x, y = y, xend = xend, yend = yend), data = line_data2, linewidth = bottom_line_width, colour = bottom_line_colour)
 
 			if(left_plot){
 				g3_data <- data.frame(number = samplesum, rowname = names(samplesum))
 				g3_data$rowname %<>% factor(levels = sample_levels)
 
 				g3 <- ggplot(g3_data, aes(x = number, y = rowname))
-				for(i in seq_len(length(unique(g3_data$rowname)))){
-					if(i %% 2 == 1){
-						g3 <- g3 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = left_background_fill, colour = left_background_fill)
-					}else{
-						g3 <- g3 + geom_rect(ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = "white", colour = "white")
-					}
+				if(length(left_background_fill) == 1){
+					# color strip type
+					use_left_background_fill <- rep(c(left_background_fill, "white"), ceiling(number_sample / 2))
+				}else{
+					use_left_background_fill <- expand_colors(left_background_fill, number_sample)
+				}
+				for(i in seq_len(number_sample)){
+					g3 <- g3 + annotate("rect", ymin = i - 0.5, ymax = i + 0.5, xmin = -Inf, xmax = Inf, fill = use_left_background_fill[i], 
+						alpha = left_background_alpha)
+				}
+				if(length(left_bar_fill) == 1){
+					g3 <- g3 + geom_col(fill = left_bar_fill, width = left_bar_width, alpha = left_bar_alpha)
+				}else{
+					use_left_bar_fill <- expand_colors(left_bar_fill, number_sample)
+					g3 <- g3 + geom_col(aes(fill = rowname), width = left_bar_width, alpha = left_bar_alpha) +
+						scale_fill_manual(values = use_left_bar_fill)
 				}
 				g3 <- g3 + 
-					geom_col(color = left_bar_fill, fill = left_bar_fill, width = left_bar_width) +
 					theme_bw() +
 					theme(legend.position = "none") +
 					scale_x_reverse() +
