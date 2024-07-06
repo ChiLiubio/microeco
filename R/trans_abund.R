@@ -2,18 +2,19 @@
 #' Create \code{trans_abund} object for taxonomic abundance visualization.
 #'
 #' @description
-#' This class is a wrapper for the taxonomic abundance transformations and visualization.
+#' This class is a wrapper for the taxonomic abundance transformations and visualization (e.g., bar plot, boxplot, heatmap, pie chart and line chart).
 #' The converted data style is the long-format for \code{ggplot2} plot.
-#' The plotting methods include bar plot, boxplot, heatmap, pie chart and line chart.
 #'
 #' @export
 trans_abund <- R6Class(classname = "trans_abund",
 	public = list(
 		#' @param dataset default NULL; the object of \code{\link{microtable}} class.
-		#' @param taxrank default "Phylum"; taxonomic rank.
+		#' @param taxrank default "Phylum"; taxonomic level, i.e. a column name in \code{tax_table} of the input object.
+		#'   The function extracts the abundance from the \code{taxa_abund} list according to the names in the list. 
+		#'   If the \code{taxa_abund} list is NULL, the function can automatically calculate the relative abundance to generate \code{taxa_abund} list.
 		#' @param show default 0; the relative abundance threshold for filtering the taxa with low abundance.
 		#' @param ntaxa default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
-		#'   This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means it is unavailable.
+		#'   This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means the parameter will be invalid.
 		#' @param groupmean default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.
 		#' @param group_morestats default FALSE; only available when \code{groupmean} parameter is provided; 
 		#'   Whether output more statistics for each group, including min, max, median and quantile;
@@ -56,12 +57,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 			){
 			check_microtable(dataset)
 			check_taxa_abund(dataset)
+			if(! taxrank %in% names(dataset$taxa_abund)){
+				stop("The input taxrank: ", taxrank, " is not found! Please check it!")
+			}
 			sample_table <- dataset$sample_table
 			if("Sample" %in% colnames(sample_table)){
 				colnames(sample_table)[colnames(sample_table) == "Sample"] <- "Sample_replace"
-			}
-			if(! taxrank %in% names(dataset$taxa_abund)){
-				stop("The input taxrank: ", taxrank, " is not found! Please check it!")
 			}
 			abund_data <- dataset$taxa_abund[[taxrank]] %>% 
 				rownames_to_column(var = "Taxonomy") %>% 

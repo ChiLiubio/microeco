@@ -40,7 +40,7 @@ generate_p_siglabel <- function(x, nonsig = ""){
 
 check_taxa_abund <- function(obj, ...){
 	if(is.null(obj$taxa_abund)){
-		message("No taxa_abund list found. Calculate it with cal_abund function ...")
+		message("No taxa_abund list found. Calculate relative abundance with cal_abund function ...")
 		obj$cal_abund(...)
 	}
 }

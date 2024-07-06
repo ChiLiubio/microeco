@@ -4,9 +4,8 @@
 \alias{trans_abund}
 \title{Create \code{trans_abund} object for taxonomic abundance visualization.}
 \description{
-This class is a wrapper for the taxonomic abundance transformations and visualization.
+This class is a wrapper for the taxonomic abundance transformations and visualization (e.g., bar plot, boxplot, heatmap, pie chart and line chart).
 The converted data style is the long-format for \code{ggplot2} plot.
-The plotting methods include bar plot, boxplot, heatmap, pie chart and line chart.
 }
 \examples{
 
@@ -134,12 +133,14 @@ t1$plot_tern()
 \describe{
 \item{\code{dataset}}{default NULL; the object of \code{\link{microtable}} class.}
 
-\item{\code{taxrank}}{default "Phylum"; taxonomic rank.}
+\item{\code{taxrank}}{default "Phylum"; taxonomic level, i.e. a column name in \code{tax_table} of the input object.
+The function extracts the abundance from the \code{taxa_abund} list according to the names in the list. 
+If the \code{taxa_abund} list is NULL, the function can automatically calculate the relative abundance to generate \code{taxa_abund} list.}
 
 \item{\code{show}}{default 0; the relative abundance threshold for filtering the taxa with low abundance.}
 
 \item{\code{ntaxa}}{default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
-This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means it is unavailable.}
+This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means the parameter will be invalid.}
 
 \item{\code{groupmean}}{default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.}
 
