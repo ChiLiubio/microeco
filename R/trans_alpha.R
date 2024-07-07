@@ -401,7 +401,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							tmp_model_p <- car::Anova(tmp)
 							tmp_model_R2 <- try(performance::r2(tmp), silent = TRUE)
 							if(inherits(tmp_model_R2, "try-error")) {
-								message("R2 unavailable for ", k, " !")
+								if(k == measure[1]){
+									message("R2 is unavailable ...")
+								}
 								tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
 							}
 							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
