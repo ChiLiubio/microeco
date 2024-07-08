@@ -366,7 +366,7 @@ m1$rarefy_samples(sample.size = min(m1$sample_sums()))
 \if{html}{\out{<a id="method-microtable-tidy_dataset"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-tidy_dataset}{}}}
 \subsection{Method \code{tidy_dataset()}}{
-Trim all the data in the \code{microtable} object to make taxa and samples consistent. So the results are intersections.
+Trim all the data in the \code{microtable} object to make taxa and samples consistent. The results are intersections across data.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$tidy_dataset(main_data = FALSE)}\if{html}{\out{</div>}}
 }
@@ -380,7 +380,8 @@ including \code{taxa_abund}, \code{alpha_diversity} and \code{beta_diversity}, a
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-None, object of \code{microtable} itself cleaned up.
+None. The data in the object are tidied up. 
+	  If \code{tax_table} is in object, its row names are totally same with the row names of \code{otu_table}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

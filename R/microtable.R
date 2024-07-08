@@ -199,11 +199,12 @@ microtable <- R6Class(classname = "microtable",
 			suppressMessages(self$tidy_dataset())
 		},
 		#' @description
-		#' Trim all the data in the \code{microtable} object to make taxa and samples consistent. So the results are intersections.
+		#' Trim all the data in the \code{microtable} object to make taxa and samples consistent. The results are intersections across data.
 		#'
 		#' @param main_data default FALSE; if TRUE, only basic data in \code{microtable} object is trimmed. Otherwise, all data, 
 		#' 	  including \code{taxa_abund}, \code{alpha_diversity} and \code{beta_diversity}, are all trimed.
-		#' @return None, object of \code{microtable} itself cleaned up. 
+		#' @return None. The data in the object are tidied up. 
+		#' 	  If \code{tax_table} is in object, its row names are totally same with the row names of \code{otu_table}.
 		#' @examples
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
