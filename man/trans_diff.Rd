@@ -294,6 +294,7 @@ Plot the abundance of differential taxa
   add_sig = FALSE,
   add_sig_label = "Significance",
   add_sig_label_color = "black",
+  add_sig_text_size = 3.88,
   add_sig_tip_length = 0.01,
   y_start = 1.01,
   y_increase = 0.05,
@@ -336,6 +337,8 @@ If provided, overlook the levels in the group of sample_table.}
 \item{\code{add_sig_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
 
 \item{\code{add_sig_label_color}}{default "black"; the color for the label text when add_sig = TRUE.}
+
+\item{\code{add_sig_text_size}}{default 3.88; the size of text in added label.}
 
 \item{\code{add_sig_tip_length}}{default 0.01; the tip length for the added line when add_sig = TRUE.}
 

@@ -891,6 +891,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param add_sig default FALSE; whether add the significance label to the plot.
 		#' @param add_sig_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
 		#' @param add_sig_label_color default "black"; the color for the label text when add_sig = TRUE.
+		#' @param add_sig_text_size default 3.88; the size of text in added label.
 		#' @param add_sig_tip_length default 0.01; the tip length for the added line when add_sig = TRUE.
 		#' @param y_start default 1.01; the y axis position from which to add the label; the default 1.01 means 1.01 * Value;
 		#'   For method != "anova", all the start positions are same, i.e. Value = max(Mean+SD or Mean+SE); 
@@ -928,6 +929,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			add_sig = FALSE,
 			add_sig_label = "Significance",
 			add_sig_label_color = "black",
+			add_sig_text_size = 3.88,
 			add_sig_tip_length = 0.01,
 			y_start = 1.01,
 			y_increase = 0.05,
@@ -1059,7 +1061,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						add = add_letter_text, 
 						stringsAsFactors = FALSE
 						)
-					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, inherit.aes = FALSE)
+					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, size = add_sig_text_size, color = add_sig_label_color, inherit.aes = FALSE)
 				}else{
 					if(! "Letter" %in% colnames(diff_data)){
 						if(any(grepl("\\s-\\s", x_axis_order))){
@@ -1091,6 +1093,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 							y_position = y_position, 
 							xmin = x_min, 
 							xmax = x_max,
+							textsize = add_sig_text_size,
 							color = add_sig_label_color,
 							tip_length = add_sig_tip_length,
 							...
@@ -1123,7 +1126,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 							add = annotations, 
 							stringsAsFactors = FALSE
 						)
-						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, inherit.aes = FALSE)
+						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, size = add_sig_text_size, color = add_sig_label_color, inherit.aes = FALSE)
 					}
 				}
 			}
