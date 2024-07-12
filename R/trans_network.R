@@ -309,7 +309,7 @@ trans_network <- R6Class(classname = "trans_network",
 						stop("All the correlation coefficients larger than COR_cut parameter are not significant under current COR_p_thres parameter!")
 					}
 					cor_matrix[cor_matrix != 1] <- 0
-					network <- graph.adjacency(cor_matrix, mode = "undirected") # graph_from_adjacency_matrix
+					network <- graph_from_adjacency_matrix(cor_matrix, mode = "undirected")
 					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 					E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
 					if(COR_weight == T){
@@ -414,7 +414,7 @@ trans_network <- R6Class(classname = "trans_network",
 						b[t(beem.out$resample$b.stab < beemStatic_t_stab)] <- 0
 					}
 					b[abs(b) < beemStatic_t_strength] <- 0
-					network <- graph.adjacency(b, mode = 'directed', weighted = 'weight')
+					network <- graph_from_adjacency_matrix(b, mode = 'directed', weighted = 'weight')
 					V(network)$name <- rownames(use_abund)
 				}
 				if(ecount(network) == 0){
