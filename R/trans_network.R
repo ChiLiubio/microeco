@@ -219,7 +219,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   the threshold used to limit the number of interactions (stability); same with the t.stab parameter in showInteraction function of beemStatic package.
 		#' @param add_taxa_name default "Phylum"; one or more taxonomic rank name; used to add taxonomic rank name to network node properties.
 		#' @param delete_unlinked_nodes default TRUE; whether delete the nodes without any link.
-		#' @param usename_rawtaxa_when_taxalevel_notOTU default FALSE; whether use OTU name as representatives of taxa when \code{taxa_level != "OTU"}.
+		#' @param usename_rawtaxa_notOTU default FALSE; whether use OTU name as representatives of taxa when \code{taxa_level != "OTU"}.
 		#'   Default \code{FALSE} means using taxonomic information of \code{taxa_level} instead of OTU name.
 		#' @param ... parameters pass to \code{SpiecEasi::spiec.easi} when \code{network_method = "SpiecEasi"};
 		#'   pass to \code{NetCoMi::netConstruct} when \code{network_method = "gcoda"}; 
@@ -255,7 +255,7 @@ trans_network <- R6Class(classname = "trans_network",
 			beemStatic_t_stab = 0.8,
 			add_taxa_name = "Phylum",
 			delete_unlinked_nodes = TRUE,
-			usename_rawtaxa_when_taxalevel_notOTU = FALSE,
+			usename_rawtaxa_notOTU = FALSE,
 			...
 			){
 			private$check_igraph()
@@ -295,8 +295,7 @@ trans_network <- R6Class(classname = "trans_network",
 						message("Start COR optimizing ...")
 						tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2], seq_by = COR_optimization_seq)
 						message("The optimized COR threshold: ", tc1, "...\n")
-					}
-					else {
+					}else{
 						tc1 <- COR_cut
 					}
 					diag(cortable) <- 0
@@ -310,7 +309,7 @@ trans_network <- R6Class(classname = "trans_network",
 						stop("All the correlation coefficients larger than COR_cut parameter are not significant under current COR_p_thres parameter!")
 					}
 					cor_matrix[cor_matrix != 1] <- 0
-					network <- graph.adjacency(cor_matrix, mode = "undirected")
+					network <- graph.adjacency(cor_matrix, mode = "undirected") # graph_from_adjacency_matrix
 					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 					E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
 					if(COR_weight == T){
@@ -458,14 +457,17 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 
 				if(taxa_level != "OTU"){
-					if(usename_rawtaxa_when_taxalevel_notOTU){
-						network <- set_vertex_attr(network, taxa_level, value = V(network)$name %>% 
-							taxa_table[., taxa_level] %>% 
-							gsub("^.__", "", .))
+					tmp <- V(network)$name %>% 
+						taxa_table[., taxa_level] %>% 
+						gsub("^.__", "", .)					
+					if(any(is.na(tmp))){
+						message("NA is found! For those NA, use original names ...")
+						tmp[is.na(tmp)] <- V(network)$name[is.na(tmp)]
+					}
+					if(usename_rawtaxa_notOTU){
+						network <- set_vertex_attr(network, taxa_level, value = tmp)
 					}else{
-						network <- set_vertex_attr(network, "name", value = V(network)$name %>% 
-							taxa_table[., taxa_level] %>% 
-							gsub("^.__", "", .))
+						network <- set_vertex_attr(network, "name", value = tmp)
 					}
 				}
 				

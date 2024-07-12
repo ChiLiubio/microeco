@@ -316,7 +316,7 @@ Construct network based on the \code{igraph} package or \code{SpiecEasi} package
   beemStatic_t_stab = 0.8,
   add_taxa_name = "Phylum",
   delete_unlinked_nodes = TRUE,
-  usename_rawtaxa_when_taxalevel_notOTU = FALSE,
+  usename_rawtaxa_notOTU = FALSE,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -387,7 +387,7 @@ the threshold used to limit the number of interactions (stability); same with th
 
 \item{\code{delete_unlinked_nodes}}{default TRUE; whether delete the nodes without any link.}
 
-\item{\code{usename_rawtaxa_when_taxalevel_notOTU}}{default FALSE; whether use OTU name as representatives of taxa when \code{taxa_level != "OTU"}.
+\item{\code{usename_rawtaxa_notOTU}}{default FALSE; whether use OTU name as representatives of taxa when \code{taxa_level != "OTU"}.
 Default \code{FALSE} means using taxonomic information of \code{taxa_level} instead of OTU name.}
 
 \item{\code{...}}{parameters pass to \code{SpiecEasi::spiec.easi} when \code{network_method = "SpiecEasi"};
