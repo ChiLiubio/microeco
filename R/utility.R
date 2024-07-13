@@ -94,6 +94,7 @@ filter_lowabund_feature <- function(abund_table, filter_thres){
 	output
 }
 
+
 expand_colors <- function(color_values, output_length){
 	if(output_length <= length(color_values)){
 		total_colors <- color_values[1:output_length]
@@ -120,6 +121,7 @@ expand_colors <- function(color_values, output_length){
 	}
 	total_colors
 }
+
 
 #' Copy an R6 class object
 #'

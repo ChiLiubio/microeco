@@ -442,6 +442,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   Heatmap is employed automatically to show the significances of differential test 
 		#' 	 when the formula is found in the \code{res_diff} table in the object.
 		#'
+		#' @param plot_type default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "errorbar".
+		#'   "ggboxplot" and "ggdotplot" are the functions from ggpubr package.
+		#'   All the methods with ggpubr package invoke the \code{data_alpha} table in the object. 
+		#'   "errorbar" represents mean-sd or mean-se plot based on ggplot2 package by invoking the \code{data_stat} table in the object.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
 		#' @param measure default "Shannon"; one alpha diversity index in the object.
 		#' @param group default NULL; group name used for the plot.
@@ -461,18 +465,16 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param xtext_size default 13; x axis text size. NULL means the default size in ggplot2.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param barwidth default 0.9; the bar width in plot; applied when by_group is not NULL.
-		#' @param use_boxplot default TRUE; TRUE denotes boxplot by using the data_alpha table in the object. 
-		#' 	  FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the object.
-		#' @param plot_SE default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.
-		#' @param errorbar_size default 1; errorbar size. Available when \code{use_boxplot = FALSE}.
-		#' @param errorbar_width default 0.2; errorbar width. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.
-		#' @param point_size default 3; point size for taxa. Available when \code{use_boxplot = FALSE}.
-		#' @param point_alpha default 0.8; point transparency. Available when \code{use_boxplot = FALSE}.
-		#' @param add_line default FALSE; whether add line. Available when \code{use_boxplot = FALSE}.
-		#' @param line_size default 0.8; line size when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
-		#' @param line_type default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
-		#' @param line_color default "grey50"; line color when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.
-		#' @param line_alpha default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.
+		#' @param plot_SE default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}. Available when \code{plot_type = "errorbar"}.
+		#' @param errorbar_size default 1; errorbar size. Available when \code{plot_type = "errorbar"}.
+		#' @param errorbar_width default 0.2; errorbar width. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.
+		#' @param point_size default 3; point size for taxa. Available when \code{plot_type = "errorbar"}.
+		#' @param point_alpha default 0.8; point transparency. Available when \code{plot_type = "errorbar"}.
+		#' @param add_line default FALSE; whether add line. Available when \code{plot_type = "errorbar"}.
+		#' @param line_size default 0.8; line size when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.
+		#' @param line_type default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.
+		#' @param line_color default "grey50"; line color when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.
+		#' @param line_alpha default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.
 		#' @param heatmap_cell default "P.unadj"; the column of \code{res_diff} table for the cell of heatmap when formula with multiple factors is found in the method.
 		#' @param heatmap_sig default "Significance"; the column of \code{res_diff} for the significance label of heatmap.
 		#' @param heatmap_x default "Factors"; the column of \code{res_diff} for the x axis of heatmap.
@@ -488,7 +490,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' 	  Point size and alpha can be adjusted with parameters \code{point_size} and \code{point_alpha}. 
 		#' 	  The significance label size can be adjusted with parameter \code{add_sig_text_size}.
 		#' 	  Furthermore, the vertical line around 0 can be adjusted with parameters \code{line_size}, \code{line_type}, \code{line_color} and \code{line_alpha}. 
-		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
+		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function when \code{plot_type = "ggboxplot"}, or 
+		#' 	  \code{ggpubr::ggdotplot} function when \code{plot_type = "ggdotplot"}, or
 		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.
 		#' @return ggplot.
 		#' @examples
@@ -501,6 +504,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' t1$plot_alpha(measure = "Shannon", add_sig = TRUE)
 		#' }
 		plot_alpha = function(
+			plot_type = "ggboxplot",
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			measure = "Shannon",
 			group = NULL,
@@ -516,7 +520,6 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			xtext_size = 13,
 			ytitle_size = 17,
 			barwidth = 0.9,
-			use_boxplot = TRUE,
 			plot_SE = TRUE,
 			errorbar_size = 1,
 			errorbar_width = 0.2,
@@ -550,14 +553,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				if(all(c("Estimate", "Std.Error") %in% colnames(self$res_diff))){
 					if(length(unique(self$res_diff$Measure)) == 1){
 						message("For one measure, employ coefficient point and errorbar instead of heatmap ...")
-						use_errorplot <- TRUE
+						use_single_errorplot <- TRUE
 					}else{
-						use_errorplot <- FALSE
+						use_single_errorplot <- FALSE
 					}
 				}else{
-					use_errorplot <- FALSE
+					use_single_errorplot <- FALSE
 				}
-				if(use_errorplot){
+				if(use_single_errorplot){
 					tmp_data <- self$res_diff
 					tmp_data %<>% .[!is.na(.$Estimate), ]
 					
@@ -632,7 +635,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				
 				use_data <- self$data_alpha[self$data_alpha$Measure == measure, ]
-				if(!use_boxplot){
+				if(plot_type == "errorbar"){
 					use_data_plot <- self$data_stat[self$data_stat$Measure == measure, ]
 				}
 				
@@ -650,13 +653,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						}) %>% unlist
 					}
 					use_data[, group] %<>% factor(., levels = mean_orders)
-					if(!use_boxplot){
+					if(plot_type == "errorbar"){
 						use_data_plot[, group] %<>% factor(., levels = mean_orders)
 					}
 				}else{
 					if(!is.factor(use_data[, group])){
 						use_data[, group] %<>% as.factor
-						if(!use_boxplot){
+						if(plot_type == "errorbar"){
 							use_data_plot[, group] %<>% as.factor
 						}
 					}
@@ -667,7 +670,11 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 				}
 				color_values <- expand_colors(color_values, length(unique(use_data[, group])))
-				if(use_boxplot){
+				
+				if(! plot_type %in% c("ggboxplot", "ggdotplot", "errorbar")){
+					stop("Unknown plot_type: ", plot_type, "!")
+				}
+				if(plot_type == "ggboxplot"){
 					if(is.null(by_group)){
 						p <- ggpubr::ggboxplot(
 							use_data, x = group, y = "Value", color = group, 
@@ -681,7 +688,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							...
 							)
 					}
-				}else{
+				}
+				if(plot_type == "ggdotplot"){
+					if(is.null(by_group)){
+						p <- ggpubr::ggdotplot(use_data, x = group, y = "Value", color = group, palette = color_values, ...)
+					}else{
+						p <- ggpubr::ggdotplot(use_data, x = by_group, y = "Value", color = group, palette = color_values, ...)
+					}
+				}
+				if(plot_type == "errorbar"){
 					colnames(use_data_plot)[colnames(use_data_plot) == "Mean"] <- "Value"
 					if(is.null(by_group)){
 						p <- ggplot(use_data_plot, aes(x = .data[[group]], y = .data[["Value"]], color = .data[[group]], group = 1))

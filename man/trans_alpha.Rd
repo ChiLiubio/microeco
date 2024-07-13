@@ -204,6 +204,7 @@ Plot the alpha diversity. Box plot is used for the visualization of alpha divers
 	 when the formula is found in the \code{res_diff} table in the object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
+  plot_type = "ggboxplot",
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   measure = "Shannon",
   group = NULL,
@@ -219,7 +220,6 @@ Plot the alpha diversity. Box plot is used for the visualization of alpha divers
   xtext_size = 13,
   ytitle_size = 17,
   barwidth = 0.9,
-  use_boxplot = TRUE,
   plot_SE = TRUE,
   errorbar_size = 1,
   errorbar_width = 0.2,
@@ -243,6 +243,11 @@ Plot the alpha diversity. Box plot is used for the visualization of alpha divers
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{plot_type}}{default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "errorbar".
+"ggboxplot" and "ggdotplot" are the functions from ggpubr package.
+All the methods with ggpubr package invoke the \code{data_alpha} table in the object. 
+"errorbar" represents mean-sd or mean-se plot based on ggplot2 package by invoking the \code{data_stat} table in the object.}
+
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.}
 
 \item{\code{measure}}{default "Shannon"; one alpha diversity index in the object.}
@@ -277,28 +282,25 @@ this parameter is also used to label the letters of anova result with the fixed 
 
 \item{\code{barwidth}}{default 0.9; the bar width in plot; applied when by_group is not NULL.}
 
-\item{\code{use_boxplot}}{default TRUE; TRUE denotes boxplot by using the data_alpha table in the object. 
-FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the object.}
-
 \item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.}
 
-\item{\code{errorbar_size}}{default 1; errorbar size. Available when \code{use_boxplot = FALSE}.}
+\item{\code{errorbar_size}}{default 1; errorbar size. Available when \code{plot_type = "errorbar"}.}
 
-\item{\code{errorbar_width}}{default 0.2; errorbar width. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.}
+\item{\code{errorbar_width}}{default 0.2; errorbar width. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.}
 
-\item{\code{point_size}}{default 3; point size for taxa. Available when \code{use_boxplot = FALSE}.}
+\item{\code{point_size}}{default 3; point size for taxa. Available when \code{plot_type = "errorbar"}.}
 
-\item{\code{point_alpha}}{default 0.8; point transparency. Available when \code{use_boxplot = FALSE}.}
+\item{\code{point_alpha}}{default 0.8; point transparency. Available when \code{plot_type = "errorbar"}.}
 
-\item{\code{add_line}}{default FALSE; whether add line. Available when \code{use_boxplot = FALSE}.}
+\item{\code{add_line}}{default FALSE; whether add line. Available when \code{plot_type = "errorbar"}.}
 
-\item{\code{line_size}}{default 0.8; line size when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
+\item{\code{line_size}}{default 0.8; line size when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.}
 
-\item{\code{line_type}}{default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
+\item{\code{line_type}}{default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.}
 
-\item{\code{line_color}}{default "grey50"; line color when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE} and \code{by_group} is NULL.}
+\item{\code{line_color}}{default "grey50"; line color when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.}
 
-\item{\code{line_alpha}}{default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{use_boxplot = FALSE}.}
+\item{\code{line_alpha}}{default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.}
 
 \item{\code{heatmap_cell}}{default "P.unadj"; the column of \code{res_diff} table for the cell of heatmap when formula with multiple factors is found in the method.}
 
@@ -321,8 +323,12 @@ Point size and alpha can be adjusted with parameters \code{point_size} and \code
 The significance label size can be adjusted with parameter \code{add_sig_text_size}.
 Furthermore, the vertical line around 0 can be adjusted with parameters \code{line_size}, \code{line_type}, \code{line_color} and \code{line_alpha}.}
 
-\item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when box plot is used or 
+\item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when \code{plot_type = "ggboxplot"}, or 
+\code{ggpubr::ggdotplot} function when \code{plot_type = "ggdotplot"}, or
 \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.}
+
+\item{\code{use_boxplot}}{default TRUE; TRUE 
+FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the object.}
 }
 \if{html}{\out{</div>}}
 }
