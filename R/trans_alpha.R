@@ -438,18 +438,21 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			message('The result is stored in object$res_diff ...')
 		},
 		#' @description
-		#' Plot the alpha diversity. Box plot is used for the visualization of alpha diversity when the \code{group} is found in the object.
-		#'   Heatmap is employed automatically to show the significances of differential test 
-		#' 	 when the formula is found in the \code{res_diff} table in the object.
+		#' Plot the alpha diversity. 
+		#'   Box plot (and others for visualizing data in groups of single factor) is used for the visualization of alpha diversity when the \code{group} is found in the object.
+		#'   When the formula is found in the \code{res_diff} table in the object, 
+		#'   heatmap is employed automatically to show the significances of differential test for multiple indexes, 
+		#' 	 and errorbar (coefficient and standard errors) can be used for single index.
 		#'
-		#' @param plot_type default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "errorbar".
-		#'   "ggboxplot" and "ggdotplot" are the functions from ggpubr package.
-		#'   All the methods with ggpubr package invoke the \code{data_alpha} table in the object. 
-		#'   "errorbar" represents mean-sd or mean-se plot based on ggplot2 package by invoking the \code{data_stat} table in the object.
+		#' @param plot_type default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", and "errorbar".
+		#'   The options starting with "gg" are function names coming from \code{ggpubr} package.
+		#'   All those methods with \code{ggpubr} package use the \code{data_alpha} table in the object. 
+		#'   "errorbar" represents mean-sd or mean-se plot based on \code{ggplot2} package by invoking the \code{data_stat} table in the object.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
 		#' @param measure default "Shannon"; one alpha diversity index in the object.
 		#' @param group default NULL; group name used for the plot.
-		#' @param add default NULL; add another plot element; passed the \code{add} parameter of \code{ggboxplot}, or \code{ggdotplot} function in \code{ggpubr} package.
+		#' @param add default NULL; add another plot element; passed to the \code{add} parameter of the function (e.g., \code{ggboxplot}) from \code{ggpubr} package 
+		#'   when \code{plot_type} starts with "gg" (functions coming from ggpubr package).
 		#' @param add_sig default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
 		#'   This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.
 		#' @param add_sig_label default "Significance"; select a colname of \code{object$res_diff} for the label text when 'Letter' is not in the table, 
@@ -490,8 +493,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' 	  Point size and alpha can be adjusted with parameters \code{point_size} and \code{point_alpha}. 
 		#' 	  The significance label size can be adjusted with parameter \code{add_sig_text_size}.
 		#' 	  Furthermore, the vertical line around 0 can be adjusted with parameters \code{line_size}, \code{line_type}, \code{line_color} and \code{line_alpha}. 
-		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function when \code{plot_type = "ggboxplot"}, or 
-		#' 	  \code{ggpubr::ggdotplot} function when \code{plot_type = "ggdotplot"}, or
+		#' @param ... parameters passing to \code{ggpubr::ggboxplot} function (or other functions shown by \code{plot_type} parameter when it starts with "gg") or 
 		#' 	  \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.
 		#' @return ggplot.
 		#' @examples
@@ -671,7 +673,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				color_values <- expand_colors(color_values, length(unique(use_data[, group])))
 				
-				if(! plot_type %in% c("ggboxplot", "ggdotplot", "errorbar")){
+				if(! plot_type %in% c("ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", "errorbar")){
 					stop("Unknown plot_type: ", plot_type, "!")
 				}
 				if(is.null(add)){
@@ -679,24 +681,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}else{
 					require(ggpubr)
 				}
-				if(plot_type == "ggboxplot"){
+				if(plot_type %in% c("ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot")){
+					use_ggpubr_function <- eval(parse(text = paste0("ggpubr::", plot_type)))
 					if(is.null(by_group)){
-						p <- ggpubr::ggboxplot(
-							use_data, x = group, y = "Value", color = group, palette = color_values, add = add,
-							...
-							)
+						p <- use_ggpubr_function(use_data, x = group, y = "Value", color = group, palette = color_values, add = add, ...)
 					}else{
-						p <- ggpubr::ggboxplot(
-							use_data, x = by_group, y = "Value", color = group, palette = color_values, add = add, 
-							...
-							)
-					}
-				}
-				if(plot_type == "ggdotplot"){
-					if(is.null(by_group)){
-						p <- ggpubr::ggdotplot(use_data, x = group, y = "Value", color = group, palette = color_values, add = add, ...)
-					}else{
-						p <- ggpubr::ggdotplot(use_data, x = by_group, y = "Value", color = group, palette = color_values, add = add, ...)
+						p <- use_ggpubr_function(use_data, x = by_group, y = "Value", color = group, palette = color_values, add = add, ...)
 					}
 				}
 				if(plot_type == "errorbar"){

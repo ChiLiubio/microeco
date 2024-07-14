@@ -199,9 +199,11 @@ t1$cal_diff(method = "anova")
 \if{html}{\out{<a id="method-trans_alpha-plot_alpha"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_alpha-plot_alpha}{}}}
 \subsection{Method \code{plot_alpha()}}{
-Plot the alpha diversity. Box plot is used for the visualization of alpha diversity when the \code{group} is found in the object.
-  Heatmap is employed automatically to show the significances of differential test 
-	 when the formula is found in the \code{res_diff} table in the object.
+Plot the alpha diversity. 
+  Box plot (and others for visualizing data in groups of single factor) is used for the visualization of alpha diversity when the \code{group} is found in the object.
+  When the formula is found in the \code{res_diff} table in the object, 
+  heatmap is employed automatically to show the significances of differential test for multiple indexes, 
+	 and errorbar (coefficient and standard errors) can be used for single index.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_alpha$plot_alpha(
   plot_type = "ggboxplot",
@@ -243,10 +245,10 @@ Plot the alpha diversity. Box plot is used for the visualization of alpha divers
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{plot_type}}{default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "errorbar".
-"ggboxplot" and "ggdotplot" are the functions from ggpubr package.
-All the methods with ggpubr package invoke the \code{data_alpha} table in the object. 
-"errorbar" represents mean-sd or mean-se plot based on ggplot2 package by invoking the \code{data_stat} table in the object.}
+\item{\code{plot_type}}{default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", and "errorbar".
+The options starting with "gg" are function names coming from \code{ggpubr} package.
+All those methods with \code{ggpubr} package use the \code{data_alpha} table in the object. 
+"errorbar" represents mean-sd or mean-se plot based on \code{ggplot2} package by invoking the \code{data_stat} table in the object.}
 
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.}
 
@@ -254,7 +256,8 @@ All the methods with ggpubr package invoke the \code{data_alpha} table in the ob
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
-\item{\code{add}}{default NULL; add another plot element; passed the \code{add} parameter of \code{ggboxplot}, or \code{ggdotplot} function in \code{ggpubr} package.}
+\item{\code{add}}{default NULL; add another plot element; passed to the \code{add} parameter of the function (e.g., \code{ggboxplot}) from \code{ggpubr} package 
+when \code{plot_type} starts with "gg" (functions coming from ggpubr package).}
 
 \item{\code{add_sig}}{default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
 This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.}
@@ -323,8 +326,7 @@ Point size and alpha can be adjusted with parameters \code{point_size} and \code
 The significance label size can be adjusted with parameter \code{add_sig_text_size}.
 Furthermore, the vertical line around 0 can be adjusted with parameters \code{line_size}, \code{line_type}, \code{line_color} and \code{line_alpha}.}
 
-\item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when \code{plot_type = "ggboxplot"}, or 
-\code{ggpubr::ggdotplot} function when \code{plot_type = "ggdotplot"}, or
+\item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function (or other functions shown by \code{plot_type} parameter when it starts with "gg") or 
 \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.}
 }
 \if{html}{\out{</div>}}
