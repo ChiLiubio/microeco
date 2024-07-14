@@ -208,11 +208,11 @@ Plot the alpha diversity. Box plot is used for the visualization of alpha divers
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   measure = "Shannon",
   group = NULL,
+  add = NULL,
   add_sig = TRUE,
   add_sig_label = "Significance",
   add_sig_text_size = 3.88,
   add_sig_label_num_dec = 4,
-  boxplot_add = "jitter",
   order_x_mean = FALSE,
   y_start = 0.1,
   y_increase = 0.05,
@@ -254,6 +254,8 @@ All the methods with ggpubr package invoke the \code{data_alpha} table in the ob
 
 \item{\code{group}}{default NULL; group name used for the plot.}
 
+\item{\code{add}}{default NULL; add another plot element; passed the \code{add} parameter of \code{ggboxplot}, or \code{ggdotplot} function in \code{ggpubr} package.}
+
 \item{\code{add_sig}}{default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
 This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.}
 
@@ -263,8 +265,6 @@ such as 'P.adj' or 'Significance'.}
 \item{\code{add_sig_text_size}}{default 3.88; the size of text in added label.}
 
 \item{\code{add_sig_label_num_dec}}{default 4; reserved decimal places when the parameter \code{add_sig_label} use numeric column, like 'P.adj'.}
-
-\item{\code{boxplot_add}}{default "jitter"; points type, see the add parameter in \code{ggpubr::ggboxplot}.}
 
 \item{\code{order_x_mean}}{default FALSE; whether order x axis by the means of groups from large to small.}
 
@@ -282,7 +282,7 @@ this parameter is also used to label the letters of anova result with the fixed 
 
 \item{\code{barwidth}}{default 0.9; the bar width in plot; applied when by_group is not NULL.}
 
-\item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}.}
+\item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}. Available when \code{plot_type = "errorbar"}.}
 
 \item{\code{errorbar_size}}{default 1; errorbar size. Available when \code{plot_type = "errorbar"}.}
 
@@ -326,9 +326,6 @@ Furthermore, the vertical line around 0 can be adjusted with parameters \code{li
 \item{\code{...}}{parameters passing to \code{ggpubr::ggboxplot} function when \code{plot_type = "ggboxplot"}, or 
 \code{ggpubr::ggdotplot} function when \code{plot_type = "ggdotplot"}, or
 \code{plot_cor} function in \code{\link{trans_env}} class for the heatmap of multiple factors when formula is found in the \code{res_diff} of the object.}
-
-\item{\code{use_boxplot}}{default TRUE; TRUE 
-FALSE represents mean-sd or mean-se plot by invoking the data_stat table in the object.}
 }
 \if{html}{\out{</div>}}
 }
