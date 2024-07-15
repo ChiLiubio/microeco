@@ -213,8 +213,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
 				}else{
 					if(! taxa_level %in% names(tmp_dataset$taxa_abund)){
-						message("Provided taxa_level: ", taxa_level, " not in tax_table of dataset; use features in otu_table ...")
-						tmp_dataset$add_rownames2taxonomy(use_name = taxa_level)
+						if(! taxa_level %in% colnames(tmp_dataset$tax_table)){
+							message("Provided taxa_level: ", taxa_level, " not in tax_table of input data set; use features in otu_table ...")
+							tmp_dataset$add_rownames2taxonomy(use_name = taxa_level)
+						}
 						suppressMessages(tmp_dataset$cal_abund(rel = TRUE))
 					}
 					abund_table <- tmp_dataset$taxa_abund[[taxa_level]]
