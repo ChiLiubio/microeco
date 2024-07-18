@@ -60,7 +60,10 @@ microtable <- R6Class(classname = "microtable",
 					`row.names<-`(.$SampleID)
 			}else{
 				if(!inherits(sample_table, "data.frame")){
-					stop("The input sample_table must be data.frame format!")
+					stop("Input sample_table must be data.frame format!")
+				}
+				if(inherits(sample_table, "tbl_df")){
+					stop("Input sample_table is of tbl_df class! It may be created using tibble package! Please convert it to traditional data.frame class!")
 				}
 				self$sample_table <- sample_table
 			}
