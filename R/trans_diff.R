@@ -1449,8 +1449,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 			annotation_shape = 22,
 			annotation_shape_size = 5
 			){
-			# developed based on microbiomeMarker
+			# developed based on microbiomeMarker package
 			abund_table <- self$abund_table
+			if(! all(grepl("^.__", rownames(abund_table)))){
+				stop("It seems that there is no standard prefix for taxonomic information (e.g., k__ and p__), ",  
+					"which is necessary for this analysis. Please use the tidy_taxonomy function to tidy the tax_table of the microtable object, ",
+					"re-run cal_abund function to calculate relative abundance, and then re-perform the LEfSe analysis!")
+			}
 			marker_table <- self$res_diff %>% dropallfactors
 			method <- self$method
 			
