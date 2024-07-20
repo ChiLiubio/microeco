@@ -94,7 +94,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param remove_unknown default TRUE; whether remove unknown features that donot have clear classification information.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
-		#' @param lefse_norm default 1000000; scale value in lefse.
+		#' @param lefse_norm default 1000000; normalization value used in lefse to scale abundances for each level. 
+		#'    A \code{lefse_norm} value < 0 (e.g., -1) means no normalization same with the LEfSe python version.
 		#' @param nresam default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".
 		#' @param boots default 30; bootstrap test number for method = "lefse" or "rf".
 		#' @param rf_imp_type default 2; the type of feature importance in random forest when \code{method = "rf"}. 
@@ -209,6 +210,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				check_taxa_abund(tmp_dataset)
 				
+				if(method == "lefse"){
+					if(lefse_norm > 0){
+						tmp_dataset$taxa_abund %<>% lapply(function(x){as.data.frame(apply(x, 2, function(y){y/sum(y)}))})
+					}
+				}
+				
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
 				}else{
@@ -236,8 +243,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 					if(method == "lefse"){
-						abund_table %<>% {. * lefse_norm}
-						self$lefse_norm <- lefse_norm
+						if(lefse_norm > 0){
+							abund_table %<>% {. * lefse_norm}
+							self$lefse_norm <- lefse_norm
+						}
 					}
 					
 					if(method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta")){
@@ -814,7 +823,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				
 				# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
 				if(grepl("lefse", method, ignore.case = TRUE)){
-					res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
+					if(lefse_norm > 0){
+						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
+					}else{
+						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
+					}
 				}else{
 					if(grepl("rf", method, ignore.case = TRUE)){
 						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")

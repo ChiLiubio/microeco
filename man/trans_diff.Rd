@@ -197,7 +197,8 @@ Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test",
 
 \item{\code{lefse_min_subsam}}{default 10; sample numbers required in the subgroup test.}
 
-\item{\code{lefse_norm}}{default 1000000; scale value in lefse.}
+\item{\code{lefse_norm}}{default 1000000; normalization value used in lefse to scale abundances for each level. 
+A \code{lefse_norm} value < 0 (e.g., -1) means no normalization same with the LEfSe python version.}
 
 \item{\code{nresam}}{default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".}
 
