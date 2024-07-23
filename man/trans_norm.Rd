@@ -97,7 +97,7 @@ Methods for normalization:
             It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
             where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i)} is the geometric mean of abundances for sample \eqn{i}.
             A pseudocount need to be added to deal with the zero. For more information, please see the 'clr' method in \code{decostand} function of vegan package.
-  \item \code{"rclr"}: Robust centered log-ratio normalization <doi: doi:10.1128/msystems.00016-19>.
+  \item \code{"rclr"}: Robust centered log-ratio normalization <doi:10.1128/msystems.00016-19>.
             It is defined:  \deqn{rclr_{ki} = \log\frac{x_{ki}}{g(x_i > 0)}}
             where \eqn{x_{ki}} is the abundance of \eqn{k}th feature in sample \eqn{i}, \eqn{g(x_i > 0)} is the geometric mean of abundances (> 0) for sample \eqn{i}.
             In rclr, zero values are kept as zeroes, and not taken into account.

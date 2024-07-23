@@ -18,9 +18,10 @@ tidy_taxonomy(
 )
 }
 \arguments{
-\item{taxonomy_table}{a data.frame with taxonomic information.}
+\item{taxonomy_table}{a data.frame with taxonomic information (rows are features; columns are taxonomic levels); 
+or a microtable object with \code{tax_table} in it.}
 
-\item{column}{default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.}
+\item{column}{default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this specific column.}
 
 \item{pattern}{default c(".*unassigned.*", ".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*", ".*No blast hit.*", ".*Incertae.sedis.*"); 
 the characters (regular expressions) to be removed or replaced; removed when parameter \code{replacement = ""}, 

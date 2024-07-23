@@ -177,8 +177,9 @@ trycharnum <- function(x){
 
 #' Clean up the taxonomic table to make taxonomic assignments consistent.
 #'
-#' @param taxonomy_table a data.frame with taxonomic information.
-#' @param column default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this column.
+#' @param taxonomy_table a data.frame with taxonomic information (rows are features; columns are taxonomic levels); 
+#'   or a microtable object with \code{tax_table} in it.
+#' @param column default "all"; "all" or a number; 'all' represents cleaning up all the columns; a number represents cleaning up this specific column.
 #' @param pattern default c(".*unassigned.*", ".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*", ".*No blast hit.*", ".*Incertae.sedis.*"); 
 #'   the characters (regular expressions) to be removed or replaced; removed when parameter \code{replacement = ""}, 
 #'   replaced when parameter replacement has something; Note that the capital and small letters are not distinguished when \code{ignore.case = TRUE}.
@@ -198,29 +199,46 @@ tidy_taxonomy <- function(taxonomy_table,
 	ignore.case = TRUE,
 	na_fill = ""
 	){
+	if(inherits(taxonomy_table, "data.frame")){
+		use_tax_table <- taxonomy_table
+	}else{
+		if(inherits(taxonomy_table, "microtable")){
+			use_tax_table <- taxonomy_table$tax_table
+			if(is.null(use_tax_table)){
+				stop("No tax_table found in input microtable object!")
+			}
+		}else{
+			stop("The input taxonomy_table must be either data.frame or microtable class!")
+		}
+	}
 	if(column == "all"){
-		taxonomy_table[] <- lapply(seq_len(ncol(taxonomy_table)), 
-			function(x) tidy_taxonomy_column(taxonomy_table, i = x, pattern = pattern, replacement = replacement, ignore.case = ignore.case, na_fill = na_fill))
+		use_tax_table[] <- lapply(seq_len(ncol(use_tax_table)), 
+			function(x) tidy_taxonomy_column(use_tax_table, i = x, pattern = pattern, replacement = replacement, ignore.case = ignore.case, na_fill = na_fill))
 	}else{
 		if(!inherits(column, "numeric")){
-			stop("The input column is not numeric class !")
+			stop("The input column should be either 'all' or a number!")
 		}
-		taxonomy_table[, column] <- tidy_taxonomy_column(taxonomy_table, i = column, pattern = pattern, 
+		use_tax_table[, column] <- tidy_taxonomy_column(use_tax_table, i = column, pattern = pattern, 
 			replacement = replacement, ignore.case = ignore.case, na_fill = na_fill)
 	}
-	taxonomy_table
+	if(inherits(taxonomy_table, "data.frame")){
+		use_tax_table
+	}else{
+		taxonomy_table$tax_table <- use_tax_table
+		taxonomy_table
+	}
 }
 
-tidy_taxonomy_column <- function(taxonomy_table, i, pattern, replacement, ignore.case, na_fill){
-	taxonomy_table[, i] <- gsub(paste0(pattern, collapse = "|"), replacement, taxonomy_table[, i], ignore.case = ignore.case)
-	taxonomy_table[, i] <- gsub("^\\s+|\\s+$", "", taxonomy_table[, i])
-	taxonomy_table[, i] <- gsub('"', "", taxonomy_table[, i], fixed = TRUE)
+tidy_taxonomy_column <- function(tax_df, i, pattern, replacement, ignore.case, na_fill){
+	tax_df[, i] <- gsub(paste0(pattern, collapse = "|"), replacement, tax_df[, i], ignore.case = ignore.case)
+	tax_df[, i] <- gsub("^\\s+|\\s+$", "", tax_df[, i])
+	tax_df[, i] <- gsub('"', "", tax_df[, i], fixed = TRUE)
 	# first double, then single
-	taxonomy_table[, i] <- gsub("^.*?__", "", taxonomy_table[, i])
-	taxonomy_table[, i] <- gsub("^._", "", taxonomy_table[, i])
-	taxonomy_table[, i][is.na(taxonomy_table[, i])] <- na_fill
-	taxonomy_table[, i] <- paste0(tolower(substr(colnames(taxonomy_table)[i], 1, 1)), "__", taxonomy_table[, i])
-	taxonomy_table[, i]
+	tax_df[, i] <- gsub("^.*?__", "", tax_df[, i])
+	tax_df[, i] <- gsub("^._", "", tax_df[, i])
+	tax_df[, i][is.na(tax_df[, i])] <- na_fill
+	tax_df[, i] <- paste0(tolower(substr(colnames(tax_df)[i], 1, 1)), "__", tax_df[, i])
+	tax_df[, i]
 }
 
 summarySE_inter <- function(usedata = NULL, measurevar, groupvars = NULL, na.rm = TRUE, more = FALSE) {
