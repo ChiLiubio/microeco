@@ -1264,10 +1264,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param point_size default 5; point size value.
 		#' @param point_alpha default 0.6; alpha value for the point color transparency.
 		#' @param line_size default 0.8; line size value.
+		#' @param line_color default "black"; fitted line color; only available when \code{group = NULL}.
 		#' @param line_se default TRUE; Whether show the confidence interval for the fitting.
 		#' @param line_se_color default "grey70"; the color to fill the confidence interval when \code{line_se = TRUE}.
-		#' @param line_alpha default 1; alpha value for the line color transparency.
-		#' @param line_color default "black"; fitted line color; only available when \code{group = NULL}.
+		#' @param line_alpha default 0.5; alpha value for the color transparency of line confidence interval.
 		#' @param pvalue_trim default 4; trim the decimal places of p value.
 		#' @param cor_coef_trim default 3; trim the decimal places of correlation coefficient.
 		#' @param lm_equation default TRUE; whether include the equation in the label when \code{type = "lm"}.
@@ -1303,10 +1303,10 @@ trans_env <- R6Class(classname = "trans_env",
 			point_size = 5,
 			point_alpha = 0.6,
 			line_size = 0.8,
-			line_alpha = 1,
 			line_color = "black",
 			line_se = TRUE,
 			line_se_color = "grey70",
+			line_alpha = 0.5,
 			pvalue_trim = 4, 
 			cor_coef_trim = 3,
 			lm_equation = TRUE,

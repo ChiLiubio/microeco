@@ -894,10 +894,10 @@ Scatter plot with fitted line based on the correlation or regression.\cr
   point_size = 5,
   point_alpha = 0.6,
   line_size = 0.8,
-  line_alpha = 1,
   line_color = "black",
   line_se = TRUE,
   line_se_color = "grey70",
+  line_alpha = 0.5,
   pvalue_trim = 4,
   cor_coef_trim = 3,
   lm_equation = TRUE,
@@ -959,13 +959,13 @@ If group_order is provided, disable the group orders or factor levels in the \co
 
 \item{\code{line_size}}{default 0.8; line size value.}
 
-\item{\code{line_alpha}}{default 1; alpha value for the line color transparency.}
-
 \item{\code{line_color}}{default "black"; fitted line color; only available when \code{group = NULL}.}
 
 \item{\code{line_se}}{default TRUE; Whether show the confidence interval for the fitting.}
 
 \item{\code{line_se_color}}{default "grey70"; the color to fill the confidence interval when \code{line_se = TRUE}.}
+
+\item{\code{line_alpha}}{default 0.5; alpha value for the color transparency of line confidence interval.}
 
 \item{\code{pvalue_trim}}{default 4; trim the decimal places of p value.}
 
