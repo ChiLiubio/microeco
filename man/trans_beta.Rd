@@ -151,8 +151,9 @@ Unconstrained ordination.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
-PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling. 
+\item{\code{method}}{default "PCoA"; "PCoA", "NMDS", "PCA", "DCA" or "PLS-DA".
+PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling, PCA: principal component analysis; DCA: detrended correspondence analysis; 
+PLS-DA: partial least squares discriminant analysis.
 Please refer to the paper <doi:10.1111/j.1574-6941.2007.00375.x> for the details of the methods.}
 
 \item{\code{ncomp}}{default 3; dimensions shown in the results (except method "NMDS").}
@@ -167,7 +168,8 @@ Only available when \code{scale_species = TURE}.}
 \item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
 or \code{vegan::decorana} function when \code{method = "DCA"}, 
 or \code{ape::pcoa} function when \code{method = "PCoA"}, 
-or \code{vegan::metaMDS} function when when \code{method = "NMDS"}.}
+or \code{vegan::metaMDS} function when \code{method = "NMDS"},
+or \code{ropls::opls} function when \code{method = "PLS-DA"}.}
 }
 \if{html}{\out{</div>}}
 }

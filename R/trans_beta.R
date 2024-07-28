@@ -84,8 +84,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Unconstrained ordination.
 		#'
-		#' @param method default "PCoA"; "PCA", "DCA", "PCoA" or "NMDS". PCA: principal component analysis; DCA: detrended correspondence analysis; 
-		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling. 
+		#' @param method default "PCoA"; "PCoA", "NMDS", "PCA", "DCA" or "PLS-DA".
+		#' 	  PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling, PCA: principal component analysis; DCA: detrended correspondence analysis; 
+		#' 	  PLS-DA: partial least squares discriminant analysis.
 		#' 	  Please refer to the paper <doi:10.1111/j.1574-6941.2007.00375.x> for the details of the methods.
 		#' @param ncomp default 3; dimensions shown in the results (except method "NMDS").
 		#' @param trans default FALSE; whether species abundance will be square transformed; only available when \code{method} is "PCA" or "DCA".
@@ -95,7 +96,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param ... parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
 		#' 	  or \code{vegan::decorana} function when \code{method = "DCA"}, 
 		#' 	  or \code{ape::pcoa} function when \code{method = "PCoA"}, 
-		#' 	  or \code{vegan::metaMDS} function when when \code{method = "NMDS"}.
+		#' 	  or \code{vegan::metaMDS} function when \code{method = "NMDS"},
+		#' 	  or \code{ropls::opls} function when \code{method = "PLS-DA"}.
 		#' @return \code{res_ordination} stored in the object.
 		#' @examples
 		#' t1$cal_ordination(method = "PCoA")
@@ -114,13 +116,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(is.null(method)){
 				stop("Input method should not be NULL !")
 			}
-			if(!method %in% c("PCA", "PCoA", "NMDS", "DCA")){
-				stop("Input method should be one of 'PCA', 'PCoA', 'NMDS' and 'DCA'!")
+			if(!method %in% c("PCA", "PCoA", "NMDS", "DCA", "PLS-DA")){
+				stop("Input method should be one of 'PCoA', 'NMDS', 'PCA', 'DCA' and 'PLS-DA' !")
 			}
 			dataset <- self$dataset
-			if(method %in% c("PCA", "DCA")){
-				plot.x <- switch(method, PCA = "PC1", DCA = "DCA1")
-				plot.y <- switch(method, PCA = "PC2", DCA = "DCA2")
+			if(method %in% c("PCA", "DCA", "PLS-DA")){
+				plot.x <- switch(method, PCA = "PC1", DCA = "DCA1", 'PLS-DA' = "p1")
+				plot.y <- switch(method, PCA = "PC2", DCA = "DCA2", 'PLS-DA' = "p2")
 				if(trans == T){
 					abund <- sqrt(dataset$otu_table)
 				}else{
@@ -130,13 +132,30 @@ trans_beta <- R6Class(classname = "trans_beta",
 				if(method == "PCA"){
 					model <- rda(abund, ...)
 					expla <- round(model$CA$eig/model$CA$tot.chi*100, 1)
-				}else{
+				}
+				if(method == "DCA"){
 					model <- decorana(abund, ...)
 					expla <- round(eigenvals(model)/model$totchi * 100, 1)
 				}
-				scores_sites <- scores(model, choices = 1:ncomp, display = "sites")
-				combined <- cbind.data.frame(scores_sites, dataset$sample_table)
-				loading <- scores(model, choices = 1:ncomp, display = "species")
+				if(method == "PLS-DA"){
+					if(is.null(self$group)){
+						stop("For PLS-DA, group is necessary! Please recreate the trans_beta object and provide the group parameter!")
+					}
+					use_group <- self$sample_table[, self$group]
+					model <- ropls::opls(abund, use_group, ...)
+					expla <- NULL
+				}
+				if(method %in% c("PCA", "DCA")){
+					scores_sites <- scores(model, choices = 1:ncomp, display = "sites")
+				}else{
+					scores_sites <- model@scoreMN[, 1:ncomp]
+				}
+				combined <- cbind.data.frame(scores_sites, dataset$sample_table[rownames(scores_sites), , drop = FALSE])
+				if(method %in% c("PCA", "DCA")){
+					loading <- scores(model, choices = 1:ncomp, display = "species")
+				}else{
+					loading <- model@loadingMN[, 1:ncomp]
+				}
 				loading %<>% as.data.frame
 				loading[, "dist"] <- loading[, plot.x]^2 + loading[, plot.y]^2
 				loading <- loading[order(loading[, "dist"], decreasing = TRUE), ]
