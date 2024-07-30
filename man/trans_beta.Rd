@@ -154,7 +154,8 @@ Unconstrained ordination.
 \item{\code{method}}{default "PCoA"; "PCoA", "NMDS", "PCA", "DCA" or "PLS-DA".
 PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling, PCA: principal component analysis; DCA: detrended correspondence analysis; 
 PLS-DA: partial least squares discriminant analysis.
-Please refer to the paper <doi:10.1111/j.1574-6941.2007.00375.x> for the details of the methods.}
+For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
+<doi:10.1186/s12859-019-3310-7> (for PLS-DA).}
 
 \item{\code{ncomp}}{default 3; dimensions shown in the results (except method "NMDS").}
 
