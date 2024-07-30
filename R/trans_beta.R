@@ -143,7 +143,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 					}
 					use_group <- self$sample_table[, self$group]
 					model <- ropls::opls(abund, use_group, ...)
-					expla <- NULL
+					expla <- model@modelDF[, "R2X"] * 100
+					names(expla) <- rownames(model@modelDF)
 				}
 				if(method %in% c("PCA", "DCA")){
 					scores_sites <- scores(model, choices = 1:ncomp, display = "sites")
@@ -288,7 +289,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if("point" %in% plot_type){
 				p <- p + geom_point(alpha = point_alpha, size = point_size)
 			}
-			if(ordination_method %in% c("PCA", "PCoA")){
+			if(ordination_method %in% c("PCA", "PCoA", "DCA", "PLS-DA")){
 				p <- p + xlab(paste(plot_x, " [", eig[plot_x],"%]", sep = "")) + 
 					ylab(paste(plot_y, " [", eig[plot_y],"%]", sep = ""))
 			}
@@ -351,7 +352,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(!is.null(plot_shape)){
 				p <- p + scale_shape_manual(values = shape_values)
 			}
-			if(loading_arrow & ordination_method %in% c("PCA", "DCA")){
+			if(loading_arrow & ordination_method %in% c("PCA", "DCA", "PLS-DA")){
 				df_arrows <- self$res_ordination$loading[1:loading_taxa_num, ]
 				colnames(df_arrows)[1:2] <- c("x", "y")
 				p <- p + geom_segment(
