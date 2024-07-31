@@ -801,8 +801,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' Calculate the correlations between taxonomic abundance and environmental variables.
 		#' Actually, it can also be applied to other correlation between any two variables from two tables.
 		#'
-		#' @param use_data default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
-		#'    "all": use all merged taxonomic abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.
+		#' @param use_data default "Genus"; "Genus", "all" or "other"; 
+		#'    "Genus" or other taxonomic names (e.g., "Phylum", "ASV"): invoke taxonomic abundance table in \code{taxa_abund} list of the \code{microtable} object; 
+		#'    "all": merge all the taxonomic abundance tables in \code{taxa_abund} list into one; "other": provide additional taxa names by assigning \code{other_taxa} parameter.
 		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
@@ -815,9 +816,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 		#' 	  The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.
 		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
-		#' @param other_taxa default NULL; character vector containing a series of feature names; used when use_data = "other"; 
-		#' 	  provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
-		#' 	  please see the example.
+		#' @param other_taxa default NULL; character vector containing a series of feature names; available when \code{use_data = "other"}; 
+		#' 	  provided names should be standard full names used to select taxa from all the tables in \code{taxa_abund} list of the \code{microtable} object;
+		#' 	  please refer to the example.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 		#' 	  \code{p_adjust_method = "none"} can disable the p value adjustment.
 		#' @param p_adjust_type default "All"; "All", "Taxa" or "Env"; P value adjustment type.

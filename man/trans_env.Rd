@@ -700,8 +700,9 @@ Actually, it can also be applied to other correlation between any two variables 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; "Genus" or other taxonomic name: use genus or other taxonomic abundance table in \code{taxa_abund}; 
-"all": use all merged taxonomic abundance table; "other": provide additional taxa name with \code{other_taxa} parameter which is necessary.}
+\item{\code{use_data}}{default "Genus"; "Genus", "all" or "other"; 
+"Genus" or other taxonomic names (e.g., "Phylum", "ASV"): invoke taxonomic abundance table in \code{taxa_abund} list of the \code{microtable} object; 
+"all": merge all the taxonomic abundance tables in \code{taxa_abund} list into one; "other": provide additional taxa names by assigning \code{other_taxa} parameter.}
 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
@@ -721,9 +722,9 @@ The features with abundances lower than filter_thres will be filtered. This para
 
 \item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".}
 
-\item{\code{other_taxa}}{default NULL; character vector containing a series of feature names; used when use_data = "other"; 
-provided names should be standard full names used to select taxa from all the tables in taxa_abund list of the microtable object;
-please see the example.}
+\item{\code{other_taxa}}{default NULL; character vector containing a series of feature names; available when \code{use_data = "other"}; 
+provided names should be standard full names used to select taxa from all the tables in \code{taxa_abund} list of the \code{microtable} object;
+please refer to the example.}
 
 \item{\code{p_adjust_method}}{default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for available options.
 \code{p_adjust_method = "none"} can disable the p value adjustment.}
