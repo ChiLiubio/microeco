@@ -679,6 +679,8 @@ Actually, it can also be applied to other correlation between any two variables 
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_cor(
   use_data = c("Genus", "all", "other")[1],
   cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
+  partial = FALSE,
+  partial_fix = NULL,
   add_abund_table = NULL,
   filter_thres = 0,
   use_taxa_num = NULL,
@@ -704,6 +706,13 @@ Actually, it can also be applied to other correlation between any two variables 
 \item{\code{cor_method}}{default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.}
+
+\item{\code{partial}}{default FALSE; whether perform partial correlation based on the \code{ppcor} package.}
+
+\item{\code{partial_fix}}{default NULL; selected environmental variable names used as third group of variables in all the partial correlations. 
+If NULL; all the variables (except the one for correlation) in the environmental data will be used as the third group of variables.
+Otherwise, the function will control for the provided variables (one or more) in all the partial correlations, 
+and the variables in \code{partial_fix} will not be employed anymore in the correlation analysis.}
 
 \item{\code{add_abund_table}}{default NULL; additional data table to be used. Row names must be sample names.}
 

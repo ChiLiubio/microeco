@@ -143,7 +143,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 						stop("For PLS-DA, group is necessary! Please recreate the trans_beta object and provide the group parameter!")
 					}
 					use_group <- self$sample_table[, self$group]
-					model <- ropls::opls(abund, use_group, ...)
+					model <- ropls::opls(abund, use_group, orthoI = 0, ...)
 					expla <- model@modelDF[, "R2X"] * 100
 					names(expla) <- rownames(model@modelDF)
 				}

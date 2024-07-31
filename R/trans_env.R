@@ -806,6 +806,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
+		#' @param partial default FALSE; whether perform partial correlation based on the \code{ppcor} package.
+		#' @param partial_fix default NULL; selected environmental variable names used as third group of variables in all the partial correlations. 
+		#' 	  If NULL; all the variables (except the one for correlation) in the environmental data will be used as the third group of variables.
+		#' 	  Otherwise, the function will control for the provided variables (one or more) in all the partial correlations, 
+		#' 	  and the variables in \code{partial_fix} will not be employed anymore in the correlation analysis.
 		#' @param add_abund_table default NULL; additional data table to be used. Row names must be sample names.
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 		#' 	  The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.
@@ -836,6 +841,8 @@ trans_env <- R6Class(classname = "trans_env",
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
 			cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
+			partial = FALSE,
+			partial_fix = NULL,
 			add_abund_table = NULL,
 			filter_thres = 0,
 			use_taxa_num = NULL,
@@ -943,11 +950,35 @@ trans_env <- R6Class(classname = "trans_env",
 				comb_names <- expand.grid(unique(groups), colnames(abund_table), colnames(env_data)) %>% 
 					t %>% 
 					as.data.frame(stringsAsFactors = FALSE)
-				res <- sapply(comb_names, function(x){
-					suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
-					{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
+				if(partial){
+					message("Conduct partial correlation ...")
+					if(is.null(partial_fix)){
+						res <- sapply(comb_names, function(x){
+							input_partial <- cbind.data.frame(abund_table[groups == x[1], x[2], drop = FALSE], env_data[groups == x[1], ])
+							raw_res <- ppcor::pcor(input_partial, method = cor_method)
+							c(x, Correlation = raw_res$estimate[x[2], x[3]], Pvalue = raw_res$p.value[x[2], x[3]])
+							}
+						)
+					}else{
+						if(!all(partial_fix %in% colnames(env_data))){
+							stop("Please provide correct partial_fix! Must be environmental variable names!")
+						}
+						comb_names <- comb_names[, !(unlist(comb_names[3, ]) %in% partial_fix)]
+						res <- sapply(comb_names, function(x){
+							input_partial <- cbind.data.frame(abund_table[groups == x[1], x[2], drop = FALSE], env_data[groups == x[1], x[3], drop = FALSE], 
+								env_data[groups == x[1], partial_fix, drop = FALSE])
+							raw_res <- ppcor::pcor(input_partial, method = cor_method)
+							c(x, Correlation = raw_res$estimate[x[2], x[3]], Pvalue = raw_res$p.value[x[2], x[3]])
+							}
+						)
 					}
-				)
+				}else{
+					res <- sapply(comb_names, function(x){
+						suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
+						{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
+						}
+					)
+				}
 				res %<>% t %>% as.data.frame(stringsAsFactors = FALSE)
 				colnames(res) <- c("by_group", "Taxa", "Env", "Correlation","Pvalue")
 				res$Pvalue %<>% as.numeric
