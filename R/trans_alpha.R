@@ -404,13 +404,33 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								if(k == measure[1]){
 									message("R2 is unavailable ...")
 								}
-								tmp_model_R2 <- list(R2_conditional = NA, R2_marginal = NA)
+								R2data <- data.frame(R2 = NA)
+							}else{
+								if(all(is.na(tmp_model_R2))){
+									R2data <- data.frame(R2 = NA)
+								}else{
+									if(!is.null(tmp_model_R2$R2)){
+										R2data <- data.frame(R2 = c(tmp_model_R2$R2, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))))
+									}else{
+										if(!is.null(tmp_model_R2$R2_conditional) | !is.null(tmp_model_R2$R2_marginal)){
+											if(is.null(tmp_model_R2$R2_conditional)){
+												tmp_model_R2$R2_conditional <- NA
+											}
+											if(is.null(tmp_model_R2$R2_marginal)){
+												tmp_model_R2$R2_marginal <- NA
+											}
+											R2data <- data.frame(R2_conditional = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+												R2_marginal = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))))
+										}else{
+											R2data <- data.frame(R2 = NA)
+										}
+									}
+								}
 							}
 							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 								Measure = k, 
 								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
-								Conditional_R2 = c(tmp_model_R2$R2_conditional, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
-								Marginal_R2 = c(tmp_model_R2$R2_marginal, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+								R2data, 
 								Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
 								Std.Error = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$`Std. Error`), 
 								P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
