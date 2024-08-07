@@ -486,19 +486,19 @@ trans_func <- R6Class(classname = "trans_func",
 			g1
 		},
 		#' @description
-		#' Predict functional potential of communities using \code{tax4fun} package.
+		#' Predict functional potential of communities using \code{Tax4Fun} package.
 		#' please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
 		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. 'g__') .
 		#'
 		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the feature table in local place.
-		#' @param folderReferenceData default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.
+		#' @param folderReferenceData default NULL; the folder, see Tax4Fun function in Tax4Fun package.
 		#' @return \code{tax4fun_KO} and \code{tax4fun_path} in object.
 		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
 			if(is.null(folderReferenceData)){
 				stop("No folderReferenceData provided! Please see the help document!")
 			}
 			if(!require("Tax4Fun")){
-				stop("Tax4Fun package not installed! see http://tax4fun.gobics.de/ ")
+				stop("Tax4Fun package not installed!")
 			}
 			otu_file <- self$otu_table
 			tax_file <- self$tax_table

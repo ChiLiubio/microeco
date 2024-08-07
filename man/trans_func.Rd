@@ -328,7 +328,7 @@ t1$plot_spe_func_perc()
 \if{html}{\out{<a id="method-trans_func-cal_tax4fun"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_func-cal_tax4fun}{}}}
 \subsection{Method \code{cal_tax4fun()}}{
-Predict functional potential of communities using \code{tax4fun} package.
+Predict functional potential of communities using \code{Tax4Fun} package.
 please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
 Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. 'g__') .
 \subsection{Usage}{
@@ -340,7 +340,7 @@ Note that this function requires a standard prefix in taxonomic table with doubl
 \describe{
 \item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the feature table in local place.}
 
-\item{\code{folderReferenceData}}{default NULL; the folder, see \href{http://tax4fun.gobics.de/}{http://tax4fun.gobics.de/}  and Tax4Fun function in Tax4Fun package.}
+\item{\code{folderReferenceData}}{default NULL; the folder, see Tax4Fun function in Tax4Fun package.}
 }
 \if{html}{\out{</div>}}
 }
