@@ -528,7 +528,7 @@ trans_network <- R6Class(classname = "trans_network",
 			self$res_network <- network
 		},
 		#' @description
-		#' Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
+		#' Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
 		#'
 		#' @param filepath default "network.gexf"; file path to save the network.
 		#' @return None

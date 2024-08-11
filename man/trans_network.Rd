@@ -469,7 +469,7 @@ t1$cal_module(method = "cluster_fast_greedy")
 \if{html}{\out{<a id="method-trans_network-save_network"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-save_network}{}}}
 \subsection{Method \code{save_network()}}{
-Save network as gexf style, which can be opened by Gephi (\href{https://gephi.org/}{https://gephi.org/}).
+Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf")}\if{html}{\out{</div>}}
 }

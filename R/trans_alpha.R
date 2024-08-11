@@ -356,13 +356,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						}
 						tmp_summary <- summary(tmp)
 						tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
-						tmp_model_R2 <- performance::r2(tmp)
 						tmp_model_p <- anova(tmp)
+						R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_coefficients))
+
 						tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 							Measure = k, 
 							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
-							R2 = c(tmp_model_R2$R2, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
-							R2_adjusted = c(tmp_model_R2$R2_adjusted, rep(NA, nrow(tmp_model_p) + length(rownames(tmp_coefficients)))),
+							R2data, 
 							Estimate  = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
 							Std.Error = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$`Std. Error`), 
 							P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_coefficients$`Pr(>|t|)`)
@@ -377,7 +377,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
 							tmp_model_p <- anova(tmp)
 							tmp_random_p <- lmerTest::ranova(tmp)
-							R2data <- private$mixed_R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_random_p) + nrow(tmp_coefficients))
+							R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_random_p) + nrow(tmp_coefficients))
 							
 							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 								Measure = k, 
@@ -399,7 +399,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							tmp_summary <- summary(tmp)
 							tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
 							tmp_model_p <- car::Anova(tmp)
-							R2data <- private$mixed_R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_coefficients))
+							R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_coefficients))
 
 							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 								Measure = k, 
@@ -1098,8 +1098,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			tmp_res
 		},
-		# extract R2 from mixed-effect models
-		mixed_R2_extract = function(model, number_supp){
+		# extract R2 from models
+		R2_extract = function(model, number_supp){
 			tmp_model_R2 <- try(performance::r2(model), silent = TRUE)
 			if(inherits(tmp_model_R2, "try-error")) {
 				R2data <- data.frame(R2 = NA)
