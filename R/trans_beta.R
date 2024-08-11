@@ -159,14 +159,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 					loading <- model@loadingMN[, 1:ncomp]
 				}
 				loading %<>% as.data.frame
-				loading[, "dist"] <- loading[, plot.x]^2 + loading[, plot.y]^2
-				loading <- loading[order(loading[, "dist"], decreasing = TRUE), ]
 				if(scale_species){
 					maxx <- max(abs(scores_sites[, plot.x]))/max(abs(loading[, plot.x]))
 					loading[, plot.x] %<>% {. * maxx * scale_species_ratio}
 					maxy <- max(abs(scores_sites[, plot.y]))/max(abs(loading[, plot.y]))
 					loading[, plot.y] %<>% {. * maxy * scale_species_ratio}
 				}
+				loading[, "dist"] <- loading[, plot.x]^2 + loading[, plot.y]^2
+				loading <- loading[order(loading[, "dist"], decreasing = TRUE), ]
 				outlist <- list(model = model, scores = combined, loading = loading, eig = expla)
 			}
 			if(method %in% c("PCoA", "NMDS")){
