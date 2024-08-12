@@ -212,7 +212,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 				
 				if(method == "lefse"){
 					if(lefse_norm > 0){
-						tmp_dataset$taxa_abund %<>% lapply(function(x){as.data.frame(apply(x, 2, function(y){y/sum(y)}))})
+						# ensure normalization is performed
+						tmp_dataset$taxa_abund %<>% lapply(function(x){
+							if(nrow(x) == 1){
+								x[1, ] <- 1
+								x
+							}else{
+								as.data.frame(apply(x, 2, function(y){y/sum(y)}))
+							}
+						})
 					}
 				}
 				
