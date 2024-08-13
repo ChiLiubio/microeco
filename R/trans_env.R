@@ -860,10 +860,12 @@ trans_env <- R6Class(classname = "trans_env",
 			){
 			if(is.null(self$data_env)){
 				stop("The data_env is NULL! Please check the data input when creating the object !")
-			}else{
-				env_data <- self$data_env
 			}
+			env_data <- self$data_env
+			
 			cor_method <- match.arg(cor_method, c("pearson", "spearman", "kendall", "maaslin2"))
+			p_adjust_type <- match.arg(p_adjust_type, c("All", "Taxa", "Env"))
+			
 			if(cor_method != "maaslin2"){
 				env_data <- private$check_numeric(env_data)
 			}
@@ -988,12 +990,11 @@ trans_env <- R6Class(classname = "trans_env",
 				if(p_adjust_type == "All"){
 					res$AdjPvalue <- p.adjust(res$Pvalue, method = p_adjust_method)
 				}else{
-					choose_col <- which(c("Taxa", "Env") %in% p_adjust_type)
-					comb_names2 <- comb_names[choose_col, ] %>% t %>% as.data.frame %>% unique %>% t %>% as.data.frame(stringsAsFactors = FALSE)
+					choose_col <- which(c("Taxa", "Env") %in% p_adjust_type) + 1
+					for_select <- comb_names[choose_col, ] %>% unlist %>% unique
 					# p value adjustment separately
-					for(i in seq_len(ncol(comb_names2))){
-						x <- comb_names2[, i]
-						row_sel <- unlist(lapply(as.data.frame(t(res[, choose_col, drop = FALSE])), function(y) all(y %in% x)))
+					for(i in for_select){
+						row_sel <- res[, p_adjust_type] == i
 						res$AdjPvalue[row_sel] <- p.adjust(res[row_sel, "Pvalue"], method = p_adjust_method)
 					}
 				}
