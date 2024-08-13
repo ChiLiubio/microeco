@@ -65,8 +65,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  Please refer to glmmTMB package to select the family function, e.g. \code{family = glmmTMB::lognormal(link = "log")}.
 		#'     	  The usage of formula is similar with that in 'lme' method.
 		#'     	  For more available parameters, please see \code{glmmTMB::glmmTMB} function and use parameter passing.
-		#'     	  In the return table, Conditional_R2 and Marginal_R2 represent total variance (explained by both fixed and random effects) and the variance explained by 
-		#'     	  fixed effects, respectively. The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
+		#'     	  In the result, Conditional R2 and Marginal R2 represent the variance explained by both fixed and random effects and the variance explained by 
+		#'     	  fixed effects, respectively. For more details on R2 calculation, please refer to the article <doi: 10.1098/rsif.2017.0213>.
+		#'     	  The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
 		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.}
 		#'     \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution, 
 		#'     	  developed for the relative abundance (ranging from 0 to 1) of taxa specifically. 
