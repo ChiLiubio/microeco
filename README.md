@@ -8,13 +8,14 @@ An R package for data mining in microbial community ecology
 
 ## Background
 With the development of high-throughput sequencing techniques,
-the increasing data amount and complexity make the microbiome data analysis and management a challenge.
-Though there has been a lot of R packages created for the microbiome profiling analysis,
+the increasing data amount and complexity make the microbiome omics data analysis and management a challenge.
+Though there has been a lot of R packages in this filed, 
 it is still difficult to perform data mining fast, efficiently and comprehensively.
 Therefore, we created R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
 
 ## Main Features
   + R6 Class to store and analyze data: flexible and modularized
+  + Data normalization
   + Taxonomic abundance analysis
   + Venn diagram
   + Alpha diversity
@@ -28,12 +29,10 @@ Therefore, we created R microeco package (abbreviated and pronounced as **_[miː
 
 
 ## Install R/RStudio
-If you do not already have R/RStudio installed, do as follows.
+If you do not already have R/RStudio installed, follow these steps:
 
 1. Install [R](https://www.r-project.org/)
 2. Install [RStudio](https://posit.co/downloads/)
-
-Put R in the computer env PATH, for example your_directory\R-4.3.0\bin\x64 
 
 Open RStudio -> Tools -> Global Options -> Packages, select the appropriate mirror in Primary CRAN repository.
 
@@ -45,7 +44,7 @@ Install microeco package from CRAN.
 install.packages("microeco")
 ```
 
-Or install the latest development version from github.
+Or install the latest development version from Github.
 
 ```r
 # If devtools package is not installed, first install it
