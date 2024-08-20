@@ -17,7 +17,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' @examples
 		#' \donttest{
 		#' data(dataset)
-		#' t1 <- dataset$merge_samples(use_group = "Group")
+		#' t1 <- dataset$merge_samples("Group")
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		#' }
 		initialize = function(dataset, ratio = NULL, name_joint = "&"

@@ -15,7 +15,7 @@ more than 5-way petal or UpSet plot and intersection transformations based on Da
 
 \donttest{
 data(dataset)
-t1 <- dataset$merge_samples(use_group = "Group")
+t1 <- dataset$merge_samples("Group")
 t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 }
 
@@ -82,7 +82,7 @@ If dataset is a matrix-like table, features must be rows.}
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 data(dataset)
-t1 <- dataset$merge_samples(use_group = "Group")
+t1 <- dataset$merge_samples("Group")
 t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 }
 }
