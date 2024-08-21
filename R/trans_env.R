@@ -411,7 +411,7 @@ trans_env <- R6Class(classname = "trans_env",
 			res_ordination <- self$res_ordination
 			scrs <- scores(res_ordination)
 			scrs$biplot <- scores(res_ordination, choices = c(1, 2), "bp", scaling = "sites")
-			df_sites <- cbind.data.frame(scrs$sites, self$dataset$sample_table[rownames(scrs$sites), ])
+			df_sites <- cbind.data.frame(scrs$sites, self$dataset$sample_table[rownames(scrs$sites), , drop = FALSE])
 			colnames(df_sites)[1:2] <- c("x", "y")
 			
 			multiplier <- vegan:::ordiArrowMul(scrs$biplot)
