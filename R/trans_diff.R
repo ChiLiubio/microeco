@@ -1448,7 +1448,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param annotation_shape_size default 5; size used in the annotation legend.
 		#' @return ggplot.
 		#' @examples
-		#' \donttest{
+		#' \dontrun{
 		#' t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 		#' }
 		plot_diff_cladogram = function(

@@ -28,9 +28,7 @@ To report bugs or discuss questions, please use Github Issues (\href{https://git
 Before creating a new issue, 
 please read the guideline (\href{https://chiliubio.github.io/microeco_tutorial/notes.html#github-issues}{https://chiliubio.github.io/microeco_tutorial/notes.html#github-issues}).
 
-To cite microeco package in publications, please run the following command to get the reference: \code{citation("microeco")}\cr
-To read the paper, please turn to the publication website 
-(\href{https://academic.oup.com/femsec/article/97/2/fiaa255/6041020}{https://academic.oup.com/femsec/article/97/2/fiaa255/6041020}).
+To cite microeco package in publications, please run the following command to get the reference: \code{citation("microeco")}
 
 Reference:\cr
 Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. 2021. microeco: an R package for data mining in microbial community ecology. 

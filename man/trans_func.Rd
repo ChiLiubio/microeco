@@ -24,7 +24,6 @@ t1 <- trans_func$new(dataset = dataset)
 
 \donttest{
 t1$cal_spe_func(prok_database = "FAPROTAX")
-t1$cal_spe_func(fungi_database = "FungalTraits")
 }
 
 ## ------------------------------------------------
@@ -177,7 +176,6 @@ Selected 'confidenceRanking' when \code{fungi_database = "FUNGuild"}.}
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$cal_spe_func(prok_database = "FAPROTAX")
-t1$cal_spe_func(fungi_database = "FungalTraits")
 }
 }
 \if{html}{\out{</div>}}

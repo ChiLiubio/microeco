@@ -57,7 +57,7 @@ t1$plot_diff_bar(use_number = 1:20)
 ## Method `trans_diff$plot_diff_cladogram`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
 }
@@ -570,7 +570,7 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
 }

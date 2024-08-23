@@ -72,7 +72,6 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func(prok_database = "FAPROTAX")
-		#' t1$cal_spe_func(fungi_database = "FungalTraits")
 		#' }
 		cal_spe_func = function(
 			prok_database = c("FAPROTAX", "NJC19")[1], 
