@@ -1143,10 +1143,18 @@ trans_env <- R6Class(classname = "trans_env",
 					.[, -1, drop = FALSE]
 				sig_data[is.na(sig_data)] <- ""
 				if(pheatmap == F){
-					row_cluster <- hclust(dist(clu_data)) 
-					lim_y <- row_cluster %>% {.$labels[.$order]}
-					col_cluster <- hclust(dist(t(clu_data)))
-					lim_x <- col_cluster %>% {.$labels[.$order]}
+					if(ncol(clu_data) == 1){
+						lim_x <- NULL
+					}else{
+						col_cluster <- hclust(dist(t(clu_data)))
+						lim_x <- col_cluster %>% {.$labels[.$order]}
+					}
+					if(nrow(clu_data) == 1){
+						lim_y <- NULL
+					}else{
+						row_cluster <- hclust(dist(clu_data))
+						lim_y <- row_cluster %>% {.$labels[.$order]}
+					}
 				}
 			}else{
 				if(is.factor(use_data[, xvalue])){
