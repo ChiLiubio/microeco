@@ -117,8 +117,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
 		#' @param alpha default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.
-		#' @param anova_post_test default "duncan.test". The post hoc test method for one-way anova. Other available options include "LSD.test" and "HSD.test". 
-		#'   All those are the function names in \code{agricolae} package.
+		#' @param anova_post_test default "duncan.test". The post hoc test method for one-way anova. 
+		#'   The default option represents the Duncan's new multiple range test.
+		#'   Other available options include "LSD.test" (LSD post hoc test) and "HSD.test" (HSD post hoc test). 
+		#'   All those are the function names from \code{agricolae} package.
 		#' @param return_model default FALSE; whether return the original "lm", "lmer" or "glmm" model list in the object.
 		#' @param ... parameters passed to \code{kruskal.test} (when \code{method = "KW"}) or \code{wilcox.test} function (when \code{method = "wilcox"}) or 
 		#'   \code{dunnTest} function of \code{FSA} package (when \code{method = "KW_dunn"}) or 

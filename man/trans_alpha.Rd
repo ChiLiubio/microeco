@@ -160,8 +160,10 @@ For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods}
 
 \item{\code{alpha}}{default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.}
 
-\item{\code{anova_post_test}}{default "duncan.test". The post hoc test method for one-way anova. Other available options include "LSD.test" and "HSD.test". 
-All those are the function names in \code{agricolae} package.}
+\item{\code{anova_post_test}}{default "duncan.test". The post hoc test method for one-way anova. 
+The default option represents the Duncan's new multiple range test.
+Other available options include "LSD.test" (LSD post hoc test) and "HSD.test" (HSD post hoc test). 
+All those are the function names from \code{agricolae} package.}
 
 \item{\code{return_model}}{default FALSE; whether return the original "lm", "lmer" or "glmm" model list in the object.}
 
