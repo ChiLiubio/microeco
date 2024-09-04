@@ -907,10 +907,12 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Subset of the network.
 		#'
-		#' @param node default NULL; provide the node names that you want to use in the sub-network.
-		#' @param edge default NULL; provide the edge name needed; must be one of "+" or "-".
+		#' @param node default NULL; provide the node names that will be used in the sub-network.
+		#' @param edge default NULL; provide the edge label or numbers that need to be remained. For the edge label, it should must be "+" or "-".
+		#'   For the numbers, they should fall within the range of rows in \code{res_edge_table} of the object.
 		#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
 		#'   So this function can also be used to remove the nodes withou any edge when node and edge are both NULL.
+		#' @param node_alledges default FALSE; whether remain the nodes and edges that related to the nodes provided in \code{node} parameter.
 		#' @return a new network
 		#' @examples
 		#' \donttest{
@@ -918,18 +920,37 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }
-		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE){
+		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE){
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
+			if(!is.null(node) & !is.null(edge)){
+				stop("Please provide either node or edge!")
+			}
+			if(node_alledges){
+				if(is.null(node)){
+					stop("When node_alledges = TRUE, node parameter must be provided!")
+				}
+				if(is.null(self$res_edge_table)){
+					self$get_edge_table()
+				}
+				edge <- self$res_edge_table %>% {.[,1] %in% node | .[,2] %in% node} %>% which
+				node <- NULL
+			}
 			if(!is.null(node)){
 				nodes_raw <- V(network)$name
 				delete_nodes <- nodes_raw %>% .[! . %in% node]
 				sub_network <- delete_vertices(network, delete_nodes)
 			}
 			if(!is.null(edge)){
-				label_raw <- E(network)$label
-				sub_network <- delete_edges(network, which(label_raw != edge))
+				if(identical(edge, "+") | identical(edge, "-")){
+					label_raw <- E(network)$label
+					sub_network <- delete_edges(network, which(label_raw != edge))
+				}else{
+					all_seqs <- 1:ecount(network)
+					edge_filter <- all_seqs[! all_seqs %in% edge]
+					sub_network <- delete_edges(network, edge_filter)
+				}
 			}
 			if(is.null(node) & is.null(edge)){
 				sub_network <- network
