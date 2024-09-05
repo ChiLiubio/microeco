@@ -815,7 +815,8 @@ Subset of the network.
   node = NULL,
   edge = NULL,
   rm_single = TRUE,
-  node_alledges = FALSE
+  node_alledges = FALSE,
+  return_igraph = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -831,6 +832,8 @@ For the numbers, they should fall within the range of rows in \code{res_edge_tab
 So this function can also be used to remove the nodes withou any edge when node and edge are both NULL.}
 
 \item{\code{node_alledges}}{default FALSE; whether remain the nodes and edges that related to the nodes provided in \code{node} parameter.}
+
+\item{\code{return_igraph}}{default TRUE; whether return the network with igraph format. If FALSE, return \code{trans_network} object.}
 }
 \if{html}{\out{</div>}}
 }

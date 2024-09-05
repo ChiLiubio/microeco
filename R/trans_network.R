@@ -913,6 +913,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
 		#'   So this function can also be used to remove the nodes withou any edge when node and edge are both NULL.
 		#' @param node_alledges default FALSE; whether remain the nodes and edges that related to the nodes provided in \code{node} parameter.
+		#' @param return_igraph default TRUE; whether return the network with igraph format. If FALSE, return \code{trans_network} object.
 		#' @return a new network
 		#' @examples
 		#' \donttest{
@@ -920,7 +921,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }
-		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE){
+		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE, return_igraph = TRUE){
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
@@ -959,7 +960,19 @@ trans_network <- R6Class(classname = "trans_network",
 			if(rm_single == T){
 				sub_network <- private$rm_unlinked_node(sub_network)
 			}
-			sub_network
+			if(return_igraph){
+				sub_network
+			}else{
+				subnet_obj <- clone(self)
+				subnet_obj$res_network <- sub_network
+				if(!is.null(self$res_edge_table)){
+					subnet_obj$get_edge_table()
+				}
+				if(!is.null(self$res_node_table)){
+					subnet_obj$get_node_table()
+				}
+				subnet_obj
+			}
 		},
 		#' @description
 		#' Fit degrees to a power law distribution. First, perform a bootstrapping hypothesis test to determine whether degrees follow a power law distribution.
