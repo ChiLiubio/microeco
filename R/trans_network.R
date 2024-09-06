@@ -960,12 +960,8 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				subnet_obj <- clone(self)
 				subnet_obj$res_network <- sub_network
-				if(!is.null(self$res_edge_table)){
-					subnet_obj$get_edge_table()
-				}
-				if(!is.null(self$res_node_table)){
-					subnet_obj$get_node_table()
-				}
+				subnet_obj$res_edge_table <- NULL
+				subnet_obj$res_node_table <- NULL
 				subnet_obj
 			}
 		},
