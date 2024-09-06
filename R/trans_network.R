@@ -750,10 +750,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(inherits(try_find, "try-error")){
 					stop("Please first install networkD3 package with command: install.packages('networkD3') !")
 				}
-				if(is.null(self$res_edge_table)){
-					message("Run get_edge_table function to obtain the edge property table ...")
-					self$get_edge_table()
-				}
+				private$check_edgetable()
 				edge_table <- self$res_edge_table
 				replace_table <- data.frame(number = 1:nrow(node_table), name = rownames(node_table))
 				rownames(replace_table) <- replace_table$name
@@ -932,9 +929,7 @@ trans_network <- R6Class(classname = "trans_network",
 				if(is.null(node)){
 					stop("When node_alledges = TRUE, node parameter must be provided!")
 				}
-				if(is.null(self$res_edge_table)){
-					self$get_edge_table()
-				}
+				private$check_edgetable()
 				edge <- self$res_edge_table %>% {.[,1] %in% node | .[,2] %in% node} %>% which
 				node <- NULL
 			}
@@ -1036,9 +1031,7 @@ trans_network <- R6Class(classname = "trans_network",
 				taxa_table %<>% .[rownames(.) %in% replace_table[, 2], ]
 				rownames(taxa_table) <- replace_table[rownames(taxa_table), 1]
 			}
-			if(is.null(self$res_edge_table)){
-				self$get_edge_table()
-			}
+			private$check_edgetable()
 			link_table <- self$res_edge_table
 			
 			if(is.null(E(network)$label)){
@@ -1267,6 +1260,16 @@ trans_network <- R6Class(classname = "trans_network",
 		check_network = function(){
 			if(is.null(self$res_network)){
 				stop("No network found! Please first run cal_network function!")
+			}
+		},
+		check_edgetable = function(){
+			if(is.null(self$res_edge_table)){
+				self$get_edge_table()
+			}else{
+				if(nrow(self$res_edge_table) != ecount(self$res_network)){
+					message("Rerun get_edge_table function as the edge numbers in res_edge_table and res_network are not same ...")
+					self$get_edge_table()
+				}
 			}
 		},
 		# x must be symmetrical matrix
