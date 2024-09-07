@@ -705,10 +705,7 @@ trans_network <- R6Class(classname = "trans_network",
 				network <- self$res_network
 				g <- igraph::plot.igraph(network, ...)
 			}else{
-				if(is.null(self$res_node_table)){
-					message("Run get_node_table function to obtain the node property table ...")
-					self$get_node_table()
-				}
+				private$check_nodetable()
 				node_table <- self$res_node_table
 				if(!is.null(node_color)){
 					if(node_color == "module"){
@@ -779,10 +776,8 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			use_abund <- self$data_abund
-			if(is.null(self$res_node_table)){
-				message("Run get_node_table function to get the node property table ...")
-				self$get_node_table()
-			}
+			
+			private$check_nodetable()
 			node_table <- self$res_node_table
 			# calculate eigengene for each module
 			res_eigen <- list()
@@ -866,10 +861,7 @@ trans_network <- R6Class(classname = "trans_network",
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
 			...
 			){
-			if(is.null(self$res_node_table)){
-				message("Run get_node_table function to get the node property table ...")
-				self$get_node_table()
-			}
+			private$check_nodetable()
 			if(use_type == 1){
 				res <- private$plot_roles_1(node_roles = self$res_node_table, 
 					roles_color_background = roles_color_background,
@@ -1191,17 +1183,14 @@ trans_network <- R6Class(classname = "trans_network",
 					stop("Please first run cal_module function to get node modules!")
 				}
 			}
-			if(is.null(self$res_node_table)){
-				message("Run get_node_table function to get the node property table ...")
-				self$get_node_table()
-			}
-			if(!use_col %in% colnames(self$res_node_table)){
+			private$check_nodetable()
+			res_node_table <- self$res_node_table
+			if(!use_col %in% colnames(res_node_table)){
 				stop("Provided use_col must be one of the colnames of object$res_node_table !")
 			}
-			if(inherits(self$res_node_table[, use_col], "numeric")){
+			if(inherits(res_node_table[, use_col], "numeric")){
 				stop("The selected column-", use_col, " must not be numeric! Please check it!")
 			}
-			res_node_table <- self$res_node_table
 			if(any(is.na(res_node_table[, use_col]))){
 				message("Filter the taxa with NA in ", use_col, " ...")
 				res_node_table %<>% .[!is.na(.[, use_col]), ]
@@ -1258,13 +1247,25 @@ trans_network <- R6Class(classname = "trans_network",
 				stop("No network found! Please first run cal_network function!")
 			}
 		},
+		check_nodetable = function(...){
+			if(is.null(self$res_node_table)){
+				message("The res_node_table in the object is not found. Automatically run get_node_table function ...")
+				suppressMessages(self$get_node_table(...))
+			}else{
+				if(nrow(self$res_node_table) != vcount(self$res_network)){
+					message("Rerun get_node_table function as the node numbers in res_node_table and res_network are not same ...")
+					suppressMessages(self$get_node_table(...))
+				}
+			}
+		},
 		check_edgetable = function(){
 			if(is.null(self$res_edge_table)){
-				self$get_edge_table()
+				message("The res_edge_table in the object is not found. Automatically run get_edge_table function ...")
+				suppressMessages(self$get_edge_table())
 			}else{
 				if(nrow(self$res_edge_table) != ecount(self$res_network)){
 					message("Rerun get_edge_table function as the edge numbers in res_edge_table and res_network are not same ...")
-					self$get_edge_table()
+					suppressMessages(self$get_edge_table())
 				}
 			}
 		},
