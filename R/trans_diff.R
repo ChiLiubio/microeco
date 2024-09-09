@@ -223,6 +223,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 							}
 						})
 					}
+					# check abnormal characters
+					first_check <- unlist(lapply(tmp_dataset$taxa_abund, function(x){any(grepl("\t|\n", rownames(x)))}))
+					if(any(first_check)){
+						check_which <- names(tmp_dataset$taxa_abund)[first_check]
+						stop("There are abnormal characters (\\t or \\n) in the row names of abundance table at level: ", paste0(check_which, collapse = " "), 
+							" ! Please fix it in tax_table and rerun cal_abund function in microtable object!")
+					}
 				}
 				
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
