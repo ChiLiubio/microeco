@@ -654,7 +654,12 @@ trans_func <- R6Class(classname = "trans_func",
 				if(inherits(self$rep_fasta, "DNAStringSet")){
 					Biostrings::writeXStringSet(x = self$rep_fasta, filepath = rep_fasta_path)
 				}else{
-					stop("Unknown fasta format! Must be either list (from read.fasta of seqinr package) or DNAStringSet (from readDNAStringSet of Biostrings package)!")
+					if(inherits(self$rep_fasta, "DNAbin")){
+						ape::write.FASTA(self$rep_fasta, file = rep_fasta_path)
+					}else{
+						stop("Unknown fasta format! Must be one of DNAStringSet (from readDNAStringSet function of Biostrings package), ", 
+							"list (from read.fasta function of seqinr package), and DNAbin (from read.FASTA function of ape package)!")
+					}
 				}
 			}
 			
