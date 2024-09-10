@@ -219,13 +219,15 @@ If not provided, the function can generate a table automatically according to th
 
 \item{\code{tax_table}}{data.frame; default NULL; The taxonomic information table; rownames are features; column names are taxonomic classes.}
 
-\item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree; use \code{read.tree} function in ape package for input.}
+\item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree that must be read with the \code{read.tree} function of ape package.}
 
-\item{\code{rep_fasta}}{\code{DNAStringSet} or \code{list} format; default NULL; The representative sequences; 
-use \code{read.fasta} function in \code{seqinr} package or \code{readDNAStringSet} function in \code{Biostrings} package for input.}
+\item{\code{rep_fasta}}{\code{DNAStringSet}, \code{list} or \code{DNAbin} format; default NULL; The sequences.
+The sequences should be read with the \code{readDNAStringSet} function in \code{Biostrings} package (DNAStringSet class), 
+\code{read.fasta} function in \code{seqinr} package (list class),
+or \code{read.FASTA} function in \code{ape} package (DNAbin class).}
 
-\item{\code{auto_tidy}}{default FALSE; Whether trim the files in the \code{microtable} object automatically;
-If TRUE, running the functions in \code{microtable} class can invoke the \code{tidy_dataset} function automatically.}
+\item{\code{auto_tidy}}{default FALSE; Whether tidy the files in the \code{microtable} object automatically.
+If TRUE, the function can invoke the \code{tidy_dataset} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -236,7 +238,7 @@ an object of class \code{microtable} with the following components:
   \item{\code{otu_table}}{The feature table.}
   \item{\code{tax_table}}{The taxonomic table.}
   \item{\code{phylo_tree}}{The phylogenetic tree.}
-  \item{\code{rep_fasta}}{The representative sequence.}
+  \item{\code{rep_fasta}}{The sequence.}
   \item{\code{taxa_abund}}{default NULL; use \code{cal_abund} function to calculate.}
   \item{\code{alpha_diversity}}{default NULL; use \code{cal_alphadiv} function to calculate.}
   \item{\code{beta_diversity}}{default NULL; use \code{cal_betadiv} function to calculate.}

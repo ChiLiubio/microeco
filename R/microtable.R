@@ -17,18 +17,20 @@ microtable <- R6Class(classname = "microtable",
 		#' @param sample_table data.frame; default NULL; The sample information table; rownames are samples; columns are sample metadata; 
 		#' 	 If not provided, the function can generate a table automatically according to the sample names in otu_table.
 		#' @param tax_table data.frame; default NULL; The taxonomic information table; rownames are features; column names are taxonomic classes.
-		#' @param phylo_tree phylo; default NULL; The phylogenetic tree; use \code{read.tree} function in ape package for input.
-		#' @param rep_fasta \code{DNAStringSet} or \code{list} format; default NULL; The representative sequences; 
-		#'   use \code{read.fasta} function in \code{seqinr} package or \code{readDNAStringSet} function in \code{Biostrings} package for input.
-		#' @param auto_tidy default FALSE; Whether trim the files in the \code{microtable} object automatically;
-		#'   If TRUE, running the functions in \code{microtable} class can invoke the \code{tidy_dataset} function automatically.
+		#' @param phylo_tree phylo; default NULL; The phylogenetic tree that must be read with the \code{read.tree} function of ape package.
+		#' @param rep_fasta \code{DNAStringSet}, \code{list} or \code{DNAbin} format; default NULL; The sequences.
+		#'   The sequences should be read with the \code{readDNAStringSet} function in \code{Biostrings} package (DNAStringSet class), 
+		#'   \code{read.fasta} function in \code{seqinr} package (list class),
+		#'   or \code{read.FASTA} function in \code{ape} package (DNAbin class).
+		#' @param auto_tidy default FALSE; Whether tidy the files in the \code{microtable} object automatically.
+		#'   If TRUE, the function can invoke the \code{tidy_dataset} function.
 		#' @return an object of class \code{microtable} with the following components:
 		#' \describe{
 		#'   \item{\code{sample_table}}{The sample information table.}
 		#'   \item{\code{otu_table}}{The feature table.}
 		#'   \item{\code{tax_table}}{The taxonomic table.}
 		#'   \item{\code{phylo_tree}}{The phylogenetic tree.}
-		#'   \item{\code{rep_fasta}}{The representative sequence.}
+		#'   \item{\code{rep_fasta}}{The sequence.}
 		#'   \item{\code{taxa_abund}}{default NULL; use \code{cal_abund} function to calculate.}
 		#'   \item{\code{alpha_diversity}}{default NULL; use \code{cal_alphadiv} function to calculate.}
 		#'   \item{\code{beta_diversity}}{default NULL; use \code{cal_betadiv} function to calculate.}
@@ -78,6 +80,12 @@ microtable <- R6Class(classname = "microtable",
 				}
 				if(!ape::is.rooted(phylo_tree)){
 					phylo_tree <- ape::multi2di(phylo_tree)
+				}
+			}
+			if(!is.null(rep_fasta)){
+				if(!(inherits(rep_fasta, "list") | inherits(rep_fasta, "DNAbin") | inherits(rep_fasta, "DNAStringSet"))){
+					stop("Unknown fasta format! Must be one of DNAStringSet (from readDNAStringSet function of Biostrings package), ", 
+						"list (from read.fasta function of seqinr package), and DNAbin (from read.FASTA function of ape package)!")
 				}
 			}
 			self$tax_table <- tax_table
@@ -484,7 +492,12 @@ microtable <- R6Class(classname = "microtable",
 					if(inherits(tmp, "DNAStringSet")){
 						Biostrings::writeXStringSet(x = tmp, filepath = save_path)
 					}else{
-						stop("Unknown fasta format! Must be either list (from read.fasta of seqinr package) or DNAStringSet (from readDNAStringSet of Biostrings package)!")
+						if(inherits(tmp, "DNAbin")){
+							ape::write.FASTA(tmp, file = save_path)
+						}else{
+							stop("Unknown fasta format! Must be one of DNAStringSet (from readDNAStringSet function of Biostrings package), ", 
+								"list (from read.fasta function of seqinr package), and DNAbin (from read.FASTA function of ape package)!")
+						}
 					}
 				}
 				message('Save sequences to ', save_path, ' ...')
