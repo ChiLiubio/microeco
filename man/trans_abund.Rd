@@ -137,9 +137,9 @@ t1$plot_tern()
 The function extracts the abundance from the \code{taxa_abund} list according to the names in the list. 
 If the \code{taxa_abund} list is NULL, the function can automatically calculate the relative abundance to generate \code{taxa_abund} list.}
 
-\item{\code{show}}{default 0; the relative abundance threshold for filtering the taxa with low abundance.}
+\item{\code{show}}{default 0; the mean relative abundance threshold for filtering the taxa with low abundance.}
 
-\item{\code{ntaxa}}{default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
+\item{\code{ntaxa}}{default 10; how many taxa are selected to use. Taxa are ordered by abundance from high to low. 
 This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means the parameter will be invalid.}
 
 \item{\code{groupmean}}{default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.}

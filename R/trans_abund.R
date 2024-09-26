@@ -12,8 +12,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param taxrank default "Phylum"; taxonomic level, i.e. a column name in \code{tax_table} of the input object.
 		#'   The function extracts the abundance from the \code{taxa_abund} list according to the names in the list. 
 		#'   If the \code{taxa_abund} list is NULL, the function can automatically calculate the relative abundance to generate \code{taxa_abund} list.
-		#' @param show default 0; the relative abundance threshold for filtering the taxa with low abundance.
-		#' @param ntaxa default 10; how many taxa are selected to show. Taxa are ordered by abundance from high to low. 
+		#' @param show default 0; the mean relative abundance threshold for filtering the taxa with low abundance.
+		#' @param ntaxa default 10; how many taxa are selected to use. Taxa are ordered by abundance from high to low. 
 		#'   This parameter does not conflict with the parameter \code{show}. Both can be used. \code{ntaxa = NULL} means the parameter will be invalid.
 		#' @param groupmean default NULL; calculate mean abundance for each group. Select a column name in \code{microtable$sample_table}.
 		#' @param group_morestats default FALSE; only available when \code{groupmean} parameter is provided; 
