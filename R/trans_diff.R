@@ -856,7 +856,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(group %in% colnames(sampleinfo)){
 						colnames(res_abund) <- c("Taxa", "Sample", "Abund")
 						res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
-						res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group))
+						res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group, by_group))
 						colnames(res_abund)[colnames(res_abund) == group] <- "Group"
 					}
 				}
@@ -899,6 +899,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$taxa_level <- taxa_level
 				# save abund_table for the cladogram
 				self$abund_table <- abund_table
+				self$by_group <- by_group
 			}
 		},
 		#' @description
