@@ -223,10 +223,14 @@ Plot the alpha diversity.
   xtext_angle = 30,
   xtext_size = 13,
   ytitle_size = 17,
-  barwidth = 0.9,
+  bar_width = 0.9,
+  bar_alpha = 0.8,
+  dodge_width = 0.9,
   plot_SE = TRUE,
   errorbar_size = 1,
   errorbar_width = 0.2,
+  errorbar_addpoint = TRUE,
+  errorbar_color_black = FALSE,
   point_size = 3,
   point_alpha = 0.8,
   add_line = FALSE,
@@ -247,10 +251,12 @@ Plot the alpha diversity.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{plot_type}}{default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", and "errorbar".
+\item{\code{plot_type}}{default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "ggviolin", 
+"ggstripchart", "ggerrorplot", "errorbar" and "barerrorbar".
 The options starting with "gg" are function names coming from \code{ggpubr} package.
 All those methods with \code{ggpubr} package use the \code{data_alpha} table in the object. 
-"errorbar" represents mean-sd or mean-se plot based on \code{ggplot2} package by invoking the \code{data_stat} table in the object.}
+"errorbar" represents Mean±SD or Mean±SE plot based on \code{ggplot2} package by invoking the \code{data_stat} table in the object.
+"barerrorbar" denotes "bar plot + error bar". It is similar with "errorbar" and has a bar plot.}
 
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.}
 
@@ -279,33 +285,41 @@ the default 0.1 means \code{max(values) + 0.1 * (max(values) - min(values))}.}
 \item{\code{y_increase}}{default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
 this parameter is also used to label the letters of anova result with the fixed space.}
 
-\item{\code{xtext_angle}}{default 30; number (e.g. 30) used to make x axis text generate angle.}
+\item{\code{xtext_angle}}{default 30; number (e.g. 30). Angle of text in x axis.}
 
 \item{\code{xtext_size}}{default 13; x axis text size. NULL means the default size in ggplot2.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
-\item{\code{barwidth}}{default 0.9; the bar width in plot; applied when by_group is not NULL.}
+\item{\code{bar_width}}{default 0.9; the bar width when \code{plot_type = "barerrorbar"}.}
 
-\item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}. Available when \code{plot_type = "errorbar"}.}
+\item{\code{bar_alpha}}{default 0.8; the alpha of bar color when \code{plot_type = "barerrorbar"}.}
 
-\item{\code{errorbar_size}}{default 1; errorbar size. Available when \code{plot_type = "errorbar"}.}
+\item{\code{dodge_width}}{default 0.9; the dodge width used in \code{position_dodge} function of ggplot2 package when \code{plot_type} is "errorbar" or "barerrorbar".}
 
-\item{\code{errorbar_width}}{default 0.2; errorbar width. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.}
+\item{\code{plot_SE}}{default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}. Available when \code{plot_type} is "errorbar" or "barerrorbar".}
 
-\item{\code{point_size}}{default 3; point size for taxa. Available when \code{plot_type = "errorbar"}.}
+\item{\code{errorbar_size}}{default 1; errorbar size. Available when \code{plot_type} is "errorbar" or "barerrorbar".}
 
-\item{\code{point_alpha}}{default 0.8; point transparency. Available when \code{plot_type = "errorbar"}.}
+\item{\code{errorbar_width}}{default 0.2; errorbar width. Available when \code{plot_type} is "errorbar" or "barerrorbar" and \code{by_group} is NULL.}
 
-\item{\code{add_line}}{default FALSE; whether add line. Available when \code{plot_type = "errorbar"}.}
+\item{\code{errorbar_addpoint}}{default TRUE; whether add point for mean. Available when \code{plot_type} is "errorbar" or "barerrorbar" and \code{by_group} is NULL.}
 
-\item{\code{line_size}}{default 0.8; line size when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.}
+\item{\code{errorbar_color_black}}{default FALSE; whether use black for the color of errorbar when \code{plot_type} is "errorbar" or "barerrorbar".}
 
-\item{\code{line_type}}{default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.}
+\item{\code{point_size}}{default 3; point size for taxa. Available when \code{plot_type} is "errorbar" or "barerrorbar".}
 
-\item{\code{line_color}}{default "grey50"; line color when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.}
+\item{\code{point_alpha}}{default 0.8; point transparency. Available when \code{plot_type} is "errorbar" or "barerrorbar".}
 
-\item{\code{line_alpha}}{default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.}
+\item{\code{add_line}}{default FALSE; whether add line. Available when \code{plot_type} is "errorbar" or "barerrorbar".}
+
+\item{\code{line_size}}{default 0.8; line size when \code{add_line = TRUE}. Available when \code{plot_type} is "errorbar" or "barerrorbar".}
+
+\item{\code{line_type}}{default 2; an integer; line type when \code{add_line = TRUE}. The available case is same with \code{line_size}.}
+
+\item{\code{line_color}}{default "grey50"; line color when \code{add_line = TRUE}. Available when \code{by_group} is NULL. Other available case is same with \code{line_size}.}
+
+\item{\code{line_alpha}}{default 0.5; line transparency when \code{add_line = TRUE}. The available case is same with \code{line_size}.}
 
 \item{\code{heatmap_cell}}{default "P.unadj"; the column of \code{res_diff} table for the cell of heatmap when formula with multiple factors is found in the method.}
 

@@ -440,10 +440,12 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   heatmap is employed automatically to show the significances of differential test for multiple indexes, 
 		#' 	 and errorbar (coefficient and standard errors) can be used for single index.
 		#'
-		#' @param plot_type default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", and "errorbar".
+		#' @param plot_type default "ggboxplot"; plot type; available options include "ggboxplot", "ggdotplot", "ggviolin", 
+		#'   "ggstripchart", "ggerrorplot", "errorbar" and "barerrorbar".
 		#'   The options starting with "gg" are function names coming from \code{ggpubr} package.
 		#'   All those methods with \code{ggpubr} package use the \code{data_alpha} table in the object. 
-		#'   "errorbar" represents mean-sd or mean-se plot based on \code{ggplot2} package by invoking the \code{data_stat} table in the object.
+		#'   "errorbar" represents Mean±SD or Mean±SE plot based on \code{ggplot2} package by invoking the \code{data_stat} table in the object.
+		#'   "barerrorbar" denotes "bar plot + error bar". It is similar with "errorbar" and has a bar plot.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
 		#' @param measure default "Shannon"; one alpha diversity index in the object.
 		#' @param group default NULL; group name used for the plot.
@@ -460,20 +462,24 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' 	  the default 0.1 means \code{max(values) + 0.1 * (max(values) - min(values))}.
 		#' @param y_increase default 0.05; the increasing y axia space to add the label (asterisk or letter); the default 0.05 means \code{0.05 * (max(values) - min(values))}; 
 		#' 	  this parameter is also used to label the letters of anova result with the fixed space.
-		#' @param xtext_angle default 30; number (e.g. 30) used to make x axis text generate angle.
+		#' @param xtext_angle default 30; number (e.g. 30). Angle of text in x axis.
 		#' @param xtext_size default 13; x axis text size. NULL means the default size in ggplot2.
 		#' @param ytitle_size default 17; y axis title size.
-		#' @param barwidth default 0.9; the bar width in plot; applied when by_group is not NULL.
-		#' @param plot_SE default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}. Available when \code{plot_type = "errorbar"}.
-		#' @param errorbar_size default 1; errorbar size. Available when \code{plot_type = "errorbar"}.
-		#' @param errorbar_width default 0.2; errorbar width. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.
-		#' @param point_size default 3; point size for taxa. Available when \code{plot_type = "errorbar"}.
-		#' @param point_alpha default 0.8; point transparency. Available when \code{plot_type = "errorbar"}.
-		#' @param add_line default FALSE; whether add line. Available when \code{plot_type = "errorbar"}.
-		#' @param line_size default 0.8; line size when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.
-		#' @param line_type default 2; an integer; line type when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.
-		#' @param line_color default "grey50"; line color when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"} and \code{by_group} is NULL.
-		#' @param line_alpha default 0.5; line transparency when \code{add_line = TRUE}. Available when \code{plot_type = "errorbar"}.
+		#' @param bar_width default 0.9; the bar width when \code{plot_type = "barerrorbar"}.
+		#' @param bar_alpha default 0.8; the alpha of bar color when \code{plot_type = "barerrorbar"}.
+		#' @param dodge_width default 0.9; the dodge width used in \code{position_dodge} function of ggplot2 package when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param plot_SE default TRUE; TRUE: the errorbar is \eqn{mean±se}; FALSE: the errorbar is \eqn{mean±sd}. Available when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param errorbar_size default 1; errorbar size. Available when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param errorbar_width default 0.2; errorbar width. Available when \code{plot_type} is "errorbar" or "barerrorbar" and \code{by_group} is NULL.
+		#' @param errorbar_addpoint default TRUE; whether add point for mean. Available when \code{plot_type} is "errorbar" or "barerrorbar" and \code{by_group} is NULL.
+		#' @param errorbar_color_black default FALSE; whether use black for the color of errorbar when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param point_size default 3; point size for taxa. Available when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param point_alpha default 0.8; point transparency. Available when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param add_line default FALSE; whether add line. Available when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param line_size default 0.8; line size when \code{add_line = TRUE}. Available when \code{plot_type} is "errorbar" or "barerrorbar".
+		#' @param line_type default 2; an integer; line type when \code{add_line = TRUE}. The available case is same with \code{line_size}.
+		#' @param line_color default "grey50"; line color when \code{add_line = TRUE}. Available when \code{by_group} is NULL. Other available case is same with \code{line_size}.
+		#' @param line_alpha default 0.5; line transparency when \code{add_line = TRUE}. The available case is same with \code{line_size}.
 		#' @param heatmap_cell default "P.unadj"; the column of \code{res_diff} table for the cell of heatmap when formula with multiple factors is found in the method.
 		#' @param heatmap_sig default "Significance"; the column of \code{res_diff} for the significance label of heatmap.
 		#' @param heatmap_x default "Factors"; the column of \code{res_diff} for the x axis of heatmap.
@@ -517,10 +523,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			xtext_angle = 30,
 			xtext_size = 13,
 			ytitle_size = 17,
-			barwidth = 0.9,
+			bar_width = 0.9,
+			bar_alpha = 0.8,
+			dodge_width = 0.9,
 			plot_SE = TRUE,
 			errorbar_size = 1,
 			errorbar_width = 0.2,
+			errorbar_addpoint = TRUE,
+			errorbar_color_black = FALSE,
 			point_size = 3,
 			point_alpha = 0.8,
 			add_line = FALSE,
@@ -633,7 +643,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				
 				use_data <- self$data_alpha[self$data_alpha$Measure == measure, ]
-				if(plot_type == "errorbar"){
+				if(plot_type %in% c("errorbar", "barerrorbar")){
 					use_data_plot <- self$data_stat[self$data_stat$Measure == measure, ]
 				}
 				
@@ -651,13 +661,13 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						}) %>% unlist
 					}
 					use_data[, group] %<>% factor(., levels = mean_orders)
-					if(plot_type == "errorbar"){
+					if(plot_type %in% c("errorbar", "barerrorbar")){
 						use_data_plot[, group] %<>% factor(., levels = mean_orders)
 					}
 				}else{
 					if(!is.factor(use_data[, group])){
 						use_data[, group] %<>% as.factor
-						if(plot_type == "errorbar"){
+						if(plot_type %in% c("errorbar", "barerrorbar")){
 							use_data_plot[, group] %<>% as.factor
 						}
 					}
@@ -669,7 +679,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				color_values <- expand_colors(color_values, length(unique(use_data[, group])))
 				
-				if(! plot_type %in% c("ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", "errorbar")){
+				if(! plot_type %in% c("ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", "errorbar", "barerrorbar")){
 					stop("Unknown plot_type: ", plot_type, "!")
 				}
 				if(is.null(add)){
@@ -685,24 +695,46 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						p <- use_ggpubr_function(use_data, x = by_group, y = "Value", color = group, palette = color_values, add = add, ...)
 					}
 				}
-				if(plot_type == "errorbar"){
+				if(plot_type %in% c("errorbar", "barerrorbar")){
 					colnames(use_data_plot)[colnames(use_data_plot) == "Mean"] <- "Value"
-					if(is.null(by_group)){
-						p <- ggplot(use_data_plot, aes(x = .data[[group]], y = .data[["Value"]], color = .data[[group]], group = 1))
-						if(plot_SE){
-							p <- p + geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), linewidth = errorbar_size, width = errorbar_width)
-						}else{
-							p <- p + geom_errorbar(aes(ymin = Value - SD, ymax = Value + SD), linewidth = errorbar_size, width = errorbar_width)
-						}
-						p <- p + geom_point(size = point_size, alpha = point_alpha)
+					if(plot_SE){
+						colnames(use_data_plot)[colnames(use_data_plot) == "SE"] <- "errvalue"
 					}else{
-						p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], group = .data[[group]]))
-						if(plot_SE){
-							p <- p + geom_errorbar(aes(ymin = Value - SE, ymax = Value + SE), position = position_dodge2(width = barwidth), linewidth = errorbar_size)
+						colnames(use_data_plot)[colnames(use_data_plot) == "SD"] <- "errvalue"
+					}
+					if(is.null(by_group)){
+						if(plot_type == "barerrorbar"){
+							p <- ggplot(use_data_plot, aes(x = .data[[group]], y = .data[["Value"]], color = .data[[group]], fill = .data[[group]], group = 1))
+							p <- p + geom_bar(stat = "identity", position = position_dodge(width = dodge_width), width = bar_width, alpha = bar_alpha)
 						}else{
-							p <- p + geom_errorbar(aes(ymin = Value - SD, ymax = Value + SD), position = position_dodge2(width = barwidth), linewidth = errorbar_size)
+							p <- ggplot(use_data_plot, aes(x = .data[[group]], y = .data[["Value"]], color = .data[[group]], group = 1))
 						}
-						p <- p + geom_point(size = point_size, alpha = point_alpha, position = position_dodge2(width = barwidth))						
+						if(errorbar_color_black){
+							p <- p + geom_errorbar(aes(ymin = Value - errvalue, ymax = Value + errvalue), linewidth = errorbar_size, width = errorbar_width, color = "black")
+						}else{
+							p <- p + geom_errorbar(aes(ymin = Value - errvalue, ymax = Value + errvalue), linewidth = errorbar_size, width = errorbar_width)
+						}
+						
+						if(errorbar_addpoint){
+							p <- p + geom_point(size = point_size, alpha = point_alpha)
+						}
+					}else{
+						if(plot_type == "barerrorbar"){
+							p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], fill = .data[[group]], group = .data[[group]]))
+							p <- p + geom_bar(stat = "identity", position = position_dodge(width = dodge_width), width = bar_width, alpha = bar_alpha)
+						}else{
+							p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], group = .data[[group]]))
+						}
+						if(errorbar_color_black){
+							p <- p + geom_errorbar(aes(ymin = Value - errvalue, ymax = Value + errvalue), position = position_dodge(width = dodge_width), 
+								linewidth = errorbar_size, width = errorbar_width, color = "black")
+						}else{
+							p <- p + geom_errorbar(aes(ymin = Value - errvalue, ymax = Value + errvalue), position = position_dodge(width = dodge_width), 
+								linewidth = errorbar_size, width = errorbar_width)						
+						}
+						if(errorbar_addpoint){
+							p <- p + geom_point(size = point_size, alpha = point_alpha, position = position_dodge(width = dodge_width))
+						}
 					}
 					if(add_line){
 						if(is.null(by_group)){
@@ -710,13 +742,24 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								linetype = line_type)
 						}else{
 							p <- p + geom_line(linewidth = line_size, alpha = line_alpha, 
-								linetype = line_type, position = position_dodge2(width = barwidth))
+								linetype = line_type, position = position_dodge(width = dodge_width))
 						}
 					}
 					p <- p + scale_color_manual(values = color_values) + theme_bw()
+					if(plot_type == "barerrorbar"){
+						p <- p + scale_fill_manual(values = color_values)
+					}
 				}
 				
 				if(add_sig){
+					if(!is.null(by_group)){
+						# identify the position for the label when by_group is not NULL
+						if(! plot_type %in% c("errorbar", "barerrorbar")){
+							bygroup_width <- 0.8
+						}else{
+							bygroup_width <- dodge_width
+						}
+					}
 					diff_res <- self$res_diff
 					if(cal_diff_method %in% c("KW", "KW_dunn", "wilcox", "t.test", "anova")){
 						if("Letter" %in% colnames(diff_res)){
@@ -747,8 +790,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 									select_tmp_data <- tmp_use_data %>% .[.[, by_group] == j, ]
 									x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
 									# identify the start x position for each by_group
-									start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
-									increase_bar_mid <- barwidth/length(x_axis_order)
+									start_bar_mid <- 1 - (bygroup_width/2 - bygroup_width/(length(x_axis_order) * 2))
+									increase_bar_mid <- bygroup_width/length(x_axis_order)
 									for(i in x_axis_order){
 										# first determine the bar range
 										mid_num <- match(j, all_by_groups) - 1
@@ -818,8 +861,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 										y_start_use <- max(select_tmp_data$Value) + y_start * y_range_use
 										x_axis_order <- all_groups %>% .[. %in% select_tmp_data[, group]]
 										# identify the start x position for each by_group
-										start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
-										increase_bar_mid <- barwidth/length(x_axis_order)
+										start_bar_mid <- 1 - (bygroup_width/2 - bygroup_width/(length(x_axis_order) * 2))
+										increase_bar_mid <- bygroup_width/length(x_axis_order)
 										# loop for each group of use_diff_data
 										tmp_diff_res <- use_diff_data[use_diff_data$by_group == j, ]
 										for(i in seq_len(nrow(tmp_diff_res))){
