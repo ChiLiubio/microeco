@@ -284,25 +284,16 @@ t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
 Plot the abundance of differential taxa
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_abund(
-  use_number = 1:20,
+  use_number = 1:10,
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-  select_group = NULL,
   select_taxa = NULL,
   simplify_names = TRUE,
   keep_prefix = TRUE,
-  group_order = NULL,
-  barwidth = 0.9,
-  use_se = TRUE,
-  add_sig = FALSE,
-  add_sig_label = "Significance",
-  add_sig_label_color = "black",
-  add_sig_text_size = 3.88,
-  add_sig_tip_length = 0.01,
-  y_start = 1.01,
-  y_increase = 0.05,
-  text_y_size = 10,
+  order_x_mean = TRUE,
   coord_flip = TRUE,
-  xtext_angle = 45,
+  add_sig = TRUE,
+  xtext_angle = 30,
+  ytitle_size = 17,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -310,14 +301,10 @@ Plot the abundance of differential taxa
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_number}}{default 1:20; numeric vector; the taxa numbers (1:n) selected in the plot; 
-If the n is larger than the number of total significant taxa, automatically use all the taxa.}
+\item{\code{use_number}}{default 1:10; numeric vector; the sequences of taxa (1:n) selected in the plot; 
+If n is larger than the number of total significant taxa, automatically use the total number as n.}
 
-\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.}
-
-\item{\code{select_group}}{default NULL; this is used to select the paired groups. 
-This parameter is especially useful when the comparision methods is applied to paired groups;
-The input select_group must be one of \code{object$res_diff$Comparison}.}
+\item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.}
 
 \item{\code{select_taxa}}{default NULL; character vector to provide taxa names. 
 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in \code{object$res_diff$Taxa}.}
@@ -326,39 +313,17 @@ The taxa names should be same with the names shown in the plot, not the 'Taxa' c
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
-\item{\code{group_order}}{default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
-If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
-If provided, overlook the levels in the group of sample_table.}
-
-\item{\code{barwidth}}{default 0.9; the bar width in plot.}
-
-\item{\code{use_se}}{default TRUE; whether use SE in plot, if FALSE, use SD.}
-
-\item{\code{add_sig}}{default FALSE; whether add the significance label to the plot.}
-
-\item{\code{add_sig_label}}{default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.}
-
-\item{\code{add_sig_label_color}}{default "black"; the color for the label text when add_sig = TRUE.}
-
-\item{\code{add_sig_text_size}}{default 3.88; the size of text in added label.}
-
-\item{\code{add_sig_tip_length}}{default 0.01; the tip length for the added line when add_sig = TRUE.}
-
-\item{\code{y_start}}{default 1.01; the y axis position from which to add the label; the default 1.01 means 1.01 * Value;
-For method != "anova", all the start positions are same, i.e. Value = max(Mean+SD or Mean+SE); 
-For method = "anova"; the stat position is calculated for each point, i.e. Value = Mean+SD or Mean+SE.}
-
-\item{\code{y_increase}}{default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
-In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.}
-
-\item{\code{text_y_size}}{default 10; the size for the y axis text, i.e. feature text.}
+\item{\code{order_x_mean}}{default TRUE; whether order x axis by the means of groups from large to small.}
 
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
 
-\item{\code{xtext_angle}}{default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
-only available when coord_flip = FALSE.}
+\item{\code{add_sig}}{default TRUE; whether add the significance label to the plot.}
 
-\item{\code{...}}{parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.}
+\item{\code{xtext_angle}}{default 30; number (e.g. 30). Angle of text in x axis.}
+
+\item{\code{ytitle_size}}{default 17; y axis title size. If \code{coord_flip = TRUE}, it represents the title size of the x axis (i.e. "Relative abundance").}
+
+\item{\code{...}}{parameters passed to \code{trans_alpha::plot_alpha}.}
 }
 \if{html}{\out{</div>}}
 }

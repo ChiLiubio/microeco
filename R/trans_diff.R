@@ -195,19 +195,21 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 				if(!is.null(group)){
 					if(! method %in% c("linda", "DESeq2")){
-						if(length(group) > 1){
-							stop("Please provide only one colname of sample_table for group parameter!")
-						}
 						if(! group %in% colnames(sampleinfo)){
 							stop("Please provide a correct colname of sample_table for group parameter!")
 						}
+						if(length(group) > 1){
+							stop("Please provide only one colname of sample_table for group parameter!")
+						}
+					}
+					if(group %in% colnames(sampleinfo)){
 						if(is.factor(sampleinfo[, group])){
 							self$group_order <- levels(sampleinfo[, group])
 							sampleinfo[, group] %<>% as.character
 						}else{
 							self$group_order <- unique(as.character(sampleinfo[, group]))
 						}
-					}
+					}					
 				}
 				check_taxa_abund(tmp_dataset)
 				
@@ -611,10 +613,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						res <- cbind(res, padj)
 						res <- as.data.frame(res[srt, ])
 						colnames(res) <- c(colnames(tb)[1:2], "P.unadj", "P.adj")
-						res <- cbind.data.frame(feature = rownames(res), res)
+						res <- cbind.data.frame(Taxa = rownames(res), res)
 						rownames(res) <- NULL
 						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-						res <- cbind.data.frame(compare = add_name, res)
+						res <- cbind.data.frame(Comparison = add_name, res)
 						output <- rbind.data.frame(output, res)
 					}
 				}
@@ -686,10 +688,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						res <- st@.Data[[1]]
 						colnames(res)[colnames(res) == "PValue"] <- "P.unadj"
 						colnames(res)[colnames(res) == "FDR"] <- "P.adj"
-						res <- cbind.data.frame(feature = rownames(res), res)
+						res <- cbind.data.frame(Taxa = rownames(res), res)
 						rownames(res) <- NULL
 						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-						res <- cbind.data.frame(compare = add_name, res)
+						res <- cbind.data.frame(Comparison = add_name, res)
 						output <- rbind.data.frame(output, res)
 					}
 				}
@@ -705,10 +707,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 						use_dataset$sample_table %<>% .[.[, group] %in% as.character(all_name[,i]), , drop = FALSE]
 						newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 						res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "t", ...)
-						res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
+						res <- cbind.data.frame(Taxa = rownames(res_raw), res_raw)
 						rownames(res) <- NULL
 						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
-						res <- cbind.data.frame(compare = add_name, res) %>%
+						res <- cbind.data.frame(Comparison = add_name, res) %>%
 							.[, !grepl("^rab\\.", colnames(.))]
 						output <- rbind.data.frame(output, res)
 					}
@@ -721,9 +723,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					use_dataset$sample_table %<>% dropallfactors
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 					res_raw <- ALDEx2::aldex(newdata$otu_table, newdata$sample_table[, group], test = "kw", ...)
-					res <- cbind.data.frame(feature = rownames(res_raw), res_raw)
+					res <- cbind.data.frame(Taxa = rownames(res_raw), res_raw)
 					comparisions <- paste0(unique(as.character(use_dataset$sample_table[, group])), collapse = " - ")
-					output <- cbind.data.frame(compare = comparisions, res)
+					output <- cbind.data.frame(Comparison = comparisions, res)
 				}
 				if(method %in% c("ALDEx2_t", "ALDEx2_kw")){
 					if(! any(colnames(output) %in% ALDEx2_sig)){
@@ -819,7 +821,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 								tmp <- res$output[[i]]
 								tmp_group_element1 <- gsub(group, "", i, fixed = TRUE)
 								tmp_group_element2 <- paste0(group, all_groups) %>% .[!. %in% names(res$output)] %>% gsub(group, "", .)
-								tmp <- data.frame(compare = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
+								tmp <- data.frame(Comparison = paste0(tmp_group_element1, " - ", tmp_group_element2), Taxa = rownames(tmp), tmp)
 								output %<>% rbind(., tmp)
 							}
 						}else{
@@ -837,47 +839,40 @@ trans_diff <- R6Class(classname = "trans_diff",
 					message('Raw trans_env object for maaslin2 is stored in object$res_trans_env ...')
 				}
 				
-				# output taxonomic abundance mean and sd for the final res_abund and enrich group finding in metagenomeSeq or ANCOMBC
+				# use trans_alpha to get the abundance summary data
 				if(grepl("lefse", method, ignore.case = TRUE)){
 					if(lefse_norm > 0){
-						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub/lefse_norm, "Taxa"), id.vars = "Taxa")
+						tmp_abund_alpha <- abund_table_sub/lefse_norm
 					}else{
-						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
+						tmp_abund_alpha <- abund_table_sub
 					}
 				}else{
 					if(grepl("rf", method, ignore.case = TRUE)){
-						res_abund <- reshape2::melt(rownames_to_column(abund_table_sub, "Taxa"), id.vars = "Taxa")
+						tmp_abund_alpha <- abund_table_sub
 					}else{
-						res_abund <- reshape2::melt(rownames_to_column(abund_table, "Taxa"), id.vars = "Taxa")
+						tmp_abund_alpha <- abund_table
 					}
 				}
-				# further calculate mean and sd of res_abund with group parameter
 				if(!is.null(group)){
 					if(group %in% colnames(sampleinfo)){
-						colnames(res_abund) <- c("Taxa", "Sample", "Abund")
-						res_abund <- suppressWarnings(dplyr::left_join(res_abund, rownames_to_column(sampleinfo), by = c("Sample" = "rowname")))
-						res_abund <- microeco:::summarySE_inter(res_abund, measurevar = "Abund", groupvars = c("Taxa", group, by_group))
-						colnames(res_abund)[colnames(res_abund) == group] <- "Group"
+						tmp_mt <- clone(tmp_dataset)
+						tmp_mt$alpha_diversity <- as.data.frame(t(tmp_abund_alpha))
+						tmp_alpha <- suppressMessages(trans_alpha$new(dataset = tmp_mt, group = group, by_group = by_group))
+						self$res_abund_tmp <- tmp_alpha
+						res_abund <- tmp_alpha$data_stat
+						colnames(res_abund)[colnames(res_abund) == "Measure"] <- "Taxa"
+					}else{
+						res_abund <- NULL
 					}
+				}else{
+					res_abund <- NULL
 				}
-				if(method %in% c("metagenomeSeq", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda")){
-					output %<>% dropallfactors(unfac2num = TRUE)
-					colnames(output)[1:2] <- c("Comparison", "Taxa")
-					if(group %in% colnames(sampleinfo)){
-						# filter the unknown taxa in output
-						output %<>% .[.$Taxa %in% res_abund$Taxa, ]
-						output$Group <- lapply(seq_along(output$Taxa), function(x){
-							select_group_split <- strsplit(output[x, "Comparison"], split = " - ") %>% unlist
-							res_abund[res_abund$Taxa == output[x, "Taxa"] & res_abund$Group %in% select_group_split, ] %>%
-							{.[which.max(.$Mean), "Group"]}
-						}) %>% unlist
-					}
+				if(is.null(res_abund)){
+					res_abund <- reshape2::melt(rownames_to_column(abund_table, "Taxa"), id.vars = "Taxa")
 				}
 				self$res_abund <- res_abund
 				message('Taxa abundance table is stored in object$res_abund ...')
-				if("Factors" %in% colnames(output)){
-					output[, "Factors"] %<>% gsub("\\s+$", "", .)
-				}
+				
 				if(!is.null(output)){
 					if("P.adj" %in% colnames(output)){
 						if(!"Significance" %in% colnames(output)){
@@ -885,7 +880,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 				}
-				self$res_diff <- output
 				if(method == "ancombc2"){
 					message("Original ancombc2 results are stored in object$res_diff_raw ...")
 					if(!is.null(output)){
@@ -895,6 +889,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}else{
 					message(method , " analysis result is stored in object$res_diff ...")
 				}
+				if(!is.null(output)){
+					if("Factors" %in% colnames(output)){
+						output[, "Factors"] %<>% gsub("\\s+$", "", .)
+					}
+					if(! "Method" %in% colnames(output)){
+						output$Method <- method
+					}
+				}
+				self$res_diff <- output
+				
 				self$method <- method
 				self$taxa_level <- taxa_level
 				# save abund_table for the cladogram
@@ -905,36 +909,19 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @description
 		#' Plot the abundance of differential taxa
 		#'
-		#' @param use_number default 1:20; numeric vector; the taxa numbers (1:n) selected in the plot; 
-		#'   If the n is larger than the number of total significant taxa, automatically use all the taxa.		
-		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.
-		#' @param select_group default NULL; this is used to select the paired groups. 
-		#'   This parameter is especially useful when the comparision methods is applied to paired groups;
-		#'   The input select_group must be one of \code{object$res_diff$Comparison}.
+		#' @param use_number default 1:10; numeric vector; the sequences of taxa (1:n) selected in the plot; 
+		#'   If n is larger than the number of total significant taxa, automatically use the total number as n.
+		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.
 		#' @param select_taxa default NULL; character vector to provide taxa names. 
 		#' 	 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in \code{object$res_diff$Taxa}.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
-		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
-		#' 	  If provided, overlook the levels in the group of sample_table.
-		#' @param barwidth default 0.9; the bar width in plot.
-		#' @param use_se default TRUE; whether use SE in plot, if FALSE, use SD.
-		#' @param add_sig default FALSE; whether add the significance label to the plot.
-		#' @param add_sig_label default "Significance"; select a colname of object$res_diff for the label text, such as 'P.adj' or 'Significance'.
-		#' @param add_sig_label_color default "black"; the color for the label text when add_sig = TRUE.
-		#' @param add_sig_text_size default 3.88; the size of text in added label.
-		#' @param add_sig_tip_length default 0.01; the tip length for the added line when add_sig = TRUE.
-		#' @param y_start default 1.01; the y axis position from which to add the label; the default 1.01 means 1.01 * Value;
-		#'   For method != "anova", all the start positions are same, i.e. Value = max(Mean+SD or Mean+SE); 
-		#'   For method = "anova"; the stat position is calculated for each point, i.e. Value = Mean+SD or Mean+SE.
-		#' @param y_increase default 0.05; the increasing y axia space to add label for paired groups; the default 0.05 means 0.05 * y_start * Value; 
-		#' 	  In addition, this parameter is also used to label the letters of anova result with the fixed (1 + y_increase) * y_start * Value.
-		#' @param text_y_size default 10; the size for the y axis text, i.e. feature text.
+		#' @param order_x_mean default TRUE; whether order x axis by the means of groups from large to small.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
-		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
-		#' 	  only available when coord_flip = FALSE.
-		#' @param ... parameters passed to \code{ggsignif::stat_signif} when add_sig = TRUE.
+		#' @param add_sig default TRUE; whether add the significance label to the plot.
+		#' @param xtext_angle default 30; number (e.g. 30). Angle of text in x axis.
+		#' @param ytitle_size default 17; y axis title size. If \code{coord_flip = TRUE}, it represents the title size of the x axis (i.e. "Relative abundance").
+		#' @param ... parameters passed to \code{trans_alpha::plot_alpha}.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
@@ -949,53 +936,41 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' t1$plot_diff_abund(use_number = 1:20, add_sig = TRUE)
 		#' }
 		plot_diff_abund = function(
-			use_number = 1:20,
+			use_number = 1:10,
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
-			select_group = NULL,
 			select_taxa = NULL,
 			simplify_names = TRUE,
 			keep_prefix = TRUE,
-			group_order = NULL,
-			barwidth = 0.9,
-			use_se = TRUE,
-			add_sig = FALSE,
-			add_sig_label = "Significance",
-			add_sig_label_color = "black",
-			add_sig_text_size = 3.88,
-			add_sig_tip_length = 0.01,
-			y_start = 1.01,
-			y_increase = 0.05,
-			text_y_size = 10,
+			order_x_mean = TRUE,
 			coord_flip = TRUE,
-			xtext_angle = 45,
+			add_sig = TRUE,
+			xtext_angle = 30,
+			ytitle_size = 17,
 			...
 			){
-			abund_data <- self$res_abund
 			method <- self$method
 			diff_data <- self$res_diff
-			if(grepl("ancombc2", method)){
-				stop("The function can not be applied to ancombc2!")
-			}
+			
 			if(grepl("formula", method)){
-				stop("The function can not be applied to multi-factor analysis!")
+				stop("This function can not be applied to multi-factor analysis!")
 			}
-			# first determine how to select compared groups
-			if(!is.null(select_group)){
-				if(length(select_group) > 1){
-					stop("The select_group parameter should only have one element! Please check the input!")
-				}
-				if(! select_group %in% diff_data$Comparison){
-					stop("The select_group parameter must be one of elements of object$res_diff$Comparison!")
-				}
-				diff_data %<>% .[.$Comparison %in% select_group, ]
-				select_group_split <- strsplit(select_group, split = " - ") %>% unlist
-				abund_data %<>% .[.$Group %in% select_group_split, ]
+			if(is.null(self$res_abund_tmp)){
+				stop("This function can not be applied for the current method!")
 			}
-			# sort according to different columns
+			tmp_transalpha <- clone(self$res_abund_tmp)
+			group <- tmp_transalpha$group
+
+			colnames(tmp_transalpha$data_alpha)[colnames(tmp_transalpha$data_alpha) == "Measure"] <- "Taxa"
+			tmp_transalpha$by_group <- "Taxa"
+			tmp_transalpha$data_alpha$Measure <- "all"
+			colnames(tmp_transalpha$data_stat)[colnames(tmp_transalpha$data_stat) == "Measure"] <- "Taxa"
+			tmp_transalpha$by_group <- "Taxa"
+			tmp_transalpha$data_stat$Measure <- "all"
+			
+			# sort and select taxa
 			if(method == "metastat"){
 				message('Reorder taxa according to qvalue in res_diff from low to high ...')
 				diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
-				# diff_data %<>% .[.$qvalue < 0.05, ]
 			}else{
 				# lefse and rf are ordered
 				if(! method %in% c("lefse", "rf", "anova")){
@@ -1010,11 +985,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			if(simplify_names == T){
 				diff_data$Taxa %<>% gsub(".*\\|", "", .)
-				abund_data$Taxa %<>% gsub(".*\\|", "", .)
+				tmp_transalpha$data_alpha$Taxa %<>% gsub(".*\\|", "", .)
+				tmp_transalpha$data_stat$Taxa %<>% gsub(".*\\|", "", .)
 			}
 			if(keep_prefix == F){
 				diff_data$Taxa %<>% gsub(".__", "", .)
-				abund_data$Taxa %<>% gsub(".__", "", .)
+				tmp_transalpha$data_alpha$Taxa %<>% gsub(".__", "", .)
+				tmp_transalpha$data_stat$Taxa %<>% gsub(".__", "", .)
 			}
 			if(is.null(select_taxa)){
 				if(length(use_number) > length(unique(as.character(diff_data$Taxa)))){
@@ -1022,168 +999,78 @@ trans_diff <- R6Class(classname = "trans_diff",
 					use_number <- 1:length(unique(as.character(diff_data$Taxa)))
 				}
 				diff_data %<>% .[.$Taxa %in% unique(as.character(diff_data$Taxa))[use_number], ]
-				diff_data$Taxa %<>% factor(., levels = rev(unique(as.character(.))))
+				diff_data$Taxa %<>% factor(., levels = unique(as.character(.)))
 			}else{
 				message('Use provided select_taxa to filter and reorder taxa ...')
 				diff_data %<>% .[.$Taxa %in% select_taxa, ]
 				if(nrow(diff_data) == 0){
-					stop("No significant taxa can be used to plot the abundance!")
+					stop("No taxa is remained! Please check the input select_taxa parameter!")
 				}
-				diff_data$Taxa %<>% factor(., levels = rev(select_taxa))
+				diff_data$Taxa %<>% factor(., levels = select_taxa)
 			}
-			abund_data %<>% .[.$Taxa %in% levels(diff_data$Taxa), ]
-			abund_data$Taxa %<>% factor(., levels = levels(diff_data$Taxa))
-			if(is.null(group_order)){
-				if((!is.null(self$group_order)) & (length(unique(abund_data$Group)) == length(self$group_order))){
-					abund_data$Group %<>% factor(., levels = rev(self$group_order))
-				}else{
-					abund_data$Group %<>% as.character %>% as.factor
-				}
-			}else{
-				abund_data$Group %<>% factor(., levels = rev(group_order))
-			}
-			if(length(color_values) < length(levels(abund_data$Group))){
-				stop("Please provide color_values parameter with more colors!")
-			}else{
-				color_values %<>% .[1:length(levels(abund_data$Group))] %>% rev
-			}
-			if(!coord_flip){
-				abund_data$Group %<>% factor(., levels = rev(levels(.)))
-				abund_data$Taxa %<>% factor(., levels = rev(levels(.)))
-				diff_data$Taxa %<>% factor(., levels = rev(levels(.)))
-				color_values %<>% rev
+
+			tmp_transalpha$data_alpha %<>% .[.$Taxa %in% levels(diff_data$Taxa), ]
+			tmp_transalpha$data_stat %<>% .[.$Taxa %in% levels(diff_data$Taxa), ]
+			tmp_transalpha$data_alpha$Taxa %<>% factor(., levels = levels(diff_data$Taxa))
+			tmp_transalpha$data_stat$Taxa %<>% factor(., levels = levels(diff_data$Taxa))
+			if(order_x_mean){
+				mean_orders <- names(sort(tapply(tmp_transalpha$data_alpha$Value, tmp_transalpha$data_alpha[, "Taxa"], mean), decreasing = TRUE))
+				tmp_transalpha$data_alpha[, "Taxa"] %<>% factor(., levels = mean_orders)
+				tmp_transalpha$data_stat[, "Taxa"] %<>% factor(., levels = mean_orders)
+				diff_data$Taxa %<>% factor(., levels = mean_orders)
 			}
 			
-			p <- ggplot(abund_data, aes(x = Taxa, y = Mean, color = Group, fill = Group)) +
-				theme_bw() +
-				geom_bar(stat="identity", position = position_dodge(), width = barwidth)
-			if(use_se == T){
-				p <- p + geom_errorbar(aes(ymin=Mean-SE, ymax=Mean+SE), width=.45, position=position_dodge(barwidth), color = "black")
-			}else{
-				p <- p + geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD), width=.45, position=position_dodge(barwidth), color = "black")
+			if(!is.factor(tmp_transalpha$data_alpha[, group])){
+				tmp_transalpha$data_alpha[, group] %<>% factor(., levels = self$group_order)
+			}
+			if(!is.factor(tmp_transalpha$data_stat[, group])){
+				tmp_transalpha$data_stat[, group] %<>% factor(., levels = self$group_order)
 			}
 			
-			if(add_sig){
-				# assign labels by factor orders
-				x_axis_order <- levels(abund_data$Group)
-				if(! add_sig_label %in% colnames(diff_data)){
-					stop("The add_sig_label parameter must be one of colnames of object$res_diff!")
-				}
-				if(is.factor(diff_data[, add_sig_label])){
-					diff_data[, add_sig_label] %<>% as.character
-				}else{
-					if(is.numeric(diff_data[, add_sig_label])){
-						diff_data[, add_sig_label] %<>% round(., 4)
-					}
-				}
-				if(use_se){
-					y_start_use <- max((abund_data$Mean + abund_data$SE)) * y_start
-				}else{
-					y_start_use <- max((abund_data$Mean + abund_data$SD)) * y_start
-				}
-				all_taxa <- levels(abund_data$Taxa)
-				
-				# for groups > 3, show the global comparision
-				if((length(levels(abund_data$Group)) > 2 & method %in% c("lefse", "rf", "KW", "ALDEx2_kw")) | 
-					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ancombc2")){
-					add_letter_text <- diff_data[match(all_taxa, diff_data$Taxa), add_sig_label]
-					textdf <- data.frame(
-						x = all_taxa, 
-						y = y_start_use, 
-						add = add_letter_text, 
-						stringsAsFactors = FALSE
-						)
-					p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, size = add_sig_text_size, color = add_sig_label_color, inherit.aes = FALSE)
-				}else{
-					if(! "Letter" %in% colnames(diff_data)){
-						if(any(grepl("\\s-\\s", x_axis_order))){
-							stop("The group names have ' - ' characters, which can hinder the group recognition and mapping in the plot! Please rename groups and rerun!")
-						}
-						annotations <- c()
-						x_min <- c()
-						x_max <- c()
-						y_position <- c()
-
-						start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
-						increase_bar_mid <- barwidth/length(x_axis_order)
-
-						for(j in all_taxa){
-							select_use_diff_data <- diff_data %>% dropallfactors %>% .[.$Taxa == j, ]
-							for(i in seq_len(nrow(select_use_diff_data))){
-								# first determine the bar range
-								mid_num <- match(j, all_taxa) - 1
-								annotations %<>% c(., select_use_diff_data[i, add_sig_label])
-								x_min %<>% c(., mid_num + 
-									(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\1", select_use_diff_data[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
-								x_max %<>% c(., mid_num + 
-									(start_bar_mid + (match(gsub("(.*)\\s-\\s(.*)", "\\2", select_use_diff_data[i, "Comparison"]), x_axis_order) - 1) * increase_bar_mid))
-								y_position %<>% c(., y_start_use * (1 + i * y_increase))
-							}
-						}
-						p <- p + ggsignif::geom_signif(
-							annotations = annotations,
-							y_position = y_position, 
-							xmin = x_min, 
-							xmax = x_max,
-							textsize = add_sig_text_size,
-							color = add_sig_label_color,
-							tip_length = add_sig_tip_length,
-							...
-						)
-					}else{
-						x_mid <- c()
-						annotations <- c()
-						y_position <- c()
-
-						start_bar_mid <- 1 - (barwidth/2 - barwidth/(length(x_axis_order) * 2))
-						increase_bar_mid <- barwidth/length(x_axis_order)
-
-						for(j in all_taxa){
-							select_use_diff_data <- diff_data %>% dropallfactors %>% .[.$Taxa == j, ]
-							for(i in seq_len(nrow(select_use_diff_data))){
-								mid_num <- match(j, all_taxa) - 1
-								annotations %<>% c(., select_use_diff_data[i, add_sig_label])
-								x_mid %<>% c(., mid_num + (start_bar_mid + (match(select_use_diff_data[i, "Group"], x_axis_order) - 1) * increase_bar_mid))
-								abund_data_select <- abund_data[abund_data$Group == select_use_diff_data[i, "Group"] & abund_data$Taxa == j, ]
-								if(use_se){
-									y_position %<>% c(., y_start * (abund_data_select$Mean + abund_data_select$SE) + y_increase * max(abund_data$Mean))						
-								}else{
-									y_position %<>% c(., y_start * (abund_data_select$Mean + abund_data_select$SD) + y_increase * max(abund_data$Mean))
-								}
-							}
-						}
-						textdf <- data.frame(
-							x = x_mid, 
-							y = y_position, 
-							add = annotations, 
-							stringsAsFactors = FALSE
-						)
-						p <- p + geom_text(aes(x = x, y = y, label = add), data = textdf, size = add_sig_text_size, color = add_sig_label_color, inherit.aes = FALSE)
-					}
-				}
-			}
-
-			p <- p + scale_color_manual(values = color_values) +
-				scale_fill_manual(values = color_values) +
-				ylab("Relative abundance") +
-				theme(legend.position = "right") +
-				theme(panel.border = element_blank(), panel.background=element_rect(fill="white")) +
-				theme(axis.title = element_text(size = 17))
-				
 			if(coord_flip){
-				p <- p + coord_flip() + guides(fill = guide_legend(reverse = TRUE, ncol = 1), color = "none") +
-					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) +
-					theme(axis.title.y = element_blank(), axis.text.y = element_text(size = text_y_size, color = "black"))
-			}else{
-				p <- p + guides(fill = guide_legend(reverse = FALSE, ncol = 1), color = "none")
-				if(xtext_angle != 0){
-					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", vjust = 1, hjust = 1, size = text_y_size))
-				}else{
-					p <- p + theme(axis.text.x = element_text(angle = xtext_angle, colour = "black", size = text_y_size))
-				}
-				p <- p + theme(axis.title.x = element_blank(), axis.text.x = element_text(size = text_y_size, color = "black")) +
-					theme(plot.margin = unit(c(.1, .1, .1, 1), "cm"))
+				# tmp_transalpha$data_alpha[, group] %<>% factor(., levels = rev(levels(.)))
+				# tmp_transalpha$data_stat[, group] %<>% factor(., levels = rev(levels(.)))
+				tmp_transalpha$data_alpha$Taxa %<>% factor(., levels = rev(levels(.)))
+				tmp_transalpha$data_stat$Taxa %<>% factor(., levels = rev(levels(.)))
+				diff_data$Taxa %<>% factor(., levels = rev(levels(.)))
+
+				xtext_angle <- 0
 			}
+			
+			# manipulate the diff table
+			if(add_sig){
+				diff_data$Measure <- "all"
+				colnames(diff_data)[colnames(diff_data) == "Taxa"] <- "by_group"
+				
+				tmp_transalpha$res_diff <- diff_data
+				# for groups > 3, show the global comparision
+				if((length(unique(tmp_transalpha$data_alpha[, group])) > 2 & method %in% c("lefse", "rf", "KW", "ALDEx2_kw")) | 
+					(length(unlist(gregexpr(" - ", diff_data$Comparison[1]))) > 1 & method == "ancombc2")){
+					tmp_transalpha$cal_diff_method <- "KW"
+				}else{
+					if("Letter" %in% colnames(diff_data)){
+						tmp_transalpha$cal_diff_method <- "anova"
+					}else{
+						tmp_transalpha$cal_diff_method <- "wilcox"
+					}
+				}
+			}
+			
+			p <- tmp_transalpha$plot_alpha(measure = "all", 
+				color_values = color_values, 
+				order_x_mean = FALSE, 
+				add_sig = add_sig, 
+				xtext_angle = xtext_angle,
+				...)
+			
+			p <- p + ylab("Relative abundance")
+			
+			if(coord_flip){
+				p <- p + coord_flip() + 
+					theme(axis.title.x = element_text(size = ytitle_size)) +
+					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank())
+			}
+
 			p
 		},
 		#' @description

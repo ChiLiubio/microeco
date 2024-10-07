@@ -650,33 +650,28 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				if(order_x_mean){
 					if(is.null(by_group)){
 						mean_orders <- names(sort(tapply(use_data$Value, use_data[, group], mean), decreasing = TRUE))
+						use_data[, group] %<>% factor(., levels = mean_orders)
+						if(plot_type %in% c("errorbar", "barerrorbar")){
+							use_data_plot[, group] %<>% factor(., levels = mean_orders)
+						}
 					}else{
 						# first sort by_group
 						mean_orders_bygroup <- names(sort(tapply(use_data$Value, use_data[, by_group], mean), decreasing = TRUE))
 						use_data[, by_group] %<>% factor(., levels = mean_orders_bygroup)
-						# sort each group by by_group levels
-						mean_orders <- lapply(mean_orders_bygroup, function(x){
-							tmp_data <- use_data[use_data[, by_group] == x, ]
-							names(sort(tapply(tmp_data$Value, tmp_data[, group], mean), decreasing = TRUE))
-						}) %>% unlist
-					}
-					use_data[, group] %<>% factor(., levels = mean_orders)
-					if(plot_type %in% c("errorbar", "barerrorbar")){
-						use_data_plot[, group] %<>% factor(., levels = mean_orders)
-					}
-				}else{
-					if(!is.factor(use_data[, group])){
-						use_data[, group] %<>% as.factor
-						if(plot_type %in% c("errorbar", "barerrorbar")){
-							use_data_plot[, group] %<>% as.factor
-						}
-					}
-					if(!is.null(by_group)){
-						if(!is.factor(use_data[, by_group])){
-							use_data[, by_group] %<>% as.factor
-						}
 					}
 				}
+				if(!is.factor(use_data[, group])){
+					use_data[, group] %<>% as.factor
+					if(plot_type %in% c("errorbar", "barerrorbar")){
+						use_data_plot[, group] %<>% as.factor
+					}
+				}
+				if(!is.null(by_group)){
+					if(!is.factor(use_data[, by_group])){
+						use_data[, by_group] %<>% as.factor
+					}
+				}
+
 				color_values <- expand_colors(color_values, length(unique(use_data[, group])))
 				
 				if(! plot_type %in% c("ggboxplot", "ggdotplot", "ggviolin", "ggstripchart", "ggerrorplot", "errorbar", "barerrorbar")){
@@ -841,7 +836,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 									y_range <- max(use_data$Value) - min(use_data$Value)
 									y_start <- max(use_data$Value) + y_start * y_range
 									for(i in seq_len(nrow(use_diff_data))){
-										annotations %<>% c(., use_diff_data[i, add_sig_label])
+										annotations %<>% c(., as.character(use_diff_data[i, add_sig_label]))
 										x_min %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\1", use_diff_data[i, "Comparison"]), x_axis_order))
 										x_max %<>% c(., match(gsub("(.*)\\s-\\s(.*)", "\\2", use_diff_data[i, "Comparison"]), x_axis_order))
 										y_position %<>% c(., y_start + i * y_increase * y_range)
@@ -866,7 +861,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 										# loop for each group of use_diff_data
 										tmp_diff_res <- use_diff_data[use_diff_data$by_group == j, ]
 										for(i in seq_len(nrow(tmp_diff_res))){
-											annotations %<>% c(., tmp_diff_res[i, add_sig_label])
+											annotations %<>% c(., as.character(tmp_diff_res[i, add_sig_label]))
 											# first determine the bar range
 											mid_num <- match(j, all_by_groups) - 1
 											x_min %<>% c(., mid_num + 
@@ -889,7 +884,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								if(is.null(by_group)){
 									comp_group_num <- sapply(use_diff_data$Comparison, function(x){length(unlist(gregexpr(" - ", x)))})
 									y_position <- max(use_data$Value) + y_start * (max(use_data$Value) - min(use_data$Value))
-									annotations <- use_diff_data[, add_sig_label]
+									annotations <- as.character(use_diff_data[, add_sig_label])
 									textdata <- data.frame(
 										x = comp_group_num/2, 
 										y = y_position, 
@@ -904,7 +899,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 									diff_by_groups <- use_diff_data$by_group %>% unique
 									for(j in diff_by_groups){
 										x_mid %<>% c(., match(j, all_by_groups))
-										annotations %<>% c(., use_diff_data[use_diff_data$by_group == j, add_sig_label])
+										annotations %<>% c(., as.character(use_diff_data[use_diff_data$by_group == j, add_sig_label]))
 									}
 									textdata <- data.frame(
 										x = x_mid, 
@@ -921,8 +916,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				p <- p + ylab(measure) + xlab("")
 				p <- p + theme(
 						axis.title.y = element_text(size = ytitle_size),
-						axis.text.y = element_text(size = rel(1.1)),
-						axis.title.x = element_blank()
+						axis.text.y = element_text(size = rel(1.1))
 						)
 				p <- p + ggplot_xtext_anglesize(xtext_angle, xtext_size)
 				if(is.null(by_group)){
