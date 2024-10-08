@@ -289,10 +289,12 @@ Plot the abundance of differential taxa
   select_taxa = NULL,
   simplify_names = TRUE,
   keep_prefix = TRUE,
+  group_order = NULL,
   order_x_mean = TRUE,
   coord_flip = TRUE,
   add_sig = TRUE,
-  xtext_angle = 30,
+  xtext_angle = 45,
+  xtext_size = 13,
   ytitle_size = 17,
   ...
 )}\if{html}{\out{</div>}}
@@ -313,13 +315,19 @@ The taxa names should be same with the names shown in the plot, not the 'Taxa' c
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
+\item{\code{group_order}}{default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
+If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+If provided, overlook the levels in the group of sample_table.}
+
 \item{\code{order_x_mean}}{default TRUE; whether order x axis by the means of groups from large to small.}
 
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
 
 \item{\code{add_sig}}{default TRUE; whether add the significance label to the plot.}
 
-\item{\code{xtext_angle}}{default 30; number (e.g. 30). Angle of text in x axis.}
+\item{\code{xtext_angle}}{default 45; number (e.g. 45). Angle of text in x axis.}
+
+\item{\code{xtext_size}}{default 13; x axis text size. NULL means the default size in ggplot2. If \code{coord_flip = TRUE}, it represents the text size of the y axis.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size. If \code{coord_flip = TRUE}, it represents the title size of the x axis (i.e. "Relative abundance").}
 

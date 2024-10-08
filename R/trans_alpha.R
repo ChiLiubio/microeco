@@ -891,7 +891,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 										add = annotations, 
 										stringsAsFactors = FALSE
 									)
-									p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
+									p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size, inherit.aes = FALSE)
 								}else{
 									x_mid <- c()
 									annotations <- c()
@@ -907,7 +907,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 										add = annotations, 
 										stringsAsFactors = FALSE
 									)
-									p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size)
+									p <- p + geom_text(aes(x = x, y = y, label = add), data = textdata, size = add_sig_text_size, inherit.aes = FALSE)
 								}
 							}
 						}

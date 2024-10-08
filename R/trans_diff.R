@@ -916,10 +916,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 The taxa names should be same with the names shown in the plot, not the 'Taxa' column names in \code{object$res_diff$Taxa}.
 		#' @param simplify_names default TRUE; whether use the simplified taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
+		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
+		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
+		#' 	  If provided, overlook the levels in the group of sample_table.
 		#' @param order_x_mean default TRUE; whether order x axis by the means of groups from large to small.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
 		#' @param add_sig default TRUE; whether add the significance label to the plot.
-		#' @param xtext_angle default 30; number (e.g. 30). Angle of text in x axis.
+		#' @param xtext_angle default 45; number (e.g. 45). Angle of text in x axis.
+		#' @param xtext_size default 13; x axis text size. NULL means the default size in ggplot2. If \code{coord_flip = TRUE}, it represents the text size of the y axis.
 		#' @param ytitle_size default 17; y axis title size. If \code{coord_flip = TRUE}, it represents the title size of the x axis (i.e. "Relative abundance").
 		#' @param ... parameters passed to \code{trans_alpha::plot_alpha}.
 		#' @return ggplot.
@@ -941,10 +945,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 			select_taxa = NULL,
 			simplify_names = TRUE,
 			keep_prefix = TRUE,
+			group_order = NULL,
 			order_x_mean = TRUE,
 			coord_flip = TRUE,
 			add_sig = TRUE,
-			xtext_angle = 30,
+			xtext_angle = 45,
+			xtext_size = 13,
 			ytitle_size = 17,
 			...
 			){
@@ -966,7 +972,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			colnames(tmp_transalpha$data_stat)[colnames(tmp_transalpha$data_stat) == "Measure"] <- "Taxa"
 			tmp_transalpha$by_group <- "Taxa"
 			tmp_transalpha$data_stat$Measure <- "all"
-			
+
 			# sort and select taxa
 			if(method == "metastat"){
 				message('Reorder taxa according to qvalue in res_diff from low to high ...')
@@ -1019,14 +1025,18 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tmp_transalpha$data_stat[, "Taxa"] %<>% factor(., levels = mean_orders)
 				diff_data$Taxa %<>% factor(., levels = mean_orders)
 			}
-			
-			if(!is.factor(tmp_transalpha$data_alpha[, group])){
-				tmp_transalpha$data_alpha[, group] %<>% factor(., levels = self$group_order)
+			if(is.null(group_order)){
+				if(!is.factor(tmp_transalpha$data_alpha[, group])){
+					tmp_transalpha$data_alpha[, group] %<>% factor(., levels = self$group_order)
+				}
+				if(!is.factor(tmp_transalpha$data_stat[, group])){
+					tmp_transalpha$data_stat[, group] %<>% factor(., levels = self$group_order)
+				}
+			}else{
+				tmp_transalpha$data_alpha[, group] %<>% factor(., levels = group_order)
+				tmp_transalpha$data_stat[, group] %<>% factor(., levels = group_order)
 			}
-			if(!is.factor(tmp_transalpha$data_stat[, group])){
-				tmp_transalpha$data_stat[, group] %<>% factor(., levels = self$group_order)
-			}
-			
+
 			if(coord_flip){
 				# tmp_transalpha$data_alpha[, group] %<>% factor(., levels = rev(levels(.)))
 				# tmp_transalpha$data_stat[, group] %<>% factor(., levels = rev(levels(.)))
@@ -1061,14 +1071,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 				order_x_mean = FALSE, 
 				add_sig = add_sig, 
 				xtext_angle = xtext_angle,
+				ggtheme = theme_bw(),
 				...)
 			
 			p <- p + ylab("Relative abundance")
 			
 			if(coord_flip){
 				p <- p + coord_flip() + 
-					theme(axis.title.x = element_text(size = ytitle_size)) +
-					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank())
+					theme(axis.title.x = element_text(size = ytitle_size), axis.text.x = element_text(size = ytitle_size * 0.618), axis.text.y = element_text(size = xtext_size)) +
+					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) +
+					theme(legend.position = "right")
 			}
 
 			p
