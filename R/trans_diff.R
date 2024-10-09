@@ -1038,12 +1038,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 
 			if(coord_flip){
-				# tmp_transalpha$data_alpha[, group] %<>% factor(., levels = rev(levels(.)))
-				# tmp_transalpha$data_stat[, group] %<>% factor(., levels = rev(levels(.)))
+				tmp_transalpha$data_alpha[, group] %<>% factor(., levels = rev(levels(.)))
+				tmp_transalpha$data_stat[, group] %<>% factor(., levels = rev(levels(.)))
+				color_values <- expand_colors(color_values, length(unique(tmp_transalpha$data_alpha[, group]))) %>% rev
+
 				tmp_transalpha$data_alpha$Taxa %<>% factor(., levels = rev(levels(.)))
 				tmp_transalpha$data_stat$Taxa %<>% factor(., levels = rev(levels(.)))
 				diff_data$Taxa %<>% factor(., levels = rev(levels(.)))
-
+				
 				xtext_angle <- 0
 			}
 			
@@ -1080,7 +1082,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				p <- p + coord_flip() + 
 					theme(axis.title.x = element_text(size = ytitle_size), axis.text.x = element_text(size = ytitle_size * 0.618), axis.text.y = element_text(size = xtext_size)) +
 					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank()) +
-					theme(legend.position = "right")
+					theme(legend.position = "right") +
+					guides(color = guide_legend(reverse = TRUE), fill = guide_legend(reverse = TRUE))
 			}
 
 			p
