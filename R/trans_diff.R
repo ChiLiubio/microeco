@@ -907,8 +907,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 		},
 		#' @description
-		#' Plot the abundance of differential taxa
-		#'
+		#' Plot the abundance of taxa. 
+		#' 
+		#' The significance can be optionally added in the plot. 
+		#' The taxa displayed are based on the taxa in the 'res_diff' table, selected using parameters. 
+		#' If the user filters out the non-significant taxa from the 'res_diff' table, these taxa will also be filtered from the plot.
+		#' 
 		#' @param use_number default 1:10; numeric vector; the sequences of taxa (1:n) selected in the plot; 
 		#'   If n is larger than the number of total significant taxa, automatically use the total number as n.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); color pallete for groups.

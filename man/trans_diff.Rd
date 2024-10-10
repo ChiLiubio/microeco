@@ -281,7 +281,11 @@ t1 <- trans_diff$new(dataset = dataset, method = "wilcox", group = "Group")
 \if{html}{\out{<a id="method-trans_diff-plot_diff_abund"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_diff-plot_diff_abund}{}}}
 \subsection{Method \code{plot_diff_abund()}}{
-Plot the abundance of differential taxa
+Plot the abundance of taxa. 
+
+The significance can be optionally added in the plot. 
+The taxa displayed are based on the taxa in the 'res_diff' table, selected using parameters. 
+If the user filters out the non-significant taxa from the 'res_diff' table, these taxa will also be filtered from the plot.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_diff_abund(
   use_number = 1:10,
