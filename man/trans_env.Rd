@@ -296,7 +296,10 @@ Calculate the autocorrelations among environmental variables.
 \describe{
 \item{\code{group}}{default NULL; a colname of sample_table; used to perform calculations for different groups.}
 
-\item{\code{ggpairs}}{default TRUE; whether use \code{GGally::ggpairs} function to plot the correlation results.}
+\item{\code{ggpairs}}{default TRUE; whether use \code{GGally::ggpairs} function to plot the correlation results.
+If \code{ggpairs = FALSE}, the function will output a table with all the values instead of a graph.
+In this case, the function will call \code{cal_cor} to calculate autocorrelation instead of using the ggpairs function in GGally, 
+so please use parameter passing to control more options.}
 
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.}
 

@@ -162,6 +162,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param group default NULL; a colname of sample_table; used to perform calculations for different groups.
 		#' @param ggpairs default TRUE; whether use \code{GGally::ggpairs} function to plot the correlation results.
+		#' 	  If \code{ggpairs = FALSE}, the function will output a table with all the values instead of a graph.
+		#' 	  In this case, the function will call \code{cal_cor} to calculate autocorrelation instead of using the ggpairs function in GGally, 
+		#' 	  so please use parameter passing to control more options.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette.
 		#' @param alpha default 0.8; the alpha value to add transparency in colors; useful when group is not NULL.
 		#' @param ... parameters passed to \code{GGally::ggpairs} when \code{ggpairs = TRUE} or 
