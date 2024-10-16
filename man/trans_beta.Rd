@@ -144,6 +144,7 @@ Unconstrained ordination.
   trans = FALSE,
   scale_species = FALSE,
   scale_species_ratio = 0.8,
+  orthoI = NA,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -151,11 +152,11 @@ Unconstrained ordination.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default "PCoA"; "PCoA", "NMDS", "PCA", "DCA" or "PLS-DA".
+\item{\code{method}}{default "PCoA"; "PCoA", "NMDS", "PCA", "DCA", "PLS-DA" or "OPLS-DA".
 PCoA: principal coordinates analysis; NMDS: non-metric multidimensional scaling, PCA: principal component analysis; DCA: detrended correspondence analysis; 
-PLS-DA: partial least squares discriminant analysis.
+PLS-DA: partial least squares discriminant analysis; OPLS-DA: orthogonal partial least squares discriminant analysis.
 For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
-<doi:10.1186/s12859-019-3310-7> (for PLS-DA).}
+<doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).}
 
 \item{\code{ncomp}}{default 3; dimensions shown in the results (except method "NMDS").}
 
@@ -166,11 +167,14 @@ For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.200
 \item{\code{scale_species_ratio}}{default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 Only available when \code{scale_species = TURE}.}
 
+\item{\code{orthoI}}{default NA; number of orthogonal components (for OPLS-DA only). Default NA means the number of orthogonal components is automatically computed.
+Please also see \code{orthoI} parameter in \code{opls} function of ropls package.}
+
 \item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
 or \code{vegan::decorana} function when \code{method = "DCA"}, 
 or \code{ape::pcoa} function when \code{method = "PCoA"}, 
 or \code{vegan::metaMDS} function when \code{method = "NMDS"},
-or \code{ropls::opls} function when \code{method = "PLS-DA"}.}
+or \code{ropls::opls} function when \code{method = "PLS-DA"} or \code{method = "OPLS-DA"} .}
 }
 \if{html}{\out{</div>}}
 }
