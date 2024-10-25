@@ -651,8 +651,9 @@ Calculate the taxonomic abundance at each taxonomic level or selected levels.
   rel = TRUE,
   merge_by = "|",
   split_group = FALSE,
-  split_by = "&&",
-  split_column = NULL
+  split_by = "&",
+  split_column = NULL,
+  split_special_char = "&&"
 )}\if{html}{\out{</div>}}
 }
 
@@ -667,20 +668,21 @@ This is very useful if there are commented columns or some columns with multiple
 
 \item{\code{merge_by}}{default "|"; the symbol to merge and concatenate taxonomic names of different levels.}
 
-\item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
-Very useful when multiple mapping information exist.}
+\item{\code{split_group}}{default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table} 
+when there is multiple mapping information.}
 
-\item{\code{split_by}}{default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; 
-see \code{sep} parameter in \code{separate_rows} function of tidyr package.}
+\item{\code{split_by}}{default "&"; Separator delimiting collapsed values; only available when \code{split_group = TRUE}.}
 
-\item{\code{split_column}}{default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
-fixed column or columns used for the splitting in tax_table for each abundance calculation; 
-list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).}
+\item{\code{split_column}}{default NULL; one column name used for the splitting in tax_table for each abundance calculation; 
+only available when \code{split_group = TRUE}. If not provided, the function will split each column that containing the \code{split_by} character.}
+
+\item{\code{split_special_char}}{default "&&"; special character that will be used to split multiple mapping information in \code{tax_table} by default
+no matter \code{split_group} setting.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-taxa_abund list in object.
+\code{taxa_abund} list in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

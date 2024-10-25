@@ -511,14 +511,14 @@ microtable <- R6Class(classname = "microtable",
 		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
 		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance (i.e. raw values) will be summed.
 		#' @param merge_by default "|"; the symbol to merge and concatenate taxonomic names of different levels.
-		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table}. 
-		#'   Very useful when multiple mapping information exist.
-		#' @param split_by default "&&"; Separator delimiting collapsed values; only useful when \code{split_group = TRUE}; 
-		#'   see \code{sep} parameter in \code{separate_rows} function of tidyr package.
-		#' @param split_column default NULL; character vector or list; only useful when \code{split_group = TRUE}; character vector: 
-		#'   fixed column or columns used for the splitting in tax_table for each abundance calculation; 
-		#'   list: containing more character vectors to assign the column names to each calculation, such as list(c("Phylum"), c("Phylum", "Class")).
-		#' @return taxa_abund list in object.
+		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table} 
+		#'   when there is multiple mapping information.
+		#' @param split_by default "&"; Separator delimiting collapsed values; only available when \code{split_group = TRUE}.
+		#' @param split_column default NULL; one column name used for the splitting in tax_table for each abundance calculation; 
+		#'   only available when \code{split_group = TRUE}. If not provided, the function will split each column that containing the \code{split_by} character.
+		#' @param split_special_char default "&&"; special character that will be used to split multiple mapping information in \code{tax_table} by default
+		#'   no matter \code{split_group} setting.
+		#' @return \code{taxa_abund} list in object.
 		#' @examples
 		#' \donttest{
 		#' m1$cal_abund()
@@ -528,8 +528,9 @@ microtable <- R6Class(classname = "microtable",
 			rel = TRUE, 
 			merge_by = "|",
 			split_group = FALSE, 
-			split_by = "&&", 
-			split_column = NULL
+			split_by = "&", 
+			split_column = NULL,
+			split_special_char = "&&"
 			){
 			taxa_abund <- list()
 			if(is.null(self$tax_table)){
@@ -561,24 +562,38 @@ microtable <- R6Class(classname = "microtable",
 					}
 				}
 			}
-			if(split_group){
-				if(is.null(split_column)){
-					stop("Spliting rows by one or more columns require split_column parameter! Please set split_column and try again!")
-				}
+			# built-in characters, such as those in MetaCyc mapping file
+			if(any(grepl(split_special_char, self$tax_table[, select_cols], fixed = TRUE))){
+				split_group <- TRUE
+				split_by <- split_special_char
 			}
 			for(i in seq_along(select_cols)){
+				tmp_mt <- clone(self)
+				sel <- select_cols[1:i]
 				taxrank <- colnames(self$tax_table)[select_cols[i]]
-				# assign the columns used for the splitting
-				if(!is.null(split_column)){
-					if(is.list(split_column)){
-						use_split_column <- split_column[[i]]
+				
+				test_doubleand <- lapply(1:i, function(x){any(grepl(split_special_char, self$tax_table[, select_cols[x]], fixed = TRUE))}) %>% unlist
+				if(any(test_doubleand)){
+					if(sum(test_doubleand) > 1){
+						use_split_column <- taxrank
+						sel <- select_cols[i]
 					}else{
-						use_split_column <- split_column
+						use_split_column <- colnames(self$tax_table)[select_cols[1:i]]
+					}
+				}else{
+					if(split_group){
+						# assign the columns used for the splitting
+						if(is.null(split_column)){
+							use_split_column <- colnames(self$tax_table)[select_cols[1:i]]
+						}else{
+							use_split_column <- split_column
+						}
 					}
 				}
+				
+				tmp_mt$tax_table %<>% .[, sel, drop = FALSE]
 				taxa_abund[[taxrank]] <- private$transform_data_proportion(
-											self, 
-											columns = select_cols[1:i], 
+											input = tmp_mt, 
 											rel = rel, 
 											merge_by = merge_by,
 											split_group = split_group, 
@@ -856,23 +871,21 @@ microtable <- R6Class(classname = "microtable",
 		},
 		transform_data_proportion = function(
 			input,
-			columns,
 			rel,
-			merge_by = "|",
-			split_group = FALSE,
-			split_by = "&&",
+			merge_by,
+			split_group,
+			split_by,
 			split_column
 			){
 			sampleinfo <- input$sample_table
 			abund <- input$otu_table
 			tax <- input$tax_table
-			tax <- tax[, columns, drop = FALSE]
-			# split rows to multiple rows if multiple correspondence
+			# split rows to multiple rows for multiple mapping
 			if(split_group){
 				merge_abund <- cbind.data.frame(tax, abund)
-				split_merge_abund <- tidyr::separate_rows(merge_abund, all_of(split_column), sep = split_by)
-				new_tax <- split_merge_abund[, columns, drop = FALSE]
-				new_abund <- split_merge_abund[, (ncol(tax) + 1):(ncol(merge_abund)), drop = FALSE]
+				split_merge_abund <- tidyr::separate_longer_delim(merge_abund, cols = all_of(split_column), delim = split_by)
+				new_tax <- split_merge_abund[, 1:ncol(tax), drop = FALSE]
+				new_abund <- split_merge_abund[, (ncol(tax) + 1):(ncol(split_merge_abund)), drop = FALSE]
 				abund1 <- cbind.data.frame(Display = apply(new_tax, 1, paste, collapse = merge_by), new_abund)
 			}else{
 				abund1 <- cbind.data.frame(Display = apply(tax, 1, paste, collapse = merge_by), abund)
