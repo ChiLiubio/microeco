@@ -506,9 +506,9 @@ microtable <- R6Class(classname = "microtable",
 		#' @description
 		#' Calculate the taxonomic abundance at each taxonomic level or selected levels.
 		#'
-		#' @param select_cols default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; 
-		#'   applied to select columns to merge and calculate abundances according to ordered hierarchical levels.
-		#'   This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.
+		#' @param select_cols default NULL; numeric vector (column sequences) or character vector (column names of \code{microtable$tax_table}); 
+		#'   applied to select columns to calculate abundances according to ordered hierarchical levels.
+		#'   This parameter is very useful when only part of the columns are needed to calculate abundances.
 		#' @param rel default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance (i.e. raw values) will be summed.
 		#' @param merge_by default "|"; the symbol to merge and concatenate taxonomic names of different levels.
 		#' @param split_group default FALSE; if TRUE, split the rows to multiple rows according to one or more columns in \code{tax_table} 
@@ -516,7 +516,7 @@ microtable <- R6Class(classname = "microtable",
 		#' @param split_by default "&"; Separator delimiting collapsed values; only available when \code{split_group = TRUE}.
 		#' @param split_column default NULL; one column name used for the splitting in tax_table for each abundance calculation; 
 		#'   only available when \code{split_group = TRUE}. If not provided, the function will split each column that containing the \code{split_by} character.
-		#' @param split_special_char default "&&"; special character that will be used to split multiple mapping information in \code{tax_table} by default
+		#' @param split_special_char default "&&"; special character that will be used forcibly to split multiple mapping information in \code{tax_table} by default
 		#'   no matter \code{split_group} setting.
 		#' @return \code{taxa_abund} list in object.
 		#' @examples

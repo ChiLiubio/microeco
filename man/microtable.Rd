@@ -660,9 +660,9 @@ Calculate the taxonomic abundance at each taxonomic level or selected levels.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{select_cols}}{default NULL; numeric vector or character vector of colnames of \code{microtable$tax_table}; 
-applied to select columns to merge and calculate abundances according to ordered hierarchical levels.
-This is very useful if there are commented columns or some columns with multiple structure that cannot be used directly.}
+\item{\code{select_cols}}{default NULL; numeric vector (column sequences) or character vector (column names of \code{microtable$tax_table}); 
+applied to select columns to calculate abundances according to ordered hierarchical levels.
+This parameter is very useful when only part of the columns are needed to calculate abundances.}
 
 \item{\code{rel}}{default TRUE; if TRUE, relative abundance is used; if FALSE, absolute abundance (i.e. raw values) will be summed.}
 
@@ -676,7 +676,7 @@ when there is multiple mapping information.}
 \item{\code{split_column}}{default NULL; one column name used for the splitting in tax_table for each abundance calculation; 
 only available when \code{split_group = TRUE}. If not provided, the function will split each column that containing the \code{split_by} character.}
 
-\item{\code{split_special_char}}{default "&&"; special character that will be used to split multiple mapping information in \code{tax_table} by default
+\item{\code{split_special_char}}{default "&&"; special character that will be used forcibly to split multiple mapping information in \code{tax_table} by default
 no matter \code{split_group} setting.}
 }
 \if{html}{\out{</div>}}
