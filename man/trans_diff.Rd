@@ -335,7 +335,7 @@ If provided, overlook the levels in the group of sample_table.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size. If \code{coord_flip = TRUE}, it represents the title size of the x axis (i.e. "Relative abundance").}
 
-\item{\code{...}}{parameters passed to \code{trans_alpha::plot_alpha}.}
+\item{\code{...}}{parameters passed to \code{plot_alpha} function of \code{\link{trans_alpha}} class.}
 }
 \if{html}{\out{</div>}}
 }

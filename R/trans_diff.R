@@ -929,7 +929,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param xtext_angle default 45; number (e.g. 45). Angle of text in x axis.
 		#' @param xtext_size default 13; x axis text size. NULL means the default size in ggplot2. If \code{coord_flip = TRUE}, it represents the text size of the y axis.
 		#' @param ytitle_size default 17; y axis title size. If \code{coord_flip = TRUE}, it represents the title size of the x axis (i.e. "Relative abundance").
-		#' @param ... parameters passed to \code{trans_alpha::plot_alpha}.
+		#' @param ... parameters passed to \code{plot_alpha} function of \code{\link{trans_alpha}} class.
 		#' @return ggplot.
 		#' @examples
 		#' \donttest{
