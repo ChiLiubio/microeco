@@ -138,10 +138,10 @@ trans_env <- R6Class(classname = "trans_env",
 			tem_data <- clone(self$dataset)
 			
 			tem_data$alpha_diversity <- env_data
-			tem_data1 <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group))
-			suppressMessages(tem_data1$cal_diff(method = method, ...))
-			self$res_diff <- tem_data1$res_diff
-			self$res_diff_tmp <- tem_data1
+			tmp_alpha <- suppressMessages(trans_alpha$new(dataset = tem_data, group = group, by_group = by_group))
+			suppressMessages(tmp_alpha$cal_diff(method = method, ...))
+			self$res_diff <- tmp_alpha$res_diff
+			self$res_diff_tmp <- tmp_alpha
 			self$group <- group
 			message('The result is stored in object$res_diff ...')
 		},
@@ -155,6 +155,8 @@ trans_env <- R6Class(classname = "trans_env",
 				stop("Please first run cal_diff function!")
 			}
 			res_diff_tmp <- self$res_diff_tmp
+			res_diff_tmp$res_diff <- self$res_diff
+			
 			res_diff_tmp$plot_alpha(...)
 		},
 		#' @description
