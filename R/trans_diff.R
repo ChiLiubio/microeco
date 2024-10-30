@@ -1624,6 +1624,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 		generate_microtable_unrel = function(use_dataset, taxa_level, filter_thres, filter_features){
 			use_dataset$tidy_dataset()
 			suppressMessages(use_dataset$cal_abund(rel = FALSE))
+			if(grepl("all", taxa_level, ignore.case = TRUE)){
+				stop("For the current method, the taxa_level should be one of column names of tax_table, not 'all' !")
+			}
+			if(! taxa_level %in% names(use_dataset$taxa_abund)){
+				stop("The taxa_level is not found in the column names of tax_table! ", 
+				"Such case is generally caused by the customized use of taxa_abund list! ", 
+				"However, for the current method, the original abundance in otu_table is used. So please try other method!")
+			}
 			use_feature_table <- use_dataset$taxa_abund[[taxa_level]]
 			if(filter_thres > 0){
 				use_feature_table %<>% .[! rownames(.) %in% names(filter_features), ]
