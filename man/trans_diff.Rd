@@ -91,6 +91,8 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
   remove_unknown = TRUE,
   lefse_subgroup = NULL,
   lefse_min_subsam = 10,
+  lefse_sub_strict = FALSE,
+  lefse_sub_alpha = NULL,
   lefse_norm = 1e+06,
   nresam = 0.6667,
   boots = 30,
@@ -197,6 +199,12 @@ Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test",
 \item{\code{lefse_subgroup}}{default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.}
 
 \item{\code{lefse_min_subsam}}{default 10; sample numbers required in the subgroup test.}
+
+\item{\code{lefse_sub_strict}}{default FALSE; whether remove the features strictly in the sub-checking.
+FALSE means only removing the features that have different orders of medians across sub-groups with those across groups and the statistics are also significant.
+TRUE means removing the features that are not significant in one (or more) sub-test or have different orders of medians across sub-groups with those across groups.}
+
+\item{\code{lefse_sub_alpha}}{default NULL; The significance threshold in the test for lefse sub-groups. NULL means it is same with \code{alpha}.}
 
 \item{\code{lefse_norm}}{default 1000000; normalization value used in lefse to scale abundances for each level. 
 A \code{lefse_norm} value < 0 (e.g., -1) means no normalization same with the LEfSe python version.}

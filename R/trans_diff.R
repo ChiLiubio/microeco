@@ -95,6 +95,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param remove_unknown default TRUE; whether remove unknown features that donot have clear classification information.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
+		#' @param lefse_sub_strict default FALSE; whether remove the features strictly in the sub-checking.
+		#'    FALSE means only removing the features that have different orders of medians across sub-groups with those across groups and the statistics are also significant.
+		#'    TRUE means removing the features that are not significant in one (or more) sub-test or have different orders of medians across sub-groups with those across groups.
+		#' @param lefse_sub_alpha default NULL; The significance threshold in the test for lefse sub-groups. NULL means it is same with \code{alpha}.
 		#' @param lefse_norm default 1000000; normalization value used in lefse to scale abundances for each level. 
 		#'    A \code{lefse_norm} value < 0 (e.g., -1) means no normalization same with the LEfSe python version.
 		#' @param nresam default 0.6667; sample number ratio used in each bootstrap for method = "lefse" or "rf".
@@ -165,6 +169,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			remove_unknown = TRUE,
 			lefse_subgroup = NULL,
 			lefse_min_subsam = 10,
+			lefse_sub_strict = FALSE,
+			lefse_sub_alpha = NULL,
 			lefse_norm = 1000000,
 			nresam = 0.6667,
 			boots = 30,
@@ -421,17 +427,38 @@ trans_diff <- R6Class(classname = "trans_diff",
 							check_median_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) {y$med[y1, 1] %>% {.[1] > .[2]}}))) %>% as.data.frame
 							check_median_sub[] <- lapply(check_median_sub, function(x) x == raw_median)
 							check_p_sub <- sapply(res_sub_total, function(x) unlist(lapply(x, function(y) y$p_value))) %>% as.data.frame
-							remove_list <- unlist(lapply(seq_len(nrow(check_median_sub)), function(x){
-								if(all(unlist(check_median_sub[x, ]))){
-									FALSE
-								}else{
-									if(any(check_p_sub[x, !unlist(check_median_sub[x, ])] < alpha)){
-										TRUE
-									}else{
-										FALSE
-									}
+							if(is.null(lefse_sub_alpha)){
+								lefse_sub_alpha <- alpha
+							}else{
+								if(!is.numeric(lefse_sub_alpha)){
+									stop("Please provide numeric value for lefse_sub_alpha parameter!")
 								}
-							}))
+							}
+							if(lefse_sub_strict){
+								remove_list <- unlist(lapply(seq_len(nrow(check_median_sub)), function(x){
+									if(all(unlist(check_p_sub[x, ]) < lefse_sub_alpha)){
+										if(all(unlist(check_median_sub[x, ]))){
+											FALSE
+										}else{
+											TRUE
+										}
+									}else{
+										TRUE
+									}
+								}))
+							}else{
+								remove_list <- unlist(lapply(seq_len(nrow(check_median_sub)), function(x){
+									if(all(unlist(check_median_sub[x, ]))){
+										FALSE
+									}else{
+										if(any(check_p_sub[x, !unlist(check_median_sub[x, ])] < lefse_sub_alpha)){
+											TRUE
+										}else{
+											FALSE
+										}
+									}
+								}))
+							}
 							remove_list_total[[i]] <- remove_list
 						}
 						if(!identical(remove_list_total, list())){
