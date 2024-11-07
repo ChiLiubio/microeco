@@ -181,21 +181,22 @@ trans_func <- R6Class(classname = "trans_func",
 					tax1$taxon <- ""
 					# operate the matching for each level that stored in the database
 					for(i in c("Phylum", "Order", "Family", "Genus", "Species")){
-						use_database <- switch(i, 
-							Phylum = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "3", ], 
-							Order = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "7", ], 
-							Family = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "9", ],
-							Genus = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "13", ],
-							Species = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel %in% c("20", "21", "22", "24"), ]
-						)
-						# search each OTU even though it has been matched
-						for(j in rownames(tax1)){
-							if(tax1[j, i] %in% use_database[, "taxon"]){
-								tax1[j, "taxon"] <- tax1[j, i]
+						if(i %in% colnames(tax1)){
+							use_database <- switch(i, 
+								Phylum = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "3", ], 
+								Order = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "7", ], 
+								Family = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "9", ],
+								Genus = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel == "13", ],
+								Species = fungi_func_FUNGuild[fungi_func_FUNGuild$taxonomicLevel %in% c("20", "21", "22", "24"), ]
+							)
+							# search each OTU even though it has been matched
+							for(j in rownames(tax1)){
+								if(tax1[j, i] %in% use_database[, "taxon"]){
+									tax1[j, "taxon"] <- tax1[j, i]
+								}
 							}
 						}
 					}
-					# merge two tables
 					res_table <- dplyr::left_join(tax1, fungi_func_FUNGuild, by = c("taxon" = "taxon"))
 					rownames(res_table) <- rownames(tax1)
 					res_table <- res_table[, which(colnames(res_table) %in% "taxon"):ncol(res_table)]
@@ -217,12 +218,10 @@ trans_func <- R6Class(classname = "trans_func",
 					}
 					# generate a data frame store the binary data
 					otu_func_table <- res_table[, c("taxon"), drop = FALSE]
-					# generate trophicMode binary information
 					trophicMode <- c("Pathotroph", "Saprotroph", "Symbiotroph")
 					for(i in trophicMode){
 						otu_func_table[, i] <- grepl(i, res_table[, "trophicMode"]) %>% as.numeric
 					}
-					# generate Guild binary information
 					Guild <- private$default_fungi_func_group$FUNGuild[["Guild"]]
 					for(i in Guild){
 						otu_func_table[, i] <- grepl(i, res_table[, "guild"]) %>% as.numeric
