@@ -180,7 +180,7 @@ microtable <- R6Class(classname = "microtable",
 				if(length(filter_names) == nrow(raw_otu_table)){
 					stop("All features are filtered! Please adjust the parameters")
 				}
-				new_table <- raw_otu_table[! rownames(raw_otu_table) %in% filter_names, ]
+				new_table <- raw_otu_table[! rownames(raw_otu_table) %in% filter_names, , drop = FALSE]
 			}
 			self$otu_table <- new_table
 			self$tidy_dataset()
