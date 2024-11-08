@@ -109,8 +109,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 				message("Add higher taxonomic level into the table ...")
 				if(! high_level %in% colnames(dataset$tax_table)){
-					stop("Provided high_level must be a colname of input dataset$tax_table!")
+					stop("Provided high_level must be a column name of input dataset$tax_table!")
 				}else{
+					if(identical(high_level, taxrank)){
+						stop("Provided high_level should not be same with taxrank !")
+					}
 					extract_tax_table <- dataset$tax_table[, c(high_level, taxrank)] %>% unique
 					if(!delete_taxonomy_lineage){
 						stop("The delete_taxonomy_lineage should be TRUE when high_level is provided!")
