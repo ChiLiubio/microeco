@@ -91,7 +91,6 @@ t1$cal_tax4fun2_FRI()
 \item \href{#method-trans_func-show_prok_func}{\code{trans_func$show_prok_func()}}
 \item \href{#method-trans_func-trans_spe_func_perc}{\code{trans_func$trans_spe_func_perc()}}
 \item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
-\item \href{#method-trans_func-cal_tax4fun}{\code{trans_func$cal_tax4fun()}}
 \item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
 \item \href{#method-trans_func-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
 \item \href{#method-trans_func-print}{\code{trans_func$print()}}
@@ -321,30 +320,6 @@ t1$plot_spe_func_perc()
 
 }
 
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-cal_tax4fun"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-cal_tax4fun}{}}}
-\subsection{Method \code{cal_tax4fun()}}{
-Predict functional potential of communities using \code{Tax4Fun} package.
-please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
-Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. 'g__') .
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_tax4fun(keep_tem = FALSE, folderReferenceData = NULL)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{keep_tem}}{default FALSE; whether keep the intermediate file, that is, the feature table in local place.}
-
-\item{\code{folderReferenceData}}{default NULL; the folder, see Tax4Fun function in Tax4Fun package.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-\code{tax4fun_KO} and \code{tax4fun_path} in object.
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_func-cal_tax4fun2"></a>}}

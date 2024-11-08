@@ -484,47 +484,6 @@ trans_func <- R6Class(classname = "trans_func",
 			g1
 		},
 		#' @description
-		#' Predict functional potential of communities using \code{Tax4Fun} package.
-		#' please cite: Tax4Fun: Predicting functional profiles from metagenomic 16S rRNA data. Bioinformatics, 31(17), 2882-2884, <doi:10.1093/bioinformatics/btv287>.
-		#' Note that this function requires a standard prefix in taxonomic table with double underlines (e.g. 'g__') .
-		#'
-		#' @param keep_tem default FALSE; whether keep the intermediate file, that is, the feature table in local place.
-		#' @param folderReferenceData default NULL; the folder, see Tax4Fun function in Tax4Fun package.
-		#' @return \code{tax4fun_KO} and \code{tax4fun_path} in object.
-		cal_tax4fun = function(keep_tem = FALSE, folderReferenceData = NULL){
-			if(is.null(folderReferenceData)){
-				stop("No folderReferenceData provided! Please see the help document!")
-			}
-			if(!require("Tax4Fun")){
-				stop("Tax4Fun package not installed!")
-			}
-			otu_file <- self$otu_table
-			tax_file <- self$tax_table
-			otu_file <- data.frame("#OTU ID" = rownames(otu_file), otu_file, check.names = FALSE, stringsAsFactors = FALSE)
-			tax_file <- apply(tax_file, 1, function(x){paste0(x, collapse = ";")})
-
-			otu_file <- data.frame(otu_file, taxonomy = tax_file, check.names = FALSE, stringsAsFactors = FALSE)
-			otu_file$taxonomy %<>% gsub(".__", "", .) %>% paste0(., ";") %>% gsub(";{1, }$", ";", .)
-
-			pathfilename <- "otu_table_filter_tax4fun"
-			pathfilename <- tempfile(pathfilename, fileext = ".txt")
-			output <- file(pathfilename, open = "wb")
-			# must write this line, otherwise sample line will disappear
-			cat("# Constructed from biom file\n", file = output)
-			suppressWarnings(write.table(otu_file, file = output, append = TRUE, quote = FALSE, sep = "\t", row.names = FALSE))
-			close(output)
-
-			x1 <- importQIIMEData(pathfilename)
-			self$tax4fun_KO <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = TRUE)
-			message('The KO abundance result is stored in object$tax4fun_KO ...')
-			self$tax4fun_path <- Tax4Fun(x1, folderReferenceData = folderReferenceData, fctProfiling = FALSE)
-			message('The pathway abundance result is stored in object$tax4fun_path ...')
-
-			if(keep_tem == F){
-				unlink(pathfilename, recursive = FALSE, force = TRUE)
-			}
-		},
-		#' @description
 		#' Predict functional potential of communities with Tax4Fun2 method. 
 		#'   The function was adapted from the raw Tax4Fun2 package to make it compatible with the microtable object.
 		#'   Pleas cite: 
