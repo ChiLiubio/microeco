@@ -10,9 +10,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param group default NULL; a column name of \code{sample_table} in the input microtable object used for the statistics across groups.
 		#' @param by_group default NULL; a column name of \code{sample_table} used to perform the differential test 
 		#'   among groups (from \code{group} parameter) for each group (from \code{by_group} parameter) separately.
-		#' @param by_ID default NULL; a column name of \code{sample_table} used to perform paired t test or paired wilcox test for the paired data,
-		#'   such as the data of plant compartments for different plant species (ID). 
+		#' @param by_ID default NULL; a column name of \code{sample_table} used to perform paired T test or paired Wilcoxon test for the paired data,
+		#'   such as continuous sampling of individual animals or plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
+		#'   When the \code{by_ID} parameter is provided, the function can automatically perform paired test, and no more parameters is required.
 		#' @param order_x default NULL; a column name of \code{sample_table} or a vector with sample names. If provided, sort samples using \code{factor}.
 		#' @return \code{data_alpha} and \code{data_stat} stored in the object.
 		#' @examples
@@ -90,8 +91,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   \describe{
 		#'     \item{\strong{'KW'}}{Kruskal-Wallis Rank Sum Test for all groups (>= 2)}
 		#'     \item{\strong{'KW_dunn'}}{Dunn's Kruskal-Wallis Multiple Comparisons <10.1080/00401706.1964.10490181> based on \code{dunnTest} function in \code{FSA} package}
-		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups}
-		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups}
+		#'     \item{\strong{'wilcox'}}{Wilcoxon Rank Sum Test for all paired groups
+		#'     	  When \code{by_ID} parameter is provided in creating the object of the class, paired Wilcoxon test will be performed.}
+		#'     \item{\strong{'t.test'}}{Student's t-Test for all paired groups. 
+		#'     	  When \code{by_ID} parameter is provided in creating the object of the class, paired t-test will be performed.}
 		#'     \item{\strong{'anova'}}{Variance analysis. For one-way anova, the default post hoc test is Duncan's new multiple range test.
 		#'     	  Please use \code{anova_post_test} parameter to change the post hoc method.
 		#'     	  For multi-way anova, Please use \code{formula} parameter to specify the model and see \code{\link{aov}} for more details}
