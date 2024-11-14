@@ -124,6 +124,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#'   The default option represents the Duncan's new multiple range test.
 		#'   Other available options include "LSD.test" (LSD post hoc test) and "HSD.test" (HSD post hoc test). 
 		#'   All those are the function names from \code{agricolae} package.
+		#' @param anova_varequal_test default FALSE; whether conduct Levene's Test for equality of variances.
+		#'   Only available for one-way anova. Significant P value means the variance among groups is not equal.
 		#' @param return_model default FALSE; whether return the original "lm", "lmer" or "glmm" model list in the object.
 		#' @param ... parameters passed to \code{kruskal.test} (when \code{method = "KW"}) or \code{wilcox.test} function (when \code{method = "wilcox"}) or 
 		#'   \code{dunnTest} function of \code{FSA} package (when \code{method = "KW_dunn"}) or 
@@ -151,6 +153,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			KW_dunn_letter = TRUE,
 			alpha = 0.05,
 			anova_post_test = "duncan.test",
+			anova_varequal_test = FALSE,
 			return_model = FALSE,
 			...
 			){
@@ -299,7 +302,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				for(k in measure){
 					if(is.null(by_group)){
 						div_table <- data_alpha[data_alpha$Measure == k, ]
-						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, alpha = alpha, ...)
+						tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, 
+							alpha = alpha, varequal_test = anova_varequal_test, ...)
 						compare_result %<>% rbind(., tmp_res)
 					}else{
 						for(each_group in unique_bygroups){
@@ -309,7 +313,8 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								next
 							}
 							div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
-							check_res <- tryCatch(tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, alpha = alpha, ...),
+							check_res <- tryCatch(tmp_res <- private$anova_test(input_table = div_table, group = group, measure = k, post_test = anova_post_test, 
+								alpha = alpha, varequal_test = anova_varequal_test, ...),
 								error = function(e) {skip_to_next <- TRUE})
 							if(rlang::is_true(check_res)){
 								next
@@ -454,7 +459,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param group default NULL; group name used for the plot.
 		#' @param add default NULL; add another plot element; passed to the \code{add} parameter of the function (e.g., \code{ggboxplot}) from \code{ggpubr} package 
 		#'   when \code{plot_type} starts with "gg" (functions coming from ggpubr package).
-		#' @param add_sig default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
+		#' @param add_sig default TRUE; whether add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
 		#'   This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.
 		#' @param add_sig_label default "Significance"; select a colname of \code{object$res_diff} for the label text when 'Letter' is not in the table, 
 		#'   such as 'P.adj' or 'Significance'.
@@ -1074,7 +1079,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			}
 			dunnTest_res
 		},
-		anova_test = function(input_table, group, measure, post_test, alpha, ...){
+		anova_test = function(input_table, group, measure, post_test, alpha, varequal_test, ...){
 			model <- aov(reformulate(group, "Value"), input_table)
 			post_test_function <- get(post_test)
 			out <- post_test_function(model, group, main = measure, alpha = alpha, ...)
@@ -1083,7 +1088,16 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			res1 <- data.frame(rownames(res1), res1, stringsAsFactors = FALSE, check.names = FALSE)
 			colnames(res1) <- c("Group", "Letter")
 			rownames(res1) <- NULL
-			res <- data.frame(Measure = measure, Method = "anova", res1)
+			if(varequal_test){
+				if(!is.factor(input_table[, group])){
+					input_table[, group] %<>% as.factor
+				}
+				ve_res <- car::leveneTest(reformulate(group, "Value"), input_table)
+				ve_p <- c(ve_res$`Pr(>F)`[1], rep(NA, nrow(res1) - 1))
+				res <- data.frame(Measure = measure, Method = "anova", res1, leveneTest_Pvalue = ve_p)
+			}else{
+				res <- data.frame(Measure = measure, Method = "anova", res1)
+			}
 			res
 		},
 		group_value_compare = function(value, group, ...){

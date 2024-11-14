@@ -114,6 +114,7 @@ Differential test on alpha diversity.
   KW_dunn_letter = TRUE,
   alpha = 0.05,
   anova_post_test = "duncan.test",
+  anova_varequal_test = FALSE,
   return_model = FALSE,
   ...
 )}\if{html}{\out{</div>}}
@@ -167,6 +168,9 @@ For \code{method = 'KW_dunn'}, please see \code{dunn.test::p.adjustment.methods}
 The default option represents the Duncan's new multiple range test.
 Other available options include "LSD.test" (LSD post hoc test) and "HSD.test" (HSD post hoc test). 
 All those are the function names from \code{agricolae} package.}
+
+\item{\code{anova_varequal_test}}{default FALSE; whether conduct Levene's Test for equality of variances.
+Only available for one-way anova. Significant P value means the variance among groups is not equal.}
 
 \item{\code{return_model}}{default FALSE; whether return the original "lm", "lmer" or "glmm" model list in the object.}
 
@@ -270,7 +274,7 @@ All those methods with \code{ggpubr} package use the \code{data_alpha} table in 
 \item{\code{add}}{default NULL; add another plot element; passed to the \code{add} parameter of the function (e.g., \code{ggboxplot}) from \code{ggpubr} package 
 when \code{plot_type} starts with "gg" (functions coming from ggpubr package).}
 
-\item{\code{add_sig}}{default TRUE; wheter add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
+\item{\code{add_sig}}{default TRUE; whether add significance label using the result of \code{cal_diff} function, i.e. \code{object$res_diff};
 This is manily designed to add post hoc test of anova or other significances to make the label mapping easy.}
 
 \item{\code{add_sig_label}}{default "Significance"; select a colname of \code{object$res_diff} for the label text when 'Letter' is not in the table, 
