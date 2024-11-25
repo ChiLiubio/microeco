@@ -871,7 +871,7 @@ trans_env <- R6Class(classname = "trans_env",
 			...
 			){
 			if(is.null(self$data_env)){
-				stop("The data_env is NULL! Please check the data input when creating the object !")
+				stop("The data_env is NULL! Please check the data input when create the object !")
 			}
 			env_data <- self$data_env
 			

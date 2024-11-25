@@ -832,12 +832,20 @@ trans_abund <- R6Class(classname = "trans_abund",
 			colnames(plot_data)[2] <- "Abundance"
 			if(is.factor(data_abund$Sample)){
 				sample_names <- levels(data_abund$Sample)
+				if(length(sample_names) > 3){
+					data_names <- colnames(plot_data)[3:ncol(plot_data)]
+					if(all(data_names %in% sample_names)){
+						sample_names %<>% .[. %in% data_names]
+					}else{
+						sample_names <- data_names
+					}
+				}
 			}else{
 				sample_names <- unique(data_abund$Sample)
 			}
 			color_values <- expand_colors(color_values, length(use_taxanames))
 
-			p <- ggtern::ggtern(data = plot_data, aes_meco(x = sample_names[1], y = sample_names[2], z = sample_names[3])) +
+			p <- ggtern::ggtern(data = plot_data, aes(x = .data[[sample_names[1]]], y = .data[[sample_names[2]]], z = .data[[sample_names[3]]])) +
 				theme_bw() +
 				geom_point(aes(color = Taxonomy, size = Abundance)) +
 				scale_color_manual(values = color_values) +
