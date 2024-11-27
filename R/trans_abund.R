@@ -27,7 +27,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param use_percentage default TRUE; show the abundance percentage.
 		#' @param input_taxaname default NULL; character vector; input taxa names to select some taxa.
 		#' @param high_level default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
-		#'   It is necessary for the legend with nested taxonomic levels in the bar plot.
+		#'   It is required for the legend with nested taxonomic levels in the bar plot or the higher taxonomic level in facets of y axis in the heatmap.
 		#' @param high_level_fix_nsub default NULL; an integer, used to fix the number of selected abundant taxa in each taxon from higher taxonomic level.
 		#'   If the total number under one taxon of higher level is less than the high_level_fix_nsub, the total number will be used.
 		#'   When \code{high_level_fix_nsub} is provided, the taxa number of higher level is calculated as: \code{ceiling(ntaxa/high_level_fix_nsub)}.
@@ -417,9 +417,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'    Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
 		#'    assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 		#'    When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.
-		#' @param facet_switch default "y"; By default, the labels are displayed on the top and right of the plot. 
+		#' @param facet_switch default "y"; By default, the labels in facets are displayed on the top and right of the plot. 
 		#'    If "x", the top labels will be displayed to the bottom. If "y", the right-hand side labels will be displayed to the left. Can also be set to "both".
-		#'    This parameter will be passed to the \code{switch} parameter in \code{ggplot2::facet_grid} or \code{ggh4x::facet_nested} function.
+		#'    When the \code{high_level} is found in the object, the function will generate facets for the higher taxonomy in y axis.
+		#'    So the default "y" of the parameter is to make the visualization better when \code{high_level} is found.
+		#'    This parameter will be passed to the \code{switch} parameter in \code{ggplot2::facet_grid} or \code{ggh4x::facet_nested} function.		
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
 		#' @param withmargin default TRUE; whether retain the tile margin.

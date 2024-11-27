@@ -161,7 +161,7 @@ Please provide the customized prefix when it is not standard, otherwise the prog
 \item{\code{input_taxaname}}{default NULL; character vector; input taxa names to select some taxa.}
 
 \item{\code{high_level}}{default NULL; a taxonomic rank, such as "Phylum", used to add the taxonomic information of higher level.
-It is necessary for the legend with nested taxonomic levels in the bar plot.}
+It is required for the legend with nested taxonomic levels in the bar plot or the higher taxonomic level in facets of y axis in the heatmap.}
 
 \item{\code{high_level_fix_nsub}}{default NULL; an integer, used to fix the number of selected abundant taxa in each taxon from higher taxonomic level.
 If the total number under one taxon of higher level is less than the high_level_fix_nsub, the total number will be used.
@@ -340,8 +340,10 @@ Please adjust the facet orders in the plot by assigning factors in \code{sample_
 assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.}
 
-\item{\code{facet_switch}}{default "y"; By default, the labels are displayed on the top and right of the plot. 
+\item{\code{facet_switch}}{default "y"; By default, the labels in facets are displayed on the top and right of the plot. 
 If "x", the top labels will be displayed to the bottom. If "y", the right-hand side labels will be displayed to the left. Can also be set to "both".
+When the \code{high_level} is found in the object, the function will generate facets for the higher taxonomy in y axis.
+So the default "y" of the parameter is to make the visualization better when \code{high_level} is found.
 This parameter will be passed to the \code{switch} parameter in \code{ggplot2::facet_grid} or \code{ggh4x::facet_nested} function.}
 
 \item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
