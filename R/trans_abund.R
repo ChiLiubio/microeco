@@ -417,6 +417,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'    Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
 		#'    assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 		#'    When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.
+		#' @param facet_switch default "y"; By default, the labels are displayed on the top and right of the plot. 
+		#'    If "x", the top labels will be displayed to the bottom. If "y", the right-hand side labels will be displayed to the left. Can also be set to "both".
+		#'    This parameter will be passed to the \code{switch} parameter in \code{ggplot2::facet_grid} or \code{ggh4x::facet_nested} function.
 		#' @param x_axis_name NULL; a character string; a column name of sample_table used to show the sample names in x axis.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as, c("S1", "S3", "S2").
 		#' @param withmargin default TRUE; whether retain the tile margin.
@@ -446,6 +449,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		plot_heatmap = function(
 			color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")), 
 			facet = NULL,
+			facet_switch = "y",
 			x_axis_name = NULL,
 			order_x = NULL,
 			withmargin = TRUE,
@@ -513,12 +517,19 @@ trans_abund <- R6Class(classname = "trans_abund",
 					}
 					facet_formula <- reformulate(facet, y_facet)
 					if(length(facet) == 1){
-						p <- p + facet_grid(facet_formula, scales = "free", space = "free")
+						p <- p + facet_grid(facet_formula, scales = "free", space = "free", switch = facet_switch)
 					}else{
-						p <- p + ggh4x::facet_nested(facet_formula, nest_line = element_line(linetype = 2), scales = "free", space = "free")
+						p <- p + ggh4x::facet_nested(facet_formula, nest_line = element_line(linetype = 2), scales = "free", space = "free", switch = facet_switch)
 					}
-					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size = strip_text)) +
-						theme(strip.text.y = element_text(angle = 360))
+					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size = strip_text))
+					p <- p + theme(strip.text.y.left = element_text(angle = 360), strip.text.y.right = element_text(angle = 360))
+					if(!is.null(self$high_level)){
+						if(!is.null(facet_switch)){
+							if(facet_switch != "x"){
+								p <- p + scale_y_discrete(position = "right")
+							}
+						}
+					}
 				}
 				p <- p + labs(x = "", y = "", fill = legend_title)
 				if (!is.null(ytext_size)){

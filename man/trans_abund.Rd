@@ -303,6 +303,7 @@ Plot the heatmap.
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_heatmap(
   color_values = rev(RColorBrewer::brewer.pal(n = 11, name = "RdYlBu")),
   facet = NULL,
+  facet_switch = "y",
   x_axis_name = NULL,
   order_x = NULL,
   withmargin = TRUE,
@@ -338,6 +339,10 @@ The latter should have a finer scale than the former one;
 Please adjust the facet orders in the plot by assigning factors in \code{sample_table} before creating \code{trans_abund} object or 
 assigning factors in the \code{data_abund} table of \code{trans_abund} object.
 When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.}
+
+\item{\code{facet_switch}}{default "y"; By default, the labels are displayed on the top and right of the plot. 
+If "x", the top labels will be displayed to the bottom. If "y", the right-hand side labels will be displayed to the left. Can also be set to "both".
+This parameter will be passed to the \code{switch} parameter in \code{ggplot2::facet_grid} or \code{ggh4x::facet_nested} function.}
 
 \item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table used to show the sample names in x axis.}
 
