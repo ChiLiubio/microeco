@@ -502,13 +502,23 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + scale_fill_gradientn(colours = color_values, trans = plot_colorscale, breaks = plot_breaks, na.value = "#00008B",
 						limits = c(min_abundance, max_abundance))
 				}
-				if(!is.null(facet)){
-					if(length(facet) == 1){
-						p <- p + facet_grid(reformulate(facet, "."), scales = "free", space = "free")
+				if(!is.null(facet) | !is.null(self$high_level)){
+					if(is.null(self$high_level)){
+						y_facet <- "."
 					}else{
-						p <- p + ggh4x::facet_nested(reformulate(facet), nest_line = element_line(linetype = 2), scales = "free", space = "free")
+						y_facet <- self$high_level
+						if(is.null(facet)){
+							facet <- "."
+						}
 					}
-					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size=strip_text))
+					facet_formula <- reformulate(facet, y_facet)
+					if(length(facet) == 1){
+						p <- p + facet_grid(facet_formula, scales = "free", space = "free")
+					}else{
+						p <- p + ggh4x::facet_nested(facet_formula, nest_line = element_line(linetype = 2), scales = "free", space = "free")
+					}
+					p <- p + theme(strip.background = element_rect(color = "white", fill = "grey92"), strip.text = element_text(size = strip_text)) +
+						theme(strip.text.y = element_text(angle = 360))
 				}
 				p <- p + labs(x = "", y = "", fill = legend_title)
 				if (!is.null(ytext_size)){
