@@ -200,6 +200,9 @@ tidy_taxonomy <- function(taxonomy_table,
 	na_fill = ""
 	){
 	if(inherits(taxonomy_table, "data.frame")){
+		if(inherits(taxonomy_table, "tbl_df")){
+			stop("Input taxonomy_table is tbl_df format! It may be created using tibble package! Please convert it to traditional data.frame class!")
+		}
 		use_tax_table <- taxonomy_table
 	}else{
 		if(inherits(taxonomy_table, "microtable")){
