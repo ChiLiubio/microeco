@@ -1013,7 +1013,6 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			res$Significance <- generate_p_siglabel(res$AdjPvalue)
 			res <- res[complete.cases(res), ]
-			res$Env %<>% factor(., levels = unique(as.character(.)))
 			if(taxa_name_full == F){
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}
@@ -1034,8 +1033,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
-		#' @param text_y_order default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.
-		#' @param text_x_order default NULL; character vector; provide customized text order for x axis.
+		#' @param text_y_order default NULL; character vector; customized text for y axis; shown in the plot from the top down. 
+		#'   The input should be consistent with the feature names in the \code{res_cor} table.
+		#' @param text_x_order default NULL; character vector; customized text for x axis.
 		#' @param xtext_angle default 30; number ranging from 0 to 90; used to adjust x axis text angle. 
 		#' @param xtext_size default 10; x axis text size.
 		#' @param xtext_color default "black"; x axis text color.
@@ -1171,7 +1171,7 @@ trans_env <- R6Class(classname = "trans_env",
 					lim_y <- levels(use_data[, "Taxa"])
 				}else{
 					lim_y <- NULL
-				}				
+				}		
 			}
 			# the input text_y_order or text_x_order has priority
 			if(! pheatmap){

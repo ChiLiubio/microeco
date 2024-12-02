@@ -825,9 +825,10 @@ For example, \code{filter_env = ""} can be used to remove features that only hav
 
 \item{\code{keep_prefix}}{default TRUE; whether retain the taxonomic prefix.}
 
-\item{\code{text_y_order}}{default NULL; character vector; provide customized text order for y axis; shown in the plot from the top down.}
+\item{\code{text_y_order}}{default NULL; character vector; customized text for y axis; shown in the plot from the top down. 
+The input should be consistent with the feature names in the \code{res_cor} table.}
 
-\item{\code{text_x_order}}{default NULL; character vector; provide customized text order for x axis.}
+\item{\code{text_x_order}}{default NULL; character vector; customized text for x axis.}
 
 \item{\code{xtext_angle}}{default 30; number ranging from 0 to 90; used to adjust x axis text angle.}
 
