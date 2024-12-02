@@ -1025,7 +1025,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.
 		#' @param color_palette default NULL; a customized palette with more color values to be used instead of the parameter \code{color_vector}.
-		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.
+
 		#' @param filter_feature default NULL; character vector; used to filter features that only have labels in the \code{filter_feature} vector. 
 		#'   For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".
 		#' @param filter_env default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
@@ -1042,27 +1042,24 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ytext_size default NULL; y axis text size. NULL means default ggplot2 value.
 		#' @param ytext_color default "black"; y axis text color.
 		#' @param sig_label_size default 4; the size of significance label shown in the cell.
-		#' @param font_family default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.
+		#' @param font_family default NULL; font family used.
 		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
 		#'   "none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
-		#'   Only available when \code{pheatmap = FALSE}.
 		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when \code{cluster_ggplot} is not "none".
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available when \code{cluster_ggplot} is not "none".
 		#' @param text_y_position default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.
-		#' @param mylabels_x default NULL; provide x axis text labels additionally; only available when \code{pheatmap = TRUE}.
-		#' @param na.value default "grey50"; the color for the missing values when \code{pheatmap = FALSE}.
-		#' @param trans default "identity"; the transformation for continuous scales in the legend when \code{pheatmap = FALSE}; 
+		#' @param na.value default "grey50"; the color for the missing values.
+		#' @param trans default "identity"; the transformation for continuous scales in the legend; 
 		#' 	 see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.
-		#' @param ... paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.
-		#' @return plot.
+		#' @param ... paremeters passed to \code{ggplot2::geom_tile}.
+		#' @return ggplot2 object.
 		#' @examples
 		#' \donttest{
-		#' t1$plot_cor(pheatmap = FALSE)
+		#' t1$plot_cor()
 		#' }
 		plot_cor = function(
 			color_vector = c("#053061", "white", "#A50026"),
 			color_palette = NULL,
-			pheatmap = FALSE,
 			filter_feature = NULL,
 			filter_env = NULL,
 			ylab_type_italic = FALSE,
@@ -1081,7 +1078,6 @@ trans_env <- R6Class(classname = "trans_env",
 			cluster_height_rows = 0.2,
 			cluster_height_cols = 0.2,
 			text_y_position = "right",
-			mylabels_x = NULL,
 			na.value = "grey50",
 			trans = "identity",
 			...
@@ -1135,10 +1131,8 @@ trans_env <- R6Class(classname = "trans_env",
 			if(keep_prefix == F){
 				use_data$Taxa %<>% gsub(".*__", "", .)
 			}
-			if(pheatmap & length(unique(use_data$by_group)) > 1){
-				use_data[, xvalue] <- paste0(use_data$by_group, ": ", use_data[, xvalue])
-			}
-			if(length(unique(use_data$by_group)) == 1 | pheatmap){
+
+			if(length(unique(use_data$by_group)) == 1){
 				clu_data <- reshape2::dcast(use_data, formula = reformulate(xvalue, "Taxa"), value.var = cell_value) %>% 
 					`row.names<-`(.[,1]) %>% 
 					.[, -1, drop = FALSE]
@@ -1147,20 +1141,20 @@ trans_env <- R6Class(classname = "trans_env",
 					`row.names<-`(.[,1]) %>% 
 					.[, -1, drop = FALSE]
 				sig_data[is.na(sig_data)] <- ""
-				if(pheatmap == F){
-					if(ncol(clu_data) == 1){
-						lim_x <- NULL
-					}else{
-						col_cluster <- hclust(dist(t(clu_data)))
-						lim_x <- col_cluster %>% {.$labels[.$order]}
-					}
-					if(nrow(clu_data) == 1){
-						lim_y <- NULL
-					}else{
-						row_cluster <- hclust(dist(clu_data))
-						lim_y <- row_cluster %>% {.$labels[.$order]}
-					}
+
+				if(ncol(clu_data) == 1){
+					lim_x <- NULL
+				}else{
+					col_cluster <- hclust(dist(t(clu_data)))
+					lim_x <- col_cluster %>% {.$labels[.$order]}
 				}
+				if(nrow(clu_data) == 1){
+					lim_y <- NULL
+				}else{
+					row_cluster <- hclust(dist(clu_data))
+					lim_y <- row_cluster %>% {.$labels[.$order]}
+				}
+				
 			}else{
 				if(is.factor(use_data[, xvalue])){
 					lim_x <- levels(use_data[, xvalue])
@@ -1174,111 +1168,63 @@ trans_env <- R6Class(classname = "trans_env",
 				}		
 			}
 			# the input text_y_order or text_x_order has priority
-			if(! pheatmap){
-				if(!is.null(text_y_order) | !is.null(text_x_order)){
-					if(cluster_ggplot != "none"){
-						cluster_ggplot <- "none"
-						message("Change cluster_ggplot to none, as text_y_order and/or text_x_order provided!")
-					}
-					if(!is.null(text_y_order)){
-						lim_y <- rev(text_y_order)
-					}
-					if(!is.null(text_x_order)){
-						lim_x <- text_x_order
-					}
+			if(!is.null(text_y_order) | !is.null(text_x_order)){
+				if(cluster_ggplot != "none"){
+					cluster_ggplot <- "none"
+					message("Change cluster_ggplot to none, as text_y_order and/or text_x_order provided!")
+				}
+				if(!is.null(text_y_order)){
+					lim_y <- rev(text_y_order)
+				}
+				if(!is.null(text_x_order)){
+					lim_x <- text_x_order
 				}
 			}
-			if(pheatmap == T){
-				if(!require("pheatmap")){
-					stop("pheatmap package not installed")
-				}
-				# check sd for each feature, if 0, delete
-				if(any(apply(clu_data, MARGIN = 1, FUN = function(x) sd(x) == 0))){
-					select_rows <- apply(clu_data, MARGIN = 1, FUN = function(x) sd(x) != 0)
-					clu_data %<>% {.[select_rows, ]}
-					sig_data %<>% {.[select_rows, ]}
-				}
-				if(ylab_type_italic == T){
-					eval(parse(text = paste0(
-						"mylabels_y <- c(", paste0("expression(italic(", paste0('"', rownames(clu_data),'"'), "))", collapse = ","),")", 
-						collapse = "")))
-				}else{
-					mylabels_y <- rownames(clu_data)
-				}
-				if(all(use_data[, cell_value] >= 0) | all(use_data[, cell_value] <= 0)){
-					if(is.null(color_palette)){
-						color_palette <- color_vector
-					}
-				}
-				if(is.null(color_palette)){
-					minpiece <- max(abs(min(clu_data)), max(clu_data))/100
-					pos <- seq(from = 0, to = max(clu_data), by = minpiece)[-1]
-					neg <- rev(seq(from = 0, to = abs(min(clu_data)), by = minpiece)[-1]) * (-1)
-					posColor <- colorRampPalette(c(color_vector[2], color_vector[3]))(100)[1:length(pos)]
-					negColor <- colorRampPalette(c(color_vector[2], color_vector[1]))(100)[1:length(neg)] %>% rev
-					# make sure color_vector_use and myBreaks have same length
-					color_vector_use <- c(negColor, color_vector[2], posColor)
-					myBreaks <- c(neg, 0, pos)		
-				}else{
-					color_vector_use <- colorRampPalette(color_palette)(100)
-					myBreaks <- NA
-				}
-				p <- pheatmap(
-					clu_data, 
-					clustering_distance_row = "correlation", 
-					clustering_distance_cols = "correlation",
-					border_color = NA, 
-					scale = "none",
-					labels_row = mylabels_y, 
-					labels_col = mylabels_x, 
-					display_numbers = sig_data, 
-					number_color = "black", 
-					color = color_vector_use,
-					breaks = myBreaks,
-					...
-					)
-				p$gtable
+			
+			p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value), data = use_data) +
+				theme_bw() + 
+				geom_tile(...)
+			
+			if(is.null(color_palette)){
+				p <- p + scale_fill_gradient2(low = color_vector[1], high = color_vector[3], mid = color_vector[2], na.value = na.value, trans = trans)
 			}else{
-				p <- ggplot(aes_meco(x = xvalue, y = "Taxa", fill = cell_value), data = use_data) +
-					theme_bw() + 
-					geom_tile(...)
-				if(is.null(color_palette)){
-					p <- p + scale_fill_gradient2(low = color_vector[1], high = color_vector[3], mid = color_vector[2], na.value = na.value, trans = trans)
-				}else{
-					p <- p + scale_fill_gradientn(colours = color_palette, na.value = na.value, trans = trans)
-				}
-				legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
-				
-				p <- p + geom_text(aes(label = Significance), color = "black", size = sig_label_size) + 
-					labs(y = NULL, x = "Measure", fill = legend_fill) +
-					theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
-					theme(strip.text = element_text(size = 11), panel.border = element_blank(), panel.grid = element_blank())
-				p <- p + ggplot_xtext_anglesize(xtext_angle, xtext_size, text_color = xtext_color) +
-					theme(axis.text.y = element_text(colour = ytext_color, size = ytext_size))
-				p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
-				
-				if(length(unique(use_data$by_group)) == 1){
-					if(cluster_ggplot != "none"){
-						if(cluster_ggplot %in% c("row", "both")){
-							row_plot <- ggtree::ggtree(row_cluster, hang = 0)
-							p %<>% aplot::insert_left(row_plot, width = cluster_height_rows)
-						}
-						if(cluster_ggplot %in% c("col", "both")){
-							col_plot <- ggtree::ggtree(col_cluster, hang = 0) + ggtree::layout_dendrogram()							
-							p %<>% aplot::insert_top(col_plot, height = cluster_height_cols)
-						}
-					}
-				}else{
-					p <- p + facet_grid(. ~ by_group, drop = TRUE, scale = "free", space = "free_x")
-				}
-				if(ylab_type_italic == T){
-					p <- p + theme(axis.text.y = element_text(face = 'italic'))
-				}
-				if(!is.null(font_family)){
-					p <- p + theme(text = element_text(family = font_family))
-				}
-				p
+				p <- p + scale_fill_gradientn(colours = color_palette, na.value = na.value, trans = trans)
 			}
+			
+			legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
+			
+			p <- p + geom_text(aes(label = Significance), color = "black", size = sig_label_size) + 
+				labs(y = NULL, x = "Measure", fill = legend_fill) +
+				theme(strip.background = element_rect(fill = "grey85", colour = "white"), axis.title = element_blank()) +
+				theme(strip.text = element_text(size = 11), panel.border = element_blank(), panel.grid = element_blank())
+			
+			p <- p + ggplot_xtext_anglesize(xtext_angle, xtext_size, text_color = xtext_color) +
+				theme(axis.text.y = element_text(colour = ytext_color, size = ytext_size))
+			
+			p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
+			
+			if(length(unique(use_data$by_group)) == 1){
+				if(cluster_ggplot != "none"){
+					if(cluster_ggplot %in% c("row", "both")){
+						row_plot <- ggtree::ggtree(row_cluster, hang = 0)
+						p %<>% aplot::insert_left(row_plot, width = cluster_height_rows)
+					}
+					if(cluster_ggplot %in% c("col", "both")){
+						col_plot <- ggtree::ggtree(col_cluster, hang = 0) + ggtree::layout_dendrogram()							
+						p %<>% aplot::insert_top(col_plot, height = cluster_height_cols)
+					}
+				}
+			}else{
+				p <- p + facet_grid(. ~ by_group, drop = TRUE, scale = "free", space = "free_x")
+			}
+			if(ylab_type_italic == T){
+				p <- p + theme(axis.text.y = element_text(face = 'italic'))
+			}
+			if(!is.null(font_family)){
+				p <- p + theme(text = element_text(family = font_family))
+			}
+			p
+			
 		},
 		#' @description
 		#' 	Scatter plot with fitted line based on the correlation or regression.\cr

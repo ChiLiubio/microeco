@@ -109,7 +109,7 @@ t1$cal_cor(use_data = "other", p_adjust_method = "fdr", other_taxa = t2$res_diff
 ## ------------------------------------------------
 
 \donttest{
-t1$plot_cor(pheatmap = FALSE)
+t1$plot_cor()
 }
 
 ## ------------------------------------------------
@@ -778,7 +778,6 @@ Plot correlation heatmap.
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_cor(
   color_vector = c("#053061", "white", "#A50026"),
   color_palette = NULL,
-  pheatmap = FALSE,
   filter_feature = NULL,
   filter_env = NULL,
   ylab_type_italic = FALSE,
@@ -797,7 +796,6 @@ Plot correlation heatmap.
   cluster_height_rows = 0.2,
   cluster_height_cols = 0.2,
   text_y_position = "right",
-  mylabels_x = NULL,
   na.value = "grey50",
   trans = "identity",
   ...
@@ -810,8 +808,6 @@ Plot correlation heatmap.
 \item{\code{color_vector}}{default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.}
 
 \item{\code{color_palette}}{default NULL; a customized palette with more color values to be used instead of the parameter \code{color_vector}.}
-
-\item{\code{pheatmap}}{default FALSE; whether use pheatmap package to plot the heatmap.}
 
 \item{\code{filter_feature}}{default NULL; character vector; used to filter features that only have labels in the \code{filter_feature} vector. 
 For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".}
@@ -842,11 +838,10 @@ The input should be consistent with the feature names in the \code{res_cor} tabl
 
 \item{\code{sig_label_size}}{default 4; the size of significance label shown in the cell.}
 
-\item{\code{font_family}}{default NULL; font family used in \code{ggplot2}; only available when \code{pheatmap = FALSE}.}
+\item{\code{font_family}}{default NULL; font family used.}
 
 \item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
-"none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
-Only available when \code{pheatmap = FALSE}.}
+"none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.}
 
 \item{\code{cluster_height_rows}}{default 0.2, the dendrogram plot height for rows; available when \code{cluster_ggplot} is not "none".}
 
@@ -854,24 +849,22 @@ Only available when \code{pheatmap = FALSE}.}
 
 \item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.}
 
-\item{\code{mylabels_x}}{default NULL; provide x axis text labels additionally; only available when \code{pheatmap = TRUE}.}
+\item{\code{na.value}}{default "grey50"; the color for the missing values.}
 
-\item{\code{na.value}}{default "grey50"; the color for the missing values when \code{pheatmap = FALSE}.}
-
-\item{\code{trans}}{default "identity"; the transformation for continuous scales in the legend when \code{pheatmap = FALSE}; 
+\item{\code{trans}}{default "identity"; the transformation for continuous scales in the legend; 
 see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.}
 
-\item{\code{...}}{paremeters passed to \code{ggplot2::geom_tile} or \code{pheatmap::pheatmap}, depending on the parameter \code{pheatmap} is FALSE or TRUE.}
+\item{\code{...}}{paremeters passed to \code{ggplot2::geom_tile}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-plot.
+ggplot2 object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_cor(pheatmap = FALSE)
+t1$plot_cor()
 }
 }
 \if{html}{\out{</div>}}
