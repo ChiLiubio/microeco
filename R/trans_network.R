@@ -213,6 +213,10 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param FlashWeave_other_para default \code{"alpha=0.01,sensitive=true,heterogeneous=true"}; the parameters passed to julia FlashWeave package;
 		#'   user can change the parameters or add more according to FlashWeave help document;
 		#'   An exception is meta_data_path parameter as it is generated based on the data inside the object, see FlashWeave_meta_data parameter for the description.
+		#' @param FlashWeave_gml default NULL; The path of FlashWeave output gml file for customized usage.
+		#'   This parameter is provided for some customized needs. 
+		#'   For instance, it can be cumbersome to input bacterial and fungal abundances as separate input files for network analysis using the above parameter. 
+		#'   Users can run FlashWeave on their own, and then provide the resulting gml file to this parameter, which allows them to continue using other functions.
 		#' @param beemStatic_t_strength default 0.001; for network_method = "beemStatic"; the threshold used to limit the number of interactions (strength);
 		#'   same with the t.strength parameter in showInteraction function of beemStatic package.
 		#' @param beemStatic_t_stab default 0.8; for network_method = "beemStatic"; 
@@ -251,6 +255,7 @@ trans_network <- R6Class(classname = "trans_network",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
 			FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
+			FlashWeave_gml = NULL,
 			beemStatic_t_strength = 0.001,
 			beemStatic_t_stab = 0.8,
 			add_taxa_name = "Phylum",
@@ -346,53 +351,60 @@ trans_network <- R6Class(classname = "trans_network",
 					V(network)$name <- colnames(asso_matrix)
 				}
 				if(network_method == "FlashWeave"){
-					use_abund <- self$data_abund
-					oldwd <- getwd()
-					# working directory is not changed when quit
-					on.exit(setwd(oldwd))
+					if(is.null(FlashWeave_gml)){
+						use_abund <- self$data_abund
+						oldwd <- getwd()
+						# working directory is not changed when quit
+						on.exit(setwd(oldwd))
 
-					if(is.null(FlashWeave_tempdir)){
-						tem_dir <- tempdir()
-					}else{
-						tem_dir <- FlashWeave_tempdir
-						if(!dir.exists(tem_dir)){
-							stop("The input temporary directory: ", tem_dir, " does not exist!")
+						if(is.null(FlashWeave_tempdir)){
+							tem_dir <- tempdir()
+						}else{
+							tem_dir <- FlashWeave_tempdir
+							if(!dir.exists(tem_dir)){
+								stop("The input temporary directory: ", tem_dir, " does not exist!")
+							}
 						}
-					}
-					setwd(tem_dir)
-					write.table(use_abund, "taxa_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
-					L1 <- "using FlashWeave\n"
-					L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
-					if(FlashWeave_meta_data){
-						if(is.null(self$data_env)){
-							stop("FlashWeave_meta_data is TRUE, but object$data_env not found! 
-								Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
+						setwd(tem_dir)
+						write.table(use_abund, "taxa_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+						L1 <- "using FlashWeave\n"
+						L2 <- 'data_path = "taxa_table_FlashWeave.tsv"\n'
+						if(FlashWeave_meta_data){
+							if(is.null(self$data_env)){
+								stop("FlashWeave_meta_data is TRUE, but object$data_env not found! 
+									Please use env_cols or add_data parameter of trans_network$new to provide the metadata when creating the object!")
+							}
+							meta_data <- self$data_env
+							write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
+							L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
+						}else{
+							L3 <- "\n"
 						}
-						meta_data <- self$data_env
-						write.table(meta_data, "meta_table_FlashWeave.tsv", sep = "\t", quote = FALSE, row.names = FALSE)
-						L3 <- 'meta_data_path = "meta_table_FlashWeave.tsv"\n'
+						if(FlashWeave_meta_data){
+							L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", FlashWeave_other_para)), ")\n")
+						}else{
+							L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", FlashWeave_other_para)), ")\n")
+						}
+						L5 <- 'save_network("network_FlashWeave.gml", netw_results)'
+						L <- paste0(L1, L2, L3, L4, L5)
+						openfile <- file("calculate_network.jl", "wb")
+						write(L, file = openfile)
+						close(openfile)
+						message("The temporary files are in ", tem_dir, " ...")
+						message("Check Julia ...")
+						check_out <- system(command = "julia -help", intern = TRUE)
+						if(length(check_out) == 0){
+							stop("Julia language not found in the system path! Install it from https://julialang.org/downloads/ and add bin directory to the path!")
+						}
+						message("Run the FlashWeave ...")
+						system("julia calculate_network.jl")
+						network <- read_graph("network_FlashWeave.gml", format = "gml")
 					}else{
-						L3 <- "\n"
+						if(!file.exists(FlashWeave_gml)){
+							stop("Provided FlashWeave_gml is not a correct path!")
+						}
+						network <- read_graph(FlashWeave_gml, format = "gml")
 					}
-					if(FlashWeave_meta_data){
-						L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, meta_data_path, ", FlashWeave_other_para)), ")\n")
-					}else{
-						L4 <- paste0(gsub(",$|,\\s+$", "", paste0("netw_results = learn_network(data_path, ", FlashWeave_other_para)), ")\n")
-					}
-					L5 <- 'save_network("network_FlashWeave.gml", netw_results)'
-					L <- paste0(L1, L2, L3, L4, L5)
-					openfile <- file("calculate_network.jl", "wb")
-					write(L, file = openfile)
-					close(openfile)
-					message("The temporary files are in ", tem_dir, " ...")
-					message("Check Julia ...")
-					check_out <- system(command = "julia -help", intern = TRUE)
-					if(length(check_out) == 0){
-						stop("Julia language not found in the system path! Install it from https://julialang.org/downloads/ and add bin directory to the path!")
-					}
-					message("Run the FlashWeave ...")
-					system("julia calculate_network.jl")
-					network <- read_graph("network_FlashWeave.gml", format = "gml")
 					network <- set_vertex_attr(network, "name", value = V(network)$label)
 				}
 				if(network_method == "beemStatic"){

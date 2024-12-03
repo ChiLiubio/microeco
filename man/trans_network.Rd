@@ -312,6 +312,7 @@ Construct network based on the \code{igraph} package or \code{SpiecEasi} package
   FlashWeave_tempdir = NULL,
   FlashWeave_meta_data = FALSE,
   FlashWeave_other_para = "alpha=0.01,sensitive=true,heterogeneous=true",
+  FlashWeave_gml = NULL,
   beemStatic_t_strength = 0.001,
   beemStatic_t_stab = 0.8,
   add_taxa_name = "Phylum",
@@ -376,6 +377,11 @@ generate a file for meta_data_path parameter of FlashWeave package.}
 \item{\code{FlashWeave_other_para}}{default \code{"alpha=0.01,sensitive=true,heterogeneous=true"}; the parameters passed to julia FlashWeave package;
 user can change the parameters or add more according to FlashWeave help document;
 An exception is meta_data_path parameter as it is generated based on the data inside the object, see FlashWeave_meta_data parameter for the description.}
+
+\item{\code{FlashWeave_gml}}{default NULL; The path of FlashWeave output gml file for customized usage.
+This parameter is provided for some customized needs. 
+For instance, it can be cumbersome to input bacterial and fungal abundances as separate input files for network analysis using the above parameter. 
+Users can run FlashWeave on their own, and then provide the resulting gml file to this parameter, which allows them to continue using other functions.}
 
 \item{\code{beemStatic_t_strength}}{default 0.001; for network_method = "beemStatic"; the threshold used to limit the number of interactions (strength);
 same with the t.strength parameter in showInteraction function of beemStatic package.}
