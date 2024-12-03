@@ -1125,13 +1125,20 @@ trans_env <- R6Class(classname = "trans_env",
 					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
 				}else{
 					# actually | may be more general as some data does not have __
-					use_data$Taxa %<>% gsub(".*\\|", "", .)
+					if(any(grepl("\\|", use_data$Taxa))){
+						use_data$Taxa %<>% gsub(".*\\|", "", .)
+					}
 				}
 			}
 			if(keep_prefix == F){
-				use_data$Taxa %<>% gsub(".*__", "", .)
+				if(any(grepl("__", use_data$Taxa))){
+					use_data$Taxa %<>% gsub(".*__", "", .)
+				}
 			}
-
+			
+			lim_x <- NULL
+			lim_y <- NULL
+			
 			if(length(unique(use_data$by_group)) == 1){
 				clu_data <- reshape2::dcast(use_data, formula = reformulate(xvalue, "Taxa"), value.var = cell_value) %>% 
 					`row.names<-`(.[,1]) %>% 
@@ -1142,42 +1149,45 @@ trans_env <- R6Class(classname = "trans_env",
 					.[, -1, drop = FALSE]
 				sig_data[is.na(sig_data)] <- ""
 
-				if(ncol(clu_data) == 1){
-					lim_x <- NULL
-				}else{
+				if(ncol(clu_data) != 1){
 					col_cluster <- hclust(dist(t(clu_data)))
 					lim_x <- col_cluster %>% {.$labels[.$order]}
 				}
-				if(nrow(clu_data) == 1){
-					lim_y <- NULL
-				}else{
+				if(nrow(clu_data) != 1){
 					row_cluster <- hclust(dist(clu_data))
 					lim_y <- row_cluster %>% {.$labels[.$order]}
 				}
-				
-			}else{
+			}
+			if(is.factor(use_data[, xvalue]) | !is.null(text_x_order)){
+				if(cluster_ggplot == "col"){
+					cluster_ggplot <- "none"
+					message("Change cluster_ggplot to 'none', as customized x-axis text order is provided!")
+				}
+				if(cluster_ggplot == "both"){
+					cluster_ggplot <- "row"
+					message("Change cluster_ggplot to 'row', as customized x-axis text order is provided!")
+				}
 				if(is.factor(use_data[, xvalue])){
 					lim_x <- levels(use_data[, xvalue])
-				}else{
-					lim_x <- NULL
-				}
-				if(is.factor(use_data[, "Taxa"])){
-					lim_y <- levels(use_data[, "Taxa"])
-				}else{
-					lim_y <- NULL
-				}		
-			}
-			# the input text_y_order or text_x_order has priority
-			if(!is.null(text_y_order) | !is.null(text_x_order)){
-				if(cluster_ggplot != "none"){
-					cluster_ggplot <- "none"
-					message("Change cluster_ggplot to none, as text_y_order and/or text_x_order provided!")
-				}
-				if(!is.null(text_y_order)){
-					lim_y <- rev(text_y_order)
 				}
 				if(!is.null(text_x_order)){
 					lim_x <- text_x_order
+				}
+			}
+			if(is.factor(use_data[, "Taxa"]) | !is.null(text_y_order)){
+				if(cluster_ggplot == "row"){
+					cluster_ggplot <- "none"
+					message("Change cluster_ggplot to 'none', as customized y-axis text order is provided!")
+				}
+				if(cluster_ggplot == "both"){
+					cluster_ggplot <- "col"
+					message("Change cluster_ggplot to 'col', as customized y-axis text order is provided!")
+				}
+				if(is.factor(use_data[, "Taxa"])){
+					lim_y <- levels(use_data[, "Taxa"])
+				}
+				if(!is.null(text_y_order)){
+					lim_y <- text_y_order
 				}
 			}
 			
@@ -1217,7 +1227,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				p <- p + facet_grid(. ~ by_group, drop = TRUE, scale = "free", space = "free_x")
 			}
-			if(ylab_type_italic == T){
+			if(ylab_type_italic){
 				p <- p + theme(axis.text.y = element_text(face = 'italic'))
 			}
 			if(!is.null(font_family)){
