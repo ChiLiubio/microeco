@@ -1207,6 +1207,14 @@ trans_network <- R6Class(classname = "trans_network",
 				message("Filter the taxa with NA in ", use_col, " ...")
 				res_node_table %<>% .[!is.na(.[, use_col]), ]
 			}
+			
+			if(self$taxa_level != "OTU"){
+				network <- self$res_network
+				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
+				res_node_table$name <- replace_table[res_node_table$name, 2]
+				rownames(res_node_table) <- res_node_table$name
+			}
+			
 			abund_table <- self$data_abund
 			if(abundance == F){
 				abund_table[abund_table > 1] <- 1
