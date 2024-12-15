@@ -334,7 +334,11 @@ d1$filter_taxa(rel_abund = 0.0001, freq = 0.2)
 \subsection{Method \code{rarefy_samples()}}{
 Rarefy communities to make all samples have same count number.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(method = c("rarefy", "SRS")[1], sample.size, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$rarefy_samples(
+  method = c("rarefy", "SRS")[1],
+  sample.size = NULL,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

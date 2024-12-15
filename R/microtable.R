@@ -192,7 +192,7 @@ microtable <- R6Class(classname = "microtable",
 		#' \donttest{
 		#' m1$rarefy_samples(sample.size = min(m1$sample_sums()))
 		#' }
-		rarefy_samples = function(method = c("rarefy", "SRS")[1], sample.size, ...){
+		rarefy_samples = function(method = c("rarefy", "SRS")[1], sample.size = NULL, ...){
 			self$tidy_dataset()
 			if(method == "rarefying"){
 				method <- "rarefy"
