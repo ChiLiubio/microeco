@@ -1,12 +1,12 @@
 #' @title
-#' Create \code{trans_nullmodel} object for phylogeny- and taxonomy-based null model analysis.
+#' Create \code{trans_nullmodel} object for null model related analysis.
 #'
 #' @description
 #' This class is a wrapper for a series of null model related approaches, 
 #' including the mantel correlogram analysis of phylogenetic signal, beta nearest taxon index (betaNTI), 
-#' beta net relatedness index (betaNRI), NTI, NRI and RCbray calculations;
-#' See Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w> for the algorithms and applications.
-#'
+#' beta net relatedness index (betaNRI), NTI, NRI and RCbray (Raup–Crick Bray–Curtis) calculations.
+#' See <doi:10.1111/j.1600-0587.2010.06548.x; 10.1890/ES10-00117.1; 10.1038/ismej.2013.93; 10.1038/s41598-017-17736-w> for the algorithms and applications.
+#' 
 #' @export
 trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 	public = list(
@@ -91,7 +91,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' 	 use PCA (principal component analysis) to reduce dimensionality.
 		#' @param break.pts default seq(0, 1, 0.02); see break.pts parameter in \code{mantel.correlog} of \code{vegan} package.
 		#' @param cutoff default FALSE; see cutoff parameter in \code{mantel.correlog}.
-		#' @param ... parameters pass to \code{mantel.correlog}.
+		#' @param ... parameters pass to \code{mantel.correlog} function in vegan package.
 		#' @return res_mantel_corr in object.
 		#' @examples
 		#' \dontrun{
@@ -205,7 +205,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			message('The result is stored in object$res_betampd ...')
 		},
 		#' @description
-		#' Calculate betaMNTD (mean nearest taxon distance). Same with \code{picante::comdistnt} package, but faster.
+		#' Calculate betaMNTD (mean nearest taxon distance). Same with \code{picante::comdistnt} function, but faster.
 		#'
 		#' @param abundance.weighted default TRUE; whether use abundance-weighted method.
 		#' @param exclude.conspecifics default FALSE; see \code{exclude.conspecifics} parameter in \code{comdistnt} function of \code{picante} package.
@@ -705,7 +705,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				.[, -1, drop = FALSE]
 			as.matrix(res1[all_samples, all_samples])
 		},
-		# from v0.7.5, use the method of iCAMP to calculate betamntd
+		# from v0.7.5, use the algorithm in iCAMP to calculate betamntd
 		betamntd = function(
 			comm = NULL, 
 			dis = NULL, 
@@ -748,9 +748,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			res
 		},
 		null_model = function(null.model, comm = NULL, dis = NULL, tip.label = NULL, iterations = 1000){
-				if(is.null(comm)){
-					stop("comm should not be NULL!")
-				}
+			if(is.null(comm)){
+				stop("comm should not be NULL!")
+			}
 			if(null.model %in% c("taxa.labels", "phylogeny.pool")){
 				if(is.null(dis)){
 					if(is.null(tip.label)){

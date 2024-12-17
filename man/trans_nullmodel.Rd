@@ -2,12 +2,12 @@
 % Please edit documentation in R/trans_nullmodel.R
 \name{trans_nullmodel}
 \alias{trans_nullmodel}
-\title{Create \code{trans_nullmodel} object for phylogeny- and taxonomy-based null model analysis.}
+\title{Create \code{trans_nullmodel} object for null model related analysis.}
 \description{
 This class is a wrapper for a series of null model related approaches, 
 including the mantel correlogram analysis of phylogenetic signal, beta nearest taxon index (betaNTI), 
-beta net relatedness index (betaNRI), NTI, NRI and RCbray calculations;
-See Stegen et al. (2013) <10.1038/ismej.2013.93> and Liu et al. (2017) <doi:10.1038/s41598-017-17736-w> for the algorithms and applications.
+beta net relatedness index (betaNRI), NTI, NRI and RCbray (Raup–Crick Bray–Curtis) calculations.
+See <doi:10.1111/j.1600-0587.2010.06548.x; 10.1890/ES10-00117.1; 10.1038/ismej.2013.93; 10.1038/s41598-017-17736-w> for the algorithms and applications.
 }
 \examples{
 
@@ -234,7 +234,7 @@ use PCA (principal component analysis) to reduce dimensionality.}
 
 \item{\code{cutoff}}{default FALSE; see cutoff parameter in \code{mantel.correlog}.}
 
-\item{\code{...}}{parameters pass to \code{mantel.correlog}.}
+\item{\code{...}}{parameters pass to \code{mantel.correlog} function in vegan package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -318,7 +318,7 @@ t1$cal_betampd(abundance.weighted = TRUE)
 \if{html}{\out{<a id="method-trans_nullmodel-cal_betamntd"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_nullmodel-cal_betamntd}{}}}
 \subsection{Method \code{cal_betamntd()}}{
-Calculate betaMNTD (mean nearest taxon distance). Same with \code{picante::comdistnt} package, but faster.
+Calculate betaMNTD (mean nearest taxon distance). Same with \code{picante::comdistnt} function, but faster.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_nullmodel$cal_betamntd(
   abundance.weighted = TRUE,
