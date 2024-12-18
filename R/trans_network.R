@@ -1376,12 +1376,12 @@ trans_network <- R6Class(classname = "trans_network",
 			nodes <- data.frame(cbind(V(network), V(network)$name))
 			edges <- get.edges(network, 1:ecount(network))
 			node_attr_name <- setdiff(list.vertex.attributes(network), "name")
-			node_attr <- data.frame(sapply(node_attr_name, function(attr) sub("&", "&", get.vertex.attribute(network, attr))))
+			node_attr <- data.frame(sapply(node_attr_name, function(attr) sub("&", "&", vertex_attr(network, attr))))
 			node_attr$RelativeAbundance %<>% as.numeric
 			edge_attr_name <- setdiff(list.edge.attributes(network), "weight")
-			edge_attr <- data.frame(sapply(edge_attr_name, function(attr) sub("&", "&", get.edge.attribute(network, attr))))
+			edge_attr <- data.frame(sapply(edge_attr_name, function(attr) sub("&", "&", edge_attr(network, attr))))
 			# combine all graph attributes into a meta-data
-			graphAtt <- sapply(list.graph.attributes(network), function(attr) sub("&", "&",get.graph.attribute(network, attr)))
+			graphAtt <- sapply(list.graph.attributes(network), function(attr) sub("&", "&", graph_attr(network, attr)))
 			output_gexf <- write.gexf(nodes, edges,
 				edgesLabel = as.data.frame(E(network)$label),
 				edgesWeight = E(network)$weight,
@@ -1429,7 +1429,7 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		#compute within-module degree
 		within_module_degree = function(comm_graph){
-			mods <- get.vertex.attribute(comm_graph, "module")
+			mods <- vertex_attr(comm_graph, "module")
 			if(is.null(mods)){
 				stop("No modules found! Please first calculate network modules using function cal_module !")
 			}
@@ -1463,7 +1463,7 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		#calculate the degree (links) of each node to nodes in other modules
 		among_module_connectivity = function(comm_graph){
-			modvs <- data.frame(taxon = V(comm_graph)$name, mod = get.vertex.attribute(comm_graph, "module"), stringsAsFactors = FALSE)
+			modvs <- data.frame(taxon = V(comm_graph)$name, mod = vertex_attr(comm_graph, "module"), stringsAsFactors = FALSE)
 			edges <- t(sapply(1:ecount(comm_graph), function(x) ends(comm_graph, x)))
 			res <- lapply(modvs$taxon, function(x){
 						sapply(unique(c(edges[edges[, 1] == x, 2], edges[edges[, 2] == x, 1])), function(y){
