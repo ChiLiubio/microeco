@@ -440,6 +440,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			self$cal_diff_method <- method
 			self$measure <- measure
 			message('The result is stored in object$res_diff ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot the alpha diversity. 

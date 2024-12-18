@@ -207,6 +207,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			self$res_ordination <- outlist
 			message('The result is stored in object$res_ordination ...')
 			self$ordination_method <- method
+			invisible(self)
 		},
 		#' @description
 		#' Plot the ordination result.
@@ -466,6 +467,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			self$res_manova <- res
 			message('The result is stored in object$res_manova ...')
+			invisible(self)
 		},
 		#' @description
 		#' Analysis of similarities (ANOSIM) based on the \code{anosim} function of vegan package.
@@ -523,6 +525,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			self$res_anosim <- res
 			message('The original result is stored in object$res_anosim ...')
+			invisible(self)
 		},
 		#' @description
 		#' Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{betadisper} function in vegan package.
@@ -540,6 +543,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			res2 <- permutest(res1, pairwise = TRUE)
 			self$res_betadisper <- res2
 			message('The result is stored in object$res_betadisper ...')
+			invisible(self)
 		},
 		#' @description
 		#' Convert symmetric distance matrix to distance table of paired samples that are within groups or between groups.
@@ -575,6 +579,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			colnames(res)[colnames(res) == "value"] <- "Value"
 			self$res_group_distance <- res
 			message('The result is stored in object$res_group_distance ...')
+			invisible(self)
 		},
 		#' @description
 		#' Differential test of converted distances across groups.
@@ -625,6 +630,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			self$res_group_distance_diff <- temp1$res_diff
 			self$res_group_distance_diff_tmp <- temp1
 			message('The result is stored in object$res_group_distance_diff ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot the distances of paired groups within or between groups.

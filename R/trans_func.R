@@ -307,6 +307,7 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 			self$res_spe_func <- otu_func_table
 			message('The functional binary table is stored in object$res_spe_func ...')
+			invisible(self)
 		},
 		#' @description
 		#' Calculating the percentages of species with specific trait in communities.
@@ -360,6 +361,7 @@ trans_func <- R6Class(classname = "trans_func",
 				.[, apply(., 2, sum) != 0]
 			self$res_spe_func_perc <- res_spe_func_perc
 			message('The result table is stored in object$res_spe_func_perc ...')
+			invisible(self)
 		},
 		#' @description
 		#' Show the annotation information for a function of prokaryotes from FAPROTAX database.
@@ -372,7 +374,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' t1$show_prok_func(use_func = "methanotrophy")
 		#' }
 		show_prok_func = function(use_func = NULL){
-			data("prok_func_FAPROTAX", envir=environment())
+			data("prok_func_FAPROTAX", envir = environment())
 			if(!is.null(use_func)){
 				prok_func_FAPROTAX$func_annotation[[use_func]]
 			}
@@ -434,6 +436,7 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 			self$res_spe_func_perc_trans <- trans_perc
 			message('Transformed long format table is stored in object$res_spe_func_perc_trans ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot the percentages of species with specific trait in communities.
@@ -757,6 +760,7 @@ trans_func <- R6Class(classname = "trans_func",
 			pathway_prediction_final <- data.frame(pathway = rownames(pathway_prediction_final), pathway_prediction_final)
 			write.table(x = pathway_prediction_final, file = file.path(path_to_temp_folder, 'pathway_prediction.txt'), 
 				append = F, quote = F, sep = "\t", row.names = F, col.names = T)
+			invisible(self)
 		},
 		#' @description
 		#' Calculate (multi-) functional redundancy index (FRI) of prokaryotic community with Tax4Fun2 method.
@@ -830,6 +834,7 @@ trans_func <- R6Class(classname = "trans_func",
 			message('Absolute functional redundancy is stored in object$res_tax4fun2_aFRI')
 			self$res_tax4fun2_rFRI <- rel_functional_redundancy_final
 			message('Relative functional redundancy is stored in object$res_tax4fun2_rFRI')
+			invisible(self)
 		},
 		#' @description
 		#' Print the trans_func object.

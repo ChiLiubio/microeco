@@ -112,6 +112,7 @@ microtable <- R6Class(classname = "microtable",
 			message("Total ", filter_num, " features are removed from tax_table ...")
 			self$tax_table <- tax_table_use
 			if(self$auto_tidy) self$tidy_dataset()
+			invisible(self)
 		},
 		#' @description
 		#' Filter the feature with low abundance and/or low occurrence frequency.
@@ -178,6 +179,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$otu_table <- new_table
 			self$tidy_dataset()
+			invisible(self)
 		},
 		#' @description
 		#' Rarefy communities to make all samples have same count number.
@@ -202,6 +204,7 @@ microtable <- R6Class(classname = "microtable",
 			tmp_new <- tmp$norm(method = method, sample.size = sample.size, ...)
 			self$otu_table <- tmp_new$otu_table
 			suppressMessages(self$tidy_dataset())
+			invisible(self)
 		},
 		#' @description
 		#' Trim all the data in the \code{microtable} object to make taxa and samples consistent. The results are intersections across data.
@@ -257,6 +260,7 @@ microtable <- R6Class(classname = "microtable",
 					self$beta_diversity %<>% lapply(., function(x) x[sample_names, sample_names, drop = FALSE])
 				}
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Add the rownames of \code{microtable$tax_table} as its last column. 
@@ -285,6 +289,7 @@ microtable <- R6Class(classname = "microtable",
 			colnames(tax_table_use)[ncol(tax_table_use)] <- use_name
 			message("Use ", use_name, " as the name of new column in tax_table ...")
 			self$tax_table <- tax_table_use
+			invisible(self)
 		},
 		#' @description
 		#' Sum the species number for each sample.
@@ -353,6 +358,7 @@ microtable <- R6Class(classname = "microtable",
 			if(!is.null(self$rep_fasta)){
 				names(self$rep_fasta)[match(old_names, names(self$rep_fasta))] <- new_names
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Merge samples according to specific group to generate a new \code{microtable}.
@@ -496,6 +502,7 @@ microtable <- R6Class(classname = "microtable",
 				}
 				message('Save sequences to ', save_path, ' ...')
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Calculate the taxonomic abundance at each taxonomic level or selected levels.
@@ -596,6 +603,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$taxa_abund <- taxa_abund
 			message('The result is stored in object$taxa_abund ...')
+			invisible(self)
 		},
 		#' @description
 		#' Save taxonomic abundance as local file.
@@ -641,6 +649,7 @@ microtable <- R6Class(classname = "microtable",
 					write.table(tmp, file = save_path, row.names = FALSE, sep = sep, ...)
 				}
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Calculate alpha diversity.
@@ -733,6 +742,7 @@ microtable <- R6Class(classname = "microtable",
 			colnames(res)[colnames(res) %in% namechange] <- renamevec[namechange]
 			self$alpha_diversity <- as.data.frame(res)
 			message('The result is stored in object$alpha_diversity ...')
+			invisible(self)
 		},
 		#' @description
 		#' Save alpha diversity table to the computer.
@@ -743,6 +753,7 @@ microtable <- R6Class(classname = "microtable",
 				dir.create(dirpath)
 			}
 			write.csv(self$alpha_diversity, file = paste0(dirpath, "/", "alpha_diversity.csv"), row.names = TRUE)
+			invisible(self)
 		},
 		#' @description
 		#' Calculate beta diversity dissimilarity matrix, such as Bray-Curtis, Jaccard, and UniFrac.
@@ -798,6 +809,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			self$beta_diversity <- res
 			message('The result is stored in object$beta_diversity ...')
+			invisible(self)
 		},
 		#' @description
 		#' Save beta diversity matrix to the computer.
@@ -810,6 +822,7 @@ microtable <- R6Class(classname = "microtable",
 			for(i in names(self$beta_diversity)){
 				write.csv(self$beta_diversity[[i]], file = paste0(dirpath, "/", i, ".csv"), row.names = TRUE)
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Print the microtable object.
@@ -825,7 +838,7 @@ microtable <- R6Class(classname = "microtable",
 			if(!is.null(self$beta_diversity)) cat(paste("Beta diversity: calculated for", paste0(names(self$beta_diversity), collapse = ","), "\n"))
 			invisible(self)
 		}
-		),
+	),
 	private = list(
 		check_df = function(input_table, showname){
 			if(!inherits(input_table, "data.frame")){

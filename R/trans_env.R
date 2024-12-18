@@ -144,6 +144,7 @@ trans_env <- R6Class(classname = "trans_env",
 			self$res_diff_tmp <- tmp_alpha
 			self$group <- group
 			message('The result is stored in object$res_diff ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot environmental variables across groups and add the significance label.
@@ -351,6 +352,7 @@ trans_env <- R6Class(classname = "trans_env",
 			message('The original ordination result is stored in object$res_ordination ...')
 			self$res_ordination_R2 <- unlist(RsquareAdj(res_ordination))
 			message('The R2 is stored in object$res_ordination_R2 ...')
+			invisible(self)
 		},
 		#' @description
 		#' Use anova to test the significance of the terms and axis in ordination.
@@ -370,6 +372,7 @@ trans_env <- R6Class(classname = "trans_env",
 				self$res_ordination_axis <- anova(self$res_ordination, by = "axis", perm.max = 1000, ...)
 				message('The axis anova result is stored in object$res_ordination_axis ...')
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Fit each environmental vector onto the ordination to obtain the contribution of each variable.
@@ -387,6 +390,7 @@ trans_env <- R6Class(classname = "trans_env",
 				self$res_ordination_envfit <- vegan::envfit(self$res_ordination, self$data_env, ...)
 				message('Result is stored in object$res_ordination_envfit ...')
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Transform ordination results for the following plot.
@@ -468,6 +472,7 @@ trans_env <- R6Class(classname = "trans_env",
 				df_arrows_spe = df_arrows_spe
 				)
 			message('The result list is stored in object$res_ordination_trans ...')
+			invisible(self)
 		},
 		#' @description
 		#' plot ordination result.
@@ -808,6 +813,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			self$res_mantel <- res_mantel
 			message('The result is stored in object$res_mantel ...')
+			invisible(self)
 		},
 		#' @description
 		#' Calculate the correlations between taxonomic abundance and environmental variables.
@@ -1019,6 +1025,7 @@ trans_env <- R6Class(classname = "trans_env",
 			self$res_cor <- res
 			message('The correlation result is stored in object$res_cor ...')
 			self$cor_method <- cor_method
+			invisible(self)
 		},
 		#' @description
 		#' Plot correlation heatmap.

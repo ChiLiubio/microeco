@@ -488,6 +488,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				message('No network_method selected! Please manually assign object$res_network!')
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Calculate network modules and add module names to the network node properties.
@@ -538,6 +539,7 @@ trans_network <- R6Class(classname = "trans_network",
 			network <- set_vertex_attr(network, "module", value = mod1)
 			message('Modules are assigned in network with attribute name -- module ...')
 			self$res_network <- network
+			invisible(self)
 		},
 		#' @description
 		#' Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
@@ -555,6 +557,7 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			private$saveAsGEXF(network = self$res_network, filepath = filepath)
+			invisible(self)
 		},
 		#' @description
 		#' Calculate network properties.
@@ -569,6 +572,7 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_network()
 			self$res_network_attr <- private$network_attribute(self$res_network)
 			message('Result is stored in object$res_network_attr ...')
+			invisible(self)
 		},
 		#' @description
 		#' Get the node property table. The properties include the node names, modules allocation, degree, betweenness, abundance, 
@@ -629,6 +633,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			self$res_node_table <- node_table
 			message('Result is stored in object$res_node_table ...')
+			invisible(self)
 		},
 		#' @description
 		#' Get the edge property table, including connected nodes, label and weight.
@@ -649,6 +654,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			self$res_edge_table <- res_edge_table
 			message('Result is stored in object$res_edge_table ...')
+			invisible(self)
 		},
 		#' @description
 		#' Get the adjacency matrix from the network graph.
@@ -665,6 +671,7 @@ trans_network <- R6Class(classname = "trans_network",
 			network <- self$res_network
 			self$res_adjacency_matrix <- as_adjacency_matrix(network, ...) %>% as.matrix
 			message('Result is stored in object$res_adjacency_matrix ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot the network based on a series of methods from other packages, such as \code{igraph}, \code{ggraph} and \code{networkD3}. 
@@ -817,6 +824,7 @@ trans_network <- R6Class(classname = "trans_network",
 			self$res_eigen <- res_eigen
 			self$res_eigen_expla <- res_eigen_expla
 			message('Result is stored in object$res_eigen and object$res_eigen_expla ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot the roles or metrics of nodes based on the \code{res_node_table} data (coming from function \code{get_node_table}) stored in the object.
@@ -1005,6 +1013,7 @@ trans_network <- R6Class(classname = "trans_network",
 				self$res_powerlaw_fit <- res_powerlaw_fit
 				message('Powerlaw fitting result is stored in object$res_powerlaw_fit ...')
 			}
+			invisible(self)
 		},
 		#' @description
 		#' This function is used to sum the links number from one taxa to another or in the same taxa, for example, at Phylum level.
@@ -1057,6 +1066,7 @@ trans_network <- R6Class(classname = "trans_network",
 					message('No negative edges found ...')
 				}
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Plot the summed linkages among taxa.

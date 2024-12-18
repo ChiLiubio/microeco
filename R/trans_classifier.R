@@ -134,6 +134,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			new_data <- predict(preProcess_res, newdata = raw_feature)
 			self$data_feature <- new_data
 			message("The converted feature table is stored in object$data_feature ...")
+			invisible(self)
 		},
 		#' @description
 		#' Perform feature selection.
@@ -182,6 +183,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			###################### ----------------
 			self$data_feature <- DataX[, boruta.list.top]
 			message("The selected features is reassigned to object$data_feature ...")
+			invisible(self)
 		},
 		#' @description
 		#' Split data for training and testing.
@@ -211,6 +213,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$data_train <- train_data
 			self$data_test <- test_data
 			message("Training and testing data are stored in object$data_train and object$data_test respectively ...")
+			invisible(self)
 		},
 		#' @description
 		#' Control parameters for the following training. Please see \code{trainControl} function of caret package for details.
@@ -243,6 +246,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 								   ...)
 			message('Generating trainControl setting stored in object$trainControl ...')
 			self$trainControl <- trainControl
+			invisible(self)
 		},
 		#' @description
 		#' Run the model training. Please see \href{https://topepo.github.io/caret/available-models.html}{https://topepo.github.io/caret/available-models.html} for available models.
@@ -320,6 +324,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$res_train <- res_train
 			message('The training result is stored in object$res_train ...')
 			self$train_method <- method
+			invisible(self)
 		},
 		#' @description
 		#' Get feature importance from the training model.
@@ -358,6 +363,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			self$res_feature_imp <- res_feature_imp
 			message('The feature importance is stored in object$res_feature_imp ...')
+			invisible(self)
 		},
 		#' @description
 		#' Bar plot for feature importance.
@@ -500,6 +506,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				message('The statistics of confusionMatrix is stored in object$res_confusion_stats ...')
 				message('Model prediction Accuracy = ',Confusion.Sts$Overall.Statistics[1])
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Plot the cross-tabulation of observed and predicted classes with associated statistics based on the results of function \code{cal_predict}.
@@ -600,6 +607,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$res_ROC <- res_ROC
 			message('Specificity-sensitivity data is stored in object$res_ROC$res_roc ...')
 			message('Recall-Precision is stored in object$res_ROC$res_pr ...')
+			invisible(self)
 		},
 		#' @description
 		#' Plot ROC curve.
@@ -703,6 +711,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			models <- caretList(Response ~ ., data = train_data, trControl = use_trainControl, ...)
 			self$res_caretList_models <- models
 			message('Models are stored in object$res_caretList_models ...')
+			invisible(self)
 		},
 		#' @description
 		#' Use \code{resamples} function of caret package to collect the metric values based on the \code{res_caretList_models} data.
@@ -734,6 +743,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			colnames(reshaped_data) <- c("Model", "Metric", "Value")
 			self$res_caretList_resamples_reshaped <- reshaped_data
 			message('Reshaped metric values are stored in object$res_caretList_resamples_reshaped ...')
+			invisible(self)
 		},
 		#' @description
 		#' Visualize the metric values based on the \code{res_caretList_resamples_reshaped} data.
