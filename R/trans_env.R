@@ -1468,6 +1468,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}else{
 				cat("No environmental variable table stored in the object.\n")
 			}
+			invisible(self)
 		}
 	),
 	private = list(

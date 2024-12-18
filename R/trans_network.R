@@ -1251,7 +1251,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			invisible(self)
 		}
-		),
+	),
 	private = list(
 		check_filter_number = function(input, param = "filter_thres"){
 			if(nrow(input) == 0){

@@ -542,8 +542,9 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' Print the trans_venn object.
 		print = function() {
 			print(self$data_summary)
+			invisible(self)
 		}
-		),
+	),
 	private = list(
 		# modified from vennSets function in systemPipeR package
 		vennSets = function(setmatrix, allcombl, index, setunion){

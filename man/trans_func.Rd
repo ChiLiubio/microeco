@@ -93,7 +93,6 @@ t1$cal_tax4fun2_FRI()
 \item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
 \item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
 \item \href{#method-trans_func-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
-\item \href{#method-trans_func-print}{\code{trans_func$print()}}
 \item \href{#method-trans_func-clone}{\code{trans_func$clone()}}
 }
 }
@@ -414,16 +413,6 @@ t1$cal_tax4fun2_FRI()
 }
 \if{html}{\out{</div>}}
 
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-print"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-print}{}}}
-\subsection{Method \code{print()}}{
-Print the trans_func object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$print()}\if{html}{\out{</div>}}
 }
 
 }

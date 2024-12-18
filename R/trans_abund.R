@@ -892,7 +892,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			invisible(self)
 		}
-		),
+	),
 	private = list(
 		adjust_axis_facet = function(plot_data, x_axis_name, order_x){
 			# order x axis samples and facet

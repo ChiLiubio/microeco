@@ -835,24 +835,6 @@ trans_func <- R6Class(classname = "trans_func",
 			self$res_tax4fun2_rFRI <- rel_functional_redundancy_final
 			message('Relative functional redundancy is stored in object$res_tax4fun2_rFRI')
 			invisible(self)
-		},
-		#' @description
-		#' Print the trans_func object.
-		print = function(){
-			cat("trans_func object:\n")
-			cat(paste("Functional analysis for", self$for_what, ".\n"))
-			if(!is.null(self$sample_table)){
-				cat("sample_table is available.\n")
-			}
-			if(!is.null(self$otu_table)){
-				cat("otu_table is available.\n")
-			}
-			if(!is.null(self$tax_table)){
-				cat("tax_table is available.\n")
-			}
-			if(!is.null(self$rep_fasta)){
-				cat("rep_fasta is available.\n")
-			}
 		}
 	),
 	active = list(
