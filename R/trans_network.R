@@ -527,7 +527,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}else{
 				message('Use ', method, ' function to partition modules ...')
 			}
-			# use NSE
+			
 			res_member <- parse(text = paste0(method, "(network)")) %>% eval
 			
 			mod1 <- as.character(res_member$membership)
@@ -1375,13 +1375,13 @@ trans_network <- R6Class(classname = "trans_network",
 			require("rgexf")
 			nodes <- data.frame(cbind(V(network), V(network)$name))
 			edges <- get.edges(network, 1:ecount(network))
-			node_attr_name <- setdiff(list.vertex.attributes(network), "name")
+			node_attr_name <- setdiff(vertex_attr_names(network), "name")
 			node_attr <- data.frame(sapply(node_attr_name, function(attr) sub("&", "&", vertex_attr(network, attr))))
 			node_attr$RelativeAbundance %<>% as.numeric
-			edge_attr_name <- setdiff(list.edge.attributes(network), "weight")
+			edge_attr_name <- setdiff(edge_attr_names(network), "weight")
 			edge_attr <- data.frame(sapply(edge_attr_name, function(attr) sub("&", "&", edge_attr(network, attr))))
 			# combine all graph attributes into a meta-data
-			graphAtt <- sapply(list.graph.attributes(network), function(attr) sub("&", "&", graph_attr(network, attr)))
+			graphAtt <- sapply(graph_attr_names(network), function(attr) sub("&", "&", graph_attr(network, attr)))
 			output_gexf <- write.gexf(nodes, edges,
 				edgesLabel = as.data.frame(E(network)$label),
 				edgesWeight = E(network)$weight,
@@ -1400,10 +1400,10 @@ trans_network <- R6Class(classname = "trans_network",
 				Vertex = round(vcount(x), 0), 
 				Edge = round(ecount(x), 0), 
 				Average_degree = sum(igraph::degree(x))/length(igraph::degree(x)), 
-				Average_path_length = average.path.length(x), 
+				Average_path_length = mean_distance(x), 
 				Network_diameter = round(diameter(x, directed = FALSE), 0), 
 				Clustering_coefficient = transitivity(x), 
-				Density = graph.density(x), 
+				Density = edge_density(x), 
 				Heterogeneity = sd(igraph::degree(x))/mean(igraph::degree(x)), 
 				Centralization = centr_degree(x)$centralization,
 				Modularity = modularity(ms)
@@ -1437,7 +1437,7 @@ trans_network <- R6Class(classname = "trans_network",
 			res <- data.frame()
 			for(mod in unique(modvs$mod)){
 				mod_nodes <- subset(modvs$taxon, modvs$mod == mod)
-				mod_subgraph <- induced.subgraph(graph = comm_graph, vids = mod_nodes)
+				mod_subgraph <- induced_subgraph(graph = comm_graph, vids = mod_nodes)
 				mod_degree <- igraph::degree(mod_subgraph)
 				for(i in mod_nodes){
 					ki <- mod_degree[names(mod_degree) == i]
