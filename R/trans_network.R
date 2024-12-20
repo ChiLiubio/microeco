@@ -545,18 +545,41 @@ trans_network <- R6Class(classname = "trans_network",
 		#' Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
 		#'
 		#' @param filepath default "network.gexf"; file path to save the network.
+		#' @param ... parameters pass to \code{gexf} function of rgexf package except for \code{nodes}, 
+		#' 	  \code{edges}, \code{edgesLabel}, \code{edgesWeight}, \code{nodesAtt}, \code{edgesAtt} and \code{meta}.
 		#' @return None
 		#' @examples
 		#' \dontrun{
 		#' t1$save_network(filepath = "network.gexf")
 		#' }
-		save_network = function(filepath = "network.gexf"){
+		save_network = function(filepath = "network.gexf", ...){
 			if(!require("rgexf")){
 				stop("Please first install rgexf package with command: install.packages('rgexf') !")
 			}
 			private$check_igraph()
 			private$check_network()
-			private$saveAsGEXF(network = self$res_network, filepath = filepath)
+			network <- self$res_network
+			
+			nodes <- data.frame(cbind(V(network), V(network)$name))
+			edges <- get.edges(network, 1:ecount(network))
+			node_attr_name <- base::setdiff(vertex_attr_names(network), "name")
+			node_attr <- data.frame(sapply(node_attr_name, function(x) vertex_attr(network, x)))
+			if("RelativeAbundance" %in% node_attr_name){
+				node_attr$RelativeAbundance %<>% as.numeric
+			}
+			edge_attr_name <- base::setdiff(edge_attr_names(network), "weight")
+			edge_attr <- data.frame(sapply(edge_attr_name, function(x) edge_attr(network, x)))
+			# combine all graph attributes into a meta-data
+			graphAtt <- sapply(graph_attr_names(network), function(x) graph_attr(network, x))
+			output_gexf <- write.gexf(nodes, edges,
+				edgesLabel = as.data.frame(E(network)$label),
+				edgesWeight = E(network)$weight,
+				nodesAtt = node_attr,
+				edgesAtt = edge_attr,
+				meta = c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt), 
+				...)
+			cat(output_gexf$graph, file = filepath)
+			
 			invisible(self)
 		},
 		#' @description
@@ -570,7 +593,29 @@ trans_network <- R6Class(classname = "trans_network",
 		cal_network_attr = function(){
 			private$check_igraph()
 			private$check_network()
-			self$res_network_attr <- private$network_attribute(self$res_network)
+			network <- self$res_network
+			
+			if(is_directed(network)){
+				ms <- cluster_walktrap(network)
+			}else{
+				ms <- cluster_fast_greedy(network)
+			}
+			res <- data.frame(
+				Vertex = round(vcount(network), 0), 
+				Edge = round(ecount(network), 0), 
+				Average_degree = sum(igraph::degree(network))/length(igraph::degree(network)), 
+				Average_path_length = mean_distance(network), 
+				Network_diameter = round(diameter(network, directed = FALSE), 0), 
+				Clustering_coefficient = transitivity(network), 
+				Density = edge_density(network), 
+				Heterogeneity = sd(igraph::degree(network))/mean(igraph::degree(network)), 
+				Centralization = centr_degree(network)$centralization,
+				Modularity = modularity(ms)
+				)
+			res <- base::as.data.frame(t(res))
+			colnames(res) <- NULL
+			
+			self$res_network_attr <- res
 			message('Result is stored in object$res_network_attr ...')
 			invisible(self)
 		},
@@ -1370,47 +1415,6 @@ trans_network <- R6Class(classname = "trans_network",
 		},
 		nnsd = function(x){
 			abs(diff(x))
-		},
-		saveAsGEXF = function(network, filepath = "network.gexf"){
-			require("rgexf")
-			nodes <- data.frame(cbind(V(network), V(network)$name))
-			edges <- get.edges(network, 1:ecount(network))
-			node_attr_name <- setdiff(vertex_attr_names(network), "name")
-			node_attr <- data.frame(sapply(node_attr_name, function(attr) sub("&", "&", vertex_attr(network, attr))))
-			node_attr$RelativeAbundance %<>% as.numeric
-			edge_attr_name <- setdiff(edge_attr_names(network), "weight")
-			edge_attr <- data.frame(sapply(edge_attr_name, function(attr) sub("&", "&", edge_attr(network, attr))))
-			# combine all graph attributes into a meta-data
-			graphAtt <- sapply(graph_attr_names(network), function(attr) sub("&", "&", graph_attr(network, attr)))
-			output_gexf <- write.gexf(nodes, edges,
-				edgesLabel = as.data.frame(E(network)$label),
-				edgesWeight = E(network)$weight,
-				nodesAtt = node_attr,
-				edgesAtt = edge_attr,
-				meta=c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt))
-			cat(output_gexf$graph, file = filepath)
-		},
-		network_attribute = function(x){
-			if(is_directed(x)){
-				ms <- cluster_walktrap(x)
-			}else{
-				ms <- cluster_fast_greedy(x)
-			}
-			res <- data.frame(
-				Vertex = round(vcount(x), 0), 
-				Edge = round(ecount(x), 0), 
-				Average_degree = sum(igraph::degree(x))/length(igraph::degree(x)), 
-				Average_path_length = mean_distance(x), 
-				Network_diameter = round(diameter(x, directed = FALSE), 0), 
-				Clustering_coefficient = transitivity(x), 
-				Density = edge_density(x), 
-				Heterogeneity = sd(igraph::degree(x))/mean(igraph::degree(x)), 
-				Centralization = centr_degree(x)$centralization,
-				Modularity = modularity(ms)
-				)
-			res <- base::as.data.frame(t(res))
-			colnames(res) <- NULL
-			res
 		},
 		# modified from microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
 		module_roles = function(comm_graph){

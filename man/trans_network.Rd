@@ -477,13 +477,16 @@ t1$cal_module(method = "cluster_fast_greedy")
 \subsection{Method \code{save_network()}}{
 Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{filepath}}{default "network.gexf"; file path to save the network.}
+
+\item{\code{...}}{parameters pass to \code{gexf} function of rgexf package except for \code{nodes}, 
+\code{edges}, \code{edgesLabel}, \code{edgesWeight}, \code{nodesAtt}, \code{edgesAtt} and \code{meta}.}
 }
 \if{html}{\out{</div>}}
 }
