@@ -881,7 +881,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param roles_color_background default FALSE; for use_type=1; TRUE: use background colors for each area; FALSE: use classic point colors.
 		#' @param roles_color_values default NULL; for use_type=1; color palette for background or points.
 		#' @param add_label default FALSE; for use_type = 1; whether add labels for the points.
-		#' @param add_label_group default "Network hubs"; If add_label = TRUE; which part of tax_roles is used to show labels; character vectors.
+		#' @param add_label_group default c("Network hubs", "Module hubs", "Connectors"); 
+		#'   If \code{add_label = TRUE}, which part in \code{taxa_roles} column is used to show labels; character vectors.
 		#' @param add_label_text default "name"; If add_label = TRUE; which column of object$res_node_table is used to label the text.
 		#' @param label_text_size default 4; The text size of the label.
 		#' @param label_text_color default "grey50"; The text color of the label.
@@ -908,7 +909,7 @@ trans_network <- R6Class(classname = "trans_network",
 			roles_color_background = FALSE,
 			roles_color_values = NULL,
 			add_label = FALSE, 
-			add_label_group = "Network hubs", 
+			add_label_group = c("Network hubs", "Module hubs", "Connectors"), 
 			add_label_text = "name", 
 			label_text_size = 4, 
 			label_text_color = "grey50", 

@@ -730,7 +730,7 @@ Plot the roles or metrics of nodes based on the \code{res_node_table} data (comi
   roles_color_background = FALSE,
   roles_color_values = NULL,
   add_label = FALSE,
-  add_label_group = "Network hubs",
+  add_label_group = c("Network hubs", "Module hubs", "Connectors"),
   add_label_text = "name",
   label_text_size = 4,
   label_text_color = "grey50",
@@ -764,7 +764,8 @@ Please refer to \code{res_node_table} data stored in the object for the detailed
 
 \item{\code{add_label}}{default FALSE; for use_type = 1; whether add labels for the points.}
 
-\item{\code{add_label_group}}{default "Network hubs"; If add_label = TRUE; which part of tax_roles is used to show labels; character vectors.}
+\item{\code{add_label_group}}{default c("Network hubs", "Module hubs", "Connectors"); 
+If \code{add_label = TRUE}, which part in \code{taxa_roles} column is used to show labels; character vectors.}
 
 \item{\code{add_label_text}}{default "name"; If add_label = TRUE; which column of object$res_node_table is used to label the text.}
 
