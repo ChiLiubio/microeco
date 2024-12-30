@@ -415,6 +415,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'    Only available when \code{manova_all = FALSE} and \code{manova_set} is not provided.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; 
 		#'    see \code{method} parameter of \code{p.adjust} function for available options.
+		#' @param by default "terms"; same with the \code{by} parameter in \code{adonis2} function of vegan package. 
+		#' @param permutations default 999; same with the \code{permutations} parameter in \code{adonis2} function of vegan package. 
 		#' @param ... parameters passed to \code{adonis2} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object with \code{data.frame} class.
 		#' @examples
@@ -425,6 +427,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 			group = NULL,
 			by_group = NULL,
 			p_adjust_method = "fdr",
+			by = "terms",
+			permutations = 999,
 			...
 			){
 			if(is.null(self$use_matrix)){
@@ -434,7 +438,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			metadata <- self$sample_table
 			if(!is.null(manova_set)){
 				use_formula <- reformulate(manova_set, substitute(as.dist(use_matrix)))
-				res <- adonis2(use_formula, data = metadata, ...)
+				res <- adonis2(use_formula, data = metadata, by = by, permutations = permutations, ...)
 			}else{
 				if(is.null(group)){
 					if(is.null(self$group)){
@@ -447,7 +451,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 				if(manova_all){
 					use_formula <- reformulate(group, substitute(as.dist(use_matrix)))
-					res <- adonis2(use_formula, data = metadata, ...)
+					res <- adonis2(use_formula, data = metadata, by = by, permutations = permutations, ...)
 				}else{
 					res <- private$paired_manova_anosim_bygroup(
 						by_group = by_group,
@@ -457,6 +461,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 						group = group, 
 						measure = self$measure, 
 						p_adjust_method = p_adjust_method,
+						permutations = permutations,
 						...
 					)
 				}
@@ -477,6 +482,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param by_group default NULL; one column name in \code{sample_table}; used to perform paired comparisions within each group. 
 		#'    Only available when \code{paired = TRUE}.
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{paired = TRUE}; see method parameter of \code{p.adjust} function for available options.
+		#' @param permutations default 999; same with the \code{permutations} parameter in \code{anosim} function of vegan package. 
 		#' @param ... parameters passed to \code{anosim} function of \code{vegan} package.
 		#' @return \code{res_anosim} stored in object with \code{data.frame} class.
 		#' @examples
@@ -486,6 +492,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			group = NULL,
 			by_group = NULL,
 			p_adjust_method = "fdr",
+			permutations = 999,
 			...
 			){
 			if(is.null(self$use_matrix)){
@@ -512,12 +519,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 					group = group, 
 					measure = self$measure, 
 					p_adjust_method = p_adjust_method,
+					permutations = permutations,
 					...
 				)
 			}else{
 				tmp <- anosim(
 					x = use_matrix, 
 					grouping = metadata[, group], 
+					permutations = permutations,
 					...
 				)
 				res <- data.frame(Test = "ANOSIM for all groups", permutations = tmp$permutations, statistic.R = tmp$statistic, p.value = tmp$signif)
@@ -855,7 +864,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			res
 		},
-		paired_manova_anosim_bygroup = function(by_group, test, sample_info_use, use_matrix, group, measure, p_adjust_method, ...){
+		paired_manova_anosim_bygroup = function(by_group, test, sample_info_use, use_matrix, group, measure, p_adjust_method, permutations, ...){
 			if(is.null(by_group)){
 				res <- private$paired_group_manova_anosim(
 					test = test,
@@ -864,6 +873,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					group = group, 
 					measure = measure, 
 					p_adjust_method = p_adjust_method,
+					permutations = permutations,
 					...
 				)
 			}else{
@@ -884,6 +894,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 						group = group, 
 						measure = measure, 
 						p_adjust_method = p_adjust_method,
+						permutations = permutations,
 						...
 					)
 					tmp <- data.frame(by_group = i, tmp)
@@ -892,7 +903,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			res
 		},
-		paired_group_manova_anosim = function(test, sample_info_use, use_matrix, group, measure, p_adjust_method, ...){
+		paired_group_manova_anosim = function(test, sample_info_use, use_matrix, group, measure, p_adjust_method, permutations, ...){
 			comnames <- c()
 			test <- match.arg(test, choices = c("permanova", "anosim"))
 			if(test == "permanova"){
@@ -910,12 +921,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 				sample_info_compare <- sample_info_use[groupvec %in% as.character(all_name[,i]), , drop = FALSE]
 				comnames <- c(comnames, paste0(as.character(all_name[,i]), collapse = " vs "))
 				if(test == "permanova"){
-					tmp_result <- adonis2(reformulate(group, substitute(as.dist(matrix_compare))), data = sample_info_compare, ...)
+					tmp_result <- adonis2(reformulate(group, substitute(as.dist(matrix_compare))), data = sample_info_compare, permutations = permutations, ...)
 					F %<>% c(., tmp_result$F[1])
 					R2 %<>% c(., tmp_result$R2[1])
 					p_value %<>% c(., tmp_result$`Pr(>F)`[1])
 				}else{
-					tmp_result <- anosim(x = matrix_compare, grouping = sample_info_compare[, group], ...)
+					tmp_result <- anosim(x = matrix_compare, grouping = sample_info_compare[, group], permutations = permutations, ...)
 					R %<>% c(., tmp_result$statistic[1])
 					p_value %<>% c(., tmp_result$signif[1])
 				}
