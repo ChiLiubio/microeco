@@ -17,7 +17,10 @@
 trans_diff <- R6Class(classname = "trans_diff",
 	public = list(
 		#' @param dataset default NULL; \code{\link{microtable}} object.
-		#' @param method default "lefse"; see the following available options:
+		#' @param method default "lefse". Some methods (e.g., "lefse", "KW", "wilcox", "anova", "lm", "betareg", "glmm" and "glmm_beta") 
+		#' 	 invoke the \code{taxa_abund} list (generally relative abundance data) of input microtable object for the analysis.
+		#' 	 Some (e.g., "metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2" and "linda") use the \code{otu_table} of input microtable object for the analysis. 
+		#' 	 Available options include:
 		#'   \describe{
 		#'     \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
 		#'     \item{\strong{'rf'}}{random forest and non-parametric test method based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
@@ -79,10 +82,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
 		#' 	  It is necessary when method is not "anova" or method is "anova" but formula is not provided.
 		#' 	  Once group is provided, the return res_abund will have mean and sd values for group.
-		#' @param taxa_level default "all"; 'all' represents using abundance data at all taxonomic ranks; 
+		#' @param taxa_level default "all"; 'all' represents using abundance data of all taxonomic ranks; 
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
-		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
+		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset (e.g., "ASV"), 
 		#' 	  the function will use the features in input \code{microtable$otu_table} automatically.
+		#' 	  Note that a specific level (e.g., "ASV") should be provided for \code{method}: 
+		#' 	  "metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2", "linda", "maaslin2".
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance; only available when method != "metastat".
 		#' 	  The features with abundances lower than filter_thres will be filtered.
 		#' @param alpha default 0.05; significance threshold to select taxa when method is "lefse" or "rf"; 
@@ -240,6 +245,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 				
+				if(method %in% c("metastat", "metagenomeSeq", "DESeq2", "edgeR", "ALDEx2_t", "ALDEx2_kw", "ancombc2", "linda", "maaslin2")){
+					if(taxa_level == "all"){
+						message("The taxa_level parameter cannot be 'all' for the current method! Automatically change it to 'ASV' ...")
+						taxa_level <- "ASV"
+					}
+				}
 				if(grepl("all", taxa_level, ignore.case = TRUE)){
 					abund_table <- do.call(rbind, unname(tmp_dataset$taxa_abund))
 				}else{
@@ -548,10 +559,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 					message("Minimum LDA score: ", range(output$LDA)[1], " maximum LDA score: ", range(output$LDA)[2])
 					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
 				}
-				
 				if(method %in% c("metastat", "metagenomeSeq", "ALDEx2_t", "edgeR")){
 					tmp_dataset$sample_table %<>% dropallfactors
-					private$check_taxa_level_all(taxa_level)
 					if(is.null(group_choose_paired)){
 						all_name <- combn(unique(as.character(sampleinfo[, group])), 2)
 					}else{
@@ -743,9 +752,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 				if(method == "ALDEx2_kw"){
-					if(taxa_level == "all"){
-						stop("Please provide the taxa_level instead of 'all', such as 'Genus' !")
-					}
 					use_dataset <- clone(tmp_dataset)
 					use_dataset$sample_table %<>% dropallfactors
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
@@ -807,7 +813,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(!require("MicrobiomeStat")){
 						stop("MicrobiomeStat package is not installed!")
 					}
-					private$check_taxa_level_all(taxa_level)
 					use_dataset <- clone(tmp_dataset)
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
 					if(is.null(group)){
@@ -1583,11 +1588,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 		}
 	),
 	private = list(
-		check_taxa_level_all = function(taxa_level){
-			if(taxa_level == "all"){
-				stop("The taxa_level parameter cannot be 'all' for this method! Please provide a taxonomic level, such as 'Genus' !")
-			}
-		},
 		# group test for lefse or rf
 		test_mark = function(dataframe, group, min_num_nonpara = 1, method = NULL){
 			d1 <- as.data.frame(t(dataframe))
@@ -1643,12 +1643,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		generate_microtable_unrel = function(use_dataset, taxa_level, filter_thres, filter_features){
 			use_dataset$tidy_dataset()
 			suppressMessages(use_dataset$cal_abund(rel = FALSE))
-			if(grepl("all", taxa_level, ignore.case = TRUE)){
-				stop("For the current method, the taxa_level should be one of column names of tax_table, not 'all' !")
-			}
 			if(! taxa_level %in% names(use_dataset$taxa_abund)){
 				stop("The taxa_level is not found in the column names of tax_table! ", 
-				"Such case is generally caused by the customized use of taxa_abund list! ", 
+				"Such case is generally caused by the customized use of taxa_abund list in your input microtable object! ", 
 				"However, for the current method, the original abundance in otu_table is used. So please try other method!")
 			}
 			use_feature_table <- use_dataset$taxa_abund[[taxa_level]]

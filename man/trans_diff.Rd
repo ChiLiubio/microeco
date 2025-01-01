@@ -111,7 +111,10 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \describe{
 \item{\code{dataset}}{default NULL; \code{\link{microtable}} object.}
 
-\item{\code{method}}{default "lefse"; see the following available options:
+\item{\code{method}}{default "lefse". Some methods (e.g., "lefse", "KW", "wilcox", "anova", "lm", "betareg", "glmm" and "glmm_beta") 
+   invoke the \code{taxa_abund} list (generally relative abundance data) of input microtable object for the analysis.
+   Some (e.g., "metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2" and "linda") use the \code{otu_table} of input microtable object for the analysis. 
+   Available options include:
 \describe{
   \item{\strong{'lefse'}}{LEfSe method based on Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>}
   \item{\strong{'rf'}}{random forest and non-parametric test method based on An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035>}
@@ -175,10 +178,12 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 It is necessary when method is not "anova" or method is "anova" but formula is not provided.
 Once group is provided, the return res_abund will have mean and sd values for group.}
 
-\item{\code{taxa_level}}{default "all"; 'all' represents using abundance data at all taxonomic ranks; 
+\item{\code{taxa_level}}{default "all"; 'all' represents using abundance data of all taxonomic ranks; 
 For testing at a specific rank, provide taxonomic rank name, such as "Genus".
-If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset, 
-the function will use the features in input \code{microtable$otu_table} automatically.}
+If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset (e.g., "ASV"), 
+the function will use the features in input \code{microtable$otu_table} automatically.
+Note that a specific level (e.g., "ASV") should be provided for \code{method}: 
+"metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2", "linda", "maaslin2".}
 
 \item{\code{filter_thres}}{default 0; the abundance threshold, such as 0.0005 when the input is relative abundance; only available when method != "metastat".
 The features with abundances lower than filter_thres will be filtered.}
