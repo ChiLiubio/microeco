@@ -897,23 +897,22 @@ trans_env <- R6Class(classname = "trans_env",
 				if(use_data %in% names(self$dataset$taxa_abund)){
 					abund_table <- self$dataset$taxa_abund[[use_data]]
 				}else{
-					if(grepl("all|other", use_data, ignore.case = TRUE)){
-						abund_table <- do.call(rbind, unname(self$dataset$taxa_abund))
-						if(use_data == "other"){
-							if(is.null(other_taxa)){
-								stop("You select other, but other_taxa parameter is not provided!")
-							}
-							if(any(is.na(other_taxa))){
-								other_taxa %<>% .[!is.na(.)]
-								message("NA is found in provided other_taxa. Filter out NA ...")
-							}
-							if(!any(other_taxa %in% rownames(abund_table))){
-								stop("Provided other_taxa is unavailable! Please check the taxonomic information in other_taxa parameter!")
-							}
-							abund_table <- abund_table[other_taxa, ]
+					if(!grepl("all|other", use_data, ignore.case = TRUE)){
+						stop("Unknown use_data parameter input!")
+					}
+					abund_table <- do.call(rbind, unname(self$dataset$taxa_abund))
+					if(use_data == "other"){
+						if(is.null(other_taxa)){
+							stop("The other_taxa parameter must be provided when use_data = 'other'!")
 						}
-					}else{
-						stop("Unknown use_data parameter provided!")
+						if(any(is.na(other_taxa))){
+							other_taxa %<>% .[!is.na(.)]
+							message("NA is found in provided other_taxa. Filter out NA ...")
+						}
+						if(!any(other_taxa %in% rownames(abund_table))){
+							stop("Provided other_taxa is unavailable! Please check the taxonomic information in other_taxa parameter!")
+						}
+						abund_table <- abund_table[other_taxa, ]
 					}
 				}
 				abund_table %<>% .[!grepl("__$", rownames(.)), ]
@@ -927,7 +926,7 @@ trans_env <- R6Class(classname = "trans_env",
 						abund_table %<>% .[1:use_taxa_num, ] 
 					}
 				}
-				abund_table <- as.data.frame(t(abund_table))
+				abund_table %<>% t %>% as.data.frame
 			}
 			# filter samples by one group
 			if(!is.null(group_use)){
@@ -937,10 +936,10 @@ trans_env <- R6Class(classname = "trans_env",
 				sel_sample_names <- self$dataset$sample_table %>% 
 					.[.[, group_use] %in% group_select, ] %>% 
 					rownames
-				abund_table <- abund_table[sel_sample_names, ]
+				abund_table %<>% .[sel_sample_names, ]
 			}
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
-			abund_table <- abund_table[rownames(env_data), , drop = FALSE]
+			abund_table %<>% .[rownames(env_data), , drop = FALSE]
 			if(cor_method == "maaslin2"){
 				save_env_data <- data.frame(ID = rownames(env_data), env_data)
 				save_abund_table <- data.frame(ID = rownames(abund_table), abund_table)
@@ -1241,7 +1240,6 @@ trans_env <- R6Class(classname = "trans_env",
 				p <- p + theme(text = element_text(family = font_family))
 			}
 			p
-			
 		},
 		#' @description
 		#' 	Scatter plot with fitted line based on the correlation or regression.\cr
