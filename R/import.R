@@ -16,4 +16,5 @@
 #' @importFrom reshape2 acast
 #' @importFrom grDevices colorRampPalette
 #' @importFrom igraph ecount
+#' @importFrom lifecycle deprecated
 NULL

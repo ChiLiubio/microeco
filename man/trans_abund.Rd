@@ -196,6 +196,7 @@ Bar plot.
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_bar(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   bar_full = TRUE,
+  bar_type = deprecated(),
   others_color = "grey90",
   facet = NULL,
   order_x = NULL,
@@ -215,8 +216,7 @@ Bar plot.
   ytitle_size = 17,
   coord_flip = FALSE,
   ggnested = FALSE,
-  high_level_add_other = FALSE,
-  ...
+  high_level_add_other = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -227,6 +227,8 @@ Bar plot.
 
 \item{\code{bar_full}}{default TRUE; Whether the bar shows all the features (including 'Others'). 
 Default \code{TRUE} means total abundance are summed to 1 or 100 (percentage). \code{FALSE} means 'Others' will not be shown.}
+
+\item{\code{bar_type}}{deprecated. Please use \code{bar_full} argument instead.}
 
 \item{\code{others_color}}{default "grey90"; the color for "Others" taxa.}
 
@@ -275,8 +277,6 @@ To make it available, please assign \code{high_level} parameter when creating th
 
 \item{\code{high_level_add_other}}{default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
 Only available when \code{ggnested = TRUE}.}
-
-\item{\code{...}}{Capture unknown parameters.}
 }
 \if{html}{\out{</div>}}
 }

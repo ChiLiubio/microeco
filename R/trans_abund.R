@@ -188,6 +188,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for the bars.
 		#' @param bar_full default TRUE; Whether the bar shows all the features (including 'Others'). 
 		#'    Default \code{TRUE} means total abundance are summed to 1 or 100 (percentage). \code{FALSE} means 'Others' will not be shown.
+		#' @param bar_type deprecated. Please use \code{bar_full} argument instead.
 		#' @param others_color default "grey90"; the color for "Others" taxa.
 		#' @param facet default NULL; a character vector for the facet; group column name of \code{sample_table}, such as, \code{"Group"};
 		#'    If multiple facets are needed, please provide ordered names, such as \code{c("Group", "Type")}.
@@ -216,7 +217,6 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   To make it available, please assign \code{high_level} parameter when creating the object.
 		#' @param high_level_add_other default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
 		#'   Only available when \code{ggnested = TRUE}.
-		#' @param ... Capture unknown parameters.
 		#' @return ggplot2 object. 
 		#' @examples
 		#' \donttest{
@@ -225,6 +225,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		plot_bar = function(
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"),
 			bar_full = TRUE,
+			bar_type = deprecated(),
 			others_color = "grey90",
 			facet = NULL,
 			order_x = NULL,
@@ -244,18 +245,18 @@ trans_abund <- R6Class(classname = "trans_abund",
 			ytitle_size = 17,
 			coord_flip = FALSE,
 			ggnested = FALSE,
-			high_level_add_other = FALSE,
-			...
+			high_level_add_other = FALSE
 			){
-			all_parameters <- c(as.list(environment()), list(...))
-			if("bar_type" %in% names(all_parameters)){
-				warning("Parameter bar_type is deprecated! Please use bar_full instead of it!")
-				if(all_parameters["bar_type"] == "full"){
+			
+			if (lifecycle::is_present(bar_type)) {
+				lifecycle::deprecate_warn("1.7.0", "plot_bar(bar_type)", "plot_bar(bar_full)")
+				if(bar_type == "full"){
 					bar_full <- TRUE
 				}else{
 					bar_full <- FALSE
 				}
 			}
+			
 			plot_data <- self$data_abund
 			# try to filter useless columns
 			plot_data %<>% .[, ! colnames(.) %in% c("N", "SD", "SE", "Median", "Min", "Max", "quantile25", "quantile75", "all_mean_abund")]
