@@ -96,6 +96,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  Only available when \code{scale_species = TURE}.
 		#' @param orthoI default NA; number of orthogonal components (for OPLS-DA only). Default NA means the number of orthogonal components is automatically computed.
 		#' 	  Please also see \code{orthoI} parameter in \code{opls} function of ropls package.
+		#' @param ordination deprecated. Please use \code{method} argument instead.
 		#' @param ... parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
 		#' 	  or \code{vegan::decorana} function when \code{method = "DCA"}, 
 		#' 	  or \code{ape::pcoa} function when \code{method = "PCoA"}, 
@@ -111,12 +112,15 @@ trans_beta <- R6Class(classname = "trans_beta",
 			scale_species = FALSE,
 			scale_species_ratio = 0.8,
 			orthoI = NA,
+			ordination = deprecated(),
 			...
 			){
-			all_parameters <- c(as.list(environment()), list(...))
-			if("ordination" %in% names(all_parameters)){
-				stop("Parameter ordination is deprecated! Please use method instead of it!")
+			
+			if(lifecycle::is_present(ordination)) {
+				lifecycle::deprecate_warn("1.8.0", "cal_ordination(ordination)", "cal_ordination(method)")
+				method <- ordination
 			}
+			
 			if(is.null(method)){
 				stop("Input method should not be NULL !")
 			}

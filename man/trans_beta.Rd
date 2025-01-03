@@ -145,6 +145,7 @@ Unconstrained ordination.
   scale_species = FALSE,
   scale_species_ratio = 0.8,
   orthoI = NA,
+  ordination = deprecated(),
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -169,6 +170,8 @@ Only available when \code{scale_species = TURE}.}
 
 \item{\code{orthoI}}{default NA; number of orthogonal components (for OPLS-DA only). Default NA means the number of orthogonal components is automatically computed.
 Please also see \code{orthoI} parameter in \code{opls} function of ropls package.}
+
+\item{\code{ordination}}{deprecated. Please use \code{method} argument instead.}
 
 \item{\code{...}}{parameters passed to \code{vegan::rda} function when \code{method = "PCA"}, 
 or \code{vegan::decorana} function when \code{method = "DCA"}, 

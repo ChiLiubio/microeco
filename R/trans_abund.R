@@ -248,7 +248,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			high_level_add_other = FALSE
 			){
 			
-			if (lifecycle::is_present(bar_type)) {
+			if(lifecycle::is_present(bar_type)) {
 				lifecycle::deprecate_warn("1.7.0", "plot_bar(bar_type)", "plot_bar(bar_full)")
 				if(bar_type == "full"){
 					bar_full <- TRUE
