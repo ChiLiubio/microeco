@@ -5,7 +5,7 @@
 \title{Create \code{trans_network} object for network analysis.}
 \description{
 This class is a wrapper for a series of network analysis methods, 
-including the network construction, network attributes analysis,
+including the network construction, topological attributes analysis,
 eigengene analysis, network subsetting, node and edge properties, network visualization and other operations.
 }
 \examples{
@@ -754,7 +754,8 @@ Plot the roles or metrics of nodes based on the \code{res_node_table} data (comi
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{use_type}}{default 1; 1 or 2; 1 represents taxa roles plot (node roles include Module hubs, Network hubs, 
-Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>); 
+Connectors and Peripherals <doi:10.1038/nature03288; 10.1186/1471-2105-13-113>). 
+The 'p' column (Pi, among-module connectivity) in \code{res_node_table} table is used in x-axis. The 'z' column (Zi, within-module connectivity) is used in y-axis; 
 2 represents the layered plot with taxa as x axis and the index (e.g., Zi and Pi) as y axis.
 Please refer to \code{res_node_table} data stored in the object for the detailed information.}
 
