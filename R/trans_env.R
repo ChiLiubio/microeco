@@ -1031,12 +1031,10 @@ trans_env <- R6Class(classname = "trans_env",
 		#'
 		#' @param color_vector default \code{c("#053061", "white", "#A50026")}; colors with only three values representing low, middle and high values.
 		#' @param color_palette default NULL; a customized palette with more color values to be used instead of the parameter \code{color_vector}.
-
 		#' @param filter_feature default NULL; character vector; used to filter features that only have labels in the \code{filter_feature} vector. 
 		#'   For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".
 		#' @param filter_env default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
 		#'   For example, \code{filter_env = ""} can be used to remove features that only have "", no any "*".
-		#' @param ylab_type_italic deprecated. Please use \code{ytext_italic} argument instead.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param text_y_order default NULL; character vector; customized text for y axis; shown in the plot from the top down. 
@@ -1048,16 +1046,18 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ytext_italic default FALSE; whether use italic for y axis text.
 		#' @param ytext_size default NULL; y axis text size. NULL means default ggplot2 value.
 		#' @param ytext_color default "black"; y axis text color.
+		#' @param ytext_position default "right"; "left" or "right"; the y axis text position.
 		#' @param sig_label_size default 4; the size of significance label shown in the cell.
 		#' @param font_family default NULL; font family used.
 		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
 		#'   "none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
 		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when \code{cluster_ggplot} is not "none".
 		#' @param cluster_height_cols default 0.2, the dendrogram plot height for columns; available when \code{cluster_ggplot} is not "none".
-		#' @param text_y_position default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.
 		#' @param na.value default "grey50"; the color for the missing values.
 		#' @param trans default "identity"; the transformation for continuous scales in the legend; 
 		#' 	 see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.
+		#' @param ylab_type_italic deprecated. Please use \code{ytext_italic} argument instead.
+		#' @param text_y_position deprecated. Please use \code{ytext_position} argument instead.
 		#' @param ... paremeters passed to \code{ggplot2::geom_tile}.
 		#' @return ggplot2 object.
 		#' @examples
@@ -1069,7 +1069,6 @@ trans_env <- R6Class(classname = "trans_env",
 			color_palette = NULL,
 			filter_feature = NULL,
 			filter_env = NULL,
-			ylab_type_italic = deprecated(),
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
 			text_y_order = NULL,
@@ -1077,22 +1076,28 @@ trans_env <- R6Class(classname = "trans_env",
 			xtext_angle = 30,
 			xtext_size = 10,
 			xtext_color = "black",
-			ytext_italic = FALSE, 
+			ytext_italic = FALSE,
 			ytext_size = NULL,
-			ytext_color = "black",			
+			ytext_color = "black",
+			ytext_position = "right",
 			sig_label_size = 4,
 			font_family = NULL,
 			cluster_ggplot = "none",
 			cluster_height_rows = 0.2,
 			cluster_height_cols = 0.2,
-			text_y_position = "right",
 			na.value = "grey50",
 			trans = "identity",
+			ylab_type_italic = deprecated(),
+			text_y_position = deprecated(),
 			...
 			){
 			if(lifecycle::is_present(ylab_type_italic)) {
 				lifecycle::deprecate_warn("1.12.1", "plot_cor(ylab_type_italic)", "plot_cor(ytext_italic)")
 				ytext_italic <- ylab_type_italic
+			}
+			if(lifecycle::is_present(text_y_position)) {
+				lifecycle::deprecate_warn("1.12.1", "plot_cor(text_y_position)", "plot_cor(ytext_position)")
+				ytext_position <- text_y_position
 			}
 			
 			if(is.null(self$res_cor)){
@@ -1224,7 +1229,7 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + ggplot_xtext_anglesize(xtext_angle, xtext_size, text_color = xtext_color) +
 				theme(axis.text.y = element_text(colour = ytext_color, size = ytext_size))
 			
-			p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
+			p <- p + scale_y_discrete(limits = lim_y, position = ytext_position) + scale_x_discrete(limits = lim_x)
 			
 			if(ytext_italic){
 				p <- p + theme(axis.text.y = element_text(face = 'italic'))

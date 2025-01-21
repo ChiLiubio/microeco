@@ -780,7 +780,6 @@ Plot correlation heatmap.
   color_palette = NULL,
   filter_feature = NULL,
   filter_env = NULL,
-  ylab_type_italic = deprecated(),
   keep_full_name = FALSE,
   keep_prefix = TRUE,
   text_y_order = NULL,
@@ -791,14 +790,16 @@ Plot correlation heatmap.
   ytext_italic = FALSE,
   ytext_size = NULL,
   ytext_color = "black",
+  ytext_position = "right",
   sig_label_size = 4,
   font_family = NULL,
   cluster_ggplot = "none",
   cluster_height_rows = 0.2,
   cluster_height_cols = 0.2,
-  text_y_position = "right",
   na.value = "grey50",
   trans = "identity",
+  ylab_type_italic = deprecated(),
+  text_y_position = deprecated(),
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -815,8 +816,6 @@ For example, \code{filter_feature = ""} can be used to remove features that only
 
 \item{\code{filter_env}}{default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
 For example, \code{filter_env = ""} can be used to remove features that only have "", no any "*".}
-
-\item{\code{ylab_type_italic}}{deprecated. Please use \code{ytext_italic} argument instead.}
 
 \item{\code{keep_full_name}}{default FALSE; whether use the complete taxonomic name.}
 
@@ -839,6 +838,8 @@ The input should be consistent with the feature names in the \code{res_cor} tabl
 
 \item{\code{ytext_color}}{default "black"; y axis text color.}
 
+\item{\code{ytext_position}}{default "right"; "left" or "right"; the y axis text position.}
+
 \item{\code{sig_label_size}}{default 4; the size of significance label shown in the cell.}
 
 \item{\code{font_family}}{default NULL; font family used.}
@@ -850,12 +851,14 @@ The input should be consistent with the feature names in the \code{res_cor} tabl
 
 \item{\code{cluster_height_cols}}{default 0.2, the dendrogram plot height for columns; available when \code{cluster_ggplot} is not "none".}
 
-\item{\code{text_y_position}}{default "right"; "left" or "right"; the y axis text position for ggplot2 based heatmap.}
-
 \item{\code{na.value}}{default "grey50"; the color for the missing values.}
 
 \item{\code{trans}}{default "identity"; the transformation for continuous scales in the legend; 
 see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.}
+
+\item{\code{ylab_type_italic}}{deprecated. Please use \code{ytext_italic} argument instead.}
+
+\item{\code{text_y_position}}{deprecated. Please use \code{ytext_position} argument instead.}
 
 \item{\code{...}}{paremeters passed to \code{ggplot2::geom_tile}.}
 }
