@@ -1036,7 +1036,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'   For example, \code{filter_feature = ""} can be used to remove features that only have "", no any "*".
 		#' @param filter_env default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
 		#'   For example, \code{filter_env = ""} can be used to remove features that only have "", no any "*".
-		#' @param ylab_type_italic default FALSE; whether use italic type for y lab text.
+		#' @param ylab_type_italic deprecated. Please use \code{ytext_italic} argument instead.
 		#' @param keep_full_name default FALSE; whether use the complete taxonomic name.
 		#' @param keep_prefix default TRUE; whether retain the taxonomic prefix.
 		#' @param text_y_order default NULL; character vector; customized text for y axis; shown in the plot from the top down. 
@@ -1045,6 +1045,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param xtext_angle default 30; number ranging from 0 to 90; used to adjust x axis text angle. 
 		#' @param xtext_size default 10; x axis text size.
 		#' @param xtext_color default "black"; x axis text color.
+		#' @param ytext_italic default FALSE; whether use italic for y axis text.
 		#' @param ytext_size default NULL; y axis text size. NULL means default ggplot2 value.
 		#' @param ytext_color default "black"; y axis text color.
 		#' @param sig_label_size default 4; the size of significance label shown in the cell.
@@ -1068,7 +1069,7 @@ trans_env <- R6Class(classname = "trans_env",
 			color_palette = NULL,
 			filter_feature = NULL,
 			filter_env = NULL,
-			ylab_type_italic = FALSE,
+			ylab_type_italic = deprecated(),
 			keep_full_name = FALSE,
 			keep_prefix = TRUE,
 			text_y_order = NULL,
@@ -1076,6 +1077,7 @@ trans_env <- R6Class(classname = "trans_env",
 			xtext_angle = 30,
 			xtext_size = 10,
 			xtext_color = "black",
+			ytext_italic = FALSE, 
 			ytext_size = NULL,
 			ytext_color = "black",			
 			sig_label_size = 4,
@@ -1088,6 +1090,11 @@ trans_env <- R6Class(classname = "trans_env",
 			trans = "identity",
 			...
 			){
+			if(lifecycle::is_present(ylab_type_italic)) {
+				lifecycle::deprecate_warn("1.12.1", "plot_cor(ylab_type_italic)", "plot_cor(ytext_italic)")
+				ytext_italic <- ylab_type_italic
+			}
+			
 			if(is.null(self$res_cor)){
 				stop("Please first run cal_cor function to get plot data!")
 			}
@@ -1218,7 +1225,8 @@ trans_env <- R6Class(classname = "trans_env",
 				theme(axis.text.y = element_text(colour = ytext_color, size = ytext_size))
 			
 			p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
-			if(ylab_type_italic){
+			
+			if(ytext_italic){
 				p <- p + theme(axis.text.y = element_text(face = 'italic'))
 			}
 			if(!is.null(font_family)){

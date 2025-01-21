@@ -780,7 +780,7 @@ Plot correlation heatmap.
   color_palette = NULL,
   filter_feature = NULL,
   filter_env = NULL,
-  ylab_type_italic = FALSE,
+  ylab_type_italic = deprecated(),
   keep_full_name = FALSE,
   keep_prefix = TRUE,
   text_y_order = NULL,
@@ -788,6 +788,7 @@ Plot correlation heatmap.
   xtext_angle = 30,
   xtext_size = 10,
   xtext_color = "black",
+  ytext_italic = FALSE,
   ytext_size = NULL,
   ytext_color = "black",
   sig_label_size = 4,
@@ -815,7 +816,7 @@ For example, \code{filter_feature = ""} can be used to remove features that only
 \item{\code{filter_env}}{default NULL; character vector; used to filter environmental variables that only have labels in the \code{filter_env} vector. 
 For example, \code{filter_env = ""} can be used to remove features that only have "", no any "*".}
 
-\item{\code{ylab_type_italic}}{default FALSE; whether use italic type for y lab text.}
+\item{\code{ylab_type_italic}}{deprecated. Please use \code{ytext_italic} argument instead.}
 
 \item{\code{keep_full_name}}{default FALSE; whether use the complete taxonomic name.}
 
@@ -831,6 +832,8 @@ The input should be consistent with the feature names in the \code{res_cor} tabl
 \item{\code{xtext_size}}{default 10; x axis text size.}
 
 \item{\code{xtext_color}}{default "black"; x axis text color.}
+
+\item{\code{ytext_italic}}{default FALSE; whether use italic for y axis text.}
 
 \item{\code{ytext_size}}{default NULL; y axis text size. NULL means default ggplot2 value.}
 
