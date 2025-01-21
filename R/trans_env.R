@@ -1218,6 +1218,12 @@ trans_env <- R6Class(classname = "trans_env",
 				theme(axis.text.y = element_text(colour = ytext_color, size = ytext_size))
 			
 			p <- p + scale_y_discrete(limits = lim_y, position = text_y_position) + scale_x_discrete(limits = lim_x)
+			if(ylab_type_italic){
+				p <- p + theme(axis.text.y = element_text(face = 'italic'))
+			}
+			if(!is.null(font_family)){
+				p <- p + theme(text = element_text(family = font_family))
+			}
 			
 			if(length(unique(use_data$by_group)) == 1){
 				if(cluster_ggplot != "none"){
@@ -1232,12 +1238,6 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 			}else{
 				p <- p + facet_grid(. ~ by_group, drop = TRUE, scale = "free", space = "free_x")
-			}
-			if(ylab_type_italic){
-				p <- p + theme(axis.text.y = element_text(face = 'italic'))
-			}
-			if(!is.null(font_family)){
-				p <- p + theme(text = element_text(family = font_family))
 			}
 			p
 		},
