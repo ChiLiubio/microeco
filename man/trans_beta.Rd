@@ -161,7 +161,7 @@ For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.200
 
 \item{\code{ncomp}}{default 3; dimensions shown in the results (except method "NMDS").}
 
-\item{\code{trans}}{default FALSE; whether species abundance will be square transformed; only available when \code{method} is "PCA" or "DCA".}
+\item{\code{trans}}{default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".}
 
 \item{\code{scale_species}}{default FALSE; whether species loading in PCA or DCA is scaled.}
 

@@ -814,7 +814,13 @@ Save alpha diversity table to the computer.
 Calculate beta diversity dissimilarity matrix, such as Bray-Curtis, Jaccard, and UniFrac.
 See An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228–8235.2005>.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(method = NULL, unifrac = FALSE, binary = FALSE, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$cal_betadiv(
+  method = NULL,
+  unifrac = FALSE,
+  binary = FALSE,
+  force_jaccard_binary = TRUE,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -825,8 +831,11 @@ See the \code{method} parameter in \code{vegdist} function for more available op
 
 \item{\code{unifrac}}{default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.}
 
-\item{\code{binary}}{default FALSE; Whether convert abundance to binary data (presence/absence) when \code{method} is not "jaccard". 
-TRUE is used for "jaccard" automatically.}
+\item{\code{binary}}{default FALSE; Whether convert abundance to binary data (presence/absence).}
+
+\item{\code{force_jaccard_binary}}{default TRUE; Whether forcibly convert abundance to binary data (presence/absence) when \code{method = "jaccard"}.
+The reason for this setting is that the Jaccard metric is commonly used for binary data. 
+If \code{force_jaccard_binary = FALSE} is set, the conversion will not be enforced, but will instead be based on the setting of the \code{binary} parameter.}
 
 \item{\code{...}}{parameters passed to \code{vegdist} function of vegan package.}
 }

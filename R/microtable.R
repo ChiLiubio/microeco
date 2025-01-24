@@ -762,8 +762,10 @@ microtable <- R6Class(classname = "microtable",
 		#' @param method default NULL; a character vector with one or more elements; \code{c("bray", "jaccard")} is used when \code{method = NULL}; 
 		#'   See the \code{method} parameter in \code{vegdist} function for more available options, such as 'aitchison' and 'robust.aitchison'. 
 		#' @param unifrac default FALSE; whether UniFrac indexes (weighted and unweighted) are calculated. Phylogenetic tree is necessary when \code{unifrac = TRUE}.
-		#' @param binary default FALSE; Whether convert abundance to binary data (presence/absence) when \code{method} is not "jaccard". 
-		#'   TRUE is used for "jaccard" automatically.
+		#' @param binary default FALSE; Whether convert abundance to binary data (presence/absence). 
+		#' @param force_jaccard_binary default TRUE; Whether forcibly convert abundance to binary data (presence/absence) when \code{method = "jaccard"}.
+		#'   The reason for this setting is that the Jaccard metric is commonly used for binary data. 
+		#'   If \code{force_jaccard_binary = FALSE} is set, the conversion will not be enforced, but will instead be based on the setting of the \code{binary} parameter.
 		#' @param ... parameters passed to \code{vegdist} function of vegan package.
 		#' @return beta_diversity list stored in the object.
 		#' @examples
@@ -771,7 +773,7 @@ microtable <- R6Class(classname = "microtable",
 		#' m1$cal_betadiv(unifrac = FALSE)
 		#' class(m1$beta_diversity)
 		#' }
-		cal_betadiv = function(method = NULL, unifrac = FALSE, binary = FALSE, ...){
+		cal_betadiv = function(method = NULL, unifrac = FALSE, binary = FALSE, force_jaccard_binary = TRUE, ...){
 			res <- list()
 			eco_table <- t(self$otu_table)
 			sample_table <- self$sample_table
@@ -784,7 +786,11 @@ microtable <- R6Class(classname = "microtable",
 			for(i in method){
 				i <- match.arg(i, vegdist_methods)
 				if(i == "jaccard"){
-					binary_use <- TRUE
+					if(force_jaccard_binary){
+						binary_use <- TRUE
+					}else{
+						binary_use <- binary
+					}
 				}else{
 					binary_use <- binary
 				}

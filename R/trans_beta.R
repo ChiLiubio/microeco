@@ -90,7 +90,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
 		#' 	  <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).
 		#' @param ncomp default 3; dimensions shown in the results (except method "NMDS").
-		#' @param trans default FALSE; whether species abundance will be square transformed; only available when \code{method} is "PCA" or "DCA".
+		#' @param trans default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".
 		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
 		#' @param scale_species_ratio default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 		#' 	  Only available when \code{scale_species = TURE}.
