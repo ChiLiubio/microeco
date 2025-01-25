@@ -315,12 +315,12 @@ Plot the heatmap.
   min_abundance = 0.01,
   max_abundance = NULL,
   strip_text = 11,
+  xtext_keep = TRUE,
+  xtext_angle = 0,
   xtext_size = 10,
   ytext_size = 11,
-  xtext_keep = TRUE,
   xtitle_keep = TRUE,
   grid_clean = TRUE,
-  xtext_angle = 0,
   legend_title = "\% Relative\\nAbundance",
   pheatmap = FALSE,
   ...
@@ -368,17 +368,17 @@ This parameter will be passed to the \code{switch} parameter in \code{ggplot2::f
 
 \item{\code{strip_text}}{default 11; facet text size.}
 
+\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+
+\item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
+
 \item{\code{xtext_size}}{default 10; x axis text size.}
 
 \item{\code{ytext_size}}{default 11; y axis text size.}
 
-\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
-
 \item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
 
 \item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
-
-\item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
 
 \item{\code{legend_title}}{default "\% Relative\\nAbundance"; legend title text.}
 
