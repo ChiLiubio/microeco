@@ -137,55 +137,6 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			invisible(self)
 		},
 		#' @description
-		#' Perform feature selection.
-		#' 	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
-		#' 
-		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the \code{maxRuns} parameter in \code{Boruta} function of Boruta package.
-		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in \code{Boruta} function of Boruta package.
-		#' @param boruta.repetitions default 4; repetition runs for the feature selection.
-		#' @param ... parameters pass to \code{Boruta} function of Boruta package.
-		#' @return optimized \code{data_feature} in the object.
-		#' @examples
-		#' \dontrun{
-		#' t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
-		#' }
-		cal_feature_sel = function(
-			boruta.maxRuns = 300,
-			boruta.pValue = 0.01,
-			boruta.repetitions = 4,
-			...
-			){
-			# ClassNames
-			data_response <- self$data_response
-			if(self$type == "Classification"){
-				data_response <- factor(data_response)
-			}
-			DataX <- self$data_feature
-			
-			###################### ----------------
-			######################    BORUTA
-			boruta.list <- list()
-			boura.fs <- function(i){
-				boruta.res <- Boruta::Boruta(x = DataX, y = data_response, 
-					maxRuns = boruta.maxRuns, pValue = boruta.pValue, ...)
-				boruta.stats <- data.frame(Boruta::attStats(boruta.res))
-				boruta.list[[i]] <- rownames(boruta.stats[boruta.stats$decision =='Confirmed', ])
-			}
-			message("Running Feature Selection (Boruta) ...")
-			boruta.list <- parallel::mclapply(1:boruta.repetitions, boura.fs)
-
-			boruta.final <- as.data.frame(table(unlist(boruta.list)))
-			#boruta.store.top <- as.character(boruta.store[which(boruta.store$Freq>10),1])
-			boruta.list.top <- as.character(boruta.final[which(boruta.final$Freq >= 2), 1])
-			boruta.n.features <- length(unique(boruta.list.top))
-			message("End of Feature Selection - Total of selected features = ", boruta.n.features)
-			######################    BORUTA end
-			###################### ----------------
-			self$data_feature <- DataX[, boruta.list.top]
-			message("The selected features is reassigned to object$data_feature ...")
-			invisible(self)
-		},
-		#' @description
 		#' Split data for training and testing.
 		#' 
 		#' @param prop.train default 3/4; the ratio of the data used for the training.
@@ -213,6 +164,62 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			self$data_train <- train_data
 			self$data_test <- test_data
 			message("Training and testing data are stored in object$data_train and object$data_test respectively ...")
+			invisible(self)
+		},
+		#' @description
+		#' Perform feature selection.
+		#' 	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
+		#' 
+		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the \code{maxRuns} parameter in \code{Boruta} function of Boruta package.
+		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in \code{Boruta} function of Boruta package.
+		#' @param boruta.repetitions default 4; repetition runs for the feature selection.
+		#' @param ... parameters pass to \code{Boruta} function of Boruta package.
+		#' @return optimized \code{data_feature} in the object.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
+		#' }
+		cal_feature_sel = function(
+			boruta.maxRuns = 300,
+			boruta.pValue = 0.01,
+			boruta.repetitions = 4,
+			...
+			){
+			data_input <- self$data_train
+			data_x <- data_input[, -1]
+			data_y <- data_input[, 1]
+
+			if(self$type == "Classification"){
+				data_y %<>% factor
+			}
+			
+			###################### ----------------
+			######################    BORUTA
+			boruta.list <- list()
+			boura.fs <- function(i){
+				boruta.res <- Boruta::Boruta(x = data_x, y = data_y, 
+					maxRuns = boruta.maxRuns, pValue = boruta.pValue, ...)
+				boruta.stats <- data.frame(Boruta::attStats(boruta.res))
+				boruta.list[[i]] <- rownames(boruta.stats[boruta.stats$decision =='Confirmed', ])
+			}
+			message("Running Feature Selection (Boruta) based on the training data ...")
+			boruta.list <- parallel::mclapply(1:boruta.repetitions, boura.fs)
+
+			boruta.final <- as.data.frame(table(unlist(boruta.list)))
+			#boruta.store.top <- as.character(boruta.store[which(boruta.store$Freq>10),1])
+			boruta.list.top <- as.character(boruta.final[which(boruta.final$Freq >= 2), 1])
+			boruta.n.features <- length(unique(boruta.list.top))
+			message("End of Feature Selection - Total of selected features = ", boruta.n.features)
+			######################    BORUTA end
+			###################### ----------------
+			data_output <- data_input[, c(colnames(data_input)[1], boruta.list.top)]
+			self$data_train <- data_output
+			
+			data_input <- self$data_test
+			data_output <- data_input[, c(colnames(data_input)[1], boruta.list.top)]
+			self$data_test <- data_output
+			
+			message("Selected features are reassigned to object$data_train and object$data_test ...")
 			invisible(self)
 		},
 		#' @description

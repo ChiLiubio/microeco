@@ -33,19 +33,19 @@ t1$cal_preProcess(method = c("center", "scale", "nzv"))
 }
 
 ## ------------------------------------------------
-## Method `trans_classifier$cal_feature_sel`
-## ------------------------------------------------
-
-\dontrun{
-t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
-}
-
-## ------------------------------------------------
 ## Method `trans_classifier$cal_split`
 ## ------------------------------------------------
 
 \dontrun{
 t1$cal_split(prop.train = 3/4)
+}
+
+## ------------------------------------------------
+## Method `trans_classifier$cal_feature_sel`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
 }
 
 ## ------------------------------------------------
@@ -144,8 +144,8 @@ t1$plot_caretList_resamples()
 \itemize{
 \item \href{#method-trans_classifier-new}{\code{trans_classifier$new()}}
 \item \href{#method-trans_classifier-cal_preProcess}{\code{trans_classifier$cal_preProcess()}}
-\item \href{#method-trans_classifier-cal_feature_sel}{\code{trans_classifier$cal_feature_sel()}}
 \item \href{#method-trans_classifier-cal_split}{\code{trans_classifier$cal_split()}}
+\item \href{#method-trans_classifier-cal_feature_sel}{\code{trans_classifier$cal_feature_sel()}}
 \item \href{#method-trans_classifier-set_trainControl}{\code{trans_classifier$set_trainControl()}}
 \item \href{#method-trans_classifier-cal_train}{\code{trans_classifier$cal_train()}}
 \item \href{#method-trans_classifier-cal_feature_imp}{\code{trans_classifier$cal_feature_imp()}}
@@ -246,6 +246,36 @@ t1$cal_preProcess(method = c("center", "scale", "nzv"))
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_classifier-cal_split"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_classifier-cal_split}{}}}
+\subsection{Method \code{cal_split()}}{
+Split data for training and testing.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_split(prop.train = 3/4)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prop.train}}{default 3/4; the ratio of the data used for the training.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{data_train} and \code{data_test} in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_split(prop.train = 3/4)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_classifier-cal_feature_sel"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_classifier-cal_feature_sel}{}}}
 \subsection{Method \code{cal_feature_sel()}}{
@@ -280,36 +310,6 @@ optimized \code{data_feature} in the object.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$cal_feature_sel(boruta.maxRuns = 300, boruta.pValue = 0.01)
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_classifier-cal_split"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_classifier-cal_split}{}}}
-\subsection{Method \code{cal_split()}}{
-Split data for training and testing.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_classifier$cal_split(prop.train = 3/4)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{prop.train}}{default 3/4; the ratio of the data used for the training.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-\code{data_train} and \code{data_test} in the object.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-t1$cal_split(prop.train = 3/4)
 }
 }
 \if{html}{\out{</div>}}
