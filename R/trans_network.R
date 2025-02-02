@@ -558,6 +558,8 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			private$check_igraph()
 			private$check_network()
+			private$check_node_name()
+			
 			network <- self$res_network
 			
 			nodes <- data.frame(cbind(V(network), V(network)$name))
@@ -641,6 +643,8 @@ trans_network <- R6Class(classname = "trans_network",
 		get_node_table = function(node_roles = TRUE){
 			private$check_igraph()
 			private$check_network()
+			private$check_node_name()
+
 			network <- self$res_network
 			# Add abundance info
 			sum_abund <- self$data_relabund
@@ -839,6 +843,8 @@ trans_network <- R6Class(classname = "trans_network",
 		cal_eigen = function(){
 			private$check_igraph()
 			private$check_network()
+			private$check_node_name()
+
 			use_abund <- self$data_abund
 			
 			private$check_nodetable()
@@ -993,6 +999,7 @@ trans_network <- R6Class(classname = "trans_network",
 				node <- NULL
 			}
 			if(!is.null(node)){
+				private$check_node_name()
 				nodes_raw <- V(network)$name
 				delete_nodes <- nodes_raw %>% .[! . %in% node]
 				sub_network <- delete_vertices(network, delete_nodes)
@@ -1083,6 +1090,7 @@ trans_network <- R6Class(classname = "trans_network",
 			network <- self$res_network
 			
 			if(self$taxa_level != "OTU"){
+				private$check_node_name()
 				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[, 2])
 				taxa_table %<>% .[rownames(.) %in% replace_table[, 2], ]
 				rownames(taxa_table) <- replace_table[rownames(taxa_table), 1]
@@ -1267,6 +1275,7 @@ trans_network <- R6Class(classname = "trans_network",
 			
 			if(self$taxa_level != "OTU"){
 				network <- self$res_network
+				private$check_node_name()
 				replace_table <- data.frame(V(network)$name, V(network)$taxa, stringsAsFactors = FALSE) %>% `row.names<-`(.[,1])
 				res_node_table$name <- replace_table[res_node_table$name, 2]
 				rownames(res_node_table) <- res_node_table$name
@@ -1322,6 +1331,15 @@ trans_network <- R6Class(classname = "trans_network",
 		check_network = function(){
 			if(is.null(self$res_network)){
 				stop("No network found! Please first run cal_network function!")
+			}
+		},
+		check_node_name = function(){
+			network <- self$res_network
+			if(is.null(V(network)$name)){
+				stop("There is no name attribute in the node of the network! ", 
+					"The most likely reason is that the network is a custom input, ",
+					"and it is missing this attribute. Please use the code like this to assign a value to the attribute name: \n",
+					"V(network)$name <- V(network)$label")
 			}
 		},
 		check_nodetable = function(...){
