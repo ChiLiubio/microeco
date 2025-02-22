@@ -837,7 +837,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					group %<>% gsub("^~", "", .)
 					# different cases
 					output <- data.frame()
-					if(grepl("+", group, fixed = TRUE)){
+					if(grepl("+", group, fixed = TRUE) | grepl("*", group, fixed = TRUE)){
 						# multi-factor
 						for(i in names(res$output)){
 							tmp <- res$output[[i]]
