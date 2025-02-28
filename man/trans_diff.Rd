@@ -396,7 +396,8 @@ Bar plot for indicator index, such as LDA score and P value.
   add_sig_text_size = 5,
   xtext_angle = 45,
   xtext_size = 10,
-  axis_text_y = 12,
+  ytext_size = NULL,
+  axis_text_y = deprecated(),
   heatmap_cell = "P.unadj",
   heatmap_sig = "Significance",
   heatmap_x = "Factors",
@@ -445,9 +446,11 @@ only available when \code{add_sig = TRUE}.}
 \item{\code{xtext_angle}}{default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 only available when coord_flip = FALSE.}
 
-\item{\code{xtext_size}}{default 10; the text size of x axis.}
+\item{\code{xtext_size}}{default 10; text size of x axis.}
 
-\item{\code{axis_text_y}}{default 12; the size for the y axis text.}
+\item{\code{ytext_size}}{default NULL; text size of y axis. NULL means default ggplot2 value.}
+
+\item{\code{axis_text_y}}{deprecated. Please use \code{ytext_size} argument instead.}
 
 \item{\code{heatmap_cell}}{default "P.unadj"; the column of data for the cell of heatmap when formula with multiple factors is found in the method.}
 

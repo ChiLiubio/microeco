@@ -1148,8 +1148,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param add_sig_text_size default 5; the size of added significance label; only available when \code{add_sig = TRUE}.
 		#' @param xtext_angle default 45; number ranging from 0 to 90; used to make x axis text generate angle to reduce text overlap; 
 		#' 	  only available when coord_flip = FALSE.
-		#' @param xtext_size default 10; the text size of x axis.
-		#' @param axis_text_y default 12; the size for the y axis text.
+		#' @param xtext_size default 10; text size of x axis.
+		#' @param ytext_size default NULL; text size of y axis. NULL means default ggplot2 value.
+		#' @param axis_text_y deprecated. Please use \code{ytext_size} argument instead.
 		#' @param heatmap_cell default "P.unadj"; the column of data for the cell of heatmap when formula with multiple factors is found in the method.
 		#' @param heatmap_sig default "Significance"; the column of data for the significance label of heatmap.
 		#' @param heatmap_x default "Factors"; the column of data for the x axis of heatmap.
@@ -1179,7 +1180,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 			add_sig_text_size = 5,
 			xtext_angle = 45,
 			xtext_size = 10,
-			axis_text_y = 12,
+			ytext_size = NULL,
+			axis_text_y = deprecated(),
 			heatmap_cell = "P.unadj",
 			heatmap_sig = "Significance",
 			heatmap_x = "Factors",
@@ -1187,6 +1189,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 			heatmap_lab_fill = "P value",
 			...
 			){
+			
+			if(lifecycle::is_present(axis_text_y)) {
+				lifecycle::deprecate_warn("1.13.1", "plot_diff_bar(axis_text_y)", "plot_diff_bar(ytext_size)")
+				ytext_size <- axis_text_y
+			}
+			
 			use_data <- self$res_diff
 			method <- self$method
 			if(is.null(method)){
@@ -1341,7 +1349,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					theme_bw() +
 					ylab(ylab_title) +
 					xlab("") +
-					theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = axis_text_y, color = "black")) +
+					theme(axis.title = element_text(size = 17), axis.text.y = element_text(size = ytext_size, color = "black")) +
 					theme(panel.grid.minor.y = element_blank(), panel.grid.major.y = element_blank(), panel.grid.minor.x = element_blank()) +
 					theme(panel.border = element_blank()) +
 					theme(axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"))
@@ -1361,7 +1369,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				message("Perform heatmap instead of bar plot as formula is found ...")
 				tmp <- use_data
 				tmp_trans_env <- convert_diff2transenv(tmp, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill)
-				tmp_trans_env$plot_cor(keep_full_name = keep_full_name, keep_prefix = keep_prefix, ...)
+				tmp_trans_env$plot_cor(keep_full_name = keep_full_name, keep_prefix = keep_prefix, 
+					xtext_angle = xtext_angle, xtext_size = xtext_size, ytext_size = ytext_size, ...)
 			}
 		},
 		#' @description
