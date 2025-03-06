@@ -279,7 +279,7 @@ This operation will remove any line of the \code{microtable$tax_table} containin
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-None
+updated microtable object
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -294,9 +294,14 @@ None
 \if{html}{\out{<a id="method-microtable-filter_taxa"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-filter_taxa}{}}}
 \subsection{Method \code{filter_taxa()}}{
-Filter the feature with low abundance and/or low occurrence frequency.
+Filter the features with low abundance and/or low occurrence frequency for \code{otu_table} or \code{taxa_abund} list.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$filter_taxa(rel_abund = 0, freq = 1, include_lowest = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$filter_taxa(
+  rel_abund = 0,
+  freq = 1,
+  include_lowest = TRUE,
+  for_taxa_abund = FALSE
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -310,11 +315,13 @@ A number smaller than 1 is also allowable.
 For instance, the number 0.1 represents filtering the feature that occurs in less than 10\% samples.}
 
 \item{\code{include_lowest}}{default TRUE; whether include the feature with the threshold.}
+
+\item{\code{for_taxa_abund}}{default FALSE; whether apply this function to \code{taxa_abund} list. FALSE means using this function for \code{otu_table}}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-None
+updated microtable object
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -355,7 +362,7 @@ For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-None; rarefied dataset.
+rarefied microtable object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -417,7 +424,7 @@ This is especially useful when the rownames of \code{microtable$tax_table} are r
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-NULL, a new tax_table stored in the object.
+new tax_table stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -539,7 +546,7 @@ Rename the features, including the rownames of \code{otu_table}, rownames of \co
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-None; renamed dataset.
+renamed microtable object
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -599,7 +606,7 @@ Merge taxa according to specific taxonomic rank to generate a new \code{microtab
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a new merged \code{microtable} object.
+merged \code{microtable} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
