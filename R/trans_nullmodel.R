@@ -442,9 +442,9 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			invisible(self)
 		},
 		#' @description
-		#' Infer the ecological processes according to ses.betaMNTD/ses.betaMPD and rcbray.
+		#' Infer the ecological processes according to ses.betaMNTD (betaNTI)/ses.betaMPD (betaNRI) and rcbray.
 		#'
-		#' @param use_betamntd default TRUE; whether use ses.betaMNTD; if false, use ses.betaMPD.
+		#' @param use_betamntd default TRUE; whether use ses.betaMNTD (betaNTI); if False, use ses.betaMPD (betaNRI).
 		#' @param group default NULL; a column name in sample_table of microtable object. 
 		#' 	   If provided, the analysis will be performed for each group instead of the whole.
 		#' @return res_process in object.
