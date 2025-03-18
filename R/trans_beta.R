@@ -230,6 +230,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
 		#' @param add_sample_label default NULL; a column name in \code{sample_table}; If provided, show the point name in plot.
 		#' @param point_size default 3; point size when "point" is in \code{plot_type} parameter.
+		#'   \code{point_size} can also be a variable name in \code{sample_table}, such as "pH".
 		#' @param point_alpha default .8; point transparency in plot when "point" is in \code{plot_type} parameter.
 		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in \code{plot_type} parameter.
 		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in \code{plot_type} parameter.
@@ -308,9 +309,17 @@ trans_beta <- R6Class(classname = "trans_beta",
 				color_values <- expand_colors(color_values, length(unique(combined[, plot_color])))
 			}			
 			
-			p <- ggplot(combined, aes_meco(x = plot_x, y = plot_y, colour = plot_color, shape = plot_shape))
-			if("point" %in% plot_type){
-				p <- p + geom_point(alpha = point_alpha, size = point_size)
+			if(is.numeric(point_size)){
+				p <- ggplot(combined, aes_meco(x = plot_x, y = plot_y, colour = plot_color, shape = plot_shape))
+				if("point" %in% plot_type){
+					p <- p + geom_point(alpha = point_alpha, size = point_size)
+				}
+			}else{
+				check_table_variable(combined, point_size, "point_size", "sample_table")
+				p <- ggplot(combined, aes_meco(x = plot_x, y = plot_y, colour = plot_color, shape = plot_shape, size = point_size))
+				if("point" %in% plot_type){
+					p <- p + geom_point(alpha = point_alpha)
+				}
 			}
 			if(ordination_method %in% c("PCA", "PCoA", "DCA", "PLS-DA", "OPLS-DA")){
 				p <- p + xlab(paste(plot_x, " [", eig[plot_x],"%]", sep = "")) + 

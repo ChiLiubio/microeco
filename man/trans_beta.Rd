@@ -250,7 +250,8 @@ Plot the ordination result.
 
 \item{\code{add_sample_label}}{default NULL; a column name in \code{sample_table}; If provided, show the point name in plot.}
 
-\item{\code{point_size}}{default 3; point size when "point" is in \code{plot_type} parameter.}
+\item{\code{point_size}}{default 3; point size when "point" is in \code{plot_type} parameter.
+\code{point_size} can also be a variable name in \code{sample_table}, such as "pH".}
 
 \item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in \code{plot_type} parameter.}
 
