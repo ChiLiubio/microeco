@@ -315,7 +315,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					p <- p + geom_point(alpha = point_alpha, size = point_size)
 				}
 			}else{
-				check_table_variable(combined, point_size, "point_size", "sample_table")
+				check_table_variable(combined, point_size, "point_size", "res_ordination$scores")
 				p <- ggplot(combined, aes_meco(x = plot_x, y = plot_y, colour = plot_color, shape = plot_shape, size = point_size))
 				if("point" %in% plot_type){
 					p <- p + geom_point(alpha = point_alpha)

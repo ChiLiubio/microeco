@@ -497,6 +497,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#'     \item{\strong{'centroid'}}{add centroid line of each group}
 		#'   }
 		#' @param point_size default 3; point size in plot when "point" is in \code{plot_type}.
+		#'   \code{point_size} can also be a variable name in \code{sample_table}, such as "pH".
 		#' @param point_alpha default .8; point transparency in plot when "point" is in \code{plot_type}.
 		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in \code{plot_type}.
 		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in \code{plot_type}.
@@ -579,14 +580,27 @@ trans_env <- R6Class(classname = "trans_env",
 			p <- p + theme(panel.grid=element_blank())
 			p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "grey80")
 			p <- p + geom_hline(yintercept = 0, linetype = "dashed", color = "grey80")
-			if("point" %in% plot_type){
-				p <- p + geom_point(
-					data = df_sites, 
-					aes_meco("x", "y", colour = plot_color, shape = plot_shape), 
-					size = point_size,
-					alpha = point_alpha,
-					...
+			
+			if(is.numeric(point_size)){
+				if("point" %in% plot_type){
+					p <- p + geom_point(
+						data = df_sites, 
+						aes_meco("x", "y", colour = plot_color, shape = plot_shape), 
+						size = point_size,
+						alpha = point_alpha,
+						...
 					)
+				}
+			}else{
+				check_table_variable(df_sites, point_size, "point_size", "res_ordination_trans$df_sites")
+				if("point" %in% plot_type){
+					p <- p + geom_point(
+						data = df_sites, 
+						aes_meco("x", "y", colour = plot_color, shape = plot_shape, size = point_size), 
+						alpha = point_alpha,
+						...
+					)
+				}
 			}
 			
 			env_text_data <- self$res_ordination_trans$df_arrows %>% dplyr::mutate(label = gsub("`", "", rownames(.)))

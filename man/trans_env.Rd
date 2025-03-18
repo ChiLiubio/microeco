@@ -558,7 +558,8 @@ one or more elements of "point", "ellipse", "chull", "centroid" and "none"; "non
     \item{\strong{'centroid'}}{add centroid line of each group}
   }}
 
-\item{\code{point_size}}{default 3; point size in plot when "point" is in \code{plot_type}.}
+\item{\code{point_size}}{default 3; point size in plot when "point" is in \code{plot_type}.
+\code{point_size} can also be a variable name in \code{sample_table}, such as "pH".}
 
 \item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in \code{plot_type}.}
 
