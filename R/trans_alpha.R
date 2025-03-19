@@ -724,10 +724,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						}
 					}else{
 						if(plot_type == "barerrorbar"){
-							p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], fill = .data[[group]], group = .data[[group]]))
+							p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], fill = .data[[group]]))
 							p <- p + geom_bar(stat = "identity", position = position_dodge(width = dodge_width), width = bar_width, alpha = bar_alpha)
 						}else{
-							p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]], group = .data[[group]]))
+							p <- ggplot(use_data_plot, aes(x = .data[[by_group]], y = .data[["Value"]], color = .data[[group]]))
 						}
 						if(errorbar_color_black){
 							p <- p + geom_errorbar(aes(ymin = Value - errvalue, ymax = Value + errvalue), position = position_dodge(width = dodge_width), 
@@ -742,10 +742,10 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					}
 					if(add_line){
 						if(is.null(by_group)){
-							p <- p + geom_line(colour = line_color, linewidth = line_size, alpha = line_alpha, 
+							p <- p + geom_line(aes_meco(group = group), colour = line_color, linewidth = line_size, alpha = line_alpha, 
 								linetype = line_type)
 						}else{
-							p <- p + geom_line(linewidth = line_size, alpha = line_alpha, 
+							p <- p + geom_line(aes_meco(group = group), linewidth = line_size, alpha = line_alpha, 
 								linetype = line_type, position = position_dodge(width = dodge_width))
 						}
 					}
