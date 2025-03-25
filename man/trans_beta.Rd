@@ -141,6 +141,7 @@ Unconstrained ordination.
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
   method = "PCoA",
   ncomp = 2,
+  NMDS_matrix = TRUE,
   trans = FALSE,
   scale_species = FALSE,
   scale_species_ratio = 0.8,
@@ -162,9 +163,12 @@ For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.200
 \item{\code{ncomp}}{default 2; dimensions in the result. 
 For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.}
 
-\item{\code{trans}}{default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".}
+\item{\code{NMDS_matrix}}{default TRUE; For the NMDS method, whether use a distance matrix as input like PCoA. If it is FALSE, the input will be the abundance table like PCA.}
 
-\item{\code{scale_species}}{default FALSE; whether species loading in PCA or DCA is scaled.}
+\item{\code{trans}}{default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".
+For method "NMDS" and \code{NMDS_matrix = FALSE}, please set the \code{autotransform} parameter, which will be passed to \code{vegan::metaMDS} function directly.}
+
+\item{\code{scale_species}}{default FALSE; whether species loading in PCA, DCA or NMDS (\code{NMDS_matrix = FALSE}) is scaled.}
 
 \item{\code{scale_species_ratio}}{default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 Only available when \code{scale_species = TURE}.}
@@ -183,7 +187,8 @@ or \code{ropls::opls} function when \code{method = "PLS-DA"} or \code{method = "
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_ordination} stored in the object.
+\code{res_ordination} list stored in the object.
+	  In the list, \code{model} is the original analysis results; \code{scores} is the sample scores table; \code{loading} is the feature loading table.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

@@ -91,8 +91,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).
 		#' @param ncomp default 2; dimensions in the result. 
 		#' 	  For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.
+		#' @param NMDS_matrix default TRUE; For the NMDS method, whether use a distance matrix as input like PCoA. If it is FALSE, the input will be the abundance table like PCA.
 		#' @param trans default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".
-		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
+		#' 	  For method "NMDS" and \code{NMDS_matrix = FALSE}, please set the \code{autotransform} parameter, which will be passed to \code{vegan::metaMDS} function directly.
+		#' @param scale_species default FALSE; whether species loading in PCA, DCA or NMDS (\code{NMDS_matrix = FALSE}) is scaled.
 		#' @param scale_species_ratio default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
 		#' 	  Only available when \code{scale_species = TURE}.
 		#' @param orthoI default NA; number of orthogonal components (for OPLS-DA only). Default NA means the number of orthogonal components is automatically computed.
@@ -103,12 +105,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  or \code{ape::pcoa} function when \code{method = "PCoA"}, 
 		#' 	  or \code{vegan::metaMDS} function when \code{method = "NMDS"},
 		#' 	  or \code{ropls::opls} function when \code{method = "PLS-DA"} or \code{method = "OPLS-DA"} .
-		#' @return \code{res_ordination} stored in the object.
+		#' @return \code{res_ordination} list stored in the object.
+		#' 	  In the list, \code{model} is the original analysis results; \code{scores} is the sample scores table; \code{loading} is the feature loading table.
 		#' @examples
 		#' t1$cal_ordination(method = "PCoA")
 		cal_ordination = function(
 			method = "PCoA",
 			ncomp = 2,
+			NMDS_matrix = TRUE,
 			trans = FALSE, 
 			scale_species = FALSE,
 			scale_species_ratio = 0.8,
@@ -182,21 +186,19 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 				loading %<>% as.data.frame
 				if(scale_species){
-					maxx <- max(abs(scores_sites[, plot.x]))/max(abs(loading[, plot.x]))
-					loading[, plot.x] %<>% {. * maxx * scale_species_ratio}
-					maxy <- max(abs(scores_sites[, plot.y]))/max(abs(loading[, plot.y]))
-					loading[, plot.y] %<>% {. * maxy * scale_species_ratio}
+					for(i in 1:ncomp){
+						maxratio <- max(abs(scores_sites[, i]))/max(abs(loading[, i]))
+						loading[, i] %<>% {. * maxratio * scale_species_ratio}
+					}
 				}
-				loading[, "dist"] <- loading[, plot.x]^2 + loading[, plot.y]^2
+				loading[, "dist"] <- apply(loading, 1, function(x){sum(x^2)})
 				loading <- loading[order(loading[, "dist"], decreasing = TRUE), ]
 				outlist <- list(model = model, scores = combined, loading = loading, eig = expla)
 			}
-			if(method %in% c("PCoA", "NMDS")){
+			if(method == "PCoA"){
 				if(is.null(self$use_matrix)){
 					stop("Please recreate the object and set the parameter measure !")
 				}
-			}
-			if(method == "PCoA"){
 				model <- ape::pcoa(as.dist(self$use_matrix), ...)
 				combined <- cbind.data.frame(model$vectors[,1:ncomp], use_data$sample_table)
 				colnames(combined)[1:ncomp] <- paste0("PCo", 1:ncomp)
@@ -205,9 +207,29 @@ trans_beta <- R6Class(classname = "trans_beta",
 				outlist <- list(model = model, scores = combined, eig = expla)
 			}
 			if(method == "NMDS"){
-				model <- vegan::metaMDS(as.dist(self$use_matrix), k = ncomp, ...)
+				if(NMDS_matrix){
+					if(is.null(self$use_matrix)){
+						stop("Please recreate the object and set the parameter measure !")
+					}
+					model <- vegan::metaMDS(as.dist(self$use_matrix), k = ncomp, ...)
+				}else{
+					abund <- use_data$otu_table %>% t
+					model <- vegan::metaMDS(abund, k = ncomp, ...)
+				}
 				combined <- cbind.data.frame(model$points, use_data$sample_table)
 				outlist <- list(model = model, scores = combined)
+				if(! NMDS_matrix){
+					loading <- scores(model, choices = 1:ncomp, display = "species") %>% as.data.frame
+					if(scale_species){
+						for(i in 1:ncomp){
+							maxratio <- max(abs(combined[, i]))/max(abs(loading[, i]))
+							loading[, i] %<>% {. * maxratio * scale_species_ratio}
+						}
+					}
+					loading[, "dist"] <- apply(loading, 1, function(x){sum(x^2)})
+					loading <- loading[order(loading[, "dist"], decreasing = TRUE), ]
+					outlist$loading <- loading
+				}
 			}
 			outlist$ncomp <- ncomp
 			self$res_ordination <- outlist
@@ -395,33 +417,35 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(!is.null(plot_shape)){
 				p <- p + scale_shape_manual(values = shape_values)
 			}
-			if(loading_arrow & ordination_method %in% c("PCA", "DCA", "PLS-DA", "OPLS-DA")){
-				df_arrows <- self$res_ordination$loading[1:loading_taxa_num, ]
-				colnames(df_arrows)[1:2] <- c("x", "y")
-				p <- p + geom_segment(
-					data = df_arrows, 
-					aes(x = 0, y = 0, xend = x, yend = y), 
-					arrow = arrow(length = unit(0.2, "cm")), 
-					color = loading_arrow_color, 
-					alpha = .6,
-					inherit.aes = FALSE
+			if(loading_arrow){
+				if(! is.null(self$res_ordination$loading)){
+					df_arrows <- self$res_ordination$loading[1:loading_taxa_num, ]
+					colnames(df_arrows)[choices] <- c("x", "y")
+					p <- p + geom_segment(
+						data = df_arrows, 
+						aes(x = 0, y = 0, xend = x, yend = y), 
+						arrow = arrow(length = unit(0.2, "cm")), 
+						color = loading_arrow_color, 
+						alpha = .6,
+						inherit.aes = FALSE
+						)
+					df_arrows$label <- rownames(df_arrows)
+					if(loading_text_italic){
+						df_arrows$label %<>% paste0("italic('", .,"')")
+						loading_text_parse <- TRUE
+					}else{
+						loading_text_parse <- FALSE
+					}
+					p <- p + ggrepel::geom_text_repel(
+						data = df_arrows, 
+						aes_meco("x", "y", label = "label"), 
+						size = loading_text_size, 
+						color = loading_text_color, 
+						segment.alpha = .01, 
+						parse = loading_text_parse,
+						inherit.aes = FALSE
 					)
-				df_arrows$label <- rownames(df_arrows)
-				if(loading_text_italic){
-					df_arrows$label %<>% paste0("italic('", .,"')")
-					loading_text_parse <- TRUE
-				}else{
-					loading_text_parse <- FALSE
 				}
-				p <- p + ggrepel::geom_text_repel(
-					data = df_arrows, 
-					aes_meco("x", "y", label = "label"), 
-					size = loading_text_size, 
-					color = loading_text_color, 
-					segment.alpha = .01, 
-					parse = loading_text_parse,
-					inherit.aes = FALSE
-				)
 			}
 			p
 		},
