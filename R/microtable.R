@@ -890,15 +890,17 @@ microtable <- R6Class(classname = "microtable",
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric class! Please check the input data!")
 			}
-			if(any(apply(otu_table, 1, sum) == 0)){
-				remove_num <- sum(apply(otu_table, 1, sum) == 0)
-				message(remove_num, " taxa with 0 abundance are removed from the otu_table ...")
-				otu_table %<>% .[apply(., 1, sum) > 0, , drop = FALSE]
-			}
-			if(any(apply(otu_table, 2, sum) == 0)){
-				remove_num <- sum(apply(otu_table, 2, sum) == 0)
-				message(remove_num, " samples with 0 abundance are removed from the otu_table ...")
-				otu_table %<>% .[, apply(., 2, sum) > 0, drop = FALSE]
+			if(all(otu_table >= 0)){
+				if(any(apply(otu_table, 1, sum) == 0)){
+					remove_num <- sum(apply(otu_table, 1, sum) == 0)
+					message(remove_num, " taxa with 0 abundance are removed from the otu_table ...")
+					otu_table %<>% .[apply(., 1, sum) > 0, , drop = FALSE]
+				}
+				if(any(apply(otu_table, 2, sum) == 0)){
+					remove_num <- sum(apply(otu_table, 2, sum) == 0)
+					message(remove_num, " samples with 0 abundance are removed from the otu_table ...")
+					otu_table %<>% .[, apply(., 2, sum) > 0, drop = FALSE]
+				}
 			}
 			if(ncol(otu_table) == 0){
 				stop("No available sample! Please check the data!")
