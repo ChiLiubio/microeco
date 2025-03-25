@@ -89,7 +89,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  PLS-DA: partial least squares discriminant analysis; OPLS-DA: orthogonal partial least squares discriminant analysis.
 		#' 	  For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
 		#' 	  <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).
-		#' @param ncomp default 3; dimensions shown in the results (except method "NMDS").
+		#' @param ncomp default 2; dimensions in the result. 
+		#' 	  For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.
 		#' @param trans default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".
 		#' @param scale_species default FALSE; whether species loading in PCA or DCA is scaled.
 		#' @param scale_species_ratio default 0.8; the ratio to scale up the loading; multiply by the maximum distance between samples and origin. 
@@ -107,7 +108,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$cal_ordination(method = "PCoA")
 		cal_ordination = function(
 			method = "PCoA",
-			ncomp = 3,
+			ncomp = 2,
 			trans = FALSE, 
 			scale_species = FALSE,
 			scale_species_ratio = 0.8,
@@ -166,7 +167,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					}else{
 						model_score <- cbind.data.frame(model@scoreMN, model@orthoScoreMN)
 					}
-					scores_sites <- model_score[, 1:2, drop = FALSE]
+					scores_sites <- model_score[, 1:ncomp, drop = FALSE]
 				}
 				combined <- cbind.data.frame(scores_sites, use_data$sample_table[rownames(scores_sites), , drop = FALSE])
 				if(method %in% c("PCA", "DCA")){
@@ -177,7 +178,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					}else{
 						model_loading <- cbind.data.frame(model@loadingMN, model@orthoLoadingMN)
 					}
-					loading <- model_loading[, 1:2, drop = FALSE]
+					loading <- model_loading[, 1:ncomp, drop = FALSE]
 				}
 				loading %<>% as.data.frame
 				if(scale_species){
@@ -204,10 +205,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 				outlist <- list(model = model, scores = combined, eig = expla)
 			}
 			if(method == "NMDS"){
-				model <- vegan::metaMDS(as.dist(self$use_matrix), ...)
+				model <- vegan::metaMDS(as.dist(self$use_matrix), k = ncomp, ...)
 				combined <- cbind.data.frame(model$points, use_data$sample_table)
 				outlist <- list(model = model, scores = combined)
 			}
+			outlist$ncomp <- ncomp
 			self$res_ordination <- outlist
 			message('The result is stored in object$res_ordination ...')
 			self$ordination_method <- method
@@ -223,6 +225,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
 		#'     \item{\strong{'centroid'}}{add centroid line of each group}
 		#'   }
+		#' @param choices default c(1, 2); selected axis for the visualization; must be numeric vector.
+		#'   The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_ordination} function.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see \code{ggplot2} tutorial.
 		#' @param plot_color default NULL; a colname of \code{sample_table} to assign colors to different groups in plot.
@@ -260,7 +264,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"), 
 		#' 	  centroid_segment_linetype = 1)
 		plot_ordination = function(
-			plot_type = "point",
+			plot_type = "point", 
+			choices = c(1, 2), 
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
 			shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
 			plot_color = NULL,
@@ -300,8 +305,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 			combined <- self$res_ordination$scores
 			eig <- self$res_ordination$eig
 			model <- self$res_ordination$model
-			plot_x <- colnames(self$res_ordination$scores)[1]
-			plot_y <- colnames(self$res_ordination$scores)[2]
+			if(length(choices) > 2){
+				stop("The maximum input length of choices parameter should be 2!")
+			}
+			if(max(choices) > self$res_ordination$ncomp){
+				stop("Maximum of input choices is larger than the dimension, please try to enlarge the ncomp parameter in the cal_ordination function!")
+			}
+			plot_x <- colnames(self$res_ordination$scores)[choices[1]]
+			plot_y <- colnames(self$res_ordination$scores)[choices[2]]
 			if(!is.null(plot_group_order)){
 				combined[, plot_color] %<>% factor(., levels = plot_group_order)
 			}

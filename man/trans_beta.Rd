@@ -140,7 +140,7 @@ Unconstrained ordination.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
   method = "PCoA",
-  ncomp = 3,
+  ncomp = 2,
   trans = FALSE,
   scale_species = FALSE,
   scale_species_ratio = 0.8,
@@ -159,7 +159,8 @@ PLS-DA: partial least squares discriminant analysis; OPLS-DA: orthogonal partial
 For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
 <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).}
 
-\item{\code{ncomp}}{default 3; dimensions shown in the results (except method "NMDS").}
+\item{\code{ncomp}}{default 2; dimensions in the result. 
+For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.}
 
 \item{\code{trans}}{default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".}
 
@@ -201,6 +202,7 @@ Plot the ordination result.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$plot_ordination(
   plot_type = "point",
+  choices = c(1, 2),
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   shape_values = c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14),
   plot_color = NULL,
@@ -237,6 +239,9 @@ Plot the ordination result.
   \item{\strong{'chull'}}{add convex hull for points of each group}
   \item{\strong{'centroid'}}{add centroid line of each group}
 }}
+
+\item{\code{choices}}{default c(1, 2); selected axis for the visualization; must be numeric vector.
+The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_ordination} function.}
 
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.}
 
