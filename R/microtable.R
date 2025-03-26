@@ -246,7 +246,7 @@ microtable <- R6Class(classname = "microtable",
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
 			self <- private$tidy_samples(self)
-			self$otu_table %<>% {.[apply(., 1, sum) > 0, , drop = FALSE]}
+			self$otu_table <- private$check_abund_table(self$otu_table)
 			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
 				.[!unlist(lapply(., is.null))]
 			taxa_names <- Reduce(intersect, taxa_list)
@@ -890,17 +890,17 @@ microtable <- R6Class(classname = "microtable",
 			if(!all(sapply(otu_table, is.numeric))){
 				stop("Some columns in otu_table are not numeric class! Please check the input data!")
 			}
-			if(all(otu_table >= 0)){
-				if(any(apply(otu_table, 1, sum) == 0)){
-					remove_num <- sum(apply(otu_table, 1, sum) == 0)
-					message(remove_num, " taxa with 0 abundance are removed from the otu_table ...")
-					otu_table %<>% .[apply(., 1, sum) > 0, , drop = FALSE]
-				}
-				if(any(apply(otu_table, 2, sum) == 0)){
-					remove_num <- sum(apply(otu_table, 2, sum) == 0)
-					message(remove_num, " samples with 0 abundance are removed from the otu_table ...")
-					otu_table %<>% .[, apply(., 2, sum) > 0, drop = FALSE]
-				}
+			if(any(apply(otu_table, 1, function(x){all(x == 0)}))){
+				all_zero <- apply(otu_table, 1, function(x){all(x == 0)})
+				remove_num <- sum(all_zero)
+				message(remove_num, " taxa with 0 abundance are removed from the otu_table ...")
+				otu_table %<>% .[! all_zero, , drop = FALSE]
+			}
+			if(any(apply(otu_table, 2, function(x){all(x == 0)}))){
+				all_zero <- apply(otu_table, 2, function(x){all(x == 0)})
+				remove_num <- sum(all_zero)
+				message(remove_num, " samples with 0 abundance are removed from the otu_table ...")
+				otu_table %<>% .[, ! all_zero, drop = FALSE]
 			}
 			if(ncol(otu_table) == 0){
 				stop("No available sample! Please check the data!")
