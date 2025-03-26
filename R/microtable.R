@@ -246,6 +246,7 @@ microtable <- R6Class(classname = "microtable",
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
 			self <- private$tidy_samples(self)
+			# check again the abundance for the case that sample filtering leads to 0 abundance of some features
 			self$otu_table <- private$check_abund_table(self$otu_table)
 			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
 				.[!unlist(lapply(., is.null))]
