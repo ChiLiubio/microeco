@@ -349,8 +349,8 @@ Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{v
 
 \item{\code{feature_sel}}{default FALSE; whether perform the feature selection based on forward selection method.}
 
-\item{\code{taxa_level}}{default NULL; If use RDA or CCA, provide the taxonomic rank, such as "Phylum" or "Genus";
-If use otu_table; please set \code{taxa_level = "OTU"}.}
+\item{\code{taxa_level}}{default NULL; the taxonomic level used in RDA or CCA.
+Default NULL means using the merged data at "Genus" level. "ASV" or "OTU" can also be provided for the use of \code{otu_table} in microtable object.}
 
 \item{\code{taxa_filter_thres}}{default NULL; relative abundance threshold used to filter taxa when method is "RDA" or "CCA".}
 
@@ -504,6 +504,7 @@ plot ordination result.
   taxa_arrow_color = "firebrick1",
   env_text_size = 3.7,
   taxa_text_size = 3,
+  taxa_text_prefix = FALSE,
   taxa_text_italic = TRUE,
   plot_type = "point",
   point_size = 3,
@@ -546,6 +547,8 @@ plot ordination result.
 \item{\code{env_text_size}}{default 3.7; environmental variable text size.}
 
 \item{\code{taxa_text_size}}{default 3; taxa text size.}
+
+\item{\code{taxa_text_prefix}}{default FALSE; whether show the prefix (e.g., g__) of taxonomic information in the text.}
 
 \item{\code{taxa_text_italic}}{default TRUE; "italic"; whether use "italic" style for the taxa text.}
 
