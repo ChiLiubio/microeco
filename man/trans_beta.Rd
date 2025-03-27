@@ -141,6 +141,7 @@ Unconstrained ordination.
 \if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_ordination(
   method = "PCoA",
   ncomp = 2,
+  taxa_level = NULL,
   NMDS_matrix = TRUE,
   trans = FALSE,
   scale_species = FALSE,
@@ -162,6 +163,11 @@ For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.200
 
 \item{\code{ncomp}}{default 2; dimensions in the result. 
 For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.}
+
+\item{\code{taxa_level}}{default NULL; available for PCA, DCA or NMDS (\code{NMDS_matrix = TRUE}).
+Default NULL means using the \code{otu_table} in the microtable object.
+For other options, please    provide the taxonomic rank names in \code{tax_table}, such as "Phylum" or "Genus".
+In such cases, the data will be merged according to the provided taxonomic levels to generated a new abundance table.}
 
 \item{\code{NMDS_matrix}}{default TRUE; For the NMDS method, whether use a distance matrix as input like PCoA. If it is FALSE, the input will be the abundance table like PCA.}
 
@@ -227,9 +233,11 @@ Plot the ordination result.
   NMDS_stress_text_prefix = "",
   loading_arrow = FALSE,
   loading_taxa_num = 10,
+  loading_text_taxlevel = NULL,
   loading_text_color = "black",
   loading_arrow_color = "grey30",
   loading_text_size = 3,
+  loading_text_prefix = FALSE,
   loading_text_italic = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -292,11 +300,16 @@ and the y-axis position is equal to \code{max(points of y axis) * NMDS_stress_po
 
 \item{\code{loading_taxa_num}}{default 10; the number of taxa used for the loading. Only available when \code{loading_arrow = TRUE}.}
 
+\item{\code{loading_text_taxlevel}}{default NULL; which level of taxonomic table will be used.
+Default NULL means using the \code{taxa_level} parameter in the previous \code{cal_ordination} function.}
+
 \item{\code{loading_text_color}}{default "black"; the color of taxa text. Only available when \code{loading_arrow = TRUE}.}
 
 \item{\code{loading_arrow_color}}{default "grey30"; the color of taxa arrow. Only available when \code{loading_arrow = TRUE}.}
 
 \item{\code{loading_text_size}}{default 3; the size of taxa text. Only available when \code{loading_arrow = TRUE}.}
+
+\item{\code{loading_text_prefix}}{default FALSE; whether show the prefix (e.g., g__) in the taxa text. Only available when \code{loading_arrow = TRUE}.}
 
 \item{\code{loading_text_italic}}{default FALSE; whether using italic for the taxa text. Only available when \code{loading_arrow = TRUE}.}
 }

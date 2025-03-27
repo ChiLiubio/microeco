@@ -91,6 +91,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).
 		#' @param ncomp default 2; dimensions in the result. 
 		#' 	  For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.
+		#' @param taxa_level default NULL; available for PCA, DCA or NMDS (\code{NMDS_matrix = TRUE}).
+		#' 	  Default NULL means using the \code{otu_table} in the microtable object.
+		#' 	  For other options, please	provide the taxonomic rank names in \code{tax_table}, such as "Phylum" or "Genus".
+		#' 	  In such cases, the data will be merged according to the provided taxonomic levels to generated a new abundance table.		
 		#' @param NMDS_matrix default TRUE; For the NMDS method, whether use a distance matrix as input like PCoA. If it is FALSE, the input will be the abundance table like PCA.
 		#' @param trans default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".
 		#' 	  For method "NMDS" and \code{NMDS_matrix = FALSE}, please set the \code{autotransform} parameter, which will be passed to \code{vegan::metaMDS} function directly.
@@ -112,6 +116,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		cal_ordination = function(
 			method = "PCoA",
 			ncomp = 2,
+			taxa_level = NULL,
 			NMDS_matrix = TRUE,
 			trans = FALSE, 
 			scale_species = FALSE,
@@ -133,6 +138,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 				stop("Input method should be one of 'PCoA', 'NMDS', 'PCA', 'DCA', 'PLS-DA' and 'OPLS-DA' !")
 			}
 			use_data <- self$dataset
+			if(! is.null(taxa_level)){
+				check_tax_level(taxa_level, use_data)
+				use_data <- use_data$merge_taxa(taxa_level)
+			}
 			if(method %in% c("PCA", "DCA", "PLS-DA", "OPLS-DA")){
 				plot.x <- switch(method, PCA = "PC1", DCA = "DCA1", 'PLS-DA' = "p1", 'OPLS-DA' = "p1")
 				plot.y <- switch(method, PCA = "PC2", DCA = "DCA2", 'PLS-DA' = "p2", 'OPLS-DA' = "o1")
@@ -233,6 +242,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			outlist$ncomp <- ncomp
 			self$res_ordination <- outlist
+			if(! is.null(taxa_level)){
+				self$res_ordination$taxa_level <- taxa_level
+			}
 			message('The result is stored in object$res_ordination ...')
 			self$ordination_method <- method
 			invisible(self)
@@ -274,9 +286,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param NMDS_stress_text_prefix default ""; If NMDS_stress_pos is not NULL, this parameter can be used to add text in front of the stress value.
 		#' @param loading_arrow default FALSE; whether show the loading using arrow.
 		#' @param loading_taxa_num default 10; the number of taxa used for the loading. Only available when \code{loading_arrow = TRUE}.
+		#' @param loading_text_taxlevel default NULL; which level of taxonomic table will be used.
+		#'   Default NULL means using the \code{taxa_level} parameter in the previous \code{cal_ordination} function.
 		#' @param loading_text_color default "black"; the color of taxa text. Only available when \code{loading_arrow = TRUE}.
 		#' @param loading_arrow_color default "grey30"; the color of taxa arrow. Only available when \code{loading_arrow = TRUE}.
 		#' @param loading_text_size default 3; the size of taxa text. Only available when \code{loading_arrow = TRUE}.
+		#' @param loading_text_prefix default FALSE; whether show the prefix (e.g., g__) in the taxa text. Only available when \code{loading_arrow = TRUE}.
 		#' @param loading_text_italic default FALSE; whether using italic for the taxa text. Only available when \code{loading_arrow = TRUE}.
 		#' @return \code{ggplot}.
 		#' @examples
@@ -307,9 +322,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 			NMDS_stress_text_prefix = "",
 			loading_arrow = FALSE,
 			loading_taxa_num = 10, 
+			loading_text_taxlevel = NULL,
 			loading_text_color = "black",
 			loading_arrow_color = "grey30",
 			loading_text_size = 3,
+			loading_text_prefix = FALSE,
 			loading_text_italic = FALSE
 			){
 			ordination_method <- self$ordination_method
@@ -429,7 +446,18 @@ trans_beta <- R6Class(classname = "trans_beta",
 						alpha = .6,
 						inherit.aes = FALSE
 						)
-					df_arrows$label <- rownames(df_arrows)
+					if(is.null(loading_text_taxlevel)){
+						if(is.null(self$res_ordination$taxa_level)){
+							df_arrows$label <- rownames(df_arrows)
+						}else{
+							df_arrows$label <- self$dataset$tax_table[rownames(df_arrows), self$res_ordination$taxa_level]
+						}
+					}else{
+						df_arrows$label <- self$dataset$tax_table[rownames(df_arrows), loading_text_taxlevel]
+					}
+					if(! loading_text_prefix){
+						df_arrows$label %<>% gsub("^.__", "", .)
+					}
 					if(loading_text_italic){
 						df_arrows$label %<>% paste0("italic('", .,"')")
 						loading_text_parse <- TRUE
