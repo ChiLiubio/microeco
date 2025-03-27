@@ -1,4 +1,17 @@
 
+# recreate microtable object
+recreate_microtable <- function(meco, ...){
+	otu_table_trans <- meco$otu_table
+	sample_table_trans <- meco$sample_table
+	tax_table_trans <- meco$tax_table
+	phylo_tree_trans <- meco$phylo_tree
+	seq_trans <- meco$rep_fasta
+
+	newmeco <- microtable$new(sample_table = sample_table_trans, otu_table = otu_table_trans, 
+		tax_table = tax_table_trans, phylo_tree = phylo_tree_trans, rep_fasta = seq_trans, ...)
+	newmeco
+}
+
 
 convert_diff2transenv <- function(diff_table, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill){
 	# heatmap for multi-factor

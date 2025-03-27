@@ -263,7 +263,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 				res_table <- private$AST(abund_table)
 			}
 			if(inherits(self$dataset, "microtable")){
-				res_dataset <- clone(self$dataset)
+				res_dataset <- recreate_microtable(self$dataset)
 				res_dataset$otu_table <- as.data.frame(t(res_table))
 				res_dataset$tidy_dataset()
 				res_dataset
