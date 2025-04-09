@@ -152,10 +152,18 @@ clone <- function(x, deep = TRUE){
 
 #' Remove all factors in a data frame
 #'
-#' @param x data frame
-#' @param unfac2num default FALSE; whether try to convert all character columns to numeric; if FALSE, only try to convert column with factor attribute.
+#' @param x data.frame object
+#' @param unfac2num default FALSE; whether try to convert all character columns to numeric directly; 
+#'   If TRUE, it will attempt to convert each column, including those of character and factor types. 
+#'   First, it tries to convert them to the character type, and then checks if they can be converted to numeric. 
+#'   If the conversion to numeric is possible, it outputs the numeric type; otherwise, it outputs the character type.
+#'   If FALSE, only columns with the factor attribute will be attempted for conversion. 
+#'   Factors will first be converted to character type, and then an attempt will be made to convert them to numeric. 
+#'   If successful, the numeric type will be output; otherwise, the character type will be output. This process can effectively remove the factor attribute.
 #'   Note that this can only transform the columns that may be transformed to numeric without using factor.
 #' @param char2num default FALSE; whether force all the character to be numeric class by using factor as an intermediate.
+#'   Therefore, this parameter can enforce the conversion of all character and factor types to numeric.
+#'   This operation is very useful in some cases that numerical data is required as input.
 #' @return data frame without factor
 #' @examples
 #' data("taxonomy_table_16S")
