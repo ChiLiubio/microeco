@@ -114,9 +114,12 @@ trans_abund <- R6Class(classname = "trans_abund",
 					if(identical(high_level, taxrank)){
 						stop("Provided high_level should not be same with taxrank !")
 					}
-					extract_tax_table <- dataset$tax_table[, c(high_level, taxrank)] %>% unique
-					if(!delete_taxonomy_lineage){
-						stop("The delete_taxonomy_lineage should be TRUE when high_level is provided!")
+					if(delete_taxonomy_lineage){
+						extract_tax_table <- dataset$tax_table[, c(high_level, taxrank)] %>% unique
+					}else{
+						tmp_tax_table <- dataset$tax_table
+						tmp_tax_table[, taxrank] <- apply(tmp_tax_table[, 1:match(taxrank, colnames(tmp_tax_table))], 1, function(x){paste0(x, collapse = "|")})
+						extract_tax_table <- tmp_tax_table[, c(high_level, taxrank)] %>% unique
 					}
 					if(delete_taxonomy_prefix){
 						extract_tax_table[, taxrank] %<>% gsub(prefix, "", .)
