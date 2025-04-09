@@ -15,7 +15,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param add_data default NULL; \code{data.frame} format; provide the environmental data in the format \code{data.frame}; rownames should be sample names.
 		#'   This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 		#'   Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.
-		#' @param character2numeric default FALSE; whether convert the characters or factors to numeric values.
+		#' @param character2numeric default FALSE; whether convert all the character or factor columns to numeric type using the \code{dropallfactors} function.
+		#'   If TRUE, character columns will first be attempted to convert to numeric. If that fails, they will be converted to the factor type and then to numeric.
 		#' @param standardize default FALSE; whether scale environmental variables to zero mean and unit variance.
 		#' @param complete_na default FALSE; Whether fill the NA (missing value) in the environmental data;
 		#'   If TRUE, the function can run the interpolation with the \code{mice} package.

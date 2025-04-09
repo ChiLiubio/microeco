@@ -172,7 +172,8 @@ Otherwise, please use \code{add_data} parameter.}
 This parameter should be used when the \code{microtable$sample_table} object does not have environmental data. 
 Under this circumstance, the \code{env_cols} parameter can not be used because no data can be selected.}
 
-\item{\code{character2numeric}}{default FALSE; whether convert the characters or factors to numeric values.}
+\item{\code{character2numeric}}{default FALSE; whether convert all the character or factor columns to numeric type using the \code{dropallfactors} function.
+If TRUE, character columns will first be attempted to convert to numeric. If that fails, they will be converted to the factor type and then to numeric.}
 
 \item{\code{standardize}}{default FALSE; whether scale environmental variables to zero mean and unit variance.}
 
