@@ -955,7 +955,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group_order default NULL; a vector to order groups, i.e. reorder the legend and colors in plot; 
 		#' 	  If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 		#' 	  If provided, overlook the levels in the group of sample_table.
-		#' @param order_x_mean default TRUE; whether order x axis by the means of groups from large to small.
+		#' @param order_x_mean default FALSE; whether order the taxa in x axis by the means of abundances from large to small. 
+		#' 	  If \code{TRUE}, all other factors in the data will become invalid.
 		#' @param coord_flip default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
 		#' @param add_sig default TRUE; whether add the significance label to the plot.
 		#' @param xtext_angle default 45; number (e.g. 45). Angle of text in x axis.
@@ -982,7 +983,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			simplify_names = TRUE,
 			keep_prefix = TRUE,
 			group_order = NULL,
-			order_x_mean = TRUE,
+			order_x_mean = FALSE,
 			coord_flip = TRUE,
 			add_sig = TRUE,
 			xtext_angle = 45,

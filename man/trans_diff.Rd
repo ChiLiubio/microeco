@@ -306,7 +306,7 @@ If the user filters out the non-significant taxa from the 'res_diff' table, thes
   simplify_names = TRUE,
   keep_prefix = TRUE,
   group_order = NULL,
-  order_x_mean = TRUE,
+  order_x_mean = FALSE,
   coord_flip = TRUE,
   add_sig = TRUE,
   xtext_angle = 45,
@@ -335,7 +335,8 @@ The taxa names should be same with the names shown in the plot, not the 'Taxa' c
 If NULL, the function can first check whether the group column of sample_table is factor. If yes, use the levels in it.
 If provided, overlook the levels in the group of sample_table.}
 
-\item{\code{order_x_mean}}{default TRUE; whether order x axis by the means of groups from large to small.}
+\item{\code{order_x_mean}}{default FALSE; whether order the taxa in x axis by the means of abundances from large to small. 
+If \code{TRUE}, all other factors in the data will become invalid.}
 
 \item{\code{coord_flip}}{default TRUE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.}
 
