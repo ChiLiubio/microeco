@@ -563,7 +563,7 @@ trans_network <- R6Class(classname = "trans_network",
 			network <- self$res_network
 			
 			nodes <- data.frame(cbind(V(network), V(network)$name))
-			edges <- get.edges(network, 1:ecount(network))
+			edges <- igraph::get.edges(network, 1:ecount(network))
 			node_attr_name <- base::setdiff(vertex_attr_names(network), "name")
 			node_attr <- data.frame(sapply(node_attr_name, function(x) vertex_attr(network, x)))
 			if("RelativeAbundance" %in% node_attr_name){
