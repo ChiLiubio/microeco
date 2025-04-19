@@ -7,7 +7,7 @@
 microtable.
 }
 \description{
-This class is a wrapper for a series of operations on the input files and basic manipulations,
+This class is a wrapper for a series of operations on the basic data manipulations,
 including microtable object creation, data trimming, data filtering, rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxonomic abundance calculation, 
 alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228-8235.2005> and other basic operations.\cr
@@ -212,33 +212,33 @@ class(m1$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
+\item{\code{otu_table}}{data.frame class; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
 
-\item{\code{sample_table}}{data.frame; default NULL; The sample information table; rownames are samples; columns are sample metadata; 
+\item{\code{sample_table}}{default NULL; data.frame; The sample information table; rownames are samples; columns are sample metadata; 
 If not provided, the function can generate a table automatically according to the sample names in otu_table.}
 
-\item{\code{tax_table}}{data.frame; default NULL; The taxonomic information table; rownames are features; column names are taxonomic classes.}
+\item{\code{tax_table}}{default NULL; data.frame class; The taxonomic information table; rownames are features; column names are taxonomic classes.}
 
-\item{\code{phylo_tree}}{phylo; default NULL; The phylogenetic tree that must be read with the \code{read.tree} function of ape package.}
+\item{\code{phylo_tree}}{default NULL; phylo class; The phylogenetic tree that must be read with the \code{read.tree} function of ape package.}
 
-\item{\code{rep_fasta}}{\code{DNAStringSet}, \code{list} or \code{DNAbin} format; default NULL; The sequences.
+\item{\code{rep_fasta}}{default NULL; \code{DNAStringSet}, \code{list} or \code{DNAbin} class; The representative sequences of OTUs/ASVs.
 The sequences should be read with the \code{readDNAStringSet} function in \code{Biostrings} package (DNAStringSet class), 
 \code{read.fasta} function in \code{seqinr} package (list class),
 or \code{read.FASTA} function in \code{ape} package (DNAbin class).}
 
-\item{\code{auto_tidy}}{default FALSE; Whether tidy the files in the \code{microtable} object automatically.
+\item{\code{auto_tidy}}{default FALSE; Whether tidy the data in the \code{microtable} object automatically.
 If TRUE, the function can invoke the \code{tidy_dataset} function.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-an object of class \code{microtable} with the following components:
+an object of \code{microtable} class with the following components:
 \describe{
   \item{\code{sample_table}}{The sample information table.}
   \item{\code{otu_table}}{The feature table.}
   \item{\code{tax_table}}{The taxonomic table.}
   \item{\code{phylo_tree}}{The phylogenetic tree.}
-  \item{\code{rep_fasta}}{The sequence.}
+  \item{\code{rep_fasta}}{The sequences.}
   \item{\code{taxa_abund}}{default NULL; use \code{cal_abund} function to calculate.}
   \item{\code{alpha_diversity}}{default NULL; use \code{cal_alphadiv} function to calculate.}
   \item{\code{beta_diversity}}{default NULL; use \code{cal_betadiv} function to calculate.}
@@ -394,7 +394,7 @@ including \code{taxa_abund}, \code{alpha_diversity} and \code{beta_diversity}, a
 }
 \subsection{Returns}{
 None. The data in the object are tidied up. 
-	  If \code{tax_table} is in object, its row names are totally same with the row names of \code{otu_table}.
+	  If \code{tax_table} is in object, its row names are completely same with the row names of \code{otu_table}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -409,9 +409,9 @@ None. The data in the object are tidied up.
 \if{html}{\out{<a id="method-microtable-add_rownames2taxonomy"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-add_rownames2taxonomy}{}}}
 \subsection{Method \code{add_rownames2taxonomy()}}{
-Add the rownames of \code{microtable$tax_table} as its last column. 
-This is especially useful when the rownames of \code{microtable$tax_table} are required as a taxonomic level 
-	 for the taxonomic abundance calculation and biomarker idenfification.
+Add the row names of \code{microtable$tax_table} as its last column. 
+This is especially useful when the row names of \code{microtable$tax_table} are required as a taxonomic level 
+	 for the taxonomic abundance calculation and biomarker identification.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$add_rownames2taxonomy(use_name = "OTU")}\if{html}{\out{</div>}}
 }
@@ -419,12 +419,12 @@ This is especially useful when the rownames of \code{microtable$tax_table} are r
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{use_name}}{default "OTU"; The column name used in the \code{tax_table}.}
+\item{\code{use_name}}{default "OTU"; The name of the column added in the \code{tax_table}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-new tax_table stored in the object.
+tax_table updated in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -441,13 +441,13 @@ m1$add_rownames2taxonomy()
 \if{html}{\out{<a id="method-microtable-sample_sums"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-sample_sums}{}}}
 \subsection{Method \code{sample_sums()}}{
-Sum the species number for each sample.
+Sum the abundance for each sample.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$sample_sums()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-species number of samples.
+abundance in each sample.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -464,13 +464,13 @@ m1$sample_sums()
 \if{html}{\out{<a id="method-microtable-taxa_sums"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-taxa_sums}{}}}
 \subsection{Method \code{taxa_sums()}}{
-Sum the species number for each taxa.
+Sum the abundance for each taxon.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$taxa_sums()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-species number of taxa.
+abundance in each taxon.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -487,7 +487,7 @@ m1$taxa_sums()
 \if{html}{\out{<a id="method-microtable-sample_names"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-sample_names}{}}}
 \subsection{Method \code{sample_names()}}{
-Show sample names.
+Show the sample names.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$sample_names()}\if{html}{\out{</div>}}
 }
@@ -510,7 +510,7 @@ m1$sample_names()
 \if{html}{\out{<a id="method-microtable-taxa_names"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-taxa_names}{}}}
 \subsection{Method \code{taxa_names()}}{
-Show taxa names of tax_table.
+Show the taxa names.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$taxa_names()}\if{html}{\out{</div>}}
 }
@@ -533,7 +533,7 @@ m1$taxa_names()
 \if{html}{\out{<a id="method-microtable-rename_taxa"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-rename_taxa}{}}}
 \subsection{Method \code{rename_taxa()}}{
-Rename the features, including the rownames of \code{otu_table}, rownames of \code{tax_table}, tip labels of \code{phylo_tree} and \code{rep_fasta}.
+Rename the features, including the row names of \code{otu_table}, row names of \code{tax_table}, tip labels of \code{phylo_tree} and names in \code{rep_fasta}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$rename_taxa(newname_prefix = "ASV_")}\if{html}{\out{</div>}}
 }
@@ -541,12 +541,12 @@ Rename the features, including the rownames of \code{otu_table}, rownames of \co
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{newname_prefix}}{default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the rownames order of \code{otu_table}.}
+\item{\code{newname_prefix}}{default "ASV_"; the prefix of new names; new names will be newname_prefix + numbers according to the order of row names in \code{otu_table}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-renamed microtable object
+renamed object
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -563,7 +563,7 @@ m1$rename_taxa()
 \if{html}{\out{<a id="method-microtable-merge_samples"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-merge_samples}{}}}
 \subsection{Method \code{merge_samples()}}{
-Merge samples according to specific group to generate a new \code{microtable}.
+Merge samples according to specific groups to generate a new \code{microtable} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$merge_samples(group)}\if{html}{\out{</div>}}
 }
@@ -576,7 +576,7 @@ Merge samples according to specific group to generate a new \code{microtable}.
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a new merged microtable object.
+a merged microtable object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -593,7 +593,7 @@ m1$merge_samples("Group")
 \if{html}{\out{<a id="method-microtable-merge_taxa"></a>}}
 \if{latex}{\out{\hypertarget{method-microtable-merge_taxa}{}}}
 \subsection{Method \code{merge_taxa()}}{
-Merge taxa according to specific taxonomic rank to generate a new \code{microtable}.
+Merge taxa according to a specific taxonomic rank to generate a new \code{microtable} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$merge_taxa(taxa = "Genus")}\if{html}{\out{</div>}}
 }
@@ -606,7 +606,7 @@ Merge taxa according to specific taxonomic rank to generate a new \code{microtab
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-merged \code{microtable} object.
+a merged \code{microtable} object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
