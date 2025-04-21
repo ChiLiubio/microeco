@@ -156,7 +156,7 @@ Thereinto, quantile25 and quantile75 denote 25\% and 75\% quantiles, respectivel
 default NULL represents using the "letter+__", e.g. "k__" for Phylum level;
 Please provide the customized prefix when it is not standard, otherwise the program can not correctly recognize it.}
 
-\item{\code{use_percentage}}{default TRUE; show the abundance percentage.}
+\item{\code{use_percentage}}{default TRUE; whether show the abundance percentage. If TRUE, the abundance data will be multiplied by 100.}
 
 \item{\code{input_taxaname}}{default NULL; character vector; input taxa names to select some taxa.}
 
@@ -196,7 +196,6 @@ Bar plot.
 \if{html}{\out{<div class="r">}}\preformatted{trans_abund$plot_bar(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   bar_full = TRUE,
-  bar_type = deprecated(),
   others_color = "grey90",
   facet = NULL,
   order_x = NULL,
@@ -216,7 +215,8 @@ Bar plot.
   ytitle_size = 17,
   coord_flip = FALSE,
   ggnested = FALSE,
-  high_level_add_other = FALSE
+  high_level_add_other = FALSE,
+  bar_type = deprecated()
 )}\if{html}{\out{</div>}}
 }
 
@@ -227,8 +227,6 @@ Bar plot.
 
 \item{\code{bar_full}}{default TRUE; Whether the bar shows all the features (including 'Others'). 
 Default \code{TRUE} means total abundance are summed to 1 or 100 (percentage). \code{FALSE} means 'Others' will not be shown.}
-
-\item{\code{bar_type}}{deprecated. Please use \code{bar_full} argument instead.}
 
 \item{\code{others_color}}{default "grey90"; the color for "Others" taxa.}
 
@@ -277,6 +275,8 @@ To make it available, please assign \code{high_level} parameter when creating th
 
 \item{\code{high_level_add_other}}{default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
 Only available when \code{ggnested = TRUE}.}
+
+\item{\code{bar_type}}{deprecated. Please use \code{bar_full} argument instead.}
 }
 \if{html}{\out{</div>}}
 }
