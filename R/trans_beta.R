@@ -9,12 +9,12 @@
 #' @export
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
-		#' @param dataset the object of \code{\link{microtable}} class.
+		#' @param dataset an object of \code{\link{microtable}} class.
 		#' @param measure default NULL; a matrix name stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", or a customized matrix; 
 		#' 	 used for ordination, manova, group distance comparision, etc.;
 		#' 	 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.
-		#' @param group default NULL; sample group used for manova, betadisper or group distance comparision.
-		#' @return measure, group and dataset stored in the object.
+		#' @param group default NULL; a column name of \code{sample_table} in the input dataset; group information will be used for manova, betadisper or distance comparision.
+		#' @return \code{measure}, \code{group} and \code{dataset} stored in the object.
 		#' @examples
 		#' data(dataset)
 		#' t1 <- trans_beta$new(dataset = dataset, measure = "bray", group = "Group")
@@ -89,8 +89,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  PLS-DA: partial least squares discriminant analysis; OPLS-DA: orthogonal partial least squares discriminant analysis.
 		#' 	  For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
 		#' 	  <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).
-		#' @param ncomp default 2; dimensions in the result. 
-		#' 	  For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.
+		#' @param ncomp default 2; dimensions in the result. For the \code{method} option "PCA", "PCoA" or "DCA", 
+		#' 	  the corresponding dimension information will be selected from the original model based on this parameter..
+		#' 	  For all the dimension information, please refer to \code{model} in the results.
+		#' 	  For the \code{method} option "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.
 		#' @param taxa_level default NULL; available for PCA, DCA or NMDS (\code{NMDS_matrix = TRUE}).
 		#' 	  Default NULL means using the \code{otu_table} in the microtable object.
 		#' 	  For other options, please	provide the taxonomic rank names in \code{tax_table}, such as "Phylum" or "Genus".
@@ -257,7 +259,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'     \item{\strong{'point'}}{add sample points}
 		#'     \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
 		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
-		#'     \item{\strong{'centroid'}}{add centroid line of each group}
+		#'     \item{\strong{'centroid'}}{add centroid line for points in each group}
 		#'   }
 		#' @param choices default c(1, 2); selected axis for the visualization; must be numeric vector.
 		#'   The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_ordination} function.

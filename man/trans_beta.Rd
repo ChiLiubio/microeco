@@ -109,18 +109,18 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{dataset}}{the object of \code{\link{microtable}} class.}
+\item{\code{dataset}}{an object of \code{\link{microtable}} class.}
 
 \item{\code{measure}}{default NULL; a matrix name stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", or a customized matrix; 
 used for ordination, manova, group distance comparision, etc.;
 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.}
 
-\item{\code{group}}{default NULL; sample group used for manova, betadisper or group distance comparision.}
+\item{\code{group}}{default NULL; a column name of \code{sample_table} in the input dataset; group information will be used for manova, betadisper or distance comparision.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-measure, group and dataset stored in the object.
+\code{measure}, \code{group} and \code{dataset} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -161,8 +161,10 @@ PLS-DA: partial least squares discriminant analysis; OPLS-DA: orthogonal partial
 For the methods details, please refer to the papers <doi:10.1111/j.1574-6941.2007.00375.x> (for PCoA, NMDS, PCA and DCA) and 
 <doi:10.1186/s12859-019-3310-7> (for PLS-DA or OPLS-DA).}
 
-\item{\code{ncomp}}{default 2; dimensions in the result. 
-For the method "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.}
+\item{\code{ncomp}}{default 2; dimensions in the result. For the \code{method} option "PCA", "PCoA" or "DCA", 
+the corresponding dimension information will be selected from the original model based on this parameter..
+For all the dimension information, please refer to \code{model} in the results.
+For the \code{method} option "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.}
 
 \item{\code{taxa_level}}{default NULL; available for PCA, DCA or NMDS (\code{NMDS_matrix = TRUE}).
 Default NULL means using the \code{otu_table} in the microtable object.
@@ -250,7 +252,7 @@ Plot the ordination result.
   \item{\strong{'point'}}{add sample points}
   \item{\strong{'ellipse'}}{add confidence ellipse for points of each group}
   \item{\strong{'chull'}}{add convex hull for points of each group}
-  \item{\strong{'centroid'}}{add centroid line of each group}
+  \item{\strong{'centroid'}}{add centroid line for points in each group}
 }}
 
 \item{\code{choices}}{default c(1, 2); selected axis for the visualization; must be numeric vector.
