@@ -34,7 +34,7 @@ convert_diff2transenv <- function(diff_table, heatmap_x, heatmap_y, heatmap_cell
 	colnames(diff_table)[colnames(diff_table) == heatmap_sig] <- "Significance"
 	
 	suppressMessages(tmp_trans_env <- trans_env$new(dataset = NULL))
-	tmp_trans_env$cor_method <- heatmap_lab_fill
+	tmp_trans_env$cal_cor_method <- heatmap_lab_fill
 	tmp_trans_env$res_cor <- diff_table
 	tmp_trans_env
 }

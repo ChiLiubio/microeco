@@ -151,7 +151,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
         The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.
         Reference: <doi:10.1186/s13059-022-02655-5>}
   \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data based on the Maaslin2 package.
-        Using this option can invoke the \code{trans_env$cal_cor} function with \code{cor_method = "maaslin2"}.}
+        Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin2"}.}
   \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package. 
         Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
   \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.

@@ -841,10 +841,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; 
 		#'    "Genus" or other taxonomic names (e.g., "Phylum", "ASV"): invoke taxonomic abundance table in \code{taxa_abund} list of the \code{microtable} object; 
 		#'    "all": merge all the taxonomic abundance tables in \code{taxa_abund} list into one; "other": provide additional taxa names by assigning \code{other_taxa} parameter.
-		#' @param cor_method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
+		#' @param method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
 		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
-		#' @param partial default FALSE; whether perform partial correlation based on the \code{ppcor} package.
+		#' @param partial default FALSE; whether perform partial correlation based on the \code{ppcor} package. 
+		#' 	  Available when \code{method} is "pearson", "spearman" or "kendall".
 		#' @param partial_fix default NULL; selected environmental variable names used as third group of variables in all the partial correlations. 
 		#' 	  If NULL; all the variables (except the one for correlation) in the environmental data will be used as the third group of variables.
 		#' 	  Otherwise, the function will control for the provided variables (one or more) in all the partial correlations, 
@@ -868,6 +869,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
 		#' @param tmp_input_maaslin2 default "tmp_input"; the temporary folder used to save the input files for Maaslin2.
 		#' @param tmp_output_maaslin2 default "tmp_output"; the temporary folder used to save the output files of Maaslin2.
+		#' @param cor_method deprecated. Please use \code{method} argument instead.
 		#' @param ... parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.
 		#' @return \code{res_cor} stored in the object.
 		#' @examples
@@ -878,7 +880,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
-			cor_method = c("pearson", "spearman", "kendall", "maaslin2")[1],
+			method = c("pearson", "spearman", "kendall", "maaslin2")[1],
 			partial = FALSE,
 			partial_fix = NULL,
 			add_abund_table = NULL,
@@ -893,6 +895,7 @@ trans_env <- R6Class(classname = "trans_env",
 			taxa_name_full = TRUE,
 			tmp_input_maaslin2 = "tmp_input",
 			tmp_output_maaslin2 = "tmp_output",
+			cor_method = deprecated(),
 			...
 			){
 			if(is.null(self$data_env)){
@@ -900,10 +903,14 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			env_data <- self$data_env
 			
-			cor_method <- match.arg(cor_method, c("pearson", "spearman", "kendall", "maaslin2"))
+			if(lifecycle::is_present(cor_method)) {
+				lifecycle::deprecate_warn("1.14.1", "cal_cor(cor_method)", "cal_cor(method)")
+				method <- cor_method
+			}
+			method <- match.arg(method, c("pearson", "spearman", "kendall", "maaslin2"))
 			p_adjust_type <- match.arg(p_adjust_type, c("All", "Taxa", "Env"))
 			
-			if(cor_method != "maaslin2"){
+			if(method != "maaslin2"){
 				env_data <- private$check_numeric(env_data)
 			}
 			if(!is.null(add_abund_table)){
@@ -959,7 +966,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
 			abund_table %<>% .[rownames(env_data), , drop = FALSE]
-			if(cor_method == "maaslin2"){
+			if(method == "maaslin2"){
 				save_env_data <- data.frame(ID = rownames(env_data), env_data)
 				save_abund_table <- data.frame(ID = rownames(abund_table), abund_table)
 				if(!dir.exists(tmp_input_maaslin2)){
@@ -994,7 +1001,7 @@ trans_env <- R6Class(classname = "trans_env",
 					if(is.null(partial_fix)){
 						res <- sapply(comb_names, function(x){
 							input_partial <- cbind.data.frame(abund_table[groups == x[1], x[2], drop = FALSE], env_data[groups == x[1], ])
-							raw_res <- ppcor::pcor(input_partial, method = cor_method)
+							raw_res <- ppcor::pcor(input_partial, method = method)
 							c(x, Correlation = raw_res$estimate[x[2], x[3]], Pvalue = raw_res$p.value[x[2], x[3]])
 							}
 						)
@@ -1006,14 +1013,14 @@ trans_env <- R6Class(classname = "trans_env",
 						res <- sapply(comb_names, function(x){
 							input_partial <- cbind.data.frame(abund_table[groups == x[1], x[2], drop = FALSE], env_data[groups == x[1], x[3], drop = FALSE], 
 								env_data[groups == x[1], partial_fix, drop = FALSE])
-							raw_res <- ppcor::pcor(input_partial, method = cor_method)
+							raw_res <- ppcor::pcor(input_partial, method = method)
 							c(x, Correlation = raw_res$estimate[x[2], x[3]], Pvalue = raw_res$p.value[x[2], x[3]])
 							}
 						)
 					}
 				}else{
 					res <- sapply(comb_names, function(x){
-						suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = cor_method)) %>%
+						suppressWarnings(cor.test(abund_table[groups == x[1], x[2]], env_data[groups == x[1], x[3]], method = method)) %>%
 						{c(x, Correlation = unname(.$estimate), Pvalue = unname(.$p.value))}
 						}
 					)
@@ -1042,7 +1049,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			self$res_cor <- res
 			message('The correlation result is stored in object$res_cor ...')
-			self$cor_method <- cor_method
+			self$cal_cor_method <- method
 			invisible(self)
 		},
 		#' @description
@@ -1127,7 +1134,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			cluster_ggplot <- match.arg(cluster_ggplot, c("none", "row", "col", "both"))
 			use_data <- self$res_cor
-			if(self$cor_method == "maaslin2"){
+			if(self$cal_cor_method == "maaslin2"){
 				message("Show the coef values of Maaslin2 method in the heatmap ...")
 				cell_value <- "coef"
 				message("Use name column of object$res_cor as the variables ...")
@@ -1238,7 +1245,7 @@ trans_env <- R6Class(classname = "trans_env",
 				p <- p + scale_fill_gradientn(colours = color_palette, na.value = na.value, trans = trans)
 			}
 			
-			legend_fill <- ifelse(self$cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cor_method, 1, 1)), substring(self$cor_method, 2)))
+			legend_fill <- ifelse(self$cal_cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cal_cor_method, 1, 1)), substring(self$cal_cor_method, 2)))
 			
 			p <- p + geom_text(aes(label = Significance), color = "black", size = sig_label_size) + 
 				labs(y = NULL, x = "Measure", fill = legend_fill) +
