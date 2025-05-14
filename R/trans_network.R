@@ -975,6 +975,11 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param rm_single default TRUE; whether remove the nodes without any edge in the sub-network.
 		#'   So this function can also be used to remove the nodes withou any edge when node and edge are both NULL.
 		#' @param node_alledges default FALSE; whether remain the nodes and edges that related to the nodes provided in \code{node} parameter.
+		#'   When this parameter is set to \code{TRUE}, the network will filter based on edges rather than directly on nodes. 
+		#'   The logic is that if at least one of the two nodes connected by an edge is included in the nodes provided by the node parameter, 
+		#'   the edge will be retained. Otherwise, it will be filtered out.
+		#'   When this parameter is set to \code{FALSE}, the network will filter directly based on the node parameter. 
+		#'   Any nodes not included in the node parameter will be filtered out.
 		#' @param return_igraph default TRUE; whether return the network with igraph format. If FALSE, return \code{trans_network} object.
 		#' @return a new network
 		#' @examples
