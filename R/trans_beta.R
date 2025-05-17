@@ -494,6 +494,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @param p_adjust_method default "fdr"; p.adjust method; available when \code{manova_all = FALSE}; 
 		#'    see \code{method} parameter of \code{p.adjust} function for available options.
 		#' @param by default "terms"; same with the \code{by} parameter in \code{adonis2} function of vegan package. 
+		#' @param by_auto_set default TRUE; Whether automatically set the options for \code{by} parameter ("marginal" or "terms") when \code{manova_set} is provided.
+		#'    The primary reason for setting this parameter is that using marginal effects (also known as "Type III" effects) is more robust for unbalanced experimental designs. 
+		#'    Since the option \code{by = "margin"} in the \code{adonis2} function ignores main effects when interaction effects are present, 
+		#'    we automatically set \code{by = "margin"} when there are no interaction effects, and set \code{by = "terms"} when interaction effects exist.
+		#'    If the user wants to use parameter \code{by}, please set \code{by_auto_set = FALSE}. Note that this parameter is only available when \code{manova_set} is provided.
 		#' @param permutations default 999; same with the \code{permutations} parameter in \code{adonis2} function of vegan package. 
 		#' @param ... parameters passed to \code{adonis2} function of \code{vegan} package.
 		#' @return \code{res_manova} stored in object with \code{data.frame} class.
@@ -506,6 +511,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			by_group = NULL,
 			p_adjust_method = "fdr",
 			by = "terms",
+			by_auto_set = TRUE,
 			permutations = 999,
 			...
 			){
@@ -516,6 +522,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 			metadata <- self$sample_table
 			if(!is.null(manova_set)){
 				use_formula <- reformulate(manova_set, substitute(as.dist(use_matrix)))
+				if(by_auto_set){
+					# check interaction effect
+					if(grepl(":", manova_set, fixed = TRUE) | grepl("*", manova_set, fixed = TRUE)){
+						by <- "terms"
+					}else{
+						by <- "margin"
+					}
+				}
 				res <- adonis2(use_formula, data = metadata, by = by, permutations = permutations, ...)
 			}else{
 				if(is.null(group)){

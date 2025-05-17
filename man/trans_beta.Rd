@@ -346,6 +346,7 @@ Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on t
   by_group = NULL,
   p_adjust_method = "fdr",
   by = "terms",
+  by_auto_set = TRUE,
   permutations = 999,
   ...
 )}\if{html}{\out{</div>}}
@@ -371,6 +372,12 @@ Only available when \code{manova_all = FALSE} and \code{manova_set} is not provi
 see \code{method} parameter of \code{p.adjust} function for available options.}
 
 \item{\code{by}}{default "terms"; same with the \code{by} parameter in \code{adonis2} function of vegan package.}
+
+\item{\code{by_auto_set}}{default TRUE; Whether automatically set the options for \code{by} parameter ("marginal" or "terms") when \code{manova_set} is provided.
+The primary reason for setting this parameter is that using marginal effects (also known as "Type III" effects) is more robust for unbalanced experimental designs. 
+Since the option \code{by = "margin"} in the \code{adonis2} function ignores main effects when interaction effects are present, 
+we automatically set \code{by = "margin"} when there are no interaction effects, and set \code{by = "terms"} when interaction effects exist.
+If the user wants to use parameter \code{by}, please set \code{by_auto_set = FALSE}. Note that this parameter is only available when \code{manova_set} is provided.}
 
 \item{\code{permutations}}{default 999; same with the \code{permutations} parameter in \code{adonis2} function of vegan package.}
 
