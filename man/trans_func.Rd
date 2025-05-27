@@ -189,13 +189,21 @@ Calculating the percentages of species with specific trait in communities.
 The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
 So this method is one representation of functional redundancy (FR) without the consideration of phylogenetic distance among taxa.
 The FR is defined:
-     \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}}}
-     \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}}}
+     \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {adj\_factor}}
+     \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {adj\_factor}}
 where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
 \eqn{N_{j}} is the number of species with function j in sample k.
 \eqn{A_{i}} is the abundance (counts) of species i in sample k.
+\eqn{adj\_factor} is the correction factor based on taxonomic information, representing the dispersion of taxa. It is 1 when \code{adj_tax = FALSE}.
+Please see the parameter \code{adj_tax} for detailed explanation.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(abundance_weighted = FALSE, perc = TRUE, dec = 2)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
+  abundance_weighted = FALSE,
+  perc = TRUE,
+  dec = 2,
+  adj_tax = FALSE,
+  adj_tax_by = "Genus"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -204,10 +212,21 @@ where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is t
 \item{\code{abundance_weighted}}{default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
 If TRUE, calculate the functional individual percentage.}
 
-\item{\code{perc}}{default TRUE; whether to use percentages in the result. If TRUE, value is bounded between 0 and 100.
+\item{\code{perc}}{default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
 If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.}
 
 \item{\code{dec}}{default 2; remained decimal places.}
+
+\item{\code{adj_tax}}{default FALSE; 
+Whether the correction factor is calculated based on taxonomic information. 
+The default \code{FALSE} represents the correction factor is 1, meaning no correction is made based on the taxonomic distribution. 
+The principle behind the calculation of the correction factor is that species with a certain function that are more dispersed taxonomically usually correspond to higher redundancy.
+It is defined:
+\deqn{adj\_factor = \frac{NU_{jk}}{NU_{k}}}
+where \eqn{NU_{jk}} denotes the number of unique taxon (at \code{adj_tax_by} level) for those ASVs/OTUs with function j in sample k. 
+\eqn{NU_{k}} denotes the number of total unique taxon (at \code{adj_tax_by} level) in sample k.}
+
+\item{\code{adj_tax_by}}{default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the correction factor (\eqn{adj\_factor}) calculated?}
 }
 \if{html}{\out{</div>}}
 }

@@ -314,42 +314,71 @@ trans_func <- R6Class(classname = "trans_func",
 		#' The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
 		#' So this method is one representation of functional redundancy (FR) without the consideration of phylogenetic distance among taxa.
 		#' The FR is defined:
-		#'      \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}}}
-		#'      \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}}}
+		#'      \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {adj\_factor}}
+		#'      \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {adj\_factor}}
 		#' where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
 		#' \eqn{N_{j}} is the number of species with function j in sample k.
 		#' \eqn{A_{i}} is the abundance (counts) of species i in sample k.
+		#' \eqn{adj\_factor} is the correction factor based on taxonomic information, representing the dispersion of taxa. It is 1 when \code{adj_tax = FALSE}.
+		#' Please see the parameter \code{adj_tax} for detailed explanation.
 		#' 
 		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
 		#' 	  If TRUE, calculate the functional individual percentage.
-		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, value is bounded between 0 and 100.
+		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
 		#' 	  If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.
 		#' @param dec default 2; remained decimal places.
+		#' @param adj_tax default FALSE; 
+		#' 	  Whether the correction factor is calculated based on taxonomic information. 
+		#' 	  The default \code{FALSE} represents the correction factor is 1, meaning no correction is made based on the taxonomic distribution. 
+		#' 	  The principle behind the calculation of the correction factor is that species with a certain function that are more dispersed taxonomically usually correspond to higher redundancy.
+		#' 	  It is defined:
+		#' 	  \deqn{adj\_factor = \frac{NU_{jk}}{NU_{k}}}
+		#' 	  where \eqn{NU_{jk}} denotes the number of unique taxon (at \code{adj_tax_by} level) for those ASVs/OTUs with function j in sample k. 
+		#' 	  \eqn{NU_{k}} denotes the number of total unique taxon (at \code{adj_tax_by} level) in sample k.
+		#' @param adj_tax_by default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the correction factor (\eqn{adj\_factor}) calculated?
 		#' @return \code{res_spe_func_perc} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_spe_func_perc(abundance_weighted = TRUE)
 		#' }
-		cal_spe_func_perc = function(abundance_weighted = FALSE, perc = TRUE, dec = 2){
+		cal_spe_func_perc = function(abundance_weighted = FALSE, perc = TRUE, dec = 2, adj_tax = FALSE, adj_tax_by = "Genus"){
 			if(is.null(self$res_spe_func)){
 				stop("Please first run cal_spe_func function !")
 			}
 			bound_value <- ifelse(perc, 100, 1)
 			res_spe_func <- self$res_spe_func
 			otu_table <- self$otu_table
+			if(adj_tax){			
+				message('Calculate adj_factor at ', adj_tax_by, ' level ...')
+			}
+			
 			res_spe_func_perc <- sapply(colnames(otu_table), function(input_samplecolumn){
 				sample_otu <- otu_table[, input_samplecolumn]
 				names(sample_otu) <- rownames(otu_table)
 				# remove species whose abundance is 0
 				sample_otu <- sample_otu[sample_otu != 0]
-				res_table <- unlist(lapply(colnames(res_spe_func), function(x){
+				if(adj_tax){
+					adj_tax_totaltax <- self$tax_table[names(sample_otu), 1:which(colnames(self$tax_table) %in% adj_tax_by), drop = FALSE] %>% 
+						apply(., 1, function(x){paste0(x, collapse = ";")})
+					adj_tax_totaltax_length <- adj_tax_totaltax %>% unique %>% length
+					tmp_extract_total <- res_spe_func[names(sample_otu), ]
+				}
+				res_table <- unlist(lapply(colnames(res_spe_func), function(each_func){
+					if(adj_tax){
+						tmp_extract_exist_names <- tmp_extract_total[tmp_extract_total[, each_func] != 0, ] %>% rownames
+						adj_tax_totaltax_extract <- adj_tax_totaltax[tmp_extract_exist_names]
+						adj_tax_totaltax_extract_length <- adj_tax_totaltax_extract %>% unique %>% length
+						adj_tax_factor <- adj_tax_totaltax_extract_length/adj_tax_totaltax_length
+					}else{
+						adj_tax_factor <- 1
+					}
 					if(abundance_weighted){
-						(res_spe_func[names(sample_otu), x, drop = TRUE] * sample_otu) %>% 
-							{sum(.) * bound_value/sum(sample_otu)} %>% 
+						(res_spe_func[names(sample_otu), each_func, drop = TRUE] * sample_otu) %>% 
+							{sum(.) * bound_value * adj_tax_factor /sum(sample_otu)} %>% 
 							{round(., dec)}
 					}else{
-						res_spe_func[names(sample_otu), x, drop = TRUE] %>% 
-							{sum(. != 0) * bound_value/length(.)} %>% 
+						res_spe_func[names(sample_otu), each_func, drop = TRUE] %>% 
+							{sum(. != 0) * bound_value * adj_tax_factor/length(.)} %>% 
 							{round(., dec)}
 					}
 				}))
