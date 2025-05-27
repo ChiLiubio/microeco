@@ -200,7 +200,7 @@ Please see the parameter \code{adj_tax} for detailed explanation.
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
   abundance_weighted = FALSE,
   perc = TRUE,
-  dec = 2,
+  dec = 4,
   adj_tax = FALSE,
   adj_tax_by = "Genus"
 )}\if{html}{\out{</div>}}
@@ -215,7 +215,7 @@ If TRUE, calculate the functional individual percentage.}
 \item{\code{perc}}{default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
 If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.}
 
-\item{\code{dec}}{default 2; remained decimal places.}
+\item{\code{dec}}{default 4; remained decimal places.}
 
 \item{\code{adj_tax}}{default FALSE; 
 Whether the correction factor is calculated based on taxonomic information. 

@@ -326,7 +326,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' 	  If TRUE, calculate the functional individual percentage.
 		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
 		#' 	  If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.
-		#' @param dec default 2; remained decimal places.
+		#' @param dec default 4; remained decimal places.
 		#' @param adj_tax default FALSE; 
 		#' 	  Whether the correction factor is calculated based on taxonomic information. 
 		#' 	  The default \code{FALSE} represents the correction factor is 1, meaning no correction is made based on the taxonomic distribution. 
@@ -341,7 +341,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' \donttest{
 		#' t1$cal_spe_func_perc(abundance_weighted = TRUE)
 		#' }
-		cal_spe_func_perc = function(abundance_weighted = FALSE, perc = TRUE, dec = 2, adj_tax = FALSE, adj_tax_by = "Genus"){
+		cal_spe_func_perc = function(abundance_weighted = FALSE, perc = TRUE, dec = 4, adj_tax = FALSE, adj_tax_by = "Genus"){
 			if(is.null(self$res_spe_func)){
 				stop("Please first run cal_spe_func function !")
 			}
