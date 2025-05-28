@@ -185,16 +185,15 @@ t1$cal_spe_func(prok_database = "FAPROTAX")
 \if{html}{\out{<a id="method-trans_func-cal_spe_func_perc"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func_perc}{}}}
 \subsection{Method \code{cal_spe_func_perc()}}{
-Calculating the percentages of species with specific trait in communities.
-The percentages of the taxa with specific trait can reflect corresponding functional potential in the community.
-So this method is one representation of functional redundancy (FR) without the consideration of phylogenetic distance among taxa.
-The FR is defined:
-     \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {adj\_factor}}
-     \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {adj\_factor}}
+Calculating the percentages of species with specific trait (i.e. guild) in communities.
+The percentages of the taxa with specific trait can reflect corresponding functional redundancy (FR) in the community.
+It is defined:
+     \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {AF}}
+     \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {AF}}
 where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
 \eqn{N_{j}} is the number of species with function j in sample k.
 \eqn{A_{i}} is the abundance (counts) of species i in sample k.
-\eqn{adj\_factor} is the correction factor based on taxonomic information, representing the dispersion of taxa. It is 1 when \code{adj_tax = FALSE}.
+\eqn{AF} is adjustment factor based on taxonomic information, representing the dispersion of taxa. It is 1 when \code{adj_tax = FALSE}.
 Please see the parameter \code{adj_tax} for detailed explanation.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
@@ -218,15 +217,18 @@ If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or re
 \item{\code{dec}}{default 4; remained decimal places.}
 
 \item{\code{adj_tax}}{default FALSE; 
-Whether the correction factor is calculated based on taxonomic information. 
-The default \code{FALSE} represents the correction factor is 1, meaning no correction is made based on the taxonomic distribution. 
-The principle behind the calculation of the correction factor is that species with a certain function that are more dispersed taxonomically usually correspond to higher redundancy.
+Whether the adjustment factor (\eqn{AF}) is calculated based on taxonomic information. 
+The default \code{FALSE} represents the adjustment factor \eqn{AF} is 1, meaning no adjustment is made based on the taxonomic distribution. 
+The principle behind the calculation of the adjustment factor is that species with a certain function that are more dispersed taxonomically usually correspond to higher redundancy.
 It is defined:
-\deqn{adj\_factor = \frac{NU_{jk}}{NU_{k}}}
+\deqn{AF = \frac{NU_{jk}}{NU_{k}}}
 where \eqn{NU_{jk}} denotes the number of unique taxon (at \code{adj_tax_by} level) for those ASVs/OTUs with function j in sample k. 
-\eqn{NU_{k}} denotes the number of total unique taxon (at \code{adj_tax_by} level) in sample k.}
+\eqn{NU_{k}} denotes the number of total unique taxon (at \code{adj_tax_by} level) in sample k.
+Please use the parameter \code{adj_tax_by} to select other taxonomic rank (default Genus level).
+Here is an example: Suppose a sample k contains a total of 10 genera (including unclassified ones in different lineages), 
+and 3 ASVs with function j are distributed among 2 genera. In this case, the \eqn{AF} would be \eqn{\frac{2}{10}}, which is 0.2.}
 
-\item{\code{adj_tax_by}}{default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the correction factor (\eqn{adj\_factor}) calculated?}
+\item{\code{adj_tax_by}}{default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the adjustment factor (\eqn{AF}) calculated?}
 }
 \if{html}{\out{</div>}}
 }
