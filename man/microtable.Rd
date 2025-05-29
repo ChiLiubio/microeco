@@ -28,7 +28,7 @@ data(phylo_tree_16S)
 m1 <- microtable$new(otu_table = otu_table_16S)
 m1 <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
-# trim the files in the dataset
+# trim each data in the object
 m1$tidy_dataset()
 
 ## ------------------------------------------------
@@ -212,19 +212,20 @@ class(m1$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame class; The feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
+\item{\code{otu_table}}{data.frame class; Feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
 
 \item{\code{sample_table}}{default NULL; data.frame; The sample information table; rownames are samples; columns are sample metadata; 
-If not provided, the function can generate a table automatically according to the sample names in otu_table.}
+If not provided, the function can generate a table automatically according to the sample names in \code{otu_table}.}
 
-\item{\code{tax_table}}{default NULL; data.frame class; The taxonomic information table; rownames are features; column names are taxonomic classes.}
+\item{\code{tax_table}}{default NULL; data.frame class; Taxonomic information table; rownames are features; column names are taxonomic ranks.
+This can also be other hierarchical information tables, such as traits, genes, or metabolic pathways.}
 
-\item{\code{phylo_tree}}{default NULL; phylo class; The phylogenetic tree that must be read with the \code{read.tree} function of ape package.}
+\item{\code{phylo_tree}}{default NULL; phylo class; Phylogenetic tree; It must be read with the \code{read.tree} function of ape package.}
 
-\item{\code{rep_fasta}}{default NULL; \code{DNAStringSet}, \code{list} or \code{DNAbin} class; The representative sequences of OTUs/ASVs.
-The sequences should be read with the \code{readDNAStringSet} function in \code{Biostrings} package (DNAStringSet class), 
-\code{read.fasta} function in \code{seqinr} package (list class),
-or \code{read.FASTA} function in \code{ape} package (DNAbin class).}
+\item{\code{rep_fasta}}{default NULL; \code{DNAStringSet}, \code{list} or \code{DNAbin} class; Representative sequences of OTUs/ASVs.
+The sequences should be read with the \code{readDNAStringSet} function of \code{Biostrings} package (DNAStringSet class), 
+\code{read.fasta} function of \code{seqinr} package (list class),
+or \code{read.FASTA} function of \code{ape} package (DNAbin class).}
 
 \item{\code{auto_tidy}}{default FALSE; Whether tidy the data in the \code{microtable} object automatically.
 If TRUE, the function can invoke the \code{tidy_dataset} function.}
@@ -253,7 +254,7 @@ data(phylo_tree_16S)
 m1 <- microtable$new(otu_table = otu_table_16S)
 m1 <- microtable$new(sample_table = sample_info_16S, otu_table = otu_table_16S, 
   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
-# trim the files in the dataset
+# trim each data in the object
 m1$tidy_dataset()
 }
 \if{html}{\out{</div>}}
