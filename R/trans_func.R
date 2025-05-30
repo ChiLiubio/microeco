@@ -881,7 +881,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param ... paremeters pass to \code{cal_func}.
 		cal_spe_func = function(...){
-			lifecycle::deprecate_warn("1.16.0", "cal_spe_func()", "cal_func()")
+			lifecycle::deprecate_warn("1.15.1", "cal_spe_func()", "cal_func()")
 			self$cal_func(...)
 			self$res_spe_func <- self$res_func
 			message('To ensure compatibility with deprecated cal_spe_func, the result is also stored in object$res_spe_func ...')
@@ -891,7 +891,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param ... paremeters pass to \code{cal_func_FR}.
 		cal_spe_func_perc = function(...){
-			lifecycle::deprecate_warn("1.16.0", "cal_spe_func_perc()", "cal_func_FR()")
+			lifecycle::deprecate_warn("1.15.1", "cal_spe_func_perc()", "cal_func_FR()")
 			self$cal_func_FR(...)
 			self$res_spe_func_perc <- self$res_func_FR
 			message('To ensure compatibility with deprecated cal_spe_func_perc, the result is also stored in object$res_spe_func_perc ...')
@@ -901,7 +901,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param ... paremeters pass to \code{trans_func_FR}.
 		trans_spe_func_perc = function(...){
-			lifecycle::deprecate_warn("1.16.0", "trans_spe_func_perc()", "trans_func_FR()")
+			lifecycle::deprecate_warn("1.15.1", "trans_spe_func_perc()", "trans_func_FR()")
 			self$trans_func_FR(...)
 			self$res_spe_func_perc <- self$res_func_FR_trans
 			message('To ensure compatibility with deprecated trans_spe_func_perc, the result is also stored in object$res_spe_func_perc ...')
@@ -911,7 +911,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'
 		#' @param ... paremeters pass to \code{plot_func_FR}.
 		plot_spe_func_perc = function(...){
-			lifecycle::deprecate_warn("1.16.0", "plot_spe_func_perc()", "plot_func_FR()")
+			lifecycle::deprecate_warn("1.15.1", "plot_spe_func_perc()", "plot_func_FR()")
 			self$plot_func_FR(...)
 		}
 	),
