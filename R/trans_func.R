@@ -349,6 +349,8 @@ trans_func <- R6Class(classname = "trans_func",
 				stop("Please first run cal_func function !")
 			}
 			bound_value <- ifelse(perc, 100, 1)
+			self$param.cal_func_FR.perc <- perc
+
 			tmp_res_func <- self$res_func
 			otu_table <- self$otu_table
 			if(adj_tax){			
@@ -482,13 +484,18 @@ trans_func <- R6Class(classname = "trans_func",
 				plot_data %<>% .[.$sampname %in% order_x, , drop = FALSE]
 				plot_data$sampname %<>% factor(., levels = order_x)
 			}
+			if(self$param.cal_func_FR.perc){
+				legend_title <- "FR (%)"
+			}else{
+				legend_title <- "FR"
+			}
 			
 			g1 <- ggplot(aes(x = sampname, y = variable, fill = value), data = plot_data) + 
 				theme_bw() + 
 				geom_tile() + 
 				scale_fill_gradient2(low = color_gradient_low, high = color_gradient_high) +
 				scale_y_discrete(position = "right") + 
-				labs(y = NULL, x = NULL, fill = "Percentage (%)") +
+				labs(y = NULL, x = NULL, fill = legend_title) +
 				theme(axis.text.x = element_text(angle = 35, colour = "black", vjust = 1, hjust = 1, size = 14), axis.text.y = element_text(size = 10)) +
 				theme(panel.grid = element_blank(), panel.border = element_blank()) +
 				theme(panel.spacing = unit(.1, "lines")) + 
