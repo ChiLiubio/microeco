@@ -35,27 +35,27 @@ t1$cal_func_FR(abundance_weighted = TRUE)
 }
 
 ## ------------------------------------------------
+## Method `trans_func$trans_func_FR`
+## ------------------------------------------------
+
+\donttest{
+t1$trans_func_FR()
+}
+
+## ------------------------------------------------
+## Method `trans_func$plot_func_FR`
+## ------------------------------------------------
+
+\donttest{
+t1$plot_func_FR()
+}
+
+## ------------------------------------------------
 ## Method `trans_func$show_prok_func`
 ## ------------------------------------------------
 
 \donttest{
 t1$show_prok_func(use_func = "methanotrophy")
-}
-
-## ------------------------------------------------
-## Method `trans_func$trans_spe_func_perc`
-## ------------------------------------------------
-
-\donttest{
-t1$trans_spe_func_perc()
-}
-
-## ------------------------------------------------
-## Method `trans_func$plot_spe_func_perc`
-## ------------------------------------------------
-
-\donttest{
-t1$plot_spe_func_perc()
 }
 
 ## ------------------------------------------------
@@ -88,13 +88,15 @@ t1$cal_tax4fun2_FRI()
 \item \href{#method-trans_func-new}{\code{trans_func$new()}}
 \item \href{#method-trans_func-cal_func}{\code{trans_func$cal_func()}}
 \item \href{#method-trans_func-cal_func_FR}{\code{trans_func$cal_func_FR()}}
+\item \href{#method-trans_func-trans_func_FR}{\code{trans_func$trans_func_FR()}}
+\item \href{#method-trans_func-plot_func_FR}{\code{trans_func$plot_func_FR()}}
 \item \href{#method-trans_func-show_prok_func}{\code{trans_func$show_prok_func()}}
-\item \href{#method-trans_func-trans_spe_func_perc}{\code{trans_func$trans_spe_func_perc()}}
-\item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
 \item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
 \item \href{#method-trans_func-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
 \item \href{#method-trans_func-cal_spe_func}{\code{trans_func$cal_spe_func()}}
 \item \href{#method-trans_func-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
+\item \href{#method-trans_func-trans_spe_func_perc}{\code{trans_func$trans_spe_func_perc()}}
+\item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
 \item \href{#method-trans_func-clone}{\code{trans_func$clone()}}
 }
 }
@@ -195,7 +197,7 @@ The FR is defined:
 where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
 \eqn{N_{j}} is the number of species with function j in sample k.
 \eqn{A_{i}} is the abundance (counts) of species i in sample k.
-\eqn{AF} is adjustment factor based on taxonomic information, representing the dispersion of ASVs/OTUs/Species. It is 1 when \code{adj_tax = FALSE}.
+\eqn{AF} is adjustment factor based on taxonomic information, representing the taxonomic dispersion of ASVs/OTUs/Species. It is 1 when \code{adj_tax = FALSE}.
 Please see the parameter \code{adj_tax} for detailed explanation.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_func_FR(
@@ -250,52 +252,22 @@ t1$cal_func_FR(abundance_weighted = TRUE)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-show_prok_func"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-show_prok_func}{}}}
-\subsection{Method \code{show_prok_func()}}{
-Show the annotation information for a function of prokaryotes from FAPROTAX database.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$show_prok_func(use_func = NULL)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{use_func}}{default NULL; the function name.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-None.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-t1$show_prok_func(use_func = "methanotrophy")
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-trans_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-trans_spe_func_perc}{}}}
-\subsection{Method \code{trans_spe_func_perc()}}{
-Transform the \code{res_spe_func_perc} table to the long table format for the following visualization.
+\if{html}{\out{<a id="method-trans_func-trans_func_FR"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-trans_func_FR}{}}}
+\subsection{Method \code{trans_func_FR()}}{
+Transform the \code{res_func_FR} table to the long table format for the following visualization.
 Also add the group information if the database has hierarchical groups.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$trans_spe_func_perc()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$trans_func_FR()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
-\code{res_spe_func_perc_trans} stored in the object.
+\code{res_func_FR_trans} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$trans_spe_func_perc()
+t1$trans_func_FR()
 }
 }
 \if{html}{\out{</div>}}
@@ -304,12 +276,12 @@ t1$trans_spe_func_perc()
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-plot_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-plot_spe_func_perc}{}}}
-\subsection{Method \code{plot_spe_func_perc()}}{
-Plot the percentages of species with specific trait in communities.
+\if{html}{\out{<a id="method-trans_func-plot_func_FR"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-plot_func_FR}{}}}
+\subsection{Method \code{plot_func_FR()}}{
+Plot the functional redundancy (FR) results generated by \code{cal_func_FR} and \code{trans_func_FR}.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_func_FR(
   add_facet = TRUE,
   order_x = NULL,
   color_gradient_low = "#00008B",
@@ -336,7 +308,37 @@ ggplot2.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$plot_spe_func_perc()
+t1$plot_func_FR()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-show_prok_func"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-show_prok_func}{}}}
+\subsection{Method \code{show_prok_func()}}{
+Show the annotation information for a function of prokaryotes from FAPROTAX database.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$show_prok_func(use_func = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_func}}{default NULL; the function name in FAPROTAX database.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$show_prok_func(use_func = "methanotrophy")
 }
 }
 \if{html}{\out{</div>}}
@@ -470,6 +472,40 @@ This is a deprecated function. Please use \code{cal_func_FR} function instead.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{paremeters pass to \code{cal_func_FR}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-trans_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-trans_spe_func_perc}{}}}
+\subsection{Method \code{trans_spe_func_perc()}}{
+This is a deprecated function. Please use \code{trans_func_FR} function instead.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$trans_spe_func_perc(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{paremeters pass to \code{trans_func_FR}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-plot_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-plot_spe_func_perc}{}}}
+\subsection{Method \code{plot_spe_func_perc()}}{
+This is a deprecated function. Please use \code{plot_func_FR} function instead.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$plot_spe_func_perc(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{paremeters pass to \code{plot_func_FR}.}
 }
 \if{html}{\out{</div>}}
 }
