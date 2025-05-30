@@ -324,9 +324,9 @@ trans_func <- R6Class(classname = "trans_func",
 		#' @param abundance_weighted default FALSE; whether use abundance of ASVs/OTUs. 
 		#' 	  \code{FALSE} corresponds to \eqn{FR_{kj}^{unweighted}} in the formula. 
 		#' 	  \code{TRUE} corresponds to \eqn{FR_{kj}^{weighted}} in the formula. 
-		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
-		#' 	  If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.
-		#' @param dec default 4; remained decimal places.
+		#' @param perc default FALSE; whether to use percentages in the result. 
+		#' 	  The default value of \code{FALSE} means that the result is in the range of 0 to 1. 
+		#' 	  If it is \code{TRUE}, the result will be multiplied by 100, meaning the range will be from 0 to 100.
 		#' @param adj_tax default FALSE; 
 		#' 	  Whether the adjustment factor (\eqn{AF}) is calculated based on taxonomic information. 
 		#' 	  The default \code{FALSE} represents the adjustment factor \eqn{AF} is 1, meaning no adjustment is made based on the taxonomic distribution. 
@@ -339,12 +339,13 @@ trans_func <- R6Class(classname = "trans_func",
 		#' 	  Here is an example: Suppose a sample k contains a total of 10 genera (including unclassified ones in different lineages), 
 		#' 	  and 3 ASVs with function j are distributed among 2 genera. In this case, the \eqn{AF} would be \eqn{\frac{2}{10}}, which is 0.2.
 		#' @param adj_tax_by default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the adjustment factor (\eqn{AF}) calculated?
+		#' @param dec default 6; remained decimal places in the result table.
 		#' @return \code{res_func_FR} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_func_FR(abundance_weighted = TRUE)
 		#' }
-		cal_func_FR = function(abundance_weighted = FALSE, perc = TRUE, dec = 4, adj_tax = FALSE, adj_tax_by = "Genus"){
+		cal_func_FR = function(abundance_weighted = FALSE, perc = FALSE, adj_tax = FALSE, adj_tax_by = "Genus", dec = 6){
 			if(is.null(self$res_func)){
 				stop("Please first run cal_func function !")
 			}
