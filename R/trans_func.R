@@ -42,12 +42,12 @@ trans_func <- R6Class(classname = "trans_func",
 					}
 				}
 			}else{
-				message("No Kingdom column found in the tax_table! Please assign for_what object using prok or fungi manually, such as object$for_what <- 'fungi'")
+				message("No Kingdom column found in the tax_table! Please set for_what in the object manually, such as object$for_what <- 'fungi' ...")
 			}
 			self$for_what <- for_what
 		},
 		#' @description
-		#' Identify traits of each feature by matching taxonomic assignments to functional database.
+		#' Predict the functions or traits of each ASV/OTU by matching taxonomic assignments to functional database.
 		#'
 		#' @param prok_database default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic trait database:
 		#'   \describe{
@@ -68,12 +68,12 @@ trans_func <- R6Class(classname = "trans_func",
 		#'   }
 		#' @param FUNGuild_confidence default c("Highly Probable", "Probable", "Possible"). 
 		#'    Selected 'confidenceRanking' when \code{fungi_database = "FUNGuild"}.
-		#' @return \code{res_spe_func} stored in object.
+		#' @return \code{res_func} stored in object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_spe_func(prok_database = "FAPROTAX")
+		#' t1$cal_func(prok_database = "FAPROTAX")
 		#' }
-		cal_spe_func = function(
+		cal_func = function(
 			prok_database = c("FAPROTAX", "NJC19")[1], 
 			fungi_database = c("FUNGuild", "FungalTraits")[1],
 			FUNGuild_confidence = c("Highly Probable", "Probable", "Possible")
@@ -305,24 +305,25 @@ trans_func <- R6Class(classname = "trans_func",
 				warning("NA found in the final table! Convert NA to 0 ...")
 				otu_func_table[is.na(otu_func_table)] <- 0
 			}
-			self$res_spe_func <- otu_func_table
-			message('The functional binary table is stored in object$res_spe_func ...')
+			self$res_func <- otu_func_table
+			message('Functional binary result is stored in object$res_func ...')
 			invisible(self)
 		},
 		#' @description
-		#' Calculating the percentages of species with specific trait (i.e. guild) in communities.
-		#' The percentages of the taxa with specific trait can reflect corresponding functional redundancy (FR) in the community.
-		#' It is defined:
+		#' Calculating the functional redundancy (FR) for each function/trait in communities.
+		#' For each sample and each function, there will be a FR value in the result table.
+		#' The FR is defined:
 		#'      \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {AF}}
 		#'      \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {AF}}
 		#' where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
 		#' \eqn{N_{j}} is the number of species with function j in sample k.
 		#' \eqn{A_{i}} is the abundance (counts) of species i in sample k.
-		#' \eqn{AF} is adjustment factor based on taxonomic information, representing the dispersion of taxa. It is 1 when \code{adj_tax = FALSE}.
+		#' \eqn{AF} is adjustment factor based on taxonomic information, representing the dispersion of ASVs/OTUs/Species. It is 1 when \code{adj_tax = FALSE}.
 		#' Please see the parameter \code{adj_tax} for detailed explanation.
 		#' 
-		#' @param abundance_weighted default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
-		#' 	  If TRUE, calculate the functional individual percentage.
+		#' @param abundance_weighted default FALSE; whether use abundance of ASVs/OTUs. 
+		#' 	  \code{FALSE} corresponds to \eqn{FR_{kj}^{unweighted}} in the formula. 
+		#' 	  \code{TRUE} corresponds to \eqn{FR_{kj}^{weighted}} in the formula. 
 		#' @param perc default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
 		#' 	  If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.
 		#' @param dec default 4; remained decimal places.
@@ -338,23 +339,23 @@ trans_func <- R6Class(classname = "trans_func",
 		#' 	  Here is an example: Suppose a sample k contains a total of 10 genera (including unclassified ones in different lineages), 
 		#' 	  and 3 ASVs with function j are distributed among 2 genera. In this case, the \eqn{AF} would be \eqn{\frac{2}{10}}, which is 0.2.
 		#' @param adj_tax_by default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the adjustment factor (\eqn{AF}) calculated?
-		#' @return \code{res_spe_func_perc} stored in the object.
+		#' @return \code{res_func_FR} stored in the object.
 		#' @examples
 		#' \donttest{
-		#' t1$cal_spe_func_perc(abundance_weighted = TRUE)
+		#' t1$cal_func_FR(abundance_weighted = TRUE)
 		#' }
-		cal_spe_func_perc = function(abundance_weighted = FALSE, perc = TRUE, dec = 4, adj_tax = FALSE, adj_tax_by = "Genus"){
-			if(is.null(self$res_spe_func)){
-				stop("Please first run cal_spe_func function !")
+		cal_func_FR = function(abundance_weighted = FALSE, perc = TRUE, dec = 4, adj_tax = FALSE, adj_tax_by = "Genus"){
+			if(is.null(self$res_func)){
+				stop("Please first run cal_func function !")
 			}
 			bound_value <- ifelse(perc, 100, 1)
-			res_spe_func <- self$res_spe_func
+			tmp_res_func <- self$res_func
 			otu_table <- self$otu_table
 			if(adj_tax){			
 				message('Calculate adj_factor at ', adj_tax_by, ' level ...')
 			}
 			
-			res_spe_func_perc <- sapply(colnames(otu_table), function(input_samplecolumn){
+			tmp_res_func_fr <- sapply(colnames(otu_table), function(input_samplecolumn){
 				sample_otu <- otu_table[, input_samplecolumn]
 				names(sample_otu) <- rownames(otu_table)
 				# remove species whose abundance is 0
@@ -363,9 +364,9 @@ trans_func <- R6Class(classname = "trans_func",
 					adj_tax_totaltax <- self$tax_table[names(sample_otu), 1:which(colnames(self$tax_table) %in% adj_tax_by), drop = FALSE] %>% 
 						apply(., 1, function(x){paste0(x, collapse = ";")})
 					adj_tax_totaltax_length <- adj_tax_totaltax %>% unique %>% length
-					tmp_extract_total <- res_spe_func[names(sample_otu), ]
+					tmp_extract_total <- tmp_res_func[names(sample_otu), ]
 				}
-				res_table <- unlist(lapply(colnames(res_spe_func), function(each_func){
+				res_table <- unlist(lapply(colnames(tmp_res_func), function(each_func){
 					if(adj_tax){
 						tmp_extract_exist_names <- tmp_extract_total[tmp_extract_total[, each_func] != 0, ] %>% rownames
 						adj_tax_totaltax_extract <- adj_tax_totaltax[tmp_extract_exist_names]
@@ -375,23 +376,23 @@ trans_func <- R6Class(classname = "trans_func",
 						adj_tax_factor <- 1
 					}
 					if(abundance_weighted){
-						(res_spe_func[names(sample_otu), each_func, drop = TRUE] * sample_otu) %>% 
+						(tmp_res_func[names(sample_otu), each_func, drop = TRUE] * sample_otu) %>% 
 							{sum(.) * bound_value * adj_tax_factor /sum(sample_otu)} %>% 
 							{round(., dec)}
 					}else{
-						res_spe_func[names(sample_otu), each_func, drop = TRUE] %>% 
+						tmp_res_func[names(sample_otu), each_func, drop = TRUE] %>% 
 							{sum(. != 0) * bound_value * adj_tax_factor/length(.)} %>% 
 							{round(., dec)}
 					}
 				}))
 				res_table
 			})
-			res_spe_func_perc %<>% t %>% 
+			tmp_res_func_fr %<>% t %>% 
 				as.data.frame %>% 
-				`colnames<-`(colnames(res_spe_func)) %>% 
+				`colnames<-`(colnames(tmp_res_func)) %>% 
 				.[, apply(., 2, sum) != 0]
-			self$res_spe_func_perc <- res_spe_func_perc
-			message('The result table is stored in object$res_spe_func_perc ...')
+			self$res_func_FR <- tmp_res_func_fr
+			message('The result table is stored in object$res_func_FR ...')
 			invisible(self)
 		},
 		#' @description
@@ -866,6 +867,26 @@ trans_func <- R6Class(classname = "trans_func",
 			self$res_tax4fun2_rFRI <- rel_functional_redundancy_final
 			message('Relative functional redundancy is stored in object$res_tax4fun2_rFRI')
 			invisible(self)
+		},
+		#' @description
+		#' This is a deprecated function. Please use \code{cal_func} function instead.
+		#'
+		#' @param ... paremeters pass to \code{cal_func}.
+		cal_spe_func = function(...){
+			lifecycle::deprecate_warn("1.16.0", "cal_spe_func()", "cal_func()")
+			self$cal_func(...)
+			self$res_spe_func <- self$res_func
+			message('To ensure compatibility with deprecated cal_spe_func, the result is also stored in object$res_spe_func ...')
+		},
+		#' @description
+		#' This is a deprecated function. Please use \code{cal_func_FR} function instead.
+		#'
+		#' @param ... paremeters pass to \code{cal_func_FR}.
+		cal_spe_func_perc = function(...){
+			lifecycle::deprecate_warn("1.16.0", "cal_spe_func_perc()", "cal_func_FR()")
+			self$cal_func_FR(...)
+			self$res_spe_func_perc <- self$res_func_FR
+			message('To ensure compatibility with deprecated cal_spe_func_perc, the result is also stored in object$res_spe_func_perc ...')
 		}
 	),
 	active = list(

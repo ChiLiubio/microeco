@@ -19,19 +19,19 @@ data(dataset)
 t1 <- trans_func$new(dataset = dataset)
 
 ## ------------------------------------------------
-## Method `trans_func$cal_spe_func`
+## Method `trans_func$cal_func`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_spe_func(prok_database = "FAPROTAX")
+t1$cal_func(prok_database = "FAPROTAX")
 }
 
 ## ------------------------------------------------
-## Method `trans_func$cal_spe_func_perc`
+## Method `trans_func$cal_func_FR`
 ## ------------------------------------------------
 
 \donttest{
-t1$cal_spe_func_perc(abundance_weighted = TRUE)
+t1$cal_func_FR(abundance_weighted = TRUE)
 }
 
 ## ------------------------------------------------
@@ -86,13 +86,15 @@ t1$cal_tax4fun2_FRI()
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-trans_func-new}{\code{trans_func$new()}}
-\item \href{#method-trans_func-cal_spe_func}{\code{trans_func$cal_spe_func()}}
-\item \href{#method-trans_func-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
+\item \href{#method-trans_func-cal_func}{\code{trans_func$cal_func()}}
+\item \href{#method-trans_func-cal_func_FR}{\code{trans_func$cal_func_FR()}}
 \item \href{#method-trans_func-show_prok_func}{\code{trans_func$show_prok_func()}}
 \item \href{#method-trans_func-trans_spe_func_perc}{\code{trans_func$trans_spe_func_perc()}}
 \item \href{#method-trans_func-plot_spe_func_perc}{\code{trans_func$plot_spe_func_perc()}}
 \item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
 \item \href{#method-trans_func-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
+\item \href{#method-trans_func-cal_spe_func}{\code{trans_func$cal_spe_func()}}
+\item \href{#method-trans_func-cal_spe_func_perc}{\code{trans_func$cal_spe_func_perc()}}
 \item \href{#method-trans_func-clone}{\code{trans_func$clone()}}
 }
 }
@@ -128,12 +130,12 @@ t1 <- trans_func$new(dataset = dataset)
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-cal_spe_func"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func}{}}}
-\subsection{Method \code{cal_spe_func()}}{
-Identify traits of each feature by matching taxonomic assignments to functional database.
+\if{html}{\out{<a id="method-trans_func-cal_func"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_func}{}}}
+\subsection{Method \code{cal_func()}}{
+Predict the functions or traits of each ASV/OTU by matching taxonomic assignments to functional database.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_func(
   prok_database = c("FAPROTAX", "NJC19")[1],
   fungi_database = c("FUNGuild", "FungalTraits")[1],
   FUNGuild_confidence = c("Highly Probable", "Probable", "Possible")
@@ -168,12 +170,12 @@ Selected 'confidenceRanking' when \code{fungi_database = "FUNGuild"}.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_spe_func} stored in object.
+\code{res_func} stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_spe_func(prok_database = "FAPROTAX")
+t1$cal_func(prok_database = "FAPROTAX")
 }
 }
 \if{html}{\out{</div>}}
@@ -182,21 +184,21 @@ t1$cal_spe_func(prok_database = "FAPROTAX")
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_func-cal_spe_func_perc"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func_perc}{}}}
-\subsection{Method \code{cal_spe_func_perc()}}{
-Calculating the percentages of species with specific trait (i.e. guild) in communities.
-The percentages of the taxa with specific trait can reflect corresponding functional redundancy (FR) in the community.
-It is defined:
+\if{html}{\out{<a id="method-trans_func-cal_func_FR"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_func_FR}{}}}
+\subsection{Method \code{cal_func_FR()}}{
+Calculating the functional redundancy (FR) for each function/trait in communities.
+For each sample and each function, there will be a FR value in the result table.
+The FR is defined:
      \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {AF}}
      \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {AF}}
 where \eqn{FR_{kj}} denotes the FR for sample k and function j. \eqn{N_{k}} is the species number in sample k.
 \eqn{N_{j}} is the number of species with function j in sample k.
 \eqn{A_{i}} is the abundance (counts) of species i in sample k.
-\eqn{AF} is adjustment factor based on taxonomic information, representing the dispersion of taxa. It is 1 when \code{adj_tax = FALSE}.
+\eqn{AF} is adjustment factor based on taxonomic information, representing the dispersion of ASVs/OTUs/Species. It is 1 when \code{adj_tax = FALSE}.
 Please see the parameter \code{adj_tax} for detailed explanation.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_func_FR(
   abundance_weighted = FALSE,
   perc = TRUE,
   dec = 4,
@@ -208,8 +210,9 @@ Please see the parameter \code{adj_tax} for detailed explanation.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{abundance_weighted}}{default FALSE; whether use abundance of taxa. If FALSE, calculate the functional population percentage. 
-If TRUE, calculate the functional individual percentage.}
+\item{\code{abundance_weighted}}{default FALSE; whether use abundance of ASVs/OTUs. 
+\code{FALSE} corresponds to \eqn{FR_{kj}^{unweighted}} in the formula. 
+\code{TRUE} corresponds to \eqn{FR_{kj}^{weighted}} in the formula.}
 
 \item{\code{perc}}{default TRUE; whether to use percentages in the result. If TRUE, values are bounded between 0 and 100. Otherwise, 0-1.
 If FALSE, the result is relative proportion (`abundance_weighted = FALSE`) or relative abundance (`abundance_weighted = TRUE`) bounded between 0 and 1.}
@@ -233,12 +236,12 @@ and 3 ASVs with function j are distributed among 2 genera. In this case, the \eq
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_spe_func_perc} stored in the object.
+\code{res_func_FR} stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-t1$cal_spe_func_perc(abundance_weighted = TRUE)
+t1$cal_func_FR(abundance_weighted = TRUE)
 }
 }
 \if{html}{\out{</div>}}
@@ -436,6 +439,40 @@ t1$cal_tax4fun2_FRI()
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-cal_spe_func"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func}{}}}
+\subsection{Method \code{cal_spe_func()}}{
+This is a deprecated function. Please use \code{cal_func} function instead.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{paremeters pass to \code{cal_func}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-cal_spe_func_perc"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_spe_func_perc}{}}}
+\subsection{Method \code{cal_spe_func_perc()}}{
+This is a deprecated function. Please use \code{cal_func_FR} function instead.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_spe_func_perc(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{paremeters pass to \code{cal_func_FR}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_func-clone"></a>}}
