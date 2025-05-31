@@ -2,9 +2,9 @@
 #' Create \code{trans_func} object for functional prediction.
 #'
 #' @description
-#' This class is a wrapper for a series of functional prediction analysis on species and communities, including the prokaryotic trait prediction based on 
+#' This class is a wrapper for a series of functional prediction analysis on ASVs/OTUs/species and communities, including the prokaryotic function/trait prediction based on 
 #' Louca et al. (2016) <doi:10.1126/science.aaf4507> and Lim et al. (2020) <10.1038/s41597-020-0516-5>, 
-#' or fungal trait prediction based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>; 
+#' or fungal function/trait prediction based on Nguyen et al. (2016) <10.1016/j.funeco.2015.06.006> and Polme et al. (2020) <doi:10.1007/s13225-020-00466-2>; 
 #' functional redundancy calculation and metabolic pathway abundance prediction Abhauer et al. (2015) <10.1093/bioinformatics/btv287>.
 #'
 #' @export
@@ -47,9 +47,9 @@ trans_func <- R6Class(classname = "trans_func",
 			self$for_what <- for_what
 		},
 		#' @description
-		#' Predict the functions or traits of each ASV/OTU by matching taxonomic assignments to functional database.
+		#' Predict the functions or traits for each ASV/OTU/species by matching taxonomic assignments to functional database.
 		#'
-		#' @param prok_database default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic trait database:
+		#' @param prok_database default "FAPROTAX"; \code{"FAPROTAX"} or \code{"NJC19"}; select a prokaryotic database:
 		#'   \describe{
 		#'     \item{\strong{'FAPROTAX'}}{FAPROTAX; Reference: Louca et al. (2016). Decoupling function and taxonomy in the global ocean microbiome. 
 		#'     	  Science, 353(6305), 1272. <doi:10.1126/science.aaf4507>}
@@ -58,7 +58,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'     	  Note that the matching in this database is performed at the species level, 
 		#'     	  hence utilizing it demands a higher level of precision in regards to the assignments of species in the taxonomic information table.}
 		#'   }
-		#' @param fungi_database default "FUNGuild"; \code{"FUNGuild"} or \code{"FungalTraits"}; select a fungal trait database:
+		#' @param fungi_database default "FUNGuild"; \code{"FUNGuild"} or \code{"FungalTraits"}; select a fungal database:
 		#'   \describe{
 		#'     \item{\strong{'FUNGuild'}}{Nguyen et al. (2016) FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild.
 		#'     	  Fungal Ecology, 20(1), 241-248, <doi:10.1016/j.funeco.2015.06.006>}
@@ -68,7 +68,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#'   }
 		#' @param FUNGuild_confidence default c("Highly Probable", "Probable", "Possible"). 
 		#'    Selected 'confidenceRanking' when \code{fungi_database = "FUNGuild"}.
-		#' @return \code{res_func} stored in object.
+		#' @return \code{res_func} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_func(prok_database = "FAPROTAX")
@@ -310,8 +310,8 @@ trans_func <- R6Class(classname = "trans_func",
 			invisible(self)
 		},
 		#' @description
-		#' Calculating the functional redundancy (FR) for each function/trait in communities.
-		#' For each sample and each function, there will be a FR value in the result table.
+		#' Calculating the functional redundancy (FR) of communities for each function/trait.
+		#' For each sample and each function/trait, there will be a FR value in the result table.
 		#' The FR is defined:
 		#'      \deqn{FR_{kj}^{unweighted} = \frac{N_{j}}{N_{k}} \cdot {AF}}
 		#'      \deqn{FR_{kj}^{weighted} = \frac{\sum_{i=1}^{N_{j}} A_{i}}{\sum_{i=1}^{N_{k}} A_{i}} \cdot {AF}}
@@ -321,7 +321,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' \eqn{AF} is adjustment factor based on taxonomic information, representing the taxonomic dispersion of ASVs/OTUs/Species. It is 1 when \code{adj_tax = FALSE}.
 		#' Please see the parameter \code{adj_tax} for detailed explanation.
 		#' 
-		#' @param abundance_weighted default FALSE; whether use abundance of ASVs/OTUs. 
+		#' @param abundance_weighted default FALSE; whether use abundance of ASVs/OTUs/species. 
 		#' 	  \code{FALSE} corresponds to \eqn{FR_{kj}^{unweighted}} in the formula. 
 		#' 	  \code{TRUE} corresponds to \eqn{FR_{kj}^{weighted}} in the formula. 
 		#' @param perc default FALSE; whether to use percentages in the result. 
@@ -333,7 +333,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' 	  The principle behind the calculation of the adjustment factor is that species with a certain function that are more dispersed taxonomically usually correspond to higher redundancy.
 		#' 	  It is defined:
 		#' 	  \deqn{AF = \frac{NU_{jk}}{NU_{k}}}
-		#' 	  where \eqn{NU_{jk}} denotes the number of unique taxon (at \code{adj_tax_by} level) for those ASVs/OTUs with function j in sample k. 
+		#' 	  where \eqn{NU_{jk}} denotes the number of unique taxon (at \code{adj_tax_by} level) for those ASVs/OTUs/species with function j in sample k. 
 		#' 	  \eqn{NU_{k}} denotes the number of total unique taxon (at \code{adj_tax_by} level) in sample k.
 		#' 	  Please use the parameter \code{adj_tax_by} to select other taxonomic rank (default Genus level).
 		#' 	  Here is an example: Suppose a sample k contains a total of 10 genera (including unclassified ones in different lineages), 
