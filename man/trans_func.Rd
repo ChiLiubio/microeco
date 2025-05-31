@@ -221,8 +221,8 @@ The default value of \code{FALSE} means that the result is in the range of 0 to 
 If it is \code{TRUE}, the result will be multiplied by 100, meaning the range will be from 0 to 100.}
 
 \item{\code{adj_tax}}{default FALSE; 
-Whether the adjustment factor (\eqn{AF}) is calculated based on taxonomic information. 
-The default \code{FALSE} represents the adjustment factor \eqn{AF} is 1, meaning no adjustment is made based on the taxonomic distribution. 
+Whether the adjustment factor (\eqn{AF}) is used. 
+The default \code{FALSE} represents the \eqn{AF} is 1, meaning no adjustment is made based on the taxonomic distribution. 
 The principle behind the calculation of the adjustment factor is that species with a certain function that are more dispersed taxonomically usually correspond to higher redundancy.
 It is defined:
 \deqn{AF = \frac{NU_{jk}}{NU_{k}}}
