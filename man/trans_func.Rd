@@ -202,9 +202,9 @@ Please see the parameter \code{adj_tax} for detailed explanation.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_func_FR(
   abundance_weighted = FALSE,
-  perc = FALSE,
   adj_tax = FALSE,
   adj_tax_by = "Genus",
+  perc = FALSE,
   dec = 6
 )}\if{html}{\out{</div>}}
 }
@@ -215,10 +215,6 @@ Please see the parameter \code{adj_tax} for detailed explanation.
 \item{\code{abundance_weighted}}{default FALSE; whether use abundance of ASVs/OTUs/species. 
 \code{FALSE} corresponds to \eqn{FR_{kj}^{unweighted}} in the formula. 
 \code{TRUE} corresponds to \eqn{FR_{kj}^{weighted}} in the formula.}
-
-\item{\code{perc}}{default FALSE; whether to use percentages in the result. 
-The default value of \code{FALSE} means that the result is in the range of 0 to 1. 
-If it is \code{TRUE}, the result will be multiplied by 100, meaning the range will be from 0 to 100.}
 
 \item{\code{adj_tax}}{default FALSE; 
 Whether the adjustment factor (\eqn{AF}) is used. 
@@ -233,6 +229,10 @@ Here is an example: Suppose a sample k contains a total of 10 genera (including 
 and 3 ASVs with function j are distributed among 2 genera. In this case, the \eqn{AF} would be \eqn{\frac{2}{10}}, which is 0.2.}
 
 \item{\code{adj_tax_by}}{default "Genus"; When \code{adj_tax = TRUE}, at which taxonomic level is the adjustment factor (\eqn{AF}) calculated?}
+
+\item{\code{perc}}{default FALSE; whether to use percentages in the result. 
+The default value of \code{FALSE} means that the result is in the range of 0 to 1. 
+If it is \code{TRUE}, the result will be multiplied by 100, meaning the range will be from 0 to 100.}
 
 \item{\code{dec}}{default 6; remained decimal places in the result table.}
 }
