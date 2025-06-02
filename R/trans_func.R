@@ -513,6 +513,37 @@ trans_func <- R6Class(classname = "trans_func",
 			g1
 		},
 		#' @description
+		#' Calculate the functional redundancy (FR) of communities based on the the result of \code{cal_func_FR} function.
+		#' It is the geometric mean of FR for each function/trait in a community.
+		#' It is defined:
+		#'      \deqn{FR_{k} = \sqrt[n]{FR_{k1} \times FR_{k2} \times \cdots \times FR_{kn}}}
+		#' where \eqn{FR_{k}} denotes the FR at community level for sample k. \eqn{FR_{kn}} represents the FR of function n for sample k.
+		#'
+		#' @return vector.
+		#' @examples
+		#' \donttest{
+		#' t1$cal_func_FR_comm()
+		#' }
+		cal_func_FR_comm = function(){
+			if(is.null(self$res_func_FR)){
+				message("The res_func_FR object is not found. Run the cal_func_FR function to get it ...")
+				self$cal_func_FR()
+			}
+			tmp_res_func_FR <- self$res_func_FR
+			geometric_mean <- function(x) {
+				exp(mean(log(x)))
+			}
+			# check the minimum value
+			test_min <- unlist(tmp_res_func_FR)
+			test_min %<>% .[. != 0] %>% min
+			test_min_low <- floor(log10(min(test_min))) - 2
+			test_min_low_add <- 10^(test_min_low)
+			message("Use the value ", test_min_low_add, " instead of 0 in the input table ...")
+			tmp_res_func_FR[tmp_res_func_FR == 0] <- test_min_low_add
+			res_fr <- apply(tmp_res_func_FR, 1, geometric_mean)
+			res_fr
+		},		
+		#' @description
 		#' Show the annotation information for a function of prokaryotes from FAPROTAX database.
 		#'
 		#'

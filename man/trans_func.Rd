@@ -51,6 +51,14 @@ t1$plot_func_FR()
 }
 
 ## ------------------------------------------------
+## Method `trans_func$cal_func_FR_comm`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_func_FR_comm()
+}
+
+## ------------------------------------------------
 ## Method `trans_func$show_prok_func`
 ## ------------------------------------------------
 
@@ -90,6 +98,7 @@ t1$cal_tax4fun2_FRI()
 \item \href{#method-trans_func-cal_func_FR}{\code{trans_func$cal_func_FR()}}
 \item \href{#method-trans_func-trans_func_FR}{\code{trans_func$trans_func_FR()}}
 \item \href{#method-trans_func-plot_func_FR}{\code{trans_func$plot_func_FR()}}
+\item \href{#method-trans_func-cal_func_FR_comm}{\code{trans_func$cal_func_FR_comm()}}
 \item \href{#method-trans_func-show_prok_func}{\code{trans_func$show_prok_func()}}
 \item \href{#method-trans_func-cal_tax4fun2}{\code{trans_func$cal_tax4fun2()}}
 \item \href{#method-trans_func-cal_tax4fun2_FRI}{\code{trans_func$cal_tax4fun2_FRI()}}
@@ -310,6 +319,33 @@ ggplot2.
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
 t1$plot_func_FR()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_func-cal_func_FR_comm"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_func-cal_func_FR_comm}{}}}
+\subsection{Method \code{cal_func_FR_comm()}}{
+Calculate the functional redundancy (FR) of communities based on the the result of \code{cal_func_FR} function.
+It is the geometric mean of FR for each function/trait in a community.
+It is defined:
+     \deqn{FR_{k} = \sqrt[n]{FR_{k1} \times FR_{k2} \times \cdots \times FR_{kn}}}
+where \eqn{FR_{k}} denotes the FR at community level for sample k. \eqn{FR_{kn}} represents the FR of function n for sample k.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_func$cal_func_FR_comm()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+vector.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+t1$cal_func_FR_comm()
 }
 }
 \if{html}{\out{</div>}}
