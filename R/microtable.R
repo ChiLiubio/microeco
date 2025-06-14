@@ -549,7 +549,10 @@ microtable <- R6Class(classname = "microtable",
 		#' @param split_column default NULL; one column name used for the splitting in tax_table for each abundance calculation; 
 		#'   only available when \code{split_group = TRUE}. If not provided, the function will split each column that containing the \code{split_by} character.
 		#' @param split_special_char default "&&"; special character that will be used forcibly to split multiple mapping information in \code{tax_table} by default
-		#'   no matter \code{split_group} setting.
+		#'   no matter \code{split_group} setting. 
+		#'   For example, the hierarchical information of MetaCyc metabolic pathways from the file2meco package may have multiple ontology entries linked together. 
+		#'   In this case, the default parameters are automatically changed to \code{split_group = TRUE} and \code{split_by = split_special_char}, which is the default "&&". 
+		#'   If users have other multi-label data in \code{tax_table}, they can adjust the \code{split_group}, \code{split_by}, and \code{split_column} parameters accordingly.
 		#' @return \code{taxa_abund} list in object.
 		#' @examples
 		#' \donttest{
