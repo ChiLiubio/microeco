@@ -217,9 +217,10 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 		},
 		#' @description
-		#' Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{vegan} package.
+		#' Constrained ordination analysis.
 		#'
-		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method.
+		#' @param method default c("RDA", "dbRDA", "CCA")[1]; the ordination method; 
+		#'   "RDA": redundancy analysis, "dbRDA": distance-based RDA, "CCA": correspondence analysis.
 		#' @param feature_sel default FALSE; whether perform the feature selection based on forward selection method.
 		#' @param taxa_level default NULL; the taxonomic level used in RDA or CCA.
 		#'   Default NULL means using the merged data at "Genus" level. "ASV" or "OTU" can also be provided for the use of \code{otu_table} in microtable object.
@@ -228,7 +229,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' 	 If not provided, use the first beta diversity matrix in the \code{microtable$beta_diversity} automatically.
 		#' @param add_matrix default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 		#'   only available when method = "dbRDA".
-		#' @param ... paremeters passed to \code{dbrda}, \code{rda} or \code{cca} function according to the \code{method} parameter.
+		#' @param ... paremeters passed to \code{rda}, \code{dbrda} or \code{cca} function of \code{vegan} package according to the \code{method} parameter.
 		#' @return \code{res_ordination} and \code{res_ordination_R2} stored in the object.
 		#' @examples
 		#' \donttest{

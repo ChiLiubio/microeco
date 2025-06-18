@@ -330,7 +330,7 @@ t1$cal_autocor(upper = list(continuous = GGally::wrap("cor", method= "spearman")
 \if{html}{\out{<a id="method-trans_env-cal_ordination"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_env-cal_ordination}{}}}
 \subsection{Method \code{cal_ordination()}}{
-Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{vegan} package.
+Constrained ordination analysis.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_ordination(
   method = c("RDA", "dbRDA", "CCA")[1],
@@ -346,7 +346,8 @@ Redundancy analysis (RDA) and Correspondence Analysis (CCA) based on the \code{v
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{method}}{default c("RDA", "dbRDA", "CCA")[1]; the ordination method.}
+\item{\code{method}}{default c("RDA", "dbRDA", "CCA")[1]; the ordination method; 
+"RDA": redundancy analysis, "dbRDA": distance-based RDA, "CCA": correspondence analysis.}
 
 \item{\code{feature_sel}}{default FALSE; whether perform the feature selection based on forward selection method.}
 
@@ -361,7 +362,7 @@ If not provided, use the first beta diversity matrix in the \code{microtable$bet
 \item{\code{add_matrix}}{default NULL; additional distance matrix provided, when the user does not want to use the beta diversity matrix within the dataset;
 only available when method = "dbRDA".}
 
-\item{\code{...}}{paremeters passed to \code{dbrda}, \code{rda} or \code{cca} function according to the \code{method} parameter.}
+\item{\code{...}}{paremeters passed to \code{rda}, \code{dbrda} or \code{cca} function of \code{vegan} package according to the \code{method} parameter.}
 }
 \if{html}{\out{</div>}}
 }
