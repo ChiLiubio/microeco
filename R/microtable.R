@@ -63,6 +63,7 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				private$check_df(sample_table, "sample_table")
 				private$check_tbldf(sample_table, "sample_table")
+				sample_table <- private$check_colnames(sample_table, "sample_table")
 				self$sample_table <- sample_table
 			}
 			if(!is.null(tax_table)){
@@ -889,6 +890,16 @@ microtable <- R6Class(classname = "microtable",
 			if(inherits(input_table, "tbl_df")){
 				stop("Input ", showname, " is tbl_df format! It may be created using tibble package! Please convert it to traditional data.frame class!")
 			}
+		},
+		check_colnames = function(input_table, showname){
+			if(any(colnames(input_table) == "")){
+				if(sum(colnames(input_table) != "") == 0){
+					stop("Please add column names to the ", showname, " ! The column name is necessary!")
+				}
+				message("The input ", showname, " has empty column name! Such column will be removed! If the user wants to retain the column, please add a column name!")
+				input_table <- input_table[, colnames(input_table) != "", drop = FALSE]
+			}
+			input_table
 		},
 		# check and remove OTU or sample with 0 abundance
 		check_abund_table = function(otu_table){
