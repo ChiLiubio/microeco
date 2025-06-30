@@ -912,6 +912,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(length(order_x) == 1){
 					stop("This may be wrong. Only one sample used to order the samples!")
 				}else{
+					if(!all(unique(plot_data$Sample) %in% order_x)){
+						message("Some sample names are not found in provided order_x parameter! This will cause the results in the figure to be abnormal!")
+					}
 					plot_data$Sample %<>% factor(., levels = order_x)
 				}
 			}
