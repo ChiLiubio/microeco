@@ -803,6 +803,7 @@ Plot correlation heatmap.
   ytext_position = "right",
   sig_label_size = 4,
   font_family = NULL,
+  legend_title = NULL,
   cluster_ggplot = "none",
   cluster_height_rows = 0.2,
   cluster_height_cols = 0.2,
@@ -853,6 +854,8 @@ The input should be consistent with the feature names in the \code{res_cor} tabl
 \item{\code{sig_label_size}}{default 4; the size of significance label shown in the cell.}
 
 \item{\code{font_family}}{default NULL; font family used.}
+
+\item{\code{legend_title}}{default NULL; legend title; default NULL means 'Pearson' for pearson method and 'Spearman' for spearman method.}
 
 \item{\code{cluster_ggplot}}{default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
 "none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.}

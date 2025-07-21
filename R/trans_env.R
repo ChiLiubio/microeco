@@ -1076,6 +1076,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ytext_position default "right"; "left" or "right"; the y axis text position.
 		#' @param sig_label_size default 4; the size of significance label shown in the cell.
 		#' @param font_family default NULL; font family used.
+		#' @param legend_title default NULL; legend title; default NULL means 'Pearson' for pearson method and 'Spearman' for spearman method.
 		#' @param cluster_ggplot default "none"; add clustering dendrogram for \code{ggplot2} based heatmap. Available options: "none", "row", "col" or "both". 
 		#'   "none": no any clustering used; "row": add clustering for rows; "col": add clustering for columns; "both": add clustering for both rows and columns.
 		#' @param cluster_height_rows default 0.2, the dendrogram plot height for rows; available when \code{cluster_ggplot} is not "none".
@@ -1109,6 +1110,7 @@ trans_env <- R6Class(classname = "trans_env",
 			ytext_position = "right",
 			sig_label_size = 4,
 			font_family = NULL,
+			legend_title = NULL,
 			cluster_ggplot = "none",
 			cluster_height_rows = 0.2,
 			cluster_height_cols = 0.2,
@@ -1246,7 +1248,12 @@ trans_env <- R6Class(classname = "trans_env",
 				p <- p + scale_fill_gradientn(colours = color_palette, na.value = na.value, trans = trans)
 			}
 			
-			legend_fill <- ifelse(self$cal_cor_method == "maaslin2", paste0("maaslin2\ncoef"), paste0(toupper(substring(self$cal_cor_method, 1, 1)), substring(self$cal_cor_method, 2)))
+			if(is.null(legend_title)){
+				legend_fill <- ifelse(self$cal_cor_method == "maaslin2", paste0("maaslin2\ncoef"), 
+					paste0(toupper(substring(self$cal_cor_method, 1, 1)), substring(self$cal_cor_method, 2)))
+			}else{
+				legend_fill <- legend_title
+			}
 			
 			p <- p + geom_text(aes(label = Significance), color = "black", size = sig_label_size) + 
 				labs(y = NULL, x = "Measure", fill = legend_fill) +
