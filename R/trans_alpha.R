@@ -358,70 +358,58 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					res_model <- list()
 				}
 				for(k in measure){
-					div_table <- data_alpha[data_alpha$Measure == k, ]
-					if(method == "lm"){
-						tmp <- stats::lm(reformulate(formula, "Value"), data = div_table, ...)
+					if(method %in% c("lm", "lme")){
+						if(is.null(by_group)){
+							div_table <- data_alpha[data_alpha$Measure == k, ]
+							tmp_res <- private$lm_lme_test(return_model, method = method, input_table = div_table, formula = formula, measure = k, ...)
+							if(is.null(tmp_res)){
+								next
+							}else{
+								compare_result %<>% rbind(., tmp_res$res_table)
+							}
+							if(return_model){
+								res_model[[k]] <- tmp_res$res_model
+							}
+						}else{
+							for(each_group in unique_bygroups){
+								div_table <- data_alpha[data_alpha$Measure == k & all_bygroups == each_group, ]
+								tmp_res <- private$lm_lme_test(return_model, method = method, input_table = div_table, formula = formula, measure = k, ...)
+								if(is.null(tmp_res)){
+									next
+								}else{
+									tmp_res_table <- cbind.data.frame(by_group = each_group, tmp_res$res_table)
+									compare_result %<>% rbind(., tmp_res_table)
+								}
+								if(return_model){
+									res_model[[k]][[each_group]] <- tmp_res$res_model
+								}
+							}
+						}
+					}else{
+						if(method == "glmm"){
+							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
+						}else{
+							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, family = glmmTMB::beta_family(link = "logit"), ...)
+						}
 						if(return_model){
 							res_model[[k]] <- tmp
 						}
 						tmp_summary <- summary(tmp)
-						tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
-						tmp_model_p <- anova(tmp)
+						tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
+						tmp_model_p <- car::Anova(tmp)
 						R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_coefficients))
 
 						tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
 							Measure = k, 
 							Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
 							R2data, 
-							Estimate  = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
+							Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
 							Std.Error = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$`Std. Error`), 
-							P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_coefficients$`Pr(>|t|)`)
-						)
-					}else{
-						if(method == "lme"){
-							tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = div_table, ...)
-							if(return_model){
-								res_model[[k]] <- tmp
-							}
-							tmp_summary <- summary(tmp)
-							tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
-							tmp_model_p <- anova(tmp)
-							tmp_random_p <- lmerTest::ranova(tmp)
-							R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_random_p) + nrow(tmp_coefficients))
+							P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
+							)
 							
-							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
-								Measure = k, 
-								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
-								R2data, 
-								Estimate  = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
-								Std.Error = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$`Std. Error`), 
-								P.unadj   = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
-							)
-						}else{
-							if(method == "glmm"){
-								tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
-							}else{
-								tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, family = glmmTMB::beta_family(link = "logit"), ...)
-							}
-							if(return_model){
-								res_model[[k]] <- tmp
-							}
-							tmp_summary <- summary(tmp)
-							tmp_coefficients <- as.data.frame(tmp_summary$coefficients$cond, check.names = FALSE)
-							tmp_model_p <- car::Anova(tmp)
-							R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_coefficients))
-
-							tmp_res <- data.frame(Method = paste0(method, " formula for ", formula), 
-								Measure = k, 
-								Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
-								R2data, 
-								Estimate = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
-								Std.Error = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$`Std. Error`), 
-								P.unadj = c(NA, tmp_model_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|z|)`)
-							)
-						}
+						compare_result %<>% rbind(., tmp_res)
 					}
-					compare_result %<>% rbind(., tmp_res)
 				}
 				if(return_model){
 					self$res_model <- res_model
@@ -1178,6 +1166,47 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						Zvalue = c(tmp_mean$`z value`, tmp_precision$`z value`), 
 						P.unadj = c(tmp_mean$`Pr(>|z|)`, tmp_precision$`Pr(>|z|)`))
 				}
+			}
+			tmp_res
+		},
+		lm_lme_test = function(return_model, method, input_table, formula, measure, ...){
+			tmp_res <- list()
+			if(method == "lm"){
+				tmp <- stats::lm(reformulate(formula, "Value"), data = input_table, ...)
+				tmp_res$res_model <- tmp
+
+				tmp_summary <- summary(tmp)
+				tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
+				tmp_model_p <- anova(tmp)
+				R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_coefficients))
+
+				tmp_res$res_table <- data.frame(Method = paste0(method, " formula for ", formula), 
+					Measure = measure, 
+					Factors = c("Model", rownames(tmp_model_p), rownames(tmp_coefficients)), 
+					R2data, 
+					Estimate  = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$Estimate), 
+					Std.Error = c(NA, rep(NA, nrow(tmp_model_p)), tmp_coefficients$`Std. Error`), 
+					P.unadj = c(NA, tmp_model_p$`Pr(>F)`, tmp_coefficients$`Pr(>|t|)`)
+				)
+			}
+			if(method == "lme"){
+				tmp <- lmerTest::lmer(reformulate(formula, "Value"), data = input_table, ...)
+				tmp_res$res_model <- tmp
+				
+				tmp_summary <- summary(tmp)
+				tmp_coefficients <- as.data.frame(tmp_summary$coefficients, check.names = FALSE)
+				tmp_model_p <- anova(tmp)
+				tmp_random_p <- lmerTest::ranova(tmp)
+				R2data <- private$R2_extract(tmp, nrow(tmp_model_p) + nrow(tmp_random_p) + nrow(tmp_coefficients))
+				
+				tmp_res$res_table <- data.frame(Method = paste0(method, " formula for ", formula), 
+					Measure = measure, 
+					Factors = c("Model", rownames(tmp_model_p), rownames(tmp_random_p), rownames(tmp_coefficients)), 
+					R2data, 
+					Estimate  = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$Estimate), 
+					Std.Error = c(NA, rep(NA, nrow(tmp_model_p) + nrow(tmp_random_p)), tmp_coefficients$`Std. Error`), 
+					P.unadj   = c(NA, tmp_model_p$`Pr(>F)`, tmp_random_p$`Pr(>Chisq)`, tmp_coefficients$`Pr(>|t|)`)
+				)
 			}
 			tmp_res
 		},
