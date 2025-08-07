@@ -67,8 +67,12 @@ we have also developed a systematic protocol based on multi-omics data (https://
 
 
 ## Citation
-Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. 2021. _microeco_: an R package for data mining in microbial community ecology.
-FEMS Microbiology Ecology, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
+Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li & Minjie Yao. 
+A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. 
+Nature Protocols (2025). https://doi.org/10.1038/s41596-025-01239-4
+
+Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. _microeco_: an R package for data mining in microbial community ecology.
+FEMS Microbiology Ecology, 2021, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
 
 
 ## Contributing
