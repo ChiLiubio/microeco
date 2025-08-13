@@ -120,7 +120,7 @@ trans_network <- R6Class(classname = "trans_network",
 					if(cor_method %in% c("pearson", "spearman")){
 						if(use_NetCoMi_pearson_spearman){
 							private$check_NetCoMi()
-							netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
+							netConstruct_raw <- netConstruct(data = as.matrix(use_abund), measure = cor_method, ...)
 							cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 						}else{
 							if(use_WGCNA_pearson_spearman){
