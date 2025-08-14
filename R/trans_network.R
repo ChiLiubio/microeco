@@ -134,7 +134,7 @@ trans_network <- R6Class(classname = "trans_network",
 						use_sparcc_method <- match.arg(use_sparcc_method, c("NetCoMi", "SpiecEasi"))
 						if(use_sparcc_method == "NetCoMi"){
 							private$check_NetCoMi()
-							netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
+							netConstruct_raw <- netConstruct(data = as.matrix(use_abund), measure = cor_method, ...)
 							cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 						}else{
 							try_find <- try(find.package("SpiecEasi"), silent = TRUE)
@@ -153,7 +153,7 @@ trans_network <- R6Class(classname = "trans_network",
 					}
 					if(cor_method %in% c("bicor", "cclasso", "ccrepe")){
 						private$check_NetCoMi()
-						netConstruct_raw <- netConstruct(data = use_abund, measure = cor_method, ...)
+						netConstruct_raw <- netConstruct(data = as.matrix(use_abund), measure = cor_method, ...)
 						cor_result <- private$get_cor_p_list(netConstruct_raw$assoMat1)
 					}
 					self$res_cor_p <- cor_result
