@@ -219,6 +219,13 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   To make it available, please assign \code{high_level} parameter when creating the object.
 		#' @param high_level_add_other default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
 		#'   Only available when \code{ggnested = TRUE}.
+		#' @param sample_plot default NULL; Use the heatmap colors to represent sample information. 
+		#'   The input should be column names from \code{sample_table}, e.g., \code{c("Group", "pH")}.
+		#' @param sample_plot_color default NULL; Color settings. The input must be a list that corresponds to \code{sample_plot}, 
+		#'   e.g. \code{list(Group = RColorBrewer::brewer.pal(6, "Set2"), pH = c("white", "red"))}.
+		#' @param sample_plot_height default NULL; Height of the sample heatmap; defaults to one-tenth of the main heatmap. 
+		#'   The input must be a vector whose length equals that of \code{sample_plot}, e.g., \code{c(0.1, 0.1)}.
+		#' @param sample_plot_mainnames default FALSE; whether show the sample names in the main plot.
 		#' @param bar_type deprecated. Please use \code{bar_full} argument instead.
 		#' @return ggplot2 object. 
 		#' @examples
@@ -248,6 +255,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 			coord_flip = FALSE,
 			ggnested = FALSE,
 			high_level_add_other = FALSE,
+			sample_plot = NULL, 
+			sample_plot_color = NULL, 
+			sample_plot_height = NULL,
+			sample_plot_mainnames = FALSE,
 			bar_type = deprecated()
 			){
 			
@@ -407,6 +418,70 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(clustering_plot){
 				left_plot <- ggtree::ggtree(tmp_hclust, hang = 0)
 				p %<>% aplot::insert_left(left_plot, width = cluster_plot_width)
+			}
+			if(!is.null(sample_plot)){
+				if(!is.vector(sample_plot)){
+					stop("Input sample_plots parameter must be a vector!")
+				}
+				if(!sample_plot_mainnames){
+					p <- p + theme(
+						axis.text.x = element_blank(),
+						axis.ticks.x = element_blank(),
+						axis.title.x = element_blank()
+						)
+				}
+				metadata_table <- plot_data[plot_data$Taxonomy == use_taxanames[1], ]
+				
+				sample_plot_list <- list()
+				for(i in sample_plot){
+					tmp <- metadata_table[, c("Sample", i)]
+					tmp2 <- reshape2::melt(tmp, id.vars = "Sample", value.name = "Value")
+					if(!is.null(facet)){
+						tmp2 <- dplyr::left_join(tmp2, metadata_table[, c("Sample", facet)], by = c("Sample" = "Sample"))
+					}
+					g1 <- ggplot(tmp2, aes(x = Sample, y = variable, fill = Value)) +
+						geom_tile()
+					if(is.numeric(tmp[, i])){
+						if(!is.null(sample_plot_color)){
+							g1 <- g1 + scale_fill_gradient2(low = sample_plot_color[[i]][1], high = sample_plot_color[[i]][2])
+						}else{
+							g1 <- g1 + scale_fill_gradient2()
+						}
+					}else{
+						if(!is.null(sample_plot_color)){
+							g1 <- g1 + scale_fill_manual(values = sample_plot_color[[i]])
+						}else{
+							g1 <- g1 + scale_fill_discrete()
+						}
+					}
+					if(!is.null(facet)){
+						if(length(facet) == 1){
+							g1 <- g1 + facet_grid(facet_formula, scales = "free", space = "free")
+						}else{
+							g1 <- g1 + ggh4x::facet_nested(facet_formula, nest_line = element_line(linetype = 2), scales = "free", space = "free")
+						}
+					}
+					g1 <- g1 + theme_minimal() +
+						labs(fill = i) + 
+						theme(
+							axis.text.x = element_blank(),
+							axis.ticks.x = element_blank(),
+							axis.title.x = element_blank(),
+							axis.title.y = element_blank(),
+							panel.grid = element_blank(),
+							strip.background = element_blank(),
+							strip.text       = element_blank(),
+							panel.border     = element_blank(),
+							panel.background = element_blank(),
+							legend.position = "right"
+						)
+					sample_plot_list[[i]] <- g1
+				}
+				if(is.null(sample_plot_height)){
+					sample_plot_height <- rep(0.1, length(sample_plot))
+				}
+				p <- patchwork::wrap_plots(c(list(p), sample_plot_list), nyrow = TRUE) +
+					patchwork::plot_layout(ncol = 1, axes = "collect_x", heights = c(1, sample_plot_height))
 			}
 			p
 		},

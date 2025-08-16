@@ -216,6 +216,10 @@ Bar plot.
   coord_flip = FALSE,
   ggnested = FALSE,
   high_level_add_other = FALSE,
+  sample_plot = NULL,
+  sample_plot_color = NULL,
+  sample_plot_height = NULL,
+  sample_plot_mainnames = FALSE,
   bar_type = deprecated()
 )}\if{html}{\out{</div>}}
 }
@@ -275,6 +279,17 @@ To make it available, please assign \code{high_level} parameter when creating th
 
 \item{\code{high_level_add_other}}{default FALSE; whether add 'Others' (all the unknown taxa) in each taxon of higher taxonomic level.
 Only available when \code{ggnested = TRUE}.}
+
+\item{\code{sample_plot}}{default NULL; Use the heatmap colors to represent sample information. 
+The input should be column names from \code{sample_table}, e.g., \code{c("Group", "pH")}.}
+
+\item{\code{sample_plot_color}}{default NULL; Color settings. The input must be a list that corresponds to \code{sample_plot}, 
+e.g. \code{list(Group = RColorBrewer::brewer.pal(6, "Set2"), pH = c("white", "red"))}.}
+
+\item{\code{sample_plot_height}}{default NULL; Height of the sample heatmap; defaults to one-tenth of the main heatmap. 
+The input must be a vector whose length equals that of \code{sample_plot}, e.g., \code{c(0.1, 0.1)}.}
+
+\item{\code{sample_plot_mainnames}}{default FALSE; whether show the sample names in the main plot.}
 
 \item{\code{bar_type}}{deprecated. Please use \code{bar_full} argument instead.}
 }
