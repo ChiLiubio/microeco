@@ -420,6 +420,9 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p %<>% aplot::insert_left(left_plot, width = cluster_plot_width)
 			}
 			if(!is.null(sample_plot)){
+				if(coord_flip){
+					stop("The sample_plot cannot be applied currently when using coord_flip!")
+				}
 				if(!is.vector(sample_plot)){
 					stop("Input sample_plots parameter must be a vector!")
 				}
@@ -430,6 +433,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 						axis.title.x = element_blank()
 						)
 				}
+				
 				metadata_table <- plot_data[plot_data$Taxonomy == use_taxanames[1], ]
 				
 				sample_plot_list <- list()
@@ -480,8 +484,10 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(is.null(sample_plot_height)){
 					sample_plot_height <- rep(0.1, length(sample_plot))
 				}
-				p <- patchwork::wrap_plots(c(list(p), sample_plot_list), nyrow = TRUE) +
-					patchwork::plot_layout(ncol = 1, axes = "collect_x", heights = c(1, sample_plot_height))
+
+				p <- patchwork::wrap_plots(c(list(p), sample_plot_list), byrow = TRUE) +
+					patchwork::plot_layout(ncol = 1, axes = "collect", heights = c(1, sample_plot_height))
+			
 			}
 			p
 		},
