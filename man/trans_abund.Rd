@@ -284,12 +284,14 @@ Only available when \code{ggnested = TRUE}.}
 The input should be column names from \code{sample_table}, e.g., \code{c("Group", "pH")}.}
 
 \item{\code{sample_plot_color}}{default NULL; Color settings. The input must be a list that corresponds to \code{sample_plot}, 
-e.g. \code{list(Group = RColorBrewer::brewer.pal(6, "Set2"), pH = c("white", "red"))}.}
+e.g. \code{list(Group = RColorBrewer::brewer.pal(6, "Set2"), pH = c("white", "red"))}.
+When the input factor is a numerical variable, it will be displayed with a color gradient; 
+therefore, two colors should be provided for the input (as shown for "pH" above).}
 
-\item{\code{sample_plot_height}}{default NULL; Height of the sample heatmap; defaults to one-tenth of the main heatmap. 
+\item{\code{sample_plot_height}}{default NULL; Height of the sample heatmap; defaults to 1/10 of the main bar plot. 
 The input must be a vector whose length equals that of \code{sample_plot}, e.g., \code{c(0.1, 0.1)}.}
 
-\item{\code{sample_plot_mainnames}}{default FALSE; whether show the sample names in the main plot.}
+\item{\code{sample_plot_mainnames}}{default FALSE; whether show the sample names in the main bar plot.}
 
 \item{\code{bar_type}}{deprecated. Please use \code{bar_full} argument instead.}
 }

@@ -223,9 +223,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'   The input should be column names from \code{sample_table}, e.g., \code{c("Group", "pH")}.
 		#' @param sample_plot_color default NULL; Color settings. The input must be a list that corresponds to \code{sample_plot}, 
 		#'   e.g. \code{list(Group = RColorBrewer::brewer.pal(6, "Set2"), pH = c("white", "red"))}.
-		#' @param sample_plot_height default NULL; Height of the sample heatmap; defaults to one-tenth of the main heatmap. 
+		#'   When the input factor is a numerical variable, it will be displayed with a color gradient; 
+		#'   therefore, two colors should be provided for the input (as shown for "pH" above).
+		#' @param sample_plot_height default NULL; Height of the sample heatmap; defaults to 1/10 of the main bar plot. 
 		#'   The input must be a vector whose length equals that of \code{sample_plot}, e.g., \code{c(0.1, 0.1)}.
-		#' @param sample_plot_mainnames default FALSE; whether show the sample names in the main plot.
+		#' @param sample_plot_mainnames default FALSE; whether show the sample names in the main bar plot.
 		#' @param bar_type deprecated. Please use \code{bar_full} argument instead.
 		#' @return ggplot2 object. 
 		#' @examples
