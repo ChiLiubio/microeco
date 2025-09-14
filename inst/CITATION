@@ -1,7 +1,19 @@
+citHeader("To cite microeco in publications, please use:")
+
 
 bibentry(bibtype = "Article",
-         textVersion = "Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao. microeco: an R package for data mining in microbial community ecology. FEMS Microbiology Ecology, 2021, Volume 97, Issue 2, fiaa255.",
-         header = "To cite microeco in publications use:",
+         textVersion = "Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li, Minjie Yao. A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. Nature Protocols (2025). https://doi.org/10.1038/s41596-025-01239-4",
+         title = "A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package",
+         author = c("Chi Liu", "Felipe R. P. Mansoldo", "Hankang Li", "Alane Beatriz Vermelho", "Raymond Jianxiong Zeng", "Xiangzhen Li", "Minjie Yao"),
+         year = "2025",
+         journal = "Nature Protocols",
+         doi = "10.1038/s41596-025-01239-4",
+         url = "https://doi.org/10.1038/s41596-025-01239-4"
+)
+
+
+bibentry(bibtype = "Article",
+         textVersion = "Chi Liu, Yaoming Cui, Xiangzhen Li, Minjie Yao. microeco: an R package for data mining in microbial community ecology. FEMS Microbiology Ecology, 2021, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255",
          title = "microeco: An R package for data mining in microbial community ecology",
          author = c("Chi Liu", "Yaoming Cui", "Xiangzhen Li", "Minjie Yao"),
          year = "2021",
