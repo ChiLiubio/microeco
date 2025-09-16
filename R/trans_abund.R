@@ -211,8 +211,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param legend_text_italic default FALSE; whether use italic in legend.
 		#' @param xtext_angle default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap; 
 		#' @param xtext_size default 10; x axis text size.
-		#' @param xtext_keep default TRUE; whether retain x text.
-		#' @param xtitle_keep default TRUE; whether retain x title.
+		#' @param xtext_keep default TRUE; whether to keep the text on the x-axis.
+		#' @param xtitle_keep default TRUE; whether to keep the title of the x-axis.
 		#' @param ytitle_size default 17; y axis title size.
 		#' @param coord_flip default FALSE; whether flip cartesian coordinates so that horizontal becomes vertical, and vertical becomes horizontal.
 		#' @param ggnested default FALSE; whether use nested legend. Need \code{ggnested} package to be installed (https://github.com/gmteunisse/ggnested).
@@ -520,11 +520,11 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param min_abundance default .01; the minimum abundance percentage in plot.
 		#' @param max_abundance default NULL; the maximum abundance percentage in plot, NULL reprensent the max percentage.
 		#' @param strip_text default 11; facet text size.
-		#' @param xtext_keep default TRUE; whether retain x text.
+		#' @param xtext_keep default TRUE; whether to keep the text on the x-axis.
 		#' @param xtext_angle default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap; 
 		#' @param xtext_size default 10; x axis text size.
 		#' @param ytext_size default 11; y axis text size.
-		#' @param xtitle_keep default TRUE; whether retain x title.
+		#' @param xtitle_keep default TRUE; whether to keep the title of the x-axis.
 		#' @param grid_clean default TRUE; whether remove grid lines.
 		#' @param legend_title default "\% Relative\\nAbundance"; legend title text.
 		#' @param pheatmap default FALSE; whether use pheatmap package to plot the heatmap.

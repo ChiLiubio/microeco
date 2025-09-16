@@ -266,9 +266,9 @@ If \code{clustering_plot = TRUE}, \code{clustering} will be also TRUE in any cas
 
 \item{\code{xtext_size}}{default 10; x axis text size.}
 
-\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+\item{\code{xtext_keep}}{default TRUE; whether to keep the text on the x-axis.}
 
-\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
+\item{\code{xtitle_keep}}{default TRUE; whether to keep the title of the x-axis.}
 
 \item{\code{ytitle_size}}{default 17; y axis title size.}
 
@@ -385,7 +385,7 @@ This parameter will be passed to the \code{switch} parameter in \code{ggplot2::f
 
 \item{\code{strip_text}}{default 11; facet text size.}
 
-\item{\code{xtext_keep}}{default TRUE; whether retain x text.}
+\item{\code{xtext_keep}}{default TRUE; whether to keep the text on the x-axis.}
 
 \item{\code{xtext_angle}}{default 0; number ranging from 0 to 90; used to adjust x axis text angle to reduce text overlap;}
 
@@ -393,7 +393,7 @@ This parameter will be passed to the \code{switch} parameter in \code{ggplot2::f
 
 \item{\code{ytext_size}}{default 11; y axis text size.}
 
-\item{\code{xtitle_keep}}{default TRUE; whether retain x title.}
+\item{\code{xtitle_keep}}{default TRUE; whether to keep the title of the x-axis.}
 
 \item{\code{grid_clean}}{default TRUE; whether remove grid lines.}
 
