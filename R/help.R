@@ -26,11 +26,15 @@
 #' Before creating a new issue, 
 #' please read the guideline (\href{https://chiliubio.github.io/microeco_tutorial/notes.html#github-issues}{https://chiliubio.github.io/microeco_tutorial/notes.html#github-issues}).
 #' 
-#' To cite microeco package in publications, please run the following command to get the reference: \code{citation("microeco")}
+#' To cite microeco package in publications, please run the following command to get the references: \code{citation("microeco")}
 #' 
 #' Reference:\cr
-#' Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. 2021. microeco: an R package for data mining in microbial community ecology. 
-#' FEMS Microbiology Ecology, 97(2): fiaa255. DOI:10.1093/femsec/fiaa255
+#' Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li & Minjie Yao. 
+#' A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. 
+#' Nature Protocols (2025). DOI:10.1038/s41596-025-01239-4
+#' 
+#' Chi Liu, Yaoming Cui, Xiangzhen Li & Minjie Yao. microeco: an R package for data mining in microbial community ecology. 
+#' FEMS Microbiology Ecology, 2021, 97(2): fiaa255. DOI:10.1093/femsec/fiaa255
 #' 
 #' @keywords Description
 #' @name microeco
