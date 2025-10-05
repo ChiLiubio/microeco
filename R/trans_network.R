@@ -200,6 +200,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param COR_p_thres default 0.01; the p value threshold for the correlation-based network.
 		#' @param COR_p_adjust default "fdr"; p value adjustment method, see \code{method} parameter of \code{p.adjust} function for available options,
 		#' 	  in which \code{COR_p_adjust = "none"} means giving up the p value adjustment.
+		#' @param COR_return_padjust default FALSE; Whether to return the adjusted p-value matrix and store it in the object (named \code{res_cor_p$p.adjust}).
 		#' @param COR_weight default TRUE; whether use correlation coefficient as the weight of edges; FALSE represents weight = 1 for all edges.
 		#' @param COR_cut default 0.6; correlation coefficient threshold for the correlation network.
 		#' @param COR_optimization default FALSE; whether use random matrix theory (RMT) based method to determine the correlation coefficient; 
@@ -246,6 +247,7 @@ trans_network <- R6Class(classname = "trans_network",
 			network_method = c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic")[1],
 			COR_p_thres = 0.01,
 			COR_p_adjust = "fdr",
+			COR_return_padjust = FALSE,
 			COR_weight = TRUE,
 			COR_cut = 0.6,
 			COR_optimization = FALSE,
@@ -295,6 +297,10 @@ trans_network <- R6Class(classname = "trans_network",
 					adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
 					if(! identical(colnames(cortable), colnames(adp))){
 						adp <- adp[colnames(cortable), colnames(cortable)]
+					}
+					if(COR_return_padjust){
+						self$res_cor_p$p.adjust <- adp
+						message("Adjusted p value matrix is stored in res_cor_p$p.adjust ...")
 					}
 					if(COR_optimization == T){
 						message("Start COR optimizing ...")

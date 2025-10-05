@@ -303,6 +303,7 @@ Construct network based on the \code{igraph} package or \code{SpiecEasi} package
   network_method = c("COR", "SpiecEasi", "gcoda", "FlashWeave", "beemStatic")[1],
   COR_p_thres = 0.01,
   COR_p_adjust = "fdr",
+  COR_return_padjust = FALSE,
   COR_weight = TRUE,
   COR_cut = 0.6,
   COR_optimization = FALSE,
@@ -355,6 +356,8 @@ The option details:
 
 \item{\code{COR_p_adjust}}{default "fdr"; p value adjustment method, see \code{method} parameter of \code{p.adjust} function for available options,
 in which \code{COR_p_adjust = "none"} means giving up the p value adjustment.}
+
+\item{\code{COR_return_padjust}}{default FALSE; Whether to return the adjusted p-value matrix and store it in the object (named \code{res_cor_p$p.adjust}).}
 
 \item{\code{COR_weight}}{default TRUE; whether use correlation coefficient as the weight of edges; FALSE represents weight = 1 for all edges.}
 
