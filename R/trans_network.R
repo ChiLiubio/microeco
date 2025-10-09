@@ -82,6 +82,8 @@ trans_network <- R6Class(classname = "trans_network",
 				message("Input dataset not provided. Please run the functions with your other customized data!")
 			}else{
 				use_dataset <- clone(dataset)
+				message(ncol(use_dataset$otu_table), " samples and ", nrow(use_dataset$otu_table), " features in the input dataset ...")
+				
 				if(!is.null(env_cols)){
 					env_data <- use_dataset$sample_table[, env_cols, drop = FALSE]
 				}
@@ -105,6 +107,8 @@ trans_network <- R6Class(classname = "trans_network",
 				rel_abund %<>% {. * 100} %>% .[rownames(use_abund)]
 				
 				private$check_filter_number(use_abund, param = "filter_thres")
+				message("After filtering, ", nrow(use_abund), " features are left ...")
+				
 				use_abund %<>% t %>% as.data.frame
 				
 				if((!is.null(cor_method)) & (!is.null(env_cols) | !is.null(add_data))){
@@ -1327,7 +1331,6 @@ trans_network <- R6Class(classname = "trans_network",
 			if(nrow(input) == 1){
 				stop("After filtering, only one feature is remained! Please try to lower ", param, "!")
 			}
-			message("After filtering, ", nrow(input), " features are remained ...")
 		},
 		check_NetCoMi = function(){
 			if(!require("NetCoMi")){
