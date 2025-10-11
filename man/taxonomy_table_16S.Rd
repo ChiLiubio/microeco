@@ -4,10 +4,13 @@
 \name{taxonomy_table_16S}
 \alias{taxonomy_table_16S}
 \title{The taxonomic information of 16S example data}
+\format{
+data.frame
+}
 \usage{
 data(taxonomy_table_16S)
 }
 \description{
 The taxonomic information of 16S example data
 }
-\keyword{data.frame}
+\keyword{datasets}

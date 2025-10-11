@@ -4,10 +4,13 @@
 \name{otu_table_ITS}
 \alias{otu_table_ITS}
 \title{The OTU table of the ITS example data}
+\format{
+data.frame
+}
 \usage{
 data(otu_table_ITS)
 }
 \description{
 The OTU table of the ITS example data
 }
-\keyword{data.frame}
+\keyword{datasets}

@@ -4,10 +4,13 @@
 \name{fungi_func_FungalTraits}
 \alias{fungi_func_FungalTraits}
 \title{The FungalTraits database for fungi trait prediction}
+\format{
+data.frame
+}
 \usage{
 data(fungi_func_FungalTraits)
 }
 \description{
 The FungalTraits database for fungi trait prediction
 }
-\keyword{data.frame}
+\keyword{datasets}

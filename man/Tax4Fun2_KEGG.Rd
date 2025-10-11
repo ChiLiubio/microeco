@@ -4,10 +4,13 @@
 \name{Tax4Fun2_KEGG}
 \alias{Tax4Fun2_KEGG}
 \title{The KEGG data files used in the trans_func class}
+\format{
+list
+}
 \usage{
 data(Tax4Fun2_KEGG)
 }
 \description{
 The KEGG data files used in the trans_func class
 }
-\keyword{list}
+\keyword{datasets}

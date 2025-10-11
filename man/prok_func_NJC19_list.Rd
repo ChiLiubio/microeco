@@ -3,11 +3,14 @@
 \docType{data}
 \name{prok_func_NJC19_list}
 \alias{prok_func_NJC19_list}
-\title{The modified NJC19 database}
+\title{The NJC19 database}
+\format{
+list
+}
 \usage{
 data(prok_func_NJC19_list)
 }
 \description{
-The modified NJC19 database
+The NJC19 database
 }
-\keyword{data.frame}
+\keyword{datasets}

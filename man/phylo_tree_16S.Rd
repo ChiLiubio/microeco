@@ -4,10 +4,13 @@
 \name{phylo_tree_16S}
 \alias{phylo_tree_16S}
 \title{The phylogenetic tree of 16S example data}
+\format{
+data.frame
+}
 \usage{
 data(phylo_tree_16S)
 }
 \description{
 The phylogenetic tree of 16S example data
 }
-\keyword{data.frame}
+\keyword{datasets}

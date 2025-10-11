@@ -8,7 +8,7 @@
 #'
 #' \itemize{
 #'   \item sample_table: sample information table
-#'   \item otu_table: species-community abundance table
+#'   \item otu_table: species-sample abundance table
 #'   \item tax_table: taxonomic table
 #'   \item phylo_tree: phylogenetic tree
 #'   \item taxa_abund: taxa abundance list with several tables for Phylum...Genus
@@ -17,19 +17,20 @@
 #' }
 #'
 #' @docType data
-#' @keywords R6 object
+#' @keywords datasets, R6
 #' @name dataset
 #' @usage data(dataset)
-#' @format An R6 class object
+#' @format R6 class object
 NULL
 
 #' The environmental factors for the 16S example data
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name env_data_16S
 #' @usage data(env_data_16S)
+#' @format data.frame
 NULL
 
 
@@ -37,9 +38,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name otu_table_16S
 #' @usage data(otu_table_16S)
+#' @format data.frame
 NULL
 
 
@@ -47,9 +49,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name otu_table_ITS
 #' @usage data(otu_table_ITS)
+#' @format data.frame
 NULL
 
 
@@ -57,29 +60,32 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name phylo_tree_16S
 #' @usage data(phylo_tree_16S)
+#' @format data.frame
 NULL
 
 
-#' The modified FAPROTAX trait database
+#' Customized FAPROTAX trait database
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name prok_func_FAPROTAX
 #' @usage data(prok_func_FAPROTAX)
+#' @format list
 NULL
 
 
-#' The modified NJC19 database
+#' The NJC19 database
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name prok_func_NJC19_list
 #' @usage data(prok_func_NJC19_list)
+#' @format list
 NULL
 
 
@@ -87,9 +93,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name fungi_func_FUNGuild
 #' @usage data(fungi_func_FUNGuild)
+#' @format data.frame
 NULL
 
 
@@ -97,9 +104,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name fungi_func_FungalTraits
 #' @usage data(fungi_func_FungalTraits)
+#' @format data.frame
 NULL
 
 
@@ -107,9 +115,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords list
+#' @keywords datasets
 #' @name Tax4Fun2_KEGG
 #' @usage data(Tax4Fun2_KEGG)
+#' @format list
 NULL
 
 
@@ -117,9 +126,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name sample_info_16S
 #' @usage data(sample_info_16S)
+#' @format data.frame
 NULL
 
 
@@ -127,9 +137,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name sample_info_ITS
 #' @usage data(sample_info_ITS)
+#' @format data.frame
 NULL
 
 
@@ -137,9 +148,10 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name taxonomy_table_16S
 #' @usage data(taxonomy_table_16S)
+#' @format data.frame
 NULL
 
 
@@ -147,7 +159,8 @@ NULL
 #'
 #'
 #' @docType data
-#' @keywords data.frame
+#' @keywords datasets
 #' @name taxonomy_table_ITS
 #' @usage data(taxonomy_table_ITS)
+#' @format data.frame
 NULL

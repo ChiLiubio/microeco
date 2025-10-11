@@ -5,7 +5,7 @@
 \alias{dataset}
 \title{The dataset structured with microtable class for the demonstration of examples}
 \format{
-An R6 class object
+R6 class object
 }
 \usage{
 data(dataset)
@@ -20,7 +20,7 @@ The column 'Saline' represents the saline soils and non-saline soils.
 \details{
 \itemize{
   \item sample_table: sample information table
-  \item otu_table: species-community abundance table
+  \item otu_table: species-sample abundance table
   \item tax_table: taxonomic table
   \item phylo_tree: phylogenetic tree
   \item taxa_abund: taxa abundance list with several tables for Phylum...Genus
@@ -29,4 +29,4 @@ The column 'Saline' represents the saline soils and non-saline soils.
 }
 }
 \keyword{R6}
-\keyword{object}
+\keyword{datasets,}

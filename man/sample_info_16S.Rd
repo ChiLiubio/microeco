@@ -4,10 +4,13 @@
 \name{sample_info_16S}
 \alias{sample_info_16S}
 \title{The sample information of 16S example data}
+\format{
+data.frame
+}
 \usage{
 data(sample_info_16S)
 }
 \description{
 The sample information of 16S example data
 }
-\keyword{data.frame}
+\keyword{datasets}
