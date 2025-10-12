@@ -98,14 +98,14 @@ trans_func <- R6Class(classname = "trans_func",
 						gsub(".__", "", .) %>% 
 						gsub(";{1, }$", "", .)
 					# reduce computational cost
-					tax2 <- unique(tax1)
-					# first create result matrix of tax2, then tax1-OTU
-					res <- matrix(nrow = length(tax2), ncol = length(prok_func_FAPROTAX$func_tax))
-					rownames(res) <- tax2
+					tax_unique <- unique(tax1)
+					# first create result matrix of tax_unique, then tax1-OTU
+					res <- matrix(nrow = length(tax_unique), ncol = length(prok_func_FAPROTAX$func_tax))
+					rownames(res) <- tax_unique
 					colnames(res) <- names(prok_func_FAPROTAX$func_tax)
 					# match taxa
 					for(i in seq_len(ncol(res))){
-						res[, i] <- grepl(prok_func_FAPROTAX$func_tax[i], tax2) %>% as.numeric
+						res[, i] <- grepl(prok_func_FAPROTAX$func_tax[i], tax_unique) %>% as.numeric
 					}
 					res %<>% as.data.frame
 					# identify the inclusion part among groups
@@ -161,7 +161,7 @@ trans_func <- R6Class(classname = "trans_func",
 					frame1$use_trait <- paste(frame1[, 2], frame1[, 3], sep = " -- ")
 					frame1$value <- 1
 					frame1 <- frame1[, -c(2:3)]
-					frame2 <- suppressMessages(reshape2::dcast(frame1, Species ~ use_trait, value.var="value"))
+					frame2 <- suppressMessages(reshape2::dcast(frame1, Species ~ use_trait, value.var = "value"))
 
 					otu_func_table <- dplyr::left_join(tax1, frame2, by = c("Species" = "Species"))
 					rownames(otu_func_table) <- rownames(tax1)
