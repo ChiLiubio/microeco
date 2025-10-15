@@ -7,10 +7,11 @@ An R package for data mining in microbial community ecology
 ![](https://img.shields.io/badge/Release-1.15.0-orange.svg) ![](https://img.shields.io/badge/Test-1.16.0-red.svg)
 
 ## Background
-The increasing volume and complexity of data pose a challenge for the downstream data analysis of microbiome omics data. 
+The increasing volume and complexity of microbiome data pose a challenge for the downstream data analysis. 
 Although numerous R packages exist in this field, 
 it remains difficult to perform data mining in an efficient and comprehensive manner. 
 Therefore, we developed the R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
+
 
 ## Main Features
   + R6 Class to store and analyze data: flexible and modularized
