@@ -7,16 +7,15 @@ An R package for data mining in microbial community ecology
 ![](https://img.shields.io/badge/Release-1.15.0-orange.svg) ![](https://img.shields.io/badge/Test-1.16.0-red.svg)
 
 ## Background
-With the development of high-throughput sequencing techniques,
-the increasing data amount and complexity make the microbiome omics data analysis and management a challenge.
-Though there has been a lot of R packages in this filed, 
-it is still difficult to perform data mining fast, efficiently and comprehensively.
-Therefore, we created R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
+The increasing volume and complexity of data pose a challenge for the downstream data analysis of microbiome omics data. 
+Although numerous R packages exist in this field, 
+it remains difficult to perform data mining in an efficient and comprehensive manner. 
+Therefore, we developed the R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
 
 ## Main Features
   + R6 Class to store and analyze data: flexible and modularized
-  + Data normalization
-  + Taxonomic abundance analysis
+  + Data preprocessing and normalization
+  + Taxonomic abundance visualization
   + Venn diagram
   + Alpha diversity
   + Beta diversity
@@ -54,35 +53,30 @@ devtools::install_github("ChiLiubio/microeco")
 
 
 ## Tutorial
-Detailed online **tutorial** (https://chiliubio.github.io/microeco_tutorial/) is released along with the package.
-The tutorial can also be downloaded to the computer to open (https://github.com/ChiLiubio/microeco_tutorial/releases).
-When the user is in an R session and want to have a look on those links, please run the command: `?microeco`.
-Please use a class name to search its help document (e.g., `?microtable`) instead of the function therein.
+A detailed online **tutorial** (https://chiliubio.github.io/microeco_tutorial/) is provided with the package.
+For offline use, the tutorial can also be downloaded and opened locally (https://github.com/ChiLiubio/microeco_tutorial/releases).
+To view these links in an R session, run `?microeco`.
+Please use a class name to search for its help document (e.g., `?microtable`) rather than searching for individual functions therein.
 Before creating a new issue in the [Issues](https://github.com/ChiLiubio/microeco/issues), 
 please read the guideline (https://chiliubio.github.io/microeco_tutorial/notes.html#github-issues).
-Creating the basic microtable object from other tools/platforms (e.g. QIIME2, HUMAnN, Kraken2 and phyloseq) 
-can be easily achieved with the package file2meco (https://github.com/ChiLiubio/file2meco).
-Additionally, to facilitate users' familiarity and utilization of the microeco package, 
-we have also developed a systematic protocol based on multi-omics data (https://github.com/ChiLiubio/microeco_protocol_v1).
+To create a basic microtable object directly from outputs of other tools/platforms (e.g. QIIME2, HUMAnN, Kraken2 and phyloseq), 
+please use the `file2meco` package (https://github.com/ChiLiubio/file2meco).
+To help users familiarize themselves with the package using multi-omics data,
+we also provide a systematic protocol (https://github.com/ChiLiubio/microeco_protocol_v1).
 
 
 ## Citation
 Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li & Minjie Yao. 
 A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. 
-Nature Protocols (2025). https://doi.org/10.1038/s41596-025-01239-4
+**Nature Protocols** (2025). https://doi.org/10.1038/s41596-025-01239-4
 
 Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. _microeco_: an R package for data mining in microbial community ecology.
-FEMS Microbiology Ecology, 2021, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
+**FEMS Microbiology Ecology**, 2021, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
 
 
 ## Contributing
 
 We welcome any contribution, including but not limited to code, idea and [tutorial](https://chiliubio.github.io/microeco_tutorial/).
-Please report errors and questions on github [Issues](https://github.com/ChiLiubio/microeco/issues).
+Please report errors and questions on Github [Issues](https://github.com/ChiLiubio/microeco/issues).
 Any contribution via [Pull requests](https://github.com/ChiLiubio/microeco/pulls) will be appreciated.
 By participating in this project you agree to abide by the terms outlined in the [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
-
-
-## References
-  - https://chiliubio.github.io/microeco_tutorial/references.html#references
-
