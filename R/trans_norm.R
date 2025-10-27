@@ -115,7 +115,9 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' @param MARGIN default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{decostand} function of vegan package.
 		#'    If MARGIN is NULL, use the default value in decostand function.
 		#' @param logbase default 2; The logarithm base.
-		#' @param ... parameters pass to \code{vegan::decostand}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
+		#' @param CSS_p default NULL; the pth quantile passed to the p augument of the \code{cumNorm} function when method = "CSS".
+		#'    Default NULL means the default \code{cumNormStatFast} function is used to calculate the quantile.
+		#' @param ... parameters pass to \code{vegan::decostand},
 		#'    or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
 		#'    or \code{trans_diff} class when method = "DESeq2",
 		#'    or \code{wrench} function of Wrench package when method = "Wrench".
@@ -125,7 +127,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' newdataset <- t1$norm(method = "clr")
 		#' newdataset <- t1$norm(method = "log")
 		norm = function(method = "rarefy", sample.size = NULL, rngseed = 123, replace = TRUE, pseudocount = 1, intersect.no = 10, 
-			ct.min = 1, condition = NULL, MARGIN = NULL, logbase = 2, ...)
+			ct.min = 1, condition = NULL, MARGIN = NULL, logbase = 2, CSS_p = NULL, ...)
 			{
 			abund_table <- self$data_table
 			if(is.null(method)){
@@ -216,7 +218,10 @@ trans_norm <- R6Class(classname = "trans_norm",
 			}
 			if(method == "css"){
 				obj <- metagenomeSeq::newMRexperiment(t(abund_table))
-				obj_1 <- metagenomeSeq::cumNorm(obj, ...)
+				if(is.null(CSS_p)){
+					CSS_p <- metagenomeSeq::cumNormStatFast(obj)
+				}
+				obj_1 <- metagenomeSeq::cumNorm(obj, p = CSS_p)
 				res_table <- t(metagenomeSeq::MRcounts(obj_1, norm = TRUE))
 			}
 			if(method == "tss"){

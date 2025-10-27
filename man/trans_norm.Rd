@@ -80,6 +80,7 @@ Normalization/transformation methods.
   condition = NULL,
   MARGIN = NULL,
   logbase = 2,
+  CSS_p = NULL,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -173,7 +174,10 @@ If MARGIN is NULL, use the default value in decostand function.}
 
 \item{\code{logbase}}{default 2; The logarithm base.}
 
-\item{\code{...}}{parameters pass to \code{vegan::decostand}, or \code{metagenomeSeq::cumNorm} when method = "CSS", 
+\item{\code{CSS_p}}{default NULL; the pth quantile passed to the p augument of the \code{cumNorm} function when method = "CSS".
+Default NULL means the default \code{cumNormStatFast} function is used to calculate the quantile.}
+
+\item{\code{...}}{parameters pass to \code{vegan::decostand},
 or \code{edgeR::normLibSizes} when method = "TMM" or "RLE", 
 or \code{trans_diff} class when method = "DESeq2",
 or \code{wrench} function of Wrench package when method = "Wrench".}
