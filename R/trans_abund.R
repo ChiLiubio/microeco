@@ -823,7 +823,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			if(add_label){
 				p <- p + ggrepel::geom_label_repel(position = position_stack(vjust = 0.5), show.legend = FALSE)
 			}
-			p <- p + private$blank_theme +
+			p <- p + private$blank_theme() +
 				scale_fill_manual(values = color_values) +
 				theme(axis.text.x = element_blank()) +
 				facet_wrap(~Sample, nrow = facet_nrow) +
@@ -1018,16 +1018,17 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 			}
 		},
-		blank_theme = 
+		blank_theme = function(){
 			theme_minimal() +
 			theme(
-			axis.title = element_blank(),
-			panel.border = element_blank(),
-			panel.grid=element_blank(),
-			axis.ticks = element_blank(),
-			legend.position="right",
-			plot.title=element_text(size=14, face="bold")
-		)
+				axis.title = element_blank(),
+				panel.border = element_blank(),
+				panel.grid = element_blank(),
+				axis.ticks = element_blank(),
+				legend.position = "right",
+				plot.title = element_text(size = 14, face = "bold")
+			)
+		}
 	),
 	lock_objects = FALSE,
 	lock_class = FALSE

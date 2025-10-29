@@ -59,7 +59,12 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
 \if{latex}{\out{\hypertarget{method-trans_venn-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_venn$new(dataset, ratio = NULL, name_joint = "&")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_venn$new(
+  dataset,
+  ratio = NULL,
+  name_joint = "&",
+  ratio_both_joint = "; "
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -68,10 +73,13 @@ t2 <- t1$trans_comm(use_frequency = TRUE)
 \item{\code{dataset}}{the object of \code{\link{microtable}} class or a matrix-like table (data.frame or matrix object).
 If dataset is a matrix-like table, features must be rows.}
 
-\item{\code{ratio}}{default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
-"seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.}
+\item{\code{ratio}}{default NULL; NULL, "numratio", "seqratio" or "both"; "numratio": calculate the percentage of feature number; 
+"seqratio": calculate the percentage of feature abundance; "both": "numratio" + "seqratio"; NULL: no additional percentage (raw counts).}
 
 \item{\code{name_joint}}{default "&"; the joint mark for generating multi-sample names.}
+
+\item{\code{ratio_both_joint}}{default "; "; the joint mark for the "both" option in \code{ratio} parameter.
+If you need to insert a line break, you can use ")\\n(".}
 }
 \if{html}{\out{</div>}}
 }

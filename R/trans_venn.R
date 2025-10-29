@@ -10,9 +10,11 @@ trans_venn <- R6Class(classname = "trans_venn",
 	public = list(
 		#' @param dataset the object of \code{\link{microtable}} class or a matrix-like table (data.frame or matrix object).
 		#' 	 If dataset is a matrix-like table, features must be rows.
-		#' @param ratio default NULL; NULL, "numratio" or "seqratio"; "numratio": calculate the percentage of feature number; 
-		#' 	 "seqratio": calculate the percentage of feature abundance; NULL: no additional percentage.
+		#' @param ratio default NULL; NULL, "numratio", "seqratio" or "both"; "numratio": calculate the percentage of feature number; 
+		#' 	 "seqratio": calculate the percentage of feature abundance; "both": "numratio" + "seqratio"; NULL: no additional percentage (raw counts).
 		#' @param name_joint default "&"; the joint mark for generating multi-sample names.
+		#' @param ratio_both_joint default "; "; the joint mark for the "both" option in \code{ratio} parameter.
+		#'    If you need to insert a line break, you can use ")\\n(".
 		#' @return \code{data_details} and \code{data_summary} stored in the object.
 		#' @examples
 		#' \donttest{
@@ -20,7 +22,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 		#' t1 <- dataset$merge_samples("Group")
 		#' t1 <- trans_venn$new(dataset = t1, ratio = "numratio")
 		#' }
-		initialize = function(dataset, ratio = NULL, name_joint = "&"
+		initialize = function(dataset, ratio = NULL, name_joint = "&", ratio_both_joint = "; "
 			){
 			if(is.null(dataset)){
 				stop("The input dataset must be provided!")
@@ -60,14 +62,16 @@ trans_venn <- R6Class(classname = "trans_venn",
 			})
 			venn_count_abund <- data.frame(Counts = sapply(venn_list, length), Abundance = venn_abund)
 			if(!is.null(ratio)){
-				if(!ratio %in% c("seqratio", "numratio")){
-					stop("Provided parameter ratio must be one of NULL, 'seqratio' or 'numratio' !")
+				if(!ratio %in% c("seqratio", "numratio", "both")){
+					stop("Provided parameter ratio must be one of NULL, 'seqratio', 'numratio' or 'both' !")
 				}
-				if(ratio == "seqratio"){
-					venn_count_abund[, 2] <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[, 2]), 3) * 100, "%")
-				}else{
-					venn_count_abund[, 2] <- paste0(round(venn_count_abund[,1]/sum(venn_count_abund[, 1]), 3) * 100, "%")
+				if(ratio %in% c("seqratio", "both")){
+					seq_ratio <- paste0(round(venn_count_abund[,2]/sum(venn_count_abund[, 2]), 3) * 100, "%")
 				}
+				if(ratio %in% c("numratio", "both")){
+					num_ratio <- paste0(round(venn_count_abund[,1]/sum(venn_count_abund[, 1]), 3) * 100, "%")
+				}
+				venn_count_abund[, 2] <- switch(ratio, 'seqratio' = seq_ratio, 'numratio' = num_ratio, 'both' = paste0(seq_ratio, ratio_both_joint, num_ratio))
 			}
 			# make the length of elements same
 			venn_maxlen <- max(sapply(venn_list, length))
