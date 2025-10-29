@@ -167,7 +167,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) + 
 					xlim(1, 9) + 
 					ylim(2.5, 9) + 
-					private$main_theme
+					private$main_theme()
 				
 				if(fill_color == T){
 					p <- p + 
@@ -185,7 +185,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) +
 					xlim(1, 9) +	
 					ylim(1, 9) + 
-					private$main_theme
+					private$main_theme()
 				
 				if(fill_color == T){
 					p <- p + 
@@ -207,7 +207,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- ggplot(data.frame(), aes(x = c(5,5), y = 0)) + 
 					xlim(0, 10) + 
 					ylim(0, 10) + 
-					private$main_theme
+					private$main_theme()
 				
 				map_data_1 <- private$plotellipse(center = c(3.5, 3.6), rotate = -35)
 				map_data_2 <- private$plotellipse(center = c(4.7, 4.4), rotate = -35)
@@ -232,7 +232,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) + 
 					xlim(0, 10.4) + 
 					ylim(-0.5, 10.8) + 
-					private$main_theme
+					private$main_theme()
 				
 				map_data_1 <- private$plotellipse(center = c(4.83, 6.2), radius = c(1.43, 4.11), rotate = 0)
 				map_data_2 <- private$plotellipse(center = c(6.25, 5.4), radius = c(1.7, 3.6), rotate = 66)
@@ -286,7 +286,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				p <- ggplot(data.frame(), aes(x=c(0, 0), y = 0)) +
 					  xlim(petal_use_lim[1], petal_use_lim[2]) +
 					  ylim(petal_use_lim[1], petal_use_lim[2]) +
-					  private$main_theme
+					  private$main_theme()
 					  
 				for(i in 1:nPetals){
 					rotate <- 90 - (i - 1) * 360/nPetals
@@ -609,16 +609,19 @@ trans_venn <- R6Class(classname = "trans_venn",
 			colnames(xy) <- c("x", "y")
 			xy
 		},
-		main_theme = theme(panel.grid.major=element_blank(), 
-			panel.grid.minor=element_blank(), 
-			axis.text=element_blank(),
-			axis.title=element_blank(),
-			axis.ticks=element_blank(),
-			panel.border=element_blank(),
+		main_theme = function(){
+			theme(
+			panel.grid.major = element_blank(), 
+			panel.grid.minor = element_blank(), 
+			axis.text = element_text(color = NA),
+			axis.title = element_text(color = NA),
+			axis.ticks = element_line(color = NA),
+			panel.border = element_blank(),
 			panel.background = element_blank(),
-			legend.key = element_blank(),
+			legend.key = element_rect(fill = NA, color = NA),
 			plot.margin = unit(c(0,0,0,0), "mm")
-		)
+			)
+		}
 	),
 	lock_class = FALSE,
 	lock_objects = FALSE
