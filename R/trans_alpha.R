@@ -386,6 +386,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							}
 						}
 					}else{
+						div_table <- data_alpha[data_alpha$Measure == k, ]
 						if(method == "glmm"){
 							tmp <- glmmTMB::glmmTMB(reformulate(formula, "Value"), data = div_table, ...)
 						}else{
