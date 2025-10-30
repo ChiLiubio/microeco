@@ -200,7 +200,7 @@ Bar plot.
   facet = NULL,
   order_x = NULL,
   x_axis_name = NULL,
-  barwidth = NULL,
+  barwidth = 0.9,
   use_alluvium = FALSE,
   clustering = FALSE,
   clustering_plot = FALSE,
@@ -245,7 +245,7 @@ When multiple facets are used, please first install package \code{ggh4x} using t
 
 \item{\code{x_axis_name}}{NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.}
 
-\item{\code{barwidth}}{default NULL; bar width, see \code{width} in \code{geom_bar}.}
+\item{\code{barwidth}}{default 0.9; bar width, see \code{width} in \code{geom_bar} of ggplot2 package.}
 
 \item{\code{use_alluvium}}{default FALSE; whether add alluvium plot. If \code{TRUE}, please first install \code{ggalluvial} package.}
 

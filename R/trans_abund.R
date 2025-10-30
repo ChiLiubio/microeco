@@ -200,7 +200,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#'    When multiple facets are used, please first install package \code{ggh4x} using the command \code{install.packages("ggh4x")}.
 		#' @param order_x default NULL; vector; used to order the sample names in x axis; must be the samples vector, such as \code{c("S1", "S3", "S2")}.
 		#' @param x_axis_name NULL; a character string; a column name of sample_table in dataset; used to show the sample names in x axis.
-		#' @param barwidth default NULL; bar width, see \code{width} in \code{geom_bar}.
+		#' @param barwidth default 0.9; bar width, see \code{width} in \code{geom_bar} of ggplot2 package.
 		#' @param use_alluvium default FALSE; whether add alluvium plot. If \code{TRUE}, please first install \code{ggalluvial} package.
 		#' @param clustering default FALSE; whether order samples by the clustering.
 		#' @param clustering_plot default FALSE; whether add clustering plot.
@@ -241,7 +241,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			facet = NULL,
 			order_x = NULL,
 			x_axis_name = NULL,
-			barwidth = NULL,
+			barwidth = 0.9,
 			use_alluvium = FALSE,
 			clustering = FALSE,
 			clustering_plot = FALSE,
