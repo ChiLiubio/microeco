@@ -215,6 +215,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 					}
 				}
 				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
+				rownames(res_table) <- rownames(abund_table)
+				colnames(res_table) <- colnames(abund_table)
 			}
 			if(method == "css"){
 				obj <- metagenomeSeq::newMRexperiment(t(abund_table))
