@@ -28,5 +28,4 @@ The column 'Saline' represents the saline soils and non-saline soils.
   \item beta_diversity: list with several beta diversity distance matrix
 }
 }
-\keyword{R6}
-\keyword{datasets,}
+\keyword{datasets}

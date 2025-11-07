@@ -141,10 +141,13 @@ Methods based on \code{decostand} function of vegan package:
 \itemize{
   \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
   \item \code{"max"}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
+  \item \code{"frequency"}:     divide by margin total and multiply by the number of non-zero items (default MARGIN = 2).    
   \item \code{"normalize"}:  make margin sum of squares equal to one (default MARGIN = 1).
   \item \code{"range"}: standardize values into range 0...1 (default MARGIN = 2). If all values are constant, they will be transformed to 0.
   \item \code{"standardize"}: scale x to zero mean and unit variance (default MARGIN = 2).
   \item \code{"pa"}: scale x to presence/absence scale (0/1).
+  \item \code{"chi.square"}: see the detailed "chi.square" documents in vegan package.
+  \item \code{"hellinger"}: square root of \code{method = "total"}.
   \item \code{"log"}: logarithmic transformation.
 }
 Other methods for transformation:

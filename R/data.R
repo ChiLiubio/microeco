@@ -17,7 +17,7 @@
 #' }
 #'
 #' @docType data
-#' @keywords datasets, R6
+#' @keywords datasets
 #' @name dataset
 #' @usage data(dataset)
 #' @format R6 class object

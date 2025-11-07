@@ -92,10 +92,13 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' \itemize{
 		#'   \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
 		#'   \item \code{"max"}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
+		#'   \item \code{"frequency"}: 	divide by margin total and multiply by the number of non-zero items (default MARGIN = 2).	
 		#'   \item \code{"normalize"}:  make margin sum of squares equal to one (default MARGIN = 1).
 		#'   \item \code{"range"}: standardize values into range 0...1 (default MARGIN = 2). If all values are constant, they will be transformed to 0.
 		#'   \item \code{"standardize"}: scale x to zero mean and unit variance (default MARGIN = 2).
 		#'   \item \code{"pa"}: scale x to presence/absence scale (0/1).
+		#'   \item \code{"chi.square"}: see the detailed "chi.square" documents in vegan package.
+		#'   \item \code{"hellinger"}: square root of \code{method = "total"}.
 		#'   \item \code{"log"}: logarithmic transformation.
 		#' }
 		#' Other methods for transformation:
@@ -138,10 +141,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
 			
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
-				if(is.null(MARGIN)){
-					MARGIN <- switch(method, total = 1, max = 2, frequency = 2, normalize = 1, range = 2, rank = 1, standardize = 2, chi.square = 1, NULL)
+				if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "chi.square")){
+					if(is.null(MARGIN)){
+						MARGIN <- switch(method, total = 1, max = 2, frequency = 2, normalize = 1, range = 2, rank = 1, standardize = 2, chi.square = 1)
+					}
+					res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
+				}else{
+					res_table <- vegan::decostand(x = abund_table, method = method, logbase = logbase, ...)
 				}
-				res_table <- vegan::decostand(x = abund_table, method = method, MARGIN = MARGIN, logbase = logbase, ...)
 			}
 			if(method %in% c("rarefy", "srs")){
 				newotu <- as.data.frame(t(abund_table))
