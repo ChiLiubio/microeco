@@ -12,7 +12,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#'   This can make the further operations same with the traditional ecological methods.
 		#' @param dataset the \code{\link{microtable}} object or \code{data.frame} object. 
 		#' 	 If it is \code{data.frame} object, please make sure that rows are samples, and columns are features.
-		#' @return data_table, stored in the object. 
+		#' @return \code{data_table}, stored in the object. 
 		#' @examples
 		#' library(microeco)
 		#' data(dataset)
@@ -43,7 +43,7 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' \cr 
 		#' Methods for normalization:
 		#' \itemize{
-		#'   \item \code{"rarefy"}: classic rarefaction based on R sample function.
+		#'   \item \code{"rarefy"}: classic rarefaction based on the R \code{sample} function.
 		#'   \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <doi:10.7717/peerj.9593>.
 		#'   \item \code{"clr"}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
 		#' 	   	 It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
@@ -90,7 +90,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' }
 		#' Methods based on \code{decostand} function of vegan package:
 		#' \itemize{
-		#'   \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
+		#'   \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples in \code{data_table} of the object).
+		#'      The default MARGIN = 1 generates results commonly referred to as relative abundance.
 		#'   \item \code{"max"}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
 		#'   \item \code{"frequency"}: 	divide by margin total and multiply by the number of non-zero items (default MARGIN = 2).	
 		#'   \item \code{"normalize"}:  make margin sum of squares equal to one (default MARGIN = 1).

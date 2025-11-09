@@ -50,7 +50,7 @@ If it is \code{data.frame} object, please make sure that rows are samples, and c
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data_table, stored in the object.
+\code{data_table}, stored in the object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -92,7 +92,7 @@ Normalization/transformation methods.
 \cr 
 Methods for normalization:
 \itemize{
-  \item \code{"rarefy"}: classic rarefaction based on R sample function.
+  \item \code{"rarefy"}: classic rarefaction based on the R \code{sample} function.
   \item \code{"SRS"}: scaling with ranked subsampling method based on the SRS package provided by Lukas Beule and Petr Karlovsky (2020) <doi:10.7717/peerj.9593>.
   \item \code{"clr"}: Centered log-ratio normalization <ISBN:978-0-412-28060-3> <doi: 10.3389/fmicb.2017.02224>. 
             It is defined:  \deqn{clr_{ki} = \log\frac{x_{ki}}{g(x_i)}}
@@ -139,7 +139,8 @@ Methods for normalization:
 }
 Methods based on \code{decostand} function of vegan package:
 \itemize{
-  \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples).
+  \item \code{"total"}: divide by margin total (default MARGIN = 1, i.e. rows - samples in \code{data_table} of the object).
+     The default MARGIN = 1 generates results commonly referred to as relative abundance.
   \item \code{"max"}: divide by margin maximum (default MARGIN = 2, i.e. columns - features).
   \item \code{"frequency"}:     divide by margin total and multiply by the number of non-zero items (default MARGIN = 2).    
   \item \code{"normalize"}:  make margin sum of squares equal to one (default MARGIN = 1).
