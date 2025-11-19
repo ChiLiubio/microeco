@@ -100,14 +100,16 @@ trans_func <- R6Class(classname = "trans_func",
 					# reduce computational cost
 					tax_unique <- unique(tax1)
 					# first create result matrix of tax_unique, then tax1-OTU
-					res <- matrix(nrow = length(tax_unique), ncol = length(prok_func_FAPROTAX$func_tax))
+					all_func_names <- c(names(prok_func_FAPROTAX$func_tax), names(prok_func_FAPROTAX$func_add_groups)) %>% unique
+					res <- matrix(nrow = length(tax_unique), ncol = length(all_func_names))
 					rownames(res) <- tax_unique
-					colnames(res) <- names(prok_func_FAPROTAX$func_tax)
+					colnames(res) <- all_func_names
 					# match taxa
-					for(i in seq_len(ncol(res))){
-						res[, i] <- grepl(prok_func_FAPROTAX$func_tax[i], tax_unique) %>% as.numeric
+					for(i in names(prok_func_FAPROTAX$func_tax)){
+						res[, i] <- grepl(prok_func_FAPROTAX$func_tax[[i]], tax_unique) %>% as.numeric
 					}
 					res %<>% as.data.frame
+					res[is.na(res)] <- 0
 					# identify the inclusion part among groups
 					for(i in names(prok_func_FAPROTAX$func_add_groups)){
 						if(length(prok_func_FAPROTAX$func_add_groups[[i]]) == 0){
