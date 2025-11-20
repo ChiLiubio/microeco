@@ -214,7 +214,8 @@ Please see the parameter \code{adj_tax} for detailed explanation.
   adj_tax = FALSE,
   adj_tax_by = "Genus",
   perc = FALSE,
-  dec = 6
+  dec = 6,
+  remove_zero = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -244,6 +245,8 @@ The default value of \code{FALSE} means that the result is in the range of 0 to 
 If it is \code{TRUE}, the result will be multiplied by 100, meaning the range will be from 0 to 100.}
 
 \item{\code{dec}}{default 6; remained decimal places in the result table.}
+
+\item{\code{remove_zero}}{default TRUE; whether to remove the columns in which the sum equals 0.}
 }
 \if{html}{\out{</div>}}
 }

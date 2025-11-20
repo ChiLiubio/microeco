@@ -342,12 +342,13 @@ trans_func <- R6Class(classname = "trans_func",
 		#' 	  The default value of \code{FALSE} means that the result is in the range of 0 to 1. 
 		#' 	  If it is \code{TRUE}, the result will be multiplied by 100, meaning the range will be from 0 to 100.
 		#' @param dec default 6; remained decimal places in the result table.
+		#' @param remove_zero default TRUE; whether to remove the columns in which the sum equals 0.
 		#' @return \code{res_func_FR} stored in the object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_func_FR(abundance_weighted = TRUE)
 		#' }
-		cal_func_FR = function(abundance_weighted = FALSE, adj_tax = FALSE, adj_tax_by = "Genus", perc = FALSE, dec = 6){
+		cal_func_FR = function(abundance_weighted = FALSE, adj_tax = FALSE, adj_tax_by = "Genus", perc = FALSE, dec = 6, remove_zero = TRUE){
 			if(is.null(self$res_func)){
 				stop("Please first run cal_func function !")
 			}
@@ -395,8 +396,11 @@ trans_func <- R6Class(classname = "trans_func",
 			tmp_res_func_fr %<>% 
 				t %>% 
 				as.data.frame %>% 
-				`colnames<-`(colnames(tmp_res_func)) %>% 
-				.[, apply(., 2, sum) != 0]
+				`colnames<-`(colnames(tmp_res_func))
+
+			if(remove_zero){
+				tmp_res_func_fr %<>% .[, apply(., 2, sum) != 0, drop = FALSE]
+			}
 			
 			self$res_func_FR <- tmp_res_func_fr
 			message('The result table is stored in object$res_func_FR ...')
