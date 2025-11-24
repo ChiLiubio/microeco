@@ -705,8 +705,8 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + scale_color_manual(values = color_values) + guides(color = "none")
 					## Change the default middle line
 					dat <- ggplot_build(p)$data[[1]]
-					p <- p + geom_segment(data=dat, aes(x=xmin, xend=xmax, y=middle, yend=middle), colour = middlecolor, size=middlesize)
-				} else {	 
+					p <- p + geom_segment(data=dat, aes(x = xmin, xend = xmax, y = middle, yend = middle), colour = middlecolor, linewidth = middlesize)
+				} else {
 					p <- p + geom_boxplot(aes(color = .data[[group]]), ...) + scale_color_manual(values = color_values)
 				}
 			}
