@@ -1475,9 +1475,9 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			p <- p + geom_point(size = point_size, alpha = point_alpha)
 			if(is.null(group)){
-				p <- p + geom_smooth(method = "lm", size = line_size, color = line_color, alpha = line_alpha, se = line_se, fill = line_se_color)
+				p <- p + geom_smooth(method = "lm", linewidth = line_size, color = line_color, alpha = line_alpha, se = line_se, fill = line_se_color)
 			}else{
-				p <- p + geom_smooth(method = "lm", size = line_size, alpha = line_alpha, se = line_se, fill = line_se_color)
+				p <- p + geom_smooth(method = "lm", linewidth = line_size, alpha = line_alpha, se = line_se, fill = line_se_color)
 			}
 			p <- p + stat_corlm(
 				type = type, 
