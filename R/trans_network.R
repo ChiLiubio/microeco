@@ -991,6 +991,8 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   When this parameter is set to \code{FALSE}, the network will filter directly based on the node parameter. 
 		#'   Any nodes not included in the node parameter will be filtered out.
 		#' @param return_igraph default TRUE; whether return the network with igraph format. If FALSE, return \code{trans_network} object.
+		#' @param sample_name default NULL; Sample names. If sample names are provided, the network will be extracted based on the nodes in these samples, 
+		#'   and the corresponding data (e.g., otu_table) in the object will also be filtered when \code{return_igraph = FALSE}.
 		#' @return a new network
 		#' @examples
 		#' \donttest{
@@ -998,7 +1000,7 @@ trans_network <- R6Class(classname = "trans_network",
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }
-		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE, return_igraph = TRUE){
+		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE, return_igraph = TRUE, sample_name = NULL){
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
@@ -1012,6 +1014,11 @@ trans_network <- R6Class(classname = "trans_network",
 				private$check_edgetable()
 				edge <- self$res_edge_table %>% {.[,1] %in% node | .[,2] %in% node} %>% which
 				node <- NULL
+			}
+			if(!is.null(sample_name)){
+				message("Extract sub-network according to features in provided samples: ", paste0(sample_name, collapse = " "), " ...")
+				extract_abund <- self$data_abund %>% .[sample_name, ]
+				node <- apply(extract_abund, 2, sum) %>% .[. != 0] %>% names
 			}
 			if(!is.null(node)){
 				private$check_node_name()
@@ -1043,6 +1050,10 @@ trans_network <- R6Class(classname = "trans_network",
 				subnet_obj$res_network <- sub_network
 				subnet_obj$res_edge_table <- NULL
 				subnet_obj$res_node_table <- NULL
+				if(!is.null(sample_name)){
+					subnet_obj$sample_table %<>% .[sample_name, , drop = FALSE]
+					subnet_obj$data_abund %<>% .[sample_name, , drop = FALSE]
+				}
 				subnet_obj
 			}
 		},

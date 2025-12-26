@@ -830,7 +830,8 @@ Subset of the network.
   edge = NULL,
   rm_single = TRUE,
   node_alledges = FALSE,
-  return_igraph = TRUE
+  return_igraph = TRUE,
+  sample_name = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -853,6 +854,9 @@ When this parameter is set to \code{FALSE}, the network will filter directly bas
 Any nodes not included in the node parameter will be filtered out.}
 
 \item{\code{return_igraph}}{default TRUE; whether return the network with igraph format. If FALSE, return \code{trans_network} object.}
+
+\item{\code{sample_name}}{default NULL; Sample names. If sample names are provided, the network will be extracted based on the nodes in these samples, 
+and the corresponding data (e.g., otu_table) in the object will also be filtered when \code{return_igraph = FALSE}.}
 }
 \if{html}{\out{</div>}}
 }
