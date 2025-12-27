@@ -1007,6 +1007,14 @@ trans_network <- R6Class(classname = "trans_network",
 			if(!is.null(node) & !is.null(edge)){
 				stop("Please provide either node or edge!")
 			}
+			if(!is.null(sample_name)){
+				if(any(!(sample_name %in% rownames(self$data_abund)))){
+					stop("Please provide correct sample names with sample_name parameter!")
+				}
+				message("Extract sub-network according to features in provided samples: ", paste0(sample_name, collapse = " "), " ...")
+				extract_abund <- self$data_abund %>% .[sample_name, ]
+				node <- apply(extract_abund, 2, sum) %>% .[. != 0] %>% names
+			}
 			if(node_alledges){
 				if(is.null(node)){
 					stop("When node_alledges = TRUE, node parameter must be provided!")
@@ -1014,11 +1022,6 @@ trans_network <- R6Class(classname = "trans_network",
 				private$check_edgetable()
 				edge <- self$res_edge_table %>% {.[,1] %in% node | .[,2] %in% node} %>% which
 				node <- NULL
-			}
-			if(!is.null(sample_name)){
-				message("Extract sub-network according to features in provided samples: ", paste0(sample_name, collapse = " "), " ...")
-				extract_abund <- self$data_abund %>% .[sample_name, ]
-				node <- apply(extract_abund, 2, sum) %>% .[. != 0] %>% names
 			}
 			if(!is.null(node)){
 				private$check_node_name()
