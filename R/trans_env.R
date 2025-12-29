@@ -502,6 +502,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param point_size default 3; point size in plot when "point" is in \code{plot_type}.
 		#'   \code{point_size} can also be a variable name in \code{sample_table}, such as "pH".
 		#' @param point_alpha default .8; point transparency in plot when "point" is in \code{plot_type}.
+		#' @param point_second default FALSE; whether plot the second group of points.
+		#'   Only available when input \code{point_size} is numeric value.
+		#' @param point_second_size default NULL; size value of the second type of point. Default means \code{point_size * 0.6}
+		#' @param point_second_alpha default NULL; point transparency of the second type of point.
+		#' @param point_second_color default NULL; a color value of the second type of point. If \code{NULL}, same with previous setting.
 		#' @param centroid_segment_alpha default 0.6; segment transparency in plot when "centroid" is in \code{plot_type}.
 		#' @param centroid_segment_size default 1; segment size in plot when "centroid" is in \code{plot_type}.
 		#' @param centroid_segment_linetype default 3; an integer; the line type related with centroid in plot when "centroid" is in \code{plot_type}.
@@ -553,6 +558,10 @@ trans_env <- R6Class(classname = "trans_env",
 			plot_type = "point",
 			point_size = 3,
 			point_alpha = 0.8,
+			point_second = FALSE,
+			point_second_size = NULL,
+			point_second_alpha = NULL,
+			point_second_color = NULL,
 			centroid_segment_alpha = 0.6,
 			centroid_segment_size = 1,
 			centroid_segment_linetype = 3,
@@ -594,6 +603,17 @@ trans_env <- R6Class(classname = "trans_env",
 						alpha = point_alpha,
 						...
 					)
+					if(point_second){
+						if(is.null(point_second_size)) point_second_size <- point_size * 3 / 5
+						if(is.null(point_second_alpha)) point_second_alpha <- 1
+						if(is.null(point_second_color)){
+							p <- p + geom_point(data = df_sites, aes_meco("x", "y", colour = plot_color, shape = plot_shape), 
+								alpha = point_second_alpha, size = point_second_size)
+						}else{
+							p <- p + geom_point(data = df_sites, aes_meco("x", "y", colour = plot_color, shape = plot_shape), 
+								alpha = point_second_alpha, size = point_second_size, color = point_second_color)
+						}
+					}
 				}
 			}else{
 				check_table_variable(df_sites, point_size, "point_size", "res_ordination_trans$df_sites")

@@ -224,6 +224,10 @@ Plot the ordination result.
   add_sample_label = NULL,
   point_size = 3,
   point_alpha = 0.8,
+  point_second = FALSE,
+  point_second_size = NULL,
+  point_second_alpha = NULL,
+  point_second_color = NULL,
   centroid_segment_alpha = 0.6,
   centroid_segment_size = 1,
   centroid_segment_linetype = 3,
@@ -274,6 +278,15 @@ The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_or
 \code{point_size} can also be a variable name in \code{sample_table}, such as "pH".}
 
 \item{\code{point_alpha}}{default .8; point transparency in plot when "point" is in \code{plot_type} parameter.}
+
+\item{\code{point_second}}{default FALSE; whether plot the second group of points.
+Only available when input \code{point_size} is numeric value.}
+
+\item{\code{point_second_size}}{default NULL; size value of the second type of point. Default means \code{point_size * 0.6}}
+
+\item{\code{point_second_alpha}}{default NULL; point transparency of the second type of point.}
+
+\item{\code{point_second_color}}{default NULL; a color value of the second type of point. If \code{NULL}, same with previous setting.}
 
 \item{\code{centroid_segment_alpha}}{default 0.6; segment transparency in plot when "centroid" is in \code{plot_type} parameter.}
 
