@@ -1639,7 +1639,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if("log2FoldChange" %in% colnames(input)){
 					input$log2FC <- input$log2FoldChange
 				}else{
-					stop("The res_diff must have log2FC or log2FoldChange column！")
+					if("logFC" %in% colnames(input)){
+						input$log2FC <- input$logFC
+					}else{
+						stop("The res_diff must have log2FC, logFC or log2FoldChange column！")
+					}
 				}
 			}
 			if (! "pvalue" %in% colnames(input)) {
