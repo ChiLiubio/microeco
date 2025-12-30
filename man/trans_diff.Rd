@@ -68,6 +68,7 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 \item \href{#method-trans_diff-plot_diff_abund}{\code{trans_diff$plot_diff_abund()}}
 \item \href{#method-trans_diff-plot_diff_bar}{\code{trans_diff$plot_diff_bar()}}
 \item \href{#method-trans_diff-plot_diff_cladogram}{\code{trans_diff$plot_diff_cladogram()}}
+\item \href{#method-trans_diff-plot_volcano}{\code{trans_diff$plot_volcano()}}
 \item \href{#method-trans_diff-clone}{\code{trans_diff$clone()}}
 }
 }
@@ -571,6 +572,38 @@ t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_lab
 
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_diff-plot_volcano"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_diff-plot_volcano}{}}}
+\subsection{Method \code{plot_volcano()}}{
+Volcano plot.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_diff$plot_volcano(
+  select_group = NULL,
+  log2fc_cutoff = 1,
+  pvalue_cutoff = 0.05,
+  color_values = c("#e74c3c", "#3498db", "gray80"),
+  label_top_n = 10
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{select_group}}{default NULL; which group is select if multiple paired groups are found in 'Comparison' column of \code{res_diff} table.
+It should be either a number or one element of 'Comparison' column.}
+
+\item{\code{log2fc_cutoff}}{default 1; cutoff value of log2FoldChange.}
+
+\item{\code{pvalue_cutoff}}{default 0.05; cutoff value of adjusted P value.}
+
+\item{\code{color_values}}{default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.}
+
+\item{\code{label_top_n}}{default 10; number of features shown in the plot. 0 means no label.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_diff-clone"></a>}}

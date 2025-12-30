@@ -1595,6 +1595,106 @@ trans_diff <- R6Class(classname = "trans_diff",
 			}
 			tree <- tree + theme(legend.position = "right", legend.title = element_blank())
 			tree
+		},
+		#' @description
+		#' Volcano plot.
+		#'
+		#' @param select_group default NULL; which group is select if multiple paired groups are found in 'Comparison' column of \code{res_diff} table.
+		#' 	 It should be either a number or one element of 'Comparison' column.
+		#' @param log2fc_cutoff default 1; cutoff value of log2FoldChange.
+		#' @param pvalue_cutoff default 0.05; cutoff value of adjusted P value.
+		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.
+		#' @param label_top_n default 10; number of features shown in the plot. 0 means no label. 
+		plot_volcano = function(select_group = NULL,
+								log2fc_cutoff = 1,
+								pvalue_cutoff = 0.05,
+								color_values = c("#e74c3c", "#3498db", "gray80"),
+								label_top_n = 10){
+			
+			input <- self$res_diff
+			
+			if("Comparison" %in% colnames(input)){
+				all_paired <- unique(input[, "Comparison"])
+				if(length(all_paired) > 1){
+					if(is.null(select_group)){
+						select_paired_name <- all_paired[1]
+						message("Select the first paired comparision: ", all_paired[1], " as the parameter select_group is NULL ...")
+					}else{
+						if(is.numeric(select_group)){
+							select_paired_name <- all_paired[select_group]
+						}else{
+							if(select_group %in% all_paired){
+								select_paired_name <- select_group
+							}else{
+								stop("Please provide a correct select_group parameter!")
+							}
+						}
+						message("Select the paired comparision: ", select_paired_name)
+					}
+				}
+				input %<>% .[.[, "Comparison"] == select_paired_name, ]
+			}
+			
+			if (! "log2FC" %in% colnames(input)) {
+				if("log2FoldChange" %in% colnames(input)){
+					input$log2FC <- input$log2FoldChange
+				}else{
+					stop("The res_diff must have log2FC or log2FoldChange column！")
+				}
+			}
+			if (! "pvalue" %in% colnames(input)) {
+				if("P.adj" %in% colnames(input)){
+					input$pvalue <- input$P.adj
+				}else{
+					stop("The res_diff must have pvalue or P.adj column！")
+				}
+			}
+		  
+			# -log10(pvalue), avoid -Inf
+			input$neg_log10_p <- -log10(input$pvalue)
+			input$neg_log10_p[is.infinite(input$neg_log10_p)] <- max(input$neg_log10_p[is.finite(input$neg_log10_p)]) + 1
+
+			input$group <- ifelse(input$log2FC > log2fc_cutoff & input$pvalue < pvalue_cutoff, "up",
+				ifelse(input$log2FC < -log2fc_cutoff & input$pvalue < pvalue_cutoff, "down", "none"))
+			input$group %<>% factor(., levels = c("up", "down", "none"))
+
+			input$tmp_name <- paste0("feature", seq_len(nrow(input)))
+			if ("Taxa" %in% colnames(input) && label_top_n > 0) {
+				top_feature <- input %>%
+					.[.$group != "none", ] %>%
+					.[order(- .$neg_log10_p), ] %>%
+					head(label_top_n)
+
+				input$label <- ifelse(input$tmp_name %in% top_feature$tmp_name, as.character(gsub(".*\\|", "", input$Taxa)), "")
+			} else {
+				input$label <- ""
+			}
+
+			p <- ggplot(input, aes(x = log2FC, y = neg_log10_p, color = group)) +
+			geom_point(alpha = 0.8, size = 1.5) +
+			geom_vline(xintercept = c(-log2fc_cutoff, log2fc_cutoff), linetype = "dashed", color = "black", linewidth = 0.5) +
+			geom_hline(yintercept = -log10(pvalue_cutoff), linetype = "dashed", color = "black", linewidth = 0.5) +
+			ggrepel::geom_text_repel(aes(label = label),
+						max.overlaps = Inf, # show all labels
+						size = 3,
+						color = "black",
+						box.padding = 0.5) +
+			scale_color_manual(values = color_values) +
+			theme_bw() +
+			theme(
+				plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+				legend.position = "right",
+				panel.grid = element_blank(),
+				axis.title = element_text(size = 12),
+				axis.text = element_text(size = 10)
+			) +
+			labs(
+				x = expression(log[2]~Fold~Change),
+				y = expression(-log[10]~P~value),
+				color = "Group"
+			)
+
+			p
 		}
 	),
 	private = list(
