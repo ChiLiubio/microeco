@@ -1649,11 +1649,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if (! "pvalue" %in% colnames(input)) {
 				if("P.adj" %in% colnames(input)){
 					input$pvalue <- input$P.adj
+					if(any(is.na(input$pvalue))){
+						remove_rows <- which(is.na(input$pvalue))
+						input %<>% .[!is.na(.$pvalue), ]
+						message("Remove the row that is NA in P value: ", paste0(remove_rows, " "))
+					}
 				}else{
 					stop("The res_diff must have pvalue or P.adj column！")
 				}
 			}
-		  
+
 			# -log10(pvalue), avoid -Inf
 			input$neg_log10_p <- -log10(input$pvalue)
 			input$neg_log10_p[is.infinite(input$neg_log10_p)] <- max(input$neg_log10_p[is.finite(input$neg_log10_p)]) + 1
