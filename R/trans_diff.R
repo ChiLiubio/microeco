@@ -1631,8 +1631,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 						message("Select the paired comparision: ", select_paired_name)
 					}
+					input %<>% .[.[, "Comparison"] == select_paired_name, ]
 				}
-				input %<>% .[.[, "Comparison"] == select_paired_name, ]
 			}
 			
 			if (! "log2FC" %in% colnames(input)) {
