@@ -1388,7 +1388,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'	  select the features according to the metric (method = "lefse" or "rf") from high to low.
 		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest.
 		#' @param select_show_labels default NULL; character vector; The features to show in the plot with full label names, not the letters.
-		#' @param only_select_show default FALSE; whether only use the the select features in the parameter \code{select_show_labels}.
+		#' @param only_select_show default FALSE; whether only use the the selected features in the parameter \code{select_show_labels}.
 		#' @param sep default "|"; the seperate character in the taxonomic information.
 		#' @param branch_size default 0.2; numberic, size of branch.
 		#' @param alpha default 0.2; shading of the color.
@@ -1606,6 +1606,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.
 		#' @param label_top_n default 10; number of features shown in the plot. 0 means no label. 
 		#' @param label_fullname default FALSE; whether show the full taxonomic lineage of each label.
+		#' @return ggplot.
+		#' @examples
+		#' \dontrun{
+		#' t1$plot_volcano()
+		#' }
 		plot_volcano = function(select_group = NULL,
 								log2fc_cutoff = 1,
 								pvalue_cutoff = 0.05,

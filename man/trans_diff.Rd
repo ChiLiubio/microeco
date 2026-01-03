@@ -60,6 +60,14 @@ t1$plot_diff_bar(use_number = 1:20)
 \dontrun{
 t1$plot_diff_cladogram(use_taxa_num = 100, use_feature_num = 30, select_show_labels = NULL)
 }
+
+## ------------------------------------------------
+## Method `trans_diff$plot_volcano`
+## ------------------------------------------------
+
+\dontrun{
+t1$plot_volcano()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -532,7 +540,7 @@ select the features according to the metric (method = "lefse" or "rf") from high
 
 \item{\code{select_show_labels}}{default NULL; character vector; The features to show in the plot with full label names, not the letters.}
 
-\item{\code{only_select_show}}{default FALSE; whether only use the the select features in the parameter \code{select_show_labels}.}
+\item{\code{only_select_show}}{default FALSE; whether only use the the selected features in the parameter \code{select_show_labels}.}
 
 \item{\code{sep}}{default "|"; the seperate character in the taxonomic information.}
 
@@ -607,6 +615,19 @@ It should be either a number or one element of 'Comparison' column.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+ggplot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$plot_volcano()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_diff-clone"></a>}}
