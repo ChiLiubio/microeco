@@ -584,7 +584,8 @@ Volcano plot.
   log2fc_cutoff = 1,
   pvalue_cutoff = 0.05,
   color_values = c("#e74c3c", "#3498db", "gray80"),
-  label_top_n = 10
+  label_top_n = 10,
+  label_fullname = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -601,6 +602,8 @@ It should be either a number or one element of 'Comparison' column.}
 \item{\code{color_values}}{default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.}
 
 \item{\code{label_top_n}}{default 10; number of features shown in the plot. 0 means no label.}
+
+\item{\code{label_fullname}}{default FALSE; whether show the full taxonomic lineage of each label.}
 }
 \if{html}{\out{</div>}}
 }

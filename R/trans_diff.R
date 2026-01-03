@@ -1605,11 +1605,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param pvalue_cutoff default 0.05; cutoff value of adjusted P value.
 		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.
 		#' @param label_top_n default 10; number of features shown in the plot. 0 means no label. 
+		#' @param label_fullname default FALSE; whether show the full taxonomic lineage of each label.
 		plot_volcano = function(select_group = NULL,
 								log2fc_cutoff = 1,
 								pvalue_cutoff = 0.05,
 								color_values = c("#e74c3c", "#3498db", "gray80"),
-								label_top_n = 10){
+								label_top_n = 10,
+								label_fullname = FALSE){
 			
 			input <- self$res_diff
 			
@@ -1667,28 +1669,35 @@ trans_diff <- R6Class(classname = "trans_diff",
 				ifelse(input$log2FC < -log2fc_cutoff & input$pvalue < pvalue_cutoff, "down", "none"))
 			input$group %<>% factor(., levels = c("up", "down", "none"))
 
-			input$tmp_name <- paste0("feature", seq_len(nrow(input)))
 			if ("Taxa" %in% colnames(input) && label_top_n > 0) {
+				input$tmp_name <- paste0("feature", seq_len(nrow(input)))
 				top_feature <- input %>%
 					.[.$group != "none", ] %>%
 					.[order(- .$neg_log10_p), ] %>%
 					head(label_top_n)
-
-				input$label <- ifelse(input$tmp_name %in% top_feature$tmp_name, as.character(gsub(".*\\|", "", input$Taxa)), "")
-			} else {
-				input$label <- ""
+				
+				if(label_fullname){
+					input$taxaname <- input$Taxa
+				}else{
+					input$taxaname <- as.character(gsub(".*\\|", "", input$Taxa))
+				}
+				input$label <- ifelse(input$tmp_name %in% top_feature$tmp_name, input$taxaname, "")
 			}
 
 			p <- ggplot(input, aes(x = log2FC, y = neg_log10_p, color = group)) +
 			geom_point(alpha = 0.8, size = 1.5) +
 			geom_vline(xintercept = c(-log2fc_cutoff, log2fc_cutoff), linetype = "dashed", color = "black", linewidth = 0.5) +
-			geom_hline(yintercept = -log10(pvalue_cutoff), linetype = "dashed", color = "black", linewidth = 0.5) +
-			ggrepel::geom_text_repel(aes(label = label),
+			geom_hline(yintercept = -log10(pvalue_cutoff), linetype = "dashed", color = "black", linewidth = 0.5)
+			
+			if ("Taxa" %in% colnames(input) && label_top_n > 0) {
+				p <- p + ggrepel::geom_text_repel(aes(label = label),
 						max.overlaps = Inf, # show all labels
 						size = 3,
 						color = "black",
-						box.padding = 0.5) +
-			scale_color_manual(values = color_values) +
+						box.padding = 0.5)
+			}
+			
+			p <- p + scale_color_manual(values = color_values) +
 			theme_bw() +
 			theme(
 				plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
