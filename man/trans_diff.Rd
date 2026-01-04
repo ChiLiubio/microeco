@@ -611,7 +611,9 @@ It should be either a number or one element of 'Comparison' column.}
 
 \item{\code{label_top_n}}{default 10; number of features shown in the plot. 0 means no label.}
 
-\item{\code{label_fullname}}{default FALSE; whether show the full taxonomic lineage of each label.}
+\item{\code{label_fullname}}{default FALSE; whether show the full taxonomic lineage of each label.
+If the user considers that the full name is too long in the figure when \code{label_fullname = TRUE}, 
+the "Taxa" column in the \code{res_diff} table of the object should be modified to retain the required taxonomic information.}
 }
 \if{html}{\out{</div>}}
 }

@@ -1606,6 +1606,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.
 		#' @param label_top_n default 10; number of features shown in the plot. 0 means no label. 
 		#' @param label_fullname default FALSE; whether show the full taxonomic lineage of each label.
+		#' 	 If the user considers that the full name is too long in the figure when \code{label_fullname = TRUE}, 
+		#' 	 the "Taxa" column in the \code{res_diff} table of the object should be modified to retain the required taxonomic information.
 		#' @return ggplot.
 		#' @examples
 		#' \dontrun{
@@ -1659,7 +1661,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(any(is.na(input$pvalue))){
 						remove_rows <- which(is.na(input$pvalue))
 						input %<>% .[!is.na(.$pvalue), ]
-						message("Remove the row that is NA in P value: ", paste0(remove_rows, " "))
+						message("Remove ", length(remove_rows), " row(s) with NA in P value ...")
 					}
 				}else{
 					stop("The res_diff must have pvalue or P.adj column！")
