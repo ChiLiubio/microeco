@@ -1603,7 +1603,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 It should be either a number or one element of 'Comparison' column.
 		#' @param log2fc_cutoff default 1; cutoff value of log2FoldChange.
 		#' @param pvalue_cutoff default 0.05; cutoff value of adjusted P value.
-		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.
+		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points (i.e. "up", "down" and "none").
 		#' @param label_top_n default 10; number of features shown in the plot. 0 means no label. 
 		#' @param label_fullname default FALSE; whether show the full taxonomic lineage of each label.
 		#' 	 If the user considers that the full name is too long in the figure when \code{label_fullname = TRUE}, 

@@ -607,7 +607,7 @@ It should be either a number or one element of 'Comparison' column.}
 
 \item{\code{pvalue_cutoff}}{default 0.05; cutoff value of adjusted P value.}
 
-\item{\code{color_values}}{default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points.}
+\item{\code{color_values}}{default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points (i.e. "up", "down" and "none").}
 
 \item{\code{label_top_n}}{default 10; number of features shown in the plot. 0 means no label.}
 
