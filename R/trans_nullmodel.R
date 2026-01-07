@@ -519,7 +519,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' @param null.model default "taxa.labels"; Null model to use; see \code{null.model} parameter in \code{ses.mntd} function of \code{picante} package for available options.
 		#' @param abundance.weighted default FALSE; Should mean nearest taxon distances for each species be weighted by species abundance?
 		#' @param runs default 999; Number of randomizations.
-		#' @param ... paremeters pass to \code{ses.mntd} function in \code{picante} package.
+		#' @param ... parameters pass to \code{ses.mntd} function in \code{picante} package.
 		#' @return res_NTI in object, equivalent to -1 times ses.mntd.
 		#' @examples
 		#' \donttest{
@@ -542,7 +542,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' Calculates the (normalised) mean number of checkerboard combinations (C-score) using \code{C.score} function in \code{bipartite} package.
 		#'
 		#' @param by_group default NULL; one column name or number in sample_table; calculate C-score for different groups separately.
-		#' @param ... paremeters pass to \code{bipartite::C.score} function.
+		#' @param ... parameters pass to \code{bipartite::C.score} function.
 		#' @return vector.
 		#' @examples
 		#' \dontrun{

@@ -603,7 +603,7 @@ Calculates Nearest Taxon Index (NTI), equivalent to -1 times the standardized ef
 
 \item{\code{runs}}{default 999; Number of randomizations.}
 
-\item{\code{...}}{paremeters pass to \code{ses.mntd} function in \code{picante} package.}
+\item{\code{...}}{parameters pass to \code{ses.mntd} function in \code{picante} package.}
 }
 \if{html}{\out{</div>}}
 }
@@ -636,7 +636,7 @@ Calculates the (normalised) mean number of checkerboard combinations (C-score) u
 \describe{
 \item{\code{by_group}}{default NULL; one column name or number in sample_table; calculate C-score for different groups separately.}
 
-\item{\code{...}}{paremeters pass to \code{bipartite::C.score} function.}
+\item{\code{...}}{parameters pass to \code{bipartite::C.score} function.}
 }
 \if{html}{\out{</div>}}
 }

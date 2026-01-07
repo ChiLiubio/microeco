@@ -142,7 +142,7 @@ t1$plot_volcano()
         drawn from the Dirichlet distribution; Reference: <doi:10.1371/journal.pone.0067019> and <doi:10.1186/2049-2618-2-15>; 
         require \code{ALDEx2} package to be installed 
         (\href{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html}{https://bioconductor.org/packages/release/bioc/html/ALDEx2.html})}
-  \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallace and generalized linear model (glm) test with \code{ALDEx2} package; 
+  \item{\strong{'ALDEx2_kw'}}{runs Kruskal-Wallis and generalized linear model (glm) test with \code{ALDEx2} package; 
         see also the \code{test} parameter in \code{ALDEx2::aldex} function.}
   \item{\strong{'DESeq2'}}{Differential expression analysis based on the Negative Binomial (a.k.a. Gamma-Poisson) distribution based on the \code{DESeq2} package.}
   \item{\strong{'edgeR'}}{The \code{exactTest} method of \code{edgeR} package is implemented.}
