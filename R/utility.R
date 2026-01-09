@@ -13,8 +13,8 @@ recreate_microtable <- function(meco, ...){
 }
 
 
+# convert differential test table to a trans_env object for the heatmap visualization of multi-factors
 convert_diff2transenv <- function(diff_table, heatmap_x, heatmap_y, heatmap_cell, heatmap_sig, heatmap_lab_fill){
-	# heatmap for multi-factor
 	check_table_variable(diff_table, heatmap_x, "heatmap_x", "object$res_diff")
 	check_table_variable(diff_table, heatmap_y, "heatmap_y", "object$res_diff")
 	check_table_variable(diff_table, heatmap_cell, "heatmap_cell", "object$res_diff")
@@ -107,7 +107,7 @@ filter_lowabund_feature <- function(abund_table, filter_thres){
 	output
 }
 
-
+# Expand the input color values by interpolating between the color and white
 expand_colors <- function(color_values, output_length){
 	if(output_length <= length(color_values)){
 		total_colors <- color_values[1:output_length]
