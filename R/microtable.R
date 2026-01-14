@@ -888,7 +888,7 @@ microtable <- R6Class(classname = "microtable",
 		},
 		check_tbldf = function(input_table, showname){
 			if(inherits(input_table, "tbl_df")){
-				stop("Input ", showname, " is tbl_df format! It may be created using tibble package! Please convert it to traditional data.frame class!")
+				stop("Input ", showname, " is tbl_df format! It may be created using tibble package! Please convert it to basic data.frame class!")
 			}
 		},
 		check_colnames = function(input_table, showname){

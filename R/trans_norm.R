@@ -327,14 +327,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 						# Handling of the NA, NaN, Inf
 						pr[is.nan(pr) | !is.finite(pr) | pr == 0] <- NA
 						# Counting the number of non-NA, NaN, Inf
-						incl.no <- colSums(!is.na(pr))		
+						included_count <- colSums(!is.na(pr))		
 						# Calculate the median of PR
 						pr.median <- matrixStats::colMedians(pr, na.rm=TRUE)
 						# Record the number of samples used for calculating the GMPR
-						comm.no[i] <- sum(incl.no >= intersect.no)
+						comm.no[i] <- sum(included_count >= intersect.no)
 						# Geometric mean of PR median
 						if (comm.no[i] > 1) {
-							exp(mean(log(pr.median[incl.no >= intersect.no])))
+							exp(mean(log(pr.median[included_count >= intersect.no])))
 						} else {
 							NA
 						}

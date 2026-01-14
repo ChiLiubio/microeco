@@ -519,7 +519,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 								res_lda_pair[[i]] <- NA
 								next
 							}else{
-								w <- mod1$scaling[,1]
+								w <- mod1$scaling[, 1]
 								if(is.null(names(w))){
 									names(w) <- rownames(mod1$scaling)
 								}
@@ -591,8 +591,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 						use_data <- new_abund[ , unlist(lapply(as.character(all_name[,i]), function(x) which(as.character(sampleinfo[, group]) %in% x)))]
 						use_data %<>% .[!grepl("__$", rownames(.)), ]
 						use_data <- use_data[apply(use_data, 1, sum) != 0, ]
-						g <- sum(as.character(sampleinfo[, group]) == as.character(all_name[1, i])) + 1
-						res <- private$calculate_metastat(inputdata = use_data, g = g)
+						group_count <- sum(as.character(sampleinfo[, group]) == as.character(all_name[1, i])) + 1
+						res <- private$calculate_metastat(inputdata = use_data, g = group_count)
 						add_name <- paste0(as.character(all_name[, i]), collapse = " - ") %>% rep(., nrow(res))
 						res <- cbind.data.frame(compare = add_name, res)
 						output <- rbind.data.frame(output, res)
