@@ -1664,7 +1664,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						message("Remove ", length(remove_rows), " row(s) with NA in P value ...")
 					}
 				}else{
-					stop("The res_diff must have pvalue or P.adj column！")
+					stop("The res_diff must have pvalue or P.adj column!")
 				}
 			}
 
