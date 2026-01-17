@@ -303,9 +303,9 @@ microtable <- R6Class(classname = "microtable",
 		#' @return tax_table updated in the object.
 		#' @examples
 		#' \donttest{
-		#' m1$add_rownames2taxonomy()
+		#' m1$add_rownames2tax()
 		#' }
-		add_rownames2taxonomy = function(use_name = "OTU"){
+		add_rownames2tax = function(use_name = "OTU"){
 			self$tidy_dataset()
 			if(is.null(self$tax_table)){
 				message("The tax_table in the microtable object is NULL! Create one ...")
@@ -878,6 +878,14 @@ microtable <- R6Class(classname = "microtable",
 			if(!is.null(self$alpha_diversity)) cat(paste("Alpha diversity: calculated for", paste0(colnames(self$alpha_diversity), collapse = ","), "\n"))
 			if(!is.null(self$beta_diversity)) cat(paste("Beta diversity: calculated for", paste0(names(self$beta_diversity), collapse = ","), "\n"))
 			invisible(self)
+		},
+		#' @description
+		#' This is a deprecated function. Please use \code{add_rownames2tax} function instead.
+		#'
+		#' @param ... paremeters pass to \code{add_rownames2tax}.
+		add_rownames2taxonomy = function(...){
+			lifecycle::deprecate_warn("2.0.0", "add_rownames2taxonomy()", "add_rownames2tax()")
+			self$add_rownames2tax(...)
 		}
 	),
 	private = list(

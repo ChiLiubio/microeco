@@ -61,11 +61,11 @@ m1$rarefy_samples(sample.size = min(m1$sample_sums()))
 m1$tidy_dataset(main_data = TRUE)
 
 ## ------------------------------------------------
-## Method `microtable$add_rownames2taxonomy`
+## Method `microtable$add_rownames2tax`
 ## ------------------------------------------------
 
 \donttest{
-m1$add_rownames2taxonomy()
+m1$add_rownames2tax()
 }
 
 ## ------------------------------------------------
@@ -175,7 +175,7 @@ class(m1$beta_diversity)
 \item \href{#method-microtable-filter_taxa}{\code{microtable$filter_taxa()}}
 \item \href{#method-microtable-rarefy_samples}{\code{microtable$rarefy_samples()}}
 \item \href{#method-microtable-tidy_dataset}{\code{microtable$tidy_dataset()}}
-\item \href{#method-microtable-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
+\item \href{#method-microtable-add_rownames2tax}{\code{microtable$add_rownames2tax()}}
 \item \href{#method-microtable-sample_sums}{\code{microtable$sample_sums()}}
 \item \href{#method-microtable-taxa_sums}{\code{microtable$taxa_sums()}}
 \item \href{#method-microtable-sample_names}{\code{microtable$sample_names()}}
@@ -191,6 +191,7 @@ class(m1$beta_diversity)
 \item \href{#method-microtable-cal_betadiv}{\code{microtable$cal_betadiv()}}
 \item \href{#method-microtable-save_betadiv}{\code{microtable$save_betadiv()}}
 \item \href{#method-microtable-print}{\code{microtable$print()}}
+\item \href{#method-microtable-add_rownames2taxonomy}{\code{microtable$add_rownames2taxonomy()}}
 \item \href{#method-microtable-clone}{\code{microtable$clone()}}
 }
 }
@@ -407,14 +408,14 @@ None. The data in the object are tidied up.
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-microtable-add_rownames2taxonomy"></a>}}
-\if{latex}{\out{\hypertarget{method-microtable-add_rownames2taxonomy}{}}}
-\subsection{Method \code{add_rownames2taxonomy()}}{
+\if{html}{\out{<a id="method-microtable-add_rownames2tax"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-add_rownames2tax}{}}}
+\subsection{Method \code{add_rownames2tax()}}{
 Add the row names of \code{microtable$tax_table} as its last column. 
 This is especially useful when the row names of \code{microtable$tax_table} are required as a taxonomic level 
 	 for the taxonomic abundance calculation and biomarker identification.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{microtable$add_rownames2taxonomy(use_name = "OTU")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{microtable$add_rownames2tax(use_name = "OTU")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -430,7 +431,7 @@ tax_table updated in the object.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\donttest{
-m1$add_rownames2taxonomy()
+m1$add_rownames2tax()
 }
 }
 \if{html}{\out{</div>}}
@@ -893,6 +894,23 @@ Print the microtable object.
 \if{html}{\out{<div class="r">}}\preformatted{microtable$print()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-microtable-add_rownames2taxonomy"></a>}}
+\if{latex}{\out{\hypertarget{method-microtable-add_rownames2taxonomy}{}}}
+\subsection{Method \code{add_rownames2taxonomy()}}{
+This is a deprecated function. Please use \code{add_rownames2tax} function instead.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{microtable$add_rownames2taxonomy(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{paremeters pass to \code{add_rownames2tax}.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-microtable-clone"></a>}}
