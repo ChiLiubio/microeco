@@ -2,12 +2,12 @@
 % Please edit documentation in R/microtable.R
 \name{microtable}
 \alias{microtable}
-\title{Create \code{microtable} object to store and manage all the basic files.}
+\title{Create \code{microtable} object to store and manage all the basic data.}
 \format{
 microtable.
 }
 \description{
-This class is a wrapper for a series of operations on the basic data manipulations,
+This class is a wrapper for a series of manipulations on the basic data,
 including microtable object creation, data trimming, data filtering, rarefaction based on Paul et al. (2013) <doi:10.1371/journal.pone.0061217>, taxonomic abundance calculation, 
 alpha and beta diversity calculation based on the An et al. (2019) <doi:10.1016/j.geoderma.2018.09.035> and 
 Lozupone et al. (2005) <doi:10.1128/AEM.71.12.8228-8235.2005> and other basic operations.
@@ -213,17 +213,17 @@ class(m1$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame class; Feature abundance table; rownames are features (e.g. OTUs/ASVs/species/genes); column names are samples.}
+\item{\code{otu_table}}{data.frame class; Feature abundance table; row names must be feature (e.g. OTUs/ASVs/species/genes) names; column names are sample names.}
 
-\item{\code{sample_table}}{default NULL; data.frame; The sample information table; rownames are samples; columns are sample metadata; 
-If not provided, the function can generate a table automatically according to the sample names in \code{otu_table}.}
+\item{\code{sample_table}}{default NULL; data.frame class; Sample information table (optional); row names should be sample names; columns are sample metadata; 
+If not provided, the function can generate a table automatically according to the sample names in the input \code{otu_table}.}
 
-\item{\code{tax_table}}{default NULL; data.frame class; Taxonomic information table; rownames are features; column names are taxonomic ranks.
+\item{\code{tax_table}}{default NULL; data.frame class; Taxonomic information table (optional); row names are feature names; column names are taxonomic ranks.
 This can also be other hierarchical information tables, such as traits, genes, or metabolic pathways.}
 
-\item{\code{phylo_tree}}{default NULL; phylo class; Phylogenetic tree; It must be read with the \code{read.tree} function of ape package.}
+\item{\code{phylo_tree}}{default NULL; phylo class; Phylogenetic tree (optional); It must be read with the \code{read.tree} function of ape package.}
 
-\item{\code{rep_fasta}}{default NULL; \code{DNAStringSet}, \code{list} or \code{DNAbin} class; Representative sequences of OTUs/ASVs.
+\item{\code{rep_fasta}}{default NULL; \code{DNAStringSet}, \code{list} or \code{DNAbin} class; Representative sequences of OTUs/ASVs (optional).
 The sequences should be read with the \code{readDNAStringSet} function of \code{Biostrings} package (DNAStringSet class), 
 \code{read.fasta} function of \code{seqinr} package (list class),
 or \code{read.FASTA} function of \code{ape} package (DNAbin class).}
@@ -236,11 +236,11 @@ If TRUE, the function can invoke the \code{tidy_dataset} function.}
 \subsection{Returns}{
 an object of \code{microtable} class with the following components:
 \describe{
-  \item{\code{sample_table}}{The sample information table.}
-  \item{\code{otu_table}}{The feature table.}
-  \item{\code{tax_table}}{The taxonomic table.}
-  \item{\code{phylo_tree}}{The phylogenetic tree.}
-  \item{\code{rep_fasta}}{The sequences.}
+  \item{\code{sample_table}}{Sample information table.}
+  \item{\code{otu_table}}{Feature table.}
+  \item{\code{tax_table}}{Taxonomic table (when provided).}
+  \item{\code{phylo_tree}}{Phylogenetic tree (when provided).}
+  \item{\code{rep_fasta}}{Sequences (when provided).}
   \item{\code{taxa_abund}}{default NULL; use \code{cal_abund} function to calculate.}
   \item{\code{alpha_diversity}}{default NULL; use \code{cal_alphadiv} function to calculate.}
   \item{\code{beta_diversity}}{default NULL; use \code{cal_betadiv} function to calculate.}
@@ -268,7 +268,7 @@ m1$tidy_dataset()
 \if{latex}{\out{\hypertarget{method-microtable-filter_pollution}{}}}
 \subsection{Method \code{filter_pollution()}}{
 Filter the features considered pollution in \code{microtable$tax_table}.
-This operation will remove any line of the \code{microtable$tax_table} containing any the word in taxa parameter regardless of word case.
+This operation will remove any line of \code{microtable$tax_table} containing any the word in input \code{taxa} parameter regardless of word case.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$filter_pollution(taxa = c("mitochondria", "chloroplast"))}\if{html}{\out{</div>}}
 }
