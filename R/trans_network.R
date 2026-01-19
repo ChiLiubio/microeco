@@ -1398,8 +1398,8 @@ trans_network <- R6Class(classname = "trans_network",
 			res_p[res_p != 0] <- 0
 			list(cor = x, p = res_p)
 		},
-		# convert long format to symmetrical matrix
-		# The first and second columns must be names
+		# Convert long format to symmetrical matrix
+		# First and second columns must be names
 		vec2mat = function(datatable, use_names, value_var, rep_value){
 			if(!inherits(datatable[, value_var], "numeric")){
 				datatable[, value_var] %<>% as.numeric
@@ -1464,7 +1464,7 @@ trans_network <- R6Class(classname = "trans_network",
 		nnsd = function(x){
 			abs(diff(x))
 		},
-		# modified from microbiomeSeq (http://www.github.com/umerijaz/microbiomeSeq) 
+		# modified from microbiomeSeq package
 		module_roles = function(comm_graph){
 			td <- igraph::degree(comm_graph) %>% data.frame(taxa = names(.), total_links = ., stringsAsFactors = FALSE)
 			wmd <- private$within_module_degree(comm_graph)
