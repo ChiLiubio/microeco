@@ -874,6 +874,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param add_abund_table default NULL; additional data table to be used. Row names must be sample names.
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 		#' 	  The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.
+		#' @param filter_unknown default TRUE; Whether filter out the unknown taxa ending with "__".
 		#' @param use_taxa_num default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".
 		#' @param other_taxa default NULL; character vector containing a series of feature names; available when \code{use_data = "other"}; 
 		#' 	  provided names should be standard full names used to select taxa from all the tables in \code{taxa_abund} list of the \code{microtable} object;
@@ -906,6 +907,7 @@ trans_env <- R6Class(classname = "trans_env",
 			partial_fix = NULL,
 			add_abund_table = NULL,
 			filter_thres = 0,
+			filter_unknown = TRUE,
 			use_taxa_num = NULL,
 			other_taxa = NULL,
 			p_adjust_method = "fdr",
@@ -962,7 +964,9 @@ trans_env <- R6Class(classname = "trans_env",
 						abund_table <- abund_table[other_taxa, ]
 					}
 				}
-				abund_table %<>% .[!grepl("__$", rownames(.)), ]
+				if(filter_unknown){
+					abund_table %<>% .[!grepl("__$", rownames(.)), ]
+				}
 				if(nrow(abund_table) == 0){
 					stop("No available feature! Please check the input data!")
 				}

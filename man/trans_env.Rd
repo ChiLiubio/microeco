@@ -705,6 +705,7 @@ Actually, it can also be applied to other correlation between any two variables 
   partial_fix = NULL,
   add_abund_table = NULL,
   filter_thres = 0,
+  filter_unknown = TRUE,
   use_taxa_num = NULL,
   other_taxa = NULL,
   p_adjust_method = "fdr",
@@ -743,6 +744,8 @@ and the variables in \code{partial_fix} will not be employed anymore in the corr
 
 \item{\code{filter_thres}}{default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.}
+
+\item{\code{filter_unknown}}{default TRUE; Whether filter out the unknown taxa ending with "__".}
 
 \item{\code{use_taxa_num}}{default NULL; integer; a number used to select high abundant taxa; only useful when \code{use_data} parameter is a taxonomic level, e.g., "Genus".}
 
