@@ -405,7 +405,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' }
 		plot_feature_imp = function(rf_sig_show = NULL, show_sig_group = FALSE, ...){
 			if(is.null(self$res_feature_imp)){
-				message("The res_feature_imp is not found! It is necessary for the visualization! Try to run cal_feature_imp function automatically ... ")
+				message("The res_feature_imp is not found! It is necessary for the visualization! Call the cal_feature_imp function automatically with default settings ... ")
 				self$cal_feature_imp()
 			}
 			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), self$res_feature_imp, check.names = FALSE)
@@ -660,7 +660,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			...
 			){
 			if(is.null(self$res_ROC)){
-				message("The res_ROC is not found! It is necessary for the visualization! Try to run cal_ROC function automatically ... ")
+				message("The res_ROC is not found! It is necessary for the visualization! Call the cal_ROC function automatically with default settings ... ")
 				self$cal_ROC()
 			}
 			plot_type <- match.arg(plot_type, c("ROC", "PR"))

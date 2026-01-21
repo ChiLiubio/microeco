@@ -341,9 +341,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 			loading_text_italic = FALSE
 			){
 			if(is.null(self$res_ordination)){
-				message("The res_ordination is not found! It is necessary for the visualization! Try to run cal_ordination function automatically ... ")
+				message("The res_ordination is not found! It is necessary for the visualization! Call the cal_ordination function automatically with default settings ... ")
 				self$cal_ordination()
-				message("Run the plot_ordination function ... ")
 			}
 			ordination_method <- self$ordination_method
 

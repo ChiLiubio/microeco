@@ -417,7 +417,8 @@ trans_env <- R6Class(classname = "trans_env",
 			max_perc_tax = 0.8
 			){
 			if(is.null(self$res_ordination)){
-				stop("Please first run cal_ordination function !")
+				message("The res_ordination is not found! Call the cal_ordination function automatically with default settings ... ")
+				self$cal_ordination()
 			}
 			res_ordination <- self$res_ordination
 			scrs <- scores(res_ordination)
@@ -577,7 +578,8 @@ trans_env <- R6Class(classname = "trans_env",
 			...
 			){
 			if(is.null(self$res_ordination_trans)){
-				stop("Please first run trans_ordination function!")
+				message("The res_ordination_trans is not found! Call the trans_ordination function automatically with empirical parameter settings ... ")
+				self$trans_ordination(adjust_arrow_length = TRUE)
 			}
 			if(is.null(plot_color)){
 				if(any(c("ellipse", "chull", "centroid") %in% plot_type)){
@@ -1154,7 +1156,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			if(is.null(self$res_cor)){
-				message("The res_cor is not found! It is necessary for the visualization! Try to run cal_cor function automatically ... ")
+				message("The res_cor is not found! It is necessary for the visualization! Call the cal_cor function automatically with default settings ... ")
 				self$cal_cor()
 			}
 			if(length(color_vector) != 3){
