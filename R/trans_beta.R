@@ -340,10 +340,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 			loading_text_prefix = FALSE,
 			loading_text_italic = FALSE
 			){
-			ordination_method <- self$ordination_method
-			if(is.null(ordination_method)){
-				stop("Please first run cal_ordination function !")
+			if(is.null(self$res_ordination)){
+				message("The res_ordination is not found! It is necessary for the visualization! Try to run cal_ordination function automatically ... ")
+				self$cal_ordination()
+				message("Run the plot_ordination function ... ")
 			}
+			ordination_method <- self$ordination_method
+
 			if(is.null(plot_color)){
 				if(any(c("ellipse", "chull", "centroid") %in% plot_type)){
 					stop("Plot ellipse or chull or centroid need groups! Please provide plot_color parameter!")
