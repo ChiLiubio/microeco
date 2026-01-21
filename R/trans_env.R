@@ -1150,7 +1150,8 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			if(is.null(self$res_cor)){
-				stop("Please first run cal_cor function to get plot data!")
+				message("The res_cor is not found! It is necessary for the visualization! Try to run cal_cor function automatically ... ")
+				self$cal_cor()
 			}
 			if(length(color_vector) != 3){
 				stop("color_vector parameter must have three values!")
