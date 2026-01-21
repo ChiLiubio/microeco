@@ -405,7 +405,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' }
 		plot_feature_imp = function(rf_sig_show = NULL, show_sig_group = FALSE, ...){
 			if(is.null(self$res_feature_imp)){
-				stop("Please first run function cal_feature_imp !")
+				message("The res_feature_imp is not found! It is necessary for the visualization! Try to run cal_feature_imp function automatically ... ")
+				self$cal_feature_imp()
 			}
 			tmp <- data.frame(Taxa = rownames(self$res_feature_imp), self$res_feature_imp, check.names = FALSE)
 			tmp$Taxa %<>% gsub("`", "", ., fixed = TRUE) %>% gsub("\\.(.__)", "\\|\\1", .)
