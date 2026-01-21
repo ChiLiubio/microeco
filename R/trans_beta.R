@@ -719,10 +719,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$cal_group_distance_diff()
 		#' }
 		cal_group_distance_diff = function(group = NULL, by_group = NULL, by_ID = NULL, ...){
-			res_group_distance <- self$res_group_distance
-			if(is.null(res_group_distance)){
-				stop("Please first run cal_group_distance function!")
+			if(is.null(self$res_group_distance)){
+				message("The res_group_distance is not found! Call the cal_group_distance function automatically with default settings ... ")
+				self$cal_group_distance()
 			}
+			res_group_distance <- self$res_group_distance
 			# use method in trans_alpha
 			temp1 <- suppressMessages(trans_alpha$new(dataset = NULL))
 			res_group_distance$Measure <- "group_distance"
@@ -766,7 +767,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		plot_group_distance = function(plot_group_order = NULL, ...){
 			if(is.null(self$res_group_distance_diff)){
 				if(is.null(self$res_group_distance)){
-					stop("Please first run cal_group_distance function!")
+					message("The res_group_distance is not found! Call the cal_group_distance function automatically with default settings ... ")
+					self$cal_group_distance()
 				}
 				group_distance <- self$res_group_distance
 				group <- self$group
