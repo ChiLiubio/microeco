@@ -658,9 +658,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			plot_method = FALSE,
 			...
 			){
-			
 			if(is.null(self$res_ROC)){
-				stop("Please first run cal_ROC to get the data for ROC curve !")
+				message("The res_ROC is not found! It is necessary for the visualization! Try to run cal_ROC function automatically ... ")
+				self$cal_ROC()
 			}
 			plot_type <- match.arg(plot_type, c("ROC", "PR"))
 			if(plot_type == "ROC"){
