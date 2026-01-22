@@ -1175,7 +1175,8 @@ trans_network <- R6Class(classname = "trans_network",
 			method <- match.arg(method, c("chorddiag", "circlize"))
 			
 			if(is.null(self$res_sum_links_pos) & is.null(self$res_sum_links_neg)){
-				stop("Please first run cal_sum_links function!")
+				message("The res_sum_links_pos is not found! Call the cal_sum_links function automatically with default settings ... ")
+				self$cal_sum_links()
 			}
 			if(plot_pos == T){
 				message("Extract the positive link information ...")
