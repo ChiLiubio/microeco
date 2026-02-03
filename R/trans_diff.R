@@ -802,7 +802,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 							W = taxon_data %>% .[, grepl("^W_", raw_colnames)] %>% unlist,
 							p = taxon_data %>% .[, grepl("^p_", raw_colnames)] %>% unlist,
 							P.adj = taxon_data %>% .[, grepl("^q_", raw_colnames)] %>% unlist,
-							diff = taxon_data %>% .[, grepl("^diff_", raw_colnames)] %>% unlist,
+							diff = taxon_data %>% .[, grepl("^diff_", raw_colnames) & !grepl("_robust_", raw_colnames)] %>% unlist,
+							diff_robust = taxon_data %>% .[, grepl("^diff_robust_", raw_colnames)] %>% unlist,
 							passed_ss = taxon_data %>% .[, grepl("^passed_ss_", raw_colnames)] %>% unlist
 							)
 						)
