@@ -305,7 +305,11 @@ trans_env <- R6Class(classname = "trans_env",
 					cat("The taxa_level is OTU; Use otu_table as abundance table input ...\n")
 					# add OTU as one column to make the operations concordant
 					if(! taxa_level %in% colnames(self$dataset$tax_table)){
-						self$dataset$add_rownames2taxonomy(use_name = "OTU")
+						if("add_rownames2tax" %in% names(self$dataset)){
+							self$dataset$add_rownames2tax(use_name = taxa_level)
+						}else{
+							self$dataset$add_rownames2taxonomy(use_name = taxa_level)
+						}
 					}
 				}else{
 					check_tax_level(taxa_level, self$dataset)

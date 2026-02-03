@@ -85,7 +85,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				}else{
 					if(! x.predictors %in% names(dataset$taxa_abund)){
 						message("x.predictors: ", x.predictors, " is not found in the names of taxa_abund list. Use the features in otu_table ...")
-						dataset$add_rownames2taxonomy(use_name = x.predictors)
+						if("add_rownames2tax" %in% names(dataset)){
+							dataset$add_rownames2tax(use_name = x.predictors)
+						}else{
+							dataset$add_rownames2taxonomy(use_name = x.predictors)
+						}
 						message("Calculate relative abundance of features ...")
 						suppressMessages(dataset$cal_abund())
 					}
