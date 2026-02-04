@@ -600,8 +600,8 @@ Volcano plot.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{select_group}}{default NULL; which group is select if multiple paired groups are found in 'Comparison' column of \code{res_diff} table.
-It should be either a number or one element of 'Comparison' column.}
+\item{\code{select_group}}{default NULL; which group is select if multiple paired groups are found in 'Comparison' or 'Factors' column of \code{res_diff} table.
+It should be either a number or one element of these columns.}
 
 \item{\code{log2fc_cutoff}}{default 1; cutoff value of log2FoldChange.}
 

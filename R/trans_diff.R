@@ -1604,8 +1604,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @description
 		#' Volcano plot.
 		#'
-		#' @param select_group default NULL; which group is select if multiple paired groups are found in 'Comparison' column of \code{res_diff} table.
-		#' 	 It should be either a number or one element of 'Comparison' column.
+		#' @param select_group default NULL; which group is select if multiple paired groups are found in 'Comparison' or 'Factors' column of \code{res_diff} table.
+		#' 	 It should be either a number or one element of these columns.
 		#' @param log2fc_cutoff default 1; cutoff value of log2FoldChange.
 		#' @param pvalue_cutoff default 0.05; cutoff value of adjusted P value.
 		#' @param color_values default c("#e74c3c", "#3498db", "gray80"); color palette for different types of points (i.e. "up", "down" and "none").
@@ -1626,6 +1626,28 @@ trans_diff <- R6Class(classname = "trans_diff",
 								label_fullname = FALSE){
 			
 			input <- self$res_diff
+			
+			if(! "log2FC" %in% colnames(input)) {
+				if(! any(c("lfc", "log2FoldChange", "logFC") %in% colnames(input))){
+					stop("The res_diff must have log2FC, logFC or log2FoldChange column!")
+				}
+				if("lfc" %in% colnames(input)){
+					input$log2FC <- input$lfc
+				}
+				if("log2FoldChange" %in% colnames(input)){
+					input$log2FC <- input$log2FoldChange
+				}
+				if("logFC" %in% colnames(input)){
+					input$log2FC <- input$logFC
+				}
+			}
+			
+			if("Factors" %in% colnames(input) & ! ("Comparison" %in% colnames(input))){
+				# filter the (Intercept) item
+				message("Filte the rows with (Intercept) in the Factors column ...")
+				input %<>% .[.[, "Factors"] != "(Intercept)", ]
+				input$Comparison <- input$Factors
+			}
 			
 			if("Comparison" %in% colnames(input)){
 				all_paired <- unique(input[, "Comparison"])
@@ -1649,17 +1671,6 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			
-			if (! "log2FC" %in% colnames(input)) {
-				if("log2FoldChange" %in% colnames(input)){
-					input$log2FC <- input$log2FoldChange
-				}else{
-					if("logFC" %in% colnames(input)){
-						input$log2FC <- input$logFC
-					}else{
-						stop("The res_diff must have log2FC, logFC or log2FoldChange column!")
-					}
-				}
-			}
 			if (! "pvalue" %in% colnames(input)) {
 				if("P.adj" %in% colnames(input)){
 					input$pvalue <- input$P.adj
