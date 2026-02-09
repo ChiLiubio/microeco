@@ -660,7 +660,8 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 			}
 			network <- self$res_network
-			node_table <- as_data_frame(network, what = "vertices")
+			node_table_raw <- as_data_frame(network, what = "vertices")
+			node_table <- node_table_raw[, "name", drop = FALSE]
 
 			# Add abundance info
 			sum_abund <- self$data_relabund
@@ -696,6 +697,11 @@ trans_network <- R6Class(classname = "trans_network",
 					node_table %<>% cbind.data.frame(., self$tax_table[rownames(.), , drop = FALSE])
 				}
 			}
+			# add other attributes
+			if(! all(colnames(node_table_raw) %in% colnames(node_table))){
+				add_names <- colnames(node_table_raw) %>% .[! . %in% colnames(node_table)]
+				node_table %<>% cbind.data.frame(., node_table_raw[rownames(.), add_names, drop = FALSE])
+			}
 			
 			self$res_node_table <- node_table
 			message('Result is stored in object$res_node_table ...')
@@ -704,24 +710,24 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Get the edge property table, including connected nodes, label and weight.
 		#'
-		#' @param weight_na default NULL; the value for weight in the table if no "weight" attribute is found in the network. Default NULL means using NA.
+		#' @param weight_na default 1; the value for weight in the table if no "weight" attribute is found in the network.
+		#' @param label_na default "all"; the value for label in the table if no "label" attribute is found in the network.
 		#' @return \code{res_edge_table} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$get_edge_table()
 		#' }
-		get_edge_table = function(weight_na = NULL){
+		get_edge_table = function(weight_na = 1, label_na = "all"){
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
 			res_edge_table <- igraph::as_data_frame(network, what = "edges")
 			colnames(res_edge_table)[1:2] <- c("node1", "node2")
 			if(! "weight" %in% colnames(res_edge_table)){
-				if(is.null(weight_na)){
-					res_edge_table$weight <- NA
-				}else{
-					res_edge_table$weight <- weight_na
-				}
+				res_edge_table$weight <- weight_na
+			}
+			if(! "label" %in% colnames(res_edge_table)){
+				res_edge_table$label <- label_na
 			}
 			self$res_edge_table <- res_edge_table
 			message('Result is stored in object$res_edge_table ...')
