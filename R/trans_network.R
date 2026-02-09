@@ -654,11 +654,17 @@ trans_network <- R6Class(classname = "trans_network",
 			private$check_igraph()
 			private$check_network()
 			private$check_node_name()
-
+			if(node_roles){
+				if(is.null(V(self$res_network)$module)){
+					self$cal_module()
+				}
+			}
 			network <- self$res_network
+			node_table <- as_data_frame(network, what = "vertices")
+
 			# Add abundance info
 			sum_abund <- self$data_relabund
-			node_table <- data.frame(name = V(network)$name) %>% `rownames<-`(.[, 1])
+
 			node_table$degree <- igraph::degree(network)[rownames(node_table)]
 			node_table$betweenness_centrality <- igraph::betweenness(network)[rownames(node_table)]
 			node_table$closeness_centrality <- igraph::closeness(network)[rownames(node_table)]
@@ -690,6 +696,7 @@ trans_network <- R6Class(classname = "trans_network",
 					node_table %<>% cbind.data.frame(., self$tax_table[rownames(.), , drop = FALSE])
 				}
 			}
+			
 			self$res_node_table <- node_table
 			message('Result is stored in object$res_node_table ...')
 			invisible(self)
@@ -697,19 +704,24 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @description
 		#' Get the edge property table, including connected nodes, label and weight.
 		#'
+		#' @param weight_na default NULL; the value for weight in the table if no "weight" attribute is found in the network. Default NULL means using NA.
 		#' @return \code{res_edge_table} in object.
 		#' @examples
 		#' \donttest{
 		#' t1$get_edge_table()
 		#' }
-		get_edge_table = function(){
+		get_edge_table = function(weight_na = NULL){
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
 			res_edge_table <- igraph::as_data_frame(network, what = "edges")
 			colnames(res_edge_table)[1:2] <- c("node1", "node2")
 			if(! "weight" %in% colnames(res_edge_table)){
-				res_edge_table$weight <- NA
+				if(is.null(weight_na)){
+					res_edge_table$weight <- NA
+				}else{
+					res_edge_table$weight <- weight_na
+				}
 			}
 			self$res_edge_table <- res_edge_table
 			message('Result is stored in object$res_edge_table ...')

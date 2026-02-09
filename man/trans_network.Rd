@@ -576,9 +576,16 @@ t1$get_node_table(node_roles = TRUE)
 \subsection{Method \code{get_edge_table()}}{
 Get the edge property table, including connected nodes, label and weight.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_edge_table()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$get_edge_table(weight_na = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{weight_na}}{default NULL; the value for weight in the table if no "weight" attribute is found in the network. Default NULL means using NA.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 \code{res_edge_table} in object.
 }
