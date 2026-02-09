@@ -341,7 +341,15 @@ trans_env <- R6Class(classname = "trans_env",
 					stop("Non variables obtained after selection according to model. Check method and data!")
 				}
 				res_sign <- res_sign[1:(length(res_sign) - 1)]
-				env_data <- env_data[, c(res_sign), drop = FALSE]
+				if(! all(res_sign %in% colnames(env_data))){
+					res_sign %<>% gsub("^`|`$", "", .)
+					if(! all(res_sign %in% colnames(env_data))){
+						warning("One or more selected variables (", paste0(res_sign[! res_sign %in% colnames(env_data)], collapse = "; "), 
+							") do not match the original variable names! Please report this to the maintainer!")
+					}
+				}
+				message("Selected variables: ", paste0(res_sign, collapse = "; "))
+				env_data <- env_data[, res_sign, drop = FALSE]
 			}
 			self$ordination_method <- method
 			self$taxa_level <- taxa_level
