@@ -2,7 +2,7 @@
 #' Create \code{trans_metab} object for metabolite analysis.
 #'
 #' @description
-#' This class is a wrapper for a series of metabolite analysis.
+#' This class is a wrapper for a series of metabolite analysis, including origin inference.
 #'
 #' @export
 trans_metab <- R6Class(classname = "trans_metab",
@@ -10,13 +10,44 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @description
 		#' Create the \code{trans_metab} object.
 		#' 
-		#' @param metab default NULL; metabolite data. A data.frame object or the \code{\link{microtable}} object.
+		#' @param metab default NULL; metabolite data. A \code{\link{microtable}} object or data.frame object.
+		#'    If the input is a data.frame object, the function can judge whether it is abundance table and preprocess the data.		
 		#' @param microb default NULL; A \code{\link{microtable}} object.
 		#' @return data inside the object.
 		initialize = function(
 			metab = NULL,
 			microb = NULL
 			){
+			if(! is.null(metab)){
+				if(inherits(metab, "data.frame")){
+					if(all(sapply(metab, function(x){inherits(x, "numeric")}))){
+						metab_otu_table <- metab
+						metab_tax_table <- data.frame(metab_name = rownames(metab))
+						rownames(metab_tax_table) <- rownames(metab)
+						metab <- microtable$new(otu_table = metab_otu_table, tax_table = metab_tax_table)
+					}else{
+						metab_tax_table <- metab
+						metab <- list()
+						metab$tax_table <- metab_tax_table
+					}
+				}else{
+					if(inherits(metab, "microtable")){
+						if(is.null(metab$tax_table)){
+							metab_tax_table <- data.frame(metab_name = rownames(metab$otu_table))
+							rownames(metab_tax_table) <- rownames(metab)
+							metab$tax_table <- metab_tax_table
+						}
+					}else{
+						stop("Unknown data type of input metab !")
+					}
+				}
+				if(nrow(metab$tax_table) > 3){
+					show_metab <- c(rownames(metab$tax_table)[1:3], "...")
+				}else{
+					show_metab <- rownames(metab$tax_table)
+				}
+				message("Input metabolites have ", nrow(metab$tax_table), ", including ", paste0(show_metab, collapse = ", "))
+			}
 			self$data_metab <- metab
 			self$data_microb <- microb
 		},

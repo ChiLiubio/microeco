@@ -4,7 +4,7 @@
 \alias{trans_metab}
 \title{Create \code{trans_metab} object for metabolite analysis.}
 \description{
-This class is a wrapper for a series of metabolite analysis.
+This class is a wrapper for a series of metabolite analysis, including origin inference.
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -26,7 +26,8 @@ Create the \code{trans_metab} object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{metab}}{default NULL; metabolite data. A data.frame object or the \code{\link{microtable}} object.}
+\item{\code{metab}}{default NULL; metabolite data. A \code{\link{microtable}} object or data.frame object.
+If the input is a data.frame object, the function can judge whether it is abundance table and preprocess the data.}
 
 \item{\code{microb}}{default NULL; A \code{\link{microtable}} object.}
 }
