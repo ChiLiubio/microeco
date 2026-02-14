@@ -10,6 +10,7 @@ This class is a wrapper for a series of metabolite analysis, including origin in
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-trans_metab-new}{\code{trans_metab$new()}}
+\item \href{#method-trans_metab-cal_match}{\code{trans_metab$cal_match()}}
 \item \href{#method-trans_metab-cal_origin}{\code{trans_metab$cal_origin()}}
 \item \href{#method-trans_metab-clone}{\code{trans_metab$clone()}}
 }
@@ -38,6 +39,37 @@ data inside the object.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_metab-cal_match"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_metab-cal_match}{}}}
+\subsection{Method \code{cal_match()}}{
+Matching compound names against the database from TidyMass2 (DOI: 10.1038/s41467-026-68464-7) to facilitate the acquisition of standardized nomenclature.
+An alternative way is to use MetaboAnalyst website (https://www.metaboanalyst.ca/faces/upload/ConvertView.xhtml).
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_match(
+  database_path = "./metorigindb_split_202602",
+  method = "jw",
+  maxDist = 0.3,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{database_path}}{default "./metorigindb_split_202602"; directory path of the downloaded database. 
+Please download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.}
+
+\item{\code{method}}{default "jw"; method of approximate string matching. Default "jw" is Jaro-Winkler distance.
+See the \code{method} parameter of \code{amatch} function in stringdist package.}
+
+\item{\code{maxDist}}{default 0.3; See the \code{maxDist} parameter of \code{amatch} function in stringdist package.}
+
+\item{\code{...}}{parameters passed to \code{amatch} function of stringdist package.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_metab-cal_origin"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_metab-cal_origin}{}}}
 \subsection{Method \code{cal_origin()}}{
@@ -54,7 +86,7 @@ Metabolite origin inference based on the preprocessed database from TidyMass2 (D
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{database_path}}{default "./metorigindb_split_202602"; directory path of the downloaded database. 
-Please first download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.}
+Please download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.}
 
 \item{\code{match_col}}{default "names"; How to match to the data of metorigindb. Default "names" means using the input names of metabolites.
 If the table has other columns like "HMDB_ID" or "KEGG_ID", the user can provide more items, like c("names", "HMDB_ID").}

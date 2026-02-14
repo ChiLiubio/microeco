@@ -52,10 +52,63 @@ trans_metab <- R6Class(classname = "trans_metab",
 			self$data_microb <- microb
 		},
 		#' @description
+		#' Matching compound names against the database from TidyMass2 (DOI: 10.1038/s41467-026-68464-7) to facilitate the acquisition of standardized nomenclature.
+		#' An alternative way is to use MetaboAnalyst website (https://www.metaboanalyst.ca/faces/upload/ConvertView.xhtml).
+		#' 
+		#' @param database_path default "./metorigindb_split_202602"; directory path of the downloaded database. 
+		#'	  Please download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.
+		#' @param method default "jw"; method of approximate string matching. Default "jw" is Jaro-Winkler distance.
+		#'	  See the \code{method} parameter of \code{amatch} function in stringdist package.
+		#' @param maxDist default 0.3; See the \code{maxDist} parameter of \code{amatch} function in stringdist package.
+		#' @param ... parameters passed to \code{amatch} function of stringdist package.
+		cal_match = function(
+			database_path = "./metorigindb_split_202602",
+			method = "jw",
+			maxDist = 0.3,
+			...
+			){
+			data_metab <- self$data_metab
+
+			load(file.path(database_path, "metorigindb_number", "metorigindb_number.RData"))
+
+			user_names <- rownames(data_metab$tax_table)
+			standard_names <- metorigindb_number$Compound_name
+
+			user_clean <- private$clean_name(user_names)
+			std_clean <- private$clean_name(standard_names)
+
+			# Jaro-Winkler distance, sensitive to the prefix
+			matched_index <- stringdist::amatch(
+				user_clean,
+				table = std_clean,
+				method = method,
+				maxDist = maxDist,
+				...
+			)
+
+			res <- data.frame(
+				original = user_names,
+				cleaned = user_clean,
+				matched_standard = ifelse(
+					is.na(matched_index), 
+					NA, 
+					standard_names[matched_index]
+				),
+				distance = ifelse(
+					is.na(matched_index), 
+					NA, 
+					stringdist::stringdist(user_clean, std_clean[matched_index], method = method)
+				)
+			)
+
+			self$res_match <- res
+			message("Match table is stored in object$res_match ...")
+		},
+		#' @description
 		#' Metabolite origin inference based on the preprocessed database from TidyMass2 (DOI: 10.1038/s41467-026-68464-7)
 		#' 
 		#' @param database_path default "./metorigindb_split_202602"; directory path of the downloaded database. 
-		#'	  Please first download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.
+		#'	  Please download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.
 		#' @param match_col default "names"; How to match to the data of metorigindb. Default "names" means using the input names of metabolites.
 		#'    If the table has other columns like "HMDB_ID" or "KEGG_ID", the user can provide more items, like c("names", "HMDB_ID").
 		#' @param bac_level default "Genus"; which bacteria level is used to parse the taxa.
@@ -113,6 +166,9 @@ trans_metab <- R6Class(classname = "trans_metab",
 			}
 
 			source_table <- do.call(rbind, res) %>% as.data.frame
+
+			self$res_origin_rawtable <- source_table
+			message("Raw origin table is stored in object$res_origin_rawtable ...")
 			
 			bac_level_lower <- tolower(bac_level)
 			bac_level_prefix <- bac_level_lower %>% substr(., 1, 1)
@@ -129,18 +185,33 @@ trans_metab <- R6Class(classname = "trans_metab",
 				lapply(., function(x){trimws(x)})
 			
 			if(! is.null(data_microb)){
+				if(! bac_level %in% colnames(data_microb$tax_table)){
+					stop("bac_level: ", bac_level, " is not found in the column names of tax_table in data_microb !")
+				}
 				all_taxa <- data_microb$tax_table[, bac_level] %>% unique %>% .[. != paste0(bac_level_prefix, "__")] %>% gsub(".__", "", .)
 				res_origin %<>% lapply(., function(x){x[x %in% all_taxa]})
 			}
 			
-			self$res_origin_rawtable <- source_table
-			message("Raw origin table is stored in object$res_origin_rawtable ...")
 			self$res_origin_list <- res_origin
 			if(! is.null(data_microb)){
 				message("Filtered origin taxa at ", bac_level, " level for each metabolite is stored in object$res_origin_list ...")
 			}else{
 				message("Origin taxa at ", bac_level, " level for each metabolite is stored in object$res_origin_list ... ...")
 			}
+		}
+	),
+	private = list(
+		clean_name = function(input) {
+			output <- input %>%
+				tolower %>%
+				gsub("l-|r-", "", .) %>%
+				gsub("\\(r\\)|\\(s\\)", "", .) %>%
+				gsub("\\d+$", "", .) %>%
+				gsub("\\s+", " ", .) %>%
+				gsub("degr.*$", " ", .) %>%
+				trimws
+
+			output
 		}
 	),
 	lock_class = FALSE,
