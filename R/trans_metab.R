@@ -126,7 +126,13 @@ trans_metab <- R6Class(classname = "trans_metab",
 			
 			length_db <- length(metorigindb_number$Compound_name)
 			if("names" %in% match_col){
-				name_ID_select <- metorigindb_number$Compound_name %in2% rownames(data_metab$tax_table)
+				res_match_table <- self$res_match
+				if(! is.null(res_match_table)){
+					select_match_table <- res_match_table[res_match_table$distance == 0, ]
+					name_ID_select <- metorigindb_number$Compound_name %in2% select_match_table$matched_standard
+				}else{
+					name_ID_select <- metorigindb_number$Compound_name %in2% rownames(data_metab$tax_table)
+				}
 			}else{
 				name_ID_select <- logical(length_db)
 			}
