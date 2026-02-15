@@ -111,10 +111,14 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#'	  Please download the pre-collated metorigindb database (RData format) from zenodo (https://zenodo.org/records/18618912) and extract the compressed archive.
 		#' @param match_col default "names"; How to match to the data of metorigindb. Default "names" means using the input names of metabolites.
 		#'    If the table has other columns like "HMDB_ID" or "KEGG_ID", the user can provide more items, like c("names", "HMDB_ID").
-		#' @param bac_level default "Genus"; which bacteria level is used to parse the taxa.
+		#' @param match_names_distance default 0; distance threshold used if the \code{res_match_table} is found in the object, 
+		#'    which is calculated from the \code{cal_match} function. Available for the "names" option in \code{match_col} parameter.
+		#' @param bac_level default "Genus"; which bacteria level is used to parse the taxa in the \code{data_microb} of object.
+		#'    The function can automatically match the taxa those found in the input data.		
 		cal_origin = function(
 			database_path = "./metorigindb_split_202602", 
 			match_col = "names",
+			match_names_distance = 0,
 			bac_level = "Genus"
 			){
 			data_metab <- self$data_metab
@@ -128,7 +132,8 @@ trans_metab <- R6Class(classname = "trans_metab",
 			if("names" %in% match_col){
 				res_match_table <- self$res_match
 				if(! is.null(res_match_table)){
-					select_match_table <- res_match_table[res_match_table$distance == 0, ]
+					message("res_match_table is found in the object. Using the names of matched_standard column to search the database ...")
+					select_match_table <- res_match_table[res_match_table$distance == match_names_distance, ]
 					name_ID_select <- metorigindb_number$Compound_name %in2% select_match_table$matched_standard
 				}else{
 					name_ID_select <- metorigindb_number$Compound_name %in2% rownames(data_metab$tax_table)

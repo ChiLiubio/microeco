@@ -78,6 +78,7 @@ Metabolite origin inference based on the preprocessed database from TidyMass2 (D
 \if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_origin(
   database_path = "./metorigindb_split_202602",
   match_col = "names",
+  match_names_distance = 0,
   bac_level = "Genus"
 )}\if{html}{\out{</div>}}
 }
@@ -91,7 +92,11 @@ Please download the pre-collated metorigindb database (RData format) from zenodo
 \item{\code{match_col}}{default "names"; How to match to the data of metorigindb. Default "names" means using the input names of metabolites.
 If the table has other columns like "HMDB_ID" or "KEGG_ID", the user can provide more items, like c("names", "HMDB_ID").}
 
-\item{\code{bac_level}}{default "Genus"; which bacteria level is used to parse the taxa.}
+\item{\code{match_names_distance}}{default 0; distance threshold used if the \code{res_match_table} is found in the object, 
+which is calculated from the \code{cal_match} function. Available for the "names" option in \code{match_col} parameter.}
+
+\item{\code{bac_level}}{default "Genus"; which bacteria level is used to parse the taxa in the \code{data_microb} of object.
+The function can automatically match the taxa those found in the input data.}
 }
 \if{html}{\out{</div>}}
 }
