@@ -6,6 +6,18 @@
 \description{
 This class is a wrapper for a series of metabolite analysis, including origin inference.
 }
+\examples{
+
+## ------------------------------------------------
+## Method `trans_metab$new`
+## ------------------------------------------------
+
+\donttest{
+data(dataset_metab)
+data(dataset)
+t1 <- trans_env$new(metab = dataset_metab, microb = dataset)
+}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -35,8 +47,20 @@ If the input is a data.frame object, the function can judge whether it is abunda
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-data inside the object.
+\code{data_metab} and \code{data_microb} stored in the object.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
+data(dataset_metab)
+data(dataset)
+t1 <- trans_env$new(metab = dataset_metab, microb = dataset)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_metab-cal_match"></a>}}

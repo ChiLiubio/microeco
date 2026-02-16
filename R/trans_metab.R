@@ -13,7 +13,13 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @param metab default NULL; metabolite data. A \code{\link{microtable}} object or data.frame object.
 		#'    If the input is a data.frame object, the function can judge whether it is abundance table and preprocess the data.		
 		#' @param microb default NULL; A \code{\link{microtable}} object.
-		#' @return data inside the object.
+		#' @return \code{data_metab} and \code{data_microb} stored in the object.
+		#' @examples
+		#' \donttest{
+		#' data(dataset_metab)
+		#' data(dataset)
+		#' t1 <- trans_env$new(metab = dataset_metab, microb = dataset)
+		#' }
 		initialize = function(
 			metab = NULL,
 			microb = NULL
