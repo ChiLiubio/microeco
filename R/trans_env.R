@@ -439,6 +439,10 @@ trans_env <- R6Class(classname = "trans_env",
 			colnames(df_sites)[1:2] <- c("x", "y")
 			
 			multiplier <- vegan:::ordiArrowMul(scrs$biplot)
+			if(is.infinite(multiplier)){
+					message("ordiArrowMul function returns infinite value for a multiplier to scale arrows. Use original values ...")
+				multiplier <- 1
+			}
 			df_arrows <- scrs$biplot * multiplier
 			colnames(df_arrows) <- c("x", "y")
 			df_arrows <- as.data.frame(df_arrows)
@@ -452,6 +456,10 @@ trans_env <- R6Class(classname = "trans_env",
 				df_species <- scrs$species
 				colnames(df_species)[1:2] <- c("x", "y")
 				multiplier_spe <- vegan:::ordiArrowMul(scrs$biplot_spe)
+				if(is.infinite(multiplier_spe)){
+					message("ordiArrowMul function returns infinite value for a multiplier to scale arrows. Use original values ...")
+					multiplier_spe <- 1
+				}
 				df_arrows_spe <- scrs$biplot_spe * multiplier_spe
 				colnames(df_arrows_spe) <- c("x", "y")
 				df_arrows_spe <- dropallfactors(cbind.data.frame(
