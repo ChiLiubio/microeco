@@ -700,7 +700,7 @@ trans_env <- R6Class(classname = "trans_env",
 					data = combined_centroid_xy, 
 					aes_meco(x = "x", xend = "cx", y = "y", yend = "cy", colour = plot_color),
 					alpha = centroid_segment_alpha, 
-					size = centroid_segment_size, 
+					linewidth = centroid_segment_size, 
 					linetype = centroid_segment_linetype
 				)
 			}
