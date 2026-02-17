@@ -16,9 +16,9 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @return \code{data_metab} and \code{data_microb} stored in the object.
 		#' @examples
 		#' \donttest{
-		#' data(dataset_metab)
-		#' data(dataset)
-		#' t1 <- trans_env$new(metab = dataset_metab, microb = dataset)
+		#' data(soil_metab)
+		#' data(soil_microb)
+		#' t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
 		#' }
 		initialize = function(
 			metab = NULL,
