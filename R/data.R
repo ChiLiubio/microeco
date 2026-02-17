@@ -164,3 +164,43 @@ NULL
 #' @usage data(taxonomy_table_ITS)
 #' @format data.frame
 NULL
+
+#' Microtable object of prokaryotic sequencing data from soil and maize 
+#' in an agricultural field experiment with crop rotation and fertilization treatments (DOI: 10.1007/s11104-024-06847-9).
+#'
+#' In the first column of \code{sample_table}, 'SampleID', is the sample name and same with the row names. 
+#' The second column, 'Group', represents different treatment groups, namely the combinations of 'Cropping' and 'Fertilization', which are two experimental factors. 
+#' 'Cropping' denotes the experimental treatments including rotational (RC) and continuous (CC) cropping, 
+#' and 'Fertilization' includes CK (no fertilizer control), NPK (inorganic fertilizer) and NPKS (NPK + straw amendment). 
+#' 'Compartment' means different sampling compartments (bulk soil, rhizosphere soil and root).
+#'
+#' \itemize{
+#'   \item sample_table: sample information table
+#'   \item otu_table: ASV abundance table
+#'   \item tax_table: taxonomic table
+#' }
+#'
+#' @docType data
+#' @keywords datasets
+#' @name soil_microb
+#' @usage data(soil_microb)
+#' @format R6 class object
+NULL
+
+#' Microtable object of non-targeted metabolome data from bulk soil and maize rhizosphere soil
+#' in an agricultural field experiment with crop rotation and fertilization treatments (DOI: 10.1007/s11104-024-06847-9).
+#' 
+#' For the explanation of each column of \code{sample_table}, please refer to the \code{soil_microb} data document.
+#' In \code{tax_table}, 'HMDB_ID' is the number of HMDB database. 'KEGG_ID' is the number of KEGG database.
+#' \itemize{
+#'   \item sample_table: sample information table
+#'   \item otu_table: metabolites abundance table
+#'   \item tax_table: annotation table
+#' }
+#'
+#' @docType data
+#' @keywords datasets
+#' @name soil_metab
+#' @usage data(soil_metab)
+#' @format R6 class object
+NULL
