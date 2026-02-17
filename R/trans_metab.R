@@ -74,8 +74,12 @@ trans_metab <- R6Class(classname = "trans_metab",
 			...
 			){
 			data_metab <- self$data_metab
-
-			load(file.path(database_path, "metorigindb_number", "metorigindb_number.RData"))
+			
+			metorigindb_number_path <- file.path(database_path, "metorigindb_number", "metorigindb_number.RData")
+			if(! file.exists(metorigindb_number_path)){
+				stop("metorigindb_number directory and metorigindb_number.RData is not found in provided path (", database_path, ")! Please provide a correct database_path!")
+			}
+			load(metorigindb_number_path, envir = environment())
 
 			user_names <- rownames(data_metab$tax_table)
 			standard_names <- metorigindb_number$Compound_name
@@ -130,7 +134,11 @@ trans_metab <- R6Class(classname = "trans_metab",
 			data_metab <- self$data_metab
 			data_microb <- self$data_microb
 			
-			load(file.path(database_path, "metorigindb_number", "metorigindb_number.RData"))
+			metorigindb_number_path <- file.path(database_path, "metorigindb_number", "metorigindb_number.RData")
+			if(! file.exists(metorigindb_number_path)){
+				stop("metorigindb_number directory and metorigindb_number.RData is not found in provided path (", database_path, ")! Please provide a correct database_path!")
+			}
+			load(metorigindb_number_path, envir = environment())
 			
 			`%in2%` <- function(x, vec) {!is.na(x) & (x %in% vec)}
 			
@@ -138,7 +146,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 			if("names" %in% match_col){
 				res_match_table <- self$res_match
 				if(! is.null(res_match_table)){
-					message("res_match_table is found in the object. Using the names of matched_standard column to search the database ...")
+					message("res_match_table is found in the object. Use the names of matched_standard column to search the database ...")
 					select_match_table <- res_match_table[res_match_table$distance == match_names_distance, ]
 					name_ID_select <- metorigindb_number$Compound_name %in2% select_match_table$matched_standard
 				}else{
@@ -167,6 +175,10 @@ trans_metab <- R6Class(classname = "trans_metab",
 			extract_number_table <- metorigindb_number[name_ID_select | HMDB_ID_select | KEGG_ID_select, ]
 
 			source_path <- file.path(database_path, "metorigindb_source")
+			if(! dir.exists(source_path)){
+				stop("metorigindb_source directory is not found in provided path (", database_path, ")! Please provide a correct database_path!")
+			}
+
 			source_path_files <- list.files(source_path)
 			res <- list()
 			ID_pass <- c()
