@@ -75,10 +75,9 @@ trans_metab <- R6Class(classname = "trans_metab",
 			){
 			data_metab <- self$data_metab
 			
+			private$check_input_path(database_path)
 			metorigindb_number_path <- file.path(database_path, "metorigindb_number", "metorigindb_number.RData")
-			if(! file.exists(metorigindb_number_path)){
-				stop("metorigindb_number directory and metorigindb_number.RData is not found in provided path (", database_path, ")! Please provide a correct database_path!")
-			}
+			private$check_file_exist(metorigindb_number_path, "metorigindb_number.RData", file.path(database_path, "metorigindb_number"))
 			load(metorigindb_number_path, envir = environment())
 
 			user_names <- rownames(data_metab$tax_table)
@@ -134,10 +133,9 @@ trans_metab <- R6Class(classname = "trans_metab",
 			data_metab <- self$data_metab
 			data_microb <- self$data_microb
 			
+			private$check_input_path(database_path)
 			metorigindb_number_path <- file.path(database_path, "metorigindb_number", "metorigindb_number.RData")
-			if(! file.exists(metorigindb_number_path)){
-				stop("metorigindb_number directory and metorigindb_number.RData is not found in provided path (", database_path, ")! Please provide a correct database_path!")
-			}
+			private$check_file_exist(metorigindb_number_path, "metorigindb_number.RData", file.path(database_path, "metorigindb_number"))
 			load(metorigindb_number_path, envir = environment())
 			
 			`%in2%` <- function(x, vec) {!is.na(x) & (x %in% vec)}
@@ -175,9 +173,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 			extract_number_table <- metorigindb_number[name_ID_select | HMDB_ID_select | KEGG_ID_select, ]
 
 			source_path <- file.path(database_path, "metorigindb_source")
-			if(! dir.exists(source_path)){
-				stop("metorigindb_source directory is not found in provided path (", database_path, ")! Please provide a correct database_path!")
-			}
+			private$check_directory_exist(source_path, "metorigindb_source", database_path)
 
 			source_path_files <- list.files(source_path)
 			res <- list()
@@ -241,6 +237,21 @@ trans_metab <- R6Class(classname = "trans_metab",
 				trimws
 
 			output
+		},
+		check_input_path = function(directory_path){
+			if(! dir.exists(directory_path)){
+				stop("Provided path is not valid (", directory_path, ")! Please check the input path!")
+			}
+		},
+		check_directory_exist = function(directory_path, directory_name, back_path){
+			if(! dir.exists(directory_path)){
+				stop(directory_name, " is not found in provided path (", back_path, ")! Please check the downloaded and decompressed folder!")
+			}
+		},
+		check_file_exist = function(file_path, file_name, back_path){
+			if(! file.exists(file_path)){
+				stop(file_name, " is not found in provided path (", back_path, ")! Please check the downloaded and decompressed folder!")
+			}
 		}
 	),
 	lock_class = FALSE,
