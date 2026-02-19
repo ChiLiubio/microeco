@@ -89,7 +89,10 @@ See the \code{method} parameter of \code{amatch} function in stringdist package.
 
 \item{\code{maxDist}}{default 0.3; See the \code{maxDist} parameter of \code{amatch} function in stringdist package.}
 
-\item{\code{...}}{parameters passed to \code{amatch} function of stringdist package.}
+\item{\code{...}}{parameters passed to \code{amatch} function of stringdist package.
+\donttest{
+t1$cal_match()
+}}
 }
 \if{html}{\out{</div>}}
 }
@@ -121,7 +124,11 @@ If the table has other columns like "HMDB_ID" or "KEGG_ID", the user can provide
 which is calculated from the \code{cal_match} function. Available for the "names" option in \code{match_col} parameter.}
 
 \item{\code{bac_level}}{default "Genus"; which bacteria level is used to parse the taxa in the \code{data_microb} of object.
-The function can automatically match the taxa those found in the input data.}
+   The function can automatically match the taxa those found in the input data.    
+\donttest{
+t1$cal_origin()
+t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
+}}
 }
 \if{html}{\out{</div>}}
 }
@@ -137,6 +144,9 @@ Metabolite-bacteria network based on the \code{res_origin_list} data of \code{ca
 
 \subsection{Returns}{
 \code{igraph} format network.
+\donttest{
+t1$cal_origin_network()
+}
 }
 }
 \if{html}{\out{<hr>}}
