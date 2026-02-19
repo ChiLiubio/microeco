@@ -24,6 +24,7 @@ t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
 \item \href{#method-trans_metab-new}{\code{trans_metab$new()}}
 \item \href{#method-trans_metab-cal_match}{\code{trans_metab$cal_match()}}
 \item \href{#method-trans_metab-cal_origin}{\code{trans_metab$cal_origin()}}
+\item \href{#method-trans_metab-cal_origin_network}{\code{trans_metab$cal_origin_network()}}
 \item \href{#method-trans_metab-clone}{\code{trans_metab$clone()}}
 }
 }
@@ -123,6 +124,19 @@ which is calculated from the \code{cal_match} function. Available for the "names
 The function can automatically match the taxa those found in the input data.}
 }
 \if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_metab-cal_origin_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_metab-cal_origin_network}{}}}
+\subsection{Method \code{cal_origin_network()}}{
+Metabolite-bacteria network based on the \code{res_origin_list} data of \code{cal_origin} function
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_origin_network()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+\code{igraph} format network.
 }
 }
 \if{html}{\out{<hr>}}

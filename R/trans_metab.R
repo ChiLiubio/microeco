@@ -223,6 +223,35 @@ trans_metab <- R6Class(classname = "trans_metab",
 			}else{
 				message("Origin taxa at ", bac_level, " level for each metabolite is stored in object$res_origin_list ... ...")
 			}
+		},
+		#' @description
+		#' Metabolite-bacteria network based on the \code{res_origin_list} data of \code{cal_origin} function
+		#' 
+		#' @return \code{igraph} format network.
+		cal_origin_network = function(){
+
+			res_origin_list <- self$res_origin_list
+			if(is.null(res_origin_list)){
+				stop("Please first run the cal_origin function !")
+			}
+			library(igraph)
+
+			# from -> to
+			edges <- lapply(names(res_origin_list), function(target) {
+				sources <- res_origin_list[[target]]
+				if (length(sources) == 0) return(NULL)
+				data.frame(from = sources, to = target, stringsAsFactors = FALSE)
+			}) %>% do.call(rbind, .)
+
+			# directed network
+			g <- graph_from_edgelist(as.matrix(edges), directed = TRUE)
+
+			# add attributes
+			all_nodes <- V(g)$name
+			type <- ifelse(all_nodes %in% edges[, 1], "bacteria", "metabolite")
+			V(g)$type <- type
+
+			g
 		}
 	),
 	private = list(
