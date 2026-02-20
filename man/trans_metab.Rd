@@ -89,12 +89,15 @@ See the \code{method} parameter of \code{amatch} function in stringdist package.
 
 \item{\code{maxDist}}{default 0.3; See the \code{maxDist} parameter of \code{amatch} function in stringdist package.}
 
-\item{\code{...}}{parameters passed to \code{amatch} function of stringdist package.
-\donttest{
-t1$cal_match()
-}}
+\item{\code{...}}{parameters passed to \code{amatch} function of stringdist package.}
 }
 \if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_match} table stored in the object.
+\donttest{
+t1$cal_match()
+}
 }
 }
 \if{html}{\out{<hr>}}
@@ -124,20 +127,25 @@ If the table has other columns like "HMDB_ID" or "KEGG_ID", the user can provide
 which is calculated from the \code{cal_match} function. Available for the "names" option in \code{match_col} parameter.}
 
 \item{\code{bac_level}}{default "Genus"; which bacteria level is used to parse the taxa in the \code{data_microb} of object.
-   The function can automatically match the taxa those found in the input data.    
+The function can automatically match the taxa those found in the input data.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_origin_rawtable} table and \code{res_origin_list} list stored in the object.
+   \code{res_origin_rawtable} is the origin table extracted from the metorigindb database based on the match of name or other ID.
+   In \code{res_origin_list}, name is the metabolite; each element is the taxa that may produce the metabolite.
 \donttest{
 t1$cal_origin()
 t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
-}}
 }
-\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_metab-cal_origin_network"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_metab-cal_origin_network}{}}}
 \subsection{Method \code{cal_origin_network()}}{
-Metabolite-bacteria network based on the \code{res_origin_list} data of \code{cal_origin} function
+Metabolite-bacteria network based on the \code{res_origin_list} data from the \code{cal_origin} function
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_origin_network()}\if{html}{\out{</div>}}
 }

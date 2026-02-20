@@ -67,6 +67,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#'	  See the \code{method} parameter of \code{amatch} function in stringdist package.
 		#' @param maxDist default 0.3; See the \code{maxDist} parameter of \code{amatch} function in stringdist package.
 		#' @param ... parameters passed to \code{amatch} function of stringdist package.
+		#' @return \code{res_match} table stored in the object.
 		#' \donttest{
 		#' t1$cal_match()
 		#' }
@@ -126,7 +127,10 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @param match_names_distance default 0; distance threshold used if the \code{res_match_table} is found in the object, 
 		#'    which is calculated from the \code{cal_match} function. Available for the "names" option in \code{match_col} parameter.
 		#' @param bac_level default "Genus"; which bacteria level is used to parse the taxa in the \code{data_microb} of object.
-		#'    The function can automatically match the taxa those found in the input data.	
+		#'    The function can automatically match the taxa those found in the input data.
+		#' @return \code{res_origin_rawtable} table and \code{res_origin_list} list stored in the object.
+		#'    \code{res_origin_rawtable} is the origin table extracted from the metorigindb database based on the match of name or other ID.
+		#'    In \code{res_origin_list}, name is the metabolite; each element is the taxa that may produce the metabolite.
 		#' \donttest{
 		#' t1$cal_origin()
 		#' t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
@@ -232,14 +236,13 @@ trans_metab <- R6Class(classname = "trans_metab",
 			}
 		},
 		#' @description
-		#' Metabolite-bacteria network based on the \code{res_origin_list} data of \code{cal_origin} function
+		#' Metabolite-bacteria network based on the \code{res_origin_list} data from the \code{cal_origin} function
 		#' 
 		#' @return \code{igraph} format network.
 		#' \donttest{
 		#' t1$cal_origin_network()
 		#' }
 		cal_origin_network = function(){
-
 			res_origin_list <- self$res_origin_list
 			if(is.null(res_origin_list)){
 				stop("Please first run the cal_origin function !")
