@@ -15,11 +15,9 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @param microb default NULL; A \code{\link{microtable}} object.
 		#' @return \code{data_metab} and \code{data_microb} stored in the object.
 		#' @examples
-		#' \donttest{
 		#' data(soil_metab)
 		#' data(soil_microb)
 		#' t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
-		#' }
 		initialize = function(
 			metab = NULL,
 			microb = NULL
