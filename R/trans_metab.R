@@ -66,6 +66,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @param maxDist default 0.3; See the \code{maxDist} parameter of \code{amatch} function in stringdist package.
 		#' @param ... parameters passed to \code{amatch} function of stringdist package.
 		#' @return \code{res_match} table stored in the object.
+		#' @examples
 		#' \donttest{
 		#' t1$cal_match()
 		#' }
@@ -129,6 +130,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @return \code{res_origin_rawtable} table and \code{res_origin_list} list stored in the object.
 		#'    \code{res_origin_rawtable} is the origin table extracted from the metorigindb database based on the match of name or other ID.
 		#'    In \code{res_origin_list}, name is the metabolite; each element is the taxa that may produce the metabolite.
+		#' @examples
 		#' \donttest{
 		#' t1$cal_origin()
 		#' t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
@@ -237,6 +239,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' Metabolite-bacteria network based on the \code{res_origin_list} data from the \code{cal_origin} function
 		#' 
 		#' @return \code{igraph} format network.
+		#' @examples
 		#' \donttest{
 		#' t1$cal_origin_network()
 		#' }

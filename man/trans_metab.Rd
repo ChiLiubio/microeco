@@ -15,6 +15,31 @@ This class is a wrapper for a series of metabolite analysis, including origin in
 data(soil_metab)
 data(soil_microb)
 t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
+
+## ------------------------------------------------
+## Method `trans_metab$cal_match`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_match()
+}
+
+## ------------------------------------------------
+## Method `trans_metab$cal_origin`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_origin()
+t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
+}
+
+## ------------------------------------------------
+## Method `trans_metab$cal_origin_network`
+## ------------------------------------------------
+
+\donttest{
+t1$cal_origin_network()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -91,10 +116,17 @@ See the \code{method} parameter of \code{amatch} function in stringdist package.
 }
 \subsection{Returns}{
 \code{res_match} table stored in the object.
-\donttest{
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
 t1$cal_match()
 }
 }
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_metab-cal_origin"></a>}}
@@ -131,11 +163,18 @@ The function can automatically match the taxa those found in the input data.}
 \code{res_origin_rawtable} table and \code{res_origin_list} list stored in the object.
    \code{res_origin_rawtable} is the origin table extracted from the metorigindb database based on the match of name or other ID.
    In \code{res_origin_list}, name is the metabolite; each element is the taxa that may produce the metabolite.
-\donttest{
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
 t1$cal_origin()
 t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
 }
 }
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_metab-cal_origin_network"></a>}}
@@ -148,10 +187,17 @@ Metabolite-bacteria network based on the \code{res_origin_list} data from the \c
 
 \subsection{Returns}{
 \code{igraph} format network.
-\donttest{
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\donttest{
 t1$cal_origin_network()
 }
 }
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_metab-clone"></a>}}
