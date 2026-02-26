@@ -1626,22 +1626,28 @@ trans_diff <- R6Class(classname = "trans_diff",
 								label_fullname = FALSE){
 			
 			input <- self$res_diff
-			
-			if(! "log2FC" %in% colnames(input)) {
-				if(! any(c("lfc", "log2FoldChange", "logFC") %in% colnames(input))){
-					stop("The res_diff must have log2FC, logFC or log2FoldChange column!")
+
+			if(any(c("log2FC", "lfc", "logFC", "log2FoldChange") %in% colnames(input))){
+				if(! "log2FC" %in% colnames(input)) {
+					if("lfc" %in% colnames(input)){
+						input$log2FC <- input$lfc
+					}
+					if("log2FoldChange" %in% colnames(input)){
+						input$log2FC <- input$log2FoldChange
+					}
+					if("logFC" %in% colnames(input)){
+						input$log2FC <- input$logFC
+					}
 				}
-				if("lfc" %in% colnames(input)){
-					input$log2FC <- input$lfc
-				}
-				if("log2FoldChange" %in% colnames(input)){
-					input$log2FC <- input$log2FoldChange
-				}
-				if("logFC" %in% colnames(input)){
-					input$log2FC <- input$logFC
+			}else{
+				if("Estimate" %in% colnames(input)){
+					input$log2FC <- input$Estimate
+				}else{
+					stop("The res_diff must have a column like log2FC, lfc, logFC, log2FoldChange or Estimate!")
 				}
 			}
-			
+			input %<>% .[!is.na(.$log2FC), ]
+
 			if("Factors" %in% colnames(input) & ! ("Comparison" %in% colnames(input))){
 				# filter the (Intercept) item
 				message("Filte the rows with (Intercept) in the Factors column ...")
@@ -1674,16 +1680,20 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if (! "pvalue" %in% colnames(input)) {
 				if("P.adj" %in% colnames(input)){
 					input$pvalue <- input$P.adj
-					if(any(is.na(input$pvalue))){
-						remove_rows <- which(is.na(input$pvalue))
-						input %<>% .[!is.na(.$pvalue), ]
-						message("Remove ", length(remove_rows), " row(s) with NA in P value ...")
-					}
 				}else{
-					stop("The res_diff must have pvalue or P.adj column!")
+					if("P.unadj" %in% colnames(input)){
+						input$pvalue <- input$P.unadj
+					}else{
+						stop("The res_diff must have pvalue, P.adj or P.unadj column!")
+					}
 				}
 			}
-
+			if(any(is.na(input$pvalue))){
+				remove_rows <- which(is.na(input$pvalue))
+				input %<>% .[!is.na(.$pvalue), ]
+				message("Remove ", length(remove_rows), " row(s) with NA in P value ...")
+			}
+			
 			# -log10(pvalue), avoid -Inf
 			input$neg_log10_p <- -log10(input$pvalue)
 			input$neg_log10_p[is.infinite(input$neg_log10_p)] <- max(input$neg_log10_p[is.finite(input$neg_log10_p)]) + 1
