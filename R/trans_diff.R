@@ -1613,6 +1613,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param label_fullname default FALSE; whether show the full taxonomic lineage of each label.
 		#' 	 If the user considers that the full name is too long in the figure when \code{label_fullname = TRUE}, 
 		#' 	 the "Taxa" column in the \code{res_diff} table of the object should be modified to retain the required taxonomic information.
+		#' @param xlabel default \code{expression(log[2]~Fold~Change)}; label of x axis.
+		#' @param ylabel default \code{expression(-log[10]~P~value)}; label of y axis.
 		#' @return ggplot.
 		#' @examples
 		#' \dontrun{
@@ -1623,7 +1625,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 								pvalue_cutoff = 0.05,
 								color_values = c("#e74c3c", "#3498db", "gray80"),
 								label_top_n = 10,
-								label_fullname = FALSE){
+								label_fullname = FALSE,
+								xlabel = expression(log[2]~Fold~Change),
+								ylabel = expression(-log[10]~P~value)){
 			
 			input <- self$res_diff
 
@@ -1740,8 +1744,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				axis.text = element_text(size = 10)
 			) +
 			labs(
-				x = expression(log[2]~Fold~Change),
-				y = expression(-log[10]~P~value),
+				x = xlabel,
+				y = ylabel,
 				color = "Group"
 			)
 

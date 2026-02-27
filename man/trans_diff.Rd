@@ -593,7 +593,9 @@ Volcano plot.
   pvalue_cutoff = 0.05,
   color_values = c("#e74c3c", "#3498db", "gray80"),
   label_top_n = 10,
-  label_fullname = FALSE
+  label_fullname = FALSE,
+  xlabel = expression(log[2] ~ Fold ~ Change),
+  ylabel = expression(-log[10] ~ P ~ value)
 )}\if{html}{\out{</div>}}
 }
 
@@ -614,6 +616,10 @@ It should be either a number or one element of these columns.}
 \item{\code{label_fullname}}{default FALSE; whether show the full taxonomic lineage of each label.
 If the user considers that the full name is too long in the figure when \code{label_fullname = TRUE}, 
 the "Taxa" column in the \code{res_diff} table of the object should be modified to retain the required taxonomic information.}
+
+\item{\code{xlabel}}{default \code{expression(log[2]~Fold~Change)}; label of x axis.}
+
+\item{\code{ylabel}}{default \code{expression(-log[10]~P~value)}; label of y axis.}
 }
 \if{html}{\out{</div>}}
 }
