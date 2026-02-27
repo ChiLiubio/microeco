@@ -594,8 +594,8 @@ Volcano plot.
   color_values = c("#e74c3c", "#3498db", "gray80"),
   label_top_n = 10,
   label_fullname = FALSE,
-  xlabel = expression(log[2] ~ Fold ~ Change),
-  ylabel = expression(-log[10] ~ P ~ value)
+  xtitle = expression(log[2] ~ Fold ~ Change),
+  ytitle = expression(-log[10] ~ P ~ value)
 )}\if{html}{\out{</div>}}
 }
 
@@ -617,9 +617,9 @@ It should be either a number or one element of these columns.}
 If the user considers that the full name is too long in the figure when \code{label_fullname = TRUE}, 
 the "Taxa" column in the \code{res_diff} table of the object should be modified to retain the required taxonomic information.}
 
-\item{\code{xlabel}}{default \code{expression(log[2]~Fold~Change)}; label of x axis.}
+\item{\code{xtitle}}{default \code{expression(log[2]~Fold~Change)}; the title of x axis.}
 
-\item{\code{ylabel}}{default \code{expression(-log[10]~P~value)}; label of y axis.}
+\item{\code{ytitle}}{default \code{expression(-log[10]~P~value)}; the title of y axis.}
 }
 \if{html}{\out{</div>}}
 }
