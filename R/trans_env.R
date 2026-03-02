@@ -912,9 +912,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
 		#' @param complete_cases default TRUE; Whether use \code{complete.cases} function to remove rows with missing values.
-		#' @param tmp_output_maaslin default "tmp_output"; the temporary folder used to save the output files of maaslin.
+		#' @param maaslin_output_folder default "tmp_output"; the temporary folder used to save the output files of maaslin.
 		#' @param cor_method deprecated. Please use \code{method} argument instead.
-		#' @param ... parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.
+		#' @param tmp_output_maaslin deprecated. Please use \code{maaslin_output_folder} argument instead.
+		#' @param tmp_input_maaslin deprecated. This parameter is no longer needed.
+		#' @param ... parameters passed to \code{maaslin3} function of \code{maaslin3} package.
 		#' @return \code{res_cor} stored in the object.
 		#' @examples
 		#' \donttest{
@@ -939,8 +941,10 @@ trans_env <- R6Class(classname = "trans_env",
 			group_select = NULL,
 			taxa_name_full = TRUE,
 			complete_cases = FALSE,
-			tmp_output_maaslin = "tmp_output",
+			maaslin_output_folder = "tmp_output",
 			cor_method = deprecated(),
+			tmp_output_maaslin = deprecated(),
+			tmp_input_maaslin = deprecated(),
 			...
 			){
 			if(is.null(self$data_env)){
@@ -951,6 +955,10 @@ trans_env <- R6Class(classname = "trans_env",
 			if(lifecycle::is_present(cor_method)) {
 				lifecycle::deprecate_warn("1.14.1", "cal_cor(cor_method)", "cal_cor(method)")
 				method <- cor_method
+			}
+			if(lifecycle::is_present(tmp_output_maaslin)) {
+				lifecycle::deprecate_warn("2.1.0", "cal_cor(tmp_output_maaslin)", "cal_cor(maaslin_output_folder)")
+				maaslin_output_folder <- tmp_output_maaslin
 			}
 			if(method %in% c("maaslin2", "maaslin3")){
 				method <- "maaslin"
@@ -1017,8 +1025,8 @@ trans_env <- R6Class(classname = "trans_env",
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
 			abund_table %<>% .[rownames(env_data), , drop = FALSE]
 			if(method == "maaslin"){
-				fit_data <- maaslin3::maaslin3(abund_table, env_data, output = tmp_output_maaslin, ...)
-				res_path <- file.path(tmp_output_maaslin, "all_results.tsv")
+				fit_data <- maaslin3::maaslin3(abund_table, env_data, output = maaslin_output_folder, ...)
+				res_path <- file.path(maaslin_output_folder, "all_results.tsv")
 				res <- read.delim(res_path)
 				
 				colnames(res)[colnames(res) == "model"] <- "by_group"

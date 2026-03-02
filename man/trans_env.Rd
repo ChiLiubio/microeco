@@ -715,8 +715,10 @@ Actually, it can also be applied to other correlation between any two variables 
   group_select = NULL,
   taxa_name_full = TRUE,
   complete_cases = FALSE,
-  tmp_output_maaslin = "tmp_output",
+  maaslin_output_folder = "tmp_output",
   cor_method = deprecated(),
+  tmp_output_maaslin = deprecated(),
+  tmp_input_maaslin = deprecated(),
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -771,11 +773,15 @@ please refer to the example.}
 
 \item{\code{complete_cases}}{default TRUE; Whether use \code{complete.cases} function to remove rows with missing values.}
 
-\item{\code{tmp_output_maaslin}}{default "tmp_output"; the temporary folder used to save the output files of maaslin.}
+\item{\code{maaslin_output_folder}}{default "tmp_output"; the temporary folder used to save the output files of maaslin.}
 
 \item{\code{cor_method}}{deprecated. Please use \code{method} argument instead.}
 
-\item{\code{...}}{parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.}
+\item{\code{tmp_output_maaslin}}{deprecated. Please use \code{maaslin_output_folder} argument instead.}
+
+\item{\code{tmp_input_maaslin}}{deprecated. This parameter is no longer needed.}
+
+\item{\code{...}}{parameters passed to \code{maaslin3} function of \code{maaslin3} package.}
 }
 \if{html}{\out{</div>}}
 }
