@@ -884,9 +884,9 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param use_data default "Genus"; "Genus", "all" or "other"; 
 		#'    "Genus" or other taxonomic names (e.g., "Phylum", "ASV"): invoke taxonomic abundance table in \code{taxa_abund} list of the \code{microtable} object; 
 		#'    "all": merge all the taxonomic abundance tables in \code{taxa_abund} list into one; "other": provide additional taxa names by assigning \code{other_taxa} parameter.
-		#' @param method default "pearson"; "pearson", "spearman", "kendall" or "maaslin2"; correlation method.
+		#' @param method default "pearson"; "pearson", "spearman", "kendall" or "maaslin"; correlation method.
 		#' 	  "pearson", "spearman" or "kendall" all refer to the correlation analysis based on the \code{cor.test} function in R.
-		#' 	  "maaslin2" is the method in \code{Maaslin2} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
+		#' 	  "maaslin" is the method in \code{maaslin3} package for finding associations between metadata and potentially high-dimensional microbial multi-omics data.
 		#' @param partial default FALSE; whether perform partial correlation based on the \code{ppcor} package. 
 		#' 	  Available when \code{method} is "pearson", "spearman" or "kendall".
 		#' @param partial_fix default NULL; selected environmental variable names used as third group of variables in all the partial correlations. 
@@ -911,8 +911,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
-		#' @param tmp_input_maaslin2 default "tmp_input"; the temporary folder used to save the input files for Maaslin2.
-		#' @param tmp_output_maaslin2 default "tmp_output"; the temporary folder used to save the output files of Maaslin2.
+		#' @param tmp_output_maaslin default "tmp_output"; the temporary folder used to save the output files of maaslin.
 		#' @param cor_method deprecated. Please use \code{method} argument instead.
 		#' @param ... parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.
 		#' @return \code{res_cor} stored in the object.
@@ -924,7 +923,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' }
 		cal_cor = function(
 			use_data = c("Genus", "all", "other")[1],
-			method = c("pearson", "spearman", "kendall", "maaslin2")[1],
+			method = c("pearson", "spearman", "kendall", "maaslin")[1],
 			partial = FALSE,
 			partial_fix = NULL,
 			add_abund_table = NULL,
@@ -938,8 +937,7 @@ trans_env <- R6Class(classname = "trans_env",
 			group_use = NULL,
 			group_select = NULL,
 			taxa_name_full = TRUE,
-			tmp_input_maaslin2 = "tmp_input",
-			tmp_output_maaslin2 = "tmp_output",
+			tmp_output_maaslin = "tmp_output",
 			cor_method = deprecated(),
 			...
 			){
@@ -952,10 +950,13 @@ trans_env <- R6Class(classname = "trans_env",
 				lifecycle::deprecate_warn("1.14.1", "cal_cor(cor_method)", "cal_cor(method)")
 				method <- cor_method
 			}
-			method <- match.arg(method, c("pearson", "spearman", "kendall", "maaslin2"))
+			if(method %in% c("maaslin2", "maaslin3")){
+				method <- "maaslin"
+			}
+			method <- match.arg(method, c("pearson", "spearman", "kendall", "maaslin"))
 			p_adjust_type <- match.arg(p_adjust_type, c("All", "Taxa", "Env"))
 			
-			if(method != "maaslin2"){
+			if(method != "maaslin"){
 				env_data <- private$check_numeric(env_data)
 			}
 			if(!is.null(add_abund_table)){
@@ -1013,26 +1014,16 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			env_data %<>% .[rownames(.) %in% rownames(abund_table), , drop = FALSE]
 			abund_table %<>% .[rownames(env_data), , drop = FALSE]
-			if(method == "maaslin2"){
-				save_env_data <- data.frame(ID = rownames(env_data), env_data)
-				save_abund_table <- data.frame(ID = rownames(abund_table), abund_table)
-				if(!dir.exists(tmp_input_maaslin2)){
-					dir.create(tmp_input_maaslin2)
-				}
-				path_metadata <- file.path(tmp_input_maaslin2, "tmp_metadata.tsv")
-				path_abundance <- file.path(tmp_input_maaslin2, "tmp_abundance.tsv")
-				write.table(save_env_data, path_metadata, row.names = FALSE)
-				write.table(save_abund_table, path_abundance, row.names = FALSE)
-				if(!dir.exists(tmp_output_maaslin2)){
-					dir.create(tmp_output_maaslin2)
-				}
-				fit_data <- Maaslin2::Maaslin2(save_abund_table, save_env_data, output = tmp_output_maaslin2, ...)
-				res <- fit_data$results
-				res <- data.frame(by_group = "All", res)
+			if(method == "maaslin"){
+				fit_data <- maaslin3::maaslin3(abund_table, env_data, output = tmp_output_maaslin, ...)
+				res_path <- file.path(tmp_output_maaslin, "all_results.tsv")
+				res <- read.delim(res_path)
+				
+				colnames(res)[colnames(res) == "model"] <- "by_group"
 				colnames(res)[colnames(res) == "feature"] <- "Taxa"
 				colnames(res)[colnames(res) == "metadata"] <- "Env"
-				colnames(res)[colnames(res) == "pval"] <- "Pvalue"
-				colnames(res)[colnames(res) == "qval"] <- "AdjPvalue"
+				colnames(res)[colnames(res) == "pval_joint"] <- "Pvalue"
+				colnames(res)[colnames(res) == "qval_joint"] <- "AdjPvalue"
 			}else{
 				if(is.null(by_group)){
 					groups <- rep("All", nrow(env_data))
@@ -1184,8 +1175,8 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			cluster_ggplot <- match.arg(cluster_ggplot, c("none", "row", "col", "both"))
 			use_data <- self$res_cor
-			if(self$cal_cor_method == "maaslin2"){
-				message("Show the coef values of Maaslin2 method in the heatmap ...")
+			if(self$cal_cor_method == "maaslin"){
+				message("Show the coef values of Maaslin method in the heatmap ...")
 				cell_value <- "coef"
 				message("Use name column of object$res_cor as the variables ...")
 				xvalue <- "name"
@@ -1215,7 +1206,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			if(keep_full_name == F){
 				if(any(grepl("\\..__", use_data$Taxa))){
-					# solve maaslin2 |
+					# solve maaslin |
 					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
 				}else{
 					# actually | may be more general as some data does not have __
@@ -1296,7 +1287,7 @@ trans_env <- R6Class(classname = "trans_env",
 			}
 			
 			if(is.null(legend_title)){
-				legend_fill <- ifelse(self$cal_cor_method == "maaslin2", paste0("maaslin2\ncoef"), 
+				legend_fill <- ifelse(self$cal_cor_method == "maaslin", paste0("maaslin\ncoef"), 
 					paste0(toupper(substring(self$cal_cor_method, 1, 1)), substring(self$cal_cor_method, 2)))
 			}else{
 				legend_fill <- legend_title

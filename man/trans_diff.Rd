@@ -89,7 +89,7 @@ t1$plot_volcano()
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
     "t.test", "anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw",
-    "DESeq2", "edgeR", "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta")[1],
+    "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -158,9 +158,9 @@ t1$plot_volcano()
         When the formula parameter is provided, it should start with '~' as it is directly used by the linda function.
         If the group parameter is used, the prefix '~' is not necessary as the function can automatically add it.
         The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.}
-  \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data 
-        based on the Maaslin2 package <doi:10.1371/journal.pcbi.1009442>.
-        Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin2"}.}
+  \item{\strong{'maaslin'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data 
+        based on the Maaslin3 package <doi:10.1371/journal.pcbi.1009442>.
+        Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin"}.}
   \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package <doi:10.18637/jss.v034.i02>. 
         Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
   \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
@@ -192,7 +192,7 @@ For testing at a specific rank, provide taxonomic rank name, such as "Genus".
 If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset (e.g., "ASV"), 
 the function will use the features in input \code{microtable$otu_table} automatically.
 Note that a specific level (e.g., "ASV") should be provided for \code{method}: 
-"metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2", "linda", "maaslin2".}
+"metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2", "linda", "maaslin".}
 
 \item{\code{filter_thres}}{default 0; the abundance threshold, such as 0.0005 when the input is relative abundance; only available when method != "metastat".
 The features with abundances lower than filter_thres will be filtered.}
@@ -262,7 +262,7 @@ passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except ta
 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
 passed to \code{MicrobiomeStat::linda} function when method = "linda";
-passed to \code{trans_env$cal_cor} function when method = "maaslin2".}
+passed to \code{trans_env$cal_cor} function when method = "maaslin".}
 }
 \if{html}{\out{</div>}}
 }

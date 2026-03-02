@@ -55,9 +55,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  When the formula parameter is provided, it should start with '~' as it is directly used by the linda function.
 		#'     	  If the group parameter is used, the prefix '~' is not necessary as the function can automatically add it.
 		#'     	  The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.}
-		#'     \item{\strong{'maaslin2'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data 
-		#'     	  based on the Maaslin2 package <doi:10.1371/journal.pcbi.1009442>.
-		#'     	  Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin2"}.}
+		#'     \item{\strong{'maaslin'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data 
+		#'     	  based on the Maaslin3 package <doi:10.1371/journal.pcbi.1009442>.
+		#'     	  Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin"}.}
 		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package <doi:10.18637/jss.v034.i02>. 
 		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
 		#'     \item{\strong{'lme'}}{Linear Mixed Effect Model based on the \code{lmerTest} package.
@@ -87,7 +87,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  If the provided taxonomic name is neither 'all' nor a colname in tax_table of input dataset (e.g., "ASV"), 
 		#' 	  the function will use the features in input \code{microtable$otu_table} automatically.
 		#' 	  Note that a specific level (e.g., "ASV") should be provided for \code{method}: 
-		#' 	  "metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2", "linda", "maaslin2".
+		#' 	  "metastat", "metagenomeSeq", "ALDEx2_t", "DESeq2", "edgeR", "ancombc2", "linda", "maaslin".
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance; only available when method != "metastat".
 		#' 	  The features with abundances lower than filter_thres will be filtered.
 		#' @param alpha default 0.05; significance threshold to select taxa when method is "lefse" or "rf"; 
@@ -137,7 +137,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
 		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
 		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda";
-		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin2".
+		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin".
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is the detailed differential test result depending on the method choice, may containing:\cr
@@ -164,7 +164,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm",
-				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta")[1],
+				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -196,12 +196,15 @@ trans_diff <- R6Class(classname = "trans_diff",
 				self$method <- NULL
 				message("Input dataset is NULL. Please run the functions with customized data ...")
 			}else{
+				if(method %in% c("maaslin2", "maaslin3")){
+					method <- "maaslin"
+				}
 				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin2", "betareg", "lme", "glmm", "glmm_beta"))
+					"anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta"))
 
 				tmp_dataset <- clone(dataset)
 				sampleinfo <- tmp_dataset$sample_table
-				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin2", "ancombc2", "linda", "DESeq2")){
+				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin", "ancombc2", "linda", "DESeq2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
 				}
 				if(!is.null(group)){
@@ -245,7 +248,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 				
-				if(method %in% c("metastat", "metagenomeSeq", "DESeq2", "edgeR", "ALDEx2_t", "ALDEx2_kw", "ancombc2", "linda", "maaslin2")){
+				if(method %in% c("metastat", "metagenomeSeq", "DESeq2", "edgeR", "ALDEx2_t", "ALDEx2_kw", "ancombc2", "linda", "maaslin")){
 					if(taxa_level == "all"){
 						message("The taxa_level parameter cannot be 'all' for the current method! Automatically change it to 'ASV' ...")
 						taxa_level <- "ASV"
@@ -867,13 +870,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					colnames(output)[colnames(output) %in% c("pvalue", "padj")] <- c("P.unadj", "P.adj")
 				}
-				if(method == "maaslin2"){
+				if(method == "maaslin"){
 					tmp_trans_env <- trans_env$new(dataset = tmp_dataset, env_cols = 1:ncol(tmp_dataset$sample_table))
-					tmp_trans_env$cal_cor(use_data = taxa_level, method = method, filter_thres = filter_thres,
-						plot_heatmap = FALSE, plot_scatter = FALSE, ...)
+					tmp_trans_env$cal_cor(use_data = taxa_level, method = method, filter_thres = filter_thres, ...)
+					
 					output <- tmp_trans_env$res_cor
 					self$res_trans_env <- tmp_trans_env
-					message('Raw trans_env object for maaslin2 is stored in object$res_trans_env ...')
+					message('Raw trans_env object for maaslin is stored in object$res_trans_env ...')
 				}
 				
 				# use trans_alpha to get the abundance summary data
@@ -1223,7 +1226,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				use_data$Taxa %<>% gsub(".__", "", .)
 			}
 
-			if((! grepl("formula", method)) & (! method %in% c("maaslin2"))){
+			if((! grepl("formula", method)) & (! method %in% c("maaslin"))){
 				if(method == "lefse"){
 					colnames(use_data)[colnames(use_data) == "LDA"] <- "Value"
 					ylab_title <- "LDA score"
