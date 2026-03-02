@@ -911,6 +911,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param group_use default NULL; numeric or character vector to select one column in sample_table for selecting samples; together with group_select.
 		#' @param group_select default NULL; the group name used; remain samples within the group.
 		#' @param taxa_name_full default TRUE; Whether use the complete taxonomic name of taxa.
+		#' @param complete_cases default TRUE; Whether use \code{complete.cases} function to remove rows with missing values.
 		#' @param tmp_output_maaslin default "tmp_output"; the temporary folder used to save the output files of maaslin.
 		#' @param cor_method deprecated. Please use \code{method} argument instead.
 		#' @param ... parameters passed to \code{Maaslin2} function of \code{Maaslin2} package.
@@ -937,6 +938,7 @@ trans_env <- R6Class(classname = "trans_env",
 			group_use = NULL,
 			group_select = NULL,
 			taxa_name_full = TRUE,
+			complete_cases = FALSE,
 			tmp_output_maaslin = "tmp_output",
 			cor_method = deprecated(),
 			...
@@ -1081,7 +1083,9 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 			}
 			res$Significance <- generate_p_siglabel(res$AdjPvalue)
-			res <- res[complete.cases(res), ]
+			if(complete_cases){
+				res <- res[complete.cases(res), ]
+			}
 			if(taxa_name_full == F){
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}

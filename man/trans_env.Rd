@@ -714,6 +714,7 @@ Actually, it can also be applied to other correlation between any two variables 
   group_use = NULL,
   group_select = NULL,
   taxa_name_full = TRUE,
+  complete_cases = FALSE,
   tmp_output_maaslin = "tmp_output",
   cor_method = deprecated(),
   ...
@@ -767,6 +768,8 @@ please refer to the example.}
 \item{\code{group_select}}{default NULL; the group name used; remain samples within the group.}
 
 \item{\code{taxa_name_full}}{default TRUE; Whether use the complete taxonomic name of taxa.}
+
+\item{\code{complete_cases}}{default TRUE; Whether use \code{complete.cases} function to remove rows with missing values.}
 
 \item{\code{tmp_output_maaslin}}{default "tmp_output"; the temporary folder used to save the output files of maaslin.}
 
