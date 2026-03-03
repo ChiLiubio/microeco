@@ -10,7 +10,7 @@
 #'  Scheirer Ray Hare test, 
 #'  R package \code{metagenomeSeq} Paulson et al. (2013) <doi:10.1038/nmeth.2658>, 
 #'  R package \code{ANCOMBC} <doi:10.1038/s41467-020-17041-7>, R package \code{ALDEx2} <doi:10.1371/journal.pone.0067019; 10.1186/2049-2618-2-15>, 
-#'  R package \code{MicrobiomeStat} <doi:10.1186/s13059-022-02655-5>, beta regression <doi:10.18637/jss.v034.i02>, R package \code{maaslin2},
+#'  R package \code{MicrobiomeStat} <doi:10.1186/s13059-022-02655-5>, beta regression <doi:10.18637/jss.v034.i02>, maaslin3 <doi:10.1038/s41592-025-02923-9>,
 #'  linear mixed-effects model and generalized linear mixed model.
 #'  
 #' @export
@@ -56,7 +56,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  If the group parameter is used, the prefix '~' is not necessary as the function can automatically add it.
 		#'     	  The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.}
 		#'     \item{\strong{'maaslin'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data 
-		#'     	  based on the Maaslin3 package <doi:10.1371/journal.pcbi.1009442>.
+		#'     	  based on the maaslin3 package <doi:10.1371/journal.pcbi.1009442>.
 		#'     	  Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin"}.}
 		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package <doi:10.18637/jss.v034.i02>. 
 		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
