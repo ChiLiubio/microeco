@@ -269,8 +269,11 @@ passed to \code{trans_env$cal_cor} function when method = "maaslin".}
 \subsection{Returns}{
 res_diff and res_abund.\cr
   \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
-  \strong{res_diff} is the detailed differential test result depending on the method choice, may containing:\cr
-    \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups. If this column is not found, all groups are used;\cr
+  \strong{res_diff} is detailed differential abundance test result depending on the method choice, may containing:\cr
+    \strong{"Comparison"}: The groups for the comparision, maybe all groups or paired groups;\cr
+    \strong{"Factors"}: Some methods (e.g., "lm" and "glmm") return a column named "Factors" instead of "Comparison". 
+       In this column, the combinations of non-numeric variable names and group levels are interpreted relative to the reference group. 
+       These methods also return an "Estimate" column (see the following document);\cr
     \strong{"Group"}: Which group has the maximum median or mean value across the test groups; 
        For non-parametric methods, median value; For t.test, mean value;\cr
     \strong{"Taxa"}: which taxa is used in this comparision;\cr
