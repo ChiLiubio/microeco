@@ -13,6 +13,7 @@ tidy_taxonomy(
   pattern = c(".*unassigned.*", ".*uncultur.*", ".*unknown.*", ".*unidentif.*",
     ".*unclassified.*", ".*No blast hit.*", ".*Incertae.sedis.*"),
   replacement = "",
+  add_prefix = TRUE,
   ignore.case = TRUE,
   na_fill = ""
 )
@@ -27,7 +28,11 @@ or a microtable object with \code{tax_table} in it.}
 the characters (regular expressions) to be removed or replaced; removed when parameter \code{replacement = ""}, 
 replaced when parameter replacement has something; Note that the capital and small letters are not distinguished when \code{ignore.case = TRUE}.}
 
-\item{replacement}{default ""; the characters used to replace the character in \code{pattern} parameter.}
+\item{replacement}{default ""; the characters used to replace the character in \code{pattern} parameter.
+Note that after the replacement is completed, if the parameter \code{add_prefix} is set to TRUE, 
+a prefix (e.g., "g__") based on the taxonomic names will be added to the result.}
+
+\item{add_prefix}{default TRUE; whether add the taxonomic prefix (e.g., "g__" for Genus level) after the replacement and other operations.}
 
 \item{ignore.case}{default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.}
 

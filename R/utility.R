@@ -205,9 +205,12 @@ trycharnum <- function(x){
 #'   the characters (regular expressions) to be removed or replaced; removed when parameter \code{replacement = ""}, 
 #'   replaced when parameter replacement has something; Note that the capital and small letters are not distinguished when \code{ignore.case = TRUE}.
 #' @param replacement default ""; the characters used to replace the character in \code{pattern} parameter.
+#'   Note that after the replacement is completed, if the parameter \code{add_prefix} is set to TRUE, 
+#'   a prefix (e.g., "g__") based on the taxonomic names will be added to the result.
+#' @param add_prefix default TRUE; whether add the taxonomic prefix (e.g., "g__" for Genus level) after the replacement and other operations.
 #' @param ignore.case default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.
 #' @param na_fill default ""; used to replace \code{NA}.
-#' @return data.frame
+#' @return data.frame or microtable object depending on the input data format.
 #' @format \code{\link{data.frame}} object.
 #' @examples
 #' data("taxonomy_table_16S")
@@ -217,6 +220,7 @@ tidy_taxonomy <- function(taxonomy_table,
 	column = "all",
 	pattern = c(".*unassigned.*", ".*uncultur.*", ".*unknown.*", ".*unidentif.*", ".*unclassified.*", ".*No blast hit.*", ".*Incertae.sedis.*"),
 	replacement = "",
+	add_prefix = TRUE,
 	ignore.case = TRUE,
 	na_fill = ""
 	){
@@ -237,13 +241,14 @@ tidy_taxonomy <- function(taxonomy_table,
 	}
 	if(column == "all"){
 		use_tax_table[] <- lapply(seq_len(ncol(use_tax_table)), 
-			function(x) tidy_taxonomy_column(use_tax_table, i = x, pattern = pattern, replacement = replacement, ignore.case = ignore.case, na_fill = na_fill))
+			function(x) tidy_taxonomy_column(use_tax_table, i = x, pattern = pattern, 
+				replacement = replacement, add_prefix = add_prefix, ignore.case = ignore.case, na_fill = na_fill))
 	}else{
 		if(!inherits(column, "numeric")){
 			stop("The input column should be either 'all' or a number!")
 		}
 		use_tax_table[, column] <- tidy_taxonomy_column(use_tax_table, i = column, pattern = pattern, 
-			replacement = replacement, ignore.case = ignore.case, na_fill = na_fill)
+			replacement = replacement, add_prefix = add_prefix, ignore.case = ignore.case, na_fill = na_fill)
 	}
 	if(inherits(taxonomy_table, "data.frame")){
 		use_tax_table
@@ -253,7 +258,7 @@ tidy_taxonomy <- function(taxonomy_table,
 	}
 }
 
-tidy_taxonomy_column <- function(tax_df, i, pattern, replacement, ignore.case, na_fill){
+tidy_taxonomy_column <- function(tax_df, i, pattern, replacement, add_prefix, ignore.case, na_fill){
 	tax_df[, i] <- gsub(paste0(pattern, collapse = "|"), replacement, tax_df[, i], ignore.case = ignore.case)
 	tax_df[, i] <- gsub("^\\s+|\\s+$", "", tax_df[, i])
 	tax_df[, i] <- gsub('"', "", tax_df[, i], fixed = TRUE)
@@ -261,7 +266,9 @@ tidy_taxonomy_column <- function(tax_df, i, pattern, replacement, ignore.case, n
 	tax_df[, i] <- gsub("^.*?__", "", tax_df[, i])
 	tax_df[, i] <- gsub("^._", "", tax_df[, i])
 	tax_df[, i][is.na(tax_df[, i])] <- na_fill
-	tax_df[, i] <- paste0(tolower(substr(colnames(tax_df)[i], 1, 1)), "__", tax_df[, i])
+	if(add_prefix){
+		tax_df[, i] <- paste0(tolower(substr(colnames(tax_df)[i], 1, 1)), "__", tax_df[, i])
+	}
 	tax_df[, i]
 }
 
