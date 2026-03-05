@@ -211,7 +211,6 @@ trycharnum <- function(x){
 #' @param ignore.case default TRUE; if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching.
 #' @param na_fill default ""; used to replace \code{NA}.
 #' @return data.frame or microtable object depending on the input data format.
-#' @format \code{\link{data.frame}} object.
 #' @examples
 #' data("taxonomy_table_16S")
 #' tidy_taxonomy(taxonomy_table_16S)

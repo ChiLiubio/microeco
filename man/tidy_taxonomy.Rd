@@ -3,9 +3,6 @@
 \name{tidy_taxonomy}
 \alias{tidy_taxonomy}
 \title{Clean up the taxonomic table to make taxonomic assignments consistent.}
-\format{
-\code{\link{data.frame}} object.
-}
 \usage{
 tidy_taxonomy(
   taxonomy_table,
@@ -39,7 +36,7 @@ a prefix (e.g., "g__") based on the taxonomic names will be added to the result.
 \item{na_fill}{default ""; used to replace \code{NA}.}
 }
 \value{
-data.frame
+data.frame or microtable object depending on the input data format.
 }
 \description{
 Clean up the taxonomic table to make taxonomic assignments consistent.
