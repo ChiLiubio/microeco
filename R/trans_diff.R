@@ -56,7 +56,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  If the group parameter is used, the prefix '~' is not necessary as the function can automatically add it.
 		#'     	  The parameter \code{feature.dat.type = 'count'} has been fixed. Other parameters can be passed to the \code{linda} function.}
 		#'     \item{\strong{'maaslin'}}{finding associations between metadata and potentially high-dimensional microbial multi-omics data 
-		#'     	  based on the maaslin3 package <doi:10.1371/journal.pcbi.1009442>.
+		#'     	  based on the maaslin3 package <doi:10.1038/s41592-025-02923-9>.
 		#'     	  Using this option can invoke the \code{trans_env$cal_cor} function with \code{method = "maaslin"}.}
 		#'     \item{\strong{'betareg'}}{Beta Regression based on the \code{betareg} package <doi:10.18637/jss.v034.i02>. 
 		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
