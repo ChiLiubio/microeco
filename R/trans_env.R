@@ -335,7 +335,11 @@ trans_env <- R6Class(classname = "trans_env",
 					mod0 <- cca(use_data ~ 1, env_data, ...)
 					mod1 <- cca(use_data ~ ., env_data, ...)					
 				}
-				forward_res <- ordiR2step(mod0, scope = formula(mod1), direction="forward", perm.max = 999)
+				
+				mod0$call$data <- env_data
+				forward_res <- vegan::ordiR2step(mod0, scope = formula(mod1), direction="forward", perm.max = 999)
+				forward_res$call$data <- quote(env_data)
+				
 				res_sign <- gsub("+ ", "", rownames(data.frame(forward_res$anova)), fixed = TRUE)
 				if(length(res_sign) == 0){
 					stop("Non variables obtained after selection according to model. Check method and data!")
