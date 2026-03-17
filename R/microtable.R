@@ -943,7 +943,7 @@ microtable <- R6Class(classname = "microtable",
 			}
 			# keep the sample order same with original sample table
 			sample_names <- rownames(microtable_obj$sample_table) %>% .[. %in% sample_names]
-			microtable_obj$sample_table %<>% .[sample_names, , drop = FALSE]
+			microtable_obj$sample_table %<>% .[sample_names, , drop = FALSE] %>% droplevels
 			microtable_obj$otu_table %<>% .[ , sample_names, drop = FALSE]
 			microtable_obj
 		},
