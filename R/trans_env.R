@@ -897,7 +897,8 @@ trans_env <- R6Class(classname = "trans_env",
 		#' 	  If NULL; all the variables (except the one for correlation) in the environmental data will be used as the third group of variables.
 		#' 	  Otherwise, the function will control for the provided variables (one or more) in all the partial correlations, 
 		#' 	  and the variables in \code{partial_fix} will not be employed anymore in the correlation analysis.
-		#' @param add_abund_table default NULL; additional data table to be used. Row names must be sample names.
+		#' @param add_abund_table default NULL; additional abundance table to be used. Row names must be sample names.
+		#' 	  When it is provided, the \code{use_data} parameter will no longer take effect; in other words, the abundance provided here has a higher priority.
 		#' @param filter_thres default 0; the abundance threshold, such as 0.0005 when the input is relative abundance.
 		#' 	  The features with abundances lower than filter_thres will be filtered. This parameter cannot be applied when add_abund_table parameter is provided.
 		#' @param filter_unknown default TRUE; Whether filter out the unknown taxa ending with "__".
