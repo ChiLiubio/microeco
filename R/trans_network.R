@@ -1011,71 +1011,84 @@ trans_network <- R6Class(classname = "trans_network",
 		#' @param return_igraph default TRUE; whether return the network with igraph format. If FALSE, return \code{trans_network} object.
 		#' @param sample_name default NULL; Sample names. If sample names are provided, the network will be extracted based on the nodes in these samples, 
 		#'   and the corresponding data (e.g., otu_table) in the object will also be filtered when \code{return_igraph = FALSE}.
-		#' @return a new network
+		#'   The input can be one or more sample names.
+		#' @param sample_name_each default FALSE; Whether to return a list containing sub-networks for each sample.
+		#'   This is an advanced usage of sample_name parameter and replaces manual input of sample names.
+		#'   This parameter takes the highest priority. Each sub-network for a sample in the returned list is in the format of a trans_network object,
+		#'   so it can be directly used for subsequent analysis with the `meconetcomp` package.
+		#' @return igraph object or trans_network object depending on the parameter return_igraph; list object containing each trans_network object when sample_name_each = TRUE.
 		#' @examples
 		#' \donttest{
 		#' t1$subset_network(node = t1$res_node_table %>% base::subset(module == "M1") %>% 
 		#'   rownames, rm_single = TRUE)
 		#' # return a sub network that contains all nodes of module M1
 		#' }
-		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE, return_igraph = TRUE, sample_name = NULL){
+		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE, return_igraph = TRUE, sample_name = NULL, sample_name_each = FALSE){
 			private$check_igraph()
 			private$check_network()
 			network <- self$res_network
 			if(!is.null(node) & !is.null(edge)){
 				stop("Please provide either node or edge!")
 			}
-			if(!is.null(sample_name)){
-				if(any(!(sample_name %in% rownames(self$data_abund)))){
-					stop("Please provide correct sample names with sample_name parameter!")
+			if(sample_name_each){
+				samples_network <- list()
+				for(i in rownames(self$data_abund)){
+					samples_network[[i]] <- self$subset_network(return_igraph = FALSE, sample_name = i)
 				}
-				message("Extract sub-network according to features in provided samples: ", paste0(sample_name, collapse = " "), " ...")
-				extract_abund <- self$data_abund %>% .[sample_name, ]
-				node <- apply(extract_abund, 2, sum) %>% .[. != 0] %>% names
-			}
-			if(node_alledges){
-				if(is.null(node)){
-					stop("When node_alledges = TRUE, node parameter must be provided!")
-				}
-				private$check_edgetable()
-				edge <- self$res_edge_table %>% {.[,1] %in% node | .[,2] %in% node} %>% which
-				node <- NULL
-			}
-			if(!is.null(node)){
-				private$check_node_name()
-				nodes_raw <- V(network)$name
-				delete_nodes <- nodes_raw %>% .[! . %in% node]
-				sub_network <- delete_vertices(network, delete_nodes)
-			}
-			if(!is.null(edge)){
-				if(identical(edge, "+") | identical(edge, "-")){
-					label_raw <- E(network)$label
-					sub_network <- delete_edges(network, which(label_raw != edge))
-				}else{
-					all_seqs <- 1:ecount(network)
-					edge_filter <- all_seqs[! all_seqs %in% edge]
-					sub_network <- delete_edges(network, edge_filter)
-				}
-			}
-			if(is.null(node) & is.null(edge)){
-				sub_network <- network
-			}
-			# whether remove the single node without edges
-			if(rm_single == T){
-				sub_network <- private$rm_unlinked_node(sub_network)
-			}
-			if(return_igraph){
-				sub_network
+				samples_network
 			}else{
-				subnet_obj <- clone(self)
-				subnet_obj$res_network <- sub_network
-				subnet_obj$res_edge_table <- NULL
-				subnet_obj$res_node_table <- NULL
 				if(!is.null(sample_name)){
-					subnet_obj$sample_table %<>% .[sample_name, , drop = FALSE]
-					subnet_obj$data_abund %<>% .[sample_name, , drop = FALSE]
+					if(any(!(sample_name %in% rownames(self$data_abund)))){
+						stop("Please provide correct sample names with sample_name parameter!")
+					}
+					message("Extract sub-network according to features in provided samples: ", paste0(sample_name, collapse = " "), " ...")
+					extract_abund <- self$data_abund %>% .[sample_name, ]
+					node <- apply(extract_abund, 2, sum) %>% .[. != 0] %>% names
 				}
-				subnet_obj
+				if(node_alledges){
+					if(is.null(node)){
+						stop("When node_alledges = TRUE, node parameter must be provided!")
+					}
+					private$check_edgetable()
+					edge <- self$res_edge_table %>% {.[,1] %in% node | .[,2] %in% node} %>% which
+					node <- NULL
+				}
+				if(!is.null(node)){
+					private$check_node_name()
+					nodes_raw <- V(network)$name
+					delete_nodes <- nodes_raw %>% .[! . %in% node]
+					sub_network <- delete_vertices(network, delete_nodes)
+				}
+				if(!is.null(edge)){
+					if(identical(edge, "+") | identical(edge, "-")){
+						label_raw <- E(network)$label
+						sub_network <- delete_edges(network, which(label_raw != edge))
+					}else{
+						all_seqs <- 1:ecount(network)
+						edge_filter <- all_seqs[! all_seqs %in% edge]
+						sub_network <- delete_edges(network, edge_filter)
+					}
+				}
+				if(is.null(node) & is.null(edge)){
+					sub_network <- network
+				}
+				# whether remove the single node without edges
+				if(rm_single == T){
+					sub_network <- private$rm_unlinked_node(sub_network)
+				}
+				if(return_igraph){
+					sub_network
+				}else{
+					subnet_obj <- clone(self)
+					subnet_obj$res_network <- sub_network
+					subnet_obj$res_edge_table <- NULL
+					subnet_obj$res_node_table <- NULL
+					if(!is.null(sample_name)){
+						subnet_obj$sample_table %<>% .[sample_name, , drop = FALSE]
+						subnet_obj$data_abund %<>% .[sample_name, , drop = FALSE]
+					}
+					subnet_obj
+				}
 			}
 		},
 		#' @description
