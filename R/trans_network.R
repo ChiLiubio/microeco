@@ -1021,7 +1021,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' \donttest{
 		#' t1$subset_network(node = t1$res_node_table %>% base::subset(module == "M1") %>% 
 		#'   rownames, rm_single = TRUE)
-		#' # return a sub network that contains all nodes of module M1
+		#' # return a sub-network that contains all nodes of module M1
+		#' t1$subset_network(sample_name = "S1", return_igraph = FALSE)
+		#' # return a sub-network that contains all nodes of sample S1
 		#' }
 		subset_network = function(node = NULL, edge = NULL, rm_single = TRUE, node_alledges = FALSE, return_igraph = TRUE, sample_name = NULL, sample_name_each = FALSE){
 			private$check_igraph()

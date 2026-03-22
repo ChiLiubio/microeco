@@ -124,7 +124,9 @@ t1$plot_taxa_roles(roles_color_background = FALSE)
 \donttest{
 t1$subset_network(node = t1$res_node_table \%>\% base::subset(module == "M1") \%>\% 
   rownames, rm_single = TRUE)
-# return a sub network that contains all nodes of module M1
+# return a sub-network that contains all nodes of module M1
+t1$subset_network(sample_name = "S1", return_igraph = FALSE)
+# return a sub-network that contains all nodes of sample S1
 }
 
 ## ------------------------------------------------
@@ -884,7 +886,9 @@ igraph object or trans_network object depending on the parameter return_igraph; 
 \preformatted{\donttest{
 t1$subset_network(node = t1$res_node_table \%>\% base::subset(module == "M1") \%>\% 
   rownames, rm_single = TRUE)
-# return a sub network that contains all nodes of module M1
+# return a sub-network that contains all nodes of module M1
+t1$subset_network(sample_name = "S1", return_igraph = FALSE)
+# return a sub-network that contains all nodes of sample S1
 }
 }
 \if{html}{\out{</div>}}
