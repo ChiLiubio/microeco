@@ -68,7 +68,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}
 				check_table_variable(data_alpha, by_ID, "by_ID", "dataset$sample_table")
 				if(!is.null(order_x)){
-					if(length(order_x == 1)){
+					if(length(order_x) == 1){
 						data_alpha$Sample %<>% factor(., levels = unique(dataset$sample_table[, order_x]))
 					} else {
 						data_alpha$Sample %<>% factor(., levels = order_x)
