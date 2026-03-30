@@ -875,7 +875,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			for(i in unique(plot_data$Sample)){
 				tmp <- plot_data[plot_data$Sample == i, ]
 				p <- ggpubr::ggdonutchart(tmp, "Abundance", fill = "Taxonomy", label = "label", color = "white", palette = color_values, ...) + 
-					guides(fill = guide_legend(title=self$taxrank))
+					guides(fill = guide_legend(title=self$taxrank)) +
 					theme(axis.text.y = element_blank())
 				if(label == F){
 					p <- p + theme(axis.text.x = element_blank())
