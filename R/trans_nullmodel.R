@@ -682,7 +682,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		},
 		betampd = function(comm = NULL, dis = NULL, abundance.weighted = FALSE){
 			dis %<>% .[colnames(comm), colnames(comm)]
-			if (abundance.weighted == F) {
+			if (abundance.weighted == FALSE) {
 				comm <- decostand(comm, method = "pa")
 			}
 			comm <- decostand(comm, method="total", MARGIN=1)

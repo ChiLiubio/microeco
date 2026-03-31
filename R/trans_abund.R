@@ -407,7 +407,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size, xtext_keep = xtext_keep, coord_flip = coord_flip)
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size))
-			if(xtitle_keep == F){
+			if(xtitle_keep == FALSE){
 				p <- p + theme(axis.title.x = element_blank())
 			}
 			p <- p + guides(fill = guide_legend(title = self$taxrank))
@@ -877,7 +877,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- ggpubr::ggdonutchart(tmp, "Abundance", fill = "Taxonomy", label = "label", color = "white", palette = color_values, ...) + 
 					guides(fill = guide_legend(title=self$taxrank)) +
 					theme(axis.text.y = element_blank())
-				if(label == F){
+				if(label == FALSE){
 					p <- p + theme(axis.text.x = element_blank())
 				}
 				if(legend_text_italic == TRUE) {

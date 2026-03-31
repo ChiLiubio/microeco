@@ -1099,7 +1099,7 @@ trans_env <- R6Class(classname = "trans_env",
 			if(complete_cases){
 				res <- res[complete.cases(res), ]
 			}
-			if(taxa_name_full == F){
+			if(taxa_name_full == FALSE){
 				res$Taxa %<>% gsub(".*__(.*?)$", "\\1", .)
 			}
 			self$res_cor <- res
@@ -1210,18 +1210,18 @@ trans_env <- R6Class(classname = "trans_env",
 			if(!is.null(filter_feature)){
 				use_feature <- lapply(as.character(unique(use_data$Taxa)), function(x){
 					tmp <- use_data %>% .[.$Taxa == x, "Significance"] %>% {all(. %in% filter_feature)}
-					if(tmp == F){ x }
+					if(tmp == FALSE){ x }
 				}) %>% unlist
 				use_data %<>% .[.$Taxa %in% use_feature, ]
 			}
 			if(!is.null(filter_env)){
 				use_envvars <- lapply(as.character(unique(use_data$Env)), function(x){
 					tmp <- use_data %>% .[.$Env == x, "Significance"] %>% {all(. %in% filter_env)}
-					if(tmp == F){ x }
+					if(tmp == FALSE){ x }
 				}) %>% unlist
 				use_data %<>% .[.$Env %in% use_envvars, ]
 			}
-			if(keep_full_name == F){
+			if(keep_full_name == FALSE){
 				if(any(grepl("\\..__", use_data$Taxa))){
 					# solve maaslin |
 					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
@@ -1232,7 +1232,7 @@ trans_env <- R6Class(classname = "trans_env",
 					}
 				}
 			}
-			if(keep_prefix == F){
+			if(keep_prefix == FALSE){
 				if(any(grepl("__", use_data$Taxa))){
 					use_data$Taxa %<>% gsub(".*__", "", .)
 				}

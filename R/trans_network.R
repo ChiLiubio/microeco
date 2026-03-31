@@ -1345,7 +1345,7 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			
 			abund_table <- self$data_abund
-			if(abundance == F){
+			if(abundance == FALSE){
 				abund_table[abund_table > 1] <- 1
 			}
 			tax_table <- self$tax_table

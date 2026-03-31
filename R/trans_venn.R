@@ -151,7 +151,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			switch_num <- colnumber - 1
 			summary_table <- self$data_summary
 
-			if(colnumber > 5 & petal_plot == F){
+			if(colnumber > 5 & petal_plot == FALSE){
 				message("The number of elements is larger than 5! Automatically change petal_plot = TRUE! An alternative way of visualization is to use plot_bar function ...")
 				petal_plot <- TRUE
 			}
@@ -164,7 +164,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 					data.frame(x = c(4.8, 9.2, 8.8, 1.65, 0.72), y = c(10.6, 7.7, 0.3, 0.2, 7.05))
 				)
 			}
-			if(colnumber %in% 2:5 & petal_plot == F){
+			if(colnumber %in% 2:5 & petal_plot == FALSE){
 				plot_data <- data.frame(summary_table, private$pos_fun(switch_num))
 			}
 			if(colnumber == 2) {
@@ -232,7 +232,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 						annotate("path", x = map_data_4$x, y = map_data_4$y, color = color_circle[4], size = linesize)
 				}
 			}
-			if(colnumber == 5 & petal_plot == F) {
+			if(colnumber == 5 & petal_plot == FALSE) {
 				p <- ggplot(data.frame(), aes(x = c(5, 5), y = 0)) + 
 					xlim(0, 10.4) + 
 					ylim(-0.5, 10.8) + 
@@ -260,7 +260,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 						annotate("path", x = map_data_5$x, y = map_data_5$y, color = color_circle[5], size = linesize)
 				}
 			}
-			if(colnumber %in% 2:5 & petal_plot == F){
+			if(colnumber %in% 2:5 & petal_plot == FALSE){
 				p <- p + annotate("text", x = text_name_position$x, y = text_name_position$y, label = res_names, size = text_name_size)
 				if(!is.null(ratio)){
 					p <- p + annotate("text", 

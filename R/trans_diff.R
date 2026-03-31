@@ -1042,7 +1042,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tmp_transalpha$data_alpha$Taxa %<>% gsub(".*\\|", "", .)
 				tmp_transalpha$data_stat$Taxa %<>% gsub(".*\\|", "", .)
 			}
-			if(keep_prefix == F){
+			if(keep_prefix == FALSE){
 				diff_data$Taxa %<>% gsub(".__", "", .)
 				tmp_transalpha$data_alpha$Taxa %<>% gsub(".__", "", .)
 				tmp_transalpha$data_stat$Taxa %<>% gsub(".__", "", .)
@@ -1218,14 +1218,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 				}
 			}
-			if(keep_full_name == F){
+			if(keep_full_name == FALSE){
 				if(any(grepl("\\..__", use_data$Taxa))){
 					use_data$Taxa %<>% gsub(".*(.__.*?$)", "\\1", .)
 				}else{
 					use_data$Taxa %<>% gsub(".*\\|", "", .)
 				}
 			}
-			if(keep_prefix == F){
+			if(keep_prefix == FALSE){
 				use_data$Taxa %<>% gsub(".__", "", .)
 			}
 
