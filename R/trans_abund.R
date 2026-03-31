@@ -166,7 +166,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				self$data_taxanames_highlevel <- data_taxanames_highlevel
 			}
 			if(ntaxa_theshold < sum(mean_abund > show) | show == 0){
-				if(use_percentage == T){
+				if(use_percentage == TRUE){
 					abund_data$Abundance %<>% {. * 100}
 					if("SE" %in% colnames(abund_data)) abund_data$SE %<>% {. * 100}
 					if("SD" %in% colnames(abund_data)) abund_data$SD %<>% {. * 100}
@@ -361,7 +361,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- ggplot(plot_data, aes_meco(x = "Sample", y = "Abundance", fill = "Taxonomy"))
 				}
 				if(bar_full){
-					if(self$use_percentage == T){
+					if(self$use_percentage == TRUE){
 						p <- p + geom_bar(stat = "identity", position = "stack", show.legend = T, width = barwidth)
 					}else{
 						p <- p + geom_bar(stat = "identity", position = "fill", show.legend = T, width = barwidth)
@@ -396,7 +396,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 			}
 			p <- p + theme(panel.grid = element_blank(), panel.border = element_blank()) + 
 				theme(axis.line.y = element_line(color = "grey60", linetype = "solid", lineend = "square"))
-			if(legend_text_italic == T) {
+			if(legend_text_italic == TRUE) {
 				p <- p + theme(legend.text = element_text(face = 'italic'))
 			}
 			if(clustering_plot){
@@ -577,14 +577,14 @@ trans_abund <- R6Class(classname = "trans_abund",
 
 				p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Taxonomy"]], label = .data[[formatC("Abundance", format = "f", digits = 1)]]))
 				
-				if(withmargin == T){
+				if(withmargin == TRUE){
 					p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
 				}else{
 					p <- p + geom_tile(aes(fill = Abundance))
 				}
 				p <- p + theme(axis.text.y = element_text(size = 12)) + theme(plot.margin = unit(c(0.3, 0.3, 0.3, 0.3), "cm"))
 
-				if (plot_numbers == T){
+				if (plot_numbers == TRUE){
 					abund <- plot_data
 					abund$Abundance <- round(abund$Abundance, 1)
 					p <- p + geom_text(data = abund, size = plot_text_size, colour = "grey10")  
@@ -692,14 +692,14 @@ trans_abund <- R6Class(classname = "trans_abund",
 
 			p <- ggplot(plot_data, aes(x = .data[["Taxonomy"]], y = .data[["Abundance"]])) 
 			p <- p + ylab(self$ylabname) + guides(col = guide_legend(reverse = TRUE)) + xlab("")
-			if (plot_flip == T){ 
+			if (plot_flip == TRUE){ 
 				p <- p + coord_flip()
 			}
 			if(is.null(group)) {
 				p <- p + geom_boxplot(color = color_values[1], ...)
 			} else {
 				color_values <- expand_colors(color_values, length(unique(plot_data[, group])))
-				if(boxfill == T){
+				if(boxfill == TRUE){
 					p <- p + geom_boxplot(aes(color = .data[[group]], fill = .data[[group]]), ...)
 					p <- p + scale_fill_manual(values = color_values)
 					p <- p + scale_color_manual(values = color_values) + guides(color = "none")
@@ -710,7 +710,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 					p <- p + geom_boxplot(aes(color = .data[[group]]), ...) + scale_color_manual(values = color_values)
 				}
 			}
-			if(show_point == T){
+			if(show_point == TRUE){
 				p <- p + geom_point(size = point_size, color = point_color, alpha = point_alpha, position = "jitter")
 			}
 			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size)
@@ -829,7 +829,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				facet_wrap(~Sample, nrow = facet_nrow) +
 				theme(strip.text = element_text(size = strip_text)) +
 				guides(fill = guide_legend(title = self$taxrank))
-			if(legend_text_italic == T) {
+			if(legend_text_italic == TRUE) {
 				p <- p + theme(legend.text = element_text(face = 'italic'))
 			}
 			p
@@ -880,7 +880,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				if(label == F){
 					p <- p + theme(axis.text.x = element_blank())
 				}
-				if(legend_text_italic == T) {
+				if(legend_text_italic == TRUE) {
 					p <- p + theme(legend.text = element_text(face = 'italic'))
 				}
 				plot_list[[i]] <- p

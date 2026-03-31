@@ -321,7 +321,7 @@ trans_env <- R6Class(classname = "trans_env",
 				}
 				use_data <- as.data.frame(t(use_abund))
 			}
-			if(feature_sel == T){
+			if(feature_sel == TRUE){
 				message('Start forward selection ...')
 				if(method == "dbRDA"){
 					mod0 <- dbrda(use_data ~ 1, env_data, ...)
@@ -485,7 +485,7 @@ trans_env <- R6Class(classname = "trans_env",
 				df_species <- NULL
 				df_arrows_spe <- NULL
 			}
-			if(adjust_arrow_length == T){
+			if(adjust_arrow_length == TRUE){
 				df_arrows[, 1:2] <- private$stand_fun(arr = df_arrows[, 1:2], ref = df_sites, min_perc = min_perc_env, max_perc = max_perc_env)
 				if(self$ordination_method != "dbRDA"){
 					df_arrows_spe[, 1:2] <- private$stand_fun(arr = df_arrows_spe[, 1:2], ref = df_sites, min_perc = min_perc_tax, max_perc = max_perc_tax)
@@ -758,7 +758,7 @@ trans_env <- R6Class(classname = "trans_env",
 				if(! taxa_text_prefix){
 					df_arrows_spe1[, self$taxa_level] %<>% gsub(".*__", "", .)
 				}
-				if(taxa_text_italic == T){
+				if(taxa_text_italic == TRUE){
 					df_arrows_spe1[, self$taxa_level] %<>% paste0("italic('", .,"')")
 				}
 				if(is.null(taxa_nudge_x) & is.null(taxa_nudge_y)){
@@ -1618,7 +1618,7 @@ trans_env <- R6Class(classname = "trans_env",
 					next
 				}
 				env_dist <- vegdist(scale(env[, i, drop = FALSE]), "euclid")
-				if(partial_mantel == T){
+				if(partial_mantel == TRUE){
 					zdis <- vegdist(scale(env[, -i, drop = FALSE]), "euclid")
 					man1 <- mantel.partial(veg, env_dist, zdis, method = method, ...)
 				}else{
@@ -1628,7 +1628,7 @@ trans_env <- R6Class(classname = "trans_env",
 				corr_res <- c(corr_res, man1$statistic)
 				p_res <- c(p_res, man1$signif)
 			}
-			if(partial_mantel == T){
+			if(partial_mantel == TRUE){
 				mantel_type <- rep("partial mantel test", length(p_res))
 			}else{
 				mantel_type <- rep("mantel test", length(p_res))

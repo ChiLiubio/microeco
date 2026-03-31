@@ -173,7 +173,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 					ylim(2.5, 9) + 
 					private$main_theme()
 				
-				if(fill_color == T){
+				if(fill_color == TRUE){
 					p <- p + 
 						geom_polygon(data = private$plotcircle(center = c(4, 6)), aes(x = x, y = y), fill=color_circle[1], alpha = alpha) +
 						geom_polygon(data = private$plotcircle(center = c(6, 6)), aes(x = x, y = y), fill=color_circle[2], alpha = alpha)
@@ -191,7 +191,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 					ylim(1, 9) + 
 					private$main_theme()
 				
-				if(fill_color == T){
+				if(fill_color == TRUE){
 					p <- p + 
 					 geom_polygon(data = private$plotcircle(center = c(4, 6)), aes(x = x, y = y), fill = color_circle[1], alpha = alpha) +
 					 geom_polygon(data = private$plotcircle(center = c(6, 6)), aes(x = x, y = y), fill = color_circle[2], alpha = alpha) +
@@ -218,7 +218,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				map_data_3 <- private$plotellipse(center = c(5.3, 4.4), rotate = 35)
 				map_data_4 <- private$plotellipse(center = c(6.5, 3.6), rotate = 35)
 			
-				if(fill_color == T){
+				if(fill_color == TRUE){
 					p <- p + 
 						geom_polygon(data = map_data_1, aes(x = x, y = y), fill = color_circle[1], alpha = alpha) +
 						geom_polygon(data = map_data_2, aes(x = x, y = y), fill = color_circle[2], alpha = alpha) +
@@ -244,7 +244,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 				map_data_4 <- private$plotellipse(center = c(4.48, 3.15), radius = c(1.55, 3.92), rotate = 210)
 				map_data_5 <- private$plotellipse(center = c(3.7, 4.8), radius = c(1.7, 3.6), rotate = 293.5)
 			
-				if(fill_color == T){
+				if(fill_color == TRUE){
 					p <- p + 
 						geom_polygon(data = map_data_1, aes(x = x, y = y), fill=color_circle[1], alpha = alpha)+
 						geom_polygon(data = map_data_2, aes(x = x, y = y), fill=color_circle[2], alpha = alpha)+
@@ -278,7 +278,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 							)
 				}
 			}
-			if(colnumber > 4 & petal_plot == T) {
+			if(colnumber > 4 & petal_plot == TRUE) {
 				nPetals <- colnumber
 				plot_data <- summary_table[c(1:nPetals, nrow(summary_table)), ]
 				if(length(petal_color) == 1){
@@ -537,7 +537,7 @@ trans_venn <- R6Class(classname = "trans_venn",
 			tt[is.na(tt)] <- 0
 			tt %<>% 'rownames<-'(.[, 1]) %>% .[, -1, drop = FALSE]
 			colnames(tt) <- colnames(venn_table)
-			if(use_frequency == T){
+			if(use_frequency == TRUE){
 				tt[tt != 0] <- 1
 			}
 			microtable$new(sample_table = sampledata, otu_table = tt, tax_table = taxdata, auto_tidy = TRUE)

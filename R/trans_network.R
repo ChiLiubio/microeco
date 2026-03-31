@@ -306,7 +306,7 @@ trans_network <- R6Class(classname = "trans_network",
 						self$res_cor_p$p.adjust <- adp
 						message("Adjusted p value matrix is stored in res_cor_p$p.adjust ...")
 					}
-					if(COR_optimization == T){
+					if(COR_optimization == TRUE){
 						message("Start COR optimizing ...")
 						tc1 <- private$rmt(cortable, low_thres = COR_optimization_low_high[1], high_thres = COR_optimization_low_high[2], seq_by = COR_optimization_seq)
 						message("The optimized COR threshold: ", tc1, "...\n")
@@ -327,7 +327,7 @@ trans_network <- R6Class(classname = "trans_network",
 					network <- graph_from_adjacency_matrix(cor_matrix, mode = "undirected")
 					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
 					E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
-					if(COR_weight == T){
+					if(COR_weight == TRUE){
 						E(network)$weight <- unlist(lapply(seq_len(nrow(edges)), function(x) abs(cortable[edges[x, 1], edges[x, 2]])))
 					}else{
 						E(network)$weight <- rep.int(1, ecount(network))
@@ -1075,7 +1075,7 @@ trans_network <- R6Class(classname = "trans_network",
 					sub_network <- network
 				}
 				# whether remove the single node without edges
-				if(rm_single == T){
+				if(rm_single == TRUE){
 					sub_network <- private$rm_unlinked_node(sub_network)
 				}
 				if(return_igraph){
@@ -1211,7 +1211,7 @@ trans_network <- R6Class(classname = "trans_network",
 				message("The res_sum_links_pos is not found! Call the cal_sum_links function automatically with default settings ... ")
 				self$cal_sum_links()
 			}
-			if(plot_pos == T){
+			if(plot_pos == TRUE){
 				message("Extract the positive link information ...")
 				if(is.null(self$res_sum_links_pos)){
 					stop("res_sum_links_pos in object is NULL! No positive links can be used!")
@@ -1605,7 +1605,7 @@ trans_network <- R6Class(classname = "trans_network",
 			label_text_size, label_text_color, label_text_italic, label_text_parse,
 			roles_color_values, module, x_lim, ...
 			){
-			if(module == T){
+			if(module == TRUE){
 				all_modules <- unique(as.character(node_roles$module))
 				node_roles$module <- factor(as.character(node_roles$module), levels = stringr::str_sort(all_modules, numeric = TRUE))
 			}
@@ -1622,7 +1622,7 @@ trans_network <- R6Class(classname = "trans_network",
 				p <- p + geom_rect(data=NULL, mapping = aes(xmin = x1, xmax = x2, ymin = y1, ymax = y2, fill = lab, alpha = .4))
 				p <- p + guides(fill = guide_legend(title = "Roles"), alpha = "none")
 				p <- p + scale_fill_manual(values = roles_color_values)
-				if(module == T){
+				if(module == TRUE){
 					p <- p + geom_point(data = node_roles, aes(x = p, y = z, shape = module), ...) + 
 						guides(shape = guide_legend(title = "Module"))
 				}else{
@@ -1631,7 +1631,7 @@ trans_network <- R6Class(classname = "trans_network",
 				p <- p + theme(strip.background = element_rect(fill = "white"))
 			}else{
 				node_roles$taxa_roles %<>% factor(., levels = rev(lab))
-				if(module == T){
+				if(module == TRUE){
 					p <- p + geom_point(data = node_roles, aes(x = p, y = z, color = taxa_roles, shape = module), ...) + 
 						guides(shape = guide_legend(title = "Module"))
 				}else{
@@ -1651,7 +1651,7 @@ trans_network <- R6Class(classname = "trans_network",
 					if(nrow(label_data) == 0){
 						message("No label need to be added!")
 					}else{
-						if(label_text_italic == T){
+						if(label_text_italic == TRUE){
 							label_data[, add_label_text] %<>% paste0("italic('", .,"')")
 							label_text_parse <- TRUE
 						}

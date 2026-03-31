@@ -147,7 +147,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(method %in% c("PCA", "DCA", "PLS-DA", "OPLS-DA")){
 				plot.x <- switch(method, PCA = "PC1", DCA = "DCA1", 'PLS-DA' = "p1", 'OPLS-DA' = "p1")
 				plot.y <- switch(method, PCA = "PC2", DCA = "DCA2", 'PLS-DA' = "p2", 'OPLS-DA' = "o1")
-				if(trans == T){
+				if(trans == TRUE){
 					abund <- sqrt(use_data$otu_table)
 				}else{
 					abund <- use_data$otu_table

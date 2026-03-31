@@ -1037,7 +1037,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			if(nrow(diff_data) == 0){
 				stop("No significant taxa can be used to plot the abundance!")
 			}
-			if(simplify_names == T){
+			if(simplify_names == TRUE){
 				diff_data$Taxa %<>% gsub(".*\\|", "", .)
 				tmp_transalpha$data_alpha$Taxa %<>% gsub(".*\\|", "", .)
 				tmp_transalpha$data_stat$Taxa %<>% gsub(".*\\|", "", .)
@@ -1463,7 +1463,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					marker_table %<>% .[1:use_feature_num, ]
 				}
 			}
-			if(only_select_show == T){
+			if(only_select_show == TRUE){
 				marker_table %<>% .[.$Taxa %in% select_show_labels, ]
 			}
 			# color legend order settings

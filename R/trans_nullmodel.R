@@ -74,7 +74,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 					env_data <- add_data[rownames(add_data) %in% rownames(use_set$sample_table), , drop = FALSE]
 				}
 				env_data[env_data == ""] <- NA
-				if(complete_na == T){
+				if(complete_na == TRUE){
 					env_data <- dropallfactors(env_data, unfac2num = TRUE)
 					env_data[] <- lapply(env_data, function(x){if(is.character(x)) as.factor(x) else x})
 					env_data %<>% mice::mice(print = FALSE) %>% mice::complete(., 1)
@@ -229,7 +229,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			comm <- self$data_comm
 			if(! use_iCAMP){
 				if(ncol(comm) > 5000){
-					if(use_iCAMP_force == T){
+					if(use_iCAMP_force == TRUE){
 						use_iCAMP <- TRUE
 						message("The feature number is larger than 5000. Automatically change use_iCAMP parameter to be TRUE and ",
 							"use iCAMP package for large matrix and parallel computing. Change use_iCAMP_force = FALSE to skip this method ...")
@@ -347,7 +347,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 			}
 			if(! use_iCAMP){
 				if(ncol(comm) > 5000){
-					if(use_iCAMP_force == T){
+					if(use_iCAMP_force == TRUE){
 						use_iCAMP <- TRUE
 						message("The feature number is larger than 5000. Automatically change use_iCAMP parameter to be TRUE and ",
 							"use iCAMP package for large matrix and parallel computing. Change use_iCAMP_force = FALSE to skip this method ...")
@@ -453,7 +453,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 		#' t1$cal_process(use_betamntd = TRUE)
 		#' }
 		cal_process = function(use_betamntd = TRUE, group = NULL){
-			if(use_betamntd == T){
+			if(use_betamntd == TRUE){
 				ses_phylo_beta <- self$res_ses_betamntd
 				if(is.null(ses_phylo_beta)){
 					stop("ses_betamntd not calculated! Please first run cal_ses_betamntd function!")
