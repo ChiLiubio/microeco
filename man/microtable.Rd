@@ -318,7 +318,7 @@ For instance, the number 0.1 represents filtering the feature that occurs in les
 
 \item{\code{include_lowest}}{default TRUE; whether include the feature with the threshold.}
 
-\item{\code{for_taxa_abund}}{default FALSE; whether apply this function to \code{taxa_abund} list. FALSE means using this function for \code{otu_table}}
+\item{\code{for_taxa_abund}}{default FALSE; whether apply this function to \code{taxa_abund} list. FALSE means using this function for \code{otu_table}.}
 }
 \if{html}{\out{</div>}}
 }

@@ -125,7 +125,7 @@ microtable <- R6Class(classname = "microtable",
 		#' 	 A number smaller than 1 is also allowable. 
 		#' 	 For instance, the number 0.1 represents filtering the feature that occurs in less than 10\% samples.
 		#' @param include_lowest default TRUE; whether include the feature with the threshold.
-		#' @param for_taxa_abund default FALSE; whether apply this function to \code{taxa_abund} list. FALSE means using this function for \code{otu_table}
+		#' @param for_taxa_abund default FALSE; whether apply this function to \code{taxa_abund} list. FALSE means using this function for \code{otu_table}.
 		#' @return updated microtable object
 		#' @examples
 		#' \donttest{

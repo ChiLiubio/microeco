@@ -63,7 +63,7 @@ NULL
 #' @keywords datasets
 #' @name phylo_tree_16S
 #' @usage data(phylo_tree_16S)
-#' @format data.frame
+#' @format phylo
 NULL
 
 
