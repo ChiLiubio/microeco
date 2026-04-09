@@ -20,7 +20,7 @@ t1 <- trans_metab$new(metab = soil_metab, microb = soil_microb)
 ## Method `trans_metab$cal_match`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_match()
 }
 
@@ -28,7 +28,7 @@ t1$cal_match()
 ## Method `trans_metab$cal_origin`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_origin()
 t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
 }
@@ -37,7 +37,7 @@ t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
 ## Method `trans_metab$cal_origin_network`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$cal_origin_network()
 }
 }
@@ -119,7 +119,7 @@ See the \code{method} parameter of \code{amatch} function in stringdist package.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_match()
 }
 }
@@ -166,7 +166,7 @@ The function can automatically match the taxa those found in the input data.}
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_origin()
 t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
 }
@@ -190,7 +190,7 @@ Metabolite-bacteria network based on the \code{res_origin_list} data from the \c
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$cal_origin_network()
 }
 }
