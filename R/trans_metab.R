@@ -17,7 +17,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' @examples
 		#' data(soil_metab)
 		#' data(soil_microb)
-		#' t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
+		#' t1 <- trans_metab$new(metab = soil_metab, microb = soil_microb)
 		initialize = function(
 			metab = NULL,
 			microb = NULL

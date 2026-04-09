@@ -14,7 +14,7 @@ This class is a wrapper for a series of metabolite analysis, including origin in
 
 data(soil_metab)
 data(soil_microb)
-t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
+t1 <- trans_metab$new(metab = soil_metab, microb = soil_microb)
 
 ## ------------------------------------------------
 ## Method `trans_metab$cal_match`
@@ -77,7 +77,7 @@ If the input is a data.frame object, the function can judge whether it is abunda
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{data(soil_metab)
 data(soil_microb)
-t1 <- trans_env$new(metab = soil_metab, microb = soil_microb)
+t1 <- trans_metab$new(metab = soil_metab, microb = soil_microb)
 }
 \if{html}{\out{</div>}}
 
