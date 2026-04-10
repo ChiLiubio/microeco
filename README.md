@@ -4,10 +4,10 @@ An R package for data mining in microbial community ecology
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
-![](https://img.shields.io/badge/Release-2.0.0-orange.svg) ![](https://img.shields.io/badge/Test-2.1.0-red.svg)
+![](https://img.shields.io/badge/Release-2.1.0-orange.svg) ![](https://img.shields.io/badge/Test-2.1.1-red.svg)
 
 ## Background
-The increasing volume and complexity of microbiome data pose a challenge for the downstream data analysis. 
+The increasing volume and complexity of microbiome omics data pose a challenge for the downstream data analysis. 
 Although numerous R packages exist in this field, 
 it remains difficult to perform data mining in an efficient and comprehensive manner. 
 Therefore, we developed the R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
@@ -26,7 +26,7 @@ Therefore, we developed the R microeco package (abbreviated and pronounced as **
   + Network analysis
   + Environmental data analysis
   + Functional prediction
-
+  + Metabolite origin inference
 
 ## Install R/RStudio
 If you do not already have R/RStudio installed, follow these steps:
