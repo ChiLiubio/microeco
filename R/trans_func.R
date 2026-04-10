@@ -924,6 +924,7 @@ trans_func <- R6Class(classname = "trans_func",
 			self$cal_func(...)
 			self$res_spe_func <- self$res_func
 			message('To ensure compatibility with deprecated cal_spe_func, the result is also stored in object$res_spe_func ...')
+			invisible(self)
 		},
 		#' @description
 		#' This is a deprecated function. Please use \code{cal_func_FR} function instead.
@@ -934,6 +935,7 @@ trans_func <- R6Class(classname = "trans_func",
 			self$cal_func_FR(...)
 			self$res_spe_func_perc <- self$res_func_FR
 			message('To ensure compatibility with deprecated cal_spe_func_perc, the result is also stored in object$res_spe_func_perc ...')
+			invisible(self)
 		},
 		#' @description
 		#' This is a deprecated function. Please use \code{trans_func_FR} function instead.
@@ -944,6 +946,7 @@ trans_func <- R6Class(classname = "trans_func",
 			self$trans_func_FR(...)
 			self$res_spe_func_perc_trans <- self$res_func_FR_trans
 			message('To ensure compatibility with deprecated trans_spe_func_perc, the result is also stored in object$res_spe_func_perc_trans ...')
+			invisible(self)
 		},
 		#' @description
 		#' This is a deprecated function. Please use \code{plot_func_FR} function instead.
