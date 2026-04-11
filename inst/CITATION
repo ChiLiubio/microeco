@@ -2,11 +2,14 @@ citHeader("To cite microeco in publications, please use:")
 
 
 bibentry(bibtype = "Article",
-         textVersion = "Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li, Minjie Yao. A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. Nature Protocols (2025). https://doi.org/10.1038/s41596-025-01239-4",
+         textVersion = "Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li, Minjie Yao. A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. Nature Protocols, 2026, 21: 1300–1324. https://doi.org/10.1038/s41596-025-01239-4",
          title = "A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package",
          author = c("Chi Liu", "Felipe R. P. Mansoldo", "Hankang Li", "Alane Beatriz Vermelho", "Raymond Jianxiong Zeng", "Xiangzhen Li", "Minjie Yao"),
-         year = "2025",
+         year = "2026",
          journal = "Nature Protocols",
+         volume = "21",
+		 number = "4",
+         pages = "1300-1324",
          doi = "10.1038/s41596-025-01239-4",
          url = "https://doi.org/10.1038/s41596-025-01239-4"
 )
