@@ -69,10 +69,10 @@ we also provide a systematic protocol (https://github.com/ChiLiubio/microeco_pro
 ## Citation
 Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li & Minjie Yao. 
 A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. 
-**Nature Protocols** (2025). https://doi.org/10.1038/s41596-025-01239-4
+**Nature Protocols**, 21: 1300–1324 (2026). https://doi.org/10.1038/s41596-025-01239-4
 
 Chi Liu, Yaoming Cui, Xiangzhen Li and Minjie Yao. _microeco_: an R package for data mining in microbial community ecology.
-**FEMS Microbiology Ecology**, 2021, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
+**FEMS Microbiology Ecology**, 97(2): fiaa255 (2021). https://doi.org/10.1093/femsec/fiaa255
 
 
 ## Contributing
