@@ -660,7 +660,7 @@ trans_network <- R6Class(classname = "trans_network",
 				}
 			}
 			network <- self$res_network
-			node_table_raw <- as_data_frame(network, what = "vertices")
+			node_table_raw <- igraph::as_data_frame(network, what = "vertices")
 			node_table <- node_table_raw[, "name", drop = FALSE]
 
 			# Add abundance info
