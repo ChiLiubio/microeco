@@ -373,7 +373,7 @@ This parameter will be passed to the \code{switch} parameter in \code{ggplot2::f
 
 \item{\code{plot_text_size}}{default 4; If plot_numbers TRUE, text size in plot.}
 
-\item{\code{plot_breaks}}{default NULL; The legend breaks.}
+\item{\code{plot_breaks}}{default NULL; The legend breaks. A numeric vector, such as c(0.01, 0.1, 1, 10).}
 
 \item{\code{margincolor}}{default "white"; If withmargin TRUE, use this as the margin color.}
 

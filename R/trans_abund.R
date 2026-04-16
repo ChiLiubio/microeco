@@ -514,7 +514,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 		#' @param withmargin default TRUE; whether retain the tile margin.
 		#' @param plot_numbers default FALSE; whether plot the number in heatmap.
 		#' @param plot_text_size default 4; If plot_numbers TRUE, text size in plot.
-		#' @param plot_breaks default NULL; The legend breaks.
+		#' @param plot_breaks default NULL; The legend breaks. A numeric vector, such as c(0.01, 0.1, 1, 10).
 		#' @param margincolor default "white"; If withmargin TRUE, use this as the margin color.
 		#' @param plot_colorscale default "log10"; color scale.
 		#' @param min_abundance default .01; the minimum abundance percentage in plot.
