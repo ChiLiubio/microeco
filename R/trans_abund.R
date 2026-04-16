@@ -385,7 +385,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}else{
 					p <- p + ggh4x::facet_nested(facet_formula, nest_line = element_line(linetype = 2), scales = "free", space = "free")
 				}
-				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size=strip_text))
+				p <- p + theme(strip.background = element_rect(fill = facet_color, color = facet_color), strip.text = element_text(size = strip_text))
 				p <- p + scale_y_continuous(expand = c(0, 0.01))
 			}else{
 				if(bar_full & self$use_percentage == FALSE){
@@ -578,7 +578,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				p <- ggplot(plot_data, aes(x = .data[["Sample"]], y = .data[["Taxonomy"]], label = .data[[formatC("Abundance", format = "f", digits = 1)]]))
 				
 				if(withmargin == TRUE){
-					p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, size = 0.5)
+					p <- p + geom_tile(aes(fill = Abundance), colour = margincolor, linewidth = 0.5)
 				}else{
 					p <- p + geom_tile(aes(fill = Abundance))
 				}
