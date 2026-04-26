@@ -1,4 +1,15 @@
 
+# trim the redundant tilde in formula
+trim_formula <- function(input){
+	output <- trimws(input)
+	if(grepl("^~", output)){
+		output <- gsub("^~", "", output)
+		output <- trimws(output)
+	}
+	output
+}
+
+
 # recreate microtable object
 recreate_microtable <- function(meco, ...){
 	otu_table_trans <- meco$otu_table

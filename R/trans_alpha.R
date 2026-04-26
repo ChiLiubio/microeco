@@ -160,6 +160,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 			method <- match.arg(method, c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta"))
 			group <- self$group
 			
+			if(! is.null(formula)){
+				formula <- trim_formula(formula)
+			}
 			if(method %in% c("scheirerRayHare", "lm", "lme", "betareg", "glmm", "glmm_beta")){
 				if(is.null(formula)){
 					stop("The formula parameter is NULL! It is necessary for the method: ", method, " !")
