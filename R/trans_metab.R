@@ -115,6 +115,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 
 			self$res_match <- res
 			message("Match table is stored in object$res_match ...")
+			invisible(self)
 		},
 		#' @description
 		#' Metabolite origin inference based on the preprocessed database from TidyMass2 (DOI: 10.1038/s41467-026-68464-7)
@@ -234,6 +235,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 			}else{
 				message("Origin taxa at ", bac_level, " level for each metabolite is stored in object$res_origin_list ... ...")
 			}
+			invisible(self)
 		},
 		#' @description
 		#' Metabolite-bacteria network based on the \code{res_origin_list} data from the \code{cal_origin} function
@@ -246,24 +248,32 @@ trans_metab <- R6Class(classname = "trans_metab",
 		cal_origin_network = function(){
 			res_origin_list <- self$res_origin_list
 			if(is.null(res_origin_list)){
-				stop("Please first run the cal_origin function !")
+					stop("Please first run the cal_origin function !")
 			}
-			library(igraph)
+			if(!requireNamespace("igraph", quietly = TRUE)){
+					stop("Package 'igraph' is required but not installed !")
+			}
 
 			# from -> to
-			edges <- lapply(names(res_origin_list), function(target) {
-				sources <- res_origin_list[[target]]
-				if (length(sources) == 0) return(NULL)
-				data.frame(from = sources, to = target, stringsAsFactors = FALSE)
-			}) %>% do.call(rbind, .)
+			edges_list <- lapply(names(res_origin_list), function(target) {
+					sources <- res_origin_list[[target]]
+					if (length(sources) == 0) return(NULL)
+					data.frame(from = sources, to = target, stringsAsFactors = FALSE)
+			})
+			# Filter NULL entries before rbind to avoid errors
+			edges_list <- edges_list[!sapply(edges_list, is.null)]
+			if(length(edges_list) == 0){
+					stop("No edges found in res_origin_list. All metabolites have empty origin taxa !")
+			}
+			edges <- do.call(rbind, edges_list)
 
 			# directed network
-			g <- graph_from_edgelist(as.matrix(edges), directed = TRUE)
+			g <- igraph::graph_from_edgelist(as.matrix(edges[, c("from", "to")]), directed = TRUE)
 
-			# add attributes
-			all_nodes <- V(g)$name
-			type <- ifelse(all_nodes %in% edges[, 1], "bacteria", "metabolite")
-			V(g)$type <- type
+			# add attributes - use the metabolite names as reference for type assignment
+			metabolite_names <- names(res_origin_list)
+			all_nodes <- igraph::V(g)$name
+			igraph::V(g)$type <- ifelse(all_nodes %in% metabolite_names, "metabolite", "bacteria")
 
 			g
 		}
