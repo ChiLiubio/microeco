@@ -184,7 +184,7 @@ t1$plot_volcano()
 }}
 
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
-It is necessary when method is not "anova" or method is "anova" but formula is not provided.
+It is necessary for some methods that formula is not applicable (e.g., wilcox, lefse, one-way anova).
 Once group is provided, the return res_abund will have mean and sd values for group.}
 
 \item{\code{taxa_level}}{default "all"; 'all' represents using abundance data of all taxonomic ranks; 

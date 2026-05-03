@@ -80,7 +80,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
-		#' 	  It is necessary when method is not "anova" or method is "anova" but formula is not provided.
+		#' 	  It is necessary for some methods that formula is not applicable (e.g., wilcox, lefse, one-way anova).
 		#' 	  Once group is provided, the return res_abund will have mean and sd values for group.
 		#' @param taxa_level default "all"; 'all' represents using abundance data of all taxonomic ranks; 
 		#' 	  For testing at a specific rank, provide taxonomic rank name, such as "Genus".
@@ -208,6 +208,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 					"anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta"))
 
 				tmp_dataset <- clone(dataset)
+				tmp_dataset$tidy_dataset()
+				
 				sampleinfo <- tmp_dataset$sample_table
 				if(is.null(group) & ! method %in% c("anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "maaslin", "ancombc2", "linda", "DESeq2")){
 					stop("The group parameter is necessary for differential test method: ", method, " !")
@@ -222,6 +224,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}
 					if(group %in% colnames(sampleinfo)){
+						if(all(table(as.character(sampleinfo[, group])) <= 1)){
+							stop("No duplicate samples were detected. Please provide a valid column name for the group parameter!")
+						}
 						if(is.factor(sampleinfo[, group])){
 							self$group_order <- levels(sampleinfo[, group])
 							sampleinfo[, group] %<>% as.character
