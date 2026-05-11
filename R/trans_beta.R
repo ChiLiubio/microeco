@@ -291,7 +291,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   and the y-axis position is equal to \code{max(points of y axis) * NMDS_stress_pos[2]}. Negative values can also be utilized for the negative part of the axis.
 		#'   \code{NMDS_stress_pos = NULL} denotes no stress text to show.
 		#' @param NMDS_stress_text_prefix default ""; If NMDS_stress_pos is not NULL, this parameter can be used to add text in front of the stress value.
-		#' @param loading_arrow default FALSE; whether show the loading using arrow.
+		#' @param loading_arrow default FALSE; whether show the loading using arrow. 
+		#'   Only valid when there is a loading object in the ordination results, for example, when the ordination method is "PCA" or "DCA".
 		#' @param loading_taxa_num default 10; the number of taxa used for the loading. Only available when \code{loading_arrow = TRUE}.
 		#' @param loading_text_taxlevel default NULL; which level of taxonomic table will be used.
 		#'   Default NULL means using the \code{taxa_level} parameter in the previous \code{cal_ordination} function.
@@ -675,8 +676,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   When \code{within_group = TRUE}, the result of by_group parameter is the format of paired groups.
 		#'   When \code{within_group = FALSE}, the result of by_group parameter is the format same with the group information in \code{sample_table}.
 		#' @param ordered_group default NULL; a vector representing the ordered elements of \code{group} parameter; only useful when within_group = FALSE.
-		#' @param sep default TRUE; a character string to separate the group names after merging them into a new name.
-		#' @return \code{res_group_distance} stored in object.
+		#' @param sep default " vs "; a character string to separate the group names after merging them into a new name.
+		#' @return \code{res_group_distance}, stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance(within_group = TRUE)
@@ -713,7 +714,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} should be the smallest unit of sample collection without any repetition in it.
 		#' @param ... parameters passed to \code{cal_diff} function of \code{\link{trans_alpha}} class.
-		#' @return \code{res_group_distance_diff} stored in object.
+		#' @return \code{res_group_distance_diff}, stored in object.
 		#' @examples
 		#' \donttest{
 		#' t1$cal_group_distance_diff()
@@ -722,6 +723,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 			if(is.null(self$res_group_distance)){
 				message("The res_group_distance is not found! Call the cal_group_distance function automatically with default settings ... ")
 				self$cal_group_distance()
+				if(is.null(self$res_group_distance)){
+					stop("cal_group_distance() failed to generate res_group_distance. Please call it manually.")
+				}
 			}
 			res_group_distance <- self$res_group_distance
 			# use method in trans_alpha

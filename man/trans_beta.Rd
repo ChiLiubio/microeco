@@ -311,7 +311,8 @@ and the y-axis position is equal to \code{max(points of y axis) * NMDS_stress_po
 
 \item{\code{NMDS_stress_text_prefix}}{default ""; If NMDS_stress_pos is not NULL, this parameter can be used to add text in front of the stress value.}
 
-\item{\code{loading_arrow}}{default FALSE; whether show the loading using arrow.}
+\item{\code{loading_arrow}}{default FALSE; whether show the loading using arrow. 
+Only valid when there is a loading object in the ordination results, for example, when the ordination method is "PCA" or "DCA".}
 
 \item{\code{loading_taxa_num}}{default 10; the number of taxa used for the loading. Only available when \code{loading_arrow = TRUE}.}
 
@@ -510,12 +511,12 @@ When \code{within_group = FALSE}, the result of by_group parameter is the format
 
 \item{\code{ordered_group}}{default NULL; a vector representing the ordered elements of \code{group} parameter; only useful when within_group = FALSE.}
 
-\item{\code{sep}}{default TRUE; a character string to separate the group names after merging them into a new name.}
+\item{\code{sep}}{default " vs "; a character string to separate the group names after merging them into a new name.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_group_distance} stored in object.
+\code{res_group_distance}, stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -560,7 +561,7 @@ So \code{by_ID} should be the smallest unit of sample collection without any rep
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-\code{res_group_distance_diff} stored in object.
+\code{res_group_distance_diff}, stored in object.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
