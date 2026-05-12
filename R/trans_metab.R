@@ -417,140 +417,225 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' t1$cal_pathway_enrich(target_metabs = target)
 		#' }
 		cal_pathway_enrich = function(
-				target_metabs = NULL,
-				background_metabs = NULL,
-				p_adjust_method = "BH",
-				p_cutoff = 0.05,
-				min_metab_count = 3
-				){
-				res_pathway_map <- self$res_pathway_map
-				if(is.null(res_pathway_map)){
-						stop("Please first run the cal_pathway function !")
+			target_metabs = NULL,
+			background_metabs = NULL,
+			p_adjust_method = "BH",
+			p_cutoff = 0.05,
+			min_metab_count = 3
+			){
+			res_pathway_map <- self$res_pathway_map
+			if(is.null(res_pathway_map)){
+					stop("Please first run the cal_pathway function !")
+			}
+
+			all_metabs <- unique(res_pathway_map$metab_name)
+
+			if(is.null(background_metabs)){
+				background_metabs <- all_metabs
+			}else{
+				if(! all(background_metabs %in% all_metabs)){
+					missing_metabs <- setdiff(background_metabs, all_metabs)
+					message("Note: ", length(missing_metabs), " background metabolites not found in pathway mapping, will be ignored ...")
+					background_metabs <- intersect(background_metabs, all_metabs)
+				}
+			}
+
+			if(is.null(target_metabs)){
+				target_metabs <- background_metabs
+			}else{
+				if(! all(target_metabs %in% background_metabs)){
+					missing_targets <- setdiff(target_metabs, background_metabs)
+					if(length(missing_targets) > 0){
+							message("Note: ", length(missing_targets), " target metabolites are not in background, will use intersection ...")
+					}
+					target_metabs <- intersect(target_metabs, background_metabs)
+				}
+			}
+
+			if(length(target_metabs) == 0){
+				stop("No valid target metabolites !")
+			}
+			if(length(background_metabs) == 0){
+				stop("No valid background metabolites !")
+			}
+
+			# Precompute pathway-metabolite lookup for efficiency
+			N <- length(background_metabs)
+			n <- length(target_metabs)
+
+			# Build target set for fast lookup
+			target_set <- unique(target_metabs)
+			background_set <- unique(background_metabs)
+
+			pathways <- unique(res_pathway_map$pathway_id)
+			res_enrich <- list()
+
+			for(pathway in pathways){
+				pathway_metabs <- unique(res_pathway_map[res_pathway_map$pathway_id == pathway, "metab_name"])
+				
+				metab_in_pathway_bg <- intersect(pathway_metabs, background_set)
+				M <- length(metab_in_pathway_bg)
+				
+				if(M < min_metab_count){
+						next
 				}
 
-				all_metabs <- unique(res_pathway_map$metab_name)
+				metab_in_pathway_target <- intersect(pathway_metabs, target_set)
+				k <- length(metab_in_pathway_target)
 
-				if(is.null(background_metabs)){
-						background_metabs <- all_metabs
+				if(k == 0){
+						next
+				}
+
+				# Validate contingency table has no negative values
+				cell_d <- N - M - n + k
+				if(cell_d < 0){
+					message("Note: Contingency table has negative cell for pathway ", pathway, 
+							". This may indicate inconsistent target/background sets. Skipping ...")
+					next
+				}
+
+				contingency <- matrix(c(k, M - k, n - k, cell_d), nrow = 2)
+				p_value <- fisher.test(contingency, alternative = "greater")$p.value
+
+				# Calculate enrichment factor with safety check
+				if(n > 0 && M > 0){
+					enrichment_factor <- (k / n) / (M / N)
 				}else{
-						if(! all(background_metabs %in% all_metabs)){
-								missing_metabs <- setdiff(background_metabs, all_metabs)
-								message("Note: ", length(missing_metabs), " background metabolites not found in pathway mapping, will be ignored ...")
-								background_metabs <- intersect(background_metabs, all_metabs)
-						}
+					enrichment_factor <- NA
 				}
 
-				if(is.null(target_metabs)){
-						target_metabs <- background_metabs
-				}else{
-						if(! all(target_metabs %in% background_metabs)){
-								missing_targets <- setdiff(target_metabs, background_metabs)
-								if(length(missing_targets) > 0){
-										message("Note: ", length(missing_targets), " target metabolites are not in background, will use intersection ...")
-								}
-								target_metabs <- intersect(target_metabs, background_metabs)
-						}
-				}
+				pathway_name <- res_pathway_map[res_pathway_map$pathway_id == pathway, "pathway_name"][1]
 
-				if(length(target_metabs) == 0){
-						stop("No valid target metabolites !")
-				}
-				if(length(background_metabs) == 0){
-						stop("No valid background metabolites !")
-				}
+				res_enrich[[length(res_enrich) + 1]] <- data.frame(
+					pathway_id = pathway,
+					pathway_name = pathway_name,
+					metab_count = k,
+					background_count = M,
+					enrichment_factor = round(enrichment_factor, 3),
+					p_value = p_value,
+					stringsAsFactors = FALSE
+				)
+			}
 
-				# Precompute pathway-metabolite lookup for efficiency
-				N <- length(background_metabs)
-				n <- length(target_metabs)
-
-				# Build target set for fast lookup
-				target_set <- unique(target_metabs)
-				background_set <- unique(background_metabs)
-
-				pathways <- unique(res_pathway_map$pathway_id)
-				res_enrich <- list()
-
-				for(pathway in pathways){
-						pathway_metabs <- unique(res_pathway_map[res_pathway_map$pathway_id == pathway, "metab_name"])
-						
-						metab_in_pathway_bg <- intersect(pathway_metabs, background_set)
-						M <- length(metab_in_pathway_bg)
-						
-						if(M < min_metab_count){
-								next
-						}
-
-						metab_in_pathway_target <- intersect(pathway_metabs, target_set)
-						k <- length(metab_in_pathway_target)
-
-						if(k == 0){
-								next
-						}
-
-						# Validate contingency table has no negative values
-						cell_d <- N - M - n + k
-						if(cell_d < 0){
-								message("Note: Contingency table has negative cell for pathway ", pathway, 
-										". This may indicate inconsistent target/background sets. Skipping ...")
-								next
-						}
-
-						contingency <- matrix(c(k, M - k, n - k, cell_d), nrow = 2)
-						p_value <- fisher.test(contingency, alternative = "greater")$p.value
-
-						# Calculate enrichment factor with safety check
-						if(n > 0 && M > 0){
-								enrichment_factor <- (k / n) / (M / N)
-						}else{
-								enrichment_factor <- NA
-						}
-
-						pathway_name <- res_pathway_map[res_pathway_map$pathway_id == pathway, "pathway_name"][1]
-
-						res_enrich[[length(res_enrich) + 1]] <- data.frame(
-								pathway_id = pathway,
-								pathway_name = pathway_name,
-								metab_count = k,
-								background_count = M,
-								enrichment_factor = round(enrichment_factor, 3),
-								p_value = p_value,
-								stringsAsFactors = FALSE
-						)
-				}
-
-				if(length(res_enrich) == 0){
-						message("No enriched pathways found with minimum metabolite count = ", min_metab_count, " ...")
-						self$res_pathway_enrich <- data.frame()
-						self$param$pathway_enrich <- list(
-								p_adjust_method = p_adjust_method,
-								p_cutoff = p_cutoff,
-								min_metab_count = min_metab_count
-						)
-						return(invisible(self))
-				}
-
-				res_enrich_df <- do.call(rbind, res_enrich)
-				res_enrich_df$p_adjust <- p.adjust(res_enrich_df$p_value, method = p_adjust_method)
-				res_enrich_df$significant <- res_enrich_df$p_adjust <= p_cutoff
-
-				res_enrich_df <- res_enrich_df[order(res_enrich_df$p_adjust), ]
-				rownames(res_enrich_df) <- NULL
-
-				self$res_pathway_enrich <- res_enrich_df
+			if(length(res_enrich) == 0){
+				message("No enriched pathways found with minimum metabolite count = ", min_metab_count, " ...")
+				self$res_pathway_enrich <- data.frame()
 				self$param$pathway_enrich <- list(
 						p_adjust_method = p_adjust_method,
 						p_cutoff = p_cutoff,
-						min_metab_count = min_metab_count,
-						n_target = n,
-						N_background = N
+						min_metab_count = min_metab_count
 				)
+				return(invisible(self))
+			}
 
-				sig_count <- sum(res_enrich_df$significant)
-				message("Pathway enrichment analysis completed ...")
-				message("Found ", sig_count, " significant enriched pathways (p_adjust <= ", p_cutoff, ") out of ", 
-						nrow(res_enrich_df), " tested pathways ...")
-				message("Result is stored in object$res_pathway_enrich ...")
-				invisible(self)
+			res_enrich_df <- do.call(rbind, res_enrich)
+			res_enrich_df$p_adjust <- p.adjust(res_enrich_df$p_value, method = p_adjust_method)
+			res_enrich_df$significant <- res_enrich_df$p_adjust <= p_cutoff
+
+			res_enrich_df <- res_enrich_df[order(res_enrich_df$p_adjust), ]
+			rownames(res_enrich_df) <- NULL
+
+			self$res_pathway_enrich <- res_enrich_df
+			self$param$pathway_enrich <- list(
+				p_adjust_method = p_adjust_method,
+				p_cutoff = p_cutoff,
+				min_metab_count = min_metab_count,
+				n_target = n,
+				N_background = N
+			)
+
+			sig_count <- sum(res_enrich_df$significant)
+			message("Pathway enrichment analysis completed ...")
+			message("Found ", sig_count, " significant enriched pathways (p_adjust <= ", p_cutoff, ") out of ", 
+				nrow(res_enrich_df), " tested pathways ...")
+			message("Result is stored in object$res_pathway_enrich ...")
+			invisible(self)
+		},
+		#' @description
+		#' Visualize pathway enrichment analysis results.
+		#' 
+		#' @param plot_type default "bubble"; plot type, "bubble" or "bar".
+		#' @param top_n default 20; number of top pathways to display.
+		#' @param color_by default "p_adjust"; column name for color mapping.
+		#' @param size_by default "metab_count"; column name for size mapping (only for bubble plot).
+		#' @param order_by default "p_adjust"; column name for ordering pathways.
+		#' @param color_gradient_low default "#132B43"; color for low values (e.g., high p-value = not significant).
+		#' @param color_gradient_high default "#56B1F7"; color for high values (e.g., low p-value = significant).
+		#' @return ggplot2 object.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_pathway()
+		#' target <- rownames(t1$data_metab$otu_table)[1:10]
+		#' t1$cal_pathway_enrich(target_metabs = target)
+		#' t1$plot_pathway_enrich()
+		#' }
+		plot_pathway_enrich = function(
+			plot_type = c("bubble", "bar")[1],
+			top_n = 20,
+			color_by = "p_adjust",
+			size_by = "metab_count",
+			order_by = "p_adjust",
+			color_gradient_low = "#132B43",
+			color_gradient_high = "#56B1F7"
+			){
+			res_enrich <- self$res_pathway_enrich
+			if(is.null(res_enrich) || nrow(res_enrich) == 0){
+				stop("No enrichment results found. Please first run the cal_pathway_enrich function !")
+			}
+
+			plot_type <- match.arg(plot_type, c("bubble", "bar"))
+
+			if(! color_by %in% colnames(res_enrich)){
+				stop(color_by, " is not found in res_pathway_enrich !")
+			}
+			if(! order_by %in% colnames(res_enrich)){
+				stop(order_by, " is not found in res_pathway_enrich !")
+			}
+
+			plot_data <- res_enrich[order(res_enrich[[order_by]]), ]
+			if(nrow(plot_data) > top_n){
+				plot_data <- plot_data[1:top_n, ]
+			}
+
+			plot_data$pathway_label <- paste0(plot_data$pathway_name, " (", plot_data$pathway_id, ")")
+			# Order: smallest p_adjust at top of plot
+			plot_data$pathway_label <- factor(plot_data$pathway_label, levels = rev(plot_data$pathway_label))
+
+			if(plot_type == "bubble"){
+				if(! size_by %in% colnames(plot_data)){
+						stop(size_by, " is not found in res_pathway_enrich !")
+				}
+
+				g <- ggplot(plot_data, aes(x = pathway_label, y = -log10(.data[[color_by]]), 
+								size = .data[[size_by]], color = .data[[color_by]])) +
+						geom_point() +
+						scale_color_gradient(low = color_gradient_low, high = color_gradient_high) +
+						scale_size_continuous(range = c(2, 8)) +
+						coord_flip() +
+						labs(x = NULL, y = paste0("-log10(", color_by, ")"), size = size_by, color = color_by) +
+						theme_bw() +
+						theme(axis.text.x = element_text(size = 12, colour = "black"),
+								  axis.text.y = element_text(size = 10),
+								  panel.grid = element_blank(),
+								  panel.border = element_rect(fill = NA, color = "black", linewidth = 1),
+								  legend.position = "right")
+			}else{
+				g <- ggplot(plot_data, aes(x = pathway_label, y = -log10(.data[[color_by]]), 
+								fill = .data[[color_by]])) +
+						geom_bar(stat = "identity") +
+						scale_fill_gradient(low = color_gradient_low, high = color_gradient_high) +
+						coord_flip() +
+						labs(x = NULL, y = paste0("-log10(", color_by, ")"), fill = color_by) +
+						theme_bw() +
+						theme(axis.text.x = element_text(size = 12, colour = "black"),
+								  axis.text.y = element_text(size = 10),
+								  panel.grid = element_blank(),
+								  panel.border = element_rect(fill = NA, color = "black", linewidth = 1),
+								  legend.position = "right")
+			}
+
+			g
 		}
 	),
 	private = list(

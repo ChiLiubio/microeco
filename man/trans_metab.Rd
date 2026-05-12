@@ -62,6 +62,17 @@ t1$cal_pathway()
 target <- rownames(t1$data_metab$otu_table)[1:10]
 t1$cal_pathway_enrich(target_metabs = target)
 }
+
+## ------------------------------------------------
+## Method `trans_metab$plot_pathway_enrich`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_pathway()
+target <- rownames(t1$data_metab$otu_table)[1:10]
+t1$cal_pathway_enrich(target_metabs = target)
+t1$plot_pathway_enrich()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -72,6 +83,7 @@ t1$cal_pathway_enrich(target_metabs = target)
 \item \href{#method-trans_metab-cal_origin_network}{\code{trans_metab$cal_origin_network()}}
 \item \href{#method-trans_metab-cal_pathway}{\code{trans_metab$cal_pathway()}}
 \item \href{#method-trans_metab-cal_pathway_enrich}{\code{trans_metab$cal_pathway_enrich()}}
+\item \href{#method-trans_metab-plot_pathway_enrich}{\code{trans_metab$plot_pathway_enrich()}}
 \item \href{#method-trans_metab-clone}{\code{trans_metab$clone()}}
 }
 }
@@ -316,6 +328,59 @@ If NULL, will use all metabolites in the pathway mapping result.}
 t1$cal_pathway()
 target <- rownames(t1$data_metab$otu_table)[1:10]
 t1$cal_pathway_enrich(target_metabs = target)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_metab-plot_pathway_enrich"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_metab-plot_pathway_enrich}{}}}
+\subsection{Method \code{plot_pathway_enrich()}}{
+Visualize pathway enrichment analysis results.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_metab$plot_pathway_enrich(
+  plot_type = c("bubble", "bar")[1],
+  top_n = 20,
+  color_by = "p_adjust",
+  size_by = "metab_count",
+  order_by = "p_adjust",
+  color_gradient_low = "#132B43",
+  color_gradient_high = "#56B1F7"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot_type}}{default "bubble"; plot type, "bubble" or "bar".}
+
+\item{\code{top_n}}{default 20; number of top pathways to display.}
+
+\item{\code{color_by}}{default "p_adjust"; column name for color mapping.}
+
+\item{\code{size_by}}{default "metab_count"; column name for size mapping (only for bubble plot).}
+
+\item{\code{order_by}}{default "p_adjust"; column name for ordering pathways.}
+
+\item{\code{color_gradient_low}}{default "#132B43"; color for low values (e.g., high p-value = not significant).}
+
+\item{\code{color_gradient_high}}{default "#56B1F7"; color for high values (e.g., low p-value = significant).}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_pathway()
+target <- rownames(t1$data_metab$otu_table)[1:10]
+t1$cal_pathway_enrich(target_metabs = target)
+t1$plot_pathway_enrich()
 }
 }
 \if{html}{\out{</div>}}
