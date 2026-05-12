@@ -40,6 +40,28 @@ t1$cal_origin(match_col = c("names", "HMDB_ID", "KEGG_ID"))
 \dontrun{
 t1$cal_origin_network()
 }
+
+## ------------------------------------------------
+## Method `trans_metab$cal_pathway`
+## ------------------------------------------------
+
+\dontrun{
+# KEGG pathway mapping (online)
+t1$cal_pathway()
+
+# KEGG pathway mapping (local database)
+t1$cal_pathway(db_type = "kegg", db_path = "kegg_pathway_db.RData")
+}
+
+## ------------------------------------------------
+## Method `trans_metab$cal_pathway_enrich`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_pathway()
+target <- rownames(t1$data_metab$otu_table)[1:10]
+t1$cal_pathway_enrich(target_metabs = target)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -48,6 +70,8 @@ t1$cal_origin_network()
 \item \href{#method-trans_metab-cal_match}{\code{trans_metab$cal_match()}}
 \item \href{#method-trans_metab-cal_origin}{\code{trans_metab$cal_origin()}}
 \item \href{#method-trans_metab-cal_origin_network}{\code{trans_metab$cal_origin_network()}}
+\item \href{#method-trans_metab-cal_pathway}{\code{trans_metab$cal_pathway()}}
+\item \href{#method-trans_metab-cal_pathway_enrich}{\code{trans_metab$cal_pathway_enrich()}}
 \item \href{#method-trans_metab-clone}{\code{trans_metab$clone()}}
 }
 }
@@ -192,6 +216,106 @@ Metabolite-bacteria network based on the \code{res_origin_list} data from the \c
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$cal_origin_network()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_metab-cal_pathway"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_metab-cal_pathway}{}}}
+\subsection{Method \code{cal_pathway()}}{
+Map metabolites to pathways based on a database (KEGG, MetaCyc, Reactome, or custom).
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_pathway(
+  db_type = c("kegg", "metacyc", "reactome", "custom")[1],
+  db_path = NULL,
+  id_type = NULL,
+  save_db = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{db_type}}{default "kegg"; pathway database type, one of "kegg", "metacyc", "reactome", "custom".}
+
+\item{\code{db_path}}{default NULL; pathway database file path (RData format). 
+For KEGG: if NULL, will attempt to fetch from KEGG REST API.
+For MetaCyc/Reactome/Custom: must provide local database file path.}
+
+\item{\code{id_type}}{default NULL; column name in tax_table containing metabolite IDs.
+If NULL, will be automatically set based on db_type: "KEGG_ID" for kegg, "METACYC_ID" for metacyc, 
+"REACTOME_ID" for reactome, "CUSTOM_ID" for custom.}
+
+\item{\code{save_db}}{default FALSE; whether save the fetched database (KEGG) to the local folder.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_pathway_map} (data.frame) stored in the object. 
+   Contains columns: pathway_id, pathway_name, metab_id, metab_name.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+# KEGG pathway mapping (online)
+t1$cal_pathway()
+
+# KEGG pathway mapping (local database)
+t1$cal_pathway(db_type = "kegg", db_path = "kegg_pathway_db.RData")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_metab-cal_pathway_enrich"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_metab-cal_pathway_enrich}{}}}
+\subsection{Method \code{cal_pathway_enrich()}}{
+Perform pathway enrichment analysis for target metabolites using Fisher's exact test.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_pathway_enrich(
+  target_metabs = NULL,
+  background_metabs = NULL,
+  p_adjust_method = "BH",
+  p_cutoff = 0.05,
+  min_metab_count = 3
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{target_metabs}}{character vector; target metabolite names (row names in tax_table), 
+e.g., differential metabolites. If NULL, will use all metabolites in the pathway mapping.}
+
+\item{\code{background_metabs}}{character vector; background metabolite names (row names in tax_table). 
+If NULL, will use all metabolites in the pathway mapping result.}
+
+\item{\code{p_adjust_method}}{default "BH"; p-value adjustment method. See \code{p.adjust} function.}
+
+\item{\code{p_cutoff}}{default 0.05; significance threshold for adjusted p-value.}
+
+\item{\code{min_metab_count}}{default 3; minimum number of background metabolites in a pathway for enrichment test.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_pathway_enrich} data.frame stored in the object.
+   Contains: pathway_id, pathway_name, metab_count, background_count, 
+   enrichment_factor, p_value, p_adjust, significant.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_pathway()
+target <- rownames(t1$data_metab$otu_table)[1:10]
+t1$cal_pathway_enrich(target_metabs = target)
 }
 }
 \if{html}{\out{</div>}}
