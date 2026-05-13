@@ -73,6 +73,17 @@ target <- rownames(t1$data_metab$otu_table)[1:10]
 t1$cal_pathway_enrich(target_metabs = target)
 t1$plot_pathway_enrich()
 }
+
+## ------------------------------------------------
+## Method `trans_metab$cal_pathway_network`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_pathway()
+target <- rownames(t1$data_metab$otu_table)[1:50]
+t1$cal_pathway_enrich(target_metabs = target)
+net <- t1$cal_pathway_network()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -84,6 +95,7 @@ t1$plot_pathway_enrich()
 \item \href{#method-trans_metab-cal_pathway}{\code{trans_metab$cal_pathway()}}
 \item \href{#method-trans_metab-cal_pathway_enrich}{\code{trans_metab$cal_pathway_enrich()}}
 \item \href{#method-trans_metab-plot_pathway_enrich}{\code{trans_metab$plot_pathway_enrich()}}
+\item \href{#method-trans_metab-cal_pathway_network}{\code{trans_metab$cal_pathway_network()}}
 \item \href{#method-trans_metab-clone}{\code{trans_metab$clone()}}
 }
 }
@@ -381,6 +393,47 @@ t1$cal_pathway()
 target <- rownames(t1$data_metab$otu_table)[1:10]
 t1$cal_pathway_enrich(target_metabs = target)
 t1$plot_pathway_enrich()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_metab-cal_pathway_network"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_metab-cal_pathway_network}{}}}
+\subsection{Method \code{cal_pathway_network()}}{
+Build metabolite-pathway network based on pathway mapping and enrichment results.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_metab$cal_pathway_network(
+  significant_only = TRUE,
+  p_cutoff = 0.05,
+  use_enrichment = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{significant_only}}{default TRUE; whether to use only significant enriched pathways.}
+
+\item{\code{p_cutoff}}{default 0.05; p-value cutoff for significant pathways (used only when significant_only = TRUE).}
+
+\item{\code{use_enrichment}}{default TRUE; whether to require enrichment results. If FALSE, build network from all pathway mappings.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{igraph} object representing metabolite-pathway bipartite network.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_pathway()
+target <- rownames(t1$data_metab$otu_table)[1:50]
+t1$cal_pathway_enrich(target_metabs = target)
+net <- t1$cal_pathway_network()
 }
 }
 \if{html}{\out{</div>}}

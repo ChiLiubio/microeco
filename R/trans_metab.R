@@ -636,6 +636,75 @@ trans_metab <- R6Class(classname = "trans_metab",
 			}
 
 			g
+		},
+		#' @description
+		#' Build metabolite-pathway network based on pathway mapping and enrichment results.
+		#' 
+		#' @param significant_only default TRUE; whether to use only significant enriched pathways.
+		#' @param p_cutoff default 0.05; p-value cutoff for significant pathways (used only when significant_only = TRUE).
+		#' @param use_enrichment default TRUE; whether to require enrichment results. If FALSE, build network from all pathway mappings.
+		#' @return \code{igraph} object representing metabolite-pathway bipartite network.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_pathway()
+		#' target <- rownames(t1$data_metab$otu_table)[1:50]
+		#' t1$cal_pathway_enrich(target_metabs = target)
+		#' net <- t1$cal_pathway_network()
+		#' }
+		cal_pathway_network = function(
+			significant_only = TRUE,
+			p_cutoff = 0.05,
+			use_enrichment = TRUE
+			){
+			res_pathway_map <- self$res_pathway_map
+
+			if(is.null(res_pathway_map)){
+				stop("Please first run the cal_pathway function !")
+			}
+
+			if(use_enrichment || significant_only){
+				res_enrich <- self$res_pathway_enrich
+				if(is.null(res_enrich) || nrow(res_enrich) == 0){
+					stop("No enrichment results found. Please first run the cal_pathway_enrich function, or set use_enrichment = FALSE !")
+				}
+			}
+
+			if(significant_only && use_enrichment){
+				if("significant" %in% colnames(res_enrich)){
+					sig_pathways <- res_enrich[res_enrich$significant == TRUE, "pathway_id"]
+				}else{
+					sig_pathways <- res_enrich[res_enrich$p_adjust <= p_cutoff, "pathway_id"]
+				}
+				if(length(sig_pathways) == 0){
+					stop("No significant pathways found with p_cutoff = ", p_cutoff, " !")
+				}
+				res_pathway_map <- res_pathway_map[res_pathway_map$pathway_id %in% sig_pathways, ]
+			}
+
+			if(nrow(res_pathway_map) == 0){
+				stop("No metabolite-pathway mappings found !")
+			}
+
+			if(!requireNamespace("igraph", quietly = TRUE)){
+				stop("Package 'igraph' is required but not installed !")
+			}
+
+			edges <- data.frame(
+					from = res_pathway_map$metab_name,
+					to = paste0(res_pathway_map$pathway_id, ": ", res_pathway_map$pathway_name),
+					stringsAsFactors = FALSE
+			)
+
+			g <- igraph::graph_from_data_frame(edges, directed = FALSE)
+
+			metabolites <- unique(res_pathway_map$metab_name)
+			igraph::V(g)$type <- ifelse(igraph::V(g)$name %in% metabolites, "metabolite", "pathway")
+
+			message("Network constructed: ", igraph::ecount(g), " edges, ", igraph::vcount(g), " nodes ...")
+			message("Metabolites: ", sum(igraph::V(g)$type == "metabolite"), 
+					", Pathways: ", sum(igraph::V(g)$type == "pathway"), " ...")
+
+			g
 		}
 	),
 	private = list(
