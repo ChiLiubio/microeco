@@ -268,14 +268,14 @@ trans_metab <- R6Class(classname = "trans_metab",
 			edges <- do.call(rbind, edges_list)
 
 			# directed network
-			g <- igraph::graph_from_edgelist(as.matrix(edges[, c("from", "to")]), directed = TRUE)
+			net <- igraph::graph_from_edgelist(as.matrix(edges[, c("from", "to")]), directed = TRUE)
 
 			# add attributes - use the metabolite names as reference for type assignment
 			metabolite_names <- names(res_origin_list)
-			all_nodes <- igraph::V(g)$name
-			igraph::V(g)$type <- ifelse(all_nodes %in% metabolite_names, "metabolite", "bacteria")
+			all_nodes <- igraph::V(net)$name
+			igraph::V(net)$type <- ifelse(all_nodes %in% metabolite_names, "metabolite", "bacteria")
 
-			g
+			net
 		},
 		#' @description
 		#' Map metabolites to pathways based on a database (KEGG, MetaCyc, Reactome, or custom).
@@ -299,103 +299,103 @@ trans_metab <- R6Class(classname = "trans_metab",
 		#' t1$cal_pathway(db_type = "kegg", db_path = "kegg_pathway_db.RData")
 		#' }
 		cal_pathway = function(
-				db_type = c("kegg", "metacyc", "reactome", "custom")[1],
-				db_path = NULL,
-				id_type = NULL,
-				save_db = FALSE
-				){
-				data_metab <- self$data_metab
-				if(is.null(data_metab)){
-						stop("data_metab is not found in the object !")
-				}
-				if(is.null(data_metab$tax_table)){
-						stop("tax_table is not found in data_metab !")
-				}
+			db_type = c("kegg", "metacyc", "reactome", "custom")[1],
+			db_path = NULL,
+			id_type = NULL,
+			save_db = FALSE
+			){
+			data_metab <- self$data_metab
+			if(is.null(data_metab)){
+					stop("data_metab is not found in the object !")
+			}
+			if(is.null(data_metab$tax_table)){
+					stop("tax_table is not found in data_metab !")
+			}
 
-				db_type <- match.arg(db_type, c("kegg", "metacyc", "reactome", "custom"))
+			db_type <- match.arg(db_type, c("kegg", "metacyc", "reactome", "custom"))
 
-				if(is.null(id_type)){
-						id_type <- switch(db_type,
-								kegg = "KEGG_ID",
-								metacyc = "METACYC_ID",
-								reactome = "REACTOME_ID",
-								custom = "CUSTOM_ID"
-						)
-				}
-				if(! id_type %in% colnames(data_metab$tax_table)){
-						stop(id_type, " column is not found in data_metab$tax_table !")
-				}
+			if(is.null(id_type)){
+					id_type <- switch(db_type,
+							kegg = "KEGG_ID",
+							metacyc = "METACYC_ID",
+							reactome = "REACTOME_ID",
+							custom = "CUSTOM_ID"
+					)
+			}
+			if(! id_type %in% colnames(data_metab$tax_table)){
+					stop(id_type, " column is not found in data_metab$tax_table !")
+			}
 
-				metab_ids <- data_metab$tax_table[, id_type]
-				metab_names <- rownames(data_metab$tax_table)
+			metab_ids <- data_metab$tax_table[, id_type]
+			metab_names <- rownames(data_metab$tax_table)
 
-				if(! is.null(db_path)){
-						if(! file.exists(db_path)){
-								stop("Database file not found: ", db_path)
-						}
-						message("Loading pathway database from local file ...")
-						db_data <- private$load_pathway_db(db_path, db_type)
-				}else{
-						if(db_type == "kegg"){
-								message("Fetching KEGG pathway information from KEGG REST API ...")
-								db_data <- private$fetch_kegg_pathways()
-								if(save_db){
-									save(db_data, file = "KEGG_pathway_db.RData")
-									message("Save KEGG pathway data to the folder: KEGG_pathway_db.RData ...")
-								}
-						}else{
-								stop(db_type, " database requires local file. Please provide db_path parameter !")
-						}
-				}
+			if(! is.null(db_path)){
+					if(! file.exists(db_path)){
+							stop("Database file not found: ", db_path)
+					}
+					message("Loading pathway database from local file ...")
+					db_data <- private$load_pathway_db(db_path, db_type)
+			}else{
+					if(db_type == "kegg"){
+							message("Fetching KEGG pathway information from KEGG REST API ...")
+							db_data <- private$fetch_kegg_pathways()
+							if(save_db){
+								save(db_data, file = "KEGG_pathway_db.RData")
+								message("Save KEGG pathway data to the folder: KEGG_pathway_db.RData ...")
+							}
+					}else{
+							stop(db_type, " database requires local file. Please provide db_path parameter !")
+					}
+			}
 
-				pathways <- db_data$pathways
-				metab_to_pathway <- db_data$metab_to_pathway
+			pathways <- db_data$pathways
+			metab_to_pathway <- db_data$metab_to_pathway
 
-				metab_valid_ids <- metab_ids[! is.na(metab_ids) & metab_ids != ""]
-				metab_valid_names <- metab_names[! is.na(metab_ids) & metab_ids != ""]
+			metab_valid_ids <- metab_ids[! is.na(metab_ids) & metab_ids != ""]
+			metab_valid_names <- metab_names[! is.na(metab_ids) & metab_ids != ""]
 
-				# Use vectorized approach for efficiency instead of row-by-row data.frame creation
-				res_pathway_id <- character()
-				res_pathway_name <- character()
-				res_metab_id <- character()
-				res_metab_name <- character()
+			# Use vectorized approach for efficiency instead of row-by-row data.frame creation
+			res_pathway_id <- character()
+			res_pathway_name <- character()
+			res_metab_id <- character()
+			res_metab_name <- character()
 
-				for(i in seq_along(metab_valid_ids)){
-						metab_id <- metab_valid_ids[i]
-						metab_name <- metab_valid_names[i]
-						
-						pathway_ids <- metab_to_pathway[[metab_id]]
-						if(! is.null(pathway_ids) && length(pathway_ids) > 0){
-								# Only keep pathway_ids that exist in the pathways dictionary
-								valid_pids <- pathway_ids[pathway_ids %in% names(pathways)]
-								if(length(valid_pids) > 0){
-										res_pathway_id <- c(res_pathway_id, valid_pids)
-										res_pathway_name <- c(res_pathway_name, unlist(pathways[valid_pids]))
-										res_metab_id <- c(res_metab_id, rep(metab_id, length(valid_pids)))
-										res_metab_name <- c(res_metab_name, rep(metab_name, length(valid_pids)))
-								}
-						}
-				}
+			for(i in seq_along(metab_valid_ids)){
+					metab_id <- metab_valid_ids[i]
+					metab_name <- metab_valid_names[i]
+					
+					pathway_ids <- metab_to_pathway[[metab_id]]
+					if(! is.null(pathway_ids) && length(pathway_ids) > 0){
+							# Only keep pathway_ids that exist in the pathways dictionary
+							valid_pids <- pathway_ids[pathway_ids %in% names(pathways)]
+							if(length(valid_pids) > 0){
+									res_pathway_id <- c(res_pathway_id, valid_pids)
+									res_pathway_name <- c(res_pathway_name, unlist(pathways[valid_pids]))
+									res_metab_id <- c(res_metab_id, rep(metab_id, length(valid_pids)))
+									res_metab_name <- c(res_metab_name, rep(metab_name, length(valid_pids)))
+							}
+					}
+			}
 
-				if(length(res_pathway_id) == 0){
-						stop("No pathway mapping found for the given metabolites. Please check ", id_type, " column !")
-				}
+			if(length(res_pathway_id) == 0){
+					stop("No pathway mapping found for the given metabolites. Please check ", id_type, " column !")
+			}
 
-				res_pathway_map <- data.frame(
-						pathway_id = res_pathway_id,
-						pathway_name = res_pathway_name,
-						metab_id = res_metab_id,
-						metab_name = res_metab_name,
-						stringsAsFactors = FALSE
-				)
+			res_pathway_map <- data.frame(
+					pathway_id = res_pathway_id,
+					pathway_name = res_pathway_name,
+					metab_id = res_metab_id,
+					metab_name = res_metab_name,
+					stringsAsFactors = FALSE
+			)
 
-				self$res_pathway_map <- res_pathway_map
-				self$param$pathway <- list(db_type = db_type, id_type = id_type, db_path = db_path)
-				message("Pathway mapping result is stored in object$res_pathway_map ...")
-				message("Total ", nrow(res_pathway_map), " metabolite-pathway mappings found for ", 
-						length(unique(res_metab_name)), " metabolites across ", 
-						length(unique(res_pathway_id)), " pathways ...")
-				invisible(self)
+			self$res_pathway_map <- res_pathway_map
+			self$param$pathway <- list(db_type = db_type, id_type = id_type, db_path = db_path)
+			message("Pathway mapping result is stored in object$res_pathway_map ...")
+			message("Total ", nrow(res_pathway_map), " metabolite-pathway mappings found for ", 
+					length(unique(res_metab_name)), " metabolites across ", 
+					length(unique(res_pathway_id)), " pathways ...")
+			invisible(self)
 		},
 		#' @description
 		#' Perform pathway enrichment analysis for target metabolites using Fisher's exact test.
@@ -695,16 +695,16 @@ trans_metab <- R6Class(classname = "trans_metab",
 					stringsAsFactors = FALSE
 			)
 
-			g <- igraph::graph_from_data_frame(edges, directed = FALSE)
+			binet <- igraph::graph_from_data_frame(edges, directed = FALSE)
 
 			metabolites <- unique(res_pathway_map$metab_name)
-			igraph::V(g)$type <- ifelse(igraph::V(g)$name %in% metabolites, "metabolite", "pathway")
+			igraph::V(binet)$type <- ifelse(igraph::V(binet)$name %in% metabolites, "metabolite", "pathway")
 
-			message("Network constructed: ", igraph::ecount(g), " edges, ", igraph::vcount(g), " nodes ...")
-			message("Metabolites: ", sum(igraph::V(g)$type == "metabolite"), 
-					", Pathways: ", sum(igraph::V(g)$type == "pathway"), " ...")
+			message("Network constructed: ", igraph::ecount(binet), " edges, ", igraph::vcount(binet), " nodes ...")
+			message("Metabolites: ", sum(igraph::V(binet)$type == "metabolite"), 
+					", Pathways: ", sum(igraph::V(binet)$type == "pathway"), " ...")
 
-			g
+			binet
 		}
 	),
 	private = list(
@@ -712,79 +712,79 @@ trans_metab <- R6Class(classname = "trans_metab",
 		# file_path path to the RData file.
 		# expected_var optional; name hint for the expected variable (used in error messages).
 		load_rdata = function(file_path, expected_var = NULL){
-				env <- new.env()
-				load(file_path, envir = env)
-				var_names <- ls(envir = env)
-				if(length(var_names) == 0){
-						stop("No objects found in the RData file: ", file_path)
-				}
-				if(length(var_names) > 1){
-						message("Note: Multiple objects found in RData file. Using the first one: ", var_names[1], " ...")
-				}
-				get(var_names[1], envir = env)
+			env <- new.env()
+			load(file_path, envir = env)
+			var_names <- ls(envir = env)
+			if(length(var_names) == 0){
+					stop("No objects found in the RData file: ", file_path)
+			}
+			if(length(var_names) > 1){
+					message("Note: Multiple objects found in RData file. Using the first one: ", var_names[1], " ...")
+			}
+			get(var_names[1], envir = env)
 		},
 		load_pathway_db = function(db_path, db_type){
-				db_data <- private$load_rdata(db_path)
-				
-				required_fields <- c("pathways", "metab_to_pathway")
-				if(!all(required_fields %in% names(db_data))){
-						stop("Invalid database format. Required fields: ", 
-							 paste(required_fields, collapse = ", "))
-				}
-				
-				message("Loaded ", db_type, " database with ", 
-						length(db_data$pathways), " pathways ...")
-				
-				db_data
+			db_data <- private$load_rdata(db_path)
+			
+			required_fields <- c("pathways", "metab_to_pathway")
+			if(!all(required_fields %in% names(db_data))){
+					stop("Invalid database format. Required fields: ", 
+						 paste(required_fields, collapse = ", "))
+			}
+			
+			message("Loaded ", db_type, " database with ", 
+					length(db_data$pathways), " pathways ...")
+			
+			db_data
 		},
 		fetch_kegg_pathways = function(){
-				message("Attempting to fetch KEGG compound and pathway data via REST API ...")
-				message("Note: This may take several minutes for the full KEGG database ...")
-				
-				kegg_pathways <- list()
-				metab_to_pathway <- list()
-				
-				tryCatch({
-						# Fetch pathways
-						pathways_url <- "https://rest.kegg.jp/list/pathway"
-						pathways_raw <- readLines(pathways_url, warn = FALSE)
-						
-						pathway_names <- list()
-						for(line in pathways_raw){
-								parts <- strsplit(line, "\t")[[1]]
-								if(length(parts) >= 2){
-										pid <- gsub("path:map", "map", parts[1])
-										pname <- parts[2]
-										pathway_names[[pid]] <- pname
-								}
-						}
-						message("Successfully retrieved ", length(pathway_names), " KEGG pathways ...")
-						
-						# Fetch all compound-pathway relationships via KEGG link API
-						message("Fetching compound-pathway mapping relationships from KEGG ...")
-						link_url <- "https://rest.kegg.jp/link/pathway/cpd"
-						link_raw <- readLines(link_url, warn = FALSE)
-						
-						for(line in link_raw){
-								parts <- strsplit(line, "\t")[[1]]
-								if(length(parts) >= 2){
-										if(grepl("path:map", parts[2])){
-												cid <- gsub("cpd:", "", parts[1])
-												pid <- gsub("path:map", "map", parts[2])
-												
-												metab_to_pathway[[cid]] <- c(metab_to_pathway[[cid]], pid)
-										}
-								}
-						}
-						
-						message("Successfully mapped ", length(metab_to_pathway), " compounds to pathways ...")
-						
-				}, error = function(e){
-						stop("Failed to fetch KEGG data: ", conditionMessage(e), 
-							 "\nPlease download KEGG database and provide local file path via db_path parameter !")
-				})
-				
-				list(pathways = pathway_names, metab_to_pathway = metab_to_pathway)
+			message("Attempting to fetch KEGG compound and pathway data via REST API ...")
+			message("Note: This may take several minutes for the full KEGG database ...")
+			
+			kegg_pathways <- list()
+			metab_to_pathway <- list()
+			
+			tryCatch({
+					# Fetch pathways
+					pathways_url <- "https://rest.kegg.jp/list/pathway"
+					pathways_raw <- readLines(pathways_url, warn = FALSE)
+					
+					pathway_names <- list()
+					for(line in pathways_raw){
+							parts <- strsplit(line, "\t")[[1]]
+							if(length(parts) >= 2){
+									pid <- gsub("path:map", "map", parts[1])
+									pname <- parts[2]
+									pathway_names[[pid]] <- pname
+							}
+					}
+					message("Successfully retrieved ", length(pathway_names), " KEGG pathways ...")
+					
+					# Fetch all compound-pathway relationships via KEGG link API
+					message("Fetching compound-pathway mapping relationships from KEGG ...")
+					link_url <- "https://rest.kegg.jp/link/pathway/cpd"
+					link_raw <- readLines(link_url, warn = FALSE)
+					
+					for(line in link_raw){
+							parts <- strsplit(line, "\t")[[1]]
+							if(length(parts) >= 2){
+									if(grepl("path:map", parts[2])){
+											cid <- gsub("cpd:", "", parts[1])
+											pid <- gsub("path:map", "map", parts[2])
+											
+											metab_to_pathway[[cid]] <- c(metab_to_pathway[[cid]], pid)
+									}
+							}
+					}
+					
+					message("Successfully mapped ", length(metab_to_pathway), " compounds to pathways ...")
+					
+			}, error = function(e){
+					stop("Failed to fetch KEGG data: ", conditionMessage(e), 
+						 "\nPlease download KEGG database and provide local file path via db_path parameter !")
+			})
+			
+			list(pathways = pathway_names, metab_to_pathway = metab_to_pathway)
 		},
 		clean_name = function(input) {
 			output <- input %>%
