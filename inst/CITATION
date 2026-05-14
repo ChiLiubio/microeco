@@ -2,7 +2,7 @@ citHeader("To cite microeco in publications, please use:")
 
 
 bibentry(bibtype = "Article",
-         textVersion = "Chi Liu, Xiangzhen Li, Felipe R. P. Mansoldo, Tong Chen, Fanzheng Meng, Ruixiang Tang, Siyu Zhou, Qinghua Yang, Ruixin Shao, Minjie Yao. 2026. microeco 2: A comprehensive R package for downstream analysis of microbiome omics data. iMeta 5: e70132. https://doi.org/10.1002/imt2.70132",
+         textVersion = "Chi Liu, Xiangzhen Li, Felipe R. P. Mansoldo, Tong Chen, Fanzheng Meng, Ruixiang Tang, Siyu Zhou, Qinghua Yang, Ruixin Shao, Minjie Yao. microeco 2: A comprehensive R package for downstream analysis of microbiome omics data. iMeta, 2026, 5: e70132. https://doi.org/10.1002/imt2.70132",
          title = "microeco 2: A comprehensive R package for downstream analysis of microbiome omics data",
          author = c("Chi Liu", "Xiangzhen Li", "Felipe R. P. Mansoldo", "Tong Chen", "Fanzheng Meng", "Ruixiang Tang", "Siyu Zhou", "Qinghua Yang", "Ruixin Shao", "Minjie Yao"),
          year = "2026",
