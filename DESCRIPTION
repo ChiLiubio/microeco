@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 2.1.1
+Version: 2.2.1
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
               person("Felipe", "R. P. Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
               person("Minjie", "Yao", role = "ctb", email = "yaomj@fafu.edu.cn"),
@@ -9,7 +9,7 @@ Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@12
 			  )
 Author: Chi Liu [aut, cre], Felipe R. P. Mansoldo [ctb], Minjie Yao [ctb], Xiangzhen Li [ctb]
 Maintainer: Chi Liu <liuchi0426@126.com>
-Description: A series of data analysis approaches for microbiome omics data based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity analysis, beta diversity analysis, differential abundance test, null model analysis, network analysis, machine learning, environmental data analysis and functional analysis.
+Description: A series of data analysis approaches for microbiome data based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity analysis, beta diversity analysis, differential abundance test, null model analysis, network analysis, machine learning, environmental data analysis and functional analysis.
 URL: https://github.com/ChiLiubio/microeco
 Depends: R (>= 3.5.0)
 Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2 (>= 3.5.0), RColorBrewer, reshape2, igraph (>= 2.0.0), lifecycle
@@ -18,7 +18,7 @@ License: GPL-3
 LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2026-04-06
+Packaged: 2026-05-14
 Repository: CRAN
-Date/Publication: 2026-04-10
+Date/Publication: 2026-05-15
 RoxygenNote: 7.3.3
