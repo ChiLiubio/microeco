@@ -201,7 +201,7 @@ class(m1$beta_diversity)
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{microtable$new(
-  otu_table,
+  otu_table = NULL,
   sample_table = NULL,
   tax_table = NULL,
   phylo_tree = NULL,
@@ -213,7 +213,7 @@ class(m1$beta_diversity)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{otu_table}}{data.frame class; Feature abundance table; row names must be feature (e.g. OTUs/ASVs/species/genes) names; column names are sample names.}
+\item{\code{otu_table}}{default NULL; data.frame class; Feature abundance table; row names must be feature (e.g. OTUs/ASVs/species/genes) names; column names are sample names.}
 
 \item{\code{sample_table}}{default NULL; data.frame class; Sample information table (optional); row names should be sample names; columns are sample metadata; 
 If not provided, the function can generate a table automatically according to the sample names in the input \code{otu_table}.}

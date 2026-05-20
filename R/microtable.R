@@ -13,7 +13,7 @@
 #' @export
 microtable <- R6Class(classname = "microtable",
 	public = list(
-		#' @param otu_table data.frame class; Feature abundance table; row names must be feature (e.g. OTUs/ASVs/species/genes) names; column names are sample names.
+		#' @param otu_table default NULL; data.frame class; Feature abundance table; row names must be feature (e.g. OTUs/ASVs/species/genes) names; column names are sample names.
 		#' @param sample_table default NULL; data.frame class; Sample information table (optional); row names should be sample names; columns are sample metadata; 
 		#' 	 If not provided, the function can generate a table automatically according to the sample names in the input \code{otu_table}.
 		#' @param tax_table default NULL; data.frame class; Taxonomic information table (optional); row names are feature names; column names are taxonomic ranks.
@@ -47,19 +47,24 @@ microtable <- R6Class(classname = "microtable",
 		#'   tax_table = taxonomy_table_16S, phylo_tree = phylo_tree_16S)
 		#' # trim each data in the object
 		#' m1$tidy_dataset()
-		initialize = function(otu_table, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, rep_fasta = NULL, auto_tidy = FALSE)
+		initialize = function(otu_table = NULL, sample_table = NULL, tax_table = NULL, phylo_tree = NULL, rep_fasta = NULL, auto_tidy = FALSE)
 			{
-			if(missing(otu_table)){
-				stop("otu_table must be provided!")
+			if(is.null(otu_table)){
+				message("No otu_table provided ...")
+			}else{
+				private$check_df(otu_table, "otu_table")
+				private$check_tbldf(otu_table, "otu_table")
+				otu_table <- private$check_abund_table(otu_table)
+				self$otu_table <- otu_table
 			}
-			private$check_df(otu_table, "otu_table")
-			private$check_tbldf(otu_table, "otu_table")
-			otu_table <- private$check_abund_table(otu_table)
-			self$otu_table <- otu_table
 			if(is.null(sample_table)){
-				message("No sample_table provided, automatically use colnames in otu_table to create one ...")
-				self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% 
-					`row.names<-`(.$SampleID)
+				if(is.null(otu_table)){
+					message("No sample_table provided ...")
+				}else{
+					message("No sample_table provided, automatically use column names in otu_table to create one ...")
+					self$sample_table <- data.frame(SampleID = colnames(otu_table), Group = colnames(otu_table)) %>% 
+						`row.names<-`(.$SampleID)
+				}
 			}else{
 				private$check_df(sample_table, "sample_table")
 				private$check_tbldf(sample_table, "sample_table")
@@ -247,9 +252,11 @@ microtable <- R6Class(classname = "microtable",
 		#' @examples
 		#' m1$tidy_dataset(main_data = TRUE)
 		tidy_dataset = function(main_data = FALSE){
-			self <- private$tidy_samples(self)
-			# check again the abundance for the case that sample filtering leads to 0 abundance of some features
-			self$otu_table <- private$check_abund_table(self$otu_table)
+			if(!is.null(self$otu_table)){
+				self <- private$tidy_samples(self)
+				# check again the abundance for the case that sample filtering leads to 0 abundance of some features
+				self$otu_table <- private$check_abund_table(self$otu_table)
+			}
 			taxa_list <- list(rownames(self$otu_table), rownames(self$tax_table), self$phylo_tree$tip.label) %>% 
 				.[!unlist(lapply(., is.null))]
 			taxa_names <- Reduce(intersect, taxa_list)
@@ -260,7 +267,9 @@ microtable <- R6Class(classname = "microtable",
 					stop("No same feature name found among otu_table, tax_table and phylo_tree! Please check feature names in those objects!")
 				}
 			}
-			self$otu_table %<>% .[taxa_names, , drop = FALSE]
+			if(!is.null(self$otu_table)){
+				self$otu_table %<>% .[taxa_names, , drop = FALSE]
+			}
 			if(!is.null(self$tax_table)){
 				self$tax_table %<>% .[taxa_names, , drop = FALSE]
 			}
@@ -279,7 +288,9 @@ microtable <- R6Class(classname = "microtable",
 				self$rep_fasta %<>% .[taxa_names]
 			}
 			# check again whether a sample has 0 abundance after feature filtering
-			self <- private$tidy_samples(self)
+			if(!is.null(self$otu_table)){
+				self <- private$tidy_samples(self)
+			}
 			if(!main_data){
 				sample_names <- rownames(self$sample_table)
 				if(!is.null(self$taxa_abund)){
@@ -869,8 +880,8 @@ microtable <- R6Class(classname = "microtable",
 		#' Print the microtable object.
 		print = function(){
 			cat("microtable-class object:\n")
-			cat(paste("sample_table have", nrow(self$sample_table), "rows and", ncol(self$sample_table), "columns\n"))
-			cat(paste("otu_table have", nrow(self$otu_table), "rows and", ncol(self$otu_table), "columns\n"))
+			if(!is.null(self$sample_table)) cat(paste("sample_table have", nrow(self$sample_table), "rows and", ncol(self$sample_table), "columns\n"))
+			if(!is.null(self$otu_table)) cat(paste("otu_table have", nrow(self$otu_table), "rows and", ncol(self$otu_table), "columns\n"))
 			if(!is.null(self$tax_table)) cat(paste("tax_table have", nrow(self$tax_table), "rows and", ncol(self$tax_table), "columns\n"))
 			if(!is.null(self$phylo_tree)) cat(paste("phylo_tree have", length(self$phylo_tree$tip.label), "tips\n"))
 			if(!is.null(self$rep_fasta)) cat(paste("rep_fasta have", length(self$rep_fasta), "sequences\n"))
