@@ -26,7 +26,7 @@ Therefore, we developed the R microeco package (abbreviated and pronounced as **
   + Network analysis
   + Environmental data analysis
   + Functional prediction
-  + Metabolite origin inference
+  + Metabolites analysis
 
 ## Install R/RStudio
 If you do not already have R/RStudio installed, follow these steps:
