@@ -4,7 +4,7 @@
 \alias{trans_metab}
 \title{Create \code{trans_metab} object for metabolite analysis.}
 \description{
-This class is a wrapper for a series of metabolite analysis, including origin inference.
+This class is a wrapper for a series of metabolite analysis, including origin inference and pathway enrichment.
 }
 \examples{
 
