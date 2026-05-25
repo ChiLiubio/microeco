@@ -11,8 +11,8 @@ Author: Chi Liu [aut, cre], Felipe R. P. Mansoldo [ctb], Minjie Yao [ctb], Xiang
 Maintainer: Chi Liu <liuchi0426@126.com>
 Description: A series of data analysis approaches for microbiome data based on the R6 class. The classes are designed for data preprocessing, taxa abundance plotting, alpha diversity analysis, beta diversity analysis, differential abundance test, null model analysis, network analysis, machine learning, environmental data analysis and functional analysis.
 URL: https://github.com/ChiLiubio/microeco
-Depends: R (>= 3.5.0)
-Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, ggplot2 (>= 3.5.0), RColorBrewer, reshape2, igraph (>= 2.0.0), lifecycle
+Depends: R (>= 3.5.0), ggplot2 (>= 3.5.0)
+Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, RColorBrewer, reshape2, igraph (>= 2.0.0), lifecycle
 Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, rgexf, mice, GGally
 License: GPL-3
 LazyData: true
@@ -20,5 +20,5 @@ Encoding: UTF-8
 NeedsCompilation: no
 Packaged: 2026-05-14
 Repository: CRAN
-Date/Publication: 2026-05-15
+Date/Publication: 2026-05-14
 RoxygenNote: 7.3.3
