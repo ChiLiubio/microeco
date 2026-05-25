@@ -13,44 +13,6 @@ trans_phylo <- R6::R6Class(
         # Public fields
         # ===========================================================================
         public = list(
-
-                #' @field dataset original microtable object
-                dataset = NULL,
-
-                #' @field phylo_tree phylo tree object (may be annotated with groupOTU)
-                phylo_tree = NULL,
-
-                #' @field phylo_tree_original original unmodified phylo tree (preserved)
-                phylo_tree_original = NULL,
-
-                #' @field tax_table taxonomy table
-                tax_table = NULL,
-
-                #' @field group_col column name used for grouping
-                group_col = NULL,
-
-                #' @field group_info group mapping table (columns: label, Group)
-                group_info = NULL,
-
-                #' @field ring_data outer ring annotation data
-                ring_data = NULL,
-
-                #' @field color_palette color palette (named vector or list)
-                color_palette = NULL,
-
-                #' @field plot_obj current ggtree plot object
-                plot_obj = NULL,
-
-                #' @field tip_labels tip labels vector
-                tip_labels = NULL,
-
-                #' @field clade_coloring whether groupOTU clade coloring is enabled
-                clade_coloring = NULL,
-
-                #' @field max_ring_extent numeric, tracks the outermost extent (offset + width) of all rings
-                #'   Used by add_spacer() to auto-calculate the spacer ring offset.
-                max_ring_extent = 0,
-
                 # =======================================================================
                 # Initialize
                 # =======================================================================
@@ -67,6 +29,127 @@ trans_phylo <- R6::R6Class(
                 #'   applied and branch_color_by_group is automatically set to FALSE in plot_tree()
                 #'   (since ggtree's stat_tree() requires groupOTU-annotated data for branch coloring).
                 #'   Tip points are still colored by group via the fill aesthetic regardless.
+                #' @examples
+                #' \dontrun{
+                #' library(microeco)
+                #' library(magrittr)
+                #'
+                #' mt <- clone(dataset)
+                #'
+                #' mt$tax_table %<>% base::subset(Kingdom == "k__Bacteria")
+                #' mt$tidy_dataset()
+                #' mt200 <- clone(mt)
+                #'
+                #' # Subset to top 200 OTUs
+                #' top_otus <- names(sort(mt200$taxa_sums(), decreasing = TRUE))[1:200]
+                #' mt200$otu_table %<>% .[top_otus, , drop = FALSE]
+                #' mt200$tidy_dataset()
+                #' 
+                #' # ========================================================================
+                #' # Build rich ring annotation data
+                #' # ========================================================================
+                #' 
+                #' otu <- mt200$otu_table
+                #' tax <- mt200$tax_table
+                #' si  <- mt200$sample_table
+                #' n_otus <- nrow(otu)
+                #' 
+                #' # Relative abundance (mean %)
+                #' total_reads <- colSums(mt$otu_table)
+                #' total_rel_abund   <- sweep(mt$otu_table, 2, total_reads, "/")
+                #' rel_abund   <- total_rel_abund[rownames(otu), ]
+                #' mean_abund  <- rowMeans(rel_abund) * 100
+                #' 
+                #' # Prevalence (% of samples where detected)
+                #' prevalence <- rowMeans(otu > 0) * 100
+                #' 
+                #' # Log10 abundance
+                #' log_abund <- log10(rowMeans(otu) + 1)
+                #' 
+                #' # ---- Simulated ecological indicators ----
+                #' # Importance index: composite of abundance and prevalence
+                #' # (mimics indicators like indicator species analysis or random forest importance)
+                #' importance_raw <- mean_abund * sqrt(prevalence / 100)
+                #' importance <- round(importance_raw / max(importance_raw, na.rm = TRUE) * 100, 2)
+                #' 
+                #' # Specificity: how concentrated is an OTU in its preferred habitat
+                #' # (low = generalist, high = specialist)
+                #' group_cols  <- split(colnames(otu), si$Group)
+                #' group_means <- sapply(group_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+                #' if (!is.matrix(group_means)) group_means <- matrix(group_means, nrow = n_otus)
+                #' # Specificity = 1 - evenness (Simpson-like)
+                #' specificity_raw <- 1 - apply(group_means, 1, function(p) {
+                #'   p <- p / sum(p)
+                #'   sum(p^2)
+                #' })
+                #' specificity <- round((1 - specificity_raw) / max(1 - specificity_raw, na.rm = TRUE) * 100, 2)
+                #' 
+                #' # Connectivity: simulated network centrality score (higher = hub OTU)
+                #' # Based on co-occurrence signal approximated from abundance correlation
+                #' set.seed(42)
+                #' connectivity_raw <- importance_raw * runif(n_otus, 0.5, 1.5) + rnorm(n_otus, 0, 2)
+                #' connectivity_raw[connectivity_raw < 0] <- 0
+                #' connectivity <- round(connectivity_raw / max(connectivity_raw, na.rm = TRUE) * 100, 2)
+                #' 
+                #' # Dominant habitat
+                #' dominant_habitat <- apply(group_means, 1, function(x) colnames(group_means)[which.max(x)])
+                #' 
+                #' # Salinity preference
+                #' sal_cols  <- split(colnames(otu), si$Saline)
+                #' sal_means <- sapply(sal_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+                #' if (!is.matrix(sal_means)) sal_means <- matrix(sal_means, nrow = n_otus)
+                #' dominant_saline <- apply(sal_means, 1, function(x) colnames(sal_means)[which.max(x)])
+                #' 
+                #' # Class taxonomy
+                #' class_col <- if ("Class" %in% colnames(tax)) tax$Class else rep("Unknown", n_otus)
+                #' 
+                #' # Assemble ring data
+                #' ring_df <- data.frame(
+                #'   label        = rownames(otu),
+                #'   RelAbund     = round(mean_abund, 4),
+                #'   Prevalence   = round(prevalence, 1),
+                #'   LogAbund     = round(log_abund, 3),
+                #'   Importance   = importance,
+                #'   Specificity  = specificity,
+                #'   Connectivity = connectivity,
+                #'   Habitat      = dominant_habitat,
+                #'   Salinity     = dominant_saline,
+                #'   Class        = class_col,
+                #'   stringsAsFactors = FALSE
+                #' )
+                #' 
+                #' # Clean Class column
+                #' ring_df$Class <- gsub("^c__", "", ring_df$Class)
+                #' ring_df$Class[ring_df$Class == "" | is.na(ring_df$Class)] <- "Unclassified"
+                #' 
+                #' # ========================================================================
+                #' # Custom style color palette for Phyla
+                #' # ========================================================================
+                #' 
+                #' phyla_present <- unique(gsub("^p__", "", mt$tax_table$Phylum))
+                #' n_phyla <- length(phyla_present)
+                #' 
+                #' phyla_colors <- c(
+                #'   "#E64B35", "#4DBBD5", "#00A087", "#3C5488",
+                #'   "#F39B7F", "#8491B4", "#91D1C2", "#DC0000",
+                #'   "#7E6148", "#B09C85", "#BB8FCE", "#5B88D4"
+                #' )
+                #' if (n_phyla <= length(phyla_colors)) {
+                #'   phyla_colors <- phyla_colors[1:n_phyla]
+                #' } else {
+                #'   phyla_colors <- colorRampPalette(phyla_colors)(n_phyla)
+                #' }
+                #' names(phyla_colors) <- phyla_present
+                #'
+                #' pviz <- trans_phylo$new(
+                #'   dataset             = mt,
+                #'   group_col           = "Phylum",
+                #'   group_prefix_remove = "p__",
+                #'   ring_data           = ring_df,
+                #'   color_palette       = list(group_color = phyla_colors),
+                #'   clade_coloring      = TRUE
+                #' )
+                #' }
                 initialize = function(dataset,
                                                           group_col = "Phylum",
                                                           ring_data = NULL,
@@ -157,6 +240,20 @@ trans_phylo <- R6::R6Class(
                 #' @param legend_font_size legend font size, default 3.5
                 #' @param theme_base base theme, default ggtree::theme_tree2()
                 #' @return ggtree plot object
+                #' @examples
+                #' \dontrun{
+                #' pviz$plot_tree(
+                #'   layout             = "fan",
+                #'   open_angle         = 18,
+                #'   branch_size        = 0.15,
+                #'   tip_point          = TRUE,
+                #'   tip_point_size     = 1.2,
+                #'   tip_point_shape    = 21,
+                #'   tip_point_stroke   = 0.1,
+                #'   tip_point_alpha    = 0.80,
+                #'   legend_title       = "Phylum"
+                #' )
+                #' }
                 plot_tree = function(layout               = "fan",
                                                          open_angle           = 30,
                                                          branch_size          = 0.3,
@@ -216,7 +313,7 @@ trans_phylo <- R6::R6Class(
                                         values   = pal,
                                         breaks   = leg_breaks,
                                         name     = leg_title,
-                                        guide    = ggplot2::guide_legend(override.aes = list(size = 3, linetype = 1)),
+                                        guide    = "legend",
                                         na.value = "grey70"
                                 )
                         } else {
@@ -238,7 +335,7 @@ trans_phylo <- R6::R6Class(
                                 # points appear darker/different from branches of the same group.
                                 # Attach group_info for tip fill mapping
                                 group_df <- self$group_info
-                                p <- p %<+% group_df
+                                p <- ggtree::`%<+%`(p, group_df)
 
                                 p <- p + ggtree::geom_tippoint(
                                         ggplot2::aes(fill = Group),
@@ -258,7 +355,7 @@ trans_phylo <- R6::R6Class(
                                         values   = pal,
                                         breaks   = leg_breaks,
                                         name     = leg_title,
-                                        guide    = ggplot2::guide_legend(override.aes = list(size = 3, linetype = 0)),
+                                        guide    = ggplot2::guide_legend(override.aes = list(size = 3, shape = 21, linetype = 1)),
                                         na.value = "grey70"
                                 )
                                 # Create new fill scale boundary for subsequent ring layers
@@ -310,6 +407,18 @@ trans_phylo <- R6::R6Class(
                 #'   All parameters are passed through to plot_tree().
                 #' @param ... all arguments passed to plot_tree()
                 #' @return ggtree plot object
+                #' @examples
+                #' \dontrun{
+                #' pviz$plot_circular(
+                #'   open_angle       = 18,
+                #'   branch_size      = 0.15,
+                #'   tip_point_size   = 1.2,
+                #'   tip_point_shape  = 21,
+                #'   tip_point_stroke = 0.1,
+                #'   tip_point_alpha  = 0.80,
+                #'   legend_title     = "Phylum"
+                #' )
+                #' }
                 plot_circular = function(...) {
                         args <- list(...)
                         if (!"layout" %in% names(args)) {
@@ -342,6 +451,30 @@ trans_phylo <- R6::R6Class(
                 #' @param point_size point size (only for geom = "point"), default 1.5
                 #' @param ... additional arguments passed to ggtreeExtra::geom_fruit() (e.g. axis.params, grid.params)
                 #' @return updated ggtree plot object
+                #' @examples
+                #' \dontrun{
+                #' # Numeric bar ring
+                #' pviz$add_ring(
+                #'   col_name            = "LogAbund",
+                #'   geom                = "bar",
+                #'   ring_width          = 0.038,
+                #'   ring_offset         = 0.012,
+                #'   color_low           = "#440154",
+                #'   color_high          = "#FDE725",
+                #'   na_fill             = "grey95",
+                #'   legend_title_custom = "Log10\\nAbund."
+                #' )
+                #'
+                #' # Categorical color band ring
+                #' pviz$add_ring(
+                #'   col_name            = "Habitat",
+                #'   ring_width          = 0.022,
+                #'   ring_offset         = 0.242,
+                #'   na_fill             = "grey95",
+                #'   legend_title_custom = "Habitat",
+                #'   categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
+                #' )
+                #' }
                 add_ring = function(col_name,
                                                         ring_data           = NULL,
                                                         color_low           = "#0D0887",
@@ -387,19 +520,6 @@ trans_phylo <- R6::R6Class(
                         # The 'color' aesthetic is reserved for the tree's discrete Group variable.
                         # We use ggnewscale::new_scale("fill") before each ring to allow independent fill scales.
                         self$plot_obj <- self$plot_obj + ggnewscale::new_scale("fill")
-
-                        # --- Local references for ggtreeExtra::geom_fruit() geom argument ---
-                        # ggtreeExtra::geom_fruit() uses .convert_to_name() internally, which
-                        # calls substitute()/deparse() on the 'geom' argument and expects a bare
-                        # function name (e.g. "geom_col"), NOT a namespace-qualified name
-                        # (e.g. "ggplot2::geom_col"). We assign ggplot2 functions to local
-                        # variables with the expected bare names so that:
-                        #   1) substitute() captures the symbol name (e.g. geom_col)
-                        #   2) deparse() produces the recognized string ("geom_col")
-                        #   3) The actual function resolution still uses ggplot2::geom_col
-                        geom_col   <- ggplot2::geom_col
-                        geom_point <- ggplot2::geom_point
-                        geom_tile  <- ggplot2::geom_tile
 
                         # --- Capture and merge user-provided ... arguments ---
                         # We must handle axis.params / grid.params specially to avoid
@@ -453,7 +573,7 @@ trans_phylo <- R6::R6Class(
                                                         guide    = legend_guide
                                                 )
                                         } else {
-                                                fill_scale <- viridis::scale_fill_viridis_c(
+                                                fill_scale <- ggplot2::scale_fill_viridis_c(
                                                         option   = "D",
                                                         begin    = 0,
                                                         end      = 1,
@@ -577,6 +697,12 @@ trans_phylo <- R6::R6Class(
                 #' @param gap numeric, small gap between the last visible ring's outer edge
                 #'   and the spacer's inner edge, default 0.004
                 #' @return updated ggtree plot object
+                #' @examples
+                #' \dontrun{
+                #' # Call after all add_ring() calls to prevent the outermost ring
+                #' # from being auto-expanded by ggtreeExtra
+                #' pviz$add_spacer()
+                #' }
                 add_spacer = function(ring_width = 0.02, gap = 0.004) {
                         if (is.null(self$plot_obj)) {
                                 stop("No plot object found. Please run $plot_tree() or $plot_circular() first.")
@@ -654,6 +780,16 @@ trans_phylo <- R6::R6Class(
                 #' @param show_legend logical, whether to show legends
                 #' @param ... additional arguments passed to each add_ring() call
                 #' @return updated ggtree plot object
+                #' @examples
+                #' \dontrun{
+                #' pviz$add_rings_batch(
+                #'   col_names    = c("RelAbund", "Prevalence", "LogAbund"),
+                #'   numeric_geom = "bar",
+                #'   ring_width   = 0.04,
+                #'   ring_offset  = 0.02,
+                #'   show_legend  = TRUE
+                #' )
+                #' }
                 add_rings_batch = function(col_names           = NULL,
                                                                    numeric_geom        = "bar",
                                                                    ring_width          = 0.08,
@@ -711,6 +847,10 @@ trans_phylo <- R6::R6Class(
                 #' @param y numeric, y coordinate
                 #' @param label string, scale bar label
                 #' @return updated plot
+                #' @examples
+                #' \dontrun{
+                #' pviz$add_scale_bar(x = 0, y = 0, label = "0.05")
+                #' }
                 add_scale_bar = function(x = NULL, y = NULL, label = "0.05") {
                         if (is.null(self$plot_obj)) stop("No plot object found.")
 
@@ -736,6 +876,11 @@ trans_phylo <- R6::R6Class(
                 #' @param alpha transparency, default 0.3
                 #' @param extend extend amount, default 0.15
                 #' @return updated plot
+                #' @examples
+                #' \dontrun{
+                #' # Highlight clade at node 150
+                #' pviz$add_highlight_clade(node = 150, fill = "steelblue", alpha = 0.3)
+                #' }
                 add_highlight_clade = function(node,
                                                                                 fill   = "steelblue",
                                                                                 alpha  = 0.3,
@@ -764,6 +909,10 @@ trans_phylo <- R6::R6Class(
                 #' @param offset offset amount, default 0.5
                 #' @param barsize bar thickness, default 0.8
                 #' @return updated plot
+                #' @examples
+                #' \dontrun{
+                #' pviz$add_clade_label(node = 150, label = "Clade A", color = "black", size = 4)
+                #' }
                 add_clade_label = function(node,
                                                                         label,
                                                                         color    = "black",
@@ -794,6 +943,10 @@ trans_phylo <- R6::R6Class(
                 #' @param base_family font family, default "sans"
                 #' @param bg_color background color, default "white"
                 #' @return updated plot
+                #' @examples
+                #' \dontrun{
+                #' pviz$theme_publication(base_size = 7)
+                #' }
                 theme_publication = function(base_size   = 12,
                                                                           base_family = "sans",
                                                                           bg_color    = "white") {
@@ -817,32 +970,24 @@ trans_phylo <- R6::R6Class(
 
                         invisible(self$plot_obj)
                 },
-
+				
                 # =======================================================================
                 # get_plot: Retrieve current plot object
                 # =======================================================================
                 #' @description Return the current ggtree plot object
                 #' @return ggtree / ggplot object
+                #' @examples
+                #' \dontrun{
+                #' p <- pviz$get_plot()
+                #' print(p)
+                #' }
                 get_plot = function() {
                         if (is.null(self$plot_obj)) {
                                 warning("No plot object available. Run $plot_tree() first.")
                         }
                         return(self$plot_obj)
                 },
-
-                # =======================================================================
-                # clear_plot: Release plot object memory
-                # =======================================================================
-                #' @description Clear the stored plot object to release memory.
-                #'   Useful in Shiny apps or batch processing where multiple plot objects
-                #'   would otherwise accumulate in R6 instance memory.
-                #' @return NULL (invisibly)
-                clear_plot = function() {
-                        self$plot_obj <- NULL
-                        message("Plot object cleared from memory.")
-                        invisible(NULL)
-                },
-
+				
                 # =======================================================================
                 # save_plot: Save plot to file
                 # =======================================================================
@@ -853,6 +998,17 @@ trans_phylo <- R6::R6Class(
                 #' @param dpi resolution, default 300
                 #' @param device graphics device, default NULL (auto)
                 #' @return NULL
+                #' @examples
+                #' \dontrun{
+                #' pviz$save_plot(
+                #'   filename = "phylo_tree.png",
+                #'   width    = 16,
+                #'   height   = 16,
+                #'   dpi      = 300
+                #' )
+                #' 
+                #' 				
+                #' }
                 save_plot = function(filename,
                                                          width   = 12,
                                                          height  = 12,
@@ -879,6 +1035,10 @@ trans_phylo <- R6::R6Class(
                 # =======================================================================
                 #' @description Print a summary of the trans_phylo object
                 #' @param ... ignored (for compatibility with the generic print method)
+                #' @examples
+                #' \dontrun{
+                #' print(pviz)
+                #' }
                 print = function(...) {
                         cat("<trans_phylo> object\n")
                         cat(sprintf("  Phylo tree tips: %d\n", length(self$tip_labels)))
@@ -905,10 +1065,10 @@ trans_phylo <- R6::R6Class(
         # Private methods
         # ===========================================================================
         private = list(
-        #' Build group mapping table from tax_table
-        #' group_col string, taxonomic rank column name
-        #' group_prefix string, prefix to add to group names
-        #' group_prefix_remove string, prefix to strip from group names
+        # Build group mapping table from tax_table
+        # group_col string, taxonomic rank column name
+        # group_prefix string, prefix to add to group names
+        # group_prefix_remove string, prefix to strip from group names
         build_group_info = function(group_col, group_prefix, group_prefix_remove) {
                 tax <- self$tax_table
                 # Ensure tax_table is a data.frame
@@ -947,7 +1107,7 @@ trans_phylo <- R6::R6Class(
 
                 self$group_info <- group_df
         },
-        #' Propagate group info to internal nodes via groupOTU
+        # Propagate group info to internal nodes via groupOTU
         apply_groupOTU = function() {
                 # Build a named list: group -> vector of tip labels
                 group_list <- split(self$group_info$label, self$group_info$Group)
@@ -958,8 +1118,8 @@ trans_phylo <- R6::R6Class(
                 # using group_name = "Group" (uppercase) causes 'object Group not found' error.
                 self$phylo_tree <- ggtree::groupOTU(self$phylo_tree, group_list, group_name = "group")
         },
-        #' Process and validate outer ring annotation data
-        #' ring_data data.frame or matrix of ring annotation data
+        # Process and validate outer ring annotation data
+        # ring_data data.frame or matrix of ring annotation data
         process_ring_data = function(ring_data) {
                 if (is.data.frame(ring_data)) {
                         df <- ring_data
@@ -992,7 +1152,7 @@ trans_phylo <- R6::R6Class(
 
                 return(df)
         },
-        #' Auto-generate color palette based on group levels
+        # Auto-generate color palette based on group levels
         generate_palette = function() {
                 groups   <- unique(self$group_info$Group)
                 n_groups <- length(groups)

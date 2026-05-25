@@ -9,35 +9,283 @@ Publication-grade phylogenetic tree visualization built on ggtree,
   coloring (with full clade coloring via groupOTU) and multi-layer outer ring
   annotations.
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{dataset}}{original microtable object}
+\examples{
 
-\item{\code{phylo_tree}}{phylo tree object (may be annotated with groupOTU)}
+## ------------------------------------------------
+## Method `trans_phylo$new`
+## ------------------------------------------------
 
-\item{\code{phylo_tree_original}}{original unmodified phylo tree (preserved)}
+\dontrun{
+library(microeco)
+library(magrittr)
 
-\item{\code{tax_table}}{taxonomy table}
+mt <- clone(dataset)
 
-\item{\code{group_col}}{column name used for grouping}
+mt$tax_table \%<>\% base::subset(Kingdom == "k__Bacteria")
+mt$tidy_dataset()
+mt200 <- clone(mt)
 
-\item{\code{group_info}}{group mapping table (columns: label, Group)}
+# Subset to top 200 OTUs
+top_otus <- names(sort(mt200$taxa_sums(), decreasing = TRUE))[1:200]
+mt200$otu_table \%<>\% .[top_otus, , drop = FALSE]
+mt200$tidy_dataset()
 
-\item{\code{ring_data}}{outer ring annotation data}
+# ========================================================================
+# Build rich ring annotation data
+# ========================================================================
 
-\item{\code{color_palette}}{color palette (named vector or list)}
+otu <- mt200$otu_table
+tax <- mt200$tax_table
+si  <- mt200$sample_table
+n_otus <- nrow(otu)
 
-\item{\code{plot_obj}}{current ggtree plot object}
+# Relative abundance (mean \%)
+total_reads <- colSums(mt$otu_table)
+total_rel_abund   <- sweep(mt$otu_table, 2, total_reads, "/")
+rel_abund   <- total_rel_abund[rownames(otu), ]
+mean_abund  <- rowMeans(rel_abund) * 100
 
-\item{\code{tip_labels}}{tip labels vector}
+# Prevalence (\% of samples where detected)
+prevalence <- rowMeans(otu > 0) * 100
 
-\item{\code{clade_coloring}}{whether groupOTU clade coloring is enabled}
+# Log10 abundance
+log_abund <- log10(rowMeans(otu) + 1)
 
-\item{\code{max_ring_extent}}{numeric, tracks the outermost extent (offset + width) of all rings
-Used by add_spacer() to auto-calculate the spacer ring offset.}
+# ---- Simulated ecological indicators ----
+# Importance index: composite of abundance and prevalence
+# (mimics indicators like indicator species analysis or random forest importance)
+importance_raw <- mean_abund * sqrt(prevalence / 100)
+importance <- round(importance_raw / max(importance_raw, na.rm = TRUE) * 100, 2)
+
+# Specificity: how concentrated is an OTU in its preferred habitat
+# (low = generalist, high = specialist)
+group_cols  <- split(colnames(otu), si$Group)
+group_means <- sapply(group_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+if (!is.matrix(group_means)) group_means <- matrix(group_means, nrow = n_otus)
+# Specificity = 1 - evenness (Simpson-like)
+specificity_raw <- 1 - apply(group_means, 1, function(p) {
+  p <- p / sum(p)
+  sum(p^2)
+})
+specificity <- round((1 - specificity_raw) / max(1 - specificity_raw, na.rm = TRUE) * 100, 2)
+
+# Connectivity: simulated network centrality score (higher = hub OTU)
+# Based on co-occurrence signal approximated from abundance correlation
+set.seed(42)
+connectivity_raw <- importance_raw * runif(n_otus, 0.5, 1.5) + rnorm(n_otus, 0, 2)
+connectivity_raw[connectivity_raw < 0] <- 0
+connectivity <- round(connectivity_raw / max(connectivity_raw, na.rm = TRUE) * 100, 2)
+
+# Dominant habitat
+dominant_habitat <- apply(group_means, 1, function(x) colnames(group_means)[which.max(x)])
+
+# Salinity preference
+sal_cols  <- split(colnames(otu), si$Saline)
+sal_means <- sapply(sal_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+if (!is.matrix(sal_means)) sal_means <- matrix(sal_means, nrow = n_otus)
+dominant_saline <- apply(sal_means, 1, function(x) colnames(sal_means)[which.max(x)])
+
+# Class taxonomy
+class_col <- if ("Class" \%in\% colnames(tax)) tax$Class else rep("Unknown", n_otus)
+
+# Assemble ring data
+ring_df <- data.frame(
+  label        = rownames(otu),
+  RelAbund     = round(mean_abund, 4),
+  Prevalence   = round(prevalence, 1),
+  LogAbund     = round(log_abund, 3),
+  Importance   = importance,
+  Specificity  = specificity,
+  Connectivity = connectivity,
+  Habitat      = dominant_habitat,
+  Salinity     = dominant_saline,
+  Class        = class_col,
+  stringsAsFactors = FALSE
+)
+
+# Clean Class column
+ring_df$Class <- gsub("^c__", "", ring_df$Class)
+ring_df$Class[ring_df$Class == "" | is.na(ring_df$Class)] <- "Unclassified"
+
+# ========================================================================
+# Custom style color palette for Phyla
+# ========================================================================
+
+phyla_present <- unique(gsub("^p__", "", mt$tax_table$Phylum))
+n_phyla <- length(phyla_present)
+
+phyla_colors <- c(
+  "#E64B35", "#4DBBD5", "#00A087", "#3C5488",
+  "#F39B7F", "#8491B4", "#91D1C2", "#DC0000",
+  "#7E6148", "#B09C85", "#BB8FCE", "#5B88D4"
+)
+if (n_phyla <= length(phyla_colors)) {
+  phyla_colors <- phyla_colors[1:n_phyla]
+} else {
+  phyla_colors <- colorRampPalette(phyla_colors)(n_phyla)
 }
-\if{html}{\out{</div>}}
+names(phyla_colors) <- phyla_present
+
+pviz <- trans_phylo$new(
+  dataset             = mt,
+  group_col           = "Phylum",
+  group_prefix_remove = "p__",
+  ring_data           = ring_df,
+  color_palette       = list(group_color = phyla_colors),
+  clade_coloring      = TRUE
+)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$plot_tree`
+## ------------------------------------------------
+
+\dontrun{
+pviz$plot_tree(
+  layout             = "fan",
+  open_angle         = 18,
+  branch_size        = 0.15,
+  tip_point          = TRUE,
+  tip_point_size     = 1.2,
+  tip_point_shape    = 21,
+  tip_point_stroke   = 0.1,
+  tip_point_alpha    = 0.80,
+  legend_title       = "Phylum"
+)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$plot_circular`
+## ------------------------------------------------
+
+\dontrun{
+pviz$plot_circular(
+  open_angle       = 18,
+  branch_size      = 0.15,
+  tip_point_size   = 1.2,
+  tip_point_shape  = 21,
+  tip_point_stroke = 0.1,
+  tip_point_alpha  = 0.80,
+  legend_title     = "Phylum"
+)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$add_ring`
+## ------------------------------------------------
+
+\dontrun{
+# Numeric bar ring
+pviz$add_ring(
+  col_name            = "LogAbund",
+  geom                = "bar",
+  ring_width          = 0.038,
+  ring_offset         = 0.012,
+  color_low           = "#440154",
+  color_high          = "#FDE725",
+  na_fill             = "grey95",
+  legend_title_custom = "Log10\\\\nAbund."
+)
+
+# Categorical color band ring
+pviz$add_ring(
+  col_name            = "Habitat",
+  ring_width          = 0.022,
+  ring_offset         = 0.242,
+  na_fill             = "grey95",
+  legend_title_custom = "Habitat",
+  categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
+)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$add_spacer`
+## ------------------------------------------------
+
+\dontrun{
+# Call after all add_ring() calls to prevent the outermost ring
+# from being auto-expanded by ggtreeExtra
+pviz$add_spacer()
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$add_rings_batch`
+## ------------------------------------------------
+
+\dontrun{
+pviz$add_rings_batch(
+  col_names    = c("RelAbund", "Prevalence", "LogAbund"),
+  numeric_geom = "bar",
+  ring_width   = 0.04,
+  ring_offset  = 0.02,
+  show_legend  = TRUE
+)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$add_scale_bar`
+## ------------------------------------------------
+
+\dontrun{
+pviz$add_scale_bar(x = 0, y = 0, label = "0.05")
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$add_highlight_clade`
+## ------------------------------------------------
+
+\dontrun{
+# Highlight clade at node 150
+pviz$add_highlight_clade(node = 150, fill = "steelblue", alpha = 0.3)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$add_clade_label`
+## ------------------------------------------------
+
+\dontrun{
+pviz$add_clade_label(node = 150, label = "Clade A", color = "black", size = 4)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$theme_publication`
+## ------------------------------------------------
+
+\dontrun{
+pviz$theme_publication(base_size = 7)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$get_plot`
+## ------------------------------------------------
+
+\dontrun{
+p <- pviz$get_plot()
+print(p)
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$save_plot`
+## ------------------------------------------------
+
+\dontrun{
+pviz$save_plot(
+  filename = "phylo_tree.png",
+  width    = 16,
+  height   = 16,
+  dpi      = 300
+)
+
+				
+}
+
+## ------------------------------------------------
+## Method `trans_phylo$print`
+## ------------------------------------------------
+
+\dontrun{
+print(pviz)
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -53,7 +301,6 @@ Used by add_spacer() to auto-calculate the spacer ring offset.}
 \item \href{#method-trans_phylo-add_clade_label}{\code{trans_phylo$add_clade_label()}}
 \item \href{#method-trans_phylo-theme_publication}{\code{trans_phylo$theme_publication()}}
 \item \href{#method-trans_phylo-get_plot}{\code{trans_phylo$get_plot()}}
-\item \href{#method-trans_phylo-clear_plot}{\code{trans_phylo$clear_plot()}}
 \item \href{#method-trans_phylo-save_plot}{\code{trans_phylo$save_plot()}}
 \item \href{#method-trans_phylo-print}{\code{trans_phylo$print()}}
 \item \href{#method-trans_phylo-clone}{\code{trans_phylo$clone()}}
@@ -100,6 +347,133 @@ Tip points are still colored by group via the fill aesthetic regardless.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+library(microeco)
+library(magrittr)
+
+mt <- clone(dataset)
+
+mt$tax_table \%<>\% base::subset(Kingdom == "k__Bacteria")
+mt$tidy_dataset()
+mt200 <- clone(mt)
+
+# Subset to top 200 OTUs
+top_otus <- names(sort(mt200$taxa_sums(), decreasing = TRUE))[1:200]
+mt200$otu_table \%<>\% .[top_otus, , drop = FALSE]
+mt200$tidy_dataset()
+
+# ========================================================================
+# Build rich ring annotation data
+# ========================================================================
+
+otu <- mt200$otu_table
+tax <- mt200$tax_table
+si  <- mt200$sample_table
+n_otus <- nrow(otu)
+
+# Relative abundance (mean \%)
+total_reads <- colSums(mt$otu_table)
+total_rel_abund   <- sweep(mt$otu_table, 2, total_reads, "/")
+rel_abund   <- total_rel_abund[rownames(otu), ]
+mean_abund  <- rowMeans(rel_abund) * 100
+
+# Prevalence (\% of samples where detected)
+prevalence <- rowMeans(otu > 0) * 100
+
+# Log10 abundance
+log_abund <- log10(rowMeans(otu) + 1)
+
+# ---- Simulated ecological indicators ----
+# Importance index: composite of abundance and prevalence
+# (mimics indicators like indicator species analysis or random forest importance)
+importance_raw <- mean_abund * sqrt(prevalence / 100)
+importance <- round(importance_raw / max(importance_raw, na.rm = TRUE) * 100, 2)
+
+# Specificity: how concentrated is an OTU in its preferred habitat
+# (low = generalist, high = specialist)
+group_cols  <- split(colnames(otu), si$Group)
+group_means <- sapply(group_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+if (!is.matrix(group_means)) group_means <- matrix(group_means, nrow = n_otus)
+# Specificity = 1 - evenness (Simpson-like)
+specificity_raw <- 1 - apply(group_means, 1, function(p) {
+  p <- p / sum(p)
+  sum(p^2)
+})
+specificity <- round((1 - specificity_raw) / max(1 - specificity_raw, na.rm = TRUE) * 100, 2)
+
+# Connectivity: simulated network centrality score (higher = hub OTU)
+# Based on co-occurrence signal approximated from abundance correlation
+set.seed(42)
+connectivity_raw <- importance_raw * runif(n_otus, 0.5, 1.5) + rnorm(n_otus, 0, 2)
+connectivity_raw[connectivity_raw < 0] <- 0
+connectivity <- round(connectivity_raw / max(connectivity_raw, na.rm = TRUE) * 100, 2)
+
+# Dominant habitat
+dominant_habitat <- apply(group_means, 1, function(x) colnames(group_means)[which.max(x)])
+
+# Salinity preference
+sal_cols  <- split(colnames(otu), si$Saline)
+sal_means <- sapply(sal_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+if (!is.matrix(sal_means)) sal_means <- matrix(sal_means, nrow = n_otus)
+dominant_saline <- apply(sal_means, 1, function(x) colnames(sal_means)[which.max(x)])
+
+# Class taxonomy
+class_col <- if ("Class" \%in\% colnames(tax)) tax$Class else rep("Unknown", n_otus)
+
+# Assemble ring data
+ring_df <- data.frame(
+  label        = rownames(otu),
+  RelAbund     = round(mean_abund, 4),
+  Prevalence   = round(prevalence, 1),
+  LogAbund     = round(log_abund, 3),
+  Importance   = importance,
+  Specificity  = specificity,
+  Connectivity = connectivity,
+  Habitat      = dominant_habitat,
+  Salinity     = dominant_saline,
+  Class        = class_col,
+  stringsAsFactors = FALSE
+)
+
+# Clean Class column
+ring_df$Class <- gsub("^c__", "", ring_df$Class)
+ring_df$Class[ring_df$Class == "" | is.na(ring_df$Class)] <- "Unclassified"
+
+# ========================================================================
+# Custom style color palette for Phyla
+# ========================================================================
+
+phyla_present <- unique(gsub("^p__", "", mt$tax_table$Phylum))
+n_phyla <- length(phyla_present)
+
+phyla_colors <- c(
+  "#E64B35", "#4DBBD5", "#00A087", "#3C5488",
+  "#F39B7F", "#8491B4", "#91D1C2", "#DC0000",
+  "#7E6148", "#B09C85", "#BB8FCE", "#5B88D4"
+)
+if (n_phyla <= length(phyla_colors)) {
+  phyla_colors <- phyla_colors[1:n_phyla]
+} else {
+  phyla_colors <- colorRampPalette(phyla_colors)(n_phyla)
+}
+names(phyla_colors) <- phyla_present
+
+pviz <- trans_phylo$new(
+  dataset             = mt,
+  group_col           = "Phylum",
+  group_prefix_remove = "p__",
+  ring_data           = ring_df,
+  color_palette       = list(group_color = phyla_colors),
+  clade_coloring      = TRUE
+)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-plot_tree"></a>}}
@@ -173,6 +547,26 @@ Draw a phylogenetic tree (publication grade)
 \subsection{Returns}{
 ggtree plot object
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$plot_tree(
+  layout             = "fan",
+  open_angle         = 18,
+  branch_size        = 0.15,
+  tip_point          = TRUE,
+  tip_point_size     = 1.2,
+  tip_point_shape    = 21,
+  tip_point_stroke   = 0.1,
+  tip_point_alpha    = 0.80,
+  legend_title       = "Phylum"
+)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-plot_circular"></a>}}
@@ -194,6 +588,24 @@ Convenience wrapper for plot_tree() with layout = "fan".
 \subsection{Returns}{
 ggtree plot object
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$plot_circular(
+  open_angle       = 18,
+  branch_size      = 0.15,
+  tip_point_size   = 1.2,
+  tip_point_shape  = 21,
+  tip_point_stroke = 0.1,
+  tip_point_alpha  = 0.80,
+  legend_title     = "Phylum"
+)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-add_ring"></a>}}
@@ -262,6 +674,36 @@ categorical columns automatically use color band regardless of this setting}
 \subsection{Returns}{
 updated ggtree plot object
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+# Numeric bar ring
+pviz$add_ring(
+  col_name            = "LogAbund",
+  geom                = "bar",
+  ring_width          = 0.038,
+  ring_offset         = 0.012,
+  color_low           = "#440154",
+  color_high          = "#FDE725",
+  na_fill             = "grey95",
+  legend_title_custom = "Log10\\\\nAbund."
+)
+
+# Categorical color band ring
+pviz$add_ring(
+  col_name            = "Habitat",
+  ring_width          = 0.022,
+  ring_offset         = 0.242,
+  na_fill             = "grey95",
+  legend_title_custom = "Habitat",
+  categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
+)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-add_spacer"></a>}}
@@ -303,6 +745,18 @@ and the spacer's inner edge, default 0.004}
 \subsection{Returns}{
 updated ggtree plot object
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+# Call after all add_ring() calls to prevent the outermost ring
+# from being auto-expanded by ggtreeExtra
+pviz$add_spacer()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-add_rings_batch"></a>}}
@@ -349,6 +803,22 @@ Batch add all (or selected) columns from ring_data as outer rings
 \subsection{Returns}{
 updated ggtree plot object
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$add_rings_batch(
+  col_names    = c("RelAbund", "Prevalence", "LogAbund"),
+  numeric_geom = "bar",
+  ring_width   = 0.04,
+  ring_offset  = 0.02,
+  show_legend  = TRUE
+)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-add_scale_bar"></a>}}
@@ -373,6 +843,16 @@ Add an evolutionary distance scale bar to the plot
 \subsection{Returns}{
 updated plot
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$add_scale_bar(x = 0, y = 0, label = "0.05")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-add_highlight_clade"></a>}}
@@ -404,6 +884,17 @@ Add highlight background to a specified clade
 \subsection{Returns}{
 updated plot
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+# Highlight clade at node 150
+pviz$add_highlight_clade(node = 150, fill = "steelblue", alpha = 0.3)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-add_clade_label"></a>}}
@@ -441,6 +932,16 @@ Add annotation text to a specified clade
 \subsection{Returns}{
 updated plot
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$add_clade_label(node = 150, label = "Clade A", color = "black", size = 4)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-theme_publication"></a>}}
@@ -469,6 +970,16 @@ Apply a publication-grade theme to the current plot
 \subsection{Returns}{
 updated plot
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$theme_publication(base_size = 7)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-get_plot"></a>}}
@@ -482,21 +993,17 @@ Return the current ggtree plot object
 \subsection{Returns}{
 ggtree / ggplot object
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+p <- pviz$get_plot()
+print(p)
 }
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_phylo-clear_plot"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_phylo-clear_plot}{}}}
-\subsection{Method \code{clear_plot()}}{
-Clear the stored plot object to release memory.
-  Useful in Shiny apps or batch processing where multiple plot objects
-  would otherwise accumulate in R6 instance memory.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_phylo$clear_plot()}\if{html}{\out{</div>}}
+}
+\if{html}{\out{</div>}}
+
 }
 
-\subsection{Returns}{
-NULL (invisibly)
-}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-save_plot"></a>}}
@@ -531,6 +1038,23 @@ Save the current plot to a file
 \subsection{Returns}{
 NULL
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+pviz$save_plot(
+  filename = "phylo_tree.png",
+  width    = 16,
+  height   = 16,
+  dpi      = 300
+)
+
+				
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-print"></a>}}
@@ -544,18 +1068,20 @@ Print a summary of the trans_phylo object
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{ignored (for compatibility with the generic print method)
-Build group mapping table from tax_table
-group_col string, taxonomic rank column name
-group_prefix string, prefix to add to group names
-group_prefix_remove string, prefix to strip from group names
-Propagate group info to internal nodes via groupOTU
-Process and validate outer ring annotation data
-ring_data data.frame or matrix of ring annotation data
-Auto-generate color palette based on group levels}
+\item{\code{...}}{ignored (for compatibility with the generic print method)}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+print(pviz)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_phylo-clone"></a>}}
