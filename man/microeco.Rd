@@ -12,6 +12,7 @@ For each R6 class, please open the help document by searching the class name.
 For example, to search microtable class, please run the command \code{help(microtable)} or \code{?microtable}.\cr
 Another way to open the help document of R6 class is to click the following links collected:\cr
 \code{\link{microtable}}\cr
+\code{\link{trans_norm}}\cr
 \code{\link{trans_abund}}\cr
 \code{\link{trans_venn}}\cr
 \code{\link{trans_alpha}}\cr
@@ -22,7 +23,7 @@ Another way to open the help document of R6 class is to click the following link
 \code{\link{trans_classifier}}\cr
 \code{\link{trans_env}}\cr
 \code{\link{trans_func}}\cr
-\code{\link{trans_norm}}\cr
+\code{\link{trans_metab}}\cr
 
 To report bugs or discuss questions, please use Github Issues (\href{https://github.com/ChiLiubio/microeco/issues}{https://github.com/ChiLiubio/microeco/issues}).
 Before creating a new issue, 
@@ -31,9 +32,13 @@ please read the guideline (\href{https://chiliubio.github.io/microeco_tutorial/n
 To cite microeco package in publications, please run the following command to get the references: \code{citation("microeco")}
 
 Reference:\cr
+Chi Liu, Xiangzhen Li, Felipe R. P. Mansoldo, Tong Chen, Fanzheng Meng, Ruixiang Tang, Siyu Zhou, Qinghua Yang, Ruixin Shao & Minjie Yao. 
+microeco 2: A comprehensive R package for downstream analysis of microbiome omics data. 
+iMeta, 2026, 5: e70132. DOI:10.1002/imt2.70132
+
 Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li & Minjie Yao. 
 A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. 
-Nature Protocols (2025). DOI:10.1038/s41596-025-01239-4
+Nature Protocols, 2026, 21: 1300–1324. DOI:10.1038/s41596-025-01239-4
 
 Chi Liu, Yaoming Cui, Xiangzhen Li & Minjie Yao. microeco: an R package for data mining in microbial community ecology. 
 FEMS Microbiology Ecology, 2021, 97(2): fiaa255. DOI:10.1093/femsec/fiaa255
