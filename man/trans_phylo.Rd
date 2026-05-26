@@ -622,8 +622,12 @@ Add one outer ring annotation layer to the current plot.
   color_high = "#F0F921",
   limits = NULL,
   categorical_colors = NULL,
-  ring_width = 0.08,
-  ring_offset = 0.03,
+  ring_width = NULL,
+  ring_offset = NULL,
+  ring_gap = 0.004,
+  ring_offset_first = 0.012,
+  ring_width_bar = 0.038,
+  ring_width_other = 0.022,
   show_legend = TRUE,
   legend_title_custom = NULL,
   geom = "bar",
@@ -650,9 +654,17 @@ default NULL means auto from data range}
 
 \item{\code{categorical_colors}}{color vector for categorical columns, default NULL (auto)}
 
-\item{\code{ring_width}}{ring width, default 0.08}
+\item{\code{ring_width}}{ring width, default NULL; see ring_width_bar and ring_width_other.}
 
-\item{\code{ring_offset}}{ring offset, default 0.03}
+\item{\code{ring_offset}}{ring offset, default NULL; If NULL, ring_offset_first + ring_gap}
+
+\item{\code{ring_gap}}{numeric, gap between consecutive rings when ring_offset is not manually specified; default 0.004}
+
+\item{\code{ring_offset_first}}{numeric, starting offset for the very first ring when ring_offset is not manually specified; default 0.012}
+
+\item{\code{ring_width_bar}}{numeric, default ring width for numeric bar-type rings when ring_width is NULL; default 0.038}
+
+\item{\code{ring_width_other}}{numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL; default 0.022}
 
 \item{\code{show_legend}}{logical, whether to show this ring's legend, default TRUE}
 

@@ -440,8 +440,12 @@ trans_phylo <- R6::R6Class(
                 #' @param limits numeric vector of length 2, explicit limits for the fill scale;
                 #'   default NULL means auto from data range
                 #' @param categorical_colors color vector for categorical columns, default NULL (auto)
-                #' @param ring_width ring width, default 0.08
-                #' @param ring_offset ring offset, default 0.03
+                #' @param ring_width ring width, default NULL; see ring_width_bar and ring_width_other.
+                #' @param ring_offset ring offset, default NULL; If NULL, ring_offset_first + ring_gap
+                #' @param ring_gap numeric, gap between consecutive rings when ring_offset is not manually specified; default 0.004
+                #' @param ring_offset_first numeric, starting offset for the very first ring when ring_offset is not manually specified; default 0.012
+                #' @param ring_width_bar numeric, default ring width for numeric bar-type rings when ring_width is NULL; default 0.038
+                #' @param ring_width_other numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL; default 0.022
                 #' @param show_legend logical, whether to show this ring's legend, default TRUE
                 #' @param legend_title_custom custom legend title, default uses column name
                 #' @param geom type: "bar" for bar heatmap, "point" for scatter, "star" for stars;
@@ -475,78 +479,66 @@ trans_phylo <- R6::R6Class(
                 #'   categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
                 #' )
                 #' }
-                add_ring = function(col_name,
-                                                        ring_data           = NULL,
-                                                        color_low           = "#0D0887",
-                                                        color_high          = "#F0F921",
-                                                        limits              = NULL,
-                                                        categorical_colors  = NULL,
-                                                        ring_width          = 0.08,
-                                                        ring_offset         = 0.03,
-                                                        show_legend         = TRUE,
-                                                        legend_title_custom = NULL,
-                                                        geom                = "bar",
-                                                        na_fill             = "grey90",
-                                                        na_replace          = "Unknown",
-                                                        point_size          = 1.5,
-                                                        ...) {
+				add_ring = function(col_name,
+									ring_data           = NULL,
+									color_low           = "#0D0887",
+									color_high          = "#F0F921",
+									limits              = NULL,
+									categorical_colors  = NULL,
+									ring_width          = NULL,
+									ring_offset         = NULL,
+									ring_gap            = 0.004,
+									ring_offset_first   = 0.012,
+									ring_width_bar      = 0.038,
+									ring_width_other    = 0.022,
+									show_legend         = TRUE,
+									legend_title_custom = NULL,
+									geom                = "bar",
+									na_fill             = "grey90",
+									na_replace          = "Unknown",
+									point_size          = 1.5,
+									...) {
 
-                        if (is.null(self$plot_obj)) {
-                                stop("No plot object found. Please run $plot_tree() or $plot_circular() first.")
-                        }
+						if (is.null(self$plot_obj)) {
+								stop("No plot object found. Please run $plot_tree() or $plot_circular() first.")
+						}
 
-                        # --- Determine data source ---
-                        df <- if (!is.null(ring_data)) ring_data else self$ring_data
-                        if (is.null(df)) {
-                                stop("No ring data available. Provide ring_data in add_ring() or during initialization.")
-                        }
-                        if (!col_name %in% colnames(df)) {
-                                stop(sprintf("Column '%s' not found in ring data.", col_name))
-                        }
+						# --- Determine data source ---
+						df <- if (!is.null(ring_data)) ring_data else self$ring_data
+						if (is.null(df)) stop("No ring data available.")
+						if (!col_name %in% colnames(df)) stop(sprintf("Column '%s' not found in ring data.", col_name))
 
-                        # --- Build sub data.frame ---
-                        sub_df <- df[, c("label", col_name), drop = FALSE]
-                        colnames(sub_df)[2] <- "value"
+						sub_df <- df[, c("label", col_name), drop = FALSE]
+						colnames(sub_df)[2] <- "value"
+						is_numeric <- is.numeric(sub_df$value)
 
-                        # --- Detect data type ---
-                        is_numeric <- is.numeric(sub_df$value)
+						# ==========================================
+						# Smart auto-layout: compute width and offset
+						# ==========================================
+						# 1. Smart ring_width and ring_offset assignment
+						if (is.null(ring_width)) {
+								ring_width <- if (is_numeric && geom == "bar") ring_width_bar else ring_width_other
+						}
+						if (is.null(ring_offset)) {
+								if (self$max_ring_extent == 0) {
+										ring_offset <- ring_offset_first # Default starting offset for the first ring
+								} else {
+										ring_offset <- self$max_ring_extent + ring_gap
+								}
+						}
 
-                        # --- Compute limits for numeric scales ---
-                        if (is_numeric && is.null(limits)) {
-                                limits <- range(sub_df$value, na.rm = TRUE)
-                        }
+						if (is_numeric && is.null(limits)) {
+								limits <- range(sub_df$value, na.rm = TRUE)
+						}
 
-                        # IMPORTANT: All ring annotations use the 'fill' aesthetic exclusively.
-                        # The 'color' aesthetic is reserved for the tree's discrete Group variable.
-                        # We use ggnewscale::new_scale("fill") before each ring to allow independent fill scales.
-                        self$plot_obj <- self$plot_obj + ggnewscale::new_scale("fill")
-
-                        # --- Capture and merge user-provided ... arguments ---
-                        # We must handle axis.params / grid.params specially to avoid
-                        # "formal argument matched by multiple actual arguments" errors.
-                        # Strategy: capture ... as a list, merge defaults with user values,
-                        # then use rlang::inject() to splice into ggtreeExtra::geom_fruit().
-                        # rlang::inject() is used instead of do.call() because ggtreeExtra::geom_fruit()
-                        # uses substitute()/deparse() on the 'geom' argument, and do.call()
-                        # evaluates the function object first, making it a closure that
-                        # cannot be coerced to character.
-                        dot_args <- list(...)
-
-                        # Merge axis.params: default = list(add = FALSE); user values override
-                        default_axis <- list(add = FALSE)
-                        if (!is.null(dot_args$axis.params)) {
-                                dot_args$axis.params <- modifyList(default_axis, dot_args$axis.params)
-                        } else {
-                                dot_args$axis.params <- default_axis
-                        }
-
-                        # Merge grid.params: default = empty list (no grid); user values override
-                        default_grid <- list()
-                        if (!is.null(dot_args$grid.params)) {
-                                dot_args$grid.params <- modifyList(default_grid, dot_args$grid.params)
-                        } else {
-                                dot_args$grid.params <- default_grid
-                        }
+						self$plot_obj <- self$plot_obj + ggnewscale::new_scale("fill")
+						dot_args <- list(...)
+						
+						default_axis <- list(add = FALSE)
+						dot_args$axis.params <- if (!is.null(dot_args$axis.params)) modifyList(default_axis, dot_args$axis.params) else default_axis
+						
+						default_grid <- list()
+						dot_args$grid.params <- if (!is.null(dot_args$grid.params)) modifyList(default_grid, dot_args$grid.params) else default_grid
 
                         if (is_numeric) {
                                 # Numeric -> heatmap bar / point / star
@@ -663,13 +655,13 @@ trans_phylo <- R6::R6Class(
                                         )
                         }
 
-                        # --- Track ring position for add_spacer() ---
-                        self$max_ring_extent <- max(self$max_ring_extent, ring_offset + ring_width)
+						# --- Track ring position (Important) ---
+						self$max_ring_extent <- max(self$max_ring_extent, ring_offset + ring_width)
 
-                        message(sprintf("Ring annotation '%s' added. (type: %s)", col_name,
-                                                   ifelse(is_numeric, "numeric", "categorical")))
-                        invisible(self$plot_obj)
-                },
+						message(sprintf("Ring annotation '%s' added. (offset: %.3f, width: %.3f)", 
+										col_name, ring_offset, ring_width))
+						invisible(self$plot_obj)
+				},
 
                 # =======================================================================
                 # add_spacer: Add invisible tile spacer to prevent outermost ring stretching
