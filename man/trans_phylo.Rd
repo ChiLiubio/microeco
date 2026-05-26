@@ -179,8 +179,8 @@ pviz$plot_circular(
 pviz$add_ring(
   col_name            = "LogAbund",
   geom                = "bar",
-  ring_width          = 0.038,
-  ring_offset         = 0.012,
+  ring_width          = 0.03,
+  ring_offset         = 0.02,
   color_low           = "#440154",
   color_high          = "#FDE725",
   na_fill             = "grey95",
@@ -190,8 +190,6 @@ pviz$add_ring(
 # Categorical color band ring
 pviz$add_ring(
   col_name            = "Habitat",
-  ring_width          = 0.022,
-  ring_offset         = 0.242,
   na_fill             = "grey95",
   legend_title_custom = "Habitat",
   categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
@@ -199,13 +197,11 @@ pviz$add_ring(
 }
 
 ## ------------------------------------------------
-## Method `trans_phylo$add_spacer`
+## Method `trans_phylo$add_ring_labels`
 ## ------------------------------------------------
 
 \dontrun{
-# Call after all add_ring() calls to prevent the outermost ring
-# from being auto-expanded by ggtreeExtra
-pviz$add_spacer()
+pviz$add_ring_labels(size = 1.8, color = "grey25")
 }
 
 ## ------------------------------------------------
@@ -294,7 +290,7 @@ print(pviz)
 \item \href{#method-trans_phylo-plot_tree}{\code{trans_phylo$plot_tree()}}
 \item \href{#method-trans_phylo-plot_circular}{\code{trans_phylo$plot_circular()}}
 \item \href{#method-trans_phylo-add_ring}{\code{trans_phylo$add_ring()}}
-\item \href{#method-trans_phylo-add_spacer}{\code{trans_phylo$add_spacer()}}
+\item \href{#method-trans_phylo-add_ring_labels}{\code{trans_phylo$add_ring_labels()}}
 \item \href{#method-trans_phylo-add_rings_batch}{\code{trans_phylo$add_rings_batch()}}
 \item \href{#method-trans_phylo-add_scale_bar}{\code{trans_phylo$add_scale_bar()}}
 \item \href{#method-trans_phylo-add_highlight_clade}{\code{trans_phylo$add_highlight_clade()}}
@@ -624,12 +620,13 @@ Add one outer ring annotation layer to the current plot.
   categorical_colors = NULL,
   ring_width = NULL,
   ring_offset = NULL,
-  ring_gap = 0.004,
-  ring_offset_first = 0.012,
-  ring_width_bar = 0.038,
-  ring_width_other = 0.022,
+  ring_gap = 0.03,
+  ring_offset_first = 0.02,
+  ring_width_bar = 0.03,
+  ring_width_other = 0.03,
   show_legend = TRUE,
   legend_title_custom = NULL,
+  ring_label = NULL,
   geom = "bar",
   na_fill = "grey90",
   na_replace = "Unknown",
@@ -658,17 +655,19 @@ default NULL means auto from data range}
 
 \item{\code{ring_offset}}{ring offset, default NULL; If NULL, ring_offset_first + ring_gap}
 
-\item{\code{ring_gap}}{numeric, gap between consecutive rings when ring_offset is not manually specified; default 0.004}
+\item{\code{ring_gap}}{numeric, gap between consecutive rings when ring_offset is not manually specified}
 
-\item{\code{ring_offset_first}}{numeric, starting offset for the very first ring when ring_offset is not manually specified; default 0.012}
+\item{\code{ring_offset_first}}{numeric, starting offset for the very first ring when ring_offset is not manually specified}
 
-\item{\code{ring_width_bar}}{numeric, default ring width for numeric bar-type rings when ring_width is NULL; default 0.038}
+\item{\code{ring_width_bar}}{numeric, default ring width for numeric bar-type rings when ring_width is NULL}
 
-\item{\code{ring_width_other}}{numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL; default 0.022}
+\item{\code{ring_width_other}}{numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL}
 
 \item{\code{show_legend}}{logical, whether to show this ring's legend, default TRUE}
 
 \item{\code{legend_title_custom}}{custom legend title, default uses column name}
+
+\item{\code{ring_label}}{label around the ring, default uses column name}
 
 \item{\code{geom}}{type: "bar" for bar heatmap, "point" for scatter, "star" for stars;
 categorical columns automatically use color band regardless of this setting}
@@ -693,8 +692,8 @@ updated ggtree plot object
 pviz$add_ring(
   col_name            = "LogAbund",
   geom                = "bar",
-  ring_width          = 0.038,
-  ring_offset         = 0.012,
+  ring_width          = 0.03,
+  ring_offset         = 0.02,
   color_low           = "#440154",
   color_high          = "#FDE725",
   na_fill             = "grey95",
@@ -704,8 +703,6 @@ pviz$add_ring(
 # Categorical color band ring
 pviz$add_ring(
   col_name            = "Habitat",
-  ring_width          = 0.022,
-  ring_offset         = 0.242,
   na_fill             = "grey95",
   legend_title_custom = "Habitat",
   categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
@@ -718,39 +715,26 @@ pviz$add_ring(
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_phylo-add_spacer"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_phylo-add_spacer}{}}}
-\subsection{Method \code{add_spacer()}}{
-Add an invisible spacer ring AFTER the last visible ring to
-  prevent ggtreeExtra from auto-stretching the outermost ring.
-
-  ggtreeExtra::geom_fruit() auto-expands the LAST (outermost) ring to
-  fill the remaining panel space, making it much thicker than the specified
-  ring_width (pwidth). This spacer uses geom_tile (same as categorical rings)
-  to render a uniform invisible white band as the last layer. Since geom_tile
-  fills a complete angular band regardless of data values, even if ggtreeExtra
-  auto-expands this spacer, it just adds more invisible white space — the
-  last VISIBLE ring stays at its correct width, and the tree layout is
-  completely unaffected.
-
-  IMPORTANT: This does NOT change the coordinate system, so the tree shape
-  and proportions remain exactly the same as without the spacer.
-
-  Call AFTER all add_ring() calls and BEFORE save_plot().
-  The offset is auto-calculated from the tracked ring positions.
+\if{html}{\out{<a id="method-trans_phylo-add_ring_labels"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_phylo-add_ring_labels}{}}}
+\subsection{Method \code{add_ring_labels()}}{
+Automatically place text labels for all added rings at the edge of the fan opening.
+  Uses the ring geometry history recorded by add_ring() to compute positions.
+  Call AFTER all add_ring() calls and AFTER add_spacer().
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_spacer(ring_width = 0.02, gap = 0.004)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_ring_labels(size = 1.8, color = "grey25", angle_offset = 15)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{ring_width}}{numeric, radial width of the spacer band, default 0.02.
-This should be similar to other categorical ring widths. Even if
-auto-expanded by ggtreeExtra, the white band remains invisible.}
+\item{\code{size}}{text font size, default 1.8}
 
-\item{\code{gap}}{numeric, small gap between the last visible ring's outer edge
-and the spacer's inner edge, default 0.004}
+\item{\code{color}}{text color, default "grey25"}
+
+\item{\code{angle_offset}}{numeric, fine-tuning angle padding inside the opening gap, default 2 (degrees)}
+
+\item{\code{fontface}}{text font style, default "italic"}
 }
 \if{html}{\out{</div>}}
 }
@@ -760,9 +744,7 @@ updated ggtree plot object
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-# Call after all add_ring() calls to prevent the outermost ring
-# from being auto-expanded by ggtreeExtra
-pviz$add_spacer()
+pviz$add_ring_labels(size = 1.8, color = "grey25")
 }
 }
 \if{html}{\out{</div>}}

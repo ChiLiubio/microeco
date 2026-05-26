@@ -188,8 +188,10 @@ trans_phylo <- R6::R6Class(
                         # --- Store clade_coloring flag ---
                         self$clade_coloring <- clade_coloring
 
-                        # --- Initialize ring extent tracker ---
-                        self$max_ring_extent <- 0
+                        self$params <- list(
+                                open_angle   = 30,
+                                ring_history = NULL
+                        )
 
                         # --- Propagate group info to internal nodes via groupOTU ---
                         if (clade_coloring) {
@@ -272,6 +274,8 @@ trans_phylo <- R6::R6Class(
                                                          legend_position      = "right",
                                                          legend_font_size     = 3.5,
                                                          theme_base           = NULL) {
+
+                        self$params$open_angle <- open_angle
 
                         # --- Build base ggtree object ---
                         # ggtree's internal stat_tree() requires lowercase 'group' for branch coloring.
@@ -442,12 +446,13 @@ trans_phylo <- R6::R6Class(
                 #' @param categorical_colors color vector for categorical columns, default NULL (auto)
                 #' @param ring_width ring width, default NULL; see ring_width_bar and ring_width_other.
                 #' @param ring_offset ring offset, default NULL; If NULL, ring_offset_first + ring_gap
-                #' @param ring_gap numeric, gap between consecutive rings when ring_offset is not manually specified; default 0.004
-                #' @param ring_offset_first numeric, starting offset for the very first ring when ring_offset is not manually specified; default 0.012
-                #' @param ring_width_bar numeric, default ring width for numeric bar-type rings when ring_width is NULL; default 0.038
-                #' @param ring_width_other numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL; default 0.022
+                #' @param ring_gap numeric, gap between consecutive rings when ring_offset is not manually specified
+                #' @param ring_offset_first numeric, starting offset for the very first ring when ring_offset is not manually specified
+                #' @param ring_width_bar numeric, default ring width for numeric bar-type rings when ring_width is NULL
+                #' @param ring_width_other numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL
                 #' @param show_legend logical, whether to show this ring's legend, default TRUE
                 #' @param legend_title_custom custom legend title, default uses column name
+                #' @param ring_label label around the ring, default uses column name
                 #' @param geom type: "bar" for bar heatmap, "point" for scatter, "star" for stars;
                 #'   categorical columns automatically use color band regardless of this setting
                 #' @param na_fill fill color for NA values, default "grey90"
@@ -461,8 +466,8 @@ trans_phylo <- R6::R6Class(
                 #' pviz$add_ring(
                 #'   col_name            = "LogAbund",
                 #'   geom                = "bar",
-                #'   ring_width          = 0.038,
-                #'   ring_offset         = 0.012,
+                #'   ring_width          = 0.03,
+                #'   ring_offset         = 0.02,
                 #'   color_low           = "#440154",
                 #'   color_high          = "#FDE725",
                 #'   na_fill             = "grey95",
@@ -472,8 +477,6 @@ trans_phylo <- R6::R6Class(
                 #' # Categorical color band ring
                 #' pviz$add_ring(
                 #'   col_name            = "Habitat",
-                #'   ring_width          = 0.022,
-                #'   ring_offset         = 0.242,
                 #'   na_fill             = "grey95",
                 #'   legend_title_custom = "Habitat",
                 #'   categorical_colors  = c("IW" = "#E64B35", "CW" = "#4DBBD5", "TW" = "#00A087")
@@ -487,12 +490,13 @@ trans_phylo <- R6::R6Class(
 									categorical_colors  = NULL,
 									ring_width          = NULL,
 									ring_offset         = NULL,
-									ring_gap            = 0.004,
-									ring_offset_first   = 0.012,
-									ring_width_bar      = 0.038,
-									ring_width_other    = 0.022,
+									ring_gap            = 0.03,
+									ring_offset_first   = 0.02,
+									ring_width_bar      = 0.03,
+									ring_width_other    = 0.03,
 									show_legend         = TRUE,
 									legend_title_custom = NULL,
+									ring_label          = NULL,
 									geom                = "bar",
 									na_fill             = "grey90",
 									na_replace          = "Unknown",
@@ -520,12 +524,17 @@ trans_phylo <- R6::R6Class(
 								ring_width <- if (is_numeric && geom == "bar") ring_width_bar else ring_width_other
 						}
 						if (is.null(ring_offset)) {
-								if (self$max_ring_extent == 0) {
+								if (is.null(self$params$ring_history) || nrow(self$params$ring_history) == 0) {
 										ring_offset <- ring_offset_first # Default starting offset for the first ring
 								} else {
-										ring_offset <- self$max_ring_extent + ring_gap
+										ring_offset <- ring_gap
 								}
 						}
+
+						r_label <- if (!is.null(ring_label)) ring_label else if (!is.null(legend_title_custom)) legend_title_custom else col_name
+						r_label <- gsub("\n", " ", r_label)
+						entry <- data.frame(label = r_label, offset = ring_offset, width = ring_width, stringsAsFactors = FALSE)
+						self$params$ring_history <- if (is.null(self$params$ring_history)) entry else rbind(self$params$ring_history, entry)
 
 						if (is_numeric && is.null(limits)) {
 								limits <- range(sub_df$value, na.rm = TRUE)
@@ -634,16 +643,18 @@ trans_phylo <- R6::R6Class(
                                 # Ensure names match levels
                                 names(categorical_colors) <- levels(sub_df$value)
 
-                                fruit_layer <- rlang::inject(ggtreeExtra::geom_fruit(
+								fruit_layer <- rlang::inject(ggtreeExtra::geom_fruit(
                                         data    = sub_df,
                                         geom    = geom_tile,
-                                        mapping = ggplot2::aes(y = label, x = 1, fill = value),
+                                        # Remove x = 1, let ggtreeExtra auto-allocate slot to prevent polar inward expansion
+                                        mapping = ggplot2::aes(y = label, fill = value),
                                         offset  = ring_offset,
                                         pwidth  = ring_width,
-                                        width   = 1,
+                                        # Remove forced width = 1 entirely
                                         !!!dot_args
                                         )
                                 )
+								
                                 self$plot_obj <- self$plot_obj +
                                         fruit_layer +
                                         ggplot2::scale_fill_manual(
@@ -655,107 +666,77 @@ trans_phylo <- R6::R6Class(
                                         )
                         }
 
-						# --- Track ring position (Important) ---
-						self$max_ring_extent <- max(self$max_ring_extent, ring_offset + ring_width)
-
 						message(sprintf("Ring annotation '%s' added. (offset: %.3f, width: %.3f)", 
 										col_name, ring_offset, ring_width))
 						invisible(self$plot_obj)
 				},
 
                 # =======================================================================
-                # add_spacer: Add invisible tile spacer to prevent outermost ring stretching
+                # add_ring_labels: Auto-label all rings at the fan opening edge
                 # =======================================================================
-                #' @description Add an invisible spacer ring AFTER the last visible ring to
-                #'   prevent ggtreeExtra from auto-stretching the outermost ring.
-                #'
-                #'   ggtreeExtra::geom_fruit() auto-expands the LAST (outermost) ring to
-                #'   fill the remaining panel space, making it much thicker than the specified
-                #'   ring_width (pwidth). This spacer uses geom_tile (same as categorical rings)
-                #'   to render a uniform invisible white band as the last layer. Since geom_tile
-                #'   fills a complete angular band regardless of data values, even if ggtreeExtra
-                #'   auto-expands this spacer, it just adds more invisible white space — the
-                #'   last VISIBLE ring stays at its correct width, and the tree layout is
-                #'   completely unaffected.
-                #'
-                #'   IMPORTANT: This does NOT change the coordinate system, so the tree shape
-                #'   and proportions remain exactly the same as without the spacer.
-                #'
-                #'   Call AFTER all add_ring() calls and BEFORE save_plot().
-                #'   The offset is auto-calculated from the tracked ring positions.
-                #' @param ring_width numeric, radial width of the spacer band, default 0.02.
-                #'   This should be similar to other categorical ring widths. Even if
-                #'   auto-expanded by ggtreeExtra, the white band remains invisible.
-                #' @param gap numeric, small gap between the last visible ring's outer edge
-                #'   and the spacer's inner edge, default 0.004
+                #' @description Automatically place text labels for all added rings at the edge of the fan opening.
+                #'   Uses the ring geometry history recorded by add_ring() to compute positions.
+                #'   Call AFTER all add_ring() calls and AFTER add_spacer().
+                #' @param angle_offset numeric, fine-tuning angle padding inside the opening gap, default 2 (degrees)
+                #' @param size text font size, default 1.8
+                #' @param color text color, default "grey25"
+                #' @param fontface text font style, default "italic"
                 #' @return updated ggtree plot object
                 #' @examples
                 #' \dontrun{
-                #' # Call after all add_ring() calls to prevent the outermost ring
-                #' # from being auto-expanded by ggtreeExtra
-                #' pviz$add_spacer()
+                #' pviz$add_ring_labels(size = 1.8, color = "grey25")
                 #' }
-                add_spacer = function(ring_width = 0.02, gap = 0.004) {
-                        if (is.null(self$plot_obj)) {
-                                stop("No plot object found. Please run $plot_tree() or $plot_circular() first.")
+                add_ring_labels = function(size = 1.8, color = "grey25", angle_offset = 15) {
+                        if (is.null(self$plot_obj)) stop("No plot object found.")
+
+                        history <- self$params$ring_history
+                        if (is.null(history) || nrow(history) == 0) return(invisible(self))
+
+                        #
+                        tree_data <- tidytree::as_tibble(self$plot_obj$data)
+                        min_x <- min(tree_data$x, na.rm = TRUE)
+                        max_x <- max(tree_data$x, na.rm = TRUE)
+                        tree_width <- max_x - min_x
+                        if (is.na(tree_width) || tree_width <= 0) tree_width <- 1.0
+
+                        outer_edges <- cumsum(history$offset + history$width)
+                        # Calculate the relative proportional positions of each ring's center point
+                        mid_points  <- outer_edges - (history$width / 2)
+                        
+                        # Compute absolute X coordinates: precisely align with the physical centers of the rings
+                        x_pos_all <- max_x + mid_points * tree_width
+                        
+                        # Y coordinates: 0.5 is the valid lower boundary for the ggtree fan layout
+                        y_pos_all <- rep(0.5, nrow(history))
+
+                        # Expand the plotting area boundaries to prevent long labels on the outermost rings from being clipped
+                        self$plot_obj <- self$plot_obj + ggplot2::expand_limits(x = max(x_pos_all) * 1.1)
+
+                        OPEN_ANGLE <- if (!is.null(self$params$open_angle)) self$params$open_angle else 30
+                        edge_angle_deg <- 270 + OPEN_ANGLE / 2 + angle_offset
+                        tangent_angle  <- (edge_angle_deg - 90) %% 360
+                        
+                        # Ensure text is always readable from left to right (auto-flip orientation)
+                        text_angle <- if (tangent_angle > 90 && tangent_angle < 270) tangent_angle - 180 else tangent_angle
+
+                        for (i in seq_len(nrow(history))) {
+                                self$plot_obj <- self$plot_obj +
+                                        ggplot2::annotate(
+                                                "text",
+                                                x     = x_pos_all[i],
+                                                y     = y_pos_all[i], 
+                                                label = history$label[i],
+                                                angle = text_angle,
+                                                size  = size,
+                                                # hjust = 1 Ensure that the end (tail) of the text is anchored at the computed X coordinate and radiates outward
+                                                hjust = 1,  
+                                                vjust = 0.5, 
+                                                color = color
+                                        )
                         }
 
-                        if (self$max_ring_extent == 0) {
-                                message("No rings have been added yet. Spacer is not needed.")
-                                return(invisible(self$plot_obj))
-                        }
-
-                        # Auto-calculate offset: just beyond the outermost ring + small gap
-                        spacer_offset <- self$max_ring_extent + gap
-
-                        # Create spacer data: a single dummy categorical value for all tips
-                        # Using the same structure as categorical rings (geom_tile)
-                                spacer_df <- data.frame(
-                                label  = self$tip_labels,
-                                spacer = rep("_spacer", length(self$tip_labels)),
-                                stringsAsFactors = FALSE
-                        )
-
-                        # Add new fill scale for this ring (required for independent scales)
-                        self$plot_obj <- self$plot_obj + ggnewscale::new_scale("fill")
-
-                        # Local reference for ggtreeExtra::geom_fruit() geom argument.
-                        # .convert_to_name() requires a bare function name, not ggplot2::geom_tile.
-                        geom_tile <- ggplot2::geom_tile
-
-                        # Use geom_tile — same as categorical rings.
-                        # This renders a complete uniform band regardless of data values.
-                        # Even if ggtreeExtra auto-expands the last ring, the extra space
-                        # is just white (invisible) — the last VISIBLE ring keeps its width.
-                        # color = NA removes the tile border outlines (otherwise visible as
-                        # thin radiating lines even when fill is white).
-                        spacer_layer <- ggtreeExtra::geom_fruit(
-                                data        = spacer_df,
-                                geom        = geom_tile,
-                                mapping     = ggplot2::aes(y = label, x = 1, fill = spacer),
-                                color       = NA,
-                                linewidth   = 0,
-                                offset      = spacer_offset,
-                                pwidth      = ring_width,
-                                width       = 1,
-                                axis.params = list(add = FALSE),
-                                grid.params = list()
-                        )
-
-                        # White fill, no legend — completely invisible
-                        self$plot_obj <- self$plot_obj +
-                        spacer_layer +
-                        ggplot2::scale_fill_manual(
-                                values   = c("_spacer" = "white"),
-                                guide    = "none",
-                                na.value = "white"
-                        )
-
-                        message(sprintf(paste0("Spacer ring added (offset: %.3f, width: %.3f). ",
-                                                                  "Uses geom_tile — invisible white band absorbs ",
-                                                                  "ggtreeExtra's auto-expansion without affecting tree layout."),
-                                                   spacer_offset, ring_width))
-                        invisible(self$plot_obj)
+                        message(sprintf("Successfully auto-labeled %d rings with dynamic cumulative layout.", nrow(history)))
+                        return(self)
                 },
 
                 # =======================================================================
