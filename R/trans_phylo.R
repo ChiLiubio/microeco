@@ -533,7 +533,13 @@ trans_phylo <- R6::R6Class(
 
 						r_label <- if (!is.null(ring_label)) ring_label else if (!is.null(legend_title_custom)) legend_title_custom else col_name
 						r_label <- gsub("\n", " ", r_label)
-						entry <- data.frame(label = r_label, offset = ring_offset, width = ring_width, stringsAsFactors = FALSE)
+						entry <- data.frame(
+							label = r_label, 
+							offset = ring_offset, 
+							width = ring_width, 
+							is_numeric = is_numeric, # add var type for label position identification
+							stringsAsFactors = FALSE)
+						
 						self$params$ring_history <- if (is.null(self$params$ring_history)) entry else rbind(self$params$ring_history, entry)
 
 						if (is_numeric && is.null(limits)) {
@@ -616,7 +622,6 @@ trans_phylo <- R6::R6Class(
                                                 !!!dot_args
                                                 )
                                         )
-                                        # Reuse the same fill_scale logic (DRY)
                                         self$plot_obj <- self$plot_obj +
                                                 fruit_layer +
                                                 fill_scale
@@ -643,18 +648,21 @@ trans_phylo <- R6::R6Class(
                                 # Ensure names match levels
                                 names(categorical_colors) <- levels(sub_df$value)
 
-								fruit_layer <- rlang::inject(ggtreeExtra::geom_fruit(
-                                        data    = sub_df,
-                                        geom    = geom_tile,
-                                        # Remove x = 1, let ggtreeExtra auto-allocate slot to prevent polar inward expansion
-                                        mapping = ggplot2::aes(y = label, fill = value),
-                                        offset  = ring_offset,
-                                        pwidth  = ring_width,
-                                        # Remove forced width = 1 entirely
+                                # Forcefully inject a constant virtual X value to reduce the heatmap to a bar chart with values uniformly fixed at 1
+                                sub_df$.dummy_x <- 1
+                                
+                                fruit_layer <- rlang::inject(ggtreeExtra::geom_fruit(
+                                        data        = sub_df,
+                                        geom        = geom_col,   # Deprecate geom_tile
+                                        mapping     = ggplot2::aes(y = label, x = .dummy_x, fill = value),
+                                        offset      = ring_offset,
+                                        pwidth      = ring_width,
+                                        orientation = "y",        # Ensure distribution along the y-axis
+                                        width       = 1,          # width=1 ensures no white gaps between adjacent categorical tiles, forming a continuous color band
                                         !!!dot_args
                                         )
                                 )
-								
+
                                 self$plot_obj <- self$plot_obj +
                                         fruit_layer +
                                         ggplot2::scale_fill_manual(
@@ -699,13 +707,22 @@ trans_phylo <- R6::R6Class(
                         tree_width <- max_x - min_x
                         if (is.na(tree_width) || tree_width <= 0) tree_width <- 1.0
 
-                        outer_edges <- cumsum(history$offset + history$width)
+                        #outer_edges <- cumsum(history$offset + history$width)
                         # Calculate the relative proportional positions of each ring's center point
-                        mid_points  <- outer_edges - (history$width / 2)
+                        #mid_points  <- outer_edges - (history$width / 2)
+
+						mid_points <- numeric(nrow(history))
+                        current_max_x_prop <- 0
                         
-                        # Compute absolute X coordinates: precisely align with the physical centers of the rings
-                        x_pos_all <- max_x + mid_points * tree_width
-                        
+                        # All layers are now uniformly stacked according to their physical left boundary
+                        for (i in seq_len(nrow(history))) {
+                                mid_points[i] <- current_max_x_prop + history$offset[i] + history$width[i] / 2
+                                current_max_x_prop <- current_max_x_prop + history$offset[i] + history$width[i]
+                        }
+
+						# Compute absolute X coordinates: precisely align with the physical centers of the rings
+						x_pos_all <- max_x + mid_points * tree_width
+
                         # Y coordinates: 0.5 is the valid lower boundary for the ggtree fan layout
                         y_pos_all <- rep(0.5, nrow(history))
 
