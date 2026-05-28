@@ -21,7 +21,8 @@ trans_phylo <- R6::R6Class(
                 #' @param group_col string, taxonomic rank column for branch/tip coloring, default "Phylum"
                 #' @param ring_data data.frame, outer ring annotation data; row names or first column
                 #'   should match tip labels. Supports numeric (heatmap) and categorical (color band) columns
-                #' @param color_palette optional custom color palette; auto-generated if NULL
+                #' @param color_palette vector, optional custom color palette; 
+                #'   If the color vector has names, they will be used in correspondence with the names; auto-generated if NULL
                 #' @param group_prefix string, prefix to add to group names for legend display
                 #' @param group_prefix_remove string, prefix to strip from group names (e.g. "p__")
                 #' @param clade_coloring logical, if TRUE (default), propagate group info to internal
@@ -121,32 +122,12 @@ trans_phylo <- R6::R6Class(
                 #' # Clean Class column
                 #' ring_df$Class <- gsub("^c__", "", ring_df$Class)
                 #' ring_df$Class[ring_df$Class == "" | is.na(ring_df$Class)] <- "Unclassified"
-                #' 
-                #' # ========================================================================
-                #' # Custom style color palette for Phyla
-                #' # ========================================================================
-                #' 
-                #' phyla_present <- unique(gsub("^p__", "", mt$tax_table$Phylum))
-                #' n_phyla <- length(phyla_present)
-                #' 
-                #' phyla_colors <- c(
-                #'   "#E64B35", "#4DBBD5", "#00A087", "#3C5488",
-                #'   "#F39B7F", "#8491B4", "#91D1C2", "#DC0000",
-                #'   "#7E6148", "#B09C85", "#BB8FCE", "#5B88D4"
-                #' )
-                #' if (n_phyla <= length(phyla_colors)) {
-                #'   phyla_colors <- phyla_colors[1:n_phyla]
-                #' } else {
-                #'   phyla_colors <- colorRampPalette(phyla_colors)(n_phyla)
-                #' }
-                #' names(phyla_colors) <- phyla_present
                 #'
                 #' pviz <- trans_phylo$new(
                 #'   dataset             = mt,
                 #'   group_col           = "Phylum",
                 #'   group_prefix_remove = "p__",
                 #'   ring_data           = ring_df,
-                #'   color_palette       = list(group_color = phyla_colors),
                 #'   clade_coloring      = TRUE
                 #' )
                 #' }
@@ -205,10 +186,17 @@ trans_phylo <- R6::R6Class(
 
                         # --- Generate color palette ---
                         if (is.null(color_palette)) {
-                                self$color_palette <- private$generate_palette()
-                        } else {
-                                self$color_palette <- color_palette
-                        }
+                                color_palette <- private$generate_palette()
+                        }else{
+							groups   <- unique(self$group_info$Group)
+							n_groups <- length(groups)
+							if(!is.vector(color_palette)) stop("Input color_palette must be a vector!")
+							if(length(color_palette) < n_groups) stop("Input color_palette is not enough!", n_groups, " is need!")
+							if(is.null(names(color_palette))){
+								names(color_palette) <- groups
+							}
+						}
+						self$color_palette <- color_palette
 
                         message("trans_phylo object initialized successfully.")
                         message(sprintf("  Tree tips: %d", length(self$tip_labels)))
@@ -298,7 +286,7 @@ trans_phylo <- R6::R6Class(
 
                         # Unified legend title and breaks for both branch color and tip point fill
                         leg_title  <- ifelse(is.null(legend_title), self$group_col, legend_title)
-                        pal        <- self$color_palette$group_color
+                        pal        <- self$color_palette
                         # Use explicit breaks to ensure color and fill scales map identically.
                         # groupOTU's 'group' column includes "0" for unassigned internal nodes,
                         # which is NOT in pal. Setting breaks = names(pal) ensures both scales
@@ -1155,15 +1143,12 @@ trans_phylo <- R6::R6Class(
                 } else if (n_groups <= 20) {
                         group_color <- colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(n_groups)
                 } else {
-                        # Use viridis when more than 20 groups
+                        # Use viridis when more than 20
                         group_color <- viridis::viridis(n_groups, option = "D")
                 }
                 names(group_color) <- groups
 
-                palette <- list(
-                group_color = group_color
-                )
-                return(palette)
+                return(group_color)
         }
         ),
         lock_class = FALSE,

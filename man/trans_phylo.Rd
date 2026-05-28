@@ -107,31 +107,11 @@ ring_df <- data.frame(
 ring_df$Class <- gsub("^c__", "", ring_df$Class)
 ring_df$Class[ring_df$Class == "" | is.na(ring_df$Class)] <- "Unclassified"
 
-# ========================================================================
-# Custom style color palette for Phyla
-# ========================================================================
-
-phyla_present <- unique(gsub("^p__", "", mt$tax_table$Phylum))
-n_phyla <- length(phyla_present)
-
-phyla_colors <- c(
-  "#E64B35", "#4DBBD5", "#00A087", "#3C5488",
-  "#F39B7F", "#8491B4", "#91D1C2", "#DC0000",
-  "#7E6148", "#B09C85", "#BB8FCE", "#5B88D4"
-)
-if (n_phyla <= length(phyla_colors)) {
-  phyla_colors <- phyla_colors[1:n_phyla]
-} else {
-  phyla_colors <- colorRampPalette(phyla_colors)(n_phyla)
-}
-names(phyla_colors) <- phyla_present
-
 pviz <- trans_phylo$new(
   dataset             = mt,
   group_col           = "Phylum",
   group_prefix_remove = "p__",
   ring_data           = ring_df,
-  color_palette       = list(group_color = phyla_colors),
   clade_coloring      = TRUE
 )
 }
@@ -329,7 +309,8 @@ Initialize a trans_phylo object
 \item{\code{ring_data}}{data.frame, outer ring annotation data; row names or first column
 should match tip labels. Supports numeric (heatmap) and categorical (color band) columns}
 
-\item{\code{color_palette}}{optional custom color palette; auto-generated if NULL}
+\item{\code{color_palette}}{vector, optional custom color palette; 
+If the color vector has names, they will be used in correspondence with the names; auto-generated if NULL}
 
 \item{\code{group_prefix}}{string, prefix to add to group names for legend display}
 
@@ -437,31 +418,11 @@ ring_df <- data.frame(
 ring_df$Class <- gsub("^c__", "", ring_df$Class)
 ring_df$Class[ring_df$Class == "" | is.na(ring_df$Class)] <- "Unclassified"
 
-# ========================================================================
-# Custom style color palette for Phyla
-# ========================================================================
-
-phyla_present <- unique(gsub("^p__", "", mt$tax_table$Phylum))
-n_phyla <- length(phyla_present)
-
-phyla_colors <- c(
-  "#E64B35", "#4DBBD5", "#00A087", "#3C5488",
-  "#F39B7F", "#8491B4", "#91D1C2", "#DC0000",
-  "#7E6148", "#B09C85", "#BB8FCE", "#5B88D4"
-)
-if (n_phyla <= length(phyla_colors)) {
-  phyla_colors <- phyla_colors[1:n_phyla]
-} else {
-  phyla_colors <- colorRampPalette(phyla_colors)(n_phyla)
-}
-names(phyla_colors) <- phyla_present
-
 pviz <- trans_phylo$new(
   dataset             = mt,
   group_col           = "Phylum",
   group_prefix_remove = "p__",
   ring_data           = ring_df,
-  color_palette       = list(group_color = phyla_colors),
   clade_coloring      = TRUE
 )
 }
