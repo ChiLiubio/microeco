@@ -192,8 +192,10 @@ pviz$add_ring_labels(size = 1.8, color = "grey25")
 pviz$add_rings_batch(
   col_names    = c("RelAbund", "Prevalence", "LogAbund"),
   numeric_geom = "bar",
-  ring_width   = 0.04,
-  ring_offset  = 0.02,
+  ring_width   = c(0.02, 0.03, 0.04),
+  ring_offset  = c(0.02, 0.01, 0.02),
+  color_low    = c("#440154", "#EDF8FB", "#FFF5EB"),
+  color_high   = c("#FDE725", "#006D2C", "#D94801"),
   show_legend  = TRUE
 )
 }
@@ -717,7 +719,10 @@ pviz$add_ring_labels(size = 1.8, color = "grey25")
 \if{html}{\out{<a id="method-trans_phylo-add_rings_batch"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_phylo-add_rings_batch}{}}}
 \subsection{Method \code{add_rings_batch()}}{
-Batch add all (or selected) columns from ring_data as outer rings
+Batch add all (or selected) columns from ring_data as outer rings.
+  Parameters ring_width, ring_offset, color_low, color_high, numeric_geom, show_legend
+  and categorical_palette all support vector input (length = number of col_names);
+  a single value is automatically recycled for all rings.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_rings_batch(
   col_names = NULL,
@@ -737,19 +742,28 @@ Batch add all (or selected) columns from ring_data as outer rings
 \describe{
 \item{\code{col_names}}{character vector of column names to add; NULL means all columns}
 
-\item{\code{numeric_geom}}{geom type for numeric columns, default "bar"}
+\item{\code{numeric_geom}}{character or character vector; geom type(s) for numeric columns, default "bar".
+Recycled if length 1; must match length of col_names otherwise.}
 
-\item{\code{ring_width}}{ring width, default 0.08}
+\item{\code{ring_width}}{numeric or numeric vector; ring width(s), default 0.08.
+Single value is recycled; vector must match length of col_names.}
 
-\item{\code{ring_offset}}{spacing between rings, default 0.02}
+\item{\code{ring_offset}}{numeric or numeric vector; gap(s) before each ring, default 0.02.
+This is the spacing *between* rings, not the absolute offset.
+Cumulative offset is computed automatically from ring_width and ring_offset.
+Single value is recycled; vector must match length of col_names.}
 
-\item{\code{color_low}}{color for low numeric values, default "#0D0887"}
+\item{\code{color_low}}{character or character vector; color(s) for low numeric values, default "#0D0887".
+Single value is recycled; vector must match length of col_names.}
 
-\item{\code{color_high}}{color for high numeric values, default "#F0F921"}
+\item{\code{color_high}}{character or character vector; color(s) for high numeric values, default "#F0F921".
+Single value is recycled; vector must match length of col_names.}
 
-\item{\code{categorical_palette}}{categorical palette function, default NULL}
+\item{\code{categorical_palette}}{palette function or list of palette functions for categorical columns.
+A single function is recycled for all rings; a list must match length of col_names. Default NULL.}
 
-\item{\code{show_legend}}{logical, whether to show legends}
+\item{\code{show_legend}}{logical or logical vector; whether to show legends, default TRUE.
+Single value is recycled; vector must match length of col_names.}
 
 \item{\code{...}}{additional arguments passed to each add_ring() call}
 }
@@ -764,8 +778,10 @@ updated ggtree plot object
 pviz$add_rings_batch(
   col_names    = c("RelAbund", "Prevalence", "LogAbund"),
   numeric_geom = "bar",
-  ring_width   = 0.04,
-  ring_offset  = 0.02,
+  ring_width   = c(0.02, 0.03, 0.04),
+  ring_offset  = c(0.02, 0.01, 0.02),
+  color_low    = c("#440154", "#EDF8FB", "#FFF5EB"),
+  color_high   = c("#FDE725", "#006D2C", "#D94801"),
   show_legend  = TRUE
 )
 }

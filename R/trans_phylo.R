@@ -747,15 +747,27 @@ trans_phylo <- R6::R6Class(
                 # =======================================================================
                 # add_rings_batch: Batch add multiple ring annotations
                 # =======================================================================
-                #' @description Batch add all (or selected) columns from ring_data as outer rings
+                #' @description Batch add all (or selected) columns from ring_data as outer rings.
+                #'   Parameters ring_width, ring_offset, color_low, color_high, numeric_geom, show_legend
+                #'   and categorical_palette all support vector input (length = number of col_names);
+                #'   a single value is automatically recycled for all rings.
                 #' @param col_names character vector of column names to add; NULL means all columns
-                #' @param numeric_geom geom type for numeric columns, default "bar"
-                #' @param ring_width ring width, default 0.08
-                #' @param ring_offset spacing between rings, default 0.02
-                #' @param color_low color for low numeric values, default "#0D0887"
-                #' @param color_high color for high numeric values, default "#F0F921"
-                #' @param categorical_palette categorical palette function, default NULL
-                #' @param show_legend logical, whether to show legends
+                #' @param numeric_geom character or character vector; geom type(s) for numeric columns, default "bar".
+                #'   Recycled if length 1; must match length of col_names otherwise.
+                #' @param ring_width numeric or numeric vector; ring width(s), default 0.08.
+                #'   Single value is recycled; vector must match length of col_names.
+                #' @param ring_offset numeric or numeric vector; gap(s) before each ring, default 0.02.
+                #'   This is the spacing *between* rings, not the absolute offset.
+                #'   Cumulative offset is computed automatically from ring_width and ring_offset.
+                #'   Single value is recycled; vector must match length of col_names.
+                #' @param color_low character or character vector; color(s) for low numeric values, default "#0D0887".
+                #'   Single value is recycled; vector must match length of col_names.
+                #' @param color_high character or character vector; color(s) for high numeric values, default "#F0F921".
+                #'   Single value is recycled; vector must match length of col_names.
+                #' @param categorical_palette palette function or list of palette functions for categorical columns.
+                #'   A single function is recycled for all rings; a list must match length of col_names. Default NULL.
+                #' @param show_legend logical or logical vector; whether to show legends, default TRUE.
+                #'   Single value is recycled; vector must match length of col_names.
                 #' @param ... additional arguments passed to each add_ring() call
                 #' @return updated ggtree plot object
                 #' @examples
@@ -763,8 +775,10 @@ trans_phylo <- R6::R6Class(
                 #' pviz$add_rings_batch(
                 #'   col_names    = c("RelAbund", "Prevalence", "LogAbund"),
                 #'   numeric_geom = "bar",
-                #'   ring_width   = 0.04,
-                #'   ring_offset  = 0.02,
+                #'   ring_width   = c(0.02, 0.03, 0.04),
+                #'   ring_offset  = c(0.02, 0.01, 0.02),
+                #'   color_low    = c("#440154", "#EDF8FB", "#FFF5EB"),
+                #'   color_high   = c("#FDE725", "#006D2C", "#D94801"),
                 #'   show_legend  = TRUE
                 #' )
                 #' }
@@ -793,24 +807,39 @@ trans_phylo <- R6::R6Class(
                                 stop("No valid columns found for ring annotation.")
                         }
 
-                        cumulative_offset <- ring_offset
+                        n <- length(all_cols)
+                        ring_width   <- rep_len(ring_width, n)
+                        ring_offset  <- rep_len(ring_offset, n)
+                        color_low    <- rep_len(color_low, n)
+                        color_high   <- rep_len(color_high, n)
+                        numeric_geom <- rep_len(numeric_geom, n)
+                        show_legend  <- rep_len(show_legend, n)
+                        cat_pal_list <- if (is.null(categorical_palette)) {
+                                rep_len(list(NULL), n)
+                        } else if (is.list(categorical_palette)) {
+                                rep_len(categorical_palette, n)
+                        } else {
+                                rep_len(list(categorical_palette), n)
+                        }
+
+                        cumulative_offset <- ring_offset[1]
 
                         for (i in seq_along(all_cols)) {
                                 cn <- all_cols[i]
                                 self$add_ring(
                                         col_name            = cn,
                                         ring_data           = df,
-                                        ring_width          = ring_width,
+                                        ring_width          = ring_width[i],
                                         ring_offset         = cumulative_offset,
-                                        geom                = numeric_geom,
-                                        color_low           = color_low,
-                                        color_high          = color_high,
-                                        show_legend         = show_legend,
+                                        geom                = numeric_geom[i],
+                                        color_low           = color_low[i],
+                                        color_high          = color_high[i],
+                                        categorical_palette = cat_pal_list[[i]],
+                                        show_legend         = show_legend[i],
                                         legend_title_custom = cn,
                                         ...
                                 )
-                                # Accumulate offset so rings are arranged from inner to outer
-                                cumulative_offset <- cumulative_offset + ring_width + ring_offset
+                                cumulative_offset <- cumulative_offset + ring_width[i] + ring_offset[i]
                         }
 
                         message(sprintf("Batch added %d ring annotation(s).", length(all_cols)))
