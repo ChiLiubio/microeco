@@ -132,12 +132,12 @@ trans_phylo <- R6::R6Class(
                 #' )
                 #' }
                 initialize = function(dataset,
-                                                          group_col = "Phylum",
-                                                          ring_data = NULL,
-                                                          color_palette = NULL,
-                                                          group_prefix = NULL,
-                                                          group_prefix_remove = NULL,
-                                                          clade_coloring = TRUE) {
+									  group_col = "Phylum",
+									  ring_data = NULL,
+									  color_palette = NULL,
+									  group_prefix = NULL,
+									  group_prefix_remove = NULL,
+									  clade_coloring = TRUE) {
 
                         # --- Parameter validation ---
                         if (is.null(dataset)) {
@@ -245,23 +245,23 @@ trans_phylo <- R6::R6Class(
                 #' )
                 #' }
                 plot_tree = function(layout               = "fan",
-                                                         open_angle           = 30,
-                                                         branch_size          = 0.3,
-                                                         tip_point            = TRUE,
-                                                         tip_point_size       = 2,
-                                                         tip_point_shape      = 21,
-                                                         tip_point_stroke     = 0.3,
-                                                         tip_point_alpha      = 0.9,
-                                                         show_tip_label       = FALSE,
-                                                         tip_label_size       = 2,
-                                                         tip_label_offset     = 0.5,
-                                                         show_node_label      = FALSE,
-                                                         branch_color_by_group = TRUE,
-                                                         branch_color         = "grey40",
-                                                         legend_title         = NULL,
-                                                         legend_position      = "right",
-                                                         legend_font_size     = 3.5,
-                                                         theme_base           = NULL) {
+									 open_angle           = 30,
+									 branch_size          = 0.3,
+									 tip_point            = TRUE,
+									 tip_point_size       = 2,
+									 tip_point_shape      = 21,
+									 tip_point_stroke     = 0.3,
+									 tip_point_alpha      = 0.9,
+									 show_tip_label       = FALSE,
+									 tip_label_size       = 2,
+									 tip_label_offset     = 0.5,
+									 show_node_label      = FALSE,
+									 branch_color_by_group = TRUE,
+									 branch_color         = "grey40",
+									 legend_title         = NULL,
+									 legend_position      = "right",
+									 legend_font_size     = 3.5,
+									 theme_base           = NULL) {
 
                         self$params$open_angle <- open_angle
 
@@ -389,7 +389,7 @@ trans_phylo <- R6::R6Class(
 
                         self$plot_obj <- p
                         message(sprintf("Tree plotted (layout: %s). Use $add_ring() to add outer annotations.", layout))
-                        invisible(self$plot_obj)
+                        invisible(self)
                 },
 
                 # =======================================================================
@@ -664,7 +664,7 @@ trans_phylo <- R6::R6Class(
 
 						message(sprintf("Ring annotation '%s' added. (offset: %.3f, width: %.3f)", 
 										col_name, ring_offset, ring_width))
-						invisible(self$plot_obj)
+                        invisible(self)
 				},
 
                 # =======================================================================
@@ -741,7 +741,7 @@ trans_phylo <- R6::R6Class(
                         }
 
                         message(sprintf("Successfully auto-labeled %d rings with dynamic cumulative layout.", nrow(history)))
-                        return(self)
+                        invisible(self)
                 },
 
                 # =======================================================================
@@ -783,14 +783,14 @@ trans_phylo <- R6::R6Class(
                 #' )
                 #' }
                 add_rings_batch = function(col_names           = NULL,
-                                                                   numeric_geom        = "bar",
-                                                                   ring_width          = 0.08,
-                                                                   ring_offset         = 0.02,
-                                                                   color_low           = "#0D0887",
-                                                                   color_high          = "#F0F921",
-                                                                   categorical_palette = NULL,
-                                                                   show_legend         = TRUE,
-                                                                   ...) {
+										   numeric_geom        = "bar",
+										   ring_width          = 0.08,
+										   ring_offset         = 0.02,
+										   color_low           = "#0D0887",
+										   color_high          = "#F0F921",
+										   categorical_palette = NULL,
+										   show_legend         = TRUE,
+										   ...) {
 
                         if (is.null(self$ring_data) && is.null(col_names)) {
                                 stop("No ring data available.")
@@ -843,7 +843,7 @@ trans_phylo <- R6::R6Class(
                         }
 
                         message(sprintf("Batch added %d ring annotation(s).", length(all_cols)))
-                        invisible(self$plot_obj)
+                        invisible(self)
                 },
 
                 # =======================================================================
@@ -871,7 +871,7 @@ trans_phylo <- R6::R6Class(
                                 linesize = 0.5,
                                 offset   = 0.2
                         )
-                        invisible(self$plot_obj)
+                        invisible(self)
                 },
 
                 # =======================================================================
@@ -889,9 +889,9 @@ trans_phylo <- R6::R6Class(
                 #' pviz$add_highlight_clade(node = 150, fill = "steelblue", alpha = 0.3)
                 #' }
                 add_highlight_clade = function(node,
-                                                                                fill   = "steelblue",
-                                                                                alpha  = 0.3,
-                                                                                extend = 0.15) {
+												fill   = "steelblue",
+												alpha  = 0.3,
+												extend = 0.15) {
                         if (is.null(self$plot_obj)) stop("No plot object found.")
 
                         self$plot_obj <- self$plot_obj +
@@ -921,11 +921,11 @@ trans_phylo <- R6::R6Class(
                 #' pviz$add_clade_label(node = 150, label = "Clade A", color = "black", size = 4)
                 #' }
                 add_clade_label = function(node,
-                                                                        label,
-                                                                        color    = "black",
-                                                                        size     = 4,
-                                                                        offset   = 0.5,
-                                                                        barsize  = 0.8) {
+											label,
+											color    = "black",
+											size     = 4,
+											offset   = 0.5,
+											barsize  = 0.8) {
                         if (is.null(self$plot_obj)) stop("No plot object found.")
 
                         self$plot_obj <- self$plot_obj +
@@ -939,7 +939,7 @@ trans_phylo <- R6::R6Class(
                                 horizontal = TRUE,
                                 angle      = 0
                         )
-                        invisible(self$plot_obj)
+                        invisible(self)
                 },
 
                 # =======================================================================
@@ -955,8 +955,8 @@ trans_phylo <- R6::R6Class(
                 #' pviz$theme_publication(base_size = 7)
                 #' }
                 theme_publication = function(base_size   = 12,
-                                                                          base_family = "sans",
-                                                                          bg_color    = "white") {
+											  base_family = "sans",
+											  bg_color    = "white") {
                         if (is.null(self$plot_obj)) stop("No plot object found.")
 
                         self$plot_obj <- self$plot_obj +
@@ -975,7 +975,7 @@ trans_phylo <- R6::R6Class(
                                 plot.margin          = ggplot2::margin(t = 5, r = 15, b = 5, l = 5, unit = "pt")
                         )
 
-                        invisible(self$plot_obj)
+                        invisible(self)
                 },
 				
                 # =======================================================================
@@ -1017,10 +1017,10 @@ trans_phylo <- R6::R6Class(
                 #' 				
                 #' }
                 save_plot = function(filename,
-                                                         width   = 12,
-                                                         height  = 12,
-                                                         dpi     = 300,
-                                                         device  = NULL) {
+									 width   = 12,
+									 height  = 12,
+									 dpi     = 300,
+									 device  = NULL) {
                         if (is.null(self$plot_obj)) {
                                 stop("No plot object to save. Run $plot_tree() first.")
                         }
