@@ -205,7 +205,7 @@ pviz$add_rings_batch(
 ## ------------------------------------------------
 
 \dontrun{
-pviz$add_scale_bar(x = 0, y = 0, label = "0.05")
+pviz$add_scale_bar(x = 0.2, y = 0, label = "0.05")
 }
 
 ## ------------------------------------------------
@@ -797,7 +797,15 @@ pviz$add_rings_batch(
 \subsection{Method \code{add_scale_bar()}}{
 Add an evolutionary distance scale bar to the plot
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_scale_bar(x = NULL, y = NULL, label = "0.05")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_scale_bar(
+  x = NULL,
+  y = NULL,
+  label = "0.05",
+  fontsize = 2,
+  linesize = 0.5,
+  offset = 0.3,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -808,6 +816,14 @@ Add an evolutionary distance scale bar to the plot
 \item{\code{y}}{numeric, y coordinate}
 
 \item{\code{label}}{string, scale bar label}
+
+\item{\code{fontsize}}{numeric, default 2, text size}
+
+\item{\code{linesize}}{numeric, default 0.5, line size}
+
+\item{\code{offset}}{numeric, default 0.3, offset of text to line}
+
+\item{\code{...}}{additional arguments passed to ggtree::geom_treescale}
 }
 \if{html}{\out{</div>}}
 }
@@ -817,7 +833,7 @@ updated plot
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-pviz$add_scale_bar(x = 0, y = 0, label = "0.05")
+pviz$add_scale_bar(x = 0.2, y = 0, label = "0.05")
 }
 }
 \if{html}{\out{</div>}}

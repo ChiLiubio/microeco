@@ -853,12 +853,16 @@ trans_phylo <- R6::R6Class(
                 #' @param x numeric, x coordinate
                 #' @param y numeric, y coordinate
                 #' @param label string, scale bar label
+                #' @param fontsize numeric, default 2, text size
+                #' @param linesize numeric, default 0.5, line size
+				#' @param offset numeric, default 0.3, offset of text to line
+                #' @param ... additional arguments passed to ggtree::geom_treescale
                 #' @return updated plot
                 #' @examples
                 #' \dontrun{
-                #' pviz$add_scale_bar(x = 0, y = 0, label = "0.05")
+                #' pviz$add_scale_bar(x = 0.2, y = 0, label = "0.05")
                 #' }
-                add_scale_bar = function(x = NULL, y = NULL, label = "0.05") {
+                add_scale_bar = function(x = NULL, y = NULL, label = "0.05", fontsize = 2, linesize = 0.5, offset = 0.3, ...) {
                         if (is.null(self$plot_obj)) stop("No plot object found.")
 
                         self$plot_obj <- self$plot_obj +
@@ -867,9 +871,10 @@ trans_phylo <- R6::R6Class(
                                 y        = y,
                                 width    = as.numeric(label),
                                 label    = label,
-                                fontsize = 3,
-                                linesize = 0.5,
-                                offset   = 0.2
+                                fontsize = fontsize,
+                                linesize = linesize,
+								offset   = offset,
+                                ...
                         )
                         invisible(self)
                 },
