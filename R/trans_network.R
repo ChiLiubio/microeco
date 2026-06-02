@@ -601,6 +601,10 @@ trans_network <- R6Class(classname = "trans_network",
 			}
 			
 			if(format == "graphml"){
+				if(grepl("\\.gexf$", filepath)){
+					filepath %<>% gsub("gexf$", "graphml", .)
+					message("Change the filepath suffix to graphml ...")
+				}
 				igraph::write_graph(self$res_network, filepath, format = "graphml")
 			}
 			
