@@ -552,45 +552,57 @@ trans_network <- R6Class(classname = "trans_network",
 			invisible(self)
 		},
 		#' @description
-		#' Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
+		#' Save network as gexf or graphml style. 
+		#' The gexf format can be opened by Gephi (https://gephi.org/).
+		#' The graphml format can be opened by Cytoscape (https://cytoscape.org/).
 		#'
-		#' @param filepath default "network.gexf"; file path to save the network.
+		#' @param filepath default "network.gexf"; file path to save the network. 
+		#'   When \code{format = "graphml"}, the file suffix should be ".graphml", e.g. "network.graphml".
+		#' @param format default "gexf"; the output format, either "gexf" or "graphml"; 
+		#'   "gexf" for Gephi software; "graphml" for Cytoscape software.
 		#' @param ... parameters pass to \code{gexf} function of rgexf package except for \code{nodes}, 
-		#' 	  \code{edges}, \code{edgesLabel}, \code{edgesWeight}, \code{nodesAtt}, \code{edgesAtt} and \code{meta}.
+		#' 	  \code{edges}, \code{edgesLabel}, \code{edgesWeight}, \code{nodesAtt}, \code{edgesAtt} and \code{meta}
+		#'   when \code{format = "gexf"}.
 		#' @return None
 		#' @examples
 		#' \dontrun{
 		#' t1$save_network(filepath = "network.gexf")
+		#' t1$save_network(filepath = "network.graphml", format = "graphml")
 		#' }
-		save_network = function(filepath = "network.gexf", ...){
-			if(!require("rgexf")){
-				stop("Please first install rgexf package with command: install.packages('rgexf') !")
-			}
+		save_network = function(filepath = "network.gexf", format = "gexf", ...){
+			format <- match.arg(format, c("gexf", "graphml"))
 			private$check_igraph()
 			private$check_network()
 			private$check_node_name()
 			
-			network <- self$res_network
-			
-			nodes <- data.frame(cbind(V(network), V(network)$name))
-			edges <- igraph::get.edges(network, 1:ecount(network))
-			node_attr_name <- base::setdiff(vertex_attr_names(network), "name")
-			node_attr <- data.frame(sapply(node_attr_name, function(x) vertex_attr(network, x)))
-			if("RelativeAbundance" %in% node_attr_name){
-				node_attr$RelativeAbundance %<>% as.numeric
+			if(format == "gexf"){
+				if(!require("rgexf")){
+					stop("Please first install rgexf package with command: install.packages('rgexf') !")
+				}
+				network <- self$res_network
+				nodes <- data.frame(cbind(V(network), V(network)$name))
+				edges <- igraph::get.edges(network, 1:ecount(network))
+				node_attr_name <- base::setdiff(vertex_attr_names(network), "name")
+				node_attr <- data.frame(sapply(node_attr_name, function(x) vertex_attr(network, x)))
+				if("RelativeAbundance" %in% node_attr_name){
+					node_attr$RelativeAbundance %<>% as.numeric
+				}
+				edge_attr_name <- base::setdiff(edge_attr_names(network), "weight")
+				edge_attr <- data.frame(sapply(edge_attr_name, function(x) edge_attr(network, x)))
+				graphAtt <- sapply(graph_attr_names(network), function(x) graph_attr(network, x))
+				output_gexf <- write.gexf(nodes, edges,
+					edgesLabel = as.data.frame(E(network)$label),
+					edgesWeight = E(network)$weight,
+					nodesAtt = node_attr,
+					edgesAtt = edge_attr,
+					meta = c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt), 
+					...)
+				cat(output_gexf$graph, file = filepath)
 			}
-			edge_attr_name <- base::setdiff(edge_attr_names(network), "weight")
-			edge_attr <- data.frame(sapply(edge_attr_name, function(x) edge_attr(network, x)))
-			# combine all graph attributes into a meta-data
-			graphAtt <- sapply(graph_attr_names(network), function(x) graph_attr(network, x))
-			output_gexf <- write.gexf(nodes, edges,
-				edgesLabel = as.data.frame(E(network)$label),
-				edgesWeight = E(network)$weight,
-				nodesAtt = node_attr,
-				edgesAtt = edge_attr,
-				meta = c(list(creator="trans_network class", description="igraph -> gexf converted file", keywords="igraph, gexf, R, rgexf"), graphAtt), 
-				...)
-			cat(output_gexf$graph, file = filepath)
+			
+			if(format == "graphml"){
+				igraph::write_graph(self$res_network, filepath, format = "graphml")
+			}
 			
 			invisible(self)
 		},

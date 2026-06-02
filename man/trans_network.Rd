@@ -57,6 +57,7 @@ t1$cal_module(method = "cluster_fast_greedy")
 
 \dontrun{
 t1$save_network(filepath = "network.gexf")
+t1$save_network(filepath = "network.graphml", format = "graphml")
 }
 
 ## ------------------------------------------------
@@ -480,18 +481,25 @@ t1$cal_module(method = "cluster_fast_greedy")
 \if{html}{\out{<a id="method-trans_network-save_network"></a>}}
 \if{latex}{\out{\hypertarget{method-trans_network-save_network}{}}}
 \subsection{Method \code{save_network()}}{
-Save network as gexf style, which can be opened by Gephi (https://gephi.org/).
+Save network as gexf or graphml style. 
+The gexf format can be opened by Gephi (https://gephi.org/).
+The graphml format can be opened by Cytoscape (https://cytoscape.org/).
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf", ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_network$save_network(filepath = "network.gexf", format = "gexf", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{filepath}}{default "network.gexf"; file path to save the network.}
+\item{\code{filepath}}{default "network.gexf"; file path to save the network. 
+When \code{format = "graphml"}, the file suffix should be ".graphml", e.g. "network.graphml".}
+
+\item{\code{format}}{default "gexf"; the output format, either "gexf" or "graphml"; 
+"gexf" for Gephi software; "graphml" for Cytoscape software.}
 
 \item{\code{...}}{parameters pass to \code{gexf} function of rgexf package except for \code{nodes}, 
-\code{edges}, \code{edgesLabel}, \code{edgesWeight}, \code{nodesAtt}, \code{edgesAtt} and \code{meta}.}
+    \code{edges}, \code{edgesLabel}, \code{edgesWeight}, \code{nodesAtt}, \code{edgesAtt} and \code{meta}
+when \code{format = "gexf"}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -502,6 +510,7 @@ None
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 t1$save_network(filepath = "network.gexf")
+t1$save_network(filepath = "network.graphml", format = "graphml")
 }
 }
 \if{html}{\out{</div>}}
