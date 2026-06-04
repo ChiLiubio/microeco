@@ -1,7 +1,7 @@
 #' @title trans_phylo class
 #'
-#' @description Publication-grade phylogenetic tree visualization built on ggtree,
-#'   designed for microeco's microtable object. Supports group-based branch/tip
+#' @description Publication-grade phylogenetic tree visualization built on ggtree package (DOI: 10.1002/imt2.56),
+#'   designed for the microtable object. Supports group-based branch/tip
 #'   coloring (with full clade coloring via groupOTU) and multi-layer outer ring
 #'   annotations.
 #'
