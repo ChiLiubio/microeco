@@ -901,7 +901,7 @@ see the \code{trans} item in \code{ggplot2::scale_colour_gradientn}.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-ggplot2 object.
+ggplot2 object, or aplot object when cluster_ggplot is not default "none".
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

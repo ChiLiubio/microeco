@@ -1141,7 +1141,7 @@ trans_env <- R6Class(classname = "trans_env",
 		#' @param ylab_type_italic deprecated. Please use \code{ytext_italic} argument instead.
 		#' @param text_y_position deprecated. Please use \code{ytext_position} argument instead.
 		#' @param ... paremeters passed to \code{ggplot2::geom_tile}.
-		#' @return ggplot2 object.
+		#' @return ggplot2 object, or aplot object when cluster_ggplot is not default "none".
 		#' @examples
 		#' \donttest{
 		#' t1$plot_cor()
