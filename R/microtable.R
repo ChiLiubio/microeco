@@ -661,13 +661,15 @@ microtable <- R6Class(classname = "microtable",
 		#' 	  Only available when \code{rm_un = TRUE}. The default "__$" means removing the names end with '__'.
 		#' @param sep default ","; the field separator string. Same with \code{sep} parameter in \code{\link{write.table}} function.
 		#' 	  default \code{','} correspond to the file name suffix 'csv'. The option \code{'\t'} correspond to the file name suffix 'tsv'. For other options, suffix are all 'txt'.
+		#' @param digits default 10; Number of decimal places to retain. The primary reason for setting this parameter is that if a number has too many decimal places, 
+		#' 	  tools like Excel will automatically convert it to text, which can hinder subsequent operations.
 		#' @param ... parameters passed to \code{\link{write.table}}.
 		#' @examples
 		#' \dontrun{
 		#' m1$save_abund(dirpath = "taxa_abund")
 		#' m1$save_abund(merge_all = TRUE, rm_un = TRUE, sep = "\t")
 		#' }
-		save_abund = function(dirpath = "taxa_abund", merge_all = FALSE, rm_un = FALSE, rm_pattern = "__$", sep = ",", ...){
+		save_abund = function(dirpath = "taxa_abund", merge_all = FALSE, rm_un = FALSE, rm_pattern = "__$", sep = ",", digits = 10, ...){
 			if(!dir.exists(dirpath)){
 				dir.create(dirpath)
 			}
@@ -677,6 +679,7 @@ microtable <- R6Class(classname = "microtable",
 				for(i in names(self$taxa_abund)){
 					res %<>% rbind(., self$taxa_abund[[i]])
 				}
+				res <- round(res, digits)
 				res <- data.frame(Taxa = rownames(res), res)
 				if(rm_un){
 					res %<>% .[!grepl(rm_pattern, .$Taxa), ]
@@ -687,6 +690,7 @@ microtable <- R6Class(classname = "microtable",
 			}else{
 				for(i in names(self$taxa_abund)){
 					tmp <- self$taxa_abund[[i]]
+					tmp <- round(tmp, digits)
 					if(rm_un){
 						tmp %<>% .[!grepl(rm_pattern, rownames(.)), ]
 					}

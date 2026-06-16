@@ -723,6 +723,7 @@ Save taxonomic abundance as local file.
   rm_un = FALSE,
   rm_pattern = "__$",
   sep = ",",
+  digits = 10,
   ...
 )}\if{html}{\out{</div>}}
 }
@@ -741,6 +742,9 @@ Only available when \code{rm_un = TRUE}. The default "__$" means removing the na
 
 \item{\code{sep}}{default ","; the field separator string. Same with \code{sep} parameter in \code{\link{write.table}} function.
 default \code{','} correspond to the file name suffix 'csv'. The option \code{'\t'} correspond to the file name suffix 'tsv'. For other options, suffix are all 'txt'.}
+
+\item{\code{digits}}{default 10; Number of decimal places to retain. The primary reason for setting this parameter is that if a number has too many decimal places, 
+tools like Excel will automatically convert it to text, which can hinder subsequent operations.}
 
 \item{\code{...}}{parameters passed to \code{\link{write.table}}.}
 }
