@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 2.2.1
+Version: 2.3.0
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
               person("Felipe", "R. P. Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
               person("Minjie", "Yao", role = "ctb", email = "yaomj@fafu.edu.cn"),
@@ -18,7 +18,7 @@ License: GPL-3
 LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2026-05-14
+Packaged: 2026-06-17
 Repository: CRAN
-Date/Publication: 2026-05-14
+Date/Publication: 2026-06-17
 RoxygenNote: 7.3.3
