@@ -444,7 +444,12 @@ trans_phylo <- R6::R6Class(
                 #' @param geom type: "bar" for bar heatmap, "point" for scatter, "star" for stars;
                 #'   categorical columns automatically use color band regardless of this setting
                 #' @param na_fill fill color for NA values, default "grey90"
-                #' @param na_replace categorical value to replace NA/empty with, default "Unknown"
+                #' @param na_replace categorical value to replace NA/empty with, default "Unknown".
+                #'   Only applied when categorical_colors is NULL (auto palette). Set to NULL to keep
+                #'   NA values as NA, in which case they are colored with na_fill via
+                #'   scale_fill_manual(na.value = na_fill). When categorical_colors is provided,
+                #'   NA is always kept as NA and colored with na_fill (regardless of na_replace),
+                #'   so the user's color vector does not need to cover an extra "Unknown" level.
                 #' @param point_size point size (only for geom = "point"), default 1.5
                 #' @param ... additional arguments passed to ggtreeExtra::geom_fruit() (e.g. axis.params, grid.params)
                 #' @return updated ggtree plot object
@@ -616,9 +621,22 @@ trans_phylo <- R6::R6Class(
                                 }
                         } else {
                                 # Categorical -> color band
-                                # Sanitize NA and empty strings before as.factor
-                                sub_df$value[is.na(sub_df$value)] <- na_replace
-                                sub_df$value[sub_df$value == ""]  <- na_replace
+                                # Sanitize empty strings: always convert to NA first (safe even when
+                                # na_replace is NULL — avoids deleting rows by assigning NULL to a subset).
+                                sub_df$value[sub_df$value == ""] <- NA_character_
+
+                                # NA handling strategy:
+                                #   - When the user provides categorical_colors, keep NA as NA so that
+                                #     scale_fill_manual(na.value = na_fill) paints it with na_fill.
+                                #     This avoids creating an extra "Unknown" level that the user's
+                                #     color vector does not cover, which previously caused:
+                                #     "names attribute [4] must be the same length as the vector [3]".
+                                #   - When colors are auto-generated, honor na_replace: if non-NULL,
+                                #     NA becomes its own labeled level (default "Unknown"); if NULL,
+                                #     NA stays as NA and is colored with na_fill.
+                                if (is.null(categorical_colors) && !is.null(na_replace)) {
+                                        sub_df$value[is.na(sub_df$value)] <- na_replace
+                                }
                                 sub_df$value <- as.factor(sub_df$value)
                                 n_levels     <- length(levels(sub_df$value))
 
@@ -632,9 +650,34 @@ trans_phylo <- R6::R6Class(
                                                   RColorBrewer::brewer.pal(9, "Set1")
                                                 )(n_levels)
                                         }
+                                        # Ensure names match levels
+                                        names(categorical_colors) <- levels(sub_df$value)
+                                } else {
+                                        # User-supplied palette: validate / repair coverage for the
+                                        # levels actually present in the data. NA is excluded because
+                                        # it is not a factor level — it is handled by na.value downstream.
+                                        data_levels <- levels(sub_df$value)
+                                        # Drop user entries that don't appear in the data (avoids
+                                        # spurious legend keys), preserving data level order.
+                                        categorical_colors <- categorical_colors[
+                                                intersect(names(categorical_colors), data_levels)
+                                        ]
+                                        missing_levels <- setdiff(data_levels, names(categorical_colors))
+                                        if (length(missing_levels) > 0) {
+                                                fallback <- if (length(missing_levels) <= 9) {
+                                                        RColorBrewer::brewer.pal(max(3, length(missing_levels)), "Set1")[1:length(missing_levels)]
+                                                } else if (length(missing_levels) <= 12) {
+                                                        RColorBrewer::brewer.pal(max(3, length(missing_levels)), "Set3")[1:length(missing_levels)]
+                                                } else {
+                                                        colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(length(missing_levels))
+                                                }
+                                                categorical_colors <- c(categorical_colors, setNames(fallback, missing_levels))
+                                                warning(sprintf(
+                                                        "[trans_phylo$add_ring] categorical_colors missing for level(s): %s. Auto-assigned fallback colors.",
+                                                        paste(missing_levels, collapse = ", ")
+                                                ))
+                                        }
                                 }
-                                # Ensure names match levels
-                                names(categorical_colors) <- levels(sub_df$value)
 
                                 # Forcefully inject a constant virtual X value to reduce the heatmap to a bar chart with values uniformly fixed at 1
                                 sub_df$.dummy_x <- 1

@@ -637,7 +637,12 @@ categorical columns automatically use color band regardless of this setting}
 
 \item{\code{na_fill}}{fill color for NA values, default "grey90"}
 
-\item{\code{na_replace}}{categorical value to replace NA/empty with, default "Unknown"}
+\item{\code{na_replace}}{categorical value to replace NA/empty with, default "Unknown".
+Only applied when categorical_colors is NULL (auto palette). Set to NULL to keep
+NA values as NA, in which case they are colored with na_fill via
+scale_fill_manual(na.value = na_fill). When categorical_colors is provided,
+NA is always kept as NA and colored with na_fill (regardless of na_replace),
+so the user's color vector does not need to cover an extra "Unknown" level.}
 
 \item{\code{point_size}}{point size (only for geom = "point"), default 1.5}
 
