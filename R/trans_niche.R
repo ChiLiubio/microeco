@@ -369,18 +369,29 @@ trans_niche <- R6Class(classname = "trans_niche",
                         }
                         env_data <- env_data[common_samples, , drop = FALSE]
                         otu_mat <- otu_mat[, common_samples, drop = FALSE]
+                        # remove constant columns before PCA (prcomp with scale. = TRUE fails on zero-variance columns)
+                        env_sd <- sapply(env_data, sd, na.rm = TRUE)
+                        if(any(env_sd == 0 | is.na(env_sd))){
+                                const_cols <- names(env_sd)[env_sd == 0 | is.na(env_sd)]
+                                message("Removing constant/NA-variance environmental variables for PCA: ", paste(const_cols, collapse = ", "), " ...")
+                                env_data <- env_data[, env_sd > 0 & !is.na(env_sd), drop = FALSE]
+                        }
+                        if(ncol(env_data) == 0){
+                                stop("No variable environmental columns left after removing constant columns!")
+                        }
                         # PCA dimensionality reduction
                         env_pca <- prcomp(env_data, scale. = TRUE, rank. = dims)
-                        pca_scores <- as.data.frame(env_pca$x[, 1:min(dims, ncol(env_pca$x)), drop = FALSE])
-                        actual_dims <- ncol(pca_scores)
-                        if(actual_dims < dims){
-                                message("Only ", actual_dims, " PCA dimensions available, using ", actual_dims, " dimensions ...")
+                        actual_dims_pca <- min(dims, ncol(env_pca$x))
+                        pca_scores <- as.data.frame(env_pca$x[, 1:actual_dims_pca, drop = FALSE])
+                        if(actual_dims_pca < dims){
+                                message("Only ", actual_dims_pca, " PCA dimensions available, using ", actual_dims_pca, " dimensions ...")
                         }
                         taxa_names <- rownames(otu_mat)
                         n_taxa <- length(taxa_names)
                         hv_list <- list()
                         volumes <- numeric(n_taxa)
                         skipped_taxa <- character(0)
+                        error_taxa <- character(0)
                         for(i in seq_along(taxa_names)){
                                 # get occurrence samples for this taxon
                                 occ_samples <- names(which(otu_mat[i, ] > 0))
@@ -391,24 +402,60 @@ trans_niche <- R6Class(classname = "trans_niche",
                                 }
                                 # extract environmental coordinates for occurrence samples
                                 species_data <- pca_scores[occ_samples, , drop = FALSE]
-                                # build hypervolume
+                                # compute bandwidth externally to avoid hypervolume package
+                                # internal Silverman computation dimensionality issues
+                                if(is.character(kde.bandwidth) && kde.bandwidth == "silverman"){
+                                        n_d <- ncol(species_data)
+                                        n_r <- nrow(species_data)
+                                        bw <- sapply(seq_len(n_d), function(k) sd(species_data[, k]))
+                                        # replace zero/NA sd with a small positive value to avoid
+                                        # degenerate kernels (species concentrated on a single PCA axis)
+                                        bw[is.na(bw) | bw == 0] <- 1e-6
+                                        bw <- (4 / (n_d + 2))^(1 / (n_d + 4)) *
+                                              n_r^(-1 / (n_d + 4)) * bw
+                                        use_bandwidth <- bw
+                                }else if(is.character(kde.bandwidth) && kde.bandwidth == "plug-in"){
+                                        if(!requireNamespace("ks", quietly = TRUE)){
+                                                stop("Package 'ks' is required for plug-in bandwidth. Please install it: install.packages('ks')")
+                                        }
+                                        use_bandwidth <- ks::hpi(as.matrix(species_data))
+                                }else{
+                                        use_bandwidth <- kde.bandwidth
+                                }
+                                # build hypervolume (wrapped in tryCatch for robustness)
                                 hv_args <- list(
                                         data = species_data,
                                         method = "gaussian",
                                         name = taxa_names[i],
-                                        kde.bandwidth = kde.bandwidth,
+                                        kde.bandwidth = use_bandwidth,
                                         quantile.requested = quantile.requested,
                                         verbose = FALSE
                                 )
                                 if(!is.null(samples.per.point)){
                                         hv_args$samples.per.point <- samples.per.point
                                 }
-                                hv <- do.call(hypervolume::hypervolume, hv_args)
+                                hv <- tryCatch(
+                                        do.call(hypervolume::hypervolume, hv_args),
+                                        error = function(e) {
+                                                message("Hypervolume construction failed for ", taxa_names[i], ": ", conditionMessage(e))
+                                                NULL
+                                        }
+                                )
+                                if(is.null(hv)){
+                                        error_taxa <- c(error_taxa, taxa_names[i])
+                                        volumes[i] <- NA
+                                        next
+                                }
                                 hv_list[[taxa_names[i]]] <- hv
                                 volumes[i] <- hypervolume::get_volume(hv)
                         }
                         if(length(skipped_taxa) > 0){
-                                message("Skipped ", length(skipped_taxa), " taxa with fewer than ", min_points, " occurrence samples: ", paste(head(skipped_taxa, 10), collapse = ", "), if(length(skipped_taxa) > 10) " ..." else "", " ...")
+                                message("Skipped ", length(skipped_taxa), " taxa with fewer than ", min_points, " occurrence samples: ", 
+									paste(head(skipped_taxa, 10), collapse = ", "), if(length(skipped_taxa) > 10) " ..." else "", " ...")
+                        }
+                        if(length(error_taxa) > 0){
+                                message("Skipped ", length(error_taxa), " taxa due to hypervolume construction errors: ", paste(head(error_taxa, 10), collapse = ", "), 
+									if(length(error_taxa) > 10) " ..." else "", " ...")
                         }
                         self$res_niche_breadth <- data.frame(
                                 Taxa = taxa_names,
@@ -483,12 +530,22 @@ trans_niche <- R6Class(classname = "trans_niche",
                         }
                         env_data <- env_data[common_samples, , drop = FALSE]
                         otu_mat <- otu_mat[, common_samples, drop = FALSE]
+                        # remove constant columns before PCA (prcomp with scale. = TRUE fails on zero-variance columns)
+                        env_sd <- sapply(env_data, sd, na.rm = TRUE)
+                        if(any(env_sd == 0 | is.na(env_sd))){
+                                const_cols <- names(env_sd)[env_sd == 0 | is.na(env_sd)]
+                                message("Removing constant/NA-variance environmental variables for PCA: ", paste(const_cols, collapse = ", "), " ...")
+                                env_data <- env_data[, env_sd > 0 & !is.na(env_sd), drop = FALSE]
+                        }
+                        if(ncol(env_data) == 0){
+                                stop("No variable environmental columns left after removing constant columns!")
+                        }
                         # PCA dimensionality reduction
                         env_pca <- prcomp(env_data, scale. = TRUE, rank. = dims)
-                        pca_scores <- as.data.frame(env_pca$x[, 1:min(dims, ncol(env_pca$x)), drop = FALSE])
-                        actual_dims <- ncol(pca_scores)
-                        if(actual_dims < dims){
-                                message("Only ", actual_dims, " PCA dimensions available, using ", actual_dims, " dimensions ...")
+                        actual_dims_pca <- min(dims, ncol(env_pca$x))
+                        pca_scores <- as.data.frame(env_pca$x[, 1:actual_dims_pca, drop = FALSE])
+                        if(actual_dims_pca < dims){
+                                message("Only ", actual_dims_pca, " PCA dimensions available, using ", actual_dims_pca, " dimensions ...")
                         }
                         # construct species-trait table
                         # for each taxon, extract environmental coordinates of its occurrence samples
@@ -516,7 +573,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                         sampUnit <- matrix(1, nrow = 1, ncol = n_species)
                         colnames(sampUnit) <- unique_species
                         rownames(sampUnit) <- "community"
-                        tpd_comm <- TPD::TPDc(TPDs = tpd_result, sampUnit = sampUnit, abundanceWeights = TRUE)
+                        tpd_comm <- TPD::TPDc(TPDs = tpd_result, sampUnit = sampUnit)
                         rend_result <- TPD::REND(TPDs = tpd_result, TPDc = tpd_comm)
                         # extract FRic, FEve, FDiv per species
                         breadth_df <- data.frame(
@@ -526,15 +583,17 @@ trans_niche <- R6Class(classname = "trans_niche",
                                 TPD_FDiv = NA_real_,
                                 stringsAsFactors = FALSE
                         )
-                        # rend_result$species_results contains per-species indices
-                        if(!is.null(rend_result$species_results)){
-                                spp_res <- rend_result$species_results
+                        # rend_result$species contains per-species indices (named vectors)
+                        if(!is.null(rend_result$species)){
+                                fric <- rend_result$species$FRichness
+                                feve <- rend_result$species$FEvenness
+                                fdiv <- rend_result$species$FDivergence
                                 for(i in seq_along(taxa_names)){
-                                        idx <- which(rownames(spp_res) == taxa_names[i])
+                                        idx <- which(names(fric) == taxa_names[i])
                                         if(length(idx) > 0){
-                                                breadth_df$TPD_FRic[i] <- spp_res$FRic[idx[1]]
-                                                breadth_df$TPD_FEve[i] <- spp_res$FEve[idx[1]]
-                                                breadth_df$TPD_FDiv[i] <- spp_res$FDiv[idx[1]]
+                                                breadth_df$TPD_FRic[i] <- fric[idx[1]]
+                                                breadth_df$TPD_FEve[i] <- feve[idx[1]]
+                                                breadth_df$TPD_FDiv[i] <- fdiv[idx[1]]
                                         }
                                 }
                         }
@@ -565,7 +624,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                         rownames(overlap_matrix) <- all_taxa
                         colnames(overlap_matrix) <- all_taxa
                         diag(overlap_matrix) <- 1
-                        # Pre-compute total density sums for each species
+                        # Pre-compute total density sums for each species.
                         total_sums <- sapply(species_names, function(sp) sum(tpd_result$TPDs[[sp]]))
                         for(i in seq_len(n_species - 1)){
                                 density_i <- tpd_result$TPDs[[species_names[i]]]
