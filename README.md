@@ -4,7 +4,7 @@ An R package for data mining in microbial community ecology
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
-![](https://img.shields.io/badge/Release-2.2.0-orange.svg) ![](https://img.shields.io/badge/Test-2.2.1-red.svg)
+![](https://img.shields.io/badge/Release-2.2.0-orange.svg) ![](https://img.shields.io/badge/Test-2.3.0-red.svg)
 
 ## Background
 The increasing volume and complexity of microbiome omics data pose a challenge for the downstream data analysis. 
@@ -18,6 +18,8 @@ Therefore, we developed the R microeco package (abbreviated and pronounced as **
   + Data preprocessing and normalization
   + Taxonomic abundance visualization
   + Venn diagram
+  + Phylogenetic tree visualization
+  + Niche analysis
   + Alpha diversity
   + Beta diversity
   + Differential abundance test
@@ -73,10 +75,10 @@ microeco 2: A comprehensive R package for downstream analysis of microbiome omic
 
 Chi Liu, Felipe R. P. Mansoldo, Hankang Li, Alane Beatriz Vermelho, Raymond Jianxiong Zeng, Xiangzhen Li & Minjie Yao. 
 A workflow for statistical analysis and visualization of microbiome omics data using the R microeco package. 
-**Nature Protocols**, 21: 1300–1324 (2026). https://doi.org/10.1038/s41596-025-01239-4
+**Nature Protocols**, 2026, 21: 1300–1324. https://doi.org/10.1038/s41596-025-01239-4
 
 Chi Liu, Yaoming Cui, Xiangzhen Li & Minjie Yao. _microeco_: an R package for data mining in microbial community ecology.
-**FEMS Microbiology Ecology**, 97(2): fiaa255 (2021). https://doi.org/10.1093/femsec/fiaa255
+**FEMS Microbiology Ecology**, 2021, 97(2): fiaa255. https://doi.org/10.1093/femsec/fiaa255
 
 
 
