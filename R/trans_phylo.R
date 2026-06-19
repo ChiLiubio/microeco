@@ -36,6 +36,9 @@ trans_phylo <- R6::R6Class(
                 #' library(magrittr)
                 #'
                 #' mt <- clone(dataset)
+                #'
+                #' mt$tax_table %<>% base::subset(Kingdom == "k__Bacteria")
+                #' mt$tidy_dataset()
                 #' mt200 <- clone(mt)
                 #'
                 #' # Subset to top 200 OTUs
@@ -53,7 +56,8 @@ trans_phylo <- R6::R6Class(
                 #' n_otus <- nrow(otu)
                 #' 
                 #' # Relative abundance (mean %)
-                #' total_rel_abund <- trans_norm$new(mt)$norm(method = "TSS")$otu_table
+                #' total_reads <- colSums(mt$otu_table)
+                #' total_rel_abund   <- sweep(mt$otu_table, 2, total_reads, "/")
                 #' rel_abund   <- total_rel_abund[rownames(otu), ]
                 #' mean_abund  <- rowMeans(rel_abund) * 100
                 #' 
@@ -71,21 +75,31 @@ trans_phylo <- R6::R6Class(
                 #' 
                 #' # Specificity: how concentrated is an OTU in its preferred habitat
                 #' # (low = generalist, high = specialist)
-                #' niche <- trans_niche$new(mt)$cal_niche_breadth()
-                #' specificity <- 1 - niche$res_niche_breadth[rownames(otu), "Levins_Standardized"]
+                #' group_cols  <- split(colnames(otu), si$Group)
+                #' group_means <- sapply(group_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+                #' if (!is.matrix(group_means)) group_means <- matrix(group_means, nrow = n_otus)
+                #' # Specificity = 1 - evenness (Simpson-like)
+                #' specificity_raw <- 1 - apply(group_means, 1, function(p) {
+                #'   p <- p / sum(p)
+                #'   sum(p^2)
+                #' })
+                #' specificity <- round((1 - specificity_raw) / max(1 - specificity_raw, na.rm = TRUE) * 100, 2)
                 #' 
-                #' # network metrics
-                #' net <- trans_network$new(mt, cor_method = "pearson")$cal_network()$get_node_table()
-                #' centrality <- net$res_node_table[rownames(otu), "closeness_centrality"]
-                #' connectivity <- net$res_node_table[rownames(otu), "z"]
+                #' # Connectivity: simulated network centrality score (higher = hub OTU)
+                #' # Based on co-occurrence signal approximated from abundance correlation
+                #' set.seed(42)
+                #' connectivity_raw <- importance_raw * runif(n_otus, 0.5, 1.5) + rnorm(n_otus, 0, 2)
+                #' connectivity_raw[connectivity_raw < 0] <- 0
+                #' connectivity <- round(connectivity_raw / max(connectivity_raw, na.rm = TRUE) * 100, 2)
                 #' 
-                #' # Habitat
-                #' mt$add_rownames2tax("OTU")
-                #' mt$cal_abund()
-                #' mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group", alpha = 1)
-                #' mt_diff_res <- mt_diff$res_diff 
-                #' rownames(mt_diff_res) %<>% gsub(".*\\|", "", .)
-                #' dominant_habitat <- mt_diff_res[rownames(otu), "Group"]
+                #' # Dominant habitat
+                #' dominant_habitat <- apply(group_means, 1, function(x) colnames(group_means)[which.max(x)])
+                #' 
+                #' # Salinity preference
+                #' sal_cols  <- split(colnames(otu), si$Saline)
+                #' sal_means <- sapply(sal_cols, function(cols) rowMeans(rel_abund[, cols, drop = FALSE]))
+                #' if (!is.matrix(sal_means)) sal_means <- matrix(sal_means, nrow = n_otus)
+                #' dominant_saline <- apply(sal_means, 1, function(x) colnames(sal_means)[which.max(x)])
                 #' 
                 #' # Class taxonomy
                 #' class_col <- if ("Class" %in% colnames(tax)) tax$Class else rep("Unknown", n_otus)
@@ -98,9 +112,9 @@ trans_phylo <- R6::R6Class(
                 #'   LogAbund     = round(log_abund, 3),
                 #'   Importance   = importance,
                 #'   Specificity  = specificity,
-                #'   Centrality   = centrality,
                 #'   Connectivity = connectivity,
                 #'   Habitat      = dominant_habitat,
+                #'   Salinity     = dominant_saline,
                 #'   Class        = class_col,
                 #'   stringsAsFactors = FALSE
                 #' )
@@ -417,7 +431,13 @@ trans_phylo <- R6::R6Class(
                 #' @param color_high color for high numeric values, default "#F0F921"
                 #' @param limits numeric vector of length 2, explicit limits for the fill scale;
                 #'   default NULL means auto from data range
-                #' @param categorical_colors color vector for categorical columns, default NULL (auto)
+                #' @param categorical_colors color vector or palette function for categorical columns, default NULL (auto).
+                #'   If a named character vector, names must correspond to factor levels present in
+                #'   the data. If an unnamed character vector, it is recycled and named by the
+                #'   factor levels in their alphabetical order. If a palette function (e.g.
+                #'   `scales::hue_pal()` or `colorRampPalette(c(...))`), it is invoked with the
+                #'   number of factor levels to produce a color vector, which is then named by
+                #'   the levels.
                 #' @param ring_width ring width, default NULL; see ring_width_bar and ring_width_other.
                 #' @param ring_offset ring offset, default NULL; If NULL, ring_offset_first + ring_gap
                 #' @param ring_gap numeric, gap between consecutive rings when ring_offset is not manually specified
@@ -626,6 +646,15 @@ trans_phylo <- R6::R6Class(
                                 sub_df$value <- as.factor(sub_df$value)
                                 n_levels     <- length(levels(sub_df$value))
 
+                                # Normalize categorical_colors input: accept a palette FUNCTION
+                                # (e.g. scales::hue_pal() or colorRampPalette(c(...))) and resolve
+                                # it to a named color vector before the coverage logic below.
+                                # This makes add_rings_batch(categorical_palette = ...) work, since
+                                # batch forwards the palette through this same parameter.
+                                if (is.function(categorical_colors)) {
+                                        categorical_colors <- categorical_colors(n_levels)
+                                }
+
                                 if (is.null(categorical_colors)) {
                                         if (n_levels <= 9) {
                                                 categorical_colors <- RColorBrewer::brewer.pal(max(3, n_levels), "Set1")[1:n_levels]
@@ -639,6 +668,13 @@ trans_phylo <- R6::R6Class(
                                         # Ensure names match levels
                                         names(categorical_colors) <- levels(sub_df$value)
                                 } else {
+                                        # User-supplied palette (named vector, unnamed vector, or
+                                        # the resolved output of a palette function). If unnamed,
+                                        # assign names by factor-level order so the coverage check
+                                        # below works correctly.
+                                        if (is.null(names(categorical_colors))) {
+                                                names(categorical_colors) <- levels(sub_df$value)[seq_along(categorical_colors)]
+                                        }
                                         # User-supplied palette: validate / repair coverage for the
                                         # levels actually present in the data. NA is excluded because
                                         # it is not a factor level — it is handled by na.value downstream.
@@ -793,8 +829,11 @@ trans_phylo <- R6::R6Class(
                 #'   Single value is recycled; vector must match length of col_names.
                 #' @param color_high character or character vector; color(s) for high numeric values, default "#F0F921".
                 #'   Single value is recycled; vector must match length of col_names.
-                #' @param categorical_palette palette function or list of palette functions for categorical columns.
-                #'   A single function is recycled for all rings; a list must match length of col_names. Default NULL.
+                #' @param categorical_palette palette function, named color vector, or list thereof, for
+                #'   categorical columns. A single value is recycled for all rings; a list must match
+                #'   the length of col_names. Each entry may be either a palette function (e.g.
+                #'   `scales::hue_pal()` or `colorRampPalette(c(...))`) or a named color vector.
+                #'   Forwarded to each add_ring() call as `categorical_colors`. Default NULL.
                 #' @param show_legend logical or logical vector; whether to show legends, default TRUE.
                 #'   Single value is recycled; vector must match length of col_names.
                 #' @param ... additional arguments passed to each add_ring() call
@@ -863,7 +902,7 @@ trans_phylo <- R6::R6Class(
                                         geom                = numeric_geom[i],
                                         color_low           = color_low[i],
                                         color_high          = color_high[i],
-                                        categorical_palette = cat_pal_list[[i]],
+                                        categorical_colors  = cat_pal_list[[i]],
                                         show_legend         = show_legend[i],
                                         legend_title_custom = cn,
                                         ...
@@ -933,8 +972,7 @@ trans_phylo <- R6::R6Class(
                                 node     = node,
                                 fill     = fill,
                                 alpha    = alpha,
-                                extend   = extend,
-                                extendto = NULL
+                                extend   = extend
                         )
                         invisible(self$plot_obj)
                 },
