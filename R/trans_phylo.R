@@ -542,6 +542,29 @@ trans_phylo <- R6::R6Class(
 
                         if (is_numeric) {
                                 # Numeric -> heatmap bar / point / star
+                                # Build fill scale once (DRY) and reuse for all numeric geoms.
+                                legend_name  <- ifelse(is.null(legend_title_custom), col_name, legend_title_custom)
+                                legend_guide <- if (show_legend) ggplot2::guide_legend() else ggplot2::guide_none()
+                                if (!identical(color_low, "#0D0887") || !identical(color_high, "#F0F921")) {
+                                        fill_scale <- ggplot2::scale_fill_gradient(
+                                                low      = color_low,
+                                                high     = color_high,
+                                                name     = legend_name,
+                                                na.value = na_fill,
+                                                limits   = limits,
+                                                guide    = legend_guide
+                                        )
+                                } else {
+                                        fill_scale <- ggplot2::scale_fill_viridis_c(
+                                                option   = "D",
+                                                begin    = 0,
+                                                end      = 1,
+                                                name     = legend_name,
+                                                na.value = na_fill,
+                                                limits   = limits,
+                                                guide    = legend_guide
+                                        )
+                                }
                                 if (geom == "bar") {
                                         fruit_layer <- rlang::inject(ggtreeExtra::geom_fruit(
                                                 data    = sub_df,
@@ -552,29 +575,6 @@ trans_phylo <- R6::R6Class(
                                                 !!!dot_args
                                                 )
                                         )
-                                        # Build fill scale — DRY: construct once, reuse for all numeric geoms
-                                        legend_name  <- ifelse(is.null(legend_title_custom), col_name, legend_title_custom)
-                                        legend_guide <- if (show_legend) ggplot2::guide_legend() else ggplot2::guide_none()
-                                        if (!identical(color_low, "#0D0887") || !identical(color_high, "#F0F921")) {
-                                                fill_scale <- ggplot2::scale_fill_gradient(
-                                                        low      = color_low,
-                                                        high     = color_high,
-                                                        name     = legend_name,
-                                                        na.value = na_fill,
-                                                        limits   = limits,
-                                                        guide    = legend_guide
-                                                )
-                                        } else {
-                                                fill_scale <- ggplot2::scale_fill_viridis_c(
-                                                        option   = "D",
-                                                        begin    = 0,
-                                                        end      = 1,
-                                                        name     = legend_name,
-                                                        na.value = na_fill,
-                                                        limits   = limits,
-                                                        guide    = legend_guide
-                                                )
-                                        }
                                         self$plot_obj <- self$plot_obj +
                                                 fruit_layer +
                                                 fill_scale
@@ -591,7 +591,6 @@ trans_phylo <- R6::R6Class(
                                                 !!!dot_args
                                                 )
                                         )
-                                        # Reuse the same fill_scale logic (DRY)
                                         self$plot_obj <- self$plot_obj +
                                                 fruit_layer +
                                                 fill_scale
