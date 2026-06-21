@@ -1773,7 +1773,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			d1$Group <- group
 			colnames(d1)[1] <- "Value"
 			formu <- reformulate("Group", "Value")
-			if(any(table(as.character(group))) < min_num_nonpara){
+			if(any(table(as.character(group)) < min_num_nonpara)){
 				list(p_value = NA, med = NA)
 			}else{
 				if(! is.null(method)){
