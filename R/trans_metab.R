@@ -38,7 +38,7 @@ trans_metab <- R6Class(classname = "trans_metab",
 					if(inherits(metab, "microtable")){
 						if(is.null(metab$tax_table)){
 							metab_tax_table <- data.frame(metab_name = rownames(metab$otu_table))
-							rownames(metab_tax_table) <- rownames(metab)
+							rownames(metab_tax_table) <- rownames(metab$otu_table)
 							metab$tax_table <- metab_tax_table
 						}
 					}else{
