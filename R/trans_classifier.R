@@ -223,7 +223,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				boruta.res <- Boruta::Boruta(x = data_x, y = data_y, 
 					maxRuns = boruta.maxRuns, pValue = boruta.pValue, ...)
 				boruta.stats <- data.frame(Boruta::attStats(boruta.res))
-				boruta.list[[i]] <- rownames(boruta.stats[boruta.stats$decision =='Confirmed', ])
+				rownames(boruta.stats[boruta.stats$decision == 'Confirmed', ])
 			}
 			message("Running Feature Selection (Boruta) based on the training data ...")
 			boruta.list <- parallel::mclapply(1:boruta.repetitions, boruta.fs)
