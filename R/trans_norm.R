@@ -316,8 +316,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 		# modified from https://github.com/jchen1981/GMPR
 		GMPR = function(comm, intersect.no, ct.min) {
 			comm[comm < ct.min] <- 0	
-			comm.no <- numeric(ncol(comm))
-			output <- sapply(1:ncol(comm),  function(i) {
+			#comm.no <- numeric(ncol(comm))
+			results <- sapply(1:ncol(comm),  function(i) {
 						if (i %% 100 == 0) {
 							cat(i, '\n')
 						}
@@ -331,15 +331,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 						# Calculate the median of PR
 						pr.median <- matrixStats::colMedians(pr, na.rm=TRUE)
 						# Record the number of samples used for calculating the GMPR
-						comm.no[i] <- sum(included_count >= intersect.no)
+						nss_i <- sum(included_count >= intersect.no)
 						# Geometric mean of PR median
-						if (comm.no[i] > 1) {
-							exp(mean(log(pr.median[included_count >= intersect.no])))
-						} else {
-							NA
-						}
+						gmpr_i <- if (nss_i > 1) exp(mean(log(pr.median[included_count >= intersect.no]))) else NA
+						c(gmpr = gmpr_i, nss = nss_i)
 					}
 			)
+			output <- results["gmpr", ]
+			comm.no <- results["nss", ]
 			if (sum(is.na(output))) {
 				warning(paste0('The following samples\n ', paste(colnames(comm)[is.na(output)], collapse='\n'), 
 						'\ndo not share at least ', intersect.no, ' common taxa with other samples! ',
