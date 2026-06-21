@@ -814,7 +814,7 @@ trans_func <- R6Class(classname = "trans_func",
 			message('Converting functions to pathways.')
 			ko2ptw <- Tax4Fun2_KEGG$ko2ptw
 			if(normalize_pathways){
-				functional_prediction_norm <- functional_prediction / ko_list$pathway_count
+				functional_prediction <- functional_prediction / ko_list$pathway_count
 			}
 			pathway_prediction <- aggregate(x = functional_prediction[ko2ptw$nrow,], by = list(ko2ptw$ptw), sum)
 			if(ncol(pathway_prediction) >= 3){
