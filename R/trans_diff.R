@@ -1556,7 +1556,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				node = .data$id,
 				offset = private$get_offset(.data$level)-0.4,
 				offset.text = 0,
-				angle = purrr::map_dbl(.data$id, private$get_angle, tree = tree),
+				angle = purrr::map_dbl(.data$id, ~ private$get_angle(tree = tree, node = .x)),
 				label = .data$label,
 				fontsize = clade_label_size + log(.data$level + clade_label_size_add, base = clade_label_size_log),
 				barsize = 0,
@@ -1933,14 +1933,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 			annotation %<>% .[label %in% tree$data$label, ]
 			annotation
 		},
-		get_angle = function(tree, node){
+		get_angle = function(node, tree){
 			if (length(node) != 1) {
 				stop("The length of `node` must be 1")
 			}
 			tree_data <- tree$data
 			sp <- tidytree::offspring(tree_data, node)$node
 			sp2 <- c(sp, node)
-			sp.df <- tree_data[match(sp2, tree_data$node),]
+			sp.df <- tree_data[match(sp2, tree_data$node), ]
 			mean(range(sp.df$angle))
 		},
 		get_offset = function(x){(x*0.2+0.2)^2},
