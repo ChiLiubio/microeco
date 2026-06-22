@@ -844,24 +844,24 @@ microtable <- R6Class(classname = "microtable",
 				}else{
 					binary_use <- binary
 				}
-				if(i == "aitchison"){
-					if(any(eco_table == 0)){
-						eco_table <- eco_table + 1
-					}
+				eco_table_use <- eco_table
+				if(i == "aitchison" && any(eco_table_use == 0)){
+					eco_table_use <- eco_table_use + 1
 				}
-				res[[i]] <- as.matrix(vegan::vegdist(eco_table, method = i, binary = binary_use, ...))
+				res[[i]] <- as.matrix(vegan::vegdist(eco_table_use, method = i, binary = binary_use, ...))
 			}
 			if(unifrac){
 				if(is.null(self$phylo_tree)){
-					stop("No phylogenetic tree provided, please change the parameter unifrac to FALSE")
+					message("No phylogenetic tree provided, UniFrac metrics cannot be calculated!")
+				}else{
+					phylo_tree <- self$phylo_tree
+					unifrac1 <- GUniFrac::GUniFrac(eco_table, phylo_tree, alpha = c(0, 0.5, 1))
+					unifrac2 <- unifrac1$unifracs
+					wei_unifrac <- unifrac2[,, "d_1"]
+					res$wei_unifrac <- wei_unifrac
+					unwei_unifrac <- unifrac2[,, "d_UW"]
+					res$unwei_unifrac <- unwei_unifrac				
 				}
-				phylo_tree <- self$phylo_tree
-				unifrac1 <- GUniFrac::GUniFrac(eco_table, phylo_tree, alpha = c(0, 0.5, 1))
-				unifrac2 <- unifrac1$unifracs
-				wei_unifrac <- unifrac2[,, "d_1"]
-				res$wei_unifrac <- wei_unifrac
-				unwei_unifrac <- unifrac2[,, "d_UW"]
-				res$unwei_unifrac <- unwei_unifrac
 			}
 			self$beta_diversity <- res
 			message('The result is stored in object$beta_diversity ...')
