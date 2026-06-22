@@ -177,20 +177,22 @@ microtable <- R6Class(classname = "microtable",
 				}else{
 					abund_names <- c()
 				}
-				if(freq != 0){
-					if(freq < 1){
+				# Use a temporary variable inside the loop
+				freq_use <- freq
+				if(freq_use != 0){
+					if(freq_use < 1){
 						message("freq smaller than 1; first convert it to an integer ...")
-						freq <- round(ncol(input_data) * freq)
-						message("Use converted freq integer: ", freq, " for the following filtering ...")
+						freq_use <- round(ncol(input_data) * freq_use)
+						message("Use converted freq integer: ", freq_use, " for the following filtering ...")
 					}
 					taxa_occur_num <- apply(input_data, 1, function(x){sum(x != 0)})
 					if(include_lowest){
-						freq_names <- taxa_occur_num[taxa_occur_num < freq] %>% names
+						freq_names <- taxa_occur_num[taxa_occur_num < freq_use] %>% names
 					}else{
-						freq_names <- taxa_occur_num[taxa_occur_num <= freq] %>% names
+						freq_names <- taxa_occur_num[taxa_occur_num <= freq_use] %>% names
 					}
 					if(length(freq_names) == nrow(input_data)){
-						stop("No feature remained! Please check the freq parameter!")
+						stop("No feature remained! Please check the input freq parameter!")
 					}
 					message(length(freq_names), " features filtered based on the occurrence for ", i, " ...")
 				}else{
