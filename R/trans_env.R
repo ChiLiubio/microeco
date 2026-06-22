@@ -81,9 +81,9 @@ trans_env <- R6Class(classname = "trans_env",
 				if(character2numeric){
 					env_data %<>% dropallfactors(., unfac2num = TRUE, char2num = TRUE)
 				}
-			}
-			if(standardize){
-				env_data %<>% decostand(., method = "standardize", MARGIN = 2)
+				if(standardize){
+					env_data %<>% decostand(., method = "standardize", MARGIN = 2)
+				}
 			}
 			self$data_env <- env_data
 			message("Env data is stored in object$data_env ...")
@@ -850,12 +850,11 @@ trans_env <- R6Class(classname = "trans_env",
 					message("The beta_diversity in dataset is NULL; try to calculate it ...")
 					self$dataset$cal_betadiv(unifrac = FALSE)
 					message("Calculating done ...")
+				}
+				if(!is.null(use_measure)){
+					use_matrix <- self$dataset$beta_diversity[[use_measure]]
 				}else{
-					if(!is.null(use_measure)){
-						use_matrix <- self$dataset$beta_diversity[[use_measure]]
-					}else{
-						use_matrix <- self$dataset$beta_diversity[[1]]
-					}
+					use_matrix <- self$dataset$beta_diversity[[1]]
 				}
 			}else{
 				use_matrix <- add_matrix
