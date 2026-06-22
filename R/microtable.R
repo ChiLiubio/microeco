@@ -852,16 +852,15 @@ microtable <- R6Class(classname = "microtable",
 			}
 			if(unifrac){
 				if(is.null(self$phylo_tree)){
-					message("No phylogenetic tree provided, UniFrac metrics cannot be calculated!")
-				}else{
-					phylo_tree <- self$phylo_tree
-					unifrac1 <- GUniFrac::GUniFrac(eco_table, phylo_tree, alpha = c(0, 0.5, 1))
-					unifrac2 <- unifrac1$unifracs
-					wei_unifrac <- unifrac2[,, "d_1"]
-					res$wei_unifrac <- wei_unifrac
-					unwei_unifrac <- unifrac2[,, "d_UW"]
-					res$unwei_unifrac <- unwei_unifrac				
+					stop("No phylogenetic tree provided, UniFrac metrics cannot be calculated!")
 				}
+				phylo_tree <- self$phylo_tree
+				unifrac1 <- GUniFrac::GUniFrac(eco_table, phylo_tree, alpha = c(0, 0.5, 1))
+				unifrac2 <- unifrac1$unifracs
+				wei_unifrac <- unifrac2[,, "d_1"]
+				res$wei_unifrac <- wei_unifrac
+				unwei_unifrac <- unifrac2[,, "d_UW"]
+				res$unwei_unifrac <- unwei_unifrac
 			}
 			self$beta_diversity <- res
 			message('The result is stored in object$beta_diversity ...')
