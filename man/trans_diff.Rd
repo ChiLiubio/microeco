@@ -536,7 +536,8 @@ If the number of provided group_order is less than the number of groups in \code
 
 \item{\code{use_taxa_num}}{default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .}
 
-\item{\code{filter_taxa}}{default NULL; The mean relative abundance used to filter the taxa with low abundance.}
+\item{\code{filter_taxa}}{default NULL; The mean abundance used to filter the taxa with low abundance. 
+Usually, it is relative abundance, depending on the data type of the \code{abund_table} stored in the object.}
 
 \item{\code{use_feature_num}}{default NULL; integer; The feature number used in the plot; 
 select the features according to the metric (method = "lefse" or "rf") from high to low.}

@@ -1401,7 +1401,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	  If provided, this parameter can overwrite the levels in the group of sample_table. 
 		#' 	  If the number of provided group_order is less than the number of groups in \code{res_diff$Group}, the function will select the groups of group_order automatically.
 		#' @param use_taxa_num default 200; integer; The taxa number used in the background tree plot; select the taxa according to the mean abundance .
-		#' @param filter_taxa default NULL; The mean relative abundance used to filter the taxa with low abundance.
+		#' @param filter_taxa default NULL; The mean abundance used to filter the taxa with low abundance. 
+		#'	  Usually, it is relative abundance, depending on the data type of the \code{abund_table} stored in the object.
 		#' @param use_feature_num default NULL; integer; The feature number used in the plot; 
 		#'	  select the features according to the metric (method = "lefse" or "rf") from high to low.
 		#' @param clade_label_level default 4; the taxonomic level for marking the label with letters, root is the largest.
@@ -1856,7 +1857,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 				}
 			}
 			if(!is.null(filter_taxa)){
-				abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
+				if(is.null(self$lefse_norm)){
+					abund_table %<>% .[apply(., 1, mean) > filter_taxa, ]
+				}else{
+					if(self$lefse_norm > 0){
+						abund_table %<>% .[apply(., 1, mean) > (self$lefse_norm * filter_taxa), ]
+					}else{
+						abund_table %<>% .[apply(., 1, mean) > filter_taxa, ]
+					}
+				}
+				message(nrow(abund_table), " features are remained after using filter_taxa ...")
 			}
 			abund_table %<>% .[sort(rownames(.)), ]
 			tree_table <- data.frame(taxa = row.names(abund_table), abd = rowMeans(abund_table), stringsAsFactors = FALSE) %>%
