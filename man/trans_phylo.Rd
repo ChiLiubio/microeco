@@ -176,12 +176,13 @@ pviz$add_ring_labels(size = 1.8, color = "grey25")
 
 \dontrun{
 pviz$add_rings_batch(
-  col_names    = c("RelAbund", "Prevalence", "LogAbund"),
+  col_names    = c("RelAbund", "Prevalence", "Habitat"),
   numeric_geom = "bar",
   ring_width   = c(0.02, 0.03, 0.04),
   ring_offset  = c(0.02, 0.01, 0.02),
-  color_low    = c("#440154", "#EDF8FB", "#FFF5EB"),
-  color_high   = c("#FDE725", "#006D2C", "#D94801"),
+  color_low    = c("#440154", "#EDF8FB"),
+  color_high   = c("#FDE725", "#006D2C"),
+  categorical_palette = list(Habitat = c("IW" = "red", "CW" = "blue", "TW" = "green")),
   show_legend  = TRUE
 )
 }
@@ -732,8 +733,6 @@ Recycled if length 1; must match length of col_names otherwise.}
 Single value is recycled; vector must match length of col_names.}
 
 \item{\code{ring_offset}}{numeric or numeric vector; gap(s) before each ring, default 0.02.
-This is the spacing *between* rings, not the absolute offset.
-Cumulative offset is computed automatically from ring_width and ring_offset.
 Single value is recycled; vector must match length of col_names.}
 
 \item{\code{color_low}}{character or character vector; color(s) for low numeric values, default "#0D0887".
@@ -743,9 +742,11 @@ Single value is recycled; vector must match length of col_names.}
 Single value is recycled; vector must match length of col_names.}
 
 \item{\code{categorical_palette}}{palette function, named color vector, or list thereof, for
-categorical columns. A single value is recycled for all rings; a list must match
-the length of col_names. Each entry may be either a palette function (e.g.
-`scales::hue_pal()` or `colorRampPalette(c(...))`) or a named color vector.
+categorical columns. A single value is recycled for all rings; an unnamed list is
+recycled positionally (length recycled to n); a NAMED list is matched to columns by
+name (e.g. list(Habitat = c(...), Salinity = c(...))), and columns without a matching
+entry fall back to auto-generated colors. Each entry may be either a palette function
+(e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a named color vector.
 Forwarded to each add_ring() call as `categorical_colors`. Default NULL.}
 
 \item{\code{show_legend}}{logical or logical vector; whether to show legends, default TRUE.
@@ -762,12 +763,13 @@ updated ggtree plot object
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
 pviz$add_rings_batch(
-  col_names    = c("RelAbund", "Prevalence", "LogAbund"),
+  col_names    = c("RelAbund", "Prevalence", "Habitat"),
   numeric_geom = "bar",
   ring_width   = c(0.02, 0.03, 0.04),
   ring_offset  = c(0.02, 0.01, 0.02),
-  color_low    = c("#440154", "#EDF8FB", "#FFF5EB"),
-  color_high   = c("#FDE725", "#006D2C", "#D94801"),
+  color_low    = c("#440154", "#EDF8FB"),
+  color_high   = c("#FDE725", "#006D2C"),
+  categorical_palette = list(Habitat = c("IW" = "red", "CW" = "blue", "TW" = "green")),
   show_legend  = TRUE
 )
 }
