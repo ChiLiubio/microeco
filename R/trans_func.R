@@ -361,8 +361,14 @@ trans_func <- R6Class(classname = "trans_func",
 
 			tmp_res_func <- self$res_func
 			otu_table <- self$otu_table
+			tax_table_use <- self$tax_table
+			
 			if(adj_tax){
+				if(! adj_tax_by %in% colnames(tax_table_use)){
+					stop("Provided adj_tax_by: ", adj_tax_by, " is not in the column names of tax_table!")
+				}
 				message('Calculate adjustment factor (AF) at ', adj_tax_by, ' level ...')
+				adj_whichcol <- which(colnames(tax_table_use) %in% adj_tax_by)
 			}
 			
 			tmp_res_func_fr <- sapply(colnames(otu_table), function(input_samplecolumn){
@@ -371,7 +377,7 @@ trans_func <- R6Class(classname = "trans_func",
 				# remove species whose abundance is 0
 				sample_otu <- sample_otu[sample_otu != 0]
 				if(adj_tax){
-					adj_tax_totaltax <- self$tax_table[names(sample_otu), 1:which(colnames(self$tax_table) %in% adj_tax_by), drop = FALSE] %>% 
+					adj_tax_totaltax <- tax_table_use[names(sample_otu), 1:adj_whichcol, drop = FALSE] %>% 
 						apply(., 1, function(x){paste0(x, collapse = ";")})
 					adj_tax_totaltax_length <- adj_tax_totaltax %>% unique %>% length
 					tmp_extract_total <- tmp_res_func[names(sample_otu), ]
@@ -545,6 +551,9 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 			# check the minimum value
 			test_min <- unlist(tmp_res_func_FR)
+			if(all(test_min == 0)){
+				stop("All values are 0! The method cannot be applied!")
+			}
 			test_min %<>% .[. != 0] %>% min
 			test_min_low <- floor(log10(min(test_min))) - 2
 			test_min_low_add <- 10^(test_min_low)
