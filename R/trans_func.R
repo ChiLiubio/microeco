@@ -23,7 +23,11 @@ trans_func <- R6Class(classname = "trans_func",
 		initialize = function(dataset = NULL
 			){
 			check_microtable(dataset)
-			self$tax_table <- dataset$tax_table
+			tax_table_use <- dataset$tax_table %>% dropallfactors
+			if(any(is.na(tax_table_use))){
+				tax_table_use[is.na(tax_table_use)] <- ""
+			}
+			self$tax_table <- tax_table_use
 			self$otu_table <- dataset$otu_table
 			self$sample_table <- dataset$sample_table
 			self$rep_fasta <- dataset$rep_fasta
