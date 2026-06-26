@@ -798,9 +798,13 @@ trans_phylo <- R6::R6Class(
                 # add_rings_batch: Batch add multiple ring annotations
                 # =======================================================================
                 #' @description Batch add all (or selected) columns from ring_data as outer rings.
-                #'   Parameters ring_width, ring_offset, color_low, color_high, numeric_geom, show_legend
-                #'   and categorical_palette all support vector input (length = number of col_names);
-                #'   a single value is automatically recycled for all rings.
+                #'   Parameters ring_width, ring_offset, numeric_geom and show_legend
+                #'   support vector input (length = number of col_names); a single value is recycled for all rings.
+                #'   color_low and color_high are aligned positionally to NUMERIC columns only (length =
+                #'   number of numeric columns; non-numeric columns are passed NULL).
+                #'   categorical_palette is aligned to NON-NUMERIC columns only (numeric columns passed NULL):
+                #'   a single value or unnamed list is recycled to the number of categorical columns;
+                #'   a named list is matched by column name.
                 #' @param col_names character vector of column names to add; NULL means all columns
                 #' @param numeric_geom character or character vector; geom type(s) for numeric columns, default "bar".
                 #'   Recycled if length 1; must match length of col_names otherwise.
@@ -809,16 +813,20 @@ trans_phylo <- R6::R6Class(
                 #' @param ring_offset numeric or numeric vector; gap(s) before each ring, default 0.02.
                 #'   Single value is recycled; vector must match length of col_names.
                 #' @param color_low character or character vector; color(s) for low numeric values, default "#0D0887".
-                #'   Single value is recycled; vector must match length of col_names.
+                #'   Aligned positionally to NUMERIC columns only and recycled to the number of numeric columns;
+                #'   non-numeric columns are passed NULL (their colors come from categorical_palette). A single
+                #'   value is recycled for all numeric columns.
                 #' @param color_high character or character vector; color(s) for high numeric values, default "#F0F921".
-                #'   Single value is recycled; vector must match length of col_names.
+                #'   Aligned positionally to NUMERIC columns only and recycled to the number of numeric columns;
+                #'   non-numeric columns are passed NULL. A single value is recycled for all numeric columns.
                 #' @param categorical_palette palette function, named color vector, or list thereof, for
-                #'   categorical columns. A single value is recycled for all rings; an unnamed list is
-                #'   recycled positionally (length recycled to n); a NAMED list is matched to columns by
-                #'   name (e.g. list(Habitat = c(...), Salinity = c(...))), and columns without a matching
-                #'   entry fall back to auto-generated colors. Each entry may be either a palette function
-                #'   (e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a named color vector.
-                #'   Forwarded to each add_ring() call as `categorical_colors`. Default NULL.
+                #'   categorical columns. Aligned to NON-NUMERIC (categorical) columns only: a single value
+                #'   is recycled for all categorical columns; an unnamed list is recycled positionally to the
+                #'   number of categorical columns; a NAMED list is matched to columns by name (e.g.
+                #'   list(Habitat = c(...), Salinity = c(...))). Numeric columns are always passed NULL.
+                #'   Columns without a matching entry fall back to auto-generated colors. Each entry may be
+                #'   either a palette function (e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a
+                #'   named color vector. Forwarded to each add_ring() call as `categorical_colors`. Default NULL.
                 #' @param show_legend logical or logical vector; whether to show legends, default TRUE.
                 #'   Single value is recycled; vector must match length of col_names.
                 #' @param ... additional arguments passed to each add_ring() call
@@ -862,21 +870,33 @@ trans_phylo <- R6::R6Class(
                         }
 
                         n <- length(all_cols)
+                        # judge numeric columns
+                        is_num_col <- vapply(all_cols, function(cn) is.numeric(df[[cn]]), logical(1))
+                        n_numeric  <- sum(is_num_col)
                         ring_width   <- rep_len(ring_width, n)
                         ring_offset  <- rep_len(ring_offset, n)
-                        color_low    <- rep_len(color_low, n)
-                        color_high   <- rep_len(color_high, n)
                         numeric_geom <- rep_len(numeric_geom, n)
                         show_legend  <- rep_len(show_legend, n)
-                        cat_pal_list <- if (is.null(categorical_palette)) {
-									rep_len(list(NULL), n)
-							} else if (is.list(categorical_palette) && !is.null(names(categorical_palette))) {
-									lapply(all_cols, function(cn) categorical_palette[[cn, exact = TRUE]])
-							} else if (is.list(categorical_palette)) {
-									rep_len(categorical_palette, n)
-							} else {
-									rep_len(list(categorical_palette), n)
+                        # color_low / color_high setting according to the numeric columns position
+                        color_low_per  <- vector("list", n)
+                        color_high_per <- vector("list", n)
+                        color_low_per[is_num_col]  <- as.list(rep_len(color_low,  n_numeric))
+                        color_high_per[is_num_col] <- as.list(rep_len(color_high, n_numeric))
+                        cat_pal_list <- vector("list", n)
+                        n_categorical <- n - n_numeric
+						if(n_categorical > 0){
+							if (! is.null(categorical_palette)) {
+								if(is.list(categorical_palette)){
+									if(!is.null(names(categorical_palette))){
+										cat_pal_list <- lapply(all_cols, function(cn) categorical_palette[[cn, exact = TRUE]])
+									}else{
+										cat_pal_list[!is_num_col] <- as.list(rep_len(categorical_palette, n_categorical))
+									}
+								}else{
+									cat_pal_list[!is_num_col] <- as.list(rep_len(list(categorical_palette), n_categorical))
+								}
 							}
+						}
 
                         for (i in seq_along(all_cols)) {
                                 cn <- all_cols[i]
@@ -886,8 +906,8 @@ trans_phylo <- R6::R6Class(
                                         ring_width          = ring_width[i],
                                         ring_offset         = ring_offset[i],
                                         geom                = numeric_geom[i],
-                                        color_low           = color_low[i],
-                                        color_high          = color_high[i],
+                                        color_low           = color_low_per[[i]],
+                                        color_high          = color_high_per[[i]],
                                         categorical_colors  = cat_pal_list[[i]],
                                         show_legend         = show_legend[i],
                                         legend_title_custom = cn,

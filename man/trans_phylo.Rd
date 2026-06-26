@@ -704,9 +704,13 @@ pviz$add_ring_labels(size = 1.8, color = "grey25")
 \if{latex}{\out{\hypertarget{method-trans_phylo-add_rings_batch}{}}}
 \subsection{Method \code{add_rings_batch()}}{
 Batch add all (or selected) columns from ring_data as outer rings.
-  Parameters ring_width, ring_offset, color_low, color_high, numeric_geom, show_legend
-  and categorical_palette all support vector input (length = number of col_names);
-  a single value is automatically recycled for all rings.
+  Parameters ring_width, ring_offset, numeric_geom and show_legend
+  support vector input (length = number of col_names); a single value is recycled for all rings.
+  color_low and color_high are aligned positionally to NUMERIC columns only (length =
+  number of numeric columns; non-numeric columns are passed NULL).
+  categorical_palette is aligned to NON-NUMERIC columns only (numeric columns passed NULL):
+  a single value or unnamed list is recycled to the number of categorical columns;
+  a named list is matched by column name.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_rings_batch(
   col_names = NULL,
@@ -736,18 +740,22 @@ Single value is recycled; vector must match length of col_names.}
 Single value is recycled; vector must match length of col_names.}
 
 \item{\code{color_low}}{character or character vector; color(s) for low numeric values, default "#0D0887".
-Single value is recycled; vector must match length of col_names.}
+Aligned positionally to NUMERIC columns only and recycled to the number of numeric columns;
+non-numeric columns are passed NULL (their colors come from categorical_palette). A single
+value is recycled for all numeric columns.}
 
 \item{\code{color_high}}{character or character vector; color(s) for high numeric values, default "#F0F921".
-Single value is recycled; vector must match length of col_names.}
+Aligned positionally to NUMERIC columns only and recycled to the number of numeric columns;
+non-numeric columns are passed NULL. A single value is recycled for all numeric columns.}
 
 \item{\code{categorical_palette}}{palette function, named color vector, or list thereof, for
-categorical columns. A single value is recycled for all rings; an unnamed list is
-recycled positionally (length recycled to n); a NAMED list is matched to columns by
-name (e.g. list(Habitat = c(...), Salinity = c(...))), and columns without a matching
-entry fall back to auto-generated colors. Each entry may be either a palette function
-(e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a named color vector.
-Forwarded to each add_ring() call as `categorical_colors`. Default NULL.}
+categorical columns. Aligned to NON-NUMERIC (categorical) columns only: a single value
+is recycled for all categorical columns; an unnamed list is recycled positionally to the
+number of categorical columns; a NAMED list is matched to columns by name (e.g.
+list(Habitat = c(...), Salinity = c(...))). Numeric columns are always passed NULL.
+Columns without a matching entry fall back to auto-generated colors. Each entry may be
+either a palette function (e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a
+named color vector. Forwarded to each add_ring() call as `categorical_colors`. Default NULL.}
 
 \item{\code{show_legend}}{logical or logical vector; whether to show legends, default TRUE.
 Single value is recycled; vector must match length of col_names.}
