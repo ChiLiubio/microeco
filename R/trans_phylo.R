@@ -808,9 +808,9 @@ trans_phylo <- R6::R6Class(
                 #' @param col_names character vector of column names to add; NULL means all columns
                 #' @param numeric_geom character or character vector; geom type(s) for numeric columns, default "bar".
                 #'   Recycled if length 1; must match length of col_names otherwise.
-                #' @param ring_width numeric or numeric vector; ring width(s), default 0.08.
+                #' @param ring_width numeric or numeric vector; ring width(s), default 0.05.
                 #'   Single value is recycled; vector must match length of col_names.
-                #' @param ring_offset numeric or numeric vector; gap(s) before each ring, default 0.02.
+                #' @param ring_offset numeric or numeric vector; gap(s) before each ring, default 0.03.
                 #'   Single value is recycled; vector must match length of col_names.
                 #' @param color_low character or character vector; color(s) for low numeric values, default "#0D0887".
                 #'   Aligned positionally to NUMERIC columns only and recycled to the number of numeric columns;
@@ -837,7 +837,7 @@ trans_phylo <- R6::R6Class(
                 #'   col_names    = c("RelAbund", "Prevalence", "Habitat"),
                 #'   numeric_geom = "bar",
                 #'   ring_width   = c(0.02, 0.03, 0.04),
-                #'   ring_offset  = c(0.02, 0.01, 0.02),
+                #'   ring_offset  = c(0.03, 0.02, 0.03),
                 #'   color_low    = c("#440154", "#EDF8FB"),
                 #'   color_high   = c("#FDE725", "#006D2C"),
                 #'   categorical_palette = list(Habitat = c("IW" = "red", "CW" = "blue", "TW" = "green")),
@@ -846,8 +846,8 @@ trans_phylo <- R6::R6Class(
                 #' }
                 add_rings_batch = function(col_names           = NULL,
 										   numeric_geom        = "bar",
-										   ring_width          = 0.08,
-										   ring_offset         = 0.02,
+										   ring_width          = 0.05,
+										   ring_offset         = 0.03,
 										   color_low           = "#0D0887",
 										   color_high          = "#F0F921",
 										   categorical_palette = NULL,

@@ -179,7 +179,7 @@ pviz$add_rings_batch(
   col_names    = c("RelAbund", "Prevalence", "Habitat"),
   numeric_geom = "bar",
   ring_width   = c(0.02, 0.03, 0.04),
-  ring_offset  = c(0.02, 0.01, 0.02),
+  ring_offset  = c(0.03, 0.02, 0.03),
   color_low    = c("#440154", "#EDF8FB"),
   color_high   = c("#FDE725", "#006D2C"),
   categorical_palette = list(Habitat = c("IW" = "red", "CW" = "blue", "TW" = "green")),
@@ -715,8 +715,8 @@ Batch add all (or selected) columns from ring_data as outer rings.
 \if{html}{\out{<div class="r">}}\preformatted{trans_phylo$add_rings_batch(
   col_names = NULL,
   numeric_geom = "bar",
-  ring_width = 0.08,
-  ring_offset = 0.02,
+  ring_width = 0.05,
+  ring_offset = 0.03,
   color_low = "#0D0887",
   color_high = "#F0F921",
   categorical_palette = NULL,
@@ -733,10 +733,10 @@ Batch add all (or selected) columns from ring_data as outer rings.
 \item{\code{numeric_geom}}{character or character vector; geom type(s) for numeric columns, default "bar".
 Recycled if length 1; must match length of col_names otherwise.}
 
-\item{\code{ring_width}}{numeric or numeric vector; ring width(s), default 0.08.
+\item{\code{ring_width}}{numeric or numeric vector; ring width(s), default 0.05.
 Single value is recycled; vector must match length of col_names.}
 
-\item{\code{ring_offset}}{numeric or numeric vector; gap(s) before each ring, default 0.02.
+\item{\code{ring_offset}}{numeric or numeric vector; gap(s) before each ring, default 0.03.
 Single value is recycled; vector must match length of col_names.}
 
 \item{\code{color_low}}{character or character vector; color(s) for low numeric values, default "#0D0887".
@@ -774,7 +774,7 @@ pviz$add_rings_batch(
   col_names    = c("RelAbund", "Prevalence", "Habitat"),
   numeric_geom = "bar",
   ring_width   = c(0.02, 0.03, 0.04),
-  ring_offset  = c(0.02, 0.01, 0.02),
+  ring_offset  = c(0.03, 0.02, 0.03),
   color_low    = c("#440154", "#EDF8FB"),
   color_high   = c("#FDE725", "#006D2C"),
   categorical_palette = list(Habitat = c("IW" = "red", "CW" = "blue", "TW" = "green")),
