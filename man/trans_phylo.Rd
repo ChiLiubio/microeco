@@ -4,10 +4,8 @@
 \alias{trans_phylo}
 \title{trans_phylo class}
 \description{
-Publication-grade phylogenetic tree visualization built on ggtree package (DOI: 10.1002/imt2.56),
-  designed for the microtable object. Supports group-based branch/tip
-  coloring (with full clade coloring via groupOTU) and multi-layer outer ring
-  annotations.
+Publication-grade phylogenetic tree visualization built on ggtree package (DOI: 10.1002/imt2.56), designed for the microtable object. 
+  Supports group-based branch/tip coloring (with full clade coloring via groupOTU) and multi-layer outer ring annotations.
 }
 \examples{
 
@@ -58,7 +56,7 @@ importance <- round(importance_raw / max(importance_raw, na.rm = TRUE) * 100, 2)
 niche <- trans_niche$new(mt)$cal_niche_breadth()
 specificity <- 1 - niche$res_niche_breadth[rownames(otu), "Levins_Standardized"]
 
-# network metrics
+# network metrics example
 net <- trans_network$new(mt, cor_method = "pearson")$cal_network()$get_node_table()
 centrality <- net$res_node_table[rownames(otu), "closeness_centrality"]
 connectivity <- net$res_node_table[rownames(otu), "z"]
@@ -66,7 +64,8 @@ connectivity <- net$res_node_table[rownames(otu), "z"]
 # Habitat
 mt$add_rownames2tax("OTU")
 mt$cal_abund()
-mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group", alpha = 1)
+# Wilcoxon test + Random forest to obtain habitats of differential OTUs
+mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group")
 mt_diff_res <- mt_diff$res_diff 
 rownames(mt_diff_res) \%<>\% gsub(".*\\\\|", "", .)
 dominant_habitat <- mt_diff_res[rownames(otu), "Group"]
@@ -293,7 +292,7 @@ Initialize a trans_phylo object
 \describe{
 \item{\code{dataset}}{microtable object containing phylo_tree and tax_table}
 
-\item{\code{group_col}}{string, taxonomic rank column for branch/tip coloring, default "Phylum"}
+\item{\code{group_col}}{string, taxonomic rank column in tax_table for branch/tip coloring, default "Phylum"}
 
 \item{\code{ring_data}}{data.frame, outer ring annotation data; row names or first column
 should match tip labels. Supports numeric (heatmap) and categorical (color band) columns}
@@ -358,7 +357,7 @@ importance <- round(importance_raw / max(importance_raw, na.rm = TRUE) * 100, 2)
 niche <- trans_niche$new(mt)$cal_niche_breadth()
 specificity <- 1 - niche$res_niche_breadth[rownames(otu), "Levins_Standardized"]
 
-# network metrics
+# network metrics example
 net <- trans_network$new(mt, cor_method = "pearson")$cal_network()$get_node_table()
 centrality <- net$res_node_table[rownames(otu), "closeness_centrality"]
 connectivity <- net$res_node_table[rownames(otu), "z"]
@@ -366,7 +365,8 @@ connectivity <- net$res_node_table[rownames(otu), "z"]
 # Habitat
 mt$add_rownames2tax("OTU")
 mt$cal_abund()
-mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group", alpha = 1)
+# Wilcoxon test + Random forest to obtain habitats of differential OTUs
+mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group")
 mt_diff_res <- mt_diff$res_diff 
 rownames(mt_diff_res) \%<>\% gsub(".*\\\\|", "", .)
 dominant_habitat <- mt_diff_res[rownames(otu), "Group"]
@@ -589,9 +589,9 @@ default NULL means auto from data range}
 If a named character vector, names must correspond to factor levels present in
 the data. If an unnamed character vector, it is recycled and named by the
 factor levels in their alphabetical order. If a palette function (e.g.
-`scales::hue_pal()` or `colorRampPalette(c(...))`), it is invoked with the
-number of factor levels to produce a color vector, which is then named by
-the levels.}
+\code{scales::hue_pal()} or \code{colorRampPalette(c(...))}), 
+it is invoked with the number of factor levels to produce a color vector, 
+which is then named by the levels.}
 
 \item{\code{ring_width}}{ring width, default NULL; see ring_width_bar and ring_width_other.}
 
@@ -754,8 +754,8 @@ is recycled for all categorical columns; an unnamed list is recycled positionall
 number of categorical columns; a NAMED list is matched to columns by name (e.g.
 list(Habitat = c(...), Salinity = c(...))). Numeric columns are always passed NULL.
 Columns without a matching entry fall back to auto-generated colors. Each entry may be
-either a palette function (e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a
-named color vector. Forwarded to each add_ring() call as `categorical_colors`. Default NULL.}
+either a palette function (e.g. \code{scales::hue_pal()} or \code{colorRampPalette(c(...))}) or a
+named color vector. Forwarded to each add_ring() call as \code{categorical_colors}. Default NULL.}
 
 \item{\code{show_legend}}{logical or logical vector; whether to show legends, default TRUE.
 Single value is recycled; vector must match length of col_names.}

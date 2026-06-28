@@ -1,9 +1,8 @@
 #' @title trans_phylo class
 #'
-#' @description Publication-grade phylogenetic tree visualization built on ggtree package (DOI: 10.1002/imt2.56),
-#'   designed for the microtable object. Supports group-based branch/tip
-#'   coloring (with full clade coloring via groupOTU) and multi-layer outer ring
-#'   annotations.
+#' @description
+#'   Publication-grade phylogenetic tree visualization built on ggtree package (DOI: 10.1002/imt2.56), designed for the microtable object. 
+#'   Supports group-based branch/tip coloring (with full clade coloring via groupOTU) and multi-layer outer ring annotations.
 #'
 #' @export
 trans_phylo <- R6::R6Class(
@@ -18,7 +17,7 @@ trans_phylo <- R6::R6Class(
                 # =======================================================================
                 #' @description Initialize a trans_phylo object
                 #' @param dataset microtable object containing phylo_tree and tax_table
-                #' @param group_col string, taxonomic rank column for branch/tip coloring, default "Phylum"
+                #' @param group_col string, taxonomic rank column in tax_table for branch/tip coloring, default "Phylum"
                 #' @param ring_data data.frame, outer ring annotation data; row names or first column
                 #'   should match tip labels. Supports numeric (heatmap) and categorical (color band) columns
                 #' @param color_palette vector, optional custom color palette; 
@@ -74,7 +73,7 @@ trans_phylo <- R6::R6Class(
                 #' niche <- trans_niche$new(mt)$cal_niche_breadth()
                 #' specificity <- 1 - niche$res_niche_breadth[rownames(otu), "Levins_Standardized"]
                 #' 
-                #' # network metrics
+                #' # network metrics example
                 #' net <- trans_network$new(mt, cor_method = "pearson")$cal_network()$get_node_table()
                 #' centrality <- net$res_node_table[rownames(otu), "closeness_centrality"]
                 #' connectivity <- net$res_node_table[rownames(otu), "z"]
@@ -82,7 +81,8 @@ trans_phylo <- R6::R6Class(
                 #' # Habitat
                 #' mt$add_rownames2tax("OTU")
                 #' mt$cal_abund()
-                #' mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group", alpha = 1)
+                #' # Wilcoxon test + Random forest to obtain habitats of differential OTUs
+                #' mt_diff <- trans_diff$new(dataset = mt, method = "rf", taxa_level = "OTU", group = "Group")
                 #' mt_diff_res <- mt_diff$res_diff 
                 #' rownames(mt_diff_res) %<>% gsub(".*\\|", "", .)
                 #' dominant_habitat <- mt_diff_res[rownames(otu), "Group"]
@@ -421,9 +421,9 @@ trans_phylo <- R6::R6Class(
                 #'   If a named character vector, names must correspond to factor levels present in
                 #'   the data. If an unnamed character vector, it is recycled and named by the
                 #'   factor levels in their alphabetical order. If a palette function (e.g.
-                #'   `scales::hue_pal()` or `colorRampPalette(c(...))`), it is invoked with the
-                #'   number of factor levels to produce a color vector, which is then named by
-                #'   the levels.
+                #'   \code{scales::hue_pal()} or \code{colorRampPalette(c(...))}), 
+                #'   it is invoked with the number of factor levels to produce a color vector, 
+                #'   which is then named by the levels.
                 #' @param ring_width ring width, default NULL; see ring_width_bar and ring_width_other.
                 #' @param ring_offset ring offset, default NULL; If NULL, ring_offset_first + ring_gap
                 #' @param ring_gap numeric, gap between consecutive rings when ring_offset is not manually specified
@@ -825,8 +825,8 @@ trans_phylo <- R6::R6Class(
                 #'   number of categorical columns; a NAMED list is matched to columns by name (e.g.
                 #'   list(Habitat = c(...), Salinity = c(...))). Numeric columns are always passed NULL.
                 #'   Columns without a matching entry fall back to auto-generated colors. Each entry may be
-                #'   either a palette function (e.g. `scales::hue_pal()` or `colorRampPalette(c(...))`) or a
-                #'   named color vector. Forwarded to each add_ring() call as `categorical_colors`. Default NULL.
+                #'   either a palette function (e.g. \code{scales::hue_pal()} or \code{colorRampPalette(c(...))}) or a
+                #'   named color vector. Forwarded to each add_ring() call as \code{categorical_colors}. Default NULL.
                 #' @param show_legend logical or logical vector; whether to show legends, default TRUE.
                 #'   Single value is recycled; vector must match length of col_names.
                 #' @param ... additional arguments passed to each add_ring() call
