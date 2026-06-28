@@ -377,34 +377,6 @@ trans_phylo <- R6::R6Class(
                         message(sprintf("Tree plotted (layout: %s). Use $add_ring() to add outer annotations.", layout))
                         invisible(self)
                 },
-
-                # =======================================================================
-                # plot_circular: Convenience wrapper for plot_tree with fan layout
-                # =======================================================================
-                #' @description Convenience wrapper for plot_tree() with layout = "fan".
-                #'   All parameters are passed through to plot_tree().
-                #' @param ... all arguments passed to plot_tree()
-                #' @return ggtree plot object
-                #' @examples
-                #' \dontrun{
-                #' pviz$plot_circular(
-                #'   open_angle       = 18,
-                #'   branch_size      = 0.15,
-                #'   tip_point_size   = 1.2,
-                #'   tip_point_shape  = 21,
-                #'   tip_point_stroke = 0.1,
-                #'   tip_point_alpha  = 0.80,
-                #'   legend_title     = "Phylum"
-                #' )
-                #' }
-                plot_circular = function(...) {
-                        args <- list(...)
-                        if (!"layout" %in% names(args)) {
-                                args$layout <- "fan"
-                        }
-                        do.call(self$plot_tree, args)
-                },
-
                 # =======================================================================
                 # add_ring: Add one outer ring annotation layer
                 # =======================================================================

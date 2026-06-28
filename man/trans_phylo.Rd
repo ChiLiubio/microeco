@@ -120,22 +120,6 @@ pviz$plot_tree(
 }
 
 ## ------------------------------------------------
-## Method `trans_phylo$plot_circular`
-## ------------------------------------------------
-
-\dontrun{
-pviz$plot_circular(
-  open_angle       = 18,
-  branch_size      = 0.15,
-  tip_point_size   = 1.2,
-  tip_point_shape  = 21,
-  tip_point_stroke = 0.1,
-  tip_point_alpha  = 0.80,
-  legend_title     = "Phylum"
-)
-}
-
-## ------------------------------------------------
 ## Method `trans_phylo$add_ring`
 ## ------------------------------------------------
 
@@ -256,7 +240,6 @@ print(pviz)
 \itemize{
 \item \href{#method-trans_phylo-new}{\code{trans_phylo$new()}}
 \item \href{#method-trans_phylo-plot_tree}{\code{trans_phylo$plot_tree()}}
-\item \href{#method-trans_phylo-plot_circular}{\code{trans_phylo$plot_circular()}}
 \item \href{#method-trans_phylo-add_ring}{\code{trans_phylo$add_ring()}}
 \item \href{#method-trans_phylo-add_ring_labels}{\code{trans_phylo$add_ring_labels()}}
 \item \href{#method-trans_phylo-add_rings_batch}{\code{trans_phylo$add_rings_batch()}}
@@ -492,45 +475,6 @@ pviz$plot_tree(
   tip_point_stroke   = 0.1,
   tip_point_alpha    = 0.80,
   legend_title       = "Phylum"
-)
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-trans_phylo-plot_circular"></a>}}
-\if{latex}{\out{\hypertarget{method-trans_phylo-plot_circular}{}}}
-\subsection{Method \code{plot_circular()}}{
-Convenience wrapper for plot_tree() with layout = "fan".
-  All parameters are passed through to plot_tree().
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_phylo$plot_circular(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{all arguments passed to plot_tree()}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-ggtree plot object
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-pviz$plot_circular(
-  open_angle       = 18,
-  branch_size      = 0.15,
-  tip_point_size   = 1.2,
-  tip_point_shape  = 21,
-  tip_point_stroke = 0.1,
-  tip_point_alpha  = 0.80,
-  legend_title     = "Phylum"
 )
 }
 }
