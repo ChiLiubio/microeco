@@ -396,12 +396,12 @@ trans_phylo <- R6::R6Class(
                 #'   \code{scales::hue_pal()} or \code{colorRampPalette(c(...))}), 
                 #'   it is invoked with the number of factor levels to produce a color vector, 
                 #'   which is then named by the levels.
-                #' @param ring_width ring width, default NULL; see ring_width_bar and ring_width_other.
-                #' @param ring_offset ring offset, default NULL; If NULL, ring_offset_first + ring_gap
+                #' @param ring_width ring width, default NULL; see \code{ring_width_bar} and \code{ring_width_other}
+                #' @param ring_offset ring offset, default NULL; If NULL, \code{ring_offset_first} + \code{ring_gap}
                 #' @param ring_gap numeric, gap between consecutive rings when ring_offset is not manually specified
                 #' @param ring_offset_first numeric, starting offset for the very first ring when ring_offset is not manually specified
-                #' @param ring_width_bar numeric, default ring width for numeric bar-type rings when ring_width is NULL
-                #' @param ring_width_other numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL
+                #' @param ring_width_bar numeric, default ring width for numeric bar-type rings when \code{ring_width} is NULL
+                #' @param ring_width_other numeric, default ring width for non-bar rings (categorical color band, point, star) when \code{ring_width} is NULL
                 #' @param show_legend logical, whether to show this ring's legend, default TRUE
                 #' @param legend_title_custom custom legend title, default uses column name
                 #' @param ring_label label around the ring, default uses column name
@@ -415,7 +415,7 @@ trans_phylo <- R6::R6Class(
                 #'   NA is always kept as NA and colored with na_fill (regardless of na_replace),
                 #'   so the user's color vector does not need to cover an extra "Unknown" level.
                 #' @param point_size point size (only for geom = "point"), default 1.5
-                #' @param ... additional arguments passed to ggtreeExtra::geom_fruit() (e.g. axis.params, grid.params)
+                #' @param ... additional arguments passed to \code{ggtreeExtra::geom_fruit()} (e.g. axis.params, grid.params)
                 #' @return updated ggtree plot object
                 #' @examples
                 #' \dontrun{
@@ -901,7 +901,7 @@ trans_phylo <- R6::R6Class(
                 #' @param fontsize numeric, default 2, text size
                 #' @param linesize numeric, default 0.5, line size
 				#' @param offset numeric, default 0.3, offset of text to line
-                #' @param ... additional arguments passed to ggtree::geom_treescale
+                #' @param ... additional arguments passed to \code{ggtree::geom_treescale}
                 #' @return updated plot
                 #' @examples
                 #' \dontrun{
@@ -1121,113 +1121,113 @@ trans_phylo <- R6::R6Class(
         # Private methods
         # ===========================================================================
         private = list(
-        # Build group mapping table from tax_table
-        # group_col string, taxonomic rank column name
-        # group_prefix string, prefix to add to group names
-        # group_prefix_remove string, prefix to strip from group names
-        build_group_info = function(group_col, group_prefix, group_prefix_remove) {
-                tax <- self$tax_table
-                # Ensure tax_table is a data.frame
-                if (!is.data.frame(tax)) {
-                        tax <- as.data.frame(tax, stringsAsFactors = FALSE)
-                }
-                # Row names are OTU/ASV identifiers
-                if (!"label" %in% colnames(tax)) {
-                        tax$label <- rownames(tax)
-                }
+			# Build group mapping table from tax_table
+			# group_col string, taxonomic rank column name
+			# group_prefix string, prefix to add to group names
+			# group_prefix_remove string, prefix to strip from group names
+			build_group_info = function(group_col, group_prefix, group_prefix_remove) {
+					tax <- self$tax_table
+					# Ensure tax_table is a data.frame
+					if (!is.data.frame(tax)) {
+							tax <- as.data.frame(tax, stringsAsFactors = FALSE)
+					}
+					# Row names are OTU/ASV identifiers
+					if (!"label" %in% colnames(tax)) {
+							tax$label <- rownames(tax)
+					}
 
-                # Check that group_col exists
-                if (!group_col %in% colnames(tax)) {
-                        stop(sprintf("Column '%s' not found in tax_table. Available: %s",
-                                         group_col, paste(colnames(tax), collapse = ", ")))
-                }
+					# Check that group_col exists
+					if (!group_col %in% colnames(tax)) {
+							stop(sprintf("Column '%s' not found in tax_table. Available: %s",
+											 group_col, paste(colnames(tax), collapse = ", ")))
+					}
 
-                group_df <- tax[, c("label", group_col), drop = FALSE]
-                colnames(group_df)[2] <- "Group"
+					group_df <- tax[, c("label", group_col), drop = FALSE]
+					colnames(group_df)[2] <- "Group"
 
-                # Keep only tips present in the tree
-                group_df <- group_df[group_df$label %in% self$tip_labels, ]
+					# Keep only tips present in the tree
+					group_df <- group_df[group_df$label %in% self$tip_labels, ]
 
-                # Remove prefix
-                if (!is.null(group_prefix_remove)) {
-                        group_df$Group <- gsub(group_prefix_remove, "", group_df$Group)
-                }
+					# Remove prefix
+					if (!is.null(group_prefix_remove)) {
+							group_df$Group <- gsub(group_prefix_remove, "", group_df$Group)
+					}
 
-                # Add prefix
-                if (!is.null(group_prefix)) {
-                        group_df$Group <- paste0(group_prefix, group_df$Group)
-                }
+					# Add prefix
+					if (!is.null(group_prefix)) {
+							group_df$Group <- paste0(group_prefix, group_df$Group)
+					}
 
-                # Handle NA / unknown groups
-                group_df$Group[is.na(group_df$Group) | group_df$Group == ""] <- "Others"
+					# Handle NA / unknown groups
+					group_df$Group[is.na(group_df$Group) | group_df$Group == ""] <- "Others"
 
-                self$group_info <- group_df
-        },
-        # Propagate group info to internal nodes via groupOTU
-        apply_groupOTU = function() {
-                # Build a named list: group -> vector of tip labels
-                group_list <- split(self$group_info$label, self$group_info$Group)
+					self$group_info <- group_df
+			},
+			# Propagate group info to internal nodes via groupOTU
+			apply_groupOTU = function() {
+					# Build a named list: group -> vector of tip labels
+					group_list <- split(self$group_info$label, self$group_info$Group)
 
-                # Apply groupOTU to annotate internal nodes with Group
-                # This ensures entire clades are colored, not just tip branches
-                # ggtree's stat_tree() internally looks for lowercase 'group';
-                # using group_name = "Group" (uppercase) causes 'object Group not found' error.
-                self$phylo_tree <- ggtree::groupOTU(self$phylo_tree, group_list, group_name = "group")
-        },
-        # Process and validate outer ring annotation data
-        # ring_data data.frame or matrix of ring annotation data
-        process_ring_data = function(ring_data) {
-                if (is.data.frame(ring_data)) {
-                        df <- ring_data
-                } else if (is.matrix(ring_data)) {
-                        df <- as.data.frame(ring_data, stringsAsFactors = FALSE)
-                } else {
-                        stop("ring_data must be a data.frame or matrix.")
-                }
+					# Apply groupOTU to annotate internal nodes with Group
+					# This ensures entire clades are colored, not just tip branches
+					# ggtree's stat_tree() internally looks for lowercase 'group';
+					# using group_name = "Group" (uppercase) causes 'object Group not found' error.
+					self$phylo_tree <- ggtree::groupOTU(self$phylo_tree, group_list, group_name = "group")
+			},
+			# Process and validate outer ring annotation data
+			# ring_data data.frame or matrix of ring annotation data
+			process_ring_data = function(ring_data) {
+					if (is.data.frame(ring_data)) {
+							df <- ring_data
+					} else if (is.matrix(ring_data)) {
+							df <- as.data.frame(ring_data, stringsAsFactors = FALSE)
+					} else {
+							stop("ring_data must be a data.frame or matrix.")
+					}
 
-                # Identify the label column: either a column named "label",
-                # row names matching tip labels, or the first column matching tip labels
-                if ("label" %in% colnames(df)) {
-                        # Already has label column
-                } else if (all(rownames(df) %in% self$tip_labels)) {
-                        df$label <- rownames(df)
-                } else if (all(df[[1]] %in% self$tip_labels)) {
-                        colnames(df)[1] <- "label"
-                } else {
-                        stop(
-                          "Cannot identify tip labels in ring_data. ",
-                          "Please ensure rownames or the first column matches tree tip labels."
-                        )
-                }
+					# Identify the label column: either a column named "label",
+					# row names matching tip labels, or the first column matching tip labels
+					if ("label" %in% colnames(df)) {
+							# Already has label column
+					} else if (all(rownames(df) %in% self$tip_labels)) {
+							df$label <- rownames(df)
+					} else if (all(df[[1]] %in% self$tip_labels)) {
+							colnames(df)[1] <- "label"
+					} else {
+							stop(
+							  "Cannot identify tip labels in ring_data. ",
+							  "Please ensure rownames or the first column matches tree tip labels."
+							)
+					}
 
-                # Keep only tips present in the tree
-                df <- df[df$label %in% self$tip_labels, ]
+					# Keep only tips present in the tree
+					df <- df[df$label %in% self$tip_labels, ]
 
-                # Move label to first column
-                df <- df[, c("label", setdiff(colnames(df), "label")), drop = FALSE]
+					# Move label to first column
+					df <- df[, c("label", setdiff(colnames(df), "label")), drop = FALSE]
 
-                return(df)
-        },
-        # Auto-generate color palette based on group levels
-        generate_palette = function() {
-                groups   <- unique(self$group_info$Group)
-                n_groups <- length(groups)
+					return(df)
+			},
+			# Auto-generate color palette based on group levels
+			generate_palette = function() {
+					groups   <- unique(self$group_info$Group)
+					n_groups <- length(groups)
 
-                # Group colors
-                if (n_groups <= 9) {
-                        group_color <- RColorBrewer::brewer.pal(max(3, n_groups), "Set1")[1:n_groups]
-                } else if (n_groups <= 12) {
-                        group_color <- RColorBrewer::brewer.pal(max(3, n_groups), "Paired")[1:n_groups]
-                } else if (n_groups <= 20) {
-                        group_color <- colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(n_groups)
-                } else {
-                        # Use viridis when more than 20
-                        group_color <- viridis::viridis(n_groups, option = "D")
-                }
-                names(group_color) <- groups
+					# Group colors
+					if (n_groups <= 9) {
+							group_color <- RColorBrewer::brewer.pal(max(3, n_groups), "Set1")[1:n_groups]
+					} else if (n_groups <= 12) {
+							group_color <- RColorBrewer::brewer.pal(max(3, n_groups), "Paired")[1:n_groups]
+					} else if (n_groups <= 20) {
+							group_color <- colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))(n_groups)
+					} else {
+							# Use viridis when more than 20
+							group_color <- viridis::viridis(n_groups, option = "D")
+					}
+					names(group_color) <- groups
 
-                return(group_color)
-        }
+					return(group_color)
+			}
         ),
         lock_class = FALSE,
         lock_objects = FALSE

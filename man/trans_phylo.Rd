@@ -537,17 +537,17 @@ factor levels in their alphabetical order. If a palette function (e.g.
 it is invoked with the number of factor levels to produce a color vector, 
 which is then named by the levels.}
 
-\item{\code{ring_width}}{ring width, default NULL; see ring_width_bar and ring_width_other.}
+\item{\code{ring_width}}{ring width, default NULL; see \code{ring_width_bar} and \code{ring_width_other}}
 
-\item{\code{ring_offset}}{ring offset, default NULL; If NULL, ring_offset_first + ring_gap}
+\item{\code{ring_offset}}{ring offset, default NULL; If NULL, \code{ring_offset_first} + \code{ring_gap}}
 
 \item{\code{ring_gap}}{numeric, gap between consecutive rings when ring_offset is not manually specified}
 
 \item{\code{ring_offset_first}}{numeric, starting offset for the very first ring when ring_offset is not manually specified}
 
-\item{\code{ring_width_bar}}{numeric, default ring width for numeric bar-type rings when ring_width is NULL}
+\item{\code{ring_width_bar}}{numeric, default ring width for numeric bar-type rings when \code{ring_width} is NULL}
 
-\item{\code{ring_width_other}}{numeric, default ring width for non-bar rings (categorical color band, point, star) when ring_width is NULL}
+\item{\code{ring_width_other}}{numeric, default ring width for non-bar rings (categorical color band, point, star) when \code{ring_width} is NULL}
 
 \item{\code{show_legend}}{logical, whether to show this ring's legend, default TRUE}
 
@@ -569,7 +569,7 @@ so the user's color vector does not need to cover an extra "Unknown" level.}
 
 \item{\code{point_size}}{point size (only for geom = "point"), default 1.5}
 
-\item{\code{...}}{additional arguments passed to ggtreeExtra::geom_fruit() (e.g. axis.params, grid.params)}
+\item{\code{...}}{additional arguments passed to \code{ggtreeExtra::geom_fruit()} (e.g. axis.params, grid.params)}
 }
 \if{html}{\out{</div>}}
 }
@@ -763,7 +763,7 @@ Add an evolutionary distance scale bar to the plot
 
 \item{\code{offset}}{numeric, default 0.3, offset of text to line}
 
-\item{\code{...}}{additional arguments passed to ggtree::geom_treescale}
+\item{\code{...}}{additional arguments passed to \code{ggtree::geom_treescale}}
 }
 \if{html}{\out{</div>}}
 }

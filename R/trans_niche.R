@@ -9,8 +9,6 @@
 #'
 #' @export
 trans_niche <- R6Class(classname = "trans_niche",
-        lock_objects = FALSE,
-        lock_class = FALSE,
         public = list(
                 #' @param dataset \code{\link{microtable}} object.
                 #' @param filter_thres default 0; the relative abundance threshold for filtering low-abundance taxa.
@@ -31,8 +29,8 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' }
                 initialize = function(dataset = NULL, filter_thres = 0, env_cols = NULL, add_data = NULL) {
                         microeco:::check_microtable(dataset)
-                        use_dataset <- dataset$clone(deep = TRUE)
-                        # filter low-abundance taxa via microtable$filter_taxa
+                        use_dataset <- microeco::clone(dataset)
+                        
                         if(filter_thres > 0){
                                 use_dataset$filter_taxa(rel_abund = filter_thres)
                         }
@@ -667,5 +665,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                                 message("Note: ", n_all - n_species, " taxa were skipped (no occurrence data for TPD); their overlap values are NA.")
                         }
                 }
-        )
+        ),
+        lock_objects = FALSE,
+        lock_class = FALSE
 )
