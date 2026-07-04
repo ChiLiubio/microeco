@@ -153,7 +153,7 @@ e.g. \code{c("Observed", "Chao1", "Shannon")}.}
 \item{\code{formula}}{default NULL; applied to two-way or multi-factor analysis when 
 method is \code{"anova"}, \code{"scheirerRayHare"}, \code{"lm"}, \code{"lme"}, \code{"betareg"} or \code{"glmm"}; 
 specified set for independent variables, i.e. the latter part of a general formula, 
-such as \code{'block + N*P*K'}.}
+such as \code{'block + N*P*K'}. It's fine to include or omit the tilde ~ at the beginning.}
 
 \item{\code{p_adjust_method}}{default "fdr" (for "KW", "wilcox", "t.test" methods) or "holm" (for "KW_dunn"); P value adjustment method; 
 For \code{method = 'KW', 'wilcox' or 't.test'}, please see \code{method} parameter of \code{p.adjust} function for available options;

@@ -563,9 +563,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 					check_table_variable(metadata, group, "group", "sample_table")
 				}
 				if(manova_all){
+					message("Use ", group, " column for the overall test!")
 					use_formula <- reformulate(group, substitute(as.dist(use_matrix)))
 					res <- adonis2(use_formula, data = metadata, by = by, permutations = permutations, ...)
 				}else{
+					message("Use groups in ", group, " column for the paired test!")
 					res <- private$paired_manova_anosim_bygroup(
 						by_group = by_group,
 						test = "permanova",
@@ -574,8 +576,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 						group = group, 
 						measure = self$measure, 
 						p_adjust_method = p_adjust_method,
-						permutations = permutations,
-						...
+						permutations = permutations
 					)
 				}
 			}
@@ -632,8 +633,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 					group = group, 
 					measure = self$measure, 
 					p_adjust_method = p_adjust_method,
-					permutations = permutations,
-					...
+					permutations = permutations
 				)
 			}else{
 				tmp <- anosim(

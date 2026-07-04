@@ -116,7 +116,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 		#' @param formula default NULL; applied to two-way or multi-factor analysis when 
 		#'   method is \code{"anova"}, \code{"scheirerRayHare"}, \code{"lm"}, \code{"lme"}, \code{"betareg"} or \code{"glmm"}; 
 		#'   specified set for independent variables, i.e. the latter part of a general formula, 
-		#'   such as \code{'block + N*P*K'}.
+		#'   such as \code{'block + N*P*K'}. It's fine to include or omit the tilde ~ at the beginning.
 		#' @param KW_dunn_letter default TRUE; For \code{method = 'KW_dunn'}, \code{TRUE} denotes significances are presented by letters;
 		#'   \code{FALSE} means significances are shown by asterisk for paired comparison.
 		#' @param alpha default 0.05; Significant level; used for generating significance letters when method is 'anova' or 'KW_dunn'.
