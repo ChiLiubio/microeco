@@ -372,7 +372,7 @@ Calculate perMANOVA (Permutational Multivariate Analysis of Variance) based on t
 \item{\code{manova_all}}{default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 FALSE represents test for all the paired groups.}
 
-\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}.
+\item{\code{manova_set}}{default NULL; other specified group set for manova, such as \code{"Group + Type"}, \code{"Group*Type"} or {"~Cropping+Fertilization"}.
 Please also see the \code{formula} parameter (only right-hand side) in \code{adonis2} function of vegan package.
 The parameter manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.}
 

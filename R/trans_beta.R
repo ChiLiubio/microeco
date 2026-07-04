@@ -505,7 +505,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'
 		#' @param manova_all default TRUE; TRUE represents test for all the groups, i.e. the overall test;
 		#'    FALSE represents test for all the paired groups.
-		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"} and \code{"Group*Type"}.
+		#' @param manova_set default NULL; other specified group set for manova, such as \code{"Group + Type"}, \code{"Group*Type"} or {"~Cropping+Fertilization"}.
 		#'    Please also see the \code{formula} parameter (only right-hand side) in \code{adonis2} function of vegan package.
 		#'    The parameter manova_set has higher priority than manova_all parameter. If manova_set is provided; manova_all is disabled.
 		#' @param group default NULL; a column name of \code{sample_table} used for manova. If NULL, search \code{group} variable stored in the object.
@@ -542,6 +542,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			use_matrix <- self$use_matrix
 			metadata <- self$sample_table
 			if(!is.null(manova_set)){
+				manova_set <- trim_formula(manova_set)
 				use_formula <- reformulate(manova_set, substitute(as.dist(use_matrix)))
 				if(by_auto_set){
 					# check interaction effect
