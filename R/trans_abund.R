@@ -775,7 +775,7 @@ trans_abund <- R6Class(classname = "trans_abund",
 				}
 			}
 			p <- p + geom_point(size = point_size, alpha = point_alpha, position = position)
-			p <- p + geom_line(size = line_size, alpha = line_alpha, linetype = line_type, position = position)
+			p <- p + geom_line(linewidth = line_size, alpha = line_alpha, linetype = line_type, position = position)
 			p <- p + ylab(self$ylabname) + guides(col = guide_legend(title=self$taxrank, reverse = TRUE)) + xlab("")
 			p <- p + private$ggplot_xtext_type(xtext_angle = xtext_angle, xtext_size = xtext_size)
 			p <- p + theme(axis.title.y = element_text(size = ytitle_size)) + scale_y_continuous(expand = c(0, 0.01))
