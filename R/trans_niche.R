@@ -62,7 +62,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #'
                 #' @param method default "levins"; the method for niche breadth calculation.
                 #'   Options:
-                #'   \itemize{
+                #'   \describe{
                 #'     \item{\strong{'levins'}}{Levins' niche breadth}
                 #'     \item{\strong{'OMI'}}{Outlying Mean Index via ade4 package; Doledec et al. (2000) <doi:10.1890/0012-9658(2000)081[2914:NSICAA]2.0.CO;2>}
                 #'     \item{\strong{'hypervolume'}}{N-dimensional hypervolume via hypervolume package; Blonder et al. (2014) <doi:10.1111/geb.12146>; Blonder (2018) <doi:10.1111/ecog.03187>}
@@ -112,7 +112,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #'
                 #' @param method default "pianka"; the method for niche overlap calculation.
                 #'   Options:
-                #'   \itemize{
+                #'   \describe{
                 #'     \item{\strong{'pianka'}}{Pianka's niche overlap}
                 #'     \item{\strong{'OMI'}}{based on OMI axes; Doledec et al. (2000) <doi:10.1890/0012-9658(2000)081[2914:NSICAA]2.0.CO;2>}
                 #'     \item{\strong{'hypervolume'}}{based on hypervolume intersection; Blonder et al. (2014) <doi:10.1111/geb.12146>; Blonder (2018) <doi:10.1111/ecog.03187>}
@@ -156,6 +156,176 @@ trans_niche <- R6Class(classname = "trans_niche",
                                 private$cal_niche_overlap_TPD(...)
                         }
                         invisible(self)
+                },
+                #' @description
+                #' Plot the niche breadth result as a horizontal bar plot.
+                #'
+                #' @param measure default NULL; a column name in \code{res_niche_breadth} used as the bar length or an integer to select the column name.
+                #'   If NULL, the first numeric column except \code{Taxa} is used automatically.
+                #' @param ntaxa default 20; number of top taxa to show, ordered by \code{measure} from high to low.
+                #' @param add_prefix default TRUE; whether prepend the taxonomic name to the y-axis taxa labels.
+                #' @param taxa_level default "Genus"; the taxonomic level used when \code{add_prefix} is \code{TRUE}
+                #' @param sep default " : "; separator between genus name and taxa name.
+                #' @param color default RColorBrewer::brewer.pal(8, "Dark2")[2]; bar fill color.
+                #' @param barwidth default 0.7; bar width passed to \code{\link{geom_bar}}.
+                #' @param ytext_size default 11; y-axis text size.
+                #' @return ggplot2 plot.
+                #' @examples
+                #' \dontrun{
+                #' t1$cal_niche_breadth(method = "levins")
+                #' t1$plot_niche_breadth()
+                #' }
+                plot_niche_breadth = function(
+                        measure = NULL,
+                        ntaxa = 20,
+                        add_prefix = TRUE,
+						taxa_level = "Genus",
+                        sep = " : ",
+                        color = RColorBrewer::brewer.pal(8, "Dark2")[2],
+                        barwidth = 0.7,
+                        ytext_size = 11
+                        ){
+                        if(is.null(self$res_niche_breadth)){
+                                stop("Please first use cal_niche_breadth() to calculate niche breadth !")
+                        }
+                        breadth_df <- self$res_niche_breadth
+                        num_cols <- colnames(breadth_df)[unlist(lapply(breadth_df, is.numeric))]
+                        num_cols <- setdiff(num_cols, "Taxa")
+                        if(length(num_cols) == 0){
+                                stop("No numeric columns found in res_niche_breadth!")
+                        }
+                        if(is.null(measure)){
+							measure <- num_cols[1]
+                        }else{
+							if(is.wholenumber(measure)){
+								if(measure > length(num_cols)){
+									message("Input measure is larger than the length of available names! Use the last one ...")
+									measure <- length(num_cols)
+								}
+								measure <- num_cols[measure]
+							}else{
+								if(! measure %in% colnames(breadth_df)){
+										stop("The measure '", measure, "' is not found in res_niche_breadth!")
+								}
+								if(! is.numeric(breadth_df[[measure]])){
+										stop("The measure '", measure, "' is not a numeric column!")
+								}
+							}
+                        }
+                        # select top taxa
+                        ordered_idx <- order(breadth_df[[measure]], decreasing = TRUE, na.last = TRUE)
+                        use_n <- min(ntaxa, length(ordered_idx))
+                        selected_idx <- ordered_idx[seq_len(use_n)]
+                        plot_data <- breadth_df[selected_idx, c("Taxa", measure), drop = FALSE]
+                        plot_data$Taxa <- as.character(plot_data$Taxa)
+                        # create y-axis labels
+                        if(add_prefix){
+                                plot_data$Taxa_label <- private$get_taxa_label(plot_data$Taxa, taxa_level, sep = sep)
+                        }else{
+                                plot_data$Taxa_label <- plot_data$Taxa
+                        }
+                        # highest value at top
+                        plot_data$Taxa_label <- factor(plot_data$Taxa_label, levels = rev(plot_data$Taxa_label))
+                        p <- ggplot(plot_data, aes_meco(x = measure, y = "Taxa_label")) +
+                                geom_bar(stat = "identity", fill = color, width = barwidth) +
+                                xlab(measure) + ylab("") +
+                                theme_bw() +
+                                theme(panel.grid = element_blank(), panel.border = element_blank(),
+                                        axis.line.x = element_line(color = "grey60", linetype = "solid", lineend = "square"),
+                                        axis.text.y = element_text(size = ytext_size))
+
+                        p
+                },
+                #' @description
+                #' Plot the niche overlap matrix as a heatmap.
+                #'
+                #' @param taxa_level default NULL; a taxonomic rank in \code{tax_table} used for filtering taxa.
+                #' @param taxa_name default NULL; a character vector of taxa names at \code{taxa_level} used for filtering.
+                #'   Must be provided together with \code{taxa_level}.
+                #' @param color_low default "white"; color for low overlap values.
+                #' @param color_high default RColorBrewer::brewer.pal(8, "Dark2")[2]; color for high overlap values.
+                #' @param plot_breaks default NULL; breaks for the color scale.
+                #' @param withmargin default TRUE; whether draw tile margins.
+                #' @param margincolor default "white"; margin color when \code{withmargin = TRUE}.
+                #' @param xtext_size default 9; x-axis text size.
+                #' @param ytext_size default 9; y-axis text size.
+                #' @return ggplot2 plot.
+                #' @examples
+                #' \dontrun{
+                #' t1$cal_niche_overlap(method = "pianka")
+                #' t1$plot_niche_overlap()
+                #' }
+                plot_niche_overlap = function(
+                        taxa_level = NULL,
+                        taxa_name = NULL,
+                        color_low = "white",
+                        color_high = RColorBrewer::brewer.pal(8, "Dark2")[2],
+                        plot_breaks = NULL,
+                        withmargin = TRUE,
+                        margincolor = "white",
+                        xtext_size = 9,
+                        ytext_size = 9
+                        ){
+                        if(is.null(self$res_niche_overlap)){
+                                stop("Please first use cal_niche_overlap() to calculate niche overlap !")
+                        }
+                        overlap_mat <- self$res_niche_overlap
+                        if(!is.matrix(overlap_mat) && !is.data.frame(overlap_mat)){
+                                stop("res_niche_overlap is not a matrix!")
+                        }
+                        all_taxa <- rownames(overlap_mat)
+                        if(is.null(all_taxa) || length(all_taxa) == 0){
+                                stop("No taxa names found in res_niche_overlap!")
+                        }
+                        # filtering by taxonomic level
+                        if(!is.null(taxa_level) && is.null(taxa_name)){
+                                stop("You provide taxa_level but no taxa_name! Please provide both or neither.")
+                        }
+                        if(is.null(taxa_level) && !is.null(taxa_name)){
+                                stop("You provide taxa_name but no taxa_level! Please provide both or neither.")
+                        }
+                        if(!is.null(taxa_level)){
+                                if(is.null(self$dataset$tax_table)){
+                                        stop("No tax_table found in the dataset! Cannot filter by taxa_level.")
+                                }
+                                if(! taxa_level %in% colnames(self$dataset$tax_table)){
+                                        stop("The taxa_level '", taxa_level, "' is not found in tax_table!")
+                                }
+                                tax_vals <- private$strip_prefix(self$dataset$tax_table[all_taxa, taxa_level, drop = TRUE])
+                                selected_vals <- private$strip_prefix(taxa_name)
+                                keep_taxa <- all_taxa[tax_vals %in% selected_vals]
+                                if(length(keep_taxa) == 0){
+                                        stop("No taxa retained after filtering by taxa_level and taxa_name!")
+                                }
+                                overlap_mat <- overlap_mat[keep_taxa, keep_taxa, drop = FALSE]
+                                all_taxa <- keep_taxa
+                        }
+                        # order taxa by taxonomy
+                        ordered_taxa <- private$order_taxa_by_taxonomy(all_taxa)
+                        overlap_mat <- overlap_mat[ordered_taxa, ordered_taxa, drop = FALSE]
+                        # convert to long format
+                        plot_data <- reshape2::melt(overlap_mat)
+                        colnames(plot_data) <- c("Taxa1", "Taxa2", "Overlap")
+                        plot_data$Taxa1 <- factor(plot_data$Taxa1, levels = ordered_taxa)
+                        plot_data$Taxa2 <- factor(plot_data$Taxa2, levels = ordered_taxa)
+                        p <- ggplot(plot_data, aes_meco(x = "Taxa1", y = "Taxa2", fill = "Overlap"))
+                        if(withmargin){
+                                p <- p + geom_tile(colour = margincolor, linewidth = 0.5)
+                        }else{
+                                p <- p + geom_tile()
+                        }
+                        if(is.null(plot_breaks)){
+                                p <- p + scale_fill_gradient(low = color_low, high = color_high, na.value = "grey90")
+                        }else{
+                                p <- p + scale_fill_gradient(low = color_low, high = color_high, na.value = "grey90", breaks = plot_breaks)
+                        }
+                        p <- p + xlab("") + ylab("") +
+                                theme_bw() +
+                                theme(panel.grid = element_blank(), panel.border = element_blank(),
+                                        axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = xtext_size),
+                                        axis.text.y = element_text(size = ytext_size))
+						
+                        p
                 },
                 #' @description
                 #' Print the trans_niche object.
@@ -664,6 +834,31 @@ trans_niche <- R6Class(classname = "trans_niche",
                         if(n_species < n_all){
                                 message("Note: ", n_all - n_species, " taxa were skipped (no occurrence data for TPD); their overlap values are NA.")
                         }
+                },
+                # ----- plotting helpers -----
+                strip_prefix = function(x){
+                        gsub("^.*__", "", as.character(x))
+                },
+                get_taxa_label = function(taxa_names, taxa_level, sep = " : "){
+                        if(is.null(self$dataset$tax_table) || ! taxa_level %in% colnames(self$dataset$tax_table)){
+                                return(taxa_names)
+                        }
+                        taxa_raw <- self$dataset$tax_table[taxa_names, taxa_level]
+                        taxa <- private$strip_prefix(taxa_raw)
+                        label <- ifelse(is.na(taxa) | taxa == "", taxa_names, paste0(taxa, sep, taxa_names))
+                        label
+                },
+                order_taxa_by_taxonomy = function(taxa_names){
+                        if(is.null(self$dataset$tax_table)){
+                                return(taxa_names)
+                        }
+                        ranks <- intersect(c("Kingdom", "Phylum", "Class", "Order", "Family", "Genus"), colnames(self$dataset$tax_table))
+                        if(length(ranks) == 0){
+                                return(taxa_names)
+                        }
+                        tax_sub <- self$dataset$tax_table[taxa_names, ranks, drop = FALSE]
+                        ord <- do.call(order, c(tax_sub, list(na.last = TRUE)))
+                        rownames(tax_sub)[ord]
                 }
         ),
         lock_objects = FALSE,

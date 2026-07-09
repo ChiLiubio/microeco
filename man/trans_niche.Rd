@@ -20,6 +20,24 @@ and TPD (Trait Probability Density) based on Carmona et al. (2016) <doi:10.1016/
 data(dataset)
 t1 <- trans_niche$new(dataset = dataset)
 }
+
+## ------------------------------------------------
+## Method `trans_niche$plot_niche_breadth`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_niche_breadth(method = "levins")
+t1$plot_niche_breadth()
+}
+
+## ------------------------------------------------
+## Method `trans_niche$plot_niche_overlap`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_niche_overlap(method = "pianka")
+t1$plot_niche_overlap()
+}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -27,6 +45,8 @@ t1 <- trans_niche$new(dataset = dataset)
 \item \href{#method-trans_niche-new}{\code{trans_niche$new()}}
 \item \href{#method-trans_niche-cal_niche_breadth}{\code{trans_niche$cal_niche_breadth()}}
 \item \href{#method-trans_niche-cal_niche_overlap}{\code{trans_niche$cal_niche_overlap()}}
+\item \href{#method-trans_niche-plot_niche_breadth}{\code{trans_niche$plot_niche_breadth()}}
+\item \href{#method-trans_niche-plot_niche_overlap}{\code{trans_niche$plot_niche_overlap()}}
 \item \href{#method-trans_niche-print}{\code{trans_niche$print()}}
 \item \href{#method-trans_niche-clone}{\code{trans_niche$clone()}}
 }
@@ -96,7 +116,7 @@ Calculate niche breadth for each taxon.
 \describe{
 \item{\code{method}}{default "levins"; the method for niche breadth calculation.
 Options:
-\itemize{
+\describe{
   \item{\strong{'levins'}}{Levins' niche breadth}
   \item{\strong{'OMI'}}{Outlying Mean Index via ade4 package; Doledec et al. (2000) <doi:10.1890/0012-9658(2000)081[2914:NSICAA]2.0.CO;2>}
   \item{\strong{'hypervolume'}}{N-dimensional hypervolume via hypervolume package; Blonder et al. (2014) <doi:10.1111/geb.12146>; Blonder (2018) <doi:10.1111/ecog.03187>}
@@ -139,7 +159,7 @@ Calculate niche overlap matrix among taxa.
 \describe{
 \item{\code{method}}{default "pianka"; the method for niche overlap calculation.
 Options:
-\itemize{
+\describe{
   \item{\strong{'pianka'}}{Pianka's niche overlap}
   \item{\strong{'OMI'}}{based on OMI axes; Doledec et al. (2000) <doi:10.1890/0012-9658(2000)081[2914:NSICAA]2.0.CO;2>}
   \item{\strong{'hypervolume'}}{based on hypervolume intersection; Blonder et al. (2014) <doi:10.1111/geb.12146>; Blonder (2018) <doi:10.1111/ecog.03187>}
@@ -165,6 +185,119 @@ Options:
   For TPD method with \code{symmetric = FALSE}, the matrix is asymmetric where
   overlap[i,j] represents the proportion of taxon i's niche overlapped by taxon j.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_niche-plot_niche_breadth"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_niche-plot_niche_breadth}{}}}
+\subsection{Method \code{plot_niche_breadth()}}{
+Plot the niche breadth result as a horizontal bar plot.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_niche$plot_niche_breadth(
+  measure = NULL,
+  ntaxa = 20,
+  add_prefix = TRUE,
+  taxa_level = "Genus",
+  sep = " : ",
+  color = RColorBrewer::brewer.pal(8, "Dark2")[2],
+  barwidth = 0.7,
+  ytext_size = 11
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{measure}}{default NULL; a column name in \code{res_niche_breadth} used as the bar length or an integer to select the column name.
+If NULL, the first numeric column except \code{Taxa} is used automatically.}
+
+\item{\code{ntaxa}}{default 20; number of top taxa to show, ordered by \code{measure} from high to low.}
+
+\item{\code{add_prefix}}{default TRUE; whether prepend the taxonomic name to the y-axis taxa labels.}
+
+\item{\code{taxa_level}}{default "Genus"; the taxonomic level used when \code{add_prefix} is \code{TRUE}}
+
+\item{\code{sep}}{default " : "; separator between genus name and taxa name.}
+
+\item{\code{color}}{default RColorBrewer::brewer.pal(8, "Dark2")[2]; bar fill color.}
+
+\item{\code{barwidth}}{default 0.7; bar width passed to \code{\link{geom_bar}}.}
+
+\item{\code{ytext_size}}{default 11; y-axis text size.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_niche_breadth(method = "levins")
+t1$plot_niche_breadth()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_niche-plot_niche_overlap"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_niche-plot_niche_overlap}{}}}
+\subsection{Method \code{plot_niche_overlap()}}{
+Plot the niche overlap matrix as a heatmap.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_niche$plot_niche_overlap(
+  taxa_level = NULL,
+  taxa_name = NULL,
+  color_low = "white",
+  color_high = RColorBrewer::brewer.pal(8, "Dark2")[2],
+  plot_breaks = NULL,
+  withmargin = TRUE,
+  margincolor = "white",
+  xtext_size = 9,
+  ytext_size = 9
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{taxa_level}}{default NULL; a taxonomic rank in \code{tax_table} used for filtering taxa.}
+
+\item{\code{taxa_name}}{default NULL; a character vector of taxa names at \code{taxa_level} used for filtering.
+Must be provided together with \code{taxa_level}.}
+
+\item{\code{color_low}}{default "white"; color for low overlap values.}
+
+\item{\code{color_high}}{default RColorBrewer::brewer.pal(8, "Dark2")[2]; color for high overlap values.}
+
+\item{\code{plot_breaks}}{default NULL; breaks for the color scale.}
+
+\item{\code{withmargin}}{default TRUE; whether draw tile margins.}
+
+\item{\code{margincolor}}{default "white"; margin color when \code{withmargin = TRUE}.}
+
+\item{\code{xtext_size}}{default 9; x-axis text size.}
+
+\item{\code{ytext_size}}{default 9; y-axis text size.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot2 plot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_niche_overlap(method = "pianka")
+t1$plot_niche_overlap()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_niche-print"></a>}}
