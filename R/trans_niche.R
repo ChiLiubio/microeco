@@ -197,18 +197,19 @@ trans_niche <- R6Class(classname = "trans_niche",
                         if(is.null(measure)){
 							measure <- num_cols[1]
                         }else{
-							if(is.wholenumber(measure)){
-								if(measure > length(num_cols)){
-									message("Input measure is larger than the length of available names! Use the last one ...")
-									measure <- length(num_cols)
-								}
-								measure <- num_cols[measure]
-							}else{
+							if(! is.numeric(measure)){
 								if(! measure %in% colnames(breadth_df)){
-										stop("The measure '", measure, "' is not found in res_niche_breadth!")
+									stop("The measure '", measure, "' is not found in res_niche_breadth!")
 								}
-								if(! is.numeric(breadth_df[[measure]])){
-										stop("The measure '", measure, "' is not a numeric column!")
+							}else{
+								if(is.wholenumber(measure)){
+									if(measure > length(num_cols)){
+										message("Input measure is larger than the length of available names! Use the last one ...")
+										measure <- length(num_cols)
+									}
+									measure <- num_cols[measure]
+								}else{
+									stop("Input measure should be integer when it is numeric class!")
 								}
 							}
                         }
