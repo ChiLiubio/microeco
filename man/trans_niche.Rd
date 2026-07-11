@@ -256,7 +256,12 @@ Plot the niche overlap matrix as a heatmap.
   withmargin = TRUE,
   margincolor = "white",
   xtext_size = 9,
-  ytext_size = 9
+  ytext_size = 9,
+  add_anno = FALSE,
+  add_anno_level = "Phylum",
+  anno_color = "grey60",
+  anno_text_size = 9,
+  anno_line_size = 0.5
 )}\if{html}{\out{</div>}}
 }
 
@@ -281,6 +286,17 @@ Must be provided together with \code{taxa_level}.}
 \item{\code{xtext_size}}{default 9; x-axis text size.}
 
 \item{\code{ytext_size}}{default 9; y-axis text size.}
+
+\item{\code{add_anno}}{default FALSE; whether add taxonomic group annotation lines and labels to x and y axes.
+When it is TRUE, the feature names will not be shown.}
+
+\item{\code{add_anno_level}}{default "Phylum"; the taxonomic rank used for axis annotation.}
+
+\item{\code{anno_color}}{default "grey60"; color of the annotation lines and labels.}
+
+\item{\code{anno_text_size}}{default 9; text size of the annotation labels.}
+
+\item{\code{anno_line_size}}{default 0.5; line width of the annotation lines.}
 }
 \if{html}{\out{</div>}}
 }

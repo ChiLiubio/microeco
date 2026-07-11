@@ -250,6 +250,12 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @param margincolor default "white"; margin color when \code{withmargin = TRUE}.
                 #' @param xtext_size default 9; x-axis text size.
                 #' @param ytext_size default 9; y-axis text size.
+                #' @param add_anno default FALSE; whether add taxonomic group annotation lines and labels to x and y axes.
+                #'   When it is TRUE, the feature names will not be shown.
+                #' @param add_anno_level default "Phylum"; the taxonomic rank used for axis annotation.
+                #' @param anno_color default "grey60"; color of the annotation lines and labels.
+                #' @param anno_text_size default 9; text size of the annotation labels.
+                #' @param anno_line_size default 0.5; line width of the annotation lines.
                 #' @return ggplot2 plot.
                 #' @examples
                 #' \dontrun{
@@ -265,7 +271,12 @@ trans_niche <- R6Class(classname = "trans_niche",
                         withmargin = TRUE,
                         margincolor = "white",
                         xtext_size = 9,
-                        ytext_size = 9
+                        ytext_size = 9,
+                        add_anno = FALSE,
+                        add_anno_level = "Phylum",
+                        anno_color = "grey60",
+                        anno_text_size = 9,
+                        anno_line_size = 0.5
                         ){
                         if(is.null(self$res_niche_overlap)){
                                 stop("Please first use cal_niche_overlap() to calculate niche overlap !")
@@ -320,12 +331,90 @@ trans_niche <- R6Class(classname = "trans_niche",
                         }else{
                                 p <- p + scale_fill_gradient(low = color_low, high = color_high, na.value = "grey90", breaks = plot_breaks)
                         }
-                        p <- p + xlab("") + ylab("") +
-                                theme_bw() +
-                                theme(panel.grid = element_blank(), panel.border = element_blank(),
+                        p <- p + xlab("") + ylab("") + theme_bw()
+                        if(! add_anno){
+                                p <- p + theme(
+                                        panel.grid = element_blank(),
+                                        panel.border = element_blank(),
                                         axis.text.x = element_text(angle = 40, colour = "black", vjust = 1, hjust = 1, size = xtext_size),
-                                        axis.text.y = element_text(size = ytext_size))
-						
+                                        axis.text.y = element_text(size = ytext_size)
+                                )
+                        }else{
+                                p <- p + theme(
+                                        panel.grid = element_blank(),
+                                        panel.border = element_blank(),
+                                        axis.text.x = element_blank(),
+                                        axis.ticks.x = element_blank(),
+                                        axis.text.y = element_blank(),
+                                        axis.ticks.y = element_blank()
+                                )
+                        }
+                        # add taxonomic group annotations to axes
+                        if(add_anno){
+                                if(is.null(self$dataset$tax_table)){
+                                        stop("No tax_table found in the dataset! Cannot add axis annotation.")
+                                }
+                                if(! add_anno_level %in% colnames(self$dataset$tax_table)){
+                                        stop("The add_anno_level '", add_anno_level, "' is not found in tax_table!")
+                                }
+                                anno_groups <- private$get_anno_groups(ordered_taxa, add_anno_level)
+                                if(nrow(anno_groups) > 0){
+                                        n_groups <- nrow(anno_groups)
+                                        is_odd <- seq_len(n_groups) %% 2 == 1
+                                        y_line <- ifelse(is_odd, -0.5, -1.5)
+                                        df_anno_x <- data.frame(
+                                                start = anno_groups$start,
+                                                end = anno_groups$end,
+                                                center = anno_groups$center,
+                                                y_line = y_line,
+                                                label = anno_groups$label,
+                                                stringsAsFactors = FALSE
+                                        )
+                                        x_line <- ifelse(is_odd, -0.5, -1.5)
+                                        df_anno_y <- data.frame(
+                                                start = anno_groups$start,
+                                                end = anno_groups$end,
+                                                center = anno_groups$center,
+                                                x_line = x_line,
+                                                label = anno_groups$label,
+                                                stringsAsFactors = FALSE
+                                        )
+                                        p <- p +
+                                                geom_segment(
+                                                        data = df_anno_x,
+                                                        aes(x = start, xend = end, y = y_line, yend = y_line),
+                                                        color = anno_color,
+                                                        linewidth = anno_line_size,
+                                                        inherit.aes = FALSE
+                                                ) +
+                                                geom_segment(
+                                                        data = df_anno_y,
+                                                        aes(x = x_line, xend = x_line, y = start, yend = end),
+                                                        color = anno_color,
+                                                        linewidth = anno_line_size,
+                                                        inherit.aes = FALSE
+                                                ) +
+                                                geom_text(
+                                                        data = df_anno_x,
+                                                        aes(x = center, y = y_line, label = label),
+                                                        size = anno_text_size / ggplot2::.pt,
+                                                        color = anno_color,
+                                                        vjust = 1.5,
+                                                        inherit.aes = FALSE
+                                                ) +
+                                                geom_text(
+                                                        data = df_anno_y,
+                                                        aes(x = x_line, y = center, label = label),
+                                                        size = anno_text_size / ggplot2::.pt,
+                                                        color = anno_color,
+                                                        hjust = 1,
+                                                        inherit.aes = FALSE
+                                                )
+                                        p <- p +
+                                                coord_cartesian(clip = "off") +
+                                                theme(plot.margin = margin(b = 60, l = 60, t = 5, r = 5))
+                                }
+                        }
                         p
                 },
                 #' @description
@@ -860,6 +949,24 @@ trans_niche <- R6Class(classname = "trans_niche",
                         tax_sub <- self$dataset$tax_table[taxa_names, ranks, drop = FALSE]
                         ord <- do.call(order, c(tax_sub, list(na.last = TRUE)))
                         rownames(tax_sub)[ord]
+                },
+                get_anno_groups = function(ordered_taxa, anno_level){
+                        if(is.null(self$dataset$tax_table) || ! anno_level %in% colnames(self$dataset$tax_table)){
+                                stop("No tax_table found or anno_level is not in tax_table!")
+                        }
+                        anno_raw <- self$dataset$tax_table[ordered_taxa, anno_level, drop = TRUE]
+                        anno_vals <- private$strip_prefix(anno_raw)
+                        anno_vals[is.na(anno_vals) | anno_vals == ""] <- ""
+                        rle_res <- rle(anno_vals)
+                        ends <- cumsum(rle_res$lengths)
+                        starts <- ends - rle_res$lengths + 1
+                        data.frame(
+                                label = rle_res$values,
+                                start = starts - 0.5,
+                                end = ends + 0.5,
+                                center = (starts + ends) / 2,
+                                stringsAsFactors = FALSE
+                        )[rle_res$values != "", , drop = FALSE]
                 }
         ),
         lock_objects = FALSE,
