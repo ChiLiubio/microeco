@@ -20,6 +20,9 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @param add_data default NULL; a data.frame of environmental variables with sample names as row names.
                 #'   If provided, it takes priority over \code{env_cols}.
                 #'   Passed to \code{\link{trans_env}} for processing (NA check and auto-fill).
+                #' @param taxa_level default NULL; a taxonomic rank in \code{tax_table} used for filtering taxa at object creation.
+                #' @param taxa_name default NULL; a character vector of taxa names at \code{taxa_level} used for filtering.
+                #'   Must be provided together with \code{taxa_level}. Useful when feature number is large.
                 #' @return \code{data_rel_abund}, \code{n_samples}, \code{n_taxa}, \code{dataset}, \code{sample_table}
                 #'   and optionally \code{data_env} stored in the object.
                 #' @examples
@@ -27,12 +30,39 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' data(dataset)
                 #' t1 <- trans_niche$new(dataset = dataset)
                 #' }
-                initialize = function(dataset = NULL, filter_thres = 0, env_cols = NULL, add_data = NULL) {
+                initialize = function(dataset = NULL, filter_thres = 0, env_cols = NULL, add_data = NULL, taxa_level = NULL, taxa_name = NULL) {
                         microeco:::check_microtable(dataset)
                         use_dataset <- microeco::clone(dataset)
                         
                         if(filter_thres > 0){
                                 use_dataset$filter_taxa(rel_abund = filter_thres)
+                        }
+                        # filter taxa by taxonomic level if requested
+                        if(!is.null(taxa_level) || !is.null(taxa_name)){
+                                if(!is.null(taxa_level) && is.null(taxa_name)){
+                                        stop("You provide taxa_level but no taxa_name! Please provide both or neither.")
+                                }
+                                if(is.null(taxa_level) && !is.null(taxa_name)){
+                                        stop("You provide taxa_name but no taxa_level! Please provide both or neither.")
+                                }
+                                if(is.null(use_dataset$tax_table)){
+                                        stop("No tax_table found in the dataset! Cannot filter by taxa_level.")
+                                }
+                                if(! taxa_level %in% colnames(use_dataset$tax_table)){
+                                        stop("The taxa_level '", taxa_level, "' is not found in tax_table!")
+                                }
+                                all_taxa <- rownames(use_dataset$otu_table)
+                                tax_vals <- private$strip_prefix(use_dataset$tax_table[all_taxa, taxa_level, drop = TRUE])
+                                selected_vals <- private$strip_prefix(taxa_name)
+                                keep_taxa <- all_taxa[tax_vals %in% selected_vals]
+                                if(length(keep_taxa) == 0){
+                                        stop("No taxa retained after filtering by taxa_level and taxa_name!")
+                                }
+                                use_dataset$otu_table <- use_dataset$otu_table[keep_taxa, , drop = FALSE]
+                                if(!is.null(use_dataset$tax_table)){
+                                        use_dataset$tax_table <- use_dataset$tax_table[keep_taxa, , drop = FALSE]
+                                }
+                                message("Filtered to ", length(keep_taxa), " taxa by taxa_level and taxa_name ...")
                         }
                         # otu_table: rows = taxa, cols = samples
                         otu_mat <- as.matrix(use_dataset$otu_table)
@@ -81,6 +111,10 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #'   }
                 #' @return \code{res_niche_breadth} stored in the object. For OMI/hypervolume/TPD methods,
                 #'   intermediate objects are also stored in \code{res_omi}, \code{res_hypervolume}, or \code{res_TPD}.
+                #' @examples
+                #' \dontrun{
+                #' t1$cal_niche_breadth()
+                #' }
                 cal_niche_breadth = function(method = c("levins", "OMI", "hypervolume", "TPD")[1], ...) {
                         method <- match.arg(method, c("levins", "OMI", "hypervolume", "TPD"))
                         if(method == "levins"){
@@ -132,6 +166,10 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @return \code{res_niche_overlap} stored in the object, a matrix of dimension Taxa x Taxa.
                 #'   For TPD method with \code{symmetric = FALSE}, the matrix is asymmetric where
                 #'   overlap[i,j] represents the proportion of taxon i's niche overlapped by taxon j.
+                #' @examples
+                #' \dontrun{
+                #' t1$cal_niche_overlap()
+                #' }
                 cal_niche_overlap = function(method = c("pianka", "OMI", "hypervolume", "TPD")[1], ...) {
                         method <- match.arg(method, c("pianka", "OMI", "hypervolume", "TPD"))
                         if(method == "pianka"){
@@ -172,7 +210,6 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @return ggplot2 plot.
                 #' @examples
                 #' \dontrun{
-                #' t1$cal_niche_breadth(method = "levins")
                 #' t1$plot_niche_breadth()
                 #' }
                 plot_niche_breadth = function(
@@ -259,7 +296,6 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @return ggplot2 plot.
                 #' @examples
                 #' \dontrun{
-                #' t1$cal_niche_overlap(method = "pianka")
                 #' t1$plot_niche_overlap()
                 #' }
                 plot_niche_overlap = function(
@@ -290,28 +326,8 @@ trans_niche <- R6Class(classname = "trans_niche",
                                 stop("No taxa names found in res_niche_overlap!")
                         }
                         # filtering by taxonomic level
-                        if(!is.null(taxa_level) && is.null(taxa_name)){
-                                stop("You provide taxa_level but no taxa_name! Please provide both or neither.")
-                        }
-                        if(is.null(taxa_level) && !is.null(taxa_name)){
-                                stop("You provide taxa_name but no taxa_level! Please provide both or neither.")
-                        }
-                        if(!is.null(taxa_level)){
-                                if(is.null(self$dataset$tax_table)){
-                                        stop("No tax_table found in the dataset! Cannot filter by taxa_level.")
-                                }
-                                if(! taxa_level %in% colnames(self$dataset$tax_table)){
-                                        stop("The taxa_level '", taxa_level, "' is not found in tax_table!")
-                                }
-                                tax_vals <- private$strip_prefix(self$dataset$tax_table[all_taxa, taxa_level, drop = TRUE])
-                                selected_vals <- private$strip_prefix(taxa_name)
-                                keep_taxa <- all_taxa[tax_vals %in% selected_vals]
-                                if(length(keep_taxa) == 0){
-                                        stop("No taxa retained after filtering by taxa_level and taxa_name!")
-                                }
-                                overlap_mat <- overlap_mat[keep_taxa, keep_taxa, drop = FALSE]
-                                all_taxa <- keep_taxa
-                        }
+                        all_taxa <- private$filter_taxa_by_level(all_taxa, taxa_level, taxa_name)
+                        overlap_mat <- overlap_mat[all_taxa, all_taxa, drop = FALSE]
                         # order taxa by taxonomy
                         ordered_taxa <- private$order_taxa_by_taxonomy(all_taxa)
                         overlap_mat <- overlap_mat[ordered_taxa, ordered_taxa, drop = FALSE]
@@ -928,6 +944,30 @@ trans_niche <- R6Class(classname = "trans_niche",
                 # ----- plotting helpers -----
                 strip_prefix = function(x){
                         gsub("^.*__", "", as.character(x))
+                },
+                filter_taxa_by_level = function(taxa_names, taxa_level = NULL, taxa_name = NULL){
+                        if(is.null(taxa_level) && is.null(taxa_name)){
+                                return(taxa_names)
+                        }
+                        if(!is.null(taxa_level) && is.null(taxa_name)){
+                                stop("You provide taxa_level but no taxa_name! Please provide both or neither.")
+                        }
+                        if(is.null(taxa_level) && !is.null(taxa_name)){
+                                stop("You provide taxa_name but no taxa_level! Please provide both or neither.")
+                        }
+                        if(is.null(self$dataset$tax_table)){
+                                stop("No tax_table found in the dataset! Cannot filter by taxa_level.")
+                        }
+                        if(! taxa_level %in% colnames(self$dataset$tax_table)){
+                                stop("The taxa_level '", taxa_level, "' is not found in tax_table!")
+                        }
+                        tax_vals <- private$strip_prefix(self$dataset$tax_table[taxa_names, taxa_level, drop = TRUE])
+                        selected_vals <- private$strip_prefix(taxa_name)
+                        keep_taxa <- taxa_names[tax_vals %in% selected_vals]
+                        if(length(keep_taxa) == 0){
+                                stop("No taxa retained after filtering by taxa_level and taxa_name!")
+                        }
+                        keep_taxa
                 },
                 get_taxa_label = function(taxa_names, taxa_level, sep = " : "){
                         if(is.null(self$dataset$tax_table) || ! taxa_level %in% colnames(self$dataset$tax_table)){

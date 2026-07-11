@@ -22,11 +22,26 @@ t1 <- trans_niche$new(dataset = dataset)
 }
 
 ## ------------------------------------------------
+## Method `trans_niche$cal_niche_breadth`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_niche_breadth()
+}
+
+## ------------------------------------------------
+## Method `trans_niche$cal_niche_overlap`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_niche_overlap()
+}
+
+## ------------------------------------------------
 ## Method `trans_niche$plot_niche_breadth`
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_niche_breadth(method = "levins")
 t1$plot_niche_breadth()
 }
 
@@ -35,7 +50,6 @@ t1$plot_niche_breadth()
 ## ------------------------------------------------
 
 \dontrun{
-t1$cal_niche_overlap(method = "pianka")
 t1$plot_niche_overlap()
 }
 }
@@ -60,7 +74,9 @@ t1$plot_niche_overlap()
   dataset = NULL,
   filter_thres = 0,
   env_cols = NULL,
-  add_data = NULL
+  add_data = NULL,
+  taxa_level = NULL,
+  taxa_name = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -80,6 +96,11 @@ Passed to \code{\link{trans_env}} for processing (NA check and auto-fill).}
 \item{\code{add_data}}{default NULL; a data.frame of environmental variables with sample names as row names.
 If provided, it takes priority over \code{env_cols}.
 Passed to \code{\link{trans_env}} for processing (NA check and auto-fill).}
+
+\item{\code{taxa_level}}{default NULL; a taxonomic rank in \code{tax_table} used for filtering taxa at object creation.}
+
+\item{\code{taxa_name}}{default NULL; a character vector of taxa names at \code{taxa_level} used for filtering.
+Must be provided together with \code{taxa_level}. Useful when feature number is large.}
 }
 \if{html}{\out{</div>}}
 }
@@ -141,6 +162,16 @@ Options:
 \code{res_niche_breadth} stored in the object. For OMI/hypervolume/TPD methods,
   intermediate objects are also stored in \code{res_omi}, \code{res_hypervolume}, or \code{res_TPD}.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_niche_breadth()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_niche-cal_niche_overlap"></a>}}
@@ -185,6 +216,16 @@ Options:
   For TPD method with \code{symmetric = FALSE}, the matrix is asymmetric where
   overlap[i,j] represents the proportion of taxon i's niche overlapped by taxon j.
 }
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_niche_overlap()
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-trans_niche-plot_niche_breadth"></a>}}
@@ -232,7 +273,6 @@ ggplot2 plot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_niche_breadth(method = "levins")
 t1$plot_niche_breadth()
 }
 }
@@ -306,7 +346,6 @@ ggplot2 plot.
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$cal_niche_overlap(method = "pianka")
 t1$plot_niche_overlap()
 }
 }
