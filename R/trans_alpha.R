@@ -210,6 +210,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				res_list$test_method <- c()
 				res_list$max_group <- c()
 				res_list$group_by <- c()
+				res_list$log2FC <- c()
 				for(k in measure){
 					if(is.null(by_group)){
 						if(is.null(by_ID)){
@@ -239,12 +240,15 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					p_value_adjust <- p.adjust(res_list$p_value, method = p_adjust_method)
 				}
 				if(is.null(by_group)){
-					compare_result <- data.frame(res_list$comnames, res_list$measure_use, res_list$test_method, res_list$max_group, res_list$p_value, p_value_adjust)
-					colnames(compare_result) <- c("Comparison", "Measure", "Method", "Group", "P.unadj", "P.adj")
+					compare_result <- data.frame(res_list$comnames, res_list$measure_use, res_list$test_method, res_list$max_group, res_list$p_value, p_value_adjust, res_list$log2FC)
+					colnames(compare_result) <- c("Comparison", "Measure", "Method", "Group", "P.unadj", "P.adj", "log2FoldChange")
 				}else{
-					compare_result <- data.frame(res_list$comnames, res_list$group_by, res_list$measure_use, res_list$test_method, 
-						res_list$max_group, res_list$p_value, p_value_adjust)
-					colnames(compare_result) <- c("Comparison", "by_group", "Measure", "Method", "Group", "P.unadj", "P.adj")
+					compare_result <- data.frame(res_list$comnames, res_list$group_by, res_list$measure_use, res_list$test_method,
+						res_list$max_group, res_list$p_value, p_value_adjust, res_list$log2FC)
+					colnames(compare_result) <- c("Comparison", "by_group", "Measure", "Method", "Group", "P.unadj", "P.adj", "log2FoldChange")
+				}
+				if(method == "KW"){
+					compare_result <- compare_result[, colnames(compare_result) != "log2FoldChange"]
 				}
 			}
 			if(method == "KW_dunn"){
@@ -1002,7 +1006,9 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 							}else{
 								res1 <- t.test(x = x_value, y = y_value, paired = TRUE, ...)
 							}
-							max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], mean)
+							group_stats <- tapply(table_compare$Value, as.character(table_compare[, group]), mean)
+							max_group_select <- names(group_stats)[which.max(group_stats)]
+							log2FC_value <- log2((group_stats[as.character(all_name[1, j])] + 1e-10) / (group_stats[as.character(all_name[2, j])] + 1e-10))
 						}else{
 							if(method == "wilcox"){
 								if(is.null(by_ID)){
@@ -1010,11 +1016,14 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 								}else{
 									res1 <- suppressWarnings(wilcox.test(x = x_value, y = y_value, paired = TRUE, ...))
 								}
-								max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], median)
+								group_stats <- tapply(table_compare$Value, as.character(table_compare[, group]), median)
+								max_group_select <- names(group_stats)[which.max(group_stats)]
+								log2FC_value <- log2((group_stats[as.character(all_name[1, j])] + 1e-10) / (group_stats[as.character(all_name[2, j])] + 1e-10))
 							}else{
 								if(method == "KW" & length(use_comp_group_num) == 1){
 									res1 <- kruskal.test(formu, data = table_compare, ...)
 									max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], median)
+									log2FC_value <- NA
 								}else{
 									next
 								}
@@ -1024,6 +1033,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 						if(method == "KW"){
 							res1 <- kruskal.test(formu, data = table_compare, ...)
 							max_group_select <- private$group_value_compare(table_compare$Value, table_compare[, group], median)
+							log2FC_value <- NA
 						}else{
 							next
 						}
@@ -1034,6 +1044,7 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 					res_list$measure_use %<>% c(., measure)
 					res_list$test_method %<>% c(., use_method)
 					res_list$max_group %<>% c(., max_group_select)
+					res_list$log2FC %<>% c(., log2FC_value)
 					if(is.null(group_by)){
 						res_list$group_by %<>% c(., NA)
 					}else{
