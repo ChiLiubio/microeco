@@ -72,12 +72,20 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  fixed effects, respectively. For more details on R2 calculation, please refer to the article <doi: 10.1098/rsif.2017.0213>.
 		#'     	  The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
 		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.}
-		#'     \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution, 
-		#'     	  developed for the relative abundance (ranging from 0 to 1) of taxa specifically. 
+		#'     \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution,
+		#'     	  developed for the relative abundance (ranging from 0 to 1) of taxa specifically.
 		#'     	  This is an extension of the GLMM model in \code{'glmm'} option.
-		#'     	  The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
+		#'     	  The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function,
 		#'     	  i.e. \code{family = glmmTMB::beta_family(link = "logit")}.
 		#'     	  Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
+		#'     \item{\strong{'VIP'}}{Variable Importance in the Projection (VIP) from OPLS-DA (for 2 groups) or PLS-DA (for > 2 groups)
+		#'     	  based on the \code{ropls} package <doi:10.1186/s12859-019-3310-7>.
+		#'     	  This method is designed for metabolomics data analysis.
+		#'     	  The VIP score is used to evaluate the contribution of each feature to the group separation.
+		#'     	  Features with VIP > 1 are generally considered as important discriminants.
+		#'     	  The significance is automatically calculated using Wilcoxon rank sum test (for 2 groups) or
+		#'     	  Kruskal-Wallis test (for > 2 groups).
+		#'     	  Require \code{ropls} package to be installed.}
 		#'   }
 		#' @param group default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
 		#' 	  It is necessary for some methods that formula is not applicable (e.g., wilcox, lefse, one-way anova).
@@ -170,7 +178,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 		initialize = function(
 			dataset = NULL,
 			method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm",
-				"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta")[1],
+			"ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta", "VIP")[1],
 			group = NULL,
 			taxa_level = "all",
 			filter_thres = 0,
@@ -205,8 +213,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 				if(method %in% c("maaslin2", "maaslin3")){
 					method <- "maaslin"
 				}
-				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test", 
-					"anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta"))
+				method <- match.arg(method, c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox", "t.test",
+				"anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw", "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta", "VIP"))
 
 				tmp_dataset <- clone(dataset)
 				tmp_dataset$tidy_dataset()
@@ -287,7 +295,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				abund_table <- filter_output$abund_table
 				filter_features <- filter_output$filter_features
 				
-				if(method %in% c("lefse", "rf", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta")){
+				if(method %in% c("lefse", "rf", "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", "betareg", "lme", "glmm", "glmm_beta", "VIP")){
 					if(remove_unknown){
 						abund_table %<>% {.[!grepl("__$|uncultured$|Incertae..edis$|_sp$", rownames(.), ignore.case = TRUE), ]}
 						message(nrow(abund_table), " features are remained after removing unknown features ...")
@@ -410,11 +418,51 @@ trans_diff <- R6Class(classname = "trans_diff",
 						colnames(output)[colnames(output) == "Metric"] <- "MeanDecreaseGini"
 					}
 					rownames(output) <- output$Taxa
-					output$P.unadj <- pvalue_raw[as.character(output$Taxa)]
-					output$P.adj <- pvalue_sub[as.character(output$Taxa)]
-					output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
+				output$P.unadj <- pvalue_raw[as.character(output$Taxa)]
+				output$P.adj <- pvalue_sub[as.character(output$Taxa)]
+				output$Significance <- generate_p_siglabel(output$P.adj, nonsig = "ns")
+			}
+			if(method == "VIP"){
+				if(!requireNamespace("ropls", quietly = TRUE)){
+					stop("Please first install the ropls package from Bioconductor!")
 				}
-				if(method == "lefse"){
+				n_groups <- length(unique(as.character(sampleinfo[, group])))
+				ordination_method <- ifelse(n_groups == 2, "OPLS-DA", "PLS-DA")
+				sig_method <- ifelse(n_groups == 2, "wilcox", "KW")
+				message("Use ", ordination_method, " for VIP calculation with ", n_groups, " groups ...")
+				message("Use ", sig_method, " for significance test ...")
+				# prepare trans_beta object: use abund_table as otu_table
+				tem_data <- clone(tmp_dataset)
+				tem_data$otu_table <- abund_table
+				tem_data$tax_table <- NULL
+				tem_data$phylo_tree <- NULL
+				tem_data$rep_fasta <- NULL
+				tem_beta <- suppressMessages(trans_beta$new(dataset = tem_data, group = group))
+				tem_beta$cal_ordination(method = ordination_method, ...)
+				# extract VIP from ropls model
+				model <- tem_beta$res_ordination$model
+				vip_values <- model@vipVn
+				vip_df <- data.frame(Taxa = names(vip_values), VIP = as.numeric(vip_values), stringsAsFactors = FALSE)
+				# recursive call trans_diff for significance
+				tem_data$taxa_abund$forvip <- abund_table
+				sig_diff <- trans_diff$new(dataset = tem_data, method = sig_method, group = group,
+					taxa_level = "forvip", filter_thres = 0, alpha = alpha,
+					p_adjust_method = p_adjust_method, remove_unknown = FALSE)
+				sig_table <- sig_diff$res_diff
+				# merge VIP with significance table
+				output <- merge(sig_table, vip_df, by = "Taxa", all.x = TRUE)
+				output <- dplyr::arrange(output, dplyr::desc(VIP))
+				rownames(output) <- NULL
+				# set Method column
+				use_method <- ifelse(n_groups == 2,
+					"OPLS-DA VIP & Wilcoxon rank sum test",
+					"PLS-DA VIP & Kruskal-Wallis test")
+				output$Method <- use_method
+				# reorder columns
+				col_order <- intersect(c("Comparison", "Taxa", "Group", "Method", "VIP", "log2FoldChange", "P.unadj", "P.adj", "Significance"), colnames(output))
+				output <- output[, col_order, drop = FALSE]
+			}
+			if(method == "lefse"){
 					all_class_pairs <- combn(unique(as.character(group_vec)), 2)
 					# check the difference among subgroups
 					if(!is.null(lefse_subgroup)){
@@ -1035,7 +1083,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 				diff_data %<>% .[order(.$qvalue, decreasing = FALSE), ]
 			}else{
 				# lefse and rf are ordered
-				if(! method %in% c("lefse", "rf", "anova")){
+				if(! method %in% c("lefse", "rf", "anova", "VIP")){
 					if("P.adj" %in% colnames(diff_data)){
 						message('Reorder taxa according to P.adj in res_diff from low to high ...')
 						diff_data %<>% .[order(.$P.adj, decreasing = FALSE), ]
@@ -1243,12 +1291,16 @@ trans_diff <- R6Class(classname = "trans_diff",
 					ylab_title <- "LDA score"
 				}else{
 					if(method == "rf"){
-						if("MeanDecreaseAccuracy" %in% colnames(use_data)){
-							ylab_title <- "MeanDecreaseAccuracy"
-						}else{
-							ylab_title <- "MeanDecreaseGini"
-						}
-						colnames(use_data)[colnames(use_data) %in% c("MeanDecreaseAccuracy", "MeanDecreaseGini")] <- "Value"
+					if("MeanDecreaseAccuracy" %in% colnames(use_data)){
+						ylab_title <- "MeanDecreaseAccuracy"
+					}else{
+						ylab_title <- "MeanDecreaseGini"
+					}
+					colnames(use_data)[colnames(use_data) %in% c("MeanDecreaseAccuracy", "MeanDecreaseGini")] <- "Value"
+				}else{
+					if(method == "VIP"){
+						ylab_title <- "VIP"
+						colnames(use_data)[colnames(use_data) == "VIP"] <- "Value"
 					}else{
 						if(method == "metastat"){
 							use_data %<>% .[.$qvalue < 0.05, ]
@@ -1384,6 +1436,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 					p <- p + ggplot_xtext_anglesize(xtext_angle = xtext_angle, xtext_size = xtext_size)
 				}
 				p
+				}
 			}else{
 				# heatmap for multi-factor
 				message("Perform heatmap instead of bar plot as formula is found ...")

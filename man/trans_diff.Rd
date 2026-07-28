@@ -89,7 +89,8 @@ t1$plot_volcano()
   dataset = NULL,
   method = c("lefse", "rf", "metastat", "metagenomeSeq", "KW", "KW_dunn", "wilcox",
     "t.test", "anova", "scheirerRayHare", "lm", "ancombc2", "ALDEx2_t", "ALDEx2_kw",
-    "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta")[1],
+    "DESeq2", "edgeR", "linda", "maaslin", "betareg", "lme", "glmm", "glmm_beta",
+    "VIP")[1],
   group = NULL,
   taxa_level = "all",
   filter_thres = 0,
@@ -175,12 +176,20 @@ t1$plot_volcano()
         fixed effects, respectively. For more details on R2 calculation, please refer to the article <doi: 10.1098/rsif.2017.0213>.
         The significance of fixed factors are tested by Chi-square test from function \code{car::Anova}.
         The significance of 'Estimate' in each term of fixed factors comes from the model.}
-  \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution, 
-        developed for the relative abundance (ranging from 0 to 1) of taxa specifically. 
+  \item{\strong{'glmm_beta'}}{Generalized linear mixed model with a family function of beta distribution,
+        developed for the relative abundance (ranging from 0 to 1) of taxa specifically.
         This is an extension of the GLMM model in \code{'glmm'} option.
-        The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function, 
+        The only difference is in \code{glmm_beta} the family function is fixed with the beta distribution function,
         i.e. \code{family = glmmTMB::beta_family(link = "logit")}.
         Please see the \code{beta_pseudo} parameter for the use of pseudo value when there is 0 or 1 in the data}
+  \item{\strong{'VIP'}}{Variable Importance in the Projection (VIP) from OPLS-DA (for 2 groups) or PLS-DA (for > 2 groups)
+        based on the \code{ropls} package <doi:10.1186/s12859-019-3310-7>.
+        This method is designed for metabolomics data analysis.
+        The VIP score is used to evaluate the contribution of each feature to the group separation.
+        Features with VIP > 1 are generally considered as important discriminants.
+        The significance is automatically calculated using Wilcoxon rank sum test (for 2 groups) or
+        Kruskal-Wallis test (for > 2 groups).
+        Require \code{ropls} package to be installed.}
 }}
 
 \item{\code{group}}{default NULL; sample group used for the comparision; a colname of input \code{microtable$sample_table};
