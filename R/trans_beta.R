@@ -171,6 +171,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 					}else{
 						model <- ropls::opls(abund, use_group, orthoI = orthoI, ...)
 					}
+					if(ncol(model@modelDF) == 0){
+						stop("Model result is NULL! The reason may be no model was built because the first predictive component was already not significant.")
+					}
 					expla <- model@modelDF[, "R2X"] * 100
 					names(expla) <- rownames(model@modelDF)
 				}

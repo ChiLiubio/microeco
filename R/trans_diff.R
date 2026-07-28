@@ -438,7 +438,27 @@ trans_diff <- R6Class(classname = "trans_diff",
 				tem_data$phylo_tree <- NULL
 				tem_data$rep_fasta <- NULL
 				tem_beta <- suppressMessages(trans_beta$new(dataset = tem_data, group = group))
-				tem_beta$cal_ordination(method = ordination_method, ...)
+				#First, try modeling with default parameters; if it fails, force the model by setting predI = 1
+				ordination_error <- tryCatch(
+					tem_beta$cal_ordination(method = ordination_method, ...),
+					error = function(e) e
+				)
+				if(inherits(ordination_error, "error")){
+					warning("The ", ordination_method, " model failed with default parameters: ",
+						conditionMessage(ordination_error),
+						"\nRetrying with predI = 1",
+						ifelse(ordination_method == "OPLS-DA", " and orthoI = 1", ""),
+						" to force model building. ",
+						"Please interpret the VIP results with caution.")
+					dot_args <- list(...)
+					dot_args$predI <- 1
+					dot_args$ncomp <- 1
+					# For OPLS-DA, also force orthoI = 1 to ensure model building
+					if(ordination_method == "OPLS-DA"){
+						dot_args$orthoI <- 1
+					}
+					do.call(tem_beta$cal_ordination, c(list(method = ordination_method), dot_args))
+				}
 				# extract VIP from ropls model
 				model <- tem_beta$res_ordination$model
 				vip_values <- model@vipVn
