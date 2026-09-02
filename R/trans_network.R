@@ -211,6 +211,9 @@ trans_network <- R6Class(classname = "trans_network",
 		#' 	  see https://doi.org/10.1186/1471-2105-13-113
 		#' @param COR_optimization_low_high default \code{c(0.01, 0.8)}; the low and high value threshold used for the RMT optimization; only useful when COR_optimization = TRUE.
 		#' @param COR_optimization_seq default 0.01; the interval of correlation coefficient used for RMT optimization; only useful when COR_optimization = TRUE.
+		#' @param COR_free_memory default FALSE; Whether to remove the \code{res_cor_p} list from the object after the network construction to save memory.
+		#'   Useful for very large datasets (e.g., > 5000 taxa). Note that if TRUE, re-running \code{cal_network} with different COR thresholds
+		#'   requires re-creating the object or re-providing the correlation matrices.
 		#' @param SpiecEasi_method default "mb"; either 'glasso' or 'mb';see spiec.easi function in package SpiecEasi and https://github.com/zdk123/SpiecEasi.
 		#' @param FlashWeave_tempdir default NULL; The temporary directory used to save the temporary files for running FlashWeave; If not assigned, use the system user temp.
 		#' @param FlashWeave_meta_data default FALSE; whether use env data for the optimization, If TRUE, the function automatically find the \code{env_data} in the object and
@@ -257,6 +260,7 @@ trans_network <- R6Class(classname = "trans_network",
 			COR_optimization = FALSE,
 			COR_optimization_low_high = c(0.01, 0.8),
 			COR_optimization_seq = 0.01,
+			COR_free_memory = FALSE,
 			SpiecEasi_method = "mb",
 			FlashWeave_tempdir = NULL,
 			FlashWeave_meta_data = FALSE,
@@ -292,17 +296,21 @@ trans_network <- R6Class(classname = "trans_network",
 						cortable %<>% .[sel, sel]
 						raw_p %<>% .[sel, sel]
 					}
-					raw_vector_p <- raw_p %>% as.dist %>% as.numeric
-					message("Perform p value adjustment with ", COR_p_adjust, " method ...")
-					adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
 					use_names <- colnames(raw_p)
 					names_combn <- t(combn(use_names, 2))
-					table_convert <- cbind.data.frame(names_combn, adjust.p = adp_raw, stringsAsFactors = FALSE)
-					adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
-					if(! identical(colnames(cortable), colnames(adp))){
-						adp <- adp[colnames(cortable), colnames(cortable)]
-					}
+					# For the large matrix, use the vector form (lower triangular part) to avoid the full matrix copies.
+					# The k-th element of as.dist result and the k-th pair of combn result are transposed pairs of each other,
+					# so the values are same for the symmetrical matrix.
+					raw_vector_p <- raw_p %>% as.dist %>% as.numeric
+					cor_vector <- cortable %>% as.dist %>% as.numeric
+					message("Perform p value adjustment with ", COR_p_adjust, " method ...")
+					adp_raw <- p.adjust(raw_vector_p, method = COR_p_adjust)
 					if(COR_return_padjust){
+						table_convert <- cbind.data.frame(names_combn, adjust.p = adp_raw, stringsAsFactors = FALSE)
+						adp <- private$vec2mat(datatable = table_convert, use_names = use_names, value_var = "adjust.p", rep_value = 0)
+						if(! identical(colnames(cortable), colnames(adp))){
+							adp <- adp[colnames(cortable), colnames(cortable)]
+						}
 						self$res_cor_p$p.adjust <- adp
 						message("Adjusted p value matrix is stored in res_cor_p$p.adjust ...")
 					}
@@ -313,24 +321,29 @@ trans_network <- R6Class(classname = "trans_network",
 					}else{
 						tc1 <- COR_cut
 					}
-					diag(cortable) <- 0
-					cor_matrix <- as.matrix(cortable)
-					if(!any(abs(cortable) >= tc1)){
+					if(!any(abs(cor_vector) >= tc1)){
 						stop("All the correlation coefficients are smaller than the threshold! Please lower the COR_cut parameter!")
 					}
-					cor_matrix[abs(cortable) >= tc1] <- 1
-					cor_matrix[adp > COR_p_thres] <- 0
-					if(!any(cor_matrix == 1)){
+					keep_edges <- abs(cor_vector) >= tc1 & adp_raw <= COR_p_thres
+					if(!any(keep_edges)){
 						stop("All the correlation coefficients larger than COR_cut parameter are not significant under current COR_p_thres parameter!")
 					}
-					cor_matrix[cor_matrix != 1] <- 0
-					network <- graph_from_adjacency_matrix(cor_matrix, mode = "undirected")
-					edges <- t(sapply(1:ecount(network), function(x) ends(network, x)))
-					E(network)$label <- unlist(lapply(seq_len(nrow(edges)), function(x) ifelse(cortable[edges[x, 1], edges[x, 2]] > 0, "+", "-")))
+					edge_pairs <- names_combn[keep_edges, , drop = FALSE]
+					edge_cor <- cor_vector[keep_edges]
+					# create the graph with all the features as vertices to keep same vertices with the adjacency-matrix-based method
+					network <- make_empty_graph(n = length(use_names), directed = FALSE)
+					V(network)$name <- use_names
+					edge_ids <- matrix(match(edge_pairs, use_names), ncol = 2)
+					network <- add_edges(network, edges = t(edge_ids))
+					E(network)$label <- ifelse(edge_cor > 0, "+", "-")
 					if(COR_weight == TRUE){
-						E(network)$weight <- unlist(lapply(seq_len(nrow(edges)), function(x) abs(cortable[edges[x, 1], edges[x, 2]])))
+						E(network)$weight <- abs(edge_cor)
 					}else{
-						E(network)$weight <- rep.int(1, ecount(network))
+						E(network)$weight <- rep.int(1, length(edge_cor))
+					}
+					if(COR_free_memory){
+						self$res_cor_p <- NULL
+						message("res_cor_p list removed from the object to save memory ...")
 					}
 				}
 				if(network_method == "SpiecEasi"){
