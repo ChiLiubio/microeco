@@ -5,7 +5,7 @@
 \title{Create \code{trans_env} object to analyze the association between environmental factor and microbial community.}
 \description{
 This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
-mantel test, correlation analysis and linear fitting.
+variation partitioning analysis, mantel test, correlation analysis and linear fitting.
 }
 \examples{
 
@@ -86,6 +86,28 @@ t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 
 }
 
 ## ------------------------------------------------
+## Method `trans_env$cal_vpa`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+  Soil = c("TOC", "pH"), Nutrient = c("NH4", "NO3", "TN")))
+t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+  Soil = c("TOC", "pH")), use_measure = NULL, taxa_level = "Genus")
+}
+
+## ------------------------------------------------
+## Method `trans_env$plot_vpa`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+  Soil = c("TOC", "pH"), Nutrient = c("NH4", "NO3", "TN")))
+t1$plot_vpa()
+t1$plot_vpa(use_plot = "bar")
+}
+
+## ------------------------------------------------
 ## Method `trans_env$cal_mantel`
 ## ------------------------------------------------
 
@@ -136,6 +158,8 @@ t1$plot_scatterfit(x =
 \item \href{#method-trans_env-cal_ordination_envfit}{\code{trans_env$cal_ordination_envfit()}}
 \item \href{#method-trans_env-trans_ordination}{\code{trans_env$trans_ordination()}}
 \item \href{#method-trans_env-plot_ordination}{\code{trans_env$plot_ordination()}}
+\item \href{#method-trans_env-cal_vpa}{\code{trans_env$cal_vpa()}}
+\item \href{#method-trans_env-plot_vpa}{\code{trans_env$plot_vpa()}}
 \item \href{#method-trans_env-cal_mantel}{\code{trans_env$cal_mantel()}}
 \item \href{#method-trans_env-cal_cor}{\code{trans_env$cal_cor()}}
 \item \href{#method-trans_env-plot_cor}{\code{trans_env$plot_cor()}}
@@ -633,6 +657,119 @@ t1$plot_ordination(plot_color = "Group", plot_type = c("point", "centroid"),
 	  centroid_segment_linetype = 1)
 t1$plot_ordination(plot_color = "Group", env_nudge_x = c(0.4, 0, 0, 0, 0, -0.2, 0, 0), 
 	  env_nudge_y = c(0.6, 0, 0.2, 0.5, 0, 0.1, 0, 0.2))
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_env-cal_vpa"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-cal_vpa}{}}}
+\subsection{Method \code{cal_vpa()}}{
+Variation partitioning analysis (VPA) to quantify the contributions of different groups of environmental variables
+to the community variation, based on the \code{varpart} function of \code{vegan} package.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$cal_vpa(
+  env_group = NULL,
+  use_measure = "bray",
+  add_matrix = NULL,
+  taxa_level = NULL,
+  taxa_filter_thres = NULL,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{env_group}}{default NULL; a named list with 2 to 4 elements; the names represent the groups of environmental variables, 
+and the values are the character vectors of the environmental variable names in each group; 
+the variables must be the colnames of \code{object$data_env}.
+For example, \code{list(Climate = c("Temperature", "Precipitation"), Soil = c("TOC", "pH"))}.}
+
+\item{\code{use_measure}}{default "bray"; a name of beta diversity matrix used as the community data (distance-based VPA, i.e. dbRDA-based);
+if it is NULL together with \code{add_matrix}, the taxa abundance table is used (RDA-based VPA).}
+
+\item{\code{add_matrix}}{default NULL; an additional distance matrix provided directly; has a higher priority than \code{use_measure}.}
+
+\item{\code{taxa_level}}{default NULL; the taxonomic level used as the community data when \code{use_measure} and \code{add_matrix} are both NULL;
+default NULL uses "Genus" level automatically (or "OTU" when Genus is not found in tax_table); same with the \code{taxa_level} parameter of \code{cal_ordination} function.}
+
+\item{\code{taxa_filter_thres}}{default NULL; relative abundance threshold used to filter taxa; same with \code{cal_ordination} function.}
+
+\item{\code{...}}{other parameters passed to \code{varpart} function of \code{vegan} package,
+such as \code{transfo = "hellinger"}, \code{scale}, \code{permutations} and \code{chisquare = TRUE} (for CCA-based VPA).}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+\code{res_vpa} (the result of \code{vegan::varpart}) and \code{vpa_group} (the names of variable groups) stored in the object.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+  Soil = c("TOC", "pH"), Nutrient = c("NH4", "NO3", "TN")))
+t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+  Soil = c("TOC", "pH")), use_measure = NULL, taxa_level = "Genus")
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_env-plot_vpa"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_env-plot_vpa}{}}}
+\subsection{Method \code{plot_vpa()}}{
+Plot the VPA result using the Venn diagram or UpSet plot based on the \code{trans_venn} class of the package.
+The values shown in the plot are the percentages of the total community variation explained by each fraction.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_env$plot_vpa(
+  use_plot = "venn",
+  digits = 2,
+  show_residual = TRUE,
+  residual_text_position = NULL,
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{use_plot}}{default "venn"; "venn" for the classic VPA Venn diagram (\code{plot_venn} function of \code{\link{trans_venn}} class)
+or "bar" for the UpSet plot (\code{plot_bar} function of \code{\link{trans_venn}} class).}
+
+\item{\code{digits}}{default 2; the number of decimal digits of the percentage values shown in the plot.}
+
+\item{\code{show_residual}}{default TRUE; whether show the residual fraction (unexplained variation) in the plot;
+for \code{use_plot = "venn"}, the residual is shown as a text in the blank area of the Venn diagram;
+for \code{use_plot = "bar"}, the residual is only printed as a message because the UpSet plot has no place for the annotation text.}
+
+\item{\code{residual_text_position}}{default NULL; a numeric vector with two values used to customize the residual text position;
+default NULL uses an automatic position according to the number of variable groups; only used when \code{use_plot = "venn"}.}
+
+\item{\code{...}}{other parameters passed to \code{plot_venn} function (when \code{use_plot = "venn"}), such as \code{color_circle},
+\code{fill_color}, \code{alpha}, \code{text_size} and \code{text_name_size},
+or \code{plot_bar} function (when \code{use_plot = "bar"}) of \code{\link{trans_venn}} class,
+such as \code{up_y_title}, \code{left_plot}, \code{sort_samples}, \code{bottom_point_size} and \code{left_bar_fill}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+ggplot object. The created \code{trans_venn} object is also stored in \code{object$res_vpa_venn}
+  for the further use, such as \code{object$res_vpa_venn$plot_bar()}.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+  Soil = c("TOC", "pH"), Nutrient = c("NH4", "NO3", "TN")))
+t1$plot_vpa()
+t1$plot_vpa(use_plot = "bar")
 }
 }
 \if{html}{\out{</div>}}

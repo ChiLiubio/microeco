@@ -3,7 +3,7 @@
 #'
 #' @description
 #' This class is a wrapper for a series of operations associated with environmental measurements, including redundancy analysis, 
-#' mantel test, correlation analysis and linear fitting.
+#' variation partitioning analysis, mantel test, correlation analysis and linear fitting.
 #'
 #' @export
 trans_env <- R6Class(classname = "trans_env",
@@ -804,6 +804,217 @@ trans_env <- R6Class(classname = "trans_env",
 					)
 			}
 			p
+		},
+		#' @description
+		#' Variation partitioning analysis (VPA) to quantify the contributions of different groups of environmental variables
+		#' to the community variation, based on the \code{varpart} function of \code{vegan} package.
+		#'
+		#' @param env_group default NULL; a named list with 2 to 4 elements; the names represent the groups of environmental variables, 
+		#'   and the values are the character vectors of the environmental variable names in each group; 
+		#'   the variables must be the colnames of \code{object$data_env}.
+		#'   For example, \code{list(Climate = c("Temperature", "Precipitation"), Soil = c("TOC", "pH"))}.
+		#' @param use_measure default "bray"; a name of beta diversity matrix used as the community data (distance-based VPA, i.e. dbRDA-based);
+		#'   if it is NULL together with \code{add_matrix}, the taxa abundance table is used (RDA-based VPA).
+		#' @param add_matrix default NULL; an additional distance matrix provided directly; has a higher priority than \code{use_measure}.
+		#' @param taxa_level default NULL; the taxonomic level used as the community data when \code{use_measure} and \code{add_matrix} are both NULL;
+		#'   default NULL uses "Genus" level automatically (or "OTU" when Genus is not found in tax_table); same with the \code{taxa_level} parameter of \code{cal_ordination} function.
+		#' @param taxa_filter_thres default NULL; relative abundance threshold used to filter taxa; same with \code{cal_ordination} function.
+		#' @param ... other parameters passed to \code{varpart} function of \code{vegan} package,
+		#'   such as \code{transfo = "hellinger"}, \code{scale}, \code{permutations} and \code{chisquare = TRUE} (for CCA-based VPA).
+		#' @return \code{res_vpa} (the result of \code{vegan::varpart}) and \code{vpa_group} (the names of variable groups) stored in the object.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+		#'   Soil = c("TOC", "pH"), Nutrient = c("NH4", "NO3", "TN")))
+		#' t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+		#'   Soil = c("TOC", "pH")), use_measure = NULL, taxa_level = "Genus")
+		#' }
+		cal_vpa = function(
+			env_group = NULL,
+			use_measure = "bray",
+			add_matrix = NULL,
+			taxa_level = NULL,
+			taxa_filter_thres = NULL,
+			...
+			){
+			if(is.null(self$data_env)){
+				stop("The data_env is NULL! Please check the data input when creating the object !")
+			}
+			env_data <- private$check_numeric(self$data_env)
+			if(is.null(env_group)){
+				stop("The env_group parameter must be provided! It must be a named list with 2 to 4 groups of environmental variables!")
+			}
+			if(!is.list(env_group)){
+				stop("The env_group parameter must be a list!")
+			}
+			if(is.null(names(env_group)) || any(names(env_group) == "")){
+				stop("Each group in the env_group parameter must have a name!")
+			}
+			if(length(env_group) < 2 || length(env_group) > 4){
+				stop("The number of groups in env_group must be 2 to 4 according to the limit of vegan::varpart function!")
+			}
+			if(any(duplicated(names(env_group)))){
+				stop("The group names in the env_group parameter must be unique!")
+			}
+			for(i in names(env_group)){
+				if(!is.character(env_group[[i]]) || length(env_group[[i]]) == 0){
+					stop("The values of each group in env_group must be non-empty character vectors of environmental variable names!")
+				}
+				if(!all(env_group[[i]] %in% colnames(env_data))){
+					stop("The variables (", paste0(env_group[[i]][! env_group[[i]] %in% colnames(env_data)], collapse = "; "), 
+						") in the group ", i, " are not found in the object$data_env! Please check the input!")
+				}
+			}
+			if(!is.null(add_matrix) || !is.null(use_measure)){
+				# distance-based VPA (dbRDA)
+				if(!is.null(add_matrix)){
+					use_matrix <- add_matrix
+					message("Use the additional distance matrix provided for VPA ...")
+				}else{
+					if(is.null(self$dataset)){
+						stop("No dataset is found in the object! Please provide the dataset when creating the object or use add_matrix parameter!")
+					}
+					if(is.null(self$dataset$beta_diversity)){
+						message("The beta_diversity in dataset is NULL; try to calculate it ...")
+						self$dataset$cal_betadiv(unifrac = FALSE)
+						message("Calculating done ...")
+					}
+					if(! use_measure %in% names(self$dataset$beta_diversity)){
+						stop("Please make sure use_measure: ", use_measure, " is in the dataset$beta_diversity!")
+					}
+					use_matrix <- self$dataset$beta_diversity[[use_measure]]
+					message("Use ", use_measure, " in dataset$beta_diversity for VPA ...")
+				}
+				Y <- as.dist(use_matrix[rownames(env_data), rownames(env_data)])
+			}else{
+				# taxa abundance table based VPA (RDA)
+				if(is.null(self$dataset)){
+					stop("The dataset in the object is NULL! Please provide the dataset when creating the object!")
+				}
+				if(is.null(taxa_level)){
+					if("Genus" %in% colnames(self$dataset$tax_table)){
+						taxa_level <- "Genus"
+						message("No taxa_level provided; use Genus level automatically !")
+					}else{
+						taxa_level <- "OTU"
+						message("No taxa_level provided; use otu_table as the feature abundance input!")
+					}
+				}
+				if(taxa_level == "OTU"){
+					use_abund <- self$dataset$otu_table
+				}else{
+					check_tax_level(taxa_level, self$dataset)
+					newdat <- self$dataset$merge_taxa(taxa_level)
+					use_abund <- newdat$otu_table
+				}
+				if(!is.null(taxa_filter_thres)){
+					use_abund <- use_abund[apply(use_abund, 1, sum)/sum(use_abund) > taxa_filter_thres, , drop = FALSE]
+				}
+				Y <- as.data.frame(t(use_abund))
+				# make the samples of env data consistent with the community data
+				env_data <- env_data[rownames(Y), , drop = FALSE]
+			}
+			env_groups <- lapply(env_group, function(x) env_data[, x, drop = FALSE])
+			switch(as.character(length(env_groups)),
+				"2" = res_vpa <- varpart(Y, env_groups[[1]], env_groups[[2]], ...),
+				"3" = res_vpa <- varpart(Y, env_groups[[1]], env_groups[[2]], env_groups[[3]], ...),
+				"4" = res_vpa <- varpart(Y, env_groups[[1]], env_groups[[2]], env_groups[[3]], env_groups[[4]], ...)
+			)
+			self$res_vpa <- res_vpa
+			self$vpa_group <- names(env_group)
+			message('The VPA result is stored in object$res_vpa ...')
+			invisible(self)
+		},
+		#' @description
+		#' Plot the VPA result using the Venn diagram or UpSet plot based on the \code{trans_venn} class of the package.
+		#' The values shown in the plot are the percentages of the total community variation explained by each fraction.
+		#'
+		#' @param use_plot default "venn"; "venn" for the classic VPA Venn diagram (\code{plot_venn} function of \code{\link{trans_venn}} class)
+		#'   or "bar" for the UpSet plot (\code{plot_bar} function of \code{\link{trans_venn}} class).
+		#' @param digits default 2; the number of decimal digits of the percentage values shown in the plot.
+		#' @param show_residual default TRUE; whether show the residual fraction (unexplained variation) in the plot;
+		#'   for \code{use_plot = "venn"}, the residual is shown as a text in the blank area of the Venn diagram;
+		#'   for \code{use_plot = "bar"}, the residual is only printed as a message because the UpSet plot has no place for the annotation text.
+		#' @param residual_text_position default NULL; a numeric vector with two values used to customize the residual text position;
+		#'   default NULL uses an automatic position according to the number of variable groups; only used when \code{use_plot = "venn"}.
+		#' @param ... other parameters passed to \code{plot_venn} function (when \code{use_plot = "venn"}), such as \code{color_circle},
+		#'   \code{fill_color}, \code{alpha}, \code{text_size} and \code{text_name_size},
+		#'   or \code{plot_bar} function (when \code{use_plot = "bar"}) of \code{\link{trans_venn}} class,
+		#'   such as \code{up_y_title}, \code{left_plot}, \code{sort_samples}, \code{bottom_point_size} and \code{left_bar_fill}.
+		#' @return ggplot object. The created \code{trans_venn} object is also stored in \code{object$res_vpa_venn}
+		#'   for the further use, such as \code{object$res_vpa_venn$plot_bar()}.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_vpa(env_group = list(Climate = c("Temperature", "Precipitation"), 
+		#'   Soil = c("TOC", "pH"), Nutrient = c("NH4", "NO3", "TN")))
+		#' t1$plot_vpa()
+		#' t1$plot_vpa(use_plot = "bar")
+		#' }
+		plot_vpa = function(
+			use_plot = "venn",
+			digits = 2,
+			show_residual = TRUE,
+			residual_text_position = NULL,
+			...
+			){
+			if(is.null(self$res_vpa)){
+				stop("Please first run cal_vpa function to obtain the VPA result!")
+			}
+			if(! use_plot %in% c("venn", "bar")){
+				stop("Provided parameter use_plot must be 'venn' or 'bar'!")
+			}
+			group_names <- self$vpa_group
+			frac_res <- private$vpa_fractions(res_vpa = self$res_vpa, group_names = group_names)
+			use_frac <- frac_res$frac
+			if(any(grepl("&", group_names, fixed = TRUE))){
+				stop("The group names in env_group must not contain the '&' character for the plot!")
+			}
+			# create the dummy feature table: rows = fractions, columns = variable groups
+			dummy_matrix <- matrix(0, nrow = length(use_frac), ncol = length(group_names),
+				dimnames = list(names(use_frac), group_names))
+			for(i in rownames(dummy_matrix)){
+				dummy_matrix[i, strsplit(i, "&", fixed = TRUE)[[1]]] <- 1
+			}
+			tmp_venn <- suppressMessages(trans_venn$new(dataset = dummy_matrix))
+			use_values <- round(100 * use_frac, digits)
+			if(any(is.na(use_values[rownames(tmp_venn$data_summary)]))){
+				stop("Failed to match the VPA fractions with the venn regions! ",
+					"Please check whether the group names contain the '&' character!")
+			}
+			tmp_venn$data_summary$Counts <- use_values[rownames(tmp_venn$data_summary)]
+			# replace the region count with the total variation explained by each group,
+			# so that the left bar plot in plot_bar function shows the total contribution of each group
+			group_total <- as.vector(use_frac %*% dummy_matrix)
+			names(group_total) <- group_names
+			tmp_venn$data_samplesum <- round(100 * group_total, digits)
+			self$res_vpa_venn <- tmp_venn
+			if(use_plot == "venn"){
+				plot_args <- list(...)
+				if(show_residual && !is.null(frac_res$residual)){
+					if(is.null(plot_args$other_text_show)){
+						plot_args$other_text_show <- paste0("Residuals\n", round(100 * frac_res$residual, digits), "%")
+						if(is.null(residual_text_position)){
+							# empirical free positions for 2-4 groups
+							residual_text_position <- switch(as.character(length(group_names)),
+								"2" = c(5, 3.2),
+								"3" = c(2.5, 1.5),
+								"4" = c(5, 9)
+							)
+						}
+						plot_args$other_text_position <- residual_text_position
+					}
+				}
+				do.call(tmp_venn$plot_venn, plot_args)
+			}else{
+				if(show_residual && !is.null(frac_res$residual)){
+					message("Residuals (unexplained variation): ", round(100 * frac_res$residual, digits), "%")
+				}
+				plot_args <- list(...)
+				if(is.null(plot_args$up_y_title)){
+					plot_args$up_y_title <- "Explained variation (%)"
+				}
+				do.call(tmp_venn$plot_bar, plot_args)
+			}
 		},
 		#' @description
 		#' Mantel test between beta diversity matrix and environmental data.
@@ -1641,6 +1852,46 @@ trans_env <- R6Class(classname = "trans_env",
 			res_mantel <- data.frame(by_group, variable_name, mantel_type, cor_method, corr_res, p_res, p_adjusted, significance)
 			colnames(res_mantel) <- c("by_group", "Variables", "mantel type", "Correlation method", "Correlation coefficient", "p.value", "p.adjusted", "Significance")
 			res_mantel
+		},
+		vpa_fractions = function(res_vpa, group_names){
+			# parse the rownames of the hierarchical partition table to obtain the letter-group mapping
+			# e.g. "[a+d+f+g] = X1" means the fractions a, d, f and g belong to the first group of variables
+			fract_names <- rownames(res_vpa$part$fract)
+			single_rows <- fract_names[grepl("= X[0-9]+$", fract_names)]
+			if(length(single_rows) != length(group_names)){
+				stop("Failed to parse the result of vegan::varpart! Please report this to the maintainer!")
+			}
+			letter2group <- list()
+			for(i in single_rows){
+				split_res <- strsplit(i, " = ", fixed = TRUE)[[1]]
+				# the fraction letters are joint with "+" for 2 or 3 groups, but not for 4 groups in vegan
+				letters_i <- gsub("\\[|\\]|\\+", "", split_res[1])
+				group_i <- as.integer(gsub("X", "", split_res[2], fixed = TRUE))
+				for(j in strsplit(letters_i, "")[[1]]){
+					letter2group[[j]] <- c(letter2group[[j]], group_i)
+				}
+			}
+			ind_table <- res_vpa$part$indfract
+			res_frac <- c()
+			residual_value <- NULL
+			for(i in seq_len(nrow(ind_table))){
+				use_rowname <- rownames(ind_table)[i]
+				if(grepl("Residuals", use_rowname)){
+					residual_value <- ind_table$Adj.R.square[i]
+					next
+				}
+				use_letter <- gsub("^\\[([a-z]+)\\].*$", "\\1", use_rowname)
+				if(! use_letter %in% names(letter2group)){
+					stop("Failed to parse the result of vegan::varpart! Please report this to the maintainer!")
+				}
+				use_groups <- sort(letter2group[[use_letter]])
+				use_name <- paste0(group_names[use_groups], collapse = "&")
+				res_frac[use_name] <- ind_table$Adj.R.square[i]
+			}
+			if(length(res_frac) != 2^length(group_names) - 1){
+				stop("Failed to parse the result of vegan::varpart! Please report this to the maintainer!")
+			}
+			list(frac = res_frac, residual = residual_value)
 		},
 		check_scatterfit_input = function(input, char_name){
 			if(!(is.vector(input) | is.matrix(input))){
