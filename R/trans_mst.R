@@ -174,6 +174,9 @@ trans_mst <- R6Class(classname = "trans_mst",
                                         metadata <- metadata[! rownames(metadata) %in% dropped_sources, , drop = FALSE]
                                 }
                         }
+                        # put sinks before sources so that the first-appearance order of id in the metadata
+                        # always matches the row order of the sink names in the FEAST output
+                        metadata <- metadata[c(sink_ids, source_ids), , drop = FALSE]
                         # ----- prepare count matrix: samples x taxa, integer -----
                         use_samples <- c(source_ids, sink_ids)
                         C <- t(self$otu_table[, use_samples, drop = FALSE])
