@@ -28,7 +28,9 @@ Therefore, we developed the R microeco package (abbreviated and pronounced as **
   + Network analysis
   + Environmental data analysis
   + Functional prediction
+  + Microbial source tracking analysis
   + Metabolites analysis
+  + Multi-omics data integration analysis
 
 ## Install R/RStudio
 If you do not already have R/RStudio installed, follow these steps:
