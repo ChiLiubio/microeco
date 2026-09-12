@@ -1211,6 +1211,144 @@ trans_multiomics <- R6Class(classname = "trans_multiomics",
 		},
 
 		#' @description
+		#' Convert the trans-kingdom network (result of \code{cal_transkingdom}) to a \code{\link{trans_network}} object.
+		#'
+		#' This function bridges the trans-kingdom (cross-omics) network with the downstream network analyses of the
+		#' \code{\link{trans_network}} class, such as module detection (\code{cal_module}), node/edge property tables
+		#' (\code{get_node_table}/\code{get_edge_table}), network topological attributes (\code{cal_network_attr}),
+		#' sub-network extraction (\code{subset_network}), eigengene analysis (\code{cal_eigen}), random network
+		#' comparison (\code{random_network}) and network visualization (\code{plot_network}).
+		#'
+		#' The conversion follows the conventions of correlation networks built by \code{trans_network$cal_network}:
+		#' the edge weight is re-defined as the absolute correlation and the edge label as the correlation sign
+		#' ("+"/"-"); note that this differs from the distance-like weight (1 - |Corr|) temporarily used inside
+		#' \code{cal_transkingdom} for the BiBC computation. The node attributes (\code{Block}, \code{Diff_p},
+		#' \code{BiBC} and \code{Hub}) are preserved, so they are reported in the node table of
+		#' \code{get_node_table}. The original (non-transformed) abundances of the network features are extracted
+		#' from \code{dataset_list} to fill \code{data_abund} (rows are samples), \code{data_relabund} (relative
+		#' abundance within each block, used as the "Abundance" of \code{get_node_table}) and \code{sample_table};
+		#' the \code{tax_table} slots of all blocks are merged (union of the columns) to fill \code{tax_table}
+		#' when \code{add_taxonomy = TRUE}.
+		#'
+		#' Note that the taxonomy-dependent functions of \code{trans_network}, e.g. \code{cal_sum_links} and
+		#' \code{plot_sum_links}, require a taxonomic column shared by all the involved blocks; for a bipartite
+		#' cross-omics network (e.g. microbe vs metabolite) such a column usually does not exist, so those
+		#' functions are not applicable unless the blocks use the same feature annotation.
+		#' @param delete_unlinked_nodes default TRUE; whether delete the nodes without any link,
+		#' 	 same with the default of \code{cal_network} in \code{\link{trans_network}} class.
+		#' @param add_taxonomy default TRUE; whether add the taxonomy information of the network features to the
+		#' 	 returned object by merging the \code{tax_table} of all blocks (columns are unioned and missing
+		#' 	 values are filled with NA). Use FALSE to skip, e.g. when the blocks have no meaningful tax_table.
+		#' @return a \code{\link{trans_network}} object; the network is stored in its \code{res_network} slot.
+		#' @examples
+		#' \dontrun{
+		#' t1$cal_transkingdom()
+		#' net1 <- t1$convert_transkingdom()
+		#' net1$cal_module()
+		#' net1$get_node_table()
+		#' net1$plot_network(method = "ggraph", node_color = "module")
+		#' }
+		convert_transkingdom = function(
+			delete_unlinked_nodes = TRUE,
+			add_taxonomy = TRUE
+			){
+			if(!requireNamespace("igraph", quietly = TRUE)){
+				stop("Please install igraph package first: install.packages('igraph')")
+			}
+			if(is.null(self$res_transkingdom)){
+				stop("The res_transkingdom is NULL! Please run cal_transkingdom() first!")
+			}
+			edges_df <- self$res_transkingdom$edges
+			nodes_df <- self$res_transkingdom$nodes
+			if(nrow(edges_df) == 0){
+				stop("No edge found in the trans-kingdom network! ",
+					"Please re-run cal_transkingdom() with relaxed thresholds (corr_thres/p_thres)!")
+			}
+			# ---- rebuild the graph with the trans_network conventions ----
+			# edge weight = |correlation| (connection strength) and label = correlation sign, same with the
+			# correlation networks of trans_network$cal_network; the distance-like weight (1 - |Corr|) used for
+			# the BiBC computation is NOT transferred as it has a different semantics
+			g <- igraph::graph_from_data_frame(
+				d = edges_df[, c("From", "To", "Corr", "P", "P_adj")],
+				directed = FALSE,
+				vertices = nodes_df[, c("Feature", "Block", "Diff_p", "BiBC", "Hub")]
+			)
+			igraph::E(g)$weight <- abs(igraph::E(g)$Corr)
+			igraph::E(g)$label <- ifelse(igraph::E(g)$Corr > 0, "+", "-")
+			igraph::V(g)$taxa <- igraph::V(g)$name
+			if(delete_unlinked_nodes){
+				g <- igraph::delete_vertices(g, igraph::degree(g) == 0)
+			}
+			# ---- fill the data slots of trans_network for the downstream functions ----
+			# features and blocks of the final network
+			use_features <- igraph::V(g)$name
+			if(anyDuplicated(use_features)){
+				stop("Duplicated feature names found across the blocks! ",
+					"Please make the feature names unique across blocks and re-run cal_transkingdom()!")
+			}
+			block_of <- setNames(as.character(nodes_df$Block), nodes_df$Feature)[use_features]
+			blocks_use <- unique(block_of)
+			# samples actually entering the trans-kingdom analysis (intersection across the involved blocks)
+			samples_use <- rownames(self$data_list[[blocks_use[1]]])
+			for(b in blocks_use){
+				samples_use <- intersect(samples_use, colnames(self$dataset_list[[b]]$otu_table))
+			}
+			if(length(samples_use) == 0){
+				stop("No common sample found across the original otu_tables of the involved blocks!")
+			}
+			# original (non-transformed) abundances of the network features: rows are samples, columns are features
+			# the blocks are assembled into one matrix directly (NOT via cbind.data.frame of a named list,
+			# which would prefix the column names with the block names and break the feature matching)
+			data_abund <- matrix(0, nrow = length(samples_use), ncol = length(use_features),
+				dimnames = list(samples_use, use_features))
+			relabund_all <- c()
+			for(b in blocks_use){
+				otu <- as.matrix(self$dataset_list[[b]]$otu_table[, samples_use, drop = FALSE])
+				feats_b <- use_features[block_of == b]
+				data_abund[, feats_b] <- t(otu[feats_b, , drop = FALSE])
+				# relative abundance (%) within the block: feature sum / block total across the samples
+				total_b <- sum(otu)
+				if(total_b > 0){
+					relabund_all <- c(relabund_all, apply(otu, 1, sum) / total_b * 100)
+				}
+			}
+			# ---- create the trans_network object ----
+			net_obj <- trans_network$new(dataset = NULL)
+			if(length(relabund_all) > 0){
+				relabund_all <- relabund_all[use_features]
+				net_obj$data_relabund <- relabund_all
+				g <- igraph::set_vertex_attr(g, "RelativeAbundance", value = unname(relabund_all))
+			}
+			net_obj$res_network <- g
+			net_obj$data_abund <- as.data.frame(data_abund)
+			net_obj$sample_table <- self$dataset_list[[blocks_use[1]]]$sample_table[samples_use, , drop = FALSE]
+			# ---- merge the tax_table of the blocks (union of the columns) ----
+			if(add_taxonomy){
+				tax_tables <- lapply(self$dataset_list[blocks_use], function(x) x$tax_table)
+				tax_tables <- tax_tables[!vapply(tax_tables, is.null, logical(1))]
+				if(length(tax_tables) > 0){
+					all_cols <- unique(unlist(lapply(tax_tables, colnames)))
+					# unname() is crucial: rbind of NAMED data.frames would prefix the row names
+					# with the block names (e.g. "microb.xxx") and break the feature matching
+					merged <- do.call(rbind, unname(lapply(tax_tables, function(tt){
+						# characters avoid the factor-level conflicts of the blocks during rbind;
+						# the columns missing in the block are padded with NA to align all blocks
+						tt <- as.data.frame(tt, stringsAsFactors = FALSE)
+						tt[] <- lapply(tt, as.character)
+						for(cl in setdiff(all_cols, colnames(tt))){
+							tt[[cl]] <- NA_character_
+						}
+						tt[, all_cols, drop = FALSE]
+					})))
+					net_obj$tax_table <- merged[rownames(merged) %in% use_features, , drop = FALSE]
+				}
+			}
+			message("Converted the trans-kingdom network (", igraph::vcount(g), " nodes, ", igraph::ecount(g),
+				" edges) to a trans_network object; the downstream functions of trans_network can be used now ...")
+			net_obj
+		},
+
+		#' @description
 		#' Compute the Area Under the ROC Curve (AUC) for the model.
 		#'
 		#' This function wraps \code{mixOmics::auroc} to perform ROC analysis for supervised models.

@@ -177,6 +177,18 @@ print(p)
 }
 
 ## ------------------------------------------------
+## Method `trans_multiomics$convert_transkingdom`
+## ------------------------------------------------
+
+\dontrun{
+t1$cal_transkingdom()
+net1 <- t1$convert_transkingdom()
+net1$cal_module()
+net1$get_node_table()
+net1$plot_network(method = "ggraph", node_color = "module")
+}
+
+## ------------------------------------------------
 ## Method `trans_multiomics$cal_auroc`
 ## ------------------------------------------------
 
@@ -226,6 +238,7 @@ t1$export_bridge(target = "mimosa2", file = "./bridge/mimosa_input",
 \item \href{#method-trans_multiomics-plot_heatmap}{\code{trans_multiomics$plot_heatmap()}}
 \item \href{#method-trans_multiomics-cal_transkingdom}{\code{trans_multiomics$cal_transkingdom()}}
 \item \href{#method-trans_multiomics-plot_transkingdom}{\code{trans_multiomics$plot_transkingdom()}}
+\item \href{#method-trans_multiomics-convert_transkingdom}{\code{trans_multiomics$convert_transkingdom()}}
 \item \href{#method-trans_multiomics-cal_auroc}{\code{trans_multiomics$cal_auroc()}}
 \item \href{#method-trans_multiomics-run_mediation}{\code{trans_multiomics$run_mediation()}}
 \item \href{#method-trans_multiomics-export_bridge}{\code{trans_multiomics$export_bridge()}}
@@ -1103,6 +1116,70 @@ a ggplot object.
 t1$cal_transkingdom()
 p <- t1$plot_transkingdom(label = "hub")
 print(p)
+}
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-trans_multiomics-convert_transkingdom"></a>}}
+\if{latex}{\out{\hypertarget{method-trans_multiomics-convert_transkingdom}{}}}
+\subsection{Method \code{convert_transkingdom()}}{
+Convert the trans-kingdom network (result of \code{cal_transkingdom}) to a \code{\link{trans_network}} object.
+
+This function bridges the trans-kingdom (cross-omics) network with the downstream network analyses of the
+\code{\link{trans_network}} class, such as module detection (\code{cal_module}), node/edge property tables
+(\code{get_node_table}/\code{get_edge_table}), network topological attributes (\code{cal_network_attr}),
+sub-network extraction (\code{subset_network}), eigengene analysis (\code{cal_eigen}), random network
+comparison (\code{random_network}) and network visualization (\code{plot_network}).
+
+The conversion follows the conventions of correlation networks built by \code{trans_network$cal_network}:
+the edge weight is re-defined as the absolute correlation and the edge label as the correlation sign
+("+"/"-"); note that this differs from the distance-like weight (1 - |Corr|) temporarily used inside
+\code{cal_transkingdom} for the BiBC computation. The node attributes (\code{Block}, \code{Diff_p},
+\code{BiBC} and \code{Hub}) are preserved, so they are reported in the node table of
+\code{get_node_table}. The original (non-transformed) abundances of the network features are extracted
+from \code{dataset_list} to fill \code{data_abund} (rows are samples), \code{data_relabund} (relative
+abundance within each block, used as the "Abundance" of \code{get_node_table}) and \code{sample_table};
+the \code{tax_table} slots of all blocks are merged (union of the columns) to fill \code{tax_table}
+when \code{add_taxonomy = TRUE}.
+
+Note that the taxonomy-dependent functions of \code{trans_network}, e.g. \code{cal_sum_links} and
+\code{plot_sum_links}, require a taxonomic column shared by all the involved blocks; for a bipartite
+cross-omics network (e.g. microbe vs metabolite) such a column usually does not exist, so those
+functions are not applicable unless the blocks use the same feature annotation.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{trans_multiomics$convert_transkingdom(
+  delete_unlinked_nodes = TRUE,
+  add_taxonomy = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{delete_unlinked_nodes}}{default TRUE; whether delete the nodes without any link,
+same with the default of \code{cal_network} in \code{\link{trans_network}} class.}
+
+\item{\code{add_taxonomy}}{default TRUE; whether add the taxonomy information of the network features to the
+returned object by merging the \code{tax_table} of all blocks (columns are unioned and missing
+values are filled with NA). Use FALSE to skip, e.g. when the blocks have no meaningful tax_table.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a \code{\link{trans_network}} object; the network is stored in its \code{res_network} slot.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+t1$cal_transkingdom()
+net1 <- t1$convert_transkingdom()
+net1$cal_module()
+net1$get_node_table()
+net1$plot_network(method = "ggraph", node_color = "module")
 }
 }
 \if{html}{\out{</div>}}
