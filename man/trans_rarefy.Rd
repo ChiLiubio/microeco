@@ -4,7 +4,7 @@
 \alias{trans_rarefy}
 \title{Rarefaction and plotting.}
 \description{
-Rarefaction based on the trans_norm class and visualization based on the ggplot2.
+Rarefaction based on the trans_norm class and visualization of the rarefaction curve based on the ggplot2.
 }
 \examples{
 
@@ -12,17 +12,18 @@ Rarefaction based on the trans_norm class and visualization based on the ggplot2
 ## Method `trans_rarefy$new`
 ## ------------------------------------------------
 
-\donttest{
-library(microeco)
+\dontrun{
 data(dataset)
 t1 <- trans_rarefy$new(dataset = dataset, depth = c(0, 10, 50, 400, 800))
+# the depth is generated automatically when it is not provided
+t1 <- trans_rarefy$new(dataset = dataset)
 }
 
 ## ------------------------------------------------
 ## Method `trans_rarefy$plot_rarefy`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 t1$plot_rarefy(color = "Group")
 }
 }
@@ -40,7 +41,13 @@ t1$plot_rarefy(color = "Group")
 \if{latex}{\out{\hypertarget{method-trans_rarefy-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_rarefy$new(dataset = NULL, alphadiv = "Shannon", depth = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_rarefy$new(
+  dataset = NULL,
+  alphadiv = "Shannon",
+  depth = NULL,
+  PD = FALSE,
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -48,23 +55,34 @@ t1$plot_rarefy(color = "Group")
 \describe{
 \item{\code{dataset}}{the object of \code{\link{microtable}} Class.}
 
-\item{\code{alphadiv}}{default "Shannon"; alpha diversity measurement used for the rarefaction; see microtable$cal_alphadiv for all the measurement.}
+\item{\code{alphadiv}}{default "Shannon"; one or more alpha diversity measurements used for the rarefaction; see microtable$cal_alphadiv for all the available measurements. 
+The measurement names are case-insensitive, e.g. "shannon" is same as "Shannon". Multiple measurements are supported and share the same rarefying process.}
 
-\item{\code{depth}}{default NULL; an integer vecotr used for the rarefying.}
+\item{\code{depth}}{default NULL; a numeric vector used for the rarefying. 0 represents using the original data without rarefying and the diversity values are all set to 0 as the starting point of the curve. 
+If NULL, a sequence of 10 depths from 0 to the maximum of sample sums (i.e. \code{max(dataset$sample_sums())}) is generated automatically.
+Note that for each sample, only the depths not larger than its own sequencing depth are available, 
+as the sample is removed at the larger depths by the \code{norm} function of \code{\link{trans_norm}} class, leading to an interrupted curve in the plot.}
 
-\item{\code{...}}{parameters passed to \code{rarefy_samples} function of \code{microtable} class, except the sample.size parameter.}
+\item{\code{PD}}{default FALSE; whether add Faith's phylogenetic diversity (PD) to the alpha diversity. The calculation depends on \code{cal_alphadiv} function of \code{microtable} class, 
+so the phylogenetic tree (\code{phylo_tree} in the dataset) is necessary for this option.}
+
+\item{\code{...}}{parameters passed to \code{norm} function of \code{\link{trans_norm}} class, such as \code{method} ("rarefy" or "SRS") and \code{rngseed}, 
+except the sample.size parameter which is controlled by the depth parameter.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-res_rarefy stored in the object.
+\code{res_rarefy} stored in the object, which is a data.frame with the columns \code{SampleID} (sample name), 
+  \code{seqnum} (the rarefying depth) and the alpha diversity measurements used (the column names are the standard measurement names). 
+  The measurements used are also stored in \code{object$measure}, and the rarefying depths in \code{object$depth}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
-library(microeco)
+\preformatted{\dontrun{
 data(dataset)
 t1 <- trans_rarefy$new(dataset = dataset, depth = c(0, 10, 50, 400, 800))
+# the depth is generated automatically when it is not provided
+t1 <- trans_rarefy$new(dataset = dataset)
 }
 }
 \if{html}{\out{</div>}}
@@ -81,10 +99,13 @@ Plotting the rarefied result.
 \if{html}{\out{<div class="r">}}\preformatted{trans_rarefy$plot_rarefy(
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   color = "SampleID",
+  measure = NULL,
   show_point = TRUE,
   point_size = 0.3,
   point_alpha = 0.6,
   add_fitting = FALSE,
+  fitting_method = "lm",
+  fitting_formula = y ~ log(x + 1),
   x_axis_title = "Sequence number",
   y_axis_title = NULL,
   show_legend = TRUE,
@@ -102,6 +123,9 @@ Plotting the rarefied result.
 
 \item{\code{color}}{default "SampleID"; color mapping in the plot.}
 
+\item{\code{measure}}{default NULL; the alpha diversity measurement(s) used as the y axis; see the alphadiv parameter in \code{new} function. 
+If NULL, all the measures stored in the object are used. When multiple measures are used, the plot is faceted by the measures.}
+
 \item{\code{show_point}}{default TRUE; whether show the point.}
 
 \item{\code{point_size}}{default .3; point size value.}
@@ -110,17 +134,23 @@ Plotting the rarefied result.
 
 \item{\code{add_fitting}}{default FALSE; whether add fitted line.}
 
+\item{\code{fitting_method}}{default "lm"; the method used by \code{ggplot2::geom_smooth} function. Only available when \code{add_fitting = TRUE}. 
+The default "lm" avoids the warnings generated by the default "loess" method, as there are usually only a few depths for each sample.}
+
+\item{\code{fitting_formula}}{default \code{y ~ log(x + 1)}; the formula used by \code{ggplot2::geom_smooth} function. Only available when \code{add_fitting = TRUE}. 
+Note that \code{x + 1} is used instead of \code{x}, as the depth 0 makes \code{log(x)} invalid.}
+
 \item{\code{x_axis_title}}{default "Sequence number"; x axis title.}
 
-\item{\code{y_axis_title}}{default NULL; default NULL represents the measure used.}
+\item{\code{y_axis_title}}{default NULL; default NULL represents the measure used; when multiple measures are used, default NULL represents "Value".}
 
-\item{\code{show_legend}}{default TRUE;    whether show the legend in the plot.}
+\item{\code{show_legend}}{default TRUE; whether show the legend in the plot.}
 
 \item{\code{show_samplename}}{default FALSE; whether show the sample name in the plot.}
 
 \item{\code{samplename_size}}{default 3; the sample name text size. Only available when show_samplename is TRUE.}
 
-\item{\code{samplename_color}}{default "grey70"; sample name text color. Only available when show_samplename is TRUE.}
+\item{\code{samplename_color}}{default "grey30"; sample name text color. Only available when show_samplename is TRUE.}
 
 \item{\code{...}}{parameters pass to ggplot2::geom_line (when add_fitting = FALSE) or ggplot2::geom_smooth (when add_fitting = TRUE).}
 }
@@ -131,7 +161,7 @@ ggplot.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 t1$plot_rarefy(color = "Group")
 }
 }
