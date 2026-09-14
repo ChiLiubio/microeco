@@ -15,6 +15,7 @@ Another way to open the help document of R6 class is to click the following link
 \code{\link{trans_norm}}\cr
 \code{\link{trans_abund}}\cr
 \code{\link{trans_venn}}\cr
+\code{\link{trans_rarefy}}\cr
 \code{\link{trans_alpha}}\cr
 \code{\link{trans_beta}}\cr
 \code{\link{trans_diff}}\cr
