@@ -59,7 +59,8 @@ t1$plot_rarefy(color = "Group")
 The measurement names are case-insensitive, e.g. "shannon" is same as "Shannon". Multiple measurements are supported and share the same rarefying process.}
 
 \item{\code{depth}}{default NULL; a numeric vector used for the rarefying. 0 represents using the original data without rarefying and the diversity values are all set to 0 as the starting point of the curve. 
-If NULL, a sequence of 10 depths from 0 to the maximum of sample sums (i.e. \code{max(dataset$sample_sums())}) is generated automatically.
+If NULL, a sequence of 10 depths from 0 to the maximum of sample sums (i.e. \code{max(dataset$sample_sums())}) is generated automatically using a quadratic spacing \code{round(max_depth * seq(0, 1, length.out = 10)^2)}, 
+so the depths are denser in the low-depth region where the rarefaction curve rises steeply and sparser in the high-depth region where the curve becomes flat.
 Note that for each sample, only the depths not larger than its own sequencing depth are available, 
 as the sample is removed at the larger depths by the \code{norm} function of \code{\link{trans_norm}} class, leading to an interrupted curve in the plot.}
 

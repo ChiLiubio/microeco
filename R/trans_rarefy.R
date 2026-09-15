@@ -11,7 +11,8 @@ trans_rarefy <- R6Class(classname = "trans_rarefy",
 		#' @param alphadiv default "Shannon"; one or more alpha diversity measurements used for the rarefaction; see microtable$cal_alphadiv for all the available measurements. 
 		#'   The measurement names are case-insensitive, e.g. "shannon" is same as "Shannon". Multiple measurements are supported and share the same rarefying process.
 		#' @param depth default NULL; a numeric vector used for the rarefying. 0 represents using the original data without rarefying and the diversity values are all set to 0 as the starting point of the curve. 
-		#'   If NULL, a sequence of 10 depths from 0 to the maximum of sample sums (i.e. \code{max(dataset$sample_sums())}) is generated automatically.
+		#'   If NULL, a sequence of 10 depths from 0 to the maximum of sample sums (i.e. \code{max(dataset$sample_sums())}) is generated automatically using a quadratic spacing \code{round(max_depth * seq(0, 1, length.out = 10)^2)}, 
+		#'   so the depths are denser in the low-depth region where the rarefaction curve rises steeply and sparser in the high-depth region where the curve becomes flat.
 		#'   Note that for each sample, only the depths not larger than its own sequencing depth are available, 
 		#'   as the sample is removed at the larger depths by the \code{norm} function of \code{\link{trans_norm}} class, leading to an interrupted curve in the plot.
 		#' @param PD default FALSE; whether add Faith's phylogenetic diversity (PD) to the alpha diversity. The calculation depends on \code{cal_alphadiv} function of \code{microtable} class, 
@@ -41,7 +42,8 @@ trans_rarefy <- R6Class(classname = "trans_rarefy",
 				if(! is.finite(max_depth) || max_depth <= 0){
 					stop("No available sequencing depth is found in the dataset! Please check the otu_table in the dataset ...")
 				}
-				depth <- unique(round(seq(0, max_depth, length.out = 10)))
+				# quadratic spacing: denser depths in the low-depth region where the rarefaction curve rises steeply, sparser in the high-depth region where the curve becomes flat
+				depth <- unique(round(max_depth * seq(0, 1, length.out = 10)^2))
 				message("The parameter depth is not provided! Use the automatically generated depths: ", paste0(depth, collapse = ", "), " ...")
 			}
 			depth_numeric <- suppressWarnings(as.numeric(depth))
