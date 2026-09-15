@@ -65,7 +65,11 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'     	  The significance of 'Estimate' in each term of fixed factors comes from the model.}
 		#'     \item{\strong{'glmm'}}{Generalized linear mixed model (GLMM) based on the \code{glmmTMB} package <doi:10.32614/RJ-2017-066>.
 		#'     	  The \code{formula} and \code{family} parameters are needed. 
-		#'     	  Please refer to glmmTMB package to select the family function, e.g. \code{family = glmmTMB::lognormal(link = "log")}.
+		#'     	  Please refer to glmmTMB package to select the family function, and make sure that the family matches the data distribution.
+		#'     	  For relative abundance data that contain zeros, families requiring strictly positive values such as
+		#'     	  \code{glmmTMB::lognormal()} or \code{glmmTMB::Gamma()} fail with "y values must be > 0";
+		#'     	  use \code{glmmTMB::tweedie(link = "log")} or \code{glmmTMB::nbinom2(link = "log")} instead,
+		#'     	  or choose the 'glmm_beta' method that handles zeros internally.
 		#'     	  The usage of formula is similar with that in 'lme' method.
 		#'     	  For more available parameters, please see \code{glmmTMB::glmmTMB} function and use parameter passing.
 		#'     	  In the result, Conditional R2 and Marginal R2 represent the variance explained by both fixed and random effects and the variance explained by 
@@ -102,11 +106,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'    or used to generate significance letters when method is 'anova' or 'KW_dunn' like the alpha parameter in \code{cal_diff} of \code{trans_alpha} class.
 		#' @param p_adjust_method default "fdr"; p.adjust method; see method parameter of \code{p.adjust} function for other available options; 
 		#'    "none" means disable p value adjustment; So when \code{p_adjust_method = "none"}, P.adj is same with P.unadj.
-		#'    This parameter is valid only when the method is one of "KW", "wilcox", "t.test", "lefse", "rf", "metagenomeSeq", or "edgeR". 
+		#'    This parameter is valid only when the method is one of "KW", "KW_dunn", "wilcox", "t.test", "lefse", "rf", "metagenomeSeq", or "edgeR". 
 		#'    Other methods are either unsuitable or have built-in approaches that render this parameter unnecessary.
+		#'    Note that for "KW_dunn" the default "fdr" is automatically replaced by "holm" as required by FSA::dunnTest.
 		#' @param transformation default NULL; feature abundance transformation method in the class \code{\link{trans_norm}},
 		#'    such as 'AST' for the arc sine square root transformation.
-		#'    Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "betareg" and "lme".
+		#'    Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", 
+		#'    "betareg", "lme", "glmm" and "glmm_beta".
 		#' @param remove_unknown default TRUE; whether remove unknown features that donot have clear classification information.
 		#' @param lefse_subgroup default NULL; sample sub group used for sub-comparision in lefse; Segata et al. (2011) <doi:10.1186/gb-2011-12-6-r60>.
 		#' @param lefse_min_subsam default 10; sample numbers required in the subgroup test.
@@ -124,7 +130,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' @param group_choose_paired default NULL; a vector used for selecting the required groups for paired testing instead of all paired combinations across groups;
 		#'    Available when method is "metastat", "metagenomeSeq", "ALDEx2_t" or "edgeR".
 		#' @param metagenomeSeq_count default 1; Filter features to have at least 'counts' counts.; see the count parameter in MRcoefs function of \code{metagenomeSeq} package.
-		#' @param ALDEx2_sig default c("wi.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
+		#' @param ALDEx2_sig default c("we.eBH", "kw.eBH"); which column of the final result is used as the significance asterisk assignment;
+		#'   The default matches the test type: "we.eBH" (Welch t test) for "ALDEx2_t" and "kw.eBH" (Kruskal-Wallis test) for "ALDEx2_kw".
 		#'   applied to method = "ALDEx2_t" or "ALDEx2_kw"; the first element is provided to "ALDEx2_t"; the second is provided to "ALDEx2_kw";
 		#'   for "ALDEx2_t", the available choice is "wi.eBH" (Expected Benjamini-Hochberg corrected P value of Wilcoxon test)
 		#'   and "we.eBH" (Expected BH corrected P value of Welch's t test); for "ALDEx2_kw"; for "ALDEx2_t",
@@ -133,6 +140,8 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#'   among groups (\code{group} parameter) for each group (\code{by_group} parameter). So \code{by_group} has a higher level than \code{group} parameter.
 		#'   Same with the \code{by_group} parameter in \code{trans_alpha} class. 
 		#'   Only available when method is one of \code{c("KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare")}.
+		#'   Note that \code{by_group} must be at a higher level than \code{group}, i.e. each level of \code{by_group}
+		#'   should contain at least two levels of \code{group}; otherwise no comparison can be performed.
 		#' @param by_ID default NULL; a column of sample_table used to perform paired t test or paired wilcox test for the paired data,
 		#'   such as the data of plant compartments for different plant species (ID). 
 		#'   So \code{by_ID} in sample_table should be the smallest unit of sample collection without any repetition in it.
@@ -146,9 +155,14 @@ trans_diff <- R6Class(classname = "trans_diff",
 		#' 	 passed to \code{randomForest::randomForest} function when method = "rf";
 		#' 	 passed to \code{ANCOMBC::ancombc2} function when method is "ancombc2" (except tax_level, global and fix_formula parameters);
 		#' 	 passed to \code{ALDEx2::aldex} function when method = "ALDEx2_t" or "ALDEx2_kw";
+		#' 	 Note that ALDEx2::aldex() ignores extra arguments in its "kw" branch and hard-codes paired.test = FALSE
+		#' 	 in its "t" branch, so the paired test through the by_ID parameter is not available for these two methods.
 		#' 	 passed to \code{DESeq2::DESeq} function when method = "DESeq2";
 		#' 	 passed to \code{MicrobiomeStat::linda} function when method = "linda";
 		#' 	 passed to \code{trans_env$cal_cor} function when method = "maaslin".
+		#' 	 For maaslin, sample-ID-like columns of sample_table are excluded automatically, and character categorical
+		#' 	 variables with more than 2 levels are converted to factors as required by \code{maaslin3::maaslin3}.
+		#' 	 You can preset the factor levels in sample_table beforehand to control the reference level.
 		#' @return res_diff and res_abund.\cr
 		#'   \strong{res_abund} includes mean abundance of each taxa (Mean), standard deviation (SD), standard error (SE) and sample number (N) in the group (Group).\cr
 		#'   \strong{res_diff} is detailed differential abundance test result depending on the method choice, may containing:\cr
@@ -196,7 +210,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 			rf_imp_type = 2,
 			group_choose_paired = NULL,
 			metagenomeSeq_count = 1,
-			ALDEx2_sig = c("wi.eBH", "kw.eBH"),
+			ALDEx2_sig = c("we.eBH", "kw.eBH"),
 			by_group = NULL,
 			by_ID = NULL,
 			beta_pseudo = .Machine$double.eps,
@@ -244,6 +258,20 @@ trans_diff <- R6Class(classname = "trans_diff",
 						}
 					}					
 				}
+				# by_group must be one level higher than group: each by_group level needs >= 2 levels of group,
+				# otherwise the downstream cal_diff skips all comparisons and throws an obscure error.
+				if(!is.null(by_group) & !is.null(group)){
+					if(by_group %in% colnames(sampleinfo) & group %in% colnames(sampleinfo)){
+						bg_group_num <- tapply(as.character(sampleinfo[, group]), as.character(sampleinfo[, by_group]),
+							function(x) length(unique(x)))
+						if(length(bg_group_num) > 0 && all(bg_group_num < 2, na.rm = TRUE)){
+							stop("The by_group parameter must be at a higher level than the group parameter: none of the levels of ", by_group,
+								" contains at least 2 levels of the group ", group, ". Please check (or swap) the two parameters!")
+						}
+					}
+				}
+				# Initialize uniformly so that is.null(output) cannot fail with object not found
+				output <- NULL
 				check_taxa_abund(tmp_dataset)
 				
 				if(method == "lefse"){
@@ -401,6 +429,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 							res <- cbind(res, imp[rownames(res), , drop = FALSE])
 						}
 					}
+					if(is.null(res)){
+						stop("Random forest analysis failed: no valid bootstrap result was generated. Please check whether each group has at least 2 samples!")
+					}
 					res <- apply(res, 1, mean) %>% as.data.frame
 					use_method <- ifelse(length(levels(group_vec)) > 2, "Kruskal-Wallis rank sum test & Random Forest", "Wilcoxon rank sum test & Random Forest")
 					Taxa_name <- nametable[rownames(res), "name"]
@@ -457,7 +488,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(ordination_method == "OPLS-DA"){
 						dot_args$orthoI <- 1
 					}
-					do.call(tem_beta$cal_ordination, c(list(method = ordination_method), dot_args))
+					tryCatch(
+						do.call(tem_beta$cal_ordination, c(list(method = ordination_method), dot_args)),
+						error = function(e){
+							stop("The ", ordination_method, " model failed again after forcing predI = 1: ", conditionMessage(e),
+								". The original error was: ", conditionMessage(ordination_error))
+						}
+					)
 				}
 				# extract VIP from ropls model
 				model <- tem_beta$res_ordination$model
@@ -600,8 +637,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 								# consider subgroup as an independent variable
 								abund1 <- cbind.data.frame(t(abund_table_sub_lda), Group = group_vec_lda, lefse_subgroup = subgroup_vec)
 							}
-							check_res <- tryCatch(mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10), error = function(e) { skip_to_next <- TRUE})
-							if(rlang::is_true(check_res)) {
+							# Assign mod1 only on success to avoid reusing the model from the previous iteration
+							check_res <- tryCatch({
+								mod1 <- MASS::lda(Group ~ ., abund1, tol = 1.0e-10)
+								TRUE
+							}, error = function(e) FALSE)
+							if(!isTRUE(check_res)) {
 								res_lda_pair[[i]] <- NA
 								next
 							}else{
@@ -696,6 +737,10 @@ trans_diff <- R6Class(classname = "trans_diff",
 					if(!require("metagenomeSeq")){
 						stop("metagenomeSeq package not installed !")
 					}
+					# AnnotatedDataFrame / pData come from Biobase; load it explicitly instead of relying on metagenomeSeq Depends
+					if(!require("Biobase")){
+						stop("Biobase package not installed !")
+					}
 					for(i in 1:ncol(all_name)) {
 						message(paste0("Run ", i, " : ", paste0(as.character(all_name[, i]), collapse = " - "), " ...\n"))
 						use_dataset <- clone(tmp_dataset)
@@ -704,7 +749,7 @@ trans_diff <- R6Class(classname = "trans_diff",
 						obj <- newMRexperiment(
 							newdata$otu_table, 
 							phenoData= AnnotatedDataFrame(newdata$sample_table)
-	#						featureData = AnnotatedDataFrame(use_dataset$tax_table)
+						#	featureData = AnnotatedDataFrame(use_dataset$tax_table)
 							)
 						## Normalization and Statistical testing
 						obj_1 <- cumNorm(obj)
@@ -748,27 +793,30 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					use_dataset <- clone(tmp_dataset)
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
+					# At least one of formula and group is required; formula is passed through ...
+					dot_args <- list(...)
 					if(is.null(group)){
-						all_parameters <- c(as.list(environment()), list(...))
-						if(! "formula" %in% names(all_parameters)){
+						if(! "formula" %in% names(dot_args)){
 							stop("Either group or formula parameter should be provided!")
 						}
-						group <- all_parameters[["formula"]]
+						group <- trimws(as.character(dot_args[["formula"]]))
 					}
 					if(!grepl("^~", group)){
 						group <- paste0("~", group)
 					}
 					use_formula <- stats::as.formula(group)
+					# Remove formula from ... since design already consumed it; otherwise DESeq() raises an unused-argument error
+					dot_args[["formula"]] <- NULL
 					deseq_obj <- DESeqDataSetFromMatrix(
 						countData = newdata$otu_table,
 						colData = newdata$sample_table,
 						design = use_formula
 						)
-					res_deseq <- DESeq(deseq_obj, ...)
+					res_deseq <- do.call(DESeq, c(list(deseq_obj), dot_args))
 					self$res_diff_raw <- res_deseq
 					message('Original result is stored in object$res_diff_raw ...')
 					message('Merge the output tables ...')
-					group %<>% gsub("^~", "", .)
+					group %<>% gsub("^~", "", .) %>% trimws()
 					if(grepl("+", group, fixed = TRUE)){
 						method <- paste0("DESeq formula: ", group)
 					}
@@ -791,7 +839,9 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					colnames(output)[colnames(output) == "padj"] <- "P.adj"
 					colnames(output)[colnames(output) == "pvalue"] <- "P.unadj"					
-					output <- output[, c("Comparison", "Taxa", colnames(output)[1:(ncol(output) - 2)])]
+					# Build the column order explicitly to avoid duplicated names from positional assumptions
+					other_cols <- setdiff(colnames(output), c("Comparison", "Taxa"))
+					output <- output[, c("Comparison", "Taxa", other_cols), drop = FALSE]
 				}
 				if(method == "edgeR"){
 					if(!require("edgeR")){
@@ -876,6 +926,13 @@ trans_diff <- R6Class(classname = "trans_diff",
 						stop("The res in the ancombc2 results is NULL!")
 					}
 					message('Converting res to long format ...')
+					# Validate the column prefixes of ancombc2 output to avoid silent breakage when upstream names change
+					need_prefix <- c("lfc_", "se_", "W_", "p_", "q_", "diff_", "diff_robust_", "passed_ss_")
+					miss_prefix <- need_prefix[!vapply(need_prefix, function(x) any(grepl(paste0("^", x), colnames(tmp))), logical(1))]
+					if(length(miss_prefix) > 0){
+						stop("Unexpected ancombc2 result columns: ", paste(miss_prefix, collapse = " "),
+							" not found! Please check the version of the ANCOMBC package!")
+					}
 					res_convert <- data.frame()
 					for(i in seq_len(nrow(tmp))){
 						taxon_data <- tmp[i, ]
@@ -902,26 +959,29 @@ trans_diff <- R6Class(classname = "trans_diff",
 					}
 					use_dataset <- clone(tmp_dataset)
 					newdata <- private$generate_microtable_unrel(use_dataset, taxa_level, filter_thres, filter_features)
+					# At least one of formula and group is required; formula is passed through ...
+					dot_args <- list(...)
 					if(is.null(group)){
-						all_parameters <- c(as.list(environment()), list(...))
-						if(! "formula" %in% names(all_parameters)){
+						if(! "formula" %in% names(dot_args)){
 							stop("Either group or formula parameter should be provided!")
 						}
-						group <- all_parameters[["formula"]]
+						group <- trimws(as.character(dot_args[["formula"]]))
 						if(!grepl("^~", group)){
 							stop("The input formula parameter should start with ~! Please read the document of formula parameter of MicrobiomeStat::linda function!")
 						}
-						res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, feature.dat.type = 'count', ...)
 					}else{
 						if(!grepl("^~", group)){
 							group <- paste0("~", group)
 						}
-						res <- MicrobiomeStat::linda(as.matrix(newdata$otu_table), newdata$sample_table, formula = group, feature.dat.type = 'count', ...)
 					}
+					# Remove formula from ... to avoid matching the same formal argument twice
+					dot_args[["formula"]] <- NULL
+					res <- do.call(MicrobiomeStat::linda, c(list(as.matrix(newdata$otu_table), newdata$sample_table, formula = group, feature.dat.type = "count"), dot_args))
 					self$res_diff_raw <- res
 					message('Original result is stored in object$res_diff_raw ...')
 					message('Merge the output tables ...')
-					group %<>% gsub("^~", "", .)
+					# Strip ~ and trim whitespace so that e.g. 「~ Group」 can still match sample_table column names
+					group %<>% gsub("^~", "", .) %>% trimws()
 					# different cases
 					output <- data.frame()
 					if(grepl("+", group, fixed = TRUE) | grepl("*", group, fixed = TRUE)){
@@ -950,7 +1010,26 @@ trans_diff <- R6Class(classname = "trans_diff",
 					colnames(output)[colnames(output) %in% c("pvalue", "padj")] <- c("P.unadj", "P.adj")
 				}
 				if(method == "maaslin"){
-					tmp_trans_env <- trans_env$new(dataset = tmp_dataset, env_cols = 1:ncol(tmp_dataset$sample_table))
+					# Exclude sample-ID-like columns (unique per sample); otherwise maaslin3 treats them as multi-level factors and fails
+					sample_info_tmp <- tmp_dataset$sample_table
+					id_cols <- colnames(sample_info_tmp)[vapply(sample_info_tmp, function(x){
+						length(unique(as.character(x))) == nrow(sample_info_tmp)
+					}, logical(1))]
+					env_cols_use <- setdiff(colnames(sample_info_tmp), id_cols)
+					if(length(env_cols_use) == 0){
+						stop("No available metadata column for maaslin analysis! Please check the sample_table of the input dataset!")
+					}
+					message("Metadata columns used for maaslin: ", paste(env_cols_use, collapse = " "), " ...")
+					# maaslin3 requires a reference for character categorical variables with more than 2 levels;
+					# converting them to factor follows its own advice and makes the method usable out of the box.
+					# Users can still preset factor levels in sample_table to control the reference level.
+					use_dataset_maaslin <- clone(tmp_dataset)
+					for(cn in env_cols_use){
+						if(is.character(use_dataset_maaslin$sample_table[, cn]) & length(unique(use_dataset_maaslin$sample_table[, cn])) > 2){
+							use_dataset_maaslin$sample_table[, cn] %<>% factor
+						}
+					}
+					tmp_trans_env <- trans_env$new(dataset = use_dataset_maaslin, env_cols = env_cols_use)
 					tmp_trans_env$cal_cor(use_data = taxa_level, method = method, filter_thres = filter_thres, ...)
 					
 					output <- tmp_trans_env$res_cor

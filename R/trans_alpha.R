@@ -239,13 +239,33 @@ trans_alpha <- R6Class(classname = "trans_alpha",
 				}else{
 					p_value_adjust <- p.adjust(res_list$p_value, method = p_adjust_method)
 				}
+				# First, use an empty table with complete column names and types but 0 rows as a skeleton:
+				# When all comparisons are skipped (e.g., when the number of group levels within each level of by_group is < 2), res_list will be empty.
+				# In this case, among the 8 arguments, only p_value_adjust is not NULL (since p.adjust(NULL) returns numeric(0)),
+				# causing data.frame() to degenerate into a 1-column, 0-row data frame, and the subsequent colnames<- assignment then throws a cryptic error:
+				# "'names' attribute [8] must be the same length as the vector [1]".
 				if(is.null(by_group)){
-					compare_result <- data.frame(res_list$comnames, res_list$measure_use, res_list$test_method, res_list$max_group, res_list$p_value, p_value_adjust, res_list$log2FC)
-					colnames(compare_result) <- c("Comparison", "Measure", "Method", "Group", "P.unadj", "P.adj", "log2FoldChange")
+					compare_result <- data.frame(Comparison = character(0),                          Measure = character(0), Method = character(0),
+						Group = character(0), P.unadj = numeric(0), P.adj = numeric(0), log2FoldChange = numeric(0),
+						stringsAsFactors = FALSE)
 				}else{
-					compare_result <- data.frame(res_list$comnames, res_list$group_by, res_list$measure_use, res_list$test_method,
-						res_list$max_group, res_list$p_value, p_value_adjust, res_list$log2FC)
-					colnames(compare_result) <- c("Comparison", "by_group", "Measure", "Method", "Group", "P.unadj", "P.adj", "log2FoldChange")
+					compare_result <- data.frame(Comparison = character(0), by_group = character(0), Measure = character(0), Method = character(0), 
+						Group = character(0), P.unadj = numeric(0), P.adj = numeric(0), log2FoldChange = numeric(0), 
+						stringsAsFactors = FALSE)
+				}
+				if(length(res_list$comnames) == 0){
+					warning("No comparison was performed! Please check that the group parameter has at least 2 levels and, ", 
+						"when the by_group parameter is provided, that every level of by_group contains at least 2 levels of group.")
+				}else{
+					filled <- if(is.null(by_group)){
+						data.frame(res_list$comnames,                    res_list$measure_use, res_list$test_method, 
+							res_list$max_group, res_list$p_value, p_value_adjust, res_list$log2FC)
+					}else{
+						data.frame(res_list$comnames, res_list$group_by, res_list$measure_use, res_list$test_method,
+							res_list$max_group, res_list$p_value, p_value_adjust, res_list$log2FC)
+					}
+					colnames(filled) <- colnames(compare_result)
+					compare_result <- filled
 				}
 				if(method == "KW"){
 					compare_result <- compare_result[, colnames(compare_result) != "log2FoldChange"]
