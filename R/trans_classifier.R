@@ -24,7 +24,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#'       columns are samples with same names in sample_table.}
 		#'   }
 		#' @param y.response default NULL; the response variable in \code{sample_table} of input \code{microtable} object.
-		#' @param n.cores default 1; the CPU thread used.
+		#' @param n.cores default 1; the number of CPU threads used in the model training and the feature selection. 
+		#'   The parallel backend of the foreach package is registered only temporarily during the computation and the 
+		#'   original backend is restored afterwards, so that the global parallel setting is not permanently changed.
 		#' @return \code{data_feature} and \code{data_response} stored in the object.
 		#' @examples
 		#' \donttest{
@@ -66,8 +68,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				# self$ClassificationCase <- ClassificationCase
 				message("Classification type = ", ClassificationCase)
 
-				ClassNames <- make.names(response_data, unique = F)
-				MapNames <- data.frame(OriginalNames = response_data, ClassNames = ClassNames)
+				ClassNames <- make.names(as.character(response_data), unique = FALSE)
+				MapNames <- data.frame(OriginalNames = as.character(response_data), 
+					ClassNames = ClassNames, stringsAsFactors = FALSE)
+				# as.character is necessary here, as identical() on a factor and a character vector is always FALSE
 				if(!identical(MapNames$OriginalNames, MapNames$ClassNames)){
 					message("Factor names are non-standard. A correction was made and the change map was saved in object$data_MapNames ...")
 				}
@@ -76,11 +80,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			# x.predictors must be character or data.frame
 			if(is.character(x.predictors)){
+				if(length(x.predictors) != 1 || is.na(x.predictors)){
+					stop("Provided x.predictors must be a single character string or a data.frame !")
+				}
 				if(is.null(dataset$taxa_abund)){
 					message("No taxa_abund found in the dataset. Calculate the relative abundance ...")
 					dataset$cal_abund()
 				}
-				if (grepl("all", x.predictors, ignore.case = TRUE)) {
+				# exact matching instead of grepl, otherwise any level name containing 'all' would be mis-matched
+				if(tolower(trimws(x.predictors)) == "all"){
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
 					if(! x.predictors %in% names(dataset$taxa_abund)){
@@ -112,10 +120,12 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			DataX <- abund_table %>% t() %>% as.data.frame(check.names = FALSE)
 			message("Total feature numbers: ", ncol(DataX))
 			
-			if(n.cores > 1){
-				message("Registering cores = ", n.cores)
-				doParallel::registerDoParallel(n.cores)
+			# the parallel backend is not registered here permanently; it is registered temporarily in the functions that 
+			# need it (cal_train, cal_feature_sel and cal_caretList) and the original backend is restored afterwards
+			if(is.null(n.cores) || length(n.cores) != 1 || is.na(n.cores) || n.cores < 1){
+				stop("Provided n.cores must be a positive integer !")
 			}
+			self$n.cores <- n.cores
 			# use data_feature to make it easily remember and search
 			self$data_feature <- DataX
 			message("The feature table is stored in object$data_feature ...")
@@ -154,6 +164,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Pre-process (centering, scaling etc.) of features based on the caret::preProcess function. 
 		#' 	 See \href{https://topepo.github.io/caret/pre-processing.html}{https://topepo.github.io/caret/pre-processing.html} for more details.
+		#' 	 Some methods of \code{preProcess}, such as 'nzv', 'zv', 'pca' and 'ica', change the number of features. 
+		#' 	 In that case the \code{data_train} and \code{data_test} are rebuilt with the new features and the 
+		#' 	 corresponding information is printed, so that the feature names always match the data. 
+		#' 	 The existing \code{data_preProcess} is reused when this function is called more than once; please assign 
+		#' 	 \code{NULL} to \code{object$data_preProcess} if a new preprocess model is needed.
 		#' 
 		#' @param ... parameters pass to \code{preProcess} function of caret package.
 		#' @return \code{data_preProcess}, \code{data_train} and \code{data_test} in the object.
@@ -169,20 +184,19 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			data_train <- self$data_train
 			
 			if(is.null(self$data_preProcess)){
-				preProcess_res <- caret::preProcess(data_train[, -1], ...)
+				preProcess_res <- caret::preProcess(data_train[, -1, drop = FALSE], ...)
 				self$data_preProcess <- preProcess_res
 				message("Preprocess model is stored in object$data_preProcess ...")
 			}else{
 				preProcess_res <- self$data_preProcess
+				message("The existing preprocess model in object$data_preProcess is reused and the arguments provided in ", 
+					"this call are ignored. Assign NULL to object$data_preProcess first if a new preprocess model is needed ...")
 			}
 			
-			data_train[, -1] <- predict(preProcess_res, newdata = data_train[, -1])
-			self$data_train <- data_train
+			self$data_train <- private$apply_preProcess(preProcess_res, data_train, "training")
 			message("Training data is preprocessed and reassigned to object$data_train ...")
 			if(!is.null(self$data_test)){
-				data_test <- self$data_test
-				data_test[, -1] <- predict(preProcess_res, newdata = data_test[, -1])
-				self$data_test <- data_test
+				self$data_test <- private$apply_preProcess(preProcess_res, self$data_test, "testing")
 				message("Testing data is preprocessed and reassigned to object$data_test ...")
 			}
 			invisible(self)
@@ -190,10 +204,18 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @description
 		#' Perform feature selection.
 		#' 	 See \href{https://topepo.github.io/caret/feature-selection-overview.html}{https://topepo.github.io/caret/feature-selection-overview.html} for more details.
+		#' 	 An error is raised when no feature is selected, as the following model training can not be performed 
+		#' 	 in that case. Please consider increasing \code{boruta.repetitions}, decreasing \code{boruta.pValue} or 
+		#' 	 using another \code{x.predictors}.
 		#' 
 		#' @param boruta.maxRuns default 300; maximal number of importance source runs; passed to the \code{maxRuns} parameter in \code{Boruta} function of Boruta package.
+		#'   Note that the Boruta function requires a value greater than 10.
 		#' @param boruta.pValue default 0.01; p value passed to the pValue parameter in \code{Boruta} function of Boruta package.
 		#' @param boruta.repetitions default 4; repetition runs for the feature selection.
+		#' @param boruta.min.repetitions default 2; a feature is selected only when it is confirmed as important in at least 
+		#'   this number of the \code{boruta.repetitions} independent runs. It must not be greater than \code{boruta.repetitions}.
+		#' @param seed default NULL; the random seed used to make the repeated Boruta runs reproducible. When it is NULL, 
+		#'   the random seeds are generated automatically and the result may change between the runs.
 		#' @param ... parameters pass to \code{Boruta} function of Boruta package.
 		#' @return optimized \code{data_train} and \code{data_test} in the object.
 		#' @examples
@@ -204,12 +226,14 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			boruta.maxRuns = 300,
 			boruta.pValue = 0.01,
 			boruta.repetitions = 4,
+			boruta.min.repetitions = 2,
+			seed = NULL,
 			...
 			){
 			self <- private$check_training_data(self)
 			
 			data_input <- self$data_train
-			data_x <- data_input[, -1]
+			data_x <- data_input[, -1, drop = FALSE]
 			data_y <- data_input[, 1]
 
 			if(self$type == "Classification"){
@@ -217,32 +241,82 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			
 			###################### ----------------
-			######################    BORUTA
-			boruta.list <- list()
-			boruta.fs <- function(i){
-				boruta.res <- Boruta::Boruta(x = data_x, y = data_y, 
-					maxRuns = boruta.maxRuns, pValue = boruta.pValue, ...)
-				boruta.stats <- data.frame(Boruta::attStats(boruta.res))
-				rownames(boruta.stats[boruta.stats$decision == 'Confirmed', ])
+			# checks of the input parameters
+			if(!is.numeric(boruta.maxRuns) || length(boruta.maxRuns) != 1 || is.na(boruta.maxRuns) || boruta.maxRuns <= 10){
+				stop("Provided boruta.maxRuns must be a single number greater than 10 (requirement of the Boruta function) !")
 			}
+			if(!is.numeric(boruta.repetitions) || length(boruta.repetitions) != 1 || is.na(boruta.repetitions) || boruta.repetitions < 1){
+				stop("Provided boruta.repetitions must be a positive integer !")
+			}
+			boruta.repetitions <- as.integer(boruta.repetitions)
+			if(!is.numeric(boruta.min.repetitions) || length(boruta.min.repetitions) != 1 || is.na(boruta.min.repetitions) || 
+				boruta.min.repetitions < 1){
+				stop("Provided boruta.min.repetitions must be a positive integer !")
+			}
+			boruta.min.repetitions <- as.integer(boruta.min.repetitions)
+			if(boruta.repetitions < boruta.min.repetitions){
+				stop("Provided boruta.repetitions (", boruta.repetitions, ") is smaller than boruta.min.repetitions (", 
+					boruta.min.repetitions, ") ! A feature should be confirmed as important in at least boruta.min.repetitions runs, ", 
+					"so no feature can be selected in this situation. Please increase boruta.repetitions or decrease ", 
+					"boruta.min.repetitions ...")
+			}
+			###################### ----------------
+			######################    BORUTA
+			# one Boruta run; the environment is set to baseenv() so that the whole trans_classifier object is not 
+			# serialized to the parallel workers
+			boruta_run_once <- function(run_seed, x_data, y_data, maxRuns_value, pValue_value, extra_args){
+				set.seed(run_seed)
+				boruta.res <- do.call(Boruta::Boruta, c(list(x = x_data, y = y_data, 
+					maxRuns = maxRuns_value, pValue = pValue_value), extra_args))
+				boruta.stats <- data.frame(Boruta::attStats(boruta.res))
+				rownames(boruta.stats[boruta.stats$decision == 'Confirmed', , drop = FALSE])
+			}
+			environment(boruta_run_once) <- baseenv()
+			# a fixed seed makes the feature selection reproducible
+			if(is.null(seed)){
+				run_seeds <- sample.int(.Machine$integer.max, boruta.repetitions)
+			}else{
+				if(!is.numeric(seed) || length(seed) != 1 || is.na(seed)){
+					stop("Provided seed must be a single number !")
+				}
+				run_seeds <- as.integer(seed) + seq_len(boruta.repetitions) - 1L
+			}
+			extra_args <- list(...)
+			use_cores <- private$get_usable_cores(boruta.repetitions)
 			message("Running Feature Selection (Boruta) based on the training data ...")
-			boruta.list <- parallel::mclapply(1:boruta.repetitions, boruta.fs)
+			if(use_cores > 1){
+				# a PSOCK cluster is used instead of parallel::mclapply so that the parallel computation also works on Windows
+				message("Performing ", boruta.repetitions, " repetitions on ", use_cores, " cores ...")
+				boruta_cluster <- parallel::makeCluster(use_cores)
+				on.exit(parallel::stopCluster(boruta_cluster), add = TRUE)
+				boruta.list <- parallel::parLapply(boruta_cluster, run_seeds, boruta_run_once, 
+					x_data = data_x, y_data = data_y, maxRuns_value = boruta.maxRuns, 
+					pValue_value = boruta.pValue, extra_args = extra_args)
+			}else{
+				boruta.list <- lapply(run_seeds, boruta_run_once, x_data = data_x, y_data = data_y, 
+					maxRuns_value = boruta.maxRuns, pValue_value = boruta.pValue, extra_args = extra_args)
+			}
 
 			boruta.final <- as.data.frame(table(unlist(boruta.list)))
-			#boruta.store.top <- as.character(boruta.store[which(boruta.store$Freq>10),1])
-			boruta.list.top <- as.character(boruta.final[which(boruta.final$Freq >= 2), 1])
+			boruta.list.top <- as.character(boruta.final[which(boruta.final$Freq >= boruta.min.repetitions), 1])
 			boruta.n.features <- length(unique(boruta.list.top))
 			message("End of Feature Selection - Total of selected features = ", boruta.n.features)
+			if(boruta.n.features < 1){
+				stop("No feature was selected by Boruta ! A feature is selected only when it is confirmed as important in ", 
+					"at least ", boruta.min.repetitions, " of the ", boruta.repetitions, " repetition run(s). Please consider ", 
+					"increasing boruta.repetitions, decreasing boruta.pValue, increasing boruta.maxRuns, or using another ", 
+					"x.predictors ...")
+			}
 			######################    BORUTA end
 			###################### ----------------
-			data_output <- data_input[, c(colnames(data_input)[1], boruta.list.top)]
+			data_output <- data_input[, c(colnames(data_input)[1], boruta.list.top), drop = FALSE]
 			self$data_train <- data_output
 			
 			if(is.null(self$data_test)){
 				message("Selected features are reassigned to object$data_train ...")
 			}else{
 				data_input <- self$data_test
-				data_output <- data_input[, c(colnames(data_input)[1], boruta.list.top)]
+				data_output <- data_input[, c(colnames(data_input)[1], boruta.list.top), drop = FALSE]
 				self$data_test <- data_output
 				message("Selected features are reassigned to object$data_train and object$data_test ...")
 			}
@@ -255,7 +329,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 	 see method parameter in \code{trainControl} function of \code{caret} package for available options.
 		#' @param classProbs default TRUE; should class probabilities be computed for classification models?;
 		#' 	 see classProbs parameter in \code{caret::trainControl} function.
-		#' @param savePredictions default TRUE; see \code{savePredictions} parameter in \code{caret::trainControl} function.
+		#' @param savePredictions default 'final'; see \code{savePredictions} parameter in \code{caret::trainControl} function.
+		#'   'final' means that only the predictions of the final model with the best tuning parameters are saved, which is 
+		#'   required by the \code{cal_ROC} function when \code{input = "train"}. TRUE (or "all") saves the predictions of 
+		#'   all the tuning parameter combinations and is not recommended, as the repeated predictions of the same sample 
+		#'   are not independent observations and would distort the ROC analysis.
 		#' @param ... parameters pass to \code{trainControl} function of caret package.
 		#' @return \code{trainControl} in the object.
 		#' @examples
@@ -265,11 +343,12 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		set_trainControl = function(
 			method = 'repeatedcv',
 			classProbs = TRUE,
-			savePredictions = TRUE,
+			savePredictions = "final",
 			...
 			){
 			if(classProbs){
 				if(self$type == "Regression"){
+					message("classProbs is set to FALSE as the response variable is numeric (regression) ...")
 					classProbs <- FALSE
 				}
 			}
@@ -283,6 +362,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Run the model training. Please see \href{https://topepo.github.io/caret/available-models.html}{https://topepo.github.io/caret/available-models.html} for available models.
+		#' 	 The mtry and ntree optimization is performed for the "rf" method in both the classification and the 
+		#' 	 regression. The mean Accuracy of the resamples is used to select the best ntree for the classification and 
+		#' 	 the mean RMSE for the regression. The selected mtry and ntree are stored in \code{object$train_params}.
 		#' 
 		#' @param method default "rf"; "rf": random forest; see method in \code{train} function of caret package for other options.
 		#' 	  For method = "rf", the \code{tuneGrid} is set: \code{expand.grid(mtry = seq(from = 1, to = max.mtry))}
@@ -312,14 +394,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(is.null(trControl)){
 				trControl <- caret::trainControl()
 			}
+			# temporarily register the parallel backend; the original backend is restored when the function exits
+			old_backend <- private$register_cores()
+			on.exit(private$restore_cores(old_backend), add = TRUE)
 			
 			###################### ----------------
-			if(method == "rf" & self$type == "Classification"){
+			if(method == "rf"){
 				# Optimization of RF parameters
 				message("Optimization of Random Forest parameters ...")
 				modellist <- list()
-				# capture the parameters
-				all_parameters <- c(as.list(environment()), list(...))
 				
 				tuneGrid <- expand.grid(mtry = seq(from = 1, to = max.mtry))
 				
@@ -329,17 +412,33 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 						key <- toString(test_ntree)
 						modellist[[key]] <- fit
 					}
-					# compare results
+					# compare results; the mean accuracy is used for the classification and the mean RMSE for the regression
 					results.tune1 <- caret::resamples(modellist)
 					res.tune1 <- summary(results.tune1)
-					res.tune1 <- as.data.frame(res.tune1$statistics$Accuracy)
-					ntree <- as.numeric(rownames(res.tune1)[which(res.tune1$Mean == max(res.tune1$Mean))])[1]
-					fit <- caret::train(Response ~ ., data = train_data, method = method, tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
-					message("ntree used:", ntree)
+					stat_list <- res.tune1$statistics
+					if(self$type == "Classification" && "Accuracy" %in% names(stat_list)){
+						use_metric <- "Accuracy"
+					}else{
+						if("RMSE" %in% names(stat_list)){
+							use_metric <- "RMSE"
+						}else{
+							use_metric <- names(stat_list)[1]
+						}
+					}
+					metric_table <- as.data.frame(stat_list[[use_metric]])
+					if(use_metric %in% c("RMSE", "MAE")){
+						best_key <- rownames(metric_table)[which.min(metric_table$Mean)]
+					}else{
+						best_key <- rownames(metric_table)[which.max(metric_table$Mean)]
+					}
+					best_key <- best_key[1]
+					fit <- modellist[[best_key]]
+					ntree <- as.numeric(best_key)
+					message("ntree used: ", ntree, " (selected by the mean ", use_metric, " of the resamples)")
 				}else{
 					fit <- caret::train(Response ~ ., data = train_data, method = method, tuneGrid = tuneGrid, trControl = trControl, ntree = ntree, ...)
 				}
-				message("best mtry:", fit$bestTune$mtry)
+				message("best mtry: ", fit$bestTune$mtry)
 				######################Optimization of RF parameters end				
 
 				tuneGrid <- expand.grid(.mtry=fit$bestTune$mtry)
@@ -358,9 +457,13 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' @param rf_feature_sig default FALSE; whether calculate feature significance in 'rf' model using \code{rfPermute} package; 
 		#'    only available for \code{method = "rf"} in \code{cal_train} function.
 		#' @param ... parameters pass to \code{varImp} function of caret package. 
-		#'    If \code{rf_feature_sig} is TURE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.
+		#'    If \code{rf_feature_sig} is TRUE and \code{train_method} is "rf", the parameters will be passed to \code{rfPermute} function of rfPermute package.
 		#' @return \code{res_feature_imp} in the object. One row for each predictor variable. The column(s) are different importance measures.
-		#'   For the method 'rf', it is MeanDecreaseGini (classification) or IncNodePurity (regression) when \code{rf_feature_sig = FALSE}.
+		#'   When \code{rf_feature_sig = FALSE}, the importance is calculated with the \code{varImp} function of caret package and 
+		#'   the column is usually 'Overall' for both the classification and the regression. When \code{rf_feature_sig = TRUE}, 
+		#'   the importance values generated by the \code{rfPermute} package are used, such as 'MeanDecreaseAccuracy' and 
+		#'   'MeanDecreaseGini' for the classification, and the corresponding p values are stored in the columns with the 
+		#'   '.pval' suffix.
 		#' @examples
 		#' \dontrun{
 		#' t1$cal_feature_imp()
@@ -369,11 +472,17 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			if(is.null(self$res_train)){
 				stop("Please first run cal_train to train the model !")
 			}
+			if(rf_feature_sig && self$train_method != "rf"){
+				message("The rf_feature_sig parameter is only available for the model trained with method = 'rf' ! ", 
+					"The feature significance is not calculated and the importance is obtained with varImp ...")
+				rf_feature_sig <- FALSE
+			}
 			if(self$train_method == "rf"){
 				if(rf_feature_sig){
 					train_data <- self$data_train
 					# replace feature names with simplified character
-					match_table <- data.frame(rawname = colnames(train_data)[2:ncol(train_data)], replacename = paste0("r", 1:(ncol(train_data) - 1)))
+					match_table <- data.frame(rawname = colnames(train_data)[2:ncol(train_data)], 
+						replacename = paste0("r", 1:(ncol(train_data) - 1)), stringsAsFactors = FALSE)
 					colnames(train_data)[2:ncol(train_data)] <- match_table$replacename
 					if(is.null(self$train_params)){
 						rfp_res <- rfPermute::rfPermute(Response ~ ., data = train_data, ...)
@@ -383,10 +492,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 					res_feature_imp <- rfPermute::importance(rfp_res, scale = TRUE) %>% as.data.frame(check.names = FALSE)
 					rownames(res_feature_imp) <- match_table[match(rownames(res_feature_imp), match_table[, 2]), 1]
 				}else{
-					res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)
+					res_feature_imp <- private$get_varImp(...)
 				}
 			}else{
-				res_feature_imp <- caret::varImp(self$res_train$finalModel, ...)
+				res_feature_imp <- private$get_varImp(...)
 			}
 			self$res_feature_imp <- res_feature_imp
 			message('The feature importance is stored in object$res_feature_imp ...')
@@ -471,8 +580,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param positive_class default NULL; see positive parameter in \code{confusionMatrix} function of caret package;
 		#' If positive_class is NULL, use the first group in data as the positive class automatically.
-		#' @return \code{res_predict}, \code{res_confusion_fit} and \code{res_confusion_stats} stored in the object.
+		#' @return \code{res_predict} and the performance data stored in the object.
 		#' 	  The \code{res_predict} is the predicted result for \code{data_test}.
+		#' 	  For the classification, \code{res_confusion_fit} and \code{res_confusion_stats} are stored in the object.
+		#' 	  For the regression, \code{res_regression_stats} with RMSE, Rsquared and MAE is stored in the object.
 		#' 	  Several evaluation metrics in \code{res_confusion_fit} are defined as follows:
 		#' 	 \deqn{Accuracy = \frac{TP + TN}{TP + TN + FP + FN}}
 		#'   \deqn{Sensitivity = Recall = TPR = \frac{TP}{TP + FN}}
@@ -506,7 +617,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				stop("No testing data is found! Please first run cal_split function!")
 			}
 
-			fit.best.predict <- predict(fit.best, test_data[, 2:ncol(test_data)])
+			fit.best.predict <- predict(fit.best, test_data[, -1, drop = FALSE])
 			self$res_predict <- fit.best.predict
 			message('The result of model prediction is stored in object$res_predict ...')
 
@@ -518,6 +629,9 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				}
 				positive_class.display <- self$data_MapNames %>% dplyr::filter(ClassNames %in% positive_class) %>% 
 						dplyr::select(OriginalNames) %>% unique() %>% dplyr::pull()
+				if(length(positive_class.display) < 1){
+					positive_class.display <- positive_class
+				}
 
 				message('Calculating confusionMatrix with positive class = ', positive_class.display, " ...")
 
@@ -527,12 +641,22 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 
 				self$res_confusion_fit <- confusion.fit.best
 				message('The result of confusionMatrix is stored in object$res_confusion_fit ...')
-				confusion.data.sts <- data.frame(confusion.fit.best$overall)
-				Confusion.Sts <- data.frame("Overall Statistics" = paste0(round(confusion.data.sts[,1],2) * 100,"%")  )
-				rownames(Confusion.Sts) <- rownames(confusion.data.sts)
+				# only the ratio statistics are displayed as percentages; Kappa and the p values are not ratios
+				confusion.data.sts <- confusion.fit.best$overall
+				Confusion.Sts <- data.frame("Overall Statistics" = private$format_confusion_stats(confusion.data.sts))
+				rownames(Confusion.Sts) <- names(confusion.data.sts)
 				self$res_confusion_stats <- Confusion.Sts
 				message('The statistics of confusionMatrix is stored in object$res_confusion_stats ...')
 				message('Model prediction Accuracy = ',Confusion.Sts$Overall.Statistics[1])
+			}else{
+				# the regression performance is evaluated with RMSE, Rsquared and MAE
+				regression.stats <- caret::postResample(pred = fit.best.predict, obs = test_data[, 1])
+				Confusion.Sts <- data.frame("Overall Statistics" = round(as.numeric(regression.stats), 4))
+				rownames(Confusion.Sts) <- names(regression.stats)
+				self$res_regression_stats <- Confusion.Sts
+				message('The regression performance is stored in object$res_regression_stats ...')
+				message('Model prediction RMSE = ', Confusion.Sts$Overall.Statistics[1], ", Rsquared = ", 
+					Confusion.Sts$Overall.Statistics[2], ", MAE = ", Confusion.Sts$Overall.Statistics[3])
 			}
 			invisible(self)
 		},
@@ -541,20 +665,29 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' 
 		#' @param plot_confusion default TRUE; whether plot the confusion matrix.
 		#' @param plot_statistics default TRUE; whether plot the statistics.
-		#' @return \code{ggplot} object.
+		#' @param as_ggplot default FALSE; whether return a \code{ggplot} object instead of the \code{gtable} object 
+		#'   assembled by the gridExtra package. As the statistics table is plotted with the \code{tableGrob} function, 
+		#'   only the confusion matrix is returned when \code{as_ggplot = TRUE}; the statistics table is available in 
+		#'   \code{object$res_confusion_stats}.
+		#' @return \code{gtable} object assembled by the gridExtra package when \code{as_ggplot = FALSE} (default), 
+		#'   or \code{ggplot} object when \code{as_ggplot = TRUE}.
 		#' @examples
 		#' \dontrun{
 		#' t1$plot_confusionMatrix()
 		#' }
 		plot_confusionMatrix = function(
 			plot_confusion = TRUE, 
-			plot_statistics = TRUE
+			plot_statistics = TRUE,
+			as_ggplot = FALSE
 			){
 			if(self$type == "Regression"){
 				stop("The function can only be available for the Classification !")
 			}
 			if(is.null(self$res_confusion_fit)){
 				stop("Please first run cal_predict to get the prediction performance !")
+			}
+			if(!isTRUE(plot_confusion) && !isTRUE(plot_statistics)){
+				stop("At least one of plot_confusion and plot_statistics must be TRUE !")
 			}
 			
 			p1 <- ggplot(data = as.data.frame(self$res_confusion_fit$table) ,
@@ -567,6 +700,13 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			Confusion.Sts <- self$res_confusion_stats
 
 			p2 <- gridExtra::tableGrob(Confusion.Sts)
+			if(as_ggplot){
+				if(plot_statistics){
+					message("as_ggplot = TRUE: only the confusion matrix is returned as a ggplot object; the statistics ", 
+						"table is available in object$res_confusion_stats ...")
+				}
+				return(p1 + ggtitle("Confusion Matrix"))
+			}
 			if(plot_confusion == TRUE & plot_statistics == TRUE){
 				p3 <- gridExtra::grid.arrange(p1, p2,nrow = 1, ncol = 2, 
 					top=grid::textGrob("Confusion Matrix and Statistics",gp=grid::gpar(fontsize=15,font=0.5)))
@@ -583,6 +723,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		},
 		#' @description
 		#' Get ROC (Receiver Operator Characteristic) curve data and the performance data.
+		#' 	 When \code{input = "train"}, the predictions are obtained from \code{object$res_train$pred}, which requires 
+		#' 	 \code{savePredictions} in \code{set_trainControl} to be 'final' (default). When the predictions of several 
+		#' 	 tuning parameter combinations are saved (e.g. \code{savePredictions = TRUE}), only the first prediction of 
+		#' 	 each sample is used, as the repeated predictions of a sample are not independent observations.
 		#' 
 		#' @param input default "pred"; 'pred' or 'train'; 'pred' represents using prediction results;
 		#'   'train' represents using training results.
@@ -605,14 +749,35 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			
 			if(input == "pred"){
 				test_data <- self$data_test
-				prediction_prob <- predict(fit.best, test_data[, 2:ncol(test_data)] , type="prob")
+				if(is.null(test_data)){
+					stop("No testing data is found! Please first run cal_split function!")
+				}
+				prediction_prob <- predict(fit.best, test_data[, -1, drop = FALSE] , type="prob")
 				class_names <- levels(droplevels(test_data[, 1])) #drop because sometimes there is empty classes
 				true_label <- test_data[, 1]
+				prediction_prob <- prediction_prob[, class_names, drop = FALSE]
 			}else{
 				# use the prediction data in the training part
+				if(is.null(fit.best$pred)){
+					stop("No prediction of the training data is found! Please set savePredictions = 'final' in the ", 
+						"set_trainControl function before cal_train ...")
+				}
 				class_names <- fit.best$levels
-				prediction_prob <- fit.best$pred[, class_names]
-				true_label <- fit.best$pred$obs
+				if(!all(class_names %in% colnames(fit.best$pred))){
+					stop("The class names are not found in the columns of object$res_train$pred ! Please check the training ", 
+						"result and the classProbs parameter in set_trainControl ...")
+				}
+				pred_table <- fit.best$pred
+				repeated_rows <- duplicated(pred_table$rowIndex)
+				if(any(repeated_rows)){
+					message("Multiple predictions are found for the same sample (usually caused by savePredictions = TRUE ", 
+						"or 'all' with several tuning parameter combinations). Only the first prediction of each sample is ", 
+						"used in the ROC analysis. Please consider set_trainControl(savePredictions = 'final') before ", 
+						"cal_train for a more rigorous result ...")
+					pred_table <- pred_table[!repeated_rows, , drop = FALSE]
+				}
+				prediction_prob <- pred_table[, class_names, drop = FALSE]
+				true_label <- pred_table$obs
 			}
 			# use multiROC package
 			label_df <- lapply(class_names, function(x){ifelse(true_label == x, 1, 0)}) %>% 
@@ -622,8 +787,8 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			prob_df <- prediction_prob %>% `colnames<-`(paste0(colnames(.), "_pred_", train_method))
 			use_df <- cbind(label_df, prob_df)
 
-			roc_res <- multiROC::multi_roc(use_df, force_diag = T)
-			pr_res <- multiROC::multi_pr(use_df, force_diag = T)
+			roc_res <- multiROC::multi_roc(use_df, force_diag = TRUE)
+			pr_res <- multiROC::multi_pr(use_df, force_diag = TRUE)
 
 			plot_roc_df <- multiROC::plot_roc_data(roc_res)
 			plot_pr_df <- multiROC::plot_pr_data(pr_res)
@@ -689,8 +854,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 		
 			if(plot_type == "ROC"){
+				# annotate is used instead of geom_segment, otherwise all the aesthetics have length 1 but the 
+				# data has multiple rows, which triggers a warning of ggplot2 in each plot
 				p <- ggplot(plot_data, aes(x = 1-Specificity, y = Sensitivity)) + 
-					geom_segment(aes(x = 0, y = 0, xend = 1, yend = 1), colour = 'grey', linetype = 'dashed')
+					annotate("segment", x = 0, y = 0, xend = 1, yend = 1, colour = "grey", linetype = "dashed")
 			}else{
 				p <- ggplot(plot_data, aes(x = Recall, y = Precision))
 			}
@@ -722,7 +889,7 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' t1$cal_caretList(methodList = c('rf', 'svmRadial'))
 		#' }
 		cal_caretList = function(...){
-			if(!require(caretEnsemble)){
+			if(!requireNamespace("caretEnsemble", quietly = TRUE)){
 				stop("Please first install caretEnsemble package from CRAN!")
 			}
 			use_trainControl <- self$trainControl
@@ -736,7 +903,10 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				self$data_train <- train_data
 			}
 			
-			models <- caretList(Response ~ ., data = train_data, trControl = use_trainControl, ...)
+			# temporarily register the parallel backend; the original backend is restored when the function exits
+			old_backend <- private$register_cores()
+			on.exit(private$restore_cores(old_backend), add = TRUE)
+			models <- caretEnsemble::caretList(Response ~ ., data = train_data, trControl = use_trainControl, ...)
 			self$res_caretList_models <- models
 			message('Models are stored in object$res_caretList_models ...')
 			invisible(self)
@@ -794,6 +964,31 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				scale_color_manual(values = color_values) +
 				facet_grid(Metric ~ ., drop = TRUE, scale = "free", space = "fixed")
 			p
+		},
+		#' @description
+		#' Print the trans_classifier object.
+		print = function() {
+			cat("trans_classifier class:\n")
+			cat("The type of the response variable:", self$type, "\n")
+			if(is.null(self$data_feature)){
+				cat("The feature table is not available ...\n")
+			}else{
+				cat("The feature number of the original input:", ncol(self$data_feature), "\n")
+			}
+			if(is.null(self$data_train)){
+				cat("The training data is not available ...\n")
+			}else{
+				cat("The dimension of data_train:", nrow(self$data_train), "samples x ", 
+					ncol(self$data_train) - 1, "features\n")
+			}
+			if(!is.null(self$data_test)){
+				cat("The dimension of data_test:", nrow(self$data_test), "samples x ", 
+					ncol(self$data_test) - 1, "features\n")
+			}
+			if(!is.null(self$train_method)){
+				cat("The model is trained with the method:", self$train_method, "\n")
+			}
+			invisible(self)
 		}
 	),
 	private = list(
@@ -808,6 +1003,109 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 				self$data_train <- train_data
 			}
 			self
+		},
+		# apply the preprocess model and rebuild the whole table, as the number of the features may be changed by 
+		# some methods (e.g. nzv and pca). A positional assignment such as data[, -1] <- predict(...) would silently 
+		# recycle the columns and leave the old feature names in this case.
+		apply_preProcess = function(preProcess_res, input_data, data_type){
+			response_name <- colnames(input_data)[1]
+			old_features <- colnames(input_data)[-1]
+			pred_data <- predict(preProcess_res, newdata = input_data[, -1, drop = FALSE])
+			pred_data <- as.data.frame(pred_data, check.names = FALSE)
+			if(ncol(pred_data) < 1){
+				stop("No feature is left after the preprocessing ! Please check the method parameter in the ", 
+					"cal_preProcess function ...")
+			}
+			output_data <- data.frame(input_data[, 1, drop = FALSE], pred_data, check.names = FALSE)
+			colnames(output_data)[1] <- response_name
+			if(ncol(output_data) != ncol(input_data)){
+				new_features <- colnames(output_data)[-1]
+				message("The feature number in the ", data_type, " data is changed from ", ncol(input_data) - 1, " to ", 
+					ncol(output_data) - 1, " after the preprocessing ...")
+				if(all(grepl("^(PC|IC)[0-9]+$", new_features))){
+					message("The new features are the principal or independent components: ", 
+						paste(new_features, collapse = ", "), " ...")
+				}else{
+					removed_features <- setdiff(old_features, new_features)
+					if(length(removed_features) > 0){
+						message("Features removed by the preprocessing: ", paste(removed_features, collapse = ", "), " ...")
+					}
+				}
+			}
+			output_data
+		},
+		# register the parallel backend temporarily; the previous backend is returned so that it can be restored
+		register_cores = function(){
+			cores <- self$n.cores
+			if(is.null(cores) || length(cores) != 1 || is.na(cores) || cores <= 1){
+				return(NULL)
+			}
+			old_backend <- list(
+				registered = tryCatch(foreach::getDoParRegistered(), error = function(e) FALSE),
+				name = tryCatch(foreach::getDoParName(), error = function(e) NA_character_),
+				workers = tryCatch(foreach::getDoParWorkers(), error = function(e) 1L)
+			)
+			doParallel::registerDoParallel(cores)
+			message("Registering cores = ", cores, " for the parallel computation ...")
+			old_backend
+		},
+		# restore the previous parallel backend
+		restore_cores = function(old_backend){
+			if(is.null(old_backend)){
+				return(invisible(NULL))
+			}
+			if(isTRUE(old_backend$registered) && !is.na(old_backend$name) && 
+				grepl("doParallel|doSnow|doSNOW|doMC", old_backend$name)){
+				doParallel::registerDoParallel(old_backend$workers)
+			}else{
+				if(requireNamespace("foreach", quietly = TRUE)){
+					foreach::registerDoSEQ()
+				}
+			}
+			invisible(NULL)
+		},
+		# the number of the cores that can be used for a task with n_tasks independent runs
+		get_usable_cores = function(n_tasks){
+			cores <- self$n.cores
+			if(is.null(cores) || length(cores) != 1 || is.na(cores) || cores < 2){
+				return(1L)
+			}
+			as.integer(min(cores, n_tasks))
+		},
+		# the feature importance of some models (e.g. svmRadial) is only available for the train object, 
+		# not for the finalModel; fall back to the train object in that case
+		get_varImp = function(...){
+			res_feature_imp <- tryCatch(caret::varImp(self$res_train$finalModel, ...), error = function(e) e)
+			if(inherits(res_feature_imp, "error")){
+				res_feature_imp <- tryCatch(caret::varImp(self$res_train, ...), error = function(e2){
+					stop("The feature importance can not be calculated for the model trained with method = '", 
+						self$train_method, "' ! Original error: ", conditionMessage(e))
+				})
+			}
+			res_feature_imp
+		},
+		# only the ratio statistics are formatted as percentages; Kappa and the p values are not ratios
+		format_confusion_stats = function(overall_stats){
+			stat_names <- names(overall_stats)
+			stat_values <- as.numeric(overall_stats)
+			ratio_stats <- c("Accuracy", "AccuracyLower", "AccuracyUpper", "AccuracyNull")
+			pvalue_stats <- c("AccuracyPValue", "McnemarPValue")
+			vapply(seq_along(stat_names), function(i){
+				use_value <- stat_values[i]
+				if(is.na(use_value)){
+					return("NA")
+				}
+				if(stat_names[i] %in% ratio_stats){
+					return(paste0(round(use_value * 100, 2), "%"))
+				}
+				if(stat_names[i] %in% pvalue_stats){
+					if(use_value < 0.001){
+						return("< 0.001")
+					}
+					return(as.character(round(use_value, 3)))
+				}
+				as.character(round(use_value, 3))
+			}, character(1))
 		}
 	),
 	lock_class = FALSE,
