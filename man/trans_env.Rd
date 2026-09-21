@@ -909,7 +909,7 @@ please refer to the example.}
 
 \item{\code{taxa_name_full}}{default TRUE; Whether use the complete taxonomic name of taxa.}
 
-\item{\code{complete_cases}}{default TRUE; Whether use \code{complete.cases} function to remove rows with missing values.}
+\item{\code{complete_cases}}{default FALSE; Whether use \code{complete.cases} function to remove rows with missing values.}
 
 \item{\code{maaslin_output_folder}}{default "tmp_output"; the temporary folder used to save the output files of maaslin.}
 
