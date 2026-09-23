@@ -14,12 +14,15 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' Create a trans_classifier object.
 		#' 
 		#' @param dataset an object of \code{\link{microtable}} class.
-		#' @param x.predictors default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from \code{microtable$taxa_abund}; 
+		#' @param x.predictors default "Genus"; character vector or data.frame; a character vector represents selecting the corresponding data from \code{microtable$taxa_abund}; 
 		#'   data.frame denotes other customized input. See the following available options:
 		#'   \describe{
 		#'     \item{\strong{'Genus'}}{use Genus level table in \code{microtable$taxa_abund}, or other specific taxonomic rank, e.g., 'Phylum'.
-		#'        If an input level (e.g., ASV) is not found in the names of taxa_abund list, the function will use \code{otu_table} to calculate relative abundance of features.}
-		#'     \item{\strong{'all'}}{use all the levels stored in \code{microtable$taxa_abund}.}
+		#'        At most one input level (e.g., ASV) is allowed to be absent in the names of taxa_abund list; 
+		#'        in that case the function will use \code{otu_table} to calculate relative abundance of features.}
+		#'     \item{\strong{'all'}}{use all the levels stored in \code{microtable$taxa_abund}. Only available when it is the sole input.}
+		#'     \item{\strong{multiple levels}}{use several levels at the same time, e.g., \code{c("Genus", "Species")}; 
+		#'       the corresponding tables in \code{microtable$taxa_abund} are combined by rows as the predictors.}
 		#'     \item{\strong{other input}}{must be a data.frame object. It should have the same format with the tables in microtable$taxa_abund, i.e. rows are features; 
 		#'       columns are samples with same names in sample_table.}
 		#'   }
@@ -34,6 +37,11 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 		#' t1 <- trans_classifier$new(
 		#' 		dataset = dataset, 
 		#' 		x.predictors = "Genus",
+		#' 		y.response = "Group")
+		#' # use multiple taxonomic levels as the predictors
+		#' t1 <- trans_classifier$new(
+		#' 		dataset = dataset, 
+		#' 		x.predictors = c("Genus", "Species"),
 		#' 		y.response = "Group")
 		#' }
 		initialize = function(dataset,
@@ -80,28 +88,49 @@ trans_classifier <- R6::R6Class(classname = "trans_classifier",
 			}
 			# x.predictors must be character or data.frame
 			if(is.character(x.predictors)){
-				if(length(x.predictors) != 1 || is.na(x.predictors)){
-					stop("Provided x.predictors must be a single character string or a data.frame !")
+				if(length(x.predictors) < 1 || any(is.na(x.predictors))){
+					stop("Provided x.predictors must be a character vector without NA or a data.frame !")
+				}
+				if(any(duplicated(x.predictors))){
+					stop("Duplicated names are found in the provided x.predictors: ", 
+						paste(unique(x.predictors[duplicated(x.predictors)]), collapse = ", "), " ! Please check the input!")
 				}
 				if(is.null(dataset$taxa_abund)){
 					message("No taxa_abund found in the dataset. Calculate the relative abundance ...")
 					dataset$cal_abund()
 				}
 				# exact matching instead of grepl, otherwise any level name containing 'all' would be mis-matched
-				if(tolower(trimws(x.predictors)) == "all"){
+				if(length(x.predictors) == 1 && tolower(trimws(x.predictors)) == "all"){
 					abund_table <- do.call(rbind, unname(dataset$taxa_abund))
 				}else{
-					if(! x.predictors %in% names(dataset$taxa_abund)){
-						message("x.predictors: ", x.predictors, " is not found in the names of taxa_abund list. Use the features in otu_table ...")
+					if(any(tolower(trimws(x.predictors)) == "all")){
+						stop("'all' can only be used as the sole x.predictors, e.g. x.predictors = 'all' ! Please check the input!")
+					}
+					# the levels that are not in taxa_abund are calculated from the otu_table; only one of them is allowed, 
+					# as all of them are generated from the same row names of otu_table and would be duplicated features otherwise
+					missing_levels <- x.predictors[! x.predictors %in% names(dataset$taxa_abund)]
+					if(length(missing_levels) > 1){
+						stop("Multiple unknown levels are found in the provided x.predictors: ", paste(missing_levels, collapse = ", "), 
+							" ! Only one unknown level can be calculated from the otu_table at a time, as the other ones would ", 
+							"generate duplicated features. Please check the input!")
+					}
+					if(length(missing_levels) == 1){
+						message("x.predictors: ", missing_levels, " is not found in the names of taxa_abund list. Use the features in otu_table ...")
 						if("add_rownames2tax" %in% names(dataset)){
-							dataset$add_rownames2tax(use_name = x.predictors)
+							dataset$add_rownames2tax(use_name = missing_levels)
 						}else{
-							dataset$add_rownames2taxonomy(use_name = x.predictors)
+							dataset$add_rownames2taxonomy(use_name = missing_levels)
 						}
 						message("Calculate relative abundance of features ...")
 						suppressMessages(dataset$cal_abund())
 					}
-					abund_table <- dataset$taxa_abund[[x.predictors]]
+					if(length(x.predictors) == 1){
+						abund_table <- dataset$taxa_abund[[x.predictors]]
+					}else{
+						abund_table <- do.call(rbind, unname(dataset$taxa_abund[x.predictors]))
+						message("Multiple levels are used as the predictors: ", paste(x.predictors, collapse = ", "), 
+							". Their tables are combined by rows ...")
+					}
 				}
 			}else{
 				# first check the data.frame

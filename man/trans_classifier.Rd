@@ -21,6 +21,11 @@ t1 <- trans_classifier$new(
 		dataset = dataset, 
 		x.predictors = "Genus",
 		y.response = "Group")
+# use multiple taxonomic levels as the predictors
+t1 <- trans_classifier$new(
+		dataset = dataset, 
+		x.predictors = c("Genus", "Species"),
+		y.response = "Group")
 }
 
 ## ------------------------------------------------
@@ -180,12 +185,15 @@ Create a trans_classifier object.
 \describe{
 \item{\code{dataset}}{an object of \code{\link{microtable}} class.}
 
-\item{\code{x.predictors}}{default "Genus"; character string or data.frame; a character string represents selecting the corresponding data from \code{microtable$taxa_abund}; 
+\item{\code{x.predictors}}{default "Genus"; character vector or data.frame; a character vector represents selecting the corresponding data from \code{microtable$taxa_abund}; 
 data.frame denotes other customized input. See the following available options:
 \describe{
   \item{\strong{'Genus'}}{use Genus level table in \code{microtable$taxa_abund}, or other specific taxonomic rank, e.g., 'Phylum'.
-     If an input level (e.g., ASV) is not found in the names of taxa_abund list, the function will use \code{otu_table} to calculate relative abundance of features.}
-  \item{\strong{'all'}}{use all the levels stored in \code{microtable$taxa_abund}.}
+     At most one input level (e.g., ASV) is allowed to be absent in the names of taxa_abund list; 
+     in that case the function will use \code{otu_table} to calculate relative abundance of features.}
+  \item{\strong{'all'}}{use all the levels stored in \code{microtable$taxa_abund}. Only available when it is the sole input.}
+  \item{\strong{multiple levels}}{use several levels at the same time, e.g., \code{c("Genus", "Species")}; 
+    the corresponding tables in \code{microtable$taxa_abund} are combined by rows as the predictors.}
   \item{\strong{other input}}{must be a data.frame object. It should have the same format with the tables in microtable$taxa_abund, i.e. rows are features; 
     columns are samples with same names in sample_table.}
 }}
@@ -208,6 +216,11 @@ data(dataset)
 t1 <- trans_classifier$new(
 		dataset = dataset, 
 		x.predictors = "Genus",
+		y.response = "Group")
+# use multiple taxonomic levels as the predictors
+t1 <- trans_classifier$new(
+		dataset = dataset, 
+		x.predictors = c("Genus", "Species"),
 		y.response = "Group")
 }
 }
