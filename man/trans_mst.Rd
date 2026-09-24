@@ -280,13 +280,13 @@ If NULL, the Dark2 (environment level) or Paired (sample level) palette of RColo
 
 \item{\code{legend_title}}{default NULL; the legend title. If NULL, "Source" is used.}
 
-\item{\code{bar_width}}{default 0.8; the bar width passed to \code{\link{geom_bar}}.}
+\item{\code{bar_width}}{default 0.8; the bar width passed to \code{geom_bar}.}
 
 \item{\code{xtext_size}}{default 10; x-axis text size.}
 
 \item{\code{xtext_angle}}{default 45; x-axis text angle.}
 
-\item{\code{facet_scales}}{default "free_x"; the scales parameter of \code{\link{facet_wrap}}.}
+\item{\code{facet_scales}}{default "free_x"; the scales parameter of \code{facet_wrap}.}
 }
 \if{html}{\out{</div>}}
 }

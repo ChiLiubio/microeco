@@ -13,9 +13,11 @@ variation partitioning analysis, mantel test, correlation analysis and linear fi
 ## Method `trans_env$new`
 ## ------------------------------------------------
 
+\donttest{
 data(dataset)
 data(env_data_16S)
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
+}
 
 ## ------------------------------------------------
 ## Method `trans_env$cal_diff`
@@ -211,9 +213,11 @@ If TRUE, the function can run the interpolation with the \code{mice} package.}
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(dataset)
+\preformatted{\donttest{
+data(dataset)
 data(env_data_16S)
 t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
+}
 }
 \if{html}{\out{</div>}}
 

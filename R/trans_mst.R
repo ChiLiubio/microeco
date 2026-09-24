@@ -290,10 +290,10 @@ trans_mst <- R6Class(classname = "trans_mst",
                 #'   If NULL, the Dark2 (environment level) or Paired (sample level) palette of RColorBrewer is used.
                 #' @param unknown_color default "grey80"; the fill color for the "Unknown" source.
                 #' @param legend_title default NULL; the legend title. If NULL, "Source" is used.
-                #' @param bar_width default 0.8; the bar width passed to \code{\link{geom_bar}}.
+                #' @param bar_width default 0.8; the bar width passed to \code{geom_bar}.
                 #' @param xtext_size default 10; x-axis text size.
                 #' @param xtext_angle default 45; x-axis text angle.
-                #' @param facet_scales default "free_x"; the scales parameter of \code{\link{facet_wrap}}.
+                #' @param facet_scales default "free_x"; the scales parameter of \code{facet_wrap}.
                 #' @return ggplot2 plot.
                 #' @examples
                 #' \dontrun{

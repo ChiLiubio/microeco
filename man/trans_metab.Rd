@@ -12,9 +12,11 @@ This class is a wrapper for a series of metabolite analysis, including origin in
 ## Method `trans_metab$new`
 ## ------------------------------------------------
 
+\donttest{
 data(soil_metab)
 data(soil_microb)
 t1 <- trans_metab$new(metab = soil_metab, microb = soil_microb)
+}
 
 ## ------------------------------------------------
 ## Method `trans_metab$cal_match`
@@ -123,9 +125,11 @@ If the input is a data.frame object, the function can judge whether it is abunda
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(soil_metab)
+\preformatted{\donttest{
+data(soil_metab)
 data(soil_microb)
 t1 <- trans_metab$new(metab = soil_metab, microb = soil_microb)
+}
 }
 \if{html}{\out{</div>}}
 

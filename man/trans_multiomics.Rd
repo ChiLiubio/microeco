@@ -72,7 +72,8 @@ t1$run_spls_single(X_block = "microb", Y_block = "metab", ncomp = 2)
 ## ------------------------------------------------
 
 \dontrun{
-t1$tune_model(ncomp = 2, test_keepX = list(microb = c(5, 10, 20), metab = c(5, 10, 20)), nrepeat = 1, seed = 123)
+t1$tune_model(ncomp = 2, test_keepX = list(microb = c(5, 10, 20), 
+		metab = c(5, 10, 20)), seed = 123)
 }
 
 ## ------------------------------------------------
@@ -594,7 +595,8 @@ Must not exceed the smallest class size of \code{Y}.}
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
 \preformatted{\dontrun{
-t1$tune_model(ncomp = 2, test_keepX = list(microb = c(5, 10, 20), metab = c(5, 10, 20)), nrepeat = 1, seed = 123)
+t1$tune_model(ncomp = 2, test_keepX = list(microb = c(5, 10, 20), 
+		metab = c(5, 10, 20)), seed = 123)
 }
 }
 \if{html}{\out{</div>}}

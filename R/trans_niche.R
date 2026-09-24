@@ -26,7 +26,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @return \code{data_rel_abund}, \code{n_samples}, \code{n_taxa}, \code{dataset}, \code{sample_table}
                 #'   and optionally \code{data_env} stored in the object.
                 #' @examples
-                #' \donttest{
+                #' \dontrun{
                 #' data(dataset)
                 #' t1 <- trans_niche$new(dataset = dataset)
                 #' }
@@ -205,7 +205,7 @@ trans_niche <- R6Class(classname = "trans_niche",
                 #' @param taxa_level default "Genus"; the taxonomic level used when \code{add_prefix} is \code{TRUE}
                 #' @param sep default " : "; separator between genus name and taxa name.
                 #' @param color default RColorBrewer::brewer.pal(8, "Dark2")[2]; bar fill color.
-                #' @param barwidth default 0.7; bar width passed to \code{\link{geom_bar}}.
+                #' @param barwidth default 0.7; bar width passed to \code{geom_bar}.
                 #' @param ytext_size default 11; y-axis text size.
                 #' @return ggplot2 plot.
                 #' @examples

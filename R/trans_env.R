@@ -22,9 +22,11 @@ trans_env <- R6Class(classname = "trans_env",
 		#'   If TRUE, the function can run the interpolation with the \code{mice} package.
 		#' @return \code{data_env} stored in the object.
 		#' @examples
+		#' \donttest{
 		#' data(dataset)
 		#' data(env_data_16S)
 		#' t1 <- trans_env$new(dataset = dataset, add_data = env_data_16S[, 4:11])
+		#' }
 		initialize = function(
 			dataset = NULL, 
 			env_cols = NULL, 

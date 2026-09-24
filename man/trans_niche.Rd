@@ -16,7 +16,7 @@ and TPD (Trait Probability Density) based on Carmona et al. (2016) <doi:10.1016/
 ## Method `trans_niche$new`
 ## ------------------------------------------------
 
-\donttest{
+\dontrun{
 data(dataset)
 t1 <- trans_niche$new(dataset = dataset)
 }
@@ -110,7 +110,7 @@ Must be provided together with \code{taxa_level}. Useful when feature number is 
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{\donttest{
+\preformatted{\dontrun{
 data(dataset)
 t1 <- trans_niche$new(dataset = dataset)
 }
@@ -261,7 +261,7 @@ If NULL, the first numeric column except \code{Taxa} is used automatically.}
 
 \item{\code{color}}{default RColorBrewer::brewer.pal(8, "Dark2")[2]; bar fill color.}
 
-\item{\code{barwidth}}{default 0.7; bar width passed to \code{\link{geom_bar}}.}
+\item{\code{barwidth}}{default 0.7; bar width passed to \code{geom_bar}.}
 
 \item{\code{ytext_size}}{default 11; y-axis text size.}
 }

@@ -18,8 +18,10 @@ trans_func <- R6Class(classname = "trans_func",
 		#' In this case, if the user still want to use the function to identify species traits, please provide "prok" or "fungi" manually, 
 		#' e.g. \code{t1$for_what <- "prok"}.
 		#' @examples
+		#' \donttest{
 		#' data(dataset)
 		#' t1 <- trans_func$new(dataset = dataset)
+		#' }
 		initialize = function(dataset = NULL
 			){
 			check_microtable(dataset)

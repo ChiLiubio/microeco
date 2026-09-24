@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 2.4.0
+Version: 2.4.1
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
               person("Felipe", "R. P. Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
               person("Minjie", "Yao", role = "ctb", email = "yaomj@fafu.edu.cn"),
@@ -9,16 +9,16 @@ Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@12
 			  )
 Author: Chi Liu [aut, cre], Felipe R. P. Mansoldo [ctb], Minjie Yao [ctb], Xiangzhen Li [ctb]
 Maintainer: Chi Liu <liuchi0426@126.com>
-Description: A series of data analysis approaches for microbiome data based on the R6 class. The classes are designed for data preprocessing, niche analysis, taxa abundance plotting, alpha diversity analysis, beta diversity analysis, differential abundance test, null model analysis, network analysis, machine learning, environmental data analysis, functional analysis, multi-omics data integration analysis, etc.
+Description: A series of data analysis approaches for microbiome data based on the R6 class. The classes are designed for data preprocessing, niche analysis, taxonomic abundance plot, alpha diversity analysis, beta diversity analysis, differential abundance test, null model analysis, network analysis, machine learning, environmental data analysis, functional redundancy analysis, metabolites analysis, etc.
 URL: https://github.com/ChiLiubio/microeco
 Depends: R (>= 3.5.0), ggplot2 (>= 3.5.0)
-Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, RColorBrewer, reshape2, igraph (>= 2.0.0), lifecycle
+Imports: R6, stats, ape, vegan, rlang, data.table, magrittr, dplyr, tibble, scales, grid, RColorBrewer, reshape2, igraph (>= 2.0.0), lifecycle, withr
 Suggests: GUniFrac, MASS, ggpubr, randomForest, ggdendro, ggrepel, agricolae, gridExtra, picante, pheatmap, mice, GGally
 License: GPL-3
 LazyData: true
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2026-09-07
+Packaged: 2026-09-23
 Repository: CRAN
-Date/Publication: 2026-09-07
+Date/Publication: 2026-09-23
 RoxygenNote: 7.3.3

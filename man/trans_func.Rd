@@ -15,8 +15,10 @@ functional redundancy calculation and metabolic pathway abundance prediction Abh
 ## Method `trans_func$new`
 ## ------------------------------------------------
 
+\donttest{
 data(dataset)
 t1 <- trans_func$new(dataset = dataset)
+}
 
 ## ------------------------------------------------
 ## Method `trans_func$cal_func`
@@ -132,8 +134,10 @@ e.g. \code{t1$for_what <- "prok"}.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
-\preformatted{data(dataset)
+\preformatted{\donttest{
+data(dataset)
 t1 <- trans_func$new(dataset = dataset)
+}
 }
 \if{html}{\out{</div>}}
 

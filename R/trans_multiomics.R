@@ -441,7 +441,8 @@ trans_multiomics <- R6Class(classname = "trans_multiomics",
 		#' @return \code{self} (invisible), enabling chained calls; \code{tune_result} and \code{best_keepX} are stored in the object.
 		#' @examples
 		#' \dontrun{
-		#' t1$tune_model(ncomp = 2, test_keepX = list(microb = c(5, 10, 20), metab = c(5, 10, 20)), nrepeat = 1, seed = 123)
+		#' t1$tune_model(ncomp = 2, test_keepX = list(microb = c(5, 10, 20), 
+		#' 		metab = c(5, 10, 20)), seed = 123)
 		#' }
 		tune_model = function(
 			method = "block.splsda",
