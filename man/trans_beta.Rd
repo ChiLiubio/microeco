@@ -111,7 +111,8 @@ t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
 \describe{
 \item{\code{dataset}}{an object of \code{\link{microtable}} class.}
 
-\item{\code{measure}}{default NULL; a matrix name stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", or a customized matrix; 
+\item{\code{measure}}{default NULL; a matrix name (or index) stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", 
+or a customized matrix (also supports \code{dist} object and \code{data.frame} format with sample names as row and column names); 
 used for ordination, manova, group distance comparision, etc.;
 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.}
 
@@ -166,10 +167,11 @@ the corresponding dimension information will be selected from the original model
 For all the dimension information, please refer to \code{model} in the results.
 For the \code{method} option "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.}
 
-\item{\code{taxa_level}}{default NULL; available for PCA, DCA or NMDS (\code{NMDS_matrix = TRUE}).
+\item{\code{taxa_level}}{default NULL; available for PCA, DCA, PLS-DA, OPLS-DA or NMDS (\code{NMDS_matrix = FALSE}).
 Default NULL means using the \code{otu_table} in the microtable object.
 For other options, please    provide the taxonomic rank names in \code{tax_table}, such as "Phylum" or "Genus".
-In such cases, the data will be merged according to the provided taxonomic levels to generated a new abundance table.}
+In such cases, the data will be merged according to the provided taxonomic levels to generated a new abundance table.        
+Note that this parameter has no effect on the methods "PCoA" and "NMDS" with \code{NMDS_matrix = TRUE}, as they use the distance matrix.}
 
 \item{\code{NMDS_matrix}}{default TRUE; For the NMDS method, whether use a distance matrix as input like PCoA. If it is FALSE, the input will be the abundance table like PCA.}
 
@@ -197,6 +199,9 @@ or \code{ropls::opls} function when \code{method = "PLS-DA"} or \code{method = "
 \subsection{Returns}{
 \code{res_ordination} list stored in the object.
 	  In the list, \code{model} is the original analysis results; \code{scores} is the sample scores table; \code{loading} is the feature loading table.
+	  Note that in the \code{loading} table, an extra column \code{dist} represents the distance of each feature to the origin, 
+	  i.e. the sum of squares of the loading values of the selected dimensions; the table is sorted by this column in decreasing order, 
+	  so the most influential features are in the first rows.
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -259,7 +264,7 @@ Plot the ordination result.
   \item{\strong{'centroid'}}{add centroid line for points in each group}
 }}
 
-\item{\code{choices}}{default c(1, 2); selected axis for the visualization; must be numeric vector.
+\item{\code{choices}}{default c(1, 2); selected axis for the visualization; must be a numeric vector with two elements.
 The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_ordination} function.}
 
 \item{\code{color_values}}{default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.}
@@ -270,7 +275,8 @@ The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_or
 
 \item{\code{plot_shape}}{default NULL; a colname of \code{sample_table} to assign shapes to different groups in plot.}
 
-\item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the legend of plot.}
+\item{\code{plot_group_order}}{default NULL; a vector used to order the groups in the legend of plot.
+Only available when \code{plot_color} parameter is provided.}
 
 \item{\code{add_sample_label}}{default NULL; a column name in \code{sample_table}; If provided, show the point name in plot.}
 
@@ -463,12 +469,18 @@ Only available when \code{paired = TRUE}.}
 \subsection{Method \code{cal_betadisper()}}{
 Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{betadisper} function in vegan package.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_betadisper(...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{trans_beta$cal_betadisper(group = NULL, permutest_args = list(), ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{group}}{default NULL; a column name of \code{sample_table} used for the test. If NULL, search \code{group} variable stored in the object.}
+
+\item{\code{permutest_args}}{default empty list; a list of parameters passed to \code{permutest} function of vegan package, 
+such as \code{list(permutations = 999)}. Note that the elements in the list should be named. 
+The pairwise comparison is always performed, so the \code{pairwise} parameter is not necessary.}
+
 \item{\code{...}}{parameters passed to \code{betadisper} function.}
 }
 \if{html}{\out{</div>}}
@@ -616,7 +628,8 @@ Plot clustering result based on the \code{ggdendro} package.
   color_values = RColorBrewer::brewer.pal(8, "Dark2"),
   measure = NULL,
   group = NULL,
-  replace_name = NULL
+  replace_name = NULL,
+  legend_position = "none"
 )}\if{html}{\out{</div>}}
 }
 
@@ -625,11 +638,16 @@ Plot clustering result based on the \code{ggdendro} package.
 \describe{
 \item{\code{color_values}}{default RColorBrewer::brewer.pal(8, "Dark2"); color palette for the text.}
 
-\item{\code{measure}}{default NULL; beta diversity index; If NULL, using the measure when creating object}
+\item{\code{measure}}{default NULL; beta diversity index; If NULL, using the measure (the distance matrix) when creating the object. 
+It can be a matrix name or index in the \code{beta_diversity} list, or a customized matrix (also supports \code{dist} object and \code{data.frame}).
+If the object has no measure and the \code{beta_diversity} list is not NULL, the first matrix in the list is used with a message.}
 
 \item{\code{group}}{default NULL; if provided, use this group to assign color.}
 
 \item{\code{replace_name}}{default NULL; if provided, use this as label.}
+
+\item{\code{legend_position}}{default "none"; the position of legend; only available when \code{group} parameter is provided. 
+Options include "none", "left", "right", "bottom" and "top".}
 }
 \if{html}{\out{</div>}}
 }

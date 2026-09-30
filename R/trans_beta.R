@@ -10,7 +10,8 @@
 trans_beta <- R6Class(classname = "trans_beta",
 	public = list(
 		#' @param dataset an object of \code{\link{microtable}} class.
-		#' @param measure default NULL; a matrix name stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", or a customized matrix; 
+		#' @param measure default NULL; a matrix name (or index) stored in \code{microtable$beta_diversity} list, such as "bray" or "jaccard", 
+		#' 	 or a customized matrix (also supports \code{dist} object and \code{data.frame} format with sample names as row and column names); 
 		#' 	 used for ordination, manova, group distance comparision, etc.;
 		#' 	 Please see \code{cal_betadiv} function of \code{\link{microtable}} class for more details.
 		#' @param group default NULL; a column name of \code{sample_table} in the input dataset; group information will be used for manova, betadisper or distance comparision.
@@ -49,6 +50,10 @@ trans_beta <- R6Class(classname = "trans_beta",
 					}
 					use_matrix <- dataset$beta_diversity[[measure]]
 				}else{
+					# accept the matrix, dist object and data.frame formats for the customized distance matrix
+					if(inherits(measure, "dist") | is.data.frame(measure)){
+						measure <- as.matrix(measure)
+					}
 					if(is.matrix(measure)){
 						if(! any(rownames(measure) %in% rownames(dataset$sample_table))){
 							stop("Provided measure is a matrix. The row names should be sample names!")
@@ -61,7 +66,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 						}
 						use_matrix <- measure[dataset$sample_names(), dataset$sample_names()]
 					}else{
-						stop("Input measure parameter should be either a vector or a matrix!")
+						stop("Input measure parameter should be one of the following formats: (1) a vector with one element ", 
+							"(the matrix name or index in the beta_diversity list); (2) a customized matrix; (3) a dist object; (4) a data.frame!")
 					}
 				}
 				self$use_matrix <- use_matrix
@@ -93,10 +99,11 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  the corresponding dimension information will be selected from the original model based on this parameter..
 		#' 	  For all the dimension information, please refer to \code{model} in the results.
 		#' 	  For the \code{method} option "NMDS", this argument will be passed to the \code{k} parameter in the \code{vegan::metaMDS} function.
-		#' @param taxa_level default NULL; available for PCA, DCA or NMDS (\code{NMDS_matrix = TRUE}).
+		#' @param taxa_level default NULL; available for PCA, DCA, PLS-DA, OPLS-DA or NMDS (\code{NMDS_matrix = FALSE}).
 		#' 	  Default NULL means using the \code{otu_table} in the microtable object.
 		#' 	  For other options, please	provide the taxonomic rank names in \code{tax_table}, such as "Phylum" or "Genus".
 		#' 	  In such cases, the data will be merged according to the provided taxonomic levels to generated a new abundance table.		
+		#' 	  Note that this parameter has no effect on the methods "PCoA" and "NMDS" with \code{NMDS_matrix = TRUE}, as they use the distance matrix.
 		#' @param NMDS_matrix default TRUE; For the NMDS method, whether use a distance matrix as input like PCoA. If it is FALSE, the input will be the abundance table like PCA.
 		#' @param trans default FALSE; whether species abundance will be square root transformed; only available when \code{method} is "PCA" or "DCA".
 		#' 	  For method "NMDS" and \code{NMDS_matrix = FALSE}, please set the \code{autotransform} parameter, which will be passed to \code{vegan::metaMDS} function directly.
@@ -113,6 +120,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' 	  or \code{ropls::opls} function when \code{method = "PLS-DA"} or \code{method = "OPLS-DA"} .
 		#' @return \code{res_ordination} list stored in the object.
 		#' 	  In the list, \code{model} is the original analysis results; \code{scores} is the sample scores table; \code{loading} is the feature loading table.
+		#' 	  Note that in the \code{loading} table, an extra column \code{dist} represents the distance of each feature to the origin, 
+		#' 	  i.e. the sum of squares of the loading values of the selected dimensions; the table is sorted by this column in decreasing order, 
+		#' 	  so the most influential features are in the first rows.
 		#' @examples
 		#' t1$cal_ordination(method = "PCoA")
 		cal_ordination = function(
@@ -141,12 +151,19 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			use_data <- self$dataset
 			if(! is.null(taxa_level)){
+				# the taxa_level parameter only works for the methods that use the abundance table as input
+				taxa_level_available <- method %in% c("PCA", "DCA", "PLS-DA", "OPLS-DA") | (method == "NMDS" & ! NMDS_matrix)
+				if(! taxa_level_available){
+					message("The taxa_level parameter is only available for the methods PCA, DCA, PLS-DA, OPLS-DA and NMDS with NMDS_matrix = FALSE! ",
+						"It has been ignored for the method ", method, " ...")
+					taxa_level <- NULL
+				}
+			}
+			if(! is.null(taxa_level)){
 				check_tax_level(taxa_level, use_data)
 				use_data <- use_data$merge_taxa(taxa_level)
 			}
 			if(method %in% c("PCA", "DCA", "PLS-DA", "OPLS-DA")){
-				plot.x <- switch(method, PCA = "PC1", DCA = "DCA1", 'PLS-DA' = "p1", 'OPLS-DA' = "p1")
-				plot.y <- switch(method, PCA = "PC2", DCA = "DCA2", 'PLS-DA' = "p2", 'OPLS-DA' = "o1")
 				if(trans == TRUE){
 					abund <- sqrt(use_data$otu_table)
 				}else{
@@ -214,7 +231,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 					stop("Please recreate the object and set the parameter measure !")
 				}
 				model <- ape::pcoa(as.dist(self$use_matrix), ...)
-				combined <- cbind.data.frame(model$vectors[,1:ncomp], use_data$sample_table)
+				if(ncomp > ncol(model$vectors)){
+					stop("The ncomp parameter: ", ncomp, " is larger than the maximum available dimensions: ", ncol(model$vectors), 
+						" in the PCoA result, as the ape::pcoa function only retains the axes with positive eigenvalues! ",
+						"Please reduce the ncomp parameter or increase the sample number!")
+				}
+				scores_sites <- model$vectors[, 1:ncomp, drop = FALSE]
+				combined <- private$add_sample_info(scores_sites, use_data$sample_table)
 				colnames(combined)[1:ncomp] <- paste0("PCo", 1:ncomp)
 				expla <- round(model$values[,1]/sum(model$values[,1])*100, 1)
 				names(expla) <- paste0("PCo", 1:length(expla))
@@ -230,7 +253,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 					abund <- use_data$otu_table %>% t
 					model <- vegan::metaMDS(abund, k = ncomp, ...)
 				}
-				combined <- cbind.data.frame(model$points, use_data$sample_table)
+				scores_sites <- model$points[, 1:ncomp, drop = FALSE]
+				combined <- private$add_sample_info(scores_sites, use_data$sample_table)
 				outlist <- list(model = model, scores = combined)
 				if(! NMDS_matrix){
 					loading <- scores(model, choices = 1:ncomp, display = "species") %>% as.data.frame
@@ -264,13 +288,14 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#'     \item{\strong{'chull'}}{add convex hull for points of each group}
 		#'     \item{\strong{'centroid'}}{add centroid line for points in each group}
 		#'   }
-		#' @param choices default c(1, 2); selected axis for the visualization; must be numeric vector.
+		#' @param choices default c(1, 2); selected axis for the visualization; must be a numeric vector with two elements.
 		#'   The maximum value must not exceed the parameter \code{ncomp} in the \code{cal_ordination} function.
 		#' @param color_values default \code{RColorBrewer::brewer.pal}(8, "Dark2"); colors palette for different groups.
 		#' @param shape_values default c(16, 17, 7, 8, 15, 18, 11, 10, 12, 13, 9, 3, 4, 0, 1, 2, 14); a vector for point shape types of groups, see \code{ggplot2} tutorial.
 		#' @param plot_color default NULL; a colname of \code{sample_table} to assign colors to different groups in plot.
 		#' @param plot_shape default NULL; a colname of \code{sample_table} to assign shapes to different groups in plot.
 		#' @param plot_group_order default NULL; a vector used to order the groups in the legend of plot.
+		#'   Only available when \code{plot_color} parameter is provided.
 		#' @param add_sample_label default NULL; a column name in \code{sample_table}; If provided, show the point name in plot.
 		#' @param point_size default 3; point size when "point" is in \code{plot_type} parameter.
 		#'   \code{point_size} can also be a variable name in \code{sample_table}, such as "pH".
@@ -356,13 +381,20 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 			}
 			if(! all(plot_type %in% c("point", "ellipse", "chull", "centroid"))){
-				message("There maybe a typo in the input plot_type! plot_type should be one or more of 'point', 'ellipse', 'chull' and 'centroid'!")
+				invalid_type <- plot_type[! plot_type %in% c("point", "ellipse", "chull", "centroid")]
+				plot_type <- plot_type[plot_type %in% c("point", "ellipse", "chull", "centroid")]
+				if(length(plot_type) == 0){
+					stop("The input plot_type: ", paste0(invalid_type, collapse = ", "), " is not valid! ",
+						"plot_type should be one or more of 'point', 'ellipse', 'chull' and 'centroid'!")
+				}
+				warning("The input plot_type: ", paste0(invalid_type, collapse = ", "), " is not valid and has been ignored! ",
+					"plot_type should be one or more of 'point', 'ellipse', 'chull' and 'centroid'!")
 			}
 			combined <- self$res_ordination$scores
 			eig <- self$res_ordination$eig
 			model <- self$res_ordination$model
-			if(length(choices) > 2){
-				stop("The maximum input length of choices parameter should be 2!")
+			if(length(choices) != 2){
+				stop("The choices parameter must have exactly two elements, such as c(1, 2)! Please check it!")
 			}
 			if(max(choices) > self$res_ordination$ncomp){
 				stop("Maximum of input choices is larger than the dimension, please try to enlarge the ncomp parameter in the cal_ordination function!")
@@ -370,6 +402,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 			plot_x <- colnames(self$res_ordination$scores)[choices[1]]
 			plot_y <- colnames(self$res_ordination$scores)[choices[2]]
 			if(!is.null(plot_group_order)){
+				if(is.null(plot_color)){
+					stop("The plot_group_order parameter requires the plot_color parameter! Please provide the plot_color parameter!")
+				}
 				combined[, plot_color] %<>% factor(., levels = plot_group_order)
 			}
 			if(!is.null(plot_color)){
@@ -403,7 +438,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			if(!is.null(NMDS_stress_pos)){
 				if(ordination_method == "NMDS"){
-					p <- p + annotate("text", x = max(combined[, 1]) * NMDS_stress_pos[1], y = max(combined[, 2]) * NMDS_stress_pos[2], 
+					p <- p + annotate("text", x = max(combined[, plot_x]) * NMDS_stress_pos[1], y = max(combined[, plot_y]) * NMDS_stress_pos[2], 
 						label = paste0(NMDS_stress_text_prefix, round(model$stress, 2)), parse = TRUE)
 				}
 			}
@@ -462,7 +497,12 @@ trans_beta <- R6Class(classname = "trans_beta",
 			}
 			if(loading_arrow){
 				if(! is.null(self$res_ordination$loading)){
-					df_arrows <- self$res_ordination$loading[1:loading_taxa_num, ]
+					if(loading_taxa_num > nrow(self$res_ordination$loading)){
+						message("The loading_taxa_num parameter: ", loading_taxa_num, " is larger than the total feature number: ", 
+							nrow(self$res_ordination$loading), " in the loading table! Use all the features in the loading table ...")
+						loading_taxa_num <- nrow(self$res_ordination$loading)
+					}
+					df_arrows <- self$res_ordination$loading[seq_len(loading_taxa_num), ]
 					colnames(df_arrows)[choices] <- c("x", "y")
 					p <- p + geom_segment(
 						data = df_arrows, 
@@ -588,6 +628,15 @@ trans_beta <- R6Class(classname = "trans_beta",
 				res %<>% as.data.frame
 				res$Significance <- generate_p_siglabel(res$`Pr(>F)`)
 			}
+			if(is.data.frame(res) && "F" %in% colnames(res)){
+				# avoid the non-finite F value (such as Inf) in the result, which is usually caused by the SumOfSqs of those terms being nearly 0
+				not_finite <- ! is.na(res[, "F"]) & ! is.finite(res[, "F"])
+				if(any(not_finite)){
+					warning("Some F values are not finite (such as Inf) in the manova result, which is usually caused by the SumOfSqs of those terms being nearly 0 ", 
+						"(e.g., when the terms in manova_set are collinear or nested)! These F values have been set to NA. Please check the model design.")
+					res[not_finite, "F"] <- NA
+				}
+			}
 			self$res_manova <- res
 			message('The result is stored in object$res_manova ...')
 			invisible(self)
@@ -656,17 +705,40 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' @description
 		#' Multivariate homogeneity test of groups dispersions (PERMDISP) based on \code{betadisper} function in vegan package.
 		#'
+		#' @param group default NULL; a column name of \code{sample_table} used for the test. If NULL, search \code{group} variable stored in the object.
+		#' @param permutest_args default empty list; a list of parameters passed to \code{permutest} function of vegan package, 
+		#'   such as \code{list(permutations = 999)}. Note that the elements in the list should be named. 
+		#'   The pairwise comparison is always performed, so the \code{pairwise} parameter is not necessary.
 		#' @param ... parameters passed to \code{betadisper} function.
 		#' @return \code{res_betadisper} stored in object.
 		#' @examples
 		#' t1$cal_betadisper()
-		cal_betadisper = function(...){
+		cal_betadisper = function(group = NULL, permutest_args = list(), ...){
 			if(is.null(self$use_matrix)){
 				stop("Please recreate the object and set the parameter measure !")
 			}
+			if(is.null(group)){
+				if(is.null(self$group)){
+					stop("The group inside the object is NULL! ",
+						"Please provide the group parameter when creating the trans_beta object or use the group parameter in this function!")
+				}else{
+					group <- self$group
+				}
+			}else{
+				check_table_variable(self$sample_table, group, "group", "sample_table")
+			}
+			if(!is.list(permutest_args)){
+				stop("The permutest_args parameter should be a list!")
+			}
+			if(length(permutest_args) > 0 && (is.null(names(permutest_args)) | any(names(permutest_args) == ""))){
+				stop("The elements in the permutest_args parameter should be named, such as list(permutations = 999)!")
+			}
 			use_matrix <- self$use_matrix
-			res1 <- betadisper(as.dist(use_matrix), self$sample_table[, self$group], ...)
-			res2 <- permutest(res1, pairwise = TRUE)
+			res1 <- betadisper(as.dist(use_matrix), self$sample_table[, group], ...)
+			# pairwise comparison is always performed; the parameters in permutest_args have higher priority
+			permutest_use <- c(list(pairwise = TRUE), permutest_args)
+			permutest_use <- permutest_use[! duplicated(names(permutest_use))]
+			res2 <- do.call(permutest, c(list(res1), permutest_use))
 			self$res_betadisper <- res2
 			message('The result is stored in object$res_betadisper ...')
 			invisible(self)
@@ -687,6 +759,9 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' t1$cal_group_distance(within_group = TRUE)
 		#' }
 		cal_group_distance = function(within_group = TRUE, by_group = NULL, ordered_group = NULL, sep = " vs "){
+			if(is.null(self$use_matrix)){
+				stop("Please recreate the object and set the parameter measure !")
+			}
 			if(!is.null(by_group)){
 				if(!all(by_group %in% colnames(self$sample_table))){
 					stop("Input by_group parameter must be colnames of sample_table in the microtable object!")
@@ -784,16 +859,8 @@ trans_beta <- R6Class(classname = "trans_beta",
 				group_distance <- self$res_group_distance_diff_tmp$data_alpha
 				group <- self$res_group_distance_diff_tmp$group
 			}
-			if(self$measure %in% c("wei_unifrac", "unwei_unifrac", "bray", "jaccard")){
-				titlename <- switch(self$measure, 
-					wei_unifrac = "Weighted Unifrac", 
-					unwei_unifrac = "Unweighted Unifrac", 
-					bray = "Bray-Curtis", 
-					jaccard = "Jaccard")
-				ylabname <- paste0(titlename, " distance")
-			}else{
-				ylabname <- self$measure
-			}
+			measure_name <- private$measure_label(self$measure)
+			ylabname <- paste0(measure_name, " distance")
 			if(!is.null(plot_group_order)) {
 				group_distance[, group] %<>% factor(., levels = plot_group_order)
 			}else{
@@ -822,9 +889,13 @@ trans_beta <- R6Class(classname = "trans_beta",
 		#' Plot clustering result based on the \code{ggdendro} package.
 		#'
 		#' @param color_values default RColorBrewer::brewer.pal(8, "Dark2"); color palette for the text.
-		#' @param measure default NULL; beta diversity index; If NULL, using the measure when creating object
+		#' @param measure default NULL; beta diversity index; If NULL, using the measure (the distance matrix) when creating the object. 
+		#'   It can be a matrix name or index in the \code{beta_diversity} list, or a customized matrix (also supports \code{dist} object and \code{data.frame}).
+		#'   If the object has no measure and the \code{beta_diversity} list is not NULL, the first matrix in the list is used with a message.
 		#' @param group default NULL; if provided, use this group to assign color.
 		#' @param replace_name default NULL; if provided, use this as label.
+		#' @param legend_position default "none"; the position of legend; only available when \code{group} parameter is provided. 
+		#'   Options include "none", "left", "right", "bottom" and "top".
 		#' @return \code{ggplot}.
 		#' @examples
 		#' t1$plot_clustering(group = "Group", replace_name = c("Saline", "Type"))
@@ -832,24 +903,15 @@ trans_beta <- R6Class(classname = "trans_beta",
 			color_values = RColorBrewer::brewer.pal(8, "Dark2"), 
 			measure = NULL, 
 			group = NULL, 
-			replace_name = NULL
+			replace_name = NULL,
+			legend_position = "none"
 			){
-			dataset <- self$dataset
-			if(is.null(measure)){
-				if(is.null(self$use_matrix)){
-					measure_matrix <- dataset$beta_diversity[[1]]
-					measure <- names(dataset$beta_diversity)[1]
-				}else{
-					measure_matrix <- self$use_matrix
-					measure <- self$measure
-				}
-			}else{
-				measure_matrix <- dataset$beta_diversity[[measure]]
-			}
+			measure_res <- private$resolve_measure(measure)
+			measure_matrix <- measure_res$matrix
+			measure <- measure_res$label
 			hc_measure <- hclust(as.dist(measure_matrix))
 			hc_d_measure <- ggdendro::dendro_data(as.dendrogram(hc_measure))
-			titlename <- switch(measure, wei_unifrac = "Weighted Unifrac", unwei_unifrac = "Unweighted Unifrac", bray = "Bray-Curtis", jaccard = "Jaccard")
-			ylabname <- paste0("Distance (", titlename, ")")
+			ylabname <- paste0("Distance (", private$measure_label(measure), ")")
 
 			g1 <- ggplot(data = ggdendro::segment(hc_d_measure)) + 
 				geom_segment(aes(x=x, y=y, xend=xend, yend=yend), color = "grey30")
@@ -881,7 +943,7 @@ trans_beta <- R6Class(classname = "trans_beta",
 				}
 				g1 <- g1 + scale_color_manual(values = color_values)
 			}
-			g1 <- g1 + theme(legend.position="none") + coord_flip() +
+			g1 <- g1 + theme(legend.position = legend_position) + coord_flip() +
 				scale_x_discrete(labels=ggdendro::label(hc_d_measure)$label) +
 				ylab(ylabname) +
 				scale_y_reverse(expand=c(0.3, 0)) + 
@@ -898,6 +960,94 @@ trans_beta <- R6Class(classname = "trans_beta",
 		}
 		),
 	private = list(
+		# resolve the measure parameter into a distance matrix and a read-friendly label
+		# measure can be NULL, a matrix name/index in dataset$beta_diversity, a customized matrix, a dist object or a data.frame
+		# when measure is NULL, the measure stored in the object is used first; if that is also NULL, the use_matrix or
+		# the first matrix in the beta_diversity list is used
+		resolve_measure = function(measure = NULL){
+			if(is.null(measure)){
+				measure <- self$measure
+			}
+			if(is.null(measure)){
+				if(!is.null(self$use_matrix)){
+					return(list(matrix = self$use_matrix, label = "Customized"))
+				}
+				if(is.null(self$dataset$beta_diversity)){
+					stop("No distance matrix is found in the object! Please provide the measure parameter when creating the trans_beta object, ",
+						"or first calculate the beta diversity matrix with the cal_betadiv function of the microtable object!")
+				}
+				message("The measure is not found in the object! Use the first matrix: ", names(self$dataset$beta_diversity)[1], 
+					" in the beta_diversity list automatically ...")
+				measure <- names(self$dataset$beta_diversity)[1]
+			}
+			if(is.numeric(measure) & length(measure) == 1){
+				measure %<>% round
+				name_list <- names(self$dataset$beta_diversity)
+				if(is.null(name_list) | measure < 1 | measure > length(name_list)){
+					stop("The input measure index: ", measure, " is not found in the beta_diversity list of the dataset! Please check it ...")
+				}
+				if(identical(self$measure, measure) & !is.null(self$use_matrix)){
+					return(list(matrix = self$use_matrix, label = name_list[measure]))
+				}
+				return(list(matrix = self$dataset$beta_diversity[[measure]], label = name_list[measure]))
+			}
+			if(is.character(measure) & length(measure) == 1){
+				if(identical(self$measure, measure) & !is.null(self$use_matrix)){
+					return(list(matrix = self$use_matrix, label = measure))
+				}
+				if(is.null(self$dataset$beta_diversity) | is.null(self$dataset$beta_diversity[[measure]])){
+					stop("The input measure: ", measure, " is not found in the beta_diversity list of the dataset! Please check it ...")
+				}
+				return(list(matrix = self$dataset$beta_diversity[[measure]], label = measure))
+			}
+			if(inherits(measure, "dist") | is.data.frame(measure)){
+				measure <- as.matrix(measure)
+			}
+			if(!is.matrix(measure)){
+				stop("The input measure should be a matrix name or index in the beta_diversity list, a customized matrix, a dist object or a data.frame!")
+			}
+			list(matrix = measure, label = "Customized")
+		},
+		# convert the measure parameter to a read-friendly label used in the plot
+		measure_label = function(measure = self$measure){
+			if(is.null(measure) | length(measure) != 1){
+				return("Customized")
+			}
+			if(is.numeric(measure)){
+				name_list <- names(self$dataset$beta_diversity)
+				measure %<>% round
+				if(!is.null(name_list) && measure >= 1 && measure <= length(name_list)){
+					measure <- name_list[measure]
+				}else{
+					measure <- as.character(measure)
+				}
+			}
+			if(!is.character(measure)){
+				return("Customized")
+			}
+			label <- switch(measure, 
+				wei_unifrac = "Weighted Unifrac", 
+				unwei_unifrac = "Unweighted Unifrac", 
+				bray = "Bray-Curtis", 
+				jaccard = "Jaccard")
+			if(is.null(label)){
+				label <- measure
+			}
+			label
+		},
+		# add the sample information to the ordination scores according to the sample names
+		add_sample_info = function(scores_sites, sample_table){
+			if(!is.null(rownames(scores_sites))){
+				if(! all(rownames(scores_sites) %in% rownames(sample_table))){
+					stop("Some sample names in the input distance matrix are not found in the sample_table of the dataset! ",
+						"Please check the sample names in the dataset and the customized measure matrix!")
+				}
+				combined <- cbind.data.frame(scores_sites, sample_table[rownames(scores_sites), , drop = FALSE])
+			}else{
+				combined <- cbind.data.frame(scores_sites, sample_table)
+			}
+			combined
+		},
 		within_group_distance = function(distance, sampleinfo, type, by_group = NULL, sep = " vs "){
 			all_group <- as.character(sampleinfo[, type]) %>% unique
 			res <- data.frame()

@@ -1010,10 +1010,12 @@ trans_diff <- R6Class(classname = "trans_diff",
 					colnames(output)[colnames(output) %in% c("pvalue", "padj")] <- c("P.unadj", "P.adj")
 				}
 				if(method == "maaslin"){
-					# Exclude sample-ID-like columns (unique per sample); otherwise maaslin3 treats them as multi-level factors and fails
+					# Exclude sample-ID-like columns (unique per sample); otherwise maaslin3 treats them as multi-level factors and fails.
+					# Only check non-numeric columns: continuous numeric variables (e.g. NH4) may also be unique per sample
+					# but are real measurements and must be kept for the regression.
 					sample_info_tmp <- tmp_dataset$sample_table
 					id_cols <- colnames(sample_info_tmp)[vapply(sample_info_tmp, function(x){
-						length(unique(as.character(x))) == nrow(sample_info_tmp)
+						!is.numeric(x) & length(unique(as.character(x))) == nrow(sample_info_tmp)
 					}, logical(1))]
 					env_cols_use <- setdiff(colnames(sample_info_tmp), id_cols)
 					if(length(env_cols_use) == 0){
