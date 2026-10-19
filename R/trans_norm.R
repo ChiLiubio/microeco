@@ -105,6 +105,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#' Other methods for transformation:
 		#' \itemize{
 		#'   \item \code{"AST"}: Arc sine square root transformation.
+		#'   \item \code{"sqrt"}: Square root transformation (element-wise).
+		#'   \item \code{"log10"}: Common logarithm (base 10); equivalent to \code{method = "log"} with \code{logbase = 10}.
 		#' }
 		#' @param sample.size default NULL; libray size for rarefaction when method = "rarefy" or "SRS". If not provided, use the minimum number across all samples. 
 		#'    For "SRS" method, this parameter is passed to \code{Cmin} parameter of \code{SRS} function of SRS package.
@@ -118,7 +120,8 @@ trans_norm <- R6Class(classname = "trans_norm",
 		#'    It must be a column name of \code{sample_table} or a vector with same length of samples.
 		#' @param MARGIN default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{decostand} function of vegan package.
 		#'    If MARGIN is NULL, use the default value in decostand function.
-		#' @param logbase default 2; The logarithm base.
+		#' @param logbase default 2; The logarithm base for \code{method = "log"}.
+		#'    Ignored when \code{method = "log10"}, which always uses base 10.
 		#' @param CSS_p default NULL; the pth quantile passed to the p augument of the \code{cumNorm} function when method = "CSS".
 		#'    Default NULL means the default \code{cumNormStatFast} function is used to calculate the quantile.
 		#' @param ... parameters pass to \code{vegan::decostand},
@@ -139,8 +142,14 @@ trans_norm <- R6Class(classname = "trans_norm",
 			}
 			method <- tolower(method)
 			method <- match.arg(method, c("rarefy", "srs", "gmpr", "clr", "rclr", "css", "tss", "ebay", "tmm", "deseq2", "rle", "wrench", "ast", 
-				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log"))
+				"total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log", "log10", "sqrt"))
 			
+			if(method == "log10"){
+				res_table <- vegan::decostand(x = abund_table, method = "log", logbase = 10, ...)
+			}
+			if(method == "sqrt"){
+				res_table <- sqrt(abund_table)
+			}
 			if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "pa", "chi.square", "hellinger", "log")){
 				if(method %in% c("total", "max", "frequency", "normalize", "range", "rank", "standardize", "chi.square")){
 					if(is.null(MARGIN)){

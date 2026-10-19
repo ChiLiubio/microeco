@@ -220,7 +220,8 @@ Other methods are either unsuitable or have built-in approaches that render this
 Note that for "KW_dunn" the default "fdr" is automatically replaced by "holm" as required by FSA::dunnTest.}
 
 \item{\code{transformation}}{default NULL; feature abundance transformation method in the class \code{\link{trans_norm}},
-such as 'AST' for the arc sine square root transformation.
+such as 'AST' for the arc sine square root transformation, 'sqrt' for the square root
+transformation, or 'log' for logarithmic transformations (see \code{trans_norm}).
 Only available when \code{method} is one of "KW", "KW_dunn", "wilcox", "t.test", "anova", "scheirerRayHare", "lm", 
 "betareg", "lme", "glmm" and "glmm_beta".}
 

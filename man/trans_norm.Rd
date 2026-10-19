@@ -154,6 +154,8 @@ Methods based on \code{decostand} function of vegan package:
 Other methods for transformation:
 \itemize{
   \item \code{"AST"}: Arc sine square root transformation.
+  \item \code{"sqrt"}: Square root transformation (element-wise).
+  \item \code{"log10"}: Common logarithm (base 10); equivalent to \code{method = "log"} with \code{logbase = 10}.
 }}
 
 \item{\code{sample.size}}{default NULL; libray size for rarefaction when method = "rarefy" or "SRS". If not provided, use the minimum number across all samples. 
@@ -176,7 +178,8 @@ It must be a column name of \code{sample_table} or a vector with same length of 
 \item{\code{MARGIN}}{default NULL; 1 = samples, and 2 = features of abundance table; only available when method comes from \code{decostand} function of vegan package.
 If MARGIN is NULL, use the default value in decostand function.}
 
-\item{\code{logbase}}{default 2; The logarithm base.}
+\item{\code{logbase}}{default 2; The logarithm base for \code{method = "log"}.
+Ignored when \code{method = "log10"}, which always uses base 10.}
 
 \item{\code{CSS_p}}{default NULL; the pth quantile passed to the p augument of the \code{cumNorm} function when method = "CSS".
 Default NULL means the default \code{cumNormStatFast} function is used to calculate the quantile.}
