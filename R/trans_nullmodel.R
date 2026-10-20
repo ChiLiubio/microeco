@@ -435,7 +435,7 @@ trans_nullmodel <- R6Class(classname = "trans_nullmodel",
 				as.vector(vegdist(picante::randomizeMatrix(comm, null.model = null.model), "bray"))
 			}) %>% do.call("cbind", .) %>% as.data.frame
 			beta_rand[, (runs + 1)] <- betaobs_vec
-			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x > x[length(x)])/length(x)})
+			beta_obs_z <- apply(X = beta_rand, MARGIN = 1, FUN = function(x){sum(x < x[length(x)])/length(x)})
 			beta_obs_z <- (beta_obs_z - 0.5) * 2
 			self$res_rcbray <- private$fin_matrix(all_samples = all_samples, beta_obs_z = beta_obs_z)
 			message('The result is stored in object$res_rcbray ...')
