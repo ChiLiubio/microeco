@@ -96,7 +96,11 @@ trans_func <- R6Class(classname = "trans_func",
 				if(grepl("FAPROTAX", prok_database, ignore.case = TRUE)){
 					# Copyright (c) 2023, Stilianos Louca. All rights reserved.
 					# developed based on the FAPROTAX database (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home)
-					data("prok_func_FAPROTAX", envir = environment())
+					# package = "microeco" is required: utils::data() only searches
+					# the attached packages when 'package' is omitted, so a caller
+					# using microeco:: (loadNamespace only) would get
+					# "object 'prok_func_FAPROTAX' not found".
+					data("prok_func_FAPROTAX", package = "microeco", envir = environment())
 					message("FAPROTAX v", prok_func_FAPROTAX$ver, ". Please also cite the original FAPROTAX paper: Louca et al. (2016).")
 					message("Decoupling function and taxonomy in the global ocean microbiome. Science, 353(6305), 1272.\n")
 					# collapse taxonomy
@@ -155,7 +159,7 @@ trans_func <- R6Class(classname = "trans_func",
 						stop("No blank space found in the Species column! Please check whether species names are right!")
 					}
 					
-					data("prok_func_NJC19_list", envir=environment())
+					data("prok_func_NJC19_list", package = "microeco", envir=environment())
 					# list to frame
 					frame1 <- data.frame()
 					for(i in names(prok_func_NJC19_list)){
@@ -180,7 +184,7 @@ trans_func <- R6Class(classname = "trans_func",
 			}
 			if(for_what == "fungi"){
 				if(grepl("FUNGuild", fungi_database, ignore.case = TRUE)){
-					data("fungi_func_FUNGuild", envir=environment())
+					data("fungi_func_FUNGuild", package = "microeco", envir=environment())
 					message("Please also cite the original paper: Nguyen et al. (2016).")
 					message("FUNGuild: An open annotation tool for parsing fungal community datasets by ecological guild. Fungal Ecology, 20(1), 241-248. \n")
 					tax1[] <- lapply(tax1, function(x) gsub(".*__", "", x))
@@ -238,7 +242,7 @@ trans_func <- R6Class(classname = "trans_func",
 					if(!any(grepl("Genus", colnames(tax1), fixed = TRUE))){
 						stop("No Genus column found in tax_table of dataset!")
 					}
-					data("fungi_func_FungalTraits", envir=environment())
+					data("fungi_func_FungalTraits", package = "microeco", envir=environment())
 					message("Please also cite: ")
 					message("FungalTraits: a user-friendly traits database of fungi and fungus-like stramenopiles. Fungal Diversity 105, 1-16 (2020).\n")
 					# remove the redundant data
@@ -575,7 +579,7 @@ trans_func <- R6Class(classname = "trans_func",
 		#' t1$show_prok_func(use_func = "methanotrophy")
 		#' }
 		show_prok_func = function(use_func = NULL){
-			data("prok_func_FAPROTAX", envir = environment())
+			data("prok_func_FAPROTAX", package = "microeco", envir = environment())
 			if(!is.null(use_func)){
 				prok_func_FAPROTAX$func_annotation[[use_func]]
 			}
@@ -790,7 +794,7 @@ trans_func <- R6Class(classname = "trans_func",
 			self$res_tax4fun2_reference_profile <- reference_profile
 			
 			# all the required KEGG files are stored in Tax4Fun2_KEGG Rdata
-			data("Tax4Fun2_KEGG", envir=environment())
+			data("Tax4Fun2_KEGG", package = "microeco", envir=environment())
 			ko_list <- Tax4Fun2_KEGG$ko_list
 
 			map_reference_profile <- data.frame(id = otu_table_reduced_aggregated$Group.1, reference_profile)
@@ -892,7 +896,7 @@ trans_func <- R6Class(classname = "trans_func",
 			distance_matrix_reduced_mean <- mean(as.dist(distance_matrix_reduced))
 			rm(distance_matrix)
 			
-			data("Tax4Fun2_KEGG", envir=environment())
+			data("Tax4Fun2_KEGG", package = "microeco", envir=environment())
 			ko_list <- Tax4Fun2_KEGG$ko_list
 
 			# Calculate functional redundancy sample-wise
