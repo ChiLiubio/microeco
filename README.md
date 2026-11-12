@@ -1,23 +1,20 @@
 # microeco <a href="https://chiliubio.github.io/microeco_tutorial/"><img src="./inst/logo.png" width=150 align="right" ></a>
 
-An R package for data mining in microbial community ecology
+An R package for downstream analysis of microbiome omics data
 
 [![CRAN](https://www.r-pkg.org/badges/version/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
-![](https://img.shields.io/badge/Release-2.4.1-orange.svg) ![](https://img.shields.io/badge/Test-2.4.2-red.svg)
+![](https://img.shields.io/badge/Release-2.4.1-orange.svg) ![](https://img.shields.io/badge/Test-2.4.3-red.svg)
 
 ## Background
 The increasing volume and complexity of microbiome omics data pose a challenge for the downstream data analysis. 
-Although numerous R packages exist in this field, 
-it remains difficult to perform data mining in an efficient and comprehensive manner. 
 Therefore, we developed the R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
 
 
 ## Main Features
   + R6 Class to store and analyze data: flexible and modularized
   + Data preprocessing and normalization
-  + Taxonomic abundance visualization
-  + Venn diagram
+  + Abundance/Composition visualization
   + Phylogenetic tree visualization
   + Niche analysis
   + Alpha diversity
@@ -32,17 +29,10 @@ Therefore, we developed the R microeco package (abbreviated and pronounced as **
   + Metabolites analysis
   + Multi-omics data integration analysis
 
-## Install R/RStudio
-If you do not already have R/RStudio installed, follow these steps:
+## Install microeco in R
 
-1. Install [R](https://www.r-project.org/)
-2. Install [RStudio](https://posit.co/downloads/)
-
+Install microeco package from CRAN. If you do not already have R/RStudio installed, please first install [R](https://www.r-project.org/) and [RStudio](https://posit.co/downloads/).
 Open RStudio -> Tools -> Global Options -> Packages, select the appropriate mirror in Primary CRAN repository.
-
-## Install microeco
-
-Install microeco package from CRAN.
 
 ```r
 install.packages("microeco")
@@ -55,6 +45,11 @@ Or install the latest development version from Github.
 install.packages("devtools")
 devtools::install_github("ChiLiubio/microeco")
 ```
+
+## MecoToolkit: Interactive Microbiome Analysis App
+
+The [MecoToolkit](https://mecotoolkit.com/) app has been released for interactive microbiome data analysis on the local computer (https://mecotoolkit.com/). 
+Install the app to access all its features, along with other microbiome analysis methods not covered in microeco package. No package/resource configuration is required.
 
 
 ## Tutorial
