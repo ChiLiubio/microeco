@@ -1,7 +1,7 @@
 Package: microeco
 Type: Package
 Title: Microbial Community Ecology Data Analysis
-Version: 2.4.3
+Version: 2.4.4
 Authors@R: c(person("Chi", "Liu", role = c("aut", "cre"), email = "liuchi0426@126.com"),
               person("Felipe", "R. P. Mansoldo", role = "ctb", email = "mansoldo@micro.ufrj.br"),
               person("Minjie", "Yao", role = "ctb", email = "yaomj@fafu.edu.cn"),
