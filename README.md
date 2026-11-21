@@ -6,13 +6,8 @@ An R package for downstream analysis of microbiome omics data
 [![CRAN](https://cranlogs.r-pkg.org/badges/grand-total/microeco)](https://cran.r-project.org/web/packages/microeco/index.html)
 ![](https://img.shields.io/badge/Release-2.4.3-orange.svg) ![](https://img.shields.io/badge/Test-2.4.4-red.svg)
 
-## Background
-The increasing volume and complexity of microbiome omics data pose a challenge for the downstream data analysis. 
-Therefore, we developed the R microeco package (abbreviated and pronounced as **_[miːkəu]_**).
-
-
 ## Main Features
-  + R6 Class to store and analyze data: flexible and modularized
+  + R6 Class to store and analyze data
   + Data preprocessing and normalization
   + Abundance/Composition visualization
   + Phylogenetic tree visualization
@@ -46,10 +41,11 @@ install.packages("devtools")
 devtools::install_github("ChiLiubio/microeco")
 ```
 
-## MecoToolkit: Interactive Microbiome Analysis App
+## MecoToolkit: Interactive analysis app based on the microeco package
 
 The [MecoToolkit](https://mecotoolkit.com/) app has been released for interactive microbiome data analysis on the local computer (https://mecotoolkit.com/). 
-Install the app to access all its features, along with other microbiome analysis methods not covered in microeco package. No package/resource configuration is required.
+Install the app to access all its features, along with other microbiome analysis methods not covered in microeco package. 
+No package/resource configuration is required.
 
 
 ## Tutorial
